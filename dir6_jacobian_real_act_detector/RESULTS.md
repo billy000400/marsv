@@ -3,7 +3,9 @@
 ## Setup
 - Real positives reused from `../dir3_manifold/data/acts_layer6.npy` — GPT-2 small resid_post
   (hidden_states[7]), all token positions pooled, RAW float16, [200000,768], FineWeb.
-- Contiguous split (doc-leakage control): TRAIN = rows[:50000], gap 5000, EVAL = next 10000.
+- Contiguous split + 5k-row gap (leakage *reduction* heuristic; the dir3 cache is in document order but
+  per-row doc IDs were not saved, so this is not a verified document-level split): TRAIN = rows[:50000],
+  gap 5000, EVAL = next 10000.
 - Baselines fit on TRAIN positives only; negatives matched to EVAL positives (10000 each).
 - Pure-numpy pipeline (no sklearn/scipy/transformers in env). `experiments/mvp_benchmark.py`, 32s.
 - Caveat: pos-0 "attention-sink" tokens (norm~3000) NOT filtered → norm/Mahalanobis confound.
@@ -129,57 +131,74 @@ fine (0.50 — it's near real neighbors), so the signal is GLOBAL (distance-from
   corruptions cannot transfer to interpolation-style negatives. It does generalize well to
   cov_gauss (0.999) where the held-in families share knn/entropy signal.
 
-## Phase 5 — CONTEXT-AWARE prediction of downstream degradation (claim 3)
-`experiments/context_validation.py`. Corrupt the layer-6 resid_post at the LAST position of 400 real
-FineWeb prompts, continue the in-context forward → measure TRUE downstream KL(clean‖corrupt). Two
-norm-matched severity sweeps (noise, interp). Spearman(score, KL), and PARTIAL Spearman controlling
-for dist_to_orig (the proximity baseline). KL rises monotonically with severity (s=0 → KL≈0; valid).
+## Phase 5 — CONTEXT-AWARE prediction of downstream degradation (claim 3) — CORRECTED in-context
+`experiments/context_validation_v2.py` (canonical). **Correction (codex review 20260623T024606Z,
+finding #1):** the first version (`context_validation.py`) continued the forward pass by feeding a
+single position `[B,1,768]` through the late blocks, so later-layer attention could not see the
+prompt — it measured single-position late-block continuation, not in-context KL. Re-run with a genuine
+in-context method: a forward hook overwrites ONLY the last-token resid_post@L6 during a FULL model
+forward, leaving all other positions with their true context. **Sanity: severity-0 → mean KL = 0.0000
+exactly** (the hook injects the true clean residual). Corrupt the L6 resid_post at the LAST position of
+400 real FineWeb prompts; two norm-matched severity sweeps (noise, interp); Spearman(score, KL) and
+PARTIAL Spearman controlling dist_to_orig.
 
 | sweep | score | Spearman ρ | partial ρ (ctrl dist) |
 |---|---|---|---|
-| noise  | dist_to_orig  | 0.871 | — (control) |
-| noise  | plateau_kl    | 0.548 | **+0.567** |
-| noise  | entropy       | 0.460 | **+0.488** |
-| noise  | maha_twosided | 0.719 | −0.271 |
-| noise  | knn_distance  | 0.584 | −0.406 |
-| interp | dist_to_orig  | 0.918 | — (control) |
-| interp | plateau_kl    | 0.129 | **+0.198** |
-| interp | entropy       | 0.120 | +0.174 |
-| interp | maha_twosided | 0.027 | +0.291 |
-| interp | knn_distance  | −0.046 | −0.268 |
+| noise  | dist_to_orig  | 0.936 | — (control) |
+| noise  | plateau_kl    | 0.788 | **+0.510** |
+| noise  | entropy       | 0.346 | **+0.347** |
+| noise  | maha_twosided | 0.817 | −0.140 |
+| noise  | knn_distance  | 0.715 | −0.191 |
+| interp | dist_to_orig  | 0.944 | — (control) |
+| interp | plateau_kl    | 0.519 | **+0.252** |
+| interp | entropy       | 0.253 | +0.188 |
+| interp | maha_twosided | −0.016 | +0.238 |
+| interp | knn_distance  | −0.014 | −0.243 |
 
-- **FUNCTIONAL scores (plateau_kl, entropy) predict in-context downstream KL BEYOND distance-to-
-  original** — positive partial ρ in BOTH sweeps (+0.57/+0.49 noise, +0.20/+0.17 interp). This is
-  genuine added predictive value (claim 3) for the functional component.
-- **Statistical scores are mostly proximity proxies for prediction**: Mahalanobis/kNN have NEGATIVE
-  partials on the noise sweep (collinear with distance, no independent signal) and only modest signal
-  on interp. So while Mahalanobis is the better *discriminator* of interpolation (Phase-3), the
-  functional features are the better *predictor* of downstream degradation at matched movement.
-- Caveat: rank-residual partial correlations are approximate; the robust, consistent signal is the
-  uniformly positive functional partials vs the distance control.
+- **Conclusion survives the correction (and is slightly strengthened).** FUNCTIONAL scores (plateau_kl,
+  entropy) predict in-context downstream KL BEYOND distance-to-original — positive partial ρ in BOTH
+  sweeps (+0.51/+0.35 noise, +0.25/+0.19 interp). Raw plateau_kl Spearman actually *rises* in-context
+  (0.55→0.79 noise, 0.13→0.52 interp): with full context the functional sensitivity is even more
+  predictive of degradation.
+- **Statistical scores remain proximity proxies for prediction**: Mahalanobis/kNN have NEGATIVE partials
+  on the noise sweep (collinear with distance). So Mahalanobis is the better *discriminator* of
+  interpolation (Phase-3) but the functional features are the better *predictor* of downstream harm at
+  matched movement.
+- Caveat: rank-residual partial correlations are approximate; the robust signal is the uniformly
+  positive functional partials vs the distance control. The pre-correction single-position numbers
+  (plateau_kl partial +0.57/+0.20) are retained in git history; the in-context values above are
+  canonical.
 
-## Phase 6 — CAUSAL repair (claim 4): can improving a realness score recover behavior?
-`experiments/causal_repair.py`. Corrupt last-position resid_post (noise s=1, norm-matched) of 300 real
-prompts; repair by gradient descent on a realness score; compare external metrics at MATCHED L2 move
-budget. External (objective-free) metric KL(clean‖x) and NLL of clean argmax. Lower = better.
+## Phase 6 — CAUSAL repair (claim 4): can improving a realness score recover behavior? — CORRECTED
+`experiments/causal_repair_v2.py` (canonical). Same in-context correction as Phase 5 (forward hook,
+full context; codex finding #1) AND a move-matching fix (codex finding #2: the first version's
+`func_descent` was compared to a random control matched to the *maha* budget, not its own). Corrupt
+last-position resid_post (noise s=1, norm-matched) of 300 real prompts; repair by gradient descent on
+a realness score (gradients flow through the late blocks to the injected residual); compare external
+objective-free metrics KL(clean‖x) and NLL of clean argmax at PER-DESCENT matched L2 move. Lower=better.
 
 | method | ext KL(clean‖x) | ext NLL | move | dist_to_clean | dist_to_mean |
 |---|---|---|---|---|---|
-| corrupted (start)        | 2.20 | 3.02 | 0.0  | 67 | 82 |
-| maha_descent             | 6.87 | 8.59 | 78.3 | 64 | 19 |
-| func_descent (plateau-KL)| 14.58| 15.41| 83.6 | 107| 118 |
-| shrink_mean (matched)    | 6.36 | 8.13 | 78.3 | 64 | 4 |
-| random_move (matched)    | 3.61 | 4.51 | 78.3 | 103| 114 |
-| **shrink_clean (oracle, matched)** | **0.03** | **0.81** | 78.3 | 11 | 70 |
+| corrupted (start)        | 0.78 | 2.37 | 0.0  | 67 | 82 |
+| maha_descent             | 3.33 | 5.62 | 78.3 | 64 | 19 |
+| func_descent (plateau-KL)| 8.82 | 10.68| 85.4 | 108| 119 |
+| shrink_mean (matched)    | 3.72 | 6.09 | 78.3 | 64 | 4 |
+| random_move (maha-matched)| 1.99 | 3.80 | 78.3 | 103| 113 |
+| random_move (func-matched)| 2.20 | 4.09 | 85.4 | 109| 119 |
+| **shrink_clean (oracle, matched)** | **0.009** | **1.32** | 78.3 | 11 | 70 |
 
-- **Claim 4 FAILS.** Optimizing EITHER realness score makes downstream behavior WORSE than the
-  corrupted start AND worse than a random move of equal size. Mahalanobis-descent moves into the
-  over-central interior (dist_to_mean 82→19) — the exact shell-distance trap — and func-descent
-  Goodharts the flatness score into a degenerate far region (KL 14.6, dist_to_clean 107).
+- **Claim 4 FAILS (in-context, with properly move-matched controls).** Optimizing EITHER realness score
+  makes downstream behavior WORSE than the corrupted start AND worse than a random move of the SAME size:
+  maha_descent 3.33 vs its matched random 1.99; func_descent 8.82 vs its OWN func-budget-matched random
+  2.20. Mahalanobis-descent moves into the over-central interior (dist_to_mean 82→19) — the shell-distance
+  trap — and func-descent Goodharts the flatness score into a degenerate far region (dist_to_clean 108).
 - The oracle (move the same distance toward the TRUE clean activation) nearly perfectly recovers
-  (KL 0.03). So the failure is the SCORE, not the optimizer: these scores are good *discriminators*
+  (KL 0.009). So the failure is the SCORE, not the optimizer: these scores are good *discriminators*
   and (functional) *predictors* but are NOT valid *causal* objectives — naive descent exploits their
   blind spots.
+- Note the in-context corrupted-start KL (0.78) is far below the pre-correction single-position value
+  (2.20): with full prompt context the same last-position corruption perturbs the next-token
+  distribution much less. The qualitative verdict is unchanged.
 - **Direction-1 implication:** do NOT regularize steering toward low Mahalanobis or low
   functional-sensitivity; that degrades behavior. A causal realness objective must penalize movement
   away from the data shell in a way these scalar scores do not.
@@ -210,13 +229,17 @@ along different axes:
 **Verdict on the 5-claim ladder:** (1) Discrimination — YES, but only via a multi-axis score
 (density ⊕ two-sided covariance ⊕ functional), not any single statistic. (2) Generalization — PARTIAL:
 generalizes across Gaussian/shuffle/perturbation and across layers, but NOT to opposite-direction
-interpolation negatives. (3) Prediction — PARTIAL/YES for the FUNCTIONAL axis: in a context-aware
-severity sweep, plateau-KL/entropy predict true in-context downstream KL beyond distance-to-original
-(partial ρ up to +0.57), whereas density scores add nothing over proximity. (4) Causality — NO: naive
-gradient descent on either a density (Mahalanobis) or functional (plateau-KL) realness score makes
-downstream behavior WORSE than the corrupted start and worse than a matched random move (reward-hacking
-/ shell-distance trap); only the oracle move toward the true clean activation recovers it. (5) Steering
-— NOT tested, but (4)'s failure means these scores are not yet usable as steering-repair objectives.
+interpolation negatives. (3) Prediction — PARTIAL/YES for the FUNCTIONAL axis: in a genuinely
+in-context severity sweep, plateau-KL/entropy predict true in-context downstream KL beyond
+distance-to-original (partial ρ up to +0.51), whereas density scores add nothing over proximity. (4)
+Causality — NO: naive gradient descent on either a density (Mahalanobis) or functional (plateau-KL)
+realness score makes downstream behavior WORSE than the corrupted start and worse than a per-descent
+move-matched random move (reward-hacking / shell-distance trap); only the oracle move toward the true
+clean activation recovers it (in-context KL 0.78→0.009). (5) Steering — NOT tested, but (4)'s failure
+means these scores are not yet usable as steering-repair objectives.
+[Phases 5 & 6 re-verified genuinely in-context (forward hook, full context) per external review
+20260623T024606Z; conclusions for claims 3 and 4 are unchanged. The single-position pre-correction
+numbers remain in git history.]
 H1 is SUPPORTED: real
 activations have geometric+functional properties (shell-distance structure, functional sensitivity)
 beyond first/second moments — but the gap is smaller and more orientation-dependent than a naive

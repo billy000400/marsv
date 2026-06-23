@@ -1,0 +1,66 @@
+{
+  "layer": 6,
+  "n": 300,
+  "noise_s": 1.0,
+  "steps": 40,
+  "method": "in-context full-model forward hook",
+  "rows": [
+    {
+      "method": "corrupted(start)",
+      "ext_KL_clean": 0.7847,
+      "ext_NLL_cleanargmax": 2.3691,
+      "move_from_corrupt": 0.0,
+      "dist_to_clean": 67.18,
+      "dist_to_mean": 82.31
+    },
+    {
+      "method": "maha_descent",
+      "ext_KL_clean": 3.329,
+      "ext_NLL_cleanargmax": 5.6195,
+      "move_from_corrupt": 78.26,
+      "dist_to_clean": 63.65,
+      "dist_to_mean": 19.32
+    },
+    {
+      "method": "func_descent",
+      "ext_KL_clean": 8.8215,
+      "ext_NLL_cleanargmax": 10.682,
+      "move_from_corrupt": 85.4,
+      "dist_to_clean": 108.03,
+      "dist_to_mean": 118.63
+    },
+    {
+      "method": "shrink_mean(matched)",
+      "ext_KL_clean": 3.7166,
+      "ext_NLL_cleanargmax": 6.0932,
+      "move_from_corrupt": 78.26,
+      "dist_to_clean": 64.35,
+      "dist_to_mean": 4.05
+    },
+    {
+      "method": "shrink_clean(oracle,matched)",
+      "ext_KL_clean": 0.0085,
+      "ext_NLL_cleanargmax": 1.3189,
+      "move_from_corrupt": 78.26,
+      "dist_to_clean": 11.08,
+      "dist_to_mean": 70.36
+    },
+    {
+      "method": "random_move(maha-matched)",
+      "ext_KL_clean": 1.9943,
+      "ext_NLL_cleanargmax": 3.8011,
+      "move_from_corrupt": 78.26,
+      "dist_to_clean": 103.02,
+      "dist_to_mean": 113.48
+    },
+    {
+      "method": "random_move(func-matched)",
+      "ext_KL_clean": 2.1956,
+      "ext_NLL_cleanargmax": 4.0914,
+      "move_from_corrupt": 85.4,
+      "dist_to_clean": 108.92,
+      "dist_to_mean": 118.71
+    }
+  ],
+  "elapsed_s": 108.8
+}

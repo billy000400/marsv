@@ -14,3 +14,24 @@ Starting from an empty scaffold, I ran **7 focused iterations** and addressed th
 **Direction-1 caution recorded:** don't regularize steering toward low Mahalanobis / low functional-sensitivity — it degrades behavior; a manifold/denoising-prior objective is needed.
 
 All state is on disk: 7 experiment scripts, 16 result files, complete PLAN/JOURNAL/RESULTS/REPORT, and `STOP`.
+Done. This iteration addressed the external codex review and re-finalized the project.
+
+## What I did
+
+The project had been finalized (iter7), but its `STOP` file was removed and an external `codex_review_20260623T024606Z.md` appeared flagging that **Phases 5 & 6 weren't actually in-context** — `continue_from()` fed a single position `[B,1,768]` through the late GPT-2 blocks, so later-layer attention never saw the prompt. That undermines the prediction (claim 3) and causal-repair (claim 4) results.
+
+I re-ran both phases **genuinely in-context** using a forward hook that overwrites only the last-token `resid_post@L6` during a *full* model forward (`context_validation_v2.py`, `causal_repair_v2.py`), and also fixed the review's move-matching gap (finding #2).
+
+## Result — both conclusions survive
+
+- **Sanity:** severity-0 corruption → mean downstream KL = **0.0000 exactly** (hook injects the true clean residual).
+- **Claim 3 holds:** functional plateau-KL/entropy keep positive partial-ρ beyond distance (noise +0.51/+0.35, interp +0.25/+0.19); raw Spearman actually *rises* in-context. Density scores stay proximity proxies (negative partials on noise).
+- **Claim 4 still fails, now rigorously:** maha_descent KL 0.78→3.33 vs its matched random 1.99; func_descent →8.82 vs its *own* func-matched random 2.20; oracle clean-direction →0.009. Both descents beaten by exactly move-matched random controls — reward-hacking is real, not a budget artifact.
+- In-context corrupted-start KL (0.78) is far below the buggy 2.20 (context anchors prediction), but the verdict is unchanged.
+
+I also corrected the wording for findings #3 (combined-LOFO uses held-out-label orientation → diagnostic), #4 (single-position probe phrasing), and #5 (split is "contiguous + gap" leakage-reduction, not a verified document-level split).
+
+## Persisted
+Updated `RESULTS.md` (new in-context tables + correction notes), `REPORT.md` (Correction section + verdict edits addressing all 5 findings), `PLAN.md` (iter8 status, S7/S8 stage notes), appended the iter8 `JOURNAL.md` entry, and **re-created `STOP`**. The pre-correction scripts are retained for provenance; the `_v2` outputs are canonical.
+
+The core scientific verdict was confirmed, not overturned, under the corrected method.

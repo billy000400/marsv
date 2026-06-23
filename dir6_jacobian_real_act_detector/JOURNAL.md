@@ -153,3 +153,34 @@ causal objective; in-context discrimination benchmark; cross-model transfer; tok
 stratification (pos-0 sink confound).
 On track? yes — FULL 5-claim ladder addressed with an honest mixed/negative verdict; deliverable
 complete; creating STOP. Stage S10 done.
+
+## Iter 8 (2026-06-23) — External review corrections: genuinely IN-CONTEXT Phases 5 & 6
+**Did:** A codex review (codex_review_20260623T024606Z.md) appeared (STOP had been removed). Triaged
+its 5 findings. The decisive one (#1): the Phase-5/6 "in-context" continuation actually fed a SINGLE
+position `[B,1,768]` through the late GPT-2 blocks, so later-layer attention never saw the prompt —
+the "in-context KL" was single-position late-block continuation. Re-implemented both phases genuinely
+in-context with a FORWARD HOOK that overwrites ONLY the last-token resid_post@L6 during a FULL model
+forward (`experiments/context_validation_v2.py`, `causal_repair_v2.py`). Gradients for func_descent
+flow through the late blocks to the injected residual. Also fixed finding #2 (func_descent's random
+control was matched to the maha move budget, not its own) by adding a func-budget-matched random
+control. Corrected wording for #3 (combined LOFO uses held-out-label orientation = diagnostic), #4
+(single-position probe phrasing), #5 (split is contiguous+gap leakage-reduction, not verified doc-level).
+Ran both (77s + 109s GPU). Wrote functional_prediction_v2.csv/.json, repair_metrics_v2.csv/.json.
+**Learned:** SANITY severity-0 → mean KL = 0.0000 EXACTLY → hook injects the true clean residual, the
+in-context machinery is correct. BOTH conclusions SURVIVE the correction. Claim 3: functional plateau-KL/
+entropy keep POSITIVE partial-ρ beyond distance in both sweeps (noise +0.51/+0.35, interp +0.25/+0.19);
+raw plateau-KL Spearman even RISES in-context (0.55→0.79 noise, 0.13→0.52 interp) — context makes the
+functional signal MORE predictive. Density scores (maha/knn) keep negative partials on noise = proximity
+proxies. Claim 4: still FAILS, now rigorously — maha_descent in-context KL 0.78→3.33 vs its matched
+random 1.99; func_descent →8.82 vs its OWN func-matched random 2.20; oracle →0.009. Both descents worse
+than their EXACTLY move-matched random controls → reward-hacking is real, not a move-budget artifact.
+Note in-context corrupted-start KL (0.78) ≪ buggy single-position (2.20): context anchors the prediction,
+so the old version overstated corruption impact — but the verdict is identical. Updated REPORT.md +
+RESULTS.md (new in-context tables, Correction section, all 5 findings addressed) + PLAN.md.
+**Next:** Project re-finalized; the external review's substantive concerns are resolved and the core
+verdict is confirmed (not overturned) under the corrected in-context method. Re-creating STOP. Genuine
+remaining future work (unchanged): a manifold/denoising-prior causal objective (Phase 6 alternative),
+an in-context DISCRIMINATION benchmark (Phase 3 negatives generated in-context), cross-model transfer,
+token-position stratification (pos-0 sink), and bootstrap CIs.
+On track? yes — review corrections applied, claims 3 & 4 re-verified in-context (conclusions unchanged),
+deliverable complete & self-consistent; re-creating STOP. Stage S10 done (re-finalized).

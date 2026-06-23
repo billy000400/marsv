@@ -1,0 +1,11 @@
+sweep,score,spearman_kl,partial_spearman_ctrl_dist
+noise,maha_twosided,0.8165,-0.1399
+noise,entropy,0.3457,0.3474
+noise,plateau_kl,0.7878,0.5095
+noise,knn_distance,0.7145,-0.1911
+noise,dist_to_orig,0.9355,
+interp,maha_twosided,-0.0158,0.238
+interp,entropy,0.2534,0.1882
+interp,plateau_kl,0.5187,0.2523
+interp,knn_distance,-0.0143,-0.2434
+interp,dist_to_orig,0.9439,

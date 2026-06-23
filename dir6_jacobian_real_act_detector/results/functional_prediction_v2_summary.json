@@ -1,0 +1,94 @@
+{
+  "layer": 6,
+  "n_prompts": 400,
+  "method": "in-context forward hook (full context)",
+  "noise_s": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    2.0
+  ],
+  "interp_s": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8
+  ],
+  "sanity_meanKL": {
+    "noise_s0.0_meanKL": 0.0,
+    "noise_s0.25_meanKL": 0.0349,
+    "noise_s0.5_meanKL": 0.1399,
+    "noise_s1.0_meanKL": 0.7717,
+    "noise_s2.0_meanKL": 3.0338,
+    "interp_s0.0_meanKL": 0.0,
+    "interp_s0.2_meanKL": 0.0341,
+    "interp_s0.4_meanKL": 0.34,
+    "interp_s0.6_meanKL": 2.8462,
+    "interp_s0.8_meanKL": 5.7599
+  },
+  "rows": [
+    {
+      "sweep": "noise",
+      "score": "maha_twosided",
+      "spearman_kl": 0.8165,
+      "partial_spearman_ctrl_dist": -0.1399
+    },
+    {
+      "sweep": "noise",
+      "score": "entropy",
+      "spearman_kl": 0.3457,
+      "partial_spearman_ctrl_dist": 0.3474
+    },
+    {
+      "sweep": "noise",
+      "score": "plateau_kl",
+      "spearman_kl": 0.7878,
+      "partial_spearman_ctrl_dist": 0.5095
+    },
+    {
+      "sweep": "noise",
+      "score": "knn_distance",
+      "spearman_kl": 0.7145,
+      "partial_spearman_ctrl_dist": -0.1911
+    },
+    {
+      "sweep": "noise",
+      "score": "dist_to_orig",
+      "spearman_kl": 0.9355,
+      "partial_spearman_ctrl_dist": ""
+    },
+    {
+      "sweep": "interp",
+      "score": "maha_twosided",
+      "spearman_kl": -0.0158,
+      "partial_spearman_ctrl_dist": 0.238
+    },
+    {
+      "sweep": "interp",
+      "score": "entropy",
+      "spearman_kl": 0.2534,
+      "partial_spearman_ctrl_dist": 0.1882
+    },
+    {
+      "sweep": "interp",
+      "score": "plateau_kl",
+      "spearman_kl": 0.5187,
+      "partial_spearman_ctrl_dist": 0.2523
+    },
+    {
+      "sweep": "interp",
+      "score": "knn_distance",
+      "spearman_kl": -0.0143,
+      "partial_spearman_ctrl_dist": -0.2434
+    },
+    {
+      "sweep": "interp",
+      "score": "dist_to_orig",
+      "spearman_kl": 0.9439,
+      "partial_spearman_ctrl_dist": ""
+    }
+  ],
+  "elapsed_s": 76.7
+}

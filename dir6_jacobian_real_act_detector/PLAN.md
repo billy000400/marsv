@@ -497,21 +497,38 @@ Correction/steering metrics:
 - [x] S6 — Train and evaluate learned realness detectors under leave-one-family-out protocols.
       (iter2: logreg/MLP FAIL to generalize, LOFO macro 0.68/0.74 < kNN 0.913 → Gate 4 fails for
       discriminative detectors; realness = local density, a one-class property)
-- [x] S7 — Test continuous prediction of downstream degradation. (iter6: context-aware severity sweep;
-      functional plateau-KL/entropy predict true in-context KL beyond dist-to-orig, partial ρ up to
-      +0.57; density scores are proximity proxies. Claim 3 = PARTIAL/YES for functional axis)
-- [x] S8 — Test causal realness-improving repair against matched controls. (iter7: NEGATIVE — descent
-      on Mahalanobis/plateau-KL makes downstream KL WORSE than corrupted & worse than random; only
-      oracle clean-direction recovers. Realness scores are not valid causal objectives.)
+- [x] S7 — Test continuous prediction of downstream degradation. (iter6 + iter8 CORRECTION: genuinely
+      in-context severity sweep via forward hook; functional plateau-KL/entropy predict true in-context
+      KL beyond dist-to-orig, partial ρ +0.51/+0.35 noise +0.25/+0.19 interp; density scores are
+      proximity proxies. Claim 3 = PARTIAL/YES for functional axis — verified in-context.)
+- [x] S8 — Test causal realness-improving repair against matched controls. (iter7 + iter8 CORRECTION:
+      NEGATIVE, in-context with per-descent move-matched controls — descent on Mahalanobis/plateau-KL
+      makes downstream KL WORSE than corrupted & worse than its OWN matched random (3.33>1.99, 8.82>2.20);
+      only oracle clean-direction recovers (0.009). Realness scores ≠ valid causal objectives.)
 - [ ] S9 — Validate on steering while preserving achieved steering effect. (NOT done — blocked by S8's
       negative; a manifold/denoising-prior objective is needed first. Documented as future work.)
-- [x] S10 — Finalize RESULTS.md, REPORT.md, JOURNAL.md, and STOP. (iter7)
+- [x] S10 — Finalize RESULTS.md, REPORT.md, JOURNAL.md, and STOP. (iter7; iter8 re-finalized after review)
 
 ## On-track check (required every iteration)
 End each JOURNAL.md entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
-## Current status (after iter7 — FINALIZED, STOP created)
+## Current status (after iter8 — REVIEW CORRECTIONS applied, re-FINALIZED, STOP re-created)
+Addressed external codex review (codex_review_20260623T024606Z.md). Its main valid finding: Phase-5/6
+"in-context" continuation actually fed a SINGLE position through the late blocks (no prompt attention).
+Re-ran BOTH phases genuinely in-context (forward hook overwrites only the last-token resid@L6 during a
+FULL forward; sanity severity-0 KL = 0.0000 exactly): `context_validation_v2.py`, `causal_repair_v2.py`.
+RESULT: both conclusions HOLD. (3) prediction — functional plateau-KL/entropy keep positive partial-ρ
+beyond distance (+0.51/+0.35 noise, +0.25/+0.19 interp); raw Spearman even rises. (4) causality — both
+descents still worse than their PER-DESCENT move-matched random controls (maha 3.33>1.99; func 8.82>2.20;
+oracle 0.009), fixing review finding #2's move-mismatch. Also corrected wording for findings #3 (combined
+LOFO uses held-out-label orientation — diagnostic), #4 (single-position probe phrasing), #5 (split is
+contiguous+gap leakage-reduction, not verified doc-level). Verdict UNCHANGED: (1) YES multi-axis; (2)
+PARTIAL; (3) PARTIAL/functional; (4) NO/reward-hacks; (5) untested. H1 supported. Project DONE.
+Future work: manifold/denoising-prior causal objective, in-context DISCRIMINATION benchmark, cross-model,
+token-position stratification (pos-0 sink confound), bootstrap CIs.
+
+## (prior) Current status (after iter7 — FINALIZED, STOP created)
 FULL 5-claim ladder addressed; REPORT.md + RESULTS.md complete & self-consistent. Verdict: (1)
 discrimination YES via multi-axis score; (2) generalization PARTIAL; (3) prediction PARTIAL (functional
 axis predicts downstream KL beyond distance); (4) causality NO — descent on realness scores reward-hacks
