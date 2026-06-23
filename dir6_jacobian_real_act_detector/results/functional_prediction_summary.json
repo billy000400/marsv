@@ -1,0 +1,81 @@
+{
+  "layer": 6,
+  "n_prompts": 400,
+  "noise_s": [
+    0.0,
+    0.25,
+    0.5,
+    1.0,
+    2.0
+  ],
+  "interp_s": [
+    0.0,
+    0.2,
+    0.4,
+    0.6,
+    0.8
+  ],
+  "rows": [
+    {
+      "sweep": "noise",
+      "score": "maha_twosided",
+      "spearman_kl": 0.7192,
+      "partial_spearman_ctrl_dist": -0.271
+    },
+    {
+      "sweep": "noise",
+      "score": "entropy",
+      "spearman_kl": 0.4596,
+      "partial_spearman_ctrl_dist": 0.4875
+    },
+    {
+      "sweep": "noise",
+      "score": "plateau_kl",
+      "spearman_kl": 0.5482,
+      "partial_spearman_ctrl_dist": 0.5675
+    },
+    {
+      "sweep": "noise",
+      "score": "knn_distance",
+      "spearman_kl": 0.5838,
+      "partial_spearman_ctrl_dist": -0.4061
+    },
+    {
+      "sweep": "noise",
+      "score": "dist_to_orig",
+      "spearman_kl": 0.8707,
+      "partial_spearman_ctrl_dist": ""
+    },
+    {
+      "sweep": "interp",
+      "score": "maha_twosided",
+      "spearman_kl": 0.0268,
+      "partial_spearman_ctrl_dist": 0.2909
+    },
+    {
+      "sweep": "interp",
+      "score": "entropy",
+      "spearman_kl": 0.1198,
+      "partial_spearman_ctrl_dist": 0.1735
+    },
+    {
+      "sweep": "interp",
+      "score": "plateau_kl",
+      "spearman_kl": 0.1293,
+      "partial_spearman_ctrl_dist": 0.1984
+    },
+    {
+      "sweep": "interp",
+      "score": "knn_distance",
+      "spearman_kl": -0.0456,
+      "partial_spearman_ctrl_dist": -0.2683
+    },
+    {
+      "sweep": "interp",
+      "score": "dist_to_orig",
+      "spearman_kl": 0.9179,
+      "partial_spearman_ctrl_dist": ""
+    }
+  ],
+  "elapsed_s": 20.6
+}

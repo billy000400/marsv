@@ -1,0 +1,14 @@
+matched param counts (spread=1024, 0.087%):
+  k=   2 h1= 576 params=1183106
+  k=   4 h1= 575 params=1182082
+  k=   8 h1= 574 params=1182084
+  k=  16 h1= 572 params=1182088
+  k=  24 h1= 570 params=1182092
+  k=  32 h1= 568 params=1182096
+  k=  48 h1= 564 params=1182104
+  k=  64 h1= 560 params=1182112
+  k= 128 h1= 544 params=1182144
+  k= 256 h1= 512 params=1182208
+[39s] seed=0 k=128 val_FVU=0.0387
+[74s] seed=0 k=256 val_FVU=0.0330
+DONE ae_matched

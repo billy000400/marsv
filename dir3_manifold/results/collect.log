@@ -1,0 +1,51 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8678.76it/s]
+[2s] model loaded on cuda
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[23s] seqs=256 min_count=55417
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[27s] seqs=512 min_count=111740
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070
+[31s] seqs=768 min_count=167070

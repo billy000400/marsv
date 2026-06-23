@@ -1,0 +1,17 @@
+{
+  "layer": 6,
+  "features": [
+    "mahalanobis",
+    "knn",
+    "entropy",
+    "plateau_kl"
+  ],
+  "combined_lofo": {
+    "cov_gauss": 0.9987,
+    "norm_pert": 0.6116,
+    "interp": 0.5385,
+    "tangent_pert": 0.6935
+  },
+  "combined_lofo_macro": 0.7106,
+  "elapsed_s": 8.5
+}

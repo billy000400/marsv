@@ -1,0 +1,49 @@
+{
+  "layer": 6,
+  "n_eval": 2000,
+  "eps_plateau": 0.02,
+  "stat_ceiling_note": "interp/tangent_pert were ~0.5 for ALL statistical baselines",
+  "per_family": {
+    "cov_gauss": {
+      "best_feature": "entropy",
+      "best_auroc": 0.9533,
+      "all": {
+        "entropy": 0.9533,
+        "msp": 0.9443,
+        "plateau_kl": 0.7594,
+        "logit_max": 0.7249
+      }
+    },
+    "norm_pert": {
+      "best_feature": "plateau_kl",
+      "best_auroc": 0.5695,
+      "all": {
+        "entropy": 0.565,
+        "msp": 0.564,
+        "plateau_kl": 0.5695,
+        "logit_max": 0.5002
+      }
+    },
+    "interp": {
+      "best_feature": "plateau_kl",
+      "best_auroc": 0.6134,
+      "all": {
+        "entropy": 0.6029,
+        "msp": 0.5811,
+        "plateau_kl": 0.6134,
+        "logit_max": 0.5148
+      }
+    },
+    "tangent_pert": {
+      "best_feature": "plateau_kl",
+      "best_auroc": 0.5671,
+      "all": {
+        "entropy": 0.5599,
+        "msp": 0.5574,
+        "plateau_kl": 0.5671,
+        "logit_max": 0.5264
+      }
+    }
+  },
+  "elapsed_s": 2.2
+}

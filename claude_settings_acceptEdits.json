@@ -1,0 +1,29 @@
+{
+  "_comment": "SAFER VARIANT. Place at <PROJECT_ROOT>/.claude/settings.json and change run.sh's flag from --dangerously-skip-permissions to --permission-mode acceptEdits. acceptEdits auto-approves file edits + filesystem bash (mkdir/touch/rm/mv/cp/sed) inside the working dir, but PROMPTS for other Bash (python, pip, pytest, git) unless allow-listed here. VERIFY the rule syntax against your build with `claude --help` / current docs before relying on it unattended.",
+  "defaultMode": "acceptEdits",
+  "permissions": {
+    "allow": [
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python -m pip:*)",
+      "Bash(pytest:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status:*)",
+      "Bash(timeout:*)",
+      "Bash(nohup:*)",
+      "Edit(./**)",
+      "Write(./**)",
+      "Read(./**)"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(sudo:*)",
+      "Read(./.env)",
+      "Read(./**/*secret*)",
+      "Read(./**/*credential*)"
+    ]
+  }
+}

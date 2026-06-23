@@ -1,0 +1,16 @@
+Done. Direction #6 is complete and finalized with `STOP` created.
+
+## Summary
+
+Starting from an empty scaffold, I ran **7 focused iterations** and addressed the full 5-claim ladder for *"what makes real activations real?"* on GPT-2 small residual activations — reusing cached real activations from `dir3_manifold` and working in a stripped environment (pure numpy + `transformers --no-deps`, torch/numpy never touched, VRAM capped 0.45, A10 GPU).
+
+**Verdict (in REPORT.md / RESULTS.md):**
+1. **Discrimination — YES, but only multi-axis.** No single statistic is "realness." Local density (kNN) and global covariance (Mahalanobis) are complementary and depth-stable (L3≈L6≈L9); norm alone is a defeated shortcut.
+2. **Generalization — PARTIAL.** Learned discriminative detectors memorize generators and fail leave-one-family-out (macro 0.68–0.74 < unsupervised kNN 0.91) → realness is a one-class property, not a boundary.
+3. The subtle case: **convex interpolations between reals are anomalous by being too *central*** (two-sided Mahalanobis ~0.68), invisible to one-sided/local scores — real activations occupy a characteristic-distance *shell*.
+4. **Prediction — PARTIAL/functional.** In a context-aware severity sweep, functional plateau-KL/entropy predict true in-context downstream KL beyond distance-to-original (partial ρ up to +0.57); density scores are mere proximity proxies.
+5. **Causality — NO (clean negative).** Gradient descent on either realness score makes behavior *worse* than the corrupted start and worse than a random move (Mahalanobis → shell-trap; plateau-KL → Goodhart); only the oracle clean-direction recovers. The scores are good detectors/predictors but invalid causal objectives.
+
+**Direction-1 caution recorded:** don't regularize steering toward low Mahalanobis / low functional-sensitivity — it degrades behavior; a manifold/denoising-prior objective is needed.
+
+All state is on disk: 7 experiment scripts, 16 result files, complete PLAN/JOURNAL/RESULTS/REPORT, and `STOP`.

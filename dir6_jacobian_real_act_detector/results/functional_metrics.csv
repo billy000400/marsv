@@ -1,0 +1,17 @@
+family,feature,auroc_oriented
+cov_gauss,entropy,0.9533
+cov_gauss,msp,0.9443
+cov_gauss,plateau_kl,0.7594
+cov_gauss,logit_max,0.7249
+norm_pert,entropy,0.565
+norm_pert,msp,0.564
+norm_pert,plateau_kl,0.5695
+norm_pert,logit_max,0.5002
+interp,entropy,0.6029
+interp,msp,0.5811
+interp,plateau_kl,0.6134
+interp,logit_max,0.5148
+tangent_pert,entropy,0.5599
+tangent_pert,msp,0.5574
+tangent_pert,plateau_kl,0.5671
+tangent_pert,logit_max,0.5264

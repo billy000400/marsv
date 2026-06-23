@@ -1,0 +1,15 @@
+loaded 1500 cached texts
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 5597.35it/s]
+[4s] model on cpu, 1500 texts
+[141s] seqs=160 min_count=34614
+[287s] seqs=320 min_count=70313
+[433s] seqs=480 min_count=104465
+[577s] seqs=640 min_count=141437
+[718s] seqs=800 min_count=177617
+saved layer0: (200000, 768) float16
+saved layer3: (200000, 768) float16
+saved layer6: (200000, 768) float16
+saved layer9: (200000, 768) float16
+saved layer11: (200000, 768) float16
+DONE {"model": "gpt2", "d_model": 768, "layers": [0, 3, 6, 9, 11], "seq_len": 256, "n_seqs": 912, "per_layer": {"0": 200000, "3": 200000, "6": 200000, "9": 200000, "11": 200000}, "dtype": "float16", "centering": "raw stored; mean-centered at analysis time", "normalized": false, "dataset": "HuggingFaceFW/fineweb CC-MAIN-2013-20 via datasets-server REST (first 1500 docs, len>=200)", "resid_def": "hidden_states[L+1] = block L output (resid_post); all token positions pooled", "elapsed_s": 821.8}

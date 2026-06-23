@@ -1,0 +1,20 @@
+{
+  "direction": 6,
+  "phase": "P0-audit + P1 + P2 (MVP)",
+  "env": {
+    "numpy": "2.3.3",
+    "transformers": false,
+    "sklearn": false,
+    "scipy": false,
+    "torch_available": true,
+    "gpu": "A10 sm_86"
+  },
+  "reused_real_acts": "../dir3_manifold/data/acts_layer{3,6,9}.npy [200000,768] f16",
+  "no_prior_d6_results": true,
+  "reusable_scripts": [
+    "../dir9_ood/experiments/plateau_score.py (model+KL/Jacobian patterns)",
+    "../dir3_manifold/experiments/collect_acts.py (act caching)"
+  ],
+  "caveat_dir9": "scalar Jacobian/plateau OOD signals were weak; don't rely on jac-norm alone",
+  "caveat_pos0_sink": "row0-type sink tokens have norm~3000; norm shortcut + Mahalanobis artifact risk"
+}

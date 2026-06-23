@@ -1,0 +1,42 @@
+[
+  {
+    "bucket": "pos0",
+    "pos_lo": 0,
+    "pos_hi": 0,
+    "n": 366,
+    "twonn": null,
+    "mle_invavg": null
+  },
+  {
+    "bucket": "early_1_15",
+    "pos_lo": 1,
+    "pos_hi": 15,
+    "n": 5490,
+    "twonn": 9.595748486816653,
+    "mle_invavg": 8.648289265216453
+  },
+  {
+    "bucket": "mid_16_63",
+    "pos_lo": 16,
+    "pos_hi": 63,
+    "n": 17552,
+    "twonn": 9.828069383795125,
+    "mle_invavg": 12.757868219125196
+  },
+  {
+    "bucket": "late_64_127",
+    "pos_lo": 64,
+    "pos_hi": 127,
+    "n": 21778,
+    "twonn": 9.894130424200947,
+    "mle_invavg": 13.25551010275615
+  },
+  {
+    "bucket": "tail_128_255",
+    "pos_lo": 128,
+    "pos_hi": 255,
+    "n": 30000,
+    "twonn": 10.034795321091996,
+    "mle_invavg": 13.087643471981947
+  }
+]

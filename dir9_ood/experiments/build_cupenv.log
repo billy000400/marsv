@@ -1,0 +1,522 @@
+=== [1] create env /mars-vol/marsv/dir9_ood/cupenv ===
+
+
+Transaction
+
+  Prefix: /mars-vol/marsv/dir9_ood/cupenv
+
+  Updating specs:
+
+   - python=3.11
+   - pip
+
+
+  Package               Version  Build                 Channel           Size
+───────────────────────────────────────────────────────────────────────────────
+  Install:
+───────────────────────────────────────────────────────────────────────────────
+
+  + _openmp_mutex           4.5  20_gnu                conda-forge       29kB
+  + bzip2                 1.0.8  hda65f42_9            conda-forge      260kB
+  + ca-certificates   2026.6.17  hbd8a1cb_0            conda-forge      129kB
+  + ld_impl_linux-64     2.45.1  default_hbd61a6d_102  conda-forge      728kB
+  + libexpat              2.8.1  hecca717_1            conda-forge       78kB
+  + libffi                3.5.2  h3435931_0            conda-forge       59kB
+  + libgcc               15.2.0  he0feb66_19           conda-forge        1MB
+  + libgcc-ng            15.2.0  h69a702a_19           conda-forge       28kB
+  + libgomp              15.2.0  he0feb66_19           conda-forge      604kB
+  + liblzma               5.8.3  hb03c661_0            conda-forge      113kB
+  + libnsl                2.0.1  hb9d3cd8_1            conda-forge     Cached
+  + libsqlite            3.53.2  h0c1763c_0            conda-forge      958kB
+  + libuuid              2.42.2  h5347b49_0            conda-forge       40kB
+  + libxcrypt            4.4.36  hd590300_1            conda-forge     Cached
+  + libzlib               1.3.2  h25fd6f3_2            conda-forge       64kB
+  + ncurses                 6.6  hdb14827_0            conda-forge      919kB
+  + openssl               3.6.3  h35e630c_0            conda-forge        3MB
+  + packaging              26.2  pyhc364b38_0          conda-forge       92kB
+  + pip                  26.1.2  pyh8b19718_0          conda-forge        1MB
+  + python              3.11.15  h7508c33_1_cpython    conda-forge       31MB
+  + readline                8.3  h853b02a_0            conda-forge      345kB
+  + setuptools           82.0.1  pyh332efcf_0          conda-forge      640kB
+  + tk                   8.6.13  noxft_h366c992_103    conda-forge        3MB
+  + tzdata                2025c  hc9c84f9_1            conda-forge      119kB
+  + wheel                0.47.0  pyhd8ed1ab_0          conda-forge       33kB
+  + zstd                  1.5.7  hb78ec9c_6            conda-forge      601kB
+
+  Summary:
+
+  Install: 26 packages
+
+  Total download: 45MB
+
+───────────────────────────────────────────────────────────────────────────────
+
+
+
+Transaction starting
+Linking libzlib-1.3.2-h25fd6f3_2
+Linking libgomp-15.2.0-he0feb66_19
+Linking zstd-1.5.7-hb78ec9c_6
+Linking _openmp_mutex-4.5-20_gnu
+Linking ld_impl_linux-64-2.45.1-default_hbd61a6d_102
+Linking libgcc-15.2.0-he0feb66_19
+Linking tk-8.6.13-noxft_h366c992_103
+Linking libsqlite-3.53.2-h0c1763c_0
+Linking libffi-3.5.2-h3435931_0
+Linking libgcc-ng-15.2.0-h69a702a_19
+Linking libuuid-2.42.2-h5347b49_0
+Linking libnsl-2.0.1-hb9d3cd8_1
+Linking libexpat-2.8.1-hecca717_1
+Linking bzip2-1.0.8-hda65f42_9
+Linking ncurses-6.6-hdb14827_0
+Linking liblzma-5.8.3-hb03c661_0
+Linking libxcrypt-4.4.36-hd590300_1
+Linking readline-8.3-h853b02a_0
+Linking tzdata-2025c-hc9c84f9_1
+Linking ca-certificates-2026.6.17-hbd8a1cb_0
+Linking openssl-3.6.3-h35e630c_0
+Linking python-3.11.15-h7508c33_1_cpython
+Linking pip-26.1.2-pyh8b19718_0
+Linking setuptools-82.0.1-pyh332efcf_0
+Linking packaging-26.2-pyhc364b38_0
+Linking wheel-0.47.0-pyhd8ed1ab_0
+
+Transaction finished
+
+
+To activate this environment, use:
+
+    mamba activate /mars-vol/marsv/dir9_ood/cupenv
+
+Or to execute a single command in this environment, use:
+
+    mamba run -p /mars-vol/marsv/dir9_ood/cupenv mycommand
+
+=== [2] torch cu130 + numpy<2 (isolated) ===
+Collecting numpy<2,>=1.24
+  Using cached numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (61 kB)
+Downloading numpy-1.26.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (18.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 18.3/18.3 MB 10.4 MB/s  0:00:01
+Installing collected packages: numpy
+Successfully installed numpy-1.26.4
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+Looking in indexes: https://download.pytorch.org/whl/cu130
+Collecting torch==2.9.0
+  Downloading torch-2.9.0%2Bcu130-cp311-cp311-manylinux_2_28_x86_64.whl.metadata (30 kB)
+Collecting filelock (from torch==2.9.0)
+  Downloading filelock-3.29.0-py3-none-any.whl.metadata (2.0 kB)
+Collecting typing-extensions>=4.10.0 (from torch==2.9.0)
+  Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting sympy>=1.13.3 (from torch==2.9.0)
+  Downloading sympy-1.14.0-py3-none-any.whl.metadata (12 kB)
+Collecting networkx>=2.5.1 (from torch==2.9.0)
+  Downloading networkx-3.6.1-py3-none-any.whl.metadata (6.8 kB)
+Collecting jinja2 (from torch==2.9.0)
+  Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting fsspec>=0.8.5 (from torch==2.9.0)
+  Using cached fsspec-2026.4.0-py3-none-any.whl.metadata (10 kB)
+Collecting nvidia-cuda-nvrtc==13.0.48 (from torch==2.9.0)
+  Downloading nvidia_cuda_nvrtc-13.0.48-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (90.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 90.2/90.2 MB 42.7 MB/s  0:00:02
+Collecting nvidia-cuda-runtime==13.0.48 (from torch==2.9.0)
+  Downloading nvidia_cuda_runtime-13.0.48-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (2.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.2/2.2 MB 160.4 MB/s  0:00:00
+Collecting nvidia-cuda-cupti==13.0.48 (from torch==2.9.0)
+  Downloading nvidia_cuda_cupti-13.0.48-py3-none-manylinux_2_25_x86_64.whl (10.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.7/10.7 MB 39.9 MB/s  0:00:00
+Collecting nvidia-cudnn-cu13==9.13.0.50 (from torch==2.9.0)
+  Downloading nvidia_cudnn_cu13-9.13.0.50-py3-none-manylinux_2_27_x86_64.whl (348.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 348.6/348.6 MB 49.0 MB/s  0:00:07
+Collecting nvidia-cublas==13.0.0.19 (from torch==2.9.0)
+  Downloading nvidia_cublas-13.0.0.19-py3-none-manylinux_2_27_x86_64.whl (419.4 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 419.4/419.4 MB 49.2 MB/s  0:00:08
+Collecting nvidia-cufft==12.0.0.15 (from torch==2.9.0)
+  Downloading nvidia_cufft-12.0.0.15-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (214.1 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 214.1/214.1 MB 44.2 MB/s  0:00:04
+Collecting nvidia-curand==10.4.0.35 (from torch==2.9.0)
+  Downloading nvidia_curand-10.4.0.35-py3-none-manylinux_2_27_x86_64.whl (59.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 59.5/59.5 MB 47.2 MB/s  0:00:01
+Collecting nvidia-cusolver==12.0.3.29 (from torch==2.9.0)
+  Downloading nvidia_cusolver-12.0.3.29-py3-none-manylinux_2_27_x86_64.whl (193.5 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 193.5/193.5 MB 41.3 MB/s  0:00:04
+Collecting nvidia-cusparse==12.6.2.49 (from torch==2.9.0)
+  Downloading nvidia_cusparse-12.6.2.49-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (140.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 140.2/140.2 MB 48.2 MB/s  0:00:02
+Collecting nvidia-cusparselt-cu13==0.8.0 (from torch==2.9.0)
+  Downloading nvidia_cusparselt_cu13-0.8.0-py3-none-manylinux2014_x86_64.whl (169.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 169.9/169.9 MB 46.4 MB/s  0:00:03
+Collecting nvidia-nccl-cu13==2.27.7 (from torch==2.9.0)
+  Downloading nvidia_nccl_cu13-2.27.7-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (193.9 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 193.9/193.9 MB 49.6 MB/s  0:00:03
+Collecting nvidia-nvshmem-cu13==3.3.24 (from torch==2.9.0)
+  Downloading nvidia_nvshmem_cu13-3.3.24-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (60.4 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 60.4/60.4 MB 45.1 MB/s  0:00:01
+Collecting nvidia-nvtx==13.0.39 (from torch==2.9.0)
+  Downloading nvidia_nvtx-13.0.39-py3-none-manylinux1_x86_64.manylinux_2_5_x86_64.whl (147 kB)
+Collecting nvidia-nvjitlink==13.0.39 (from torch==2.9.0)
+  Downloading nvidia_nvjitlink-13.0.39-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (40.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 40.7/40.7 MB 53.3 MB/s  0:00:00
+Collecting nvidia-cufile==1.15.0.42 (from torch==2.9.0)
+  Downloading nvidia_cufile-1.15.0.42-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.2 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 196.5 MB/s  0:00:00
+Collecting triton==3.5.0 (from torch==2.9.0)
+  Downloading triton-3.5.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (1.7 kB)
+Collecting mpmath<1.4,>=1.1.0 (from sympy>=1.13.3->torch==2.9.0)
+  Downloading mpmath-1.3.0-py3-none-any.whl.metadata (8.6 kB)
+Collecting MarkupSafe>=2.0 (from jinja2->torch==2.9.0)
+  Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+Downloading torch-2.9.0%2Bcu130-cp311-cp311-manylinux_2_28_x86_64.whl (612.7 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 612.7/612.7 MB 66.8 MB/s  0:00:07
+Downloading triton-3.5.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (170.4 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 170.4/170.4 MB 50.1 MB/s  0:00:03
+Downloading fsspec-2026.4.0-py3-none-any.whl (203 kB)
+Downloading networkx-3.6.1-py3-none-any.whl (2.1 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 1.7 MB/s  0:00:01
+Downloading sympy-1.14.0-py3-none-any.whl (6.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 3.8 MB/s  0:00:01
+Downloading mpmath-1.3.0-py3-none-any.whl (536 kB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 162.6 kB/s  0:00:01
+Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Downloading filelock-3.29.0-py3-none-any.whl (39 kB)
+Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading markupsafe-3.0.3-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+Installing collected packages: nvidia-cusparselt-cu13, mpmath, typing-extensions, triton, sympy, nvidia-nvtx, nvidia-nvshmem-cu13, nvidia-nvjitlink, nvidia-nccl-cu13, nvidia-curand, nvidia-cufile, nvidia-cuda-runtime, nvidia-cuda-nvrtc, nvidia-cuda-cupti, nvidia-cublas, networkx, MarkupSafe, fsspec, filelock, nvidia-cusparse, nvidia-cufft, nvidia-cudnn-cu13, jinja2, nvidia-cusolver, torch
+
+Successfully installed MarkupSafe-3.0.3 filelock-3.29.0 fsspec-2026.4.0 jinja2-3.1.6 mpmath-1.3.0 networkx-3.6.1 nvidia-cublas-13.0.0.19 nvidia-cuda-cupti-13.0.48 nvidia-cuda-nvrtc-13.0.48 nvidia-cuda-runtime-13.0.48 nvidia-cudnn-cu13-9.13.0.50 nvidia-cufft-12.0.0.15 nvidia-cufile-1.15.0.42 nvidia-curand-10.4.0.35 nvidia-cusolver-12.0.3.29 nvidia-cusparse-12.6.2.49 nvidia-cusparselt-cu13-0.8.1 nvidia-nccl-cu13-2.27.7 nvidia-nvjitlink-13.0.39 nvidia-nvshmem-cu13-3.3.24 nvidia-nvtx-13.0.39 sympy-1.14.0 torch-2.9.0+cu130 triton-3.7.1 typing-extensions-4.15.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+=== [3] cupbearer + deps from GitHub clone ===
+Obtaining file:///mars-vol/marsv/dir9_ood/vendor/cupbearer-main
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: numpy<2,>=1.24 in ./cupenv/lib/python3.11/site-packages (from cupbearer==0.0.1) (1.26.4)
+Collecting scikit-learn (from cupbearer==0.0.1)
+  Using cached scikit_learn-1.9.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (11 kB)
+Collecting Pillow>=9.4 (from cupbearer==0.0.1)
+  Using cached pillow-12.2.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (8.8 kB)
+Requirement already satisfied: torch>=2.0 in ./cupenv/lib/python3.11/site-packages (from cupbearer==0.0.1) (2.9.0+cu130)
+Collecting torchvision>=0.15 (from cupbearer==0.0.1)
+  Using cached torchvision-0.27.1-cp311-cp311-manylinux_2_28_x86_64.whl.metadata (5.5 kB)
+Collecting torchattacks>=3.5 (from cupbearer==0.0.1)
+  Using cached torchattacks-3.5.1-py3-none-any.whl.metadata (927 bytes)
+Collecting lightning>=2.1 (from cupbearer==0.0.1)
+  Using cached lightning-2.6.5-py3-none-any.whl.metadata (44 kB)
+Collecting torchmetrics>=1.2 (from cupbearer==0.0.1)
+  Using cached torchmetrics-1.9.0-py3-none-any.whl.metadata (23 kB)
+Collecting tensorboard (from cupbearer==0.0.1)
+  Using cached tensorboard-2.20.0-py3-none-any.whl.metadata (1.8 kB)
+Collecting datasets (from cupbearer==0.0.1)
+  Using cached datasets-5.0.0-py3-none-any.whl.metadata (23 kB)
+Requirement already satisfied: tqdm in ./cupenv/lib/python3.11/site-packages (from cupbearer==0.0.1) (4.68.3)
+Collecting loguru (from cupbearer==0.0.1)
+  Using cached loguru-0.7.3-py3-none-any.whl.metadata (22 kB)
+Collecting matplotlib (from cupbearer==0.0.1)
+  Using cached matplotlib-3.11.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (80 kB)
+Requirement already satisfied: PyYAML<8.0,>5.4 in ./cupenv/lib/python3.11/site-packages (from lightning>=2.1->cupbearer==0.0.1) (6.0.3)
+Requirement already satisfied: fsspec<2028.0,>=2022.5.0 in ./cupenv/lib/python3.11/site-packages (from fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1) (2026.4.0)
+Collecting lightning-utilities<2.0,>=0.10.0 (from lightning>=2.1->cupbearer==0.0.1)
+  Using cached lightning_utilities-0.15.3-py3-none-any.whl.metadata (5.5 kB)
+Requirement already satisfied: packaging<27.0,>=23.0 in ./cupenv/lib/python3.11/site-packages (from lightning>=2.1->cupbearer==0.0.1) (26.2)
+Requirement already satisfied: typing-extensions<6.0,>4.5.0 in ./cupenv/lib/python3.11/site-packages (from lightning>=2.1->cupbearer==0.0.1) (4.15.0)
+Collecting pytorch-lightning (from lightning>=2.1->cupbearer==0.0.1)
+  Using cached pytorch_lightning-2.6.5-py3-none-any.whl.metadata (21 kB)
+Collecting aiohttp!=4.0.0a0,!=4.0.0a1 (from fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached aiohttp-3.14.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+Requirement already satisfied: filelock in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (3.29.0)
+Requirement already satisfied: sympy>=1.13.3 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (1.14.0)
+Requirement already satisfied: networkx>=2.5.1 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (3.6.1)
+Requirement already satisfied: jinja2 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (3.1.6)
+Requirement already satisfied: nvidia-cuda-nvrtc==13.0.48 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (13.0.48)
+Requirement already satisfied: nvidia-cuda-runtime==13.0.48 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (13.0.48)
+Requirement already satisfied: nvidia-cuda-cupti==13.0.48 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (13.0.48)
+Requirement already satisfied: nvidia-cudnn-cu13==9.13.0.50 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (9.13.0.50)
+Requirement already satisfied: nvidia-cublas==13.0.0.19 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (13.0.0.19)
+Requirement already satisfied: nvidia-cufft==12.0.0.15 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (12.0.0.15)
+Requirement already satisfied: nvidia-curand==10.4.0.35 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (10.4.0.35)
+Requirement already satisfied: nvidia-cusolver==12.0.3.29 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (12.0.3.29)
+Requirement already satisfied: nvidia-cusparse==12.6.2.49 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (12.6.2.49)
+Collecting nvidia-cusparselt-cu13==0.8.0 (from torch>=2.0->cupbearer==0.0.1)
+  Downloading nvidia_cusparselt_cu13-0.8.0-py3-none-manylinux2014_x86_64.whl.metadata (12 kB)
+Requirement already satisfied: nvidia-nccl-cu13==2.27.7 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (2.27.7)
+Requirement already satisfied: nvidia-nvshmem-cu13==3.3.24 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (3.3.24)
+Requirement already satisfied: nvidia-nvtx==13.0.39 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (13.0.39)
+Requirement already satisfied: nvidia-nvjitlink==13.0.39 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (13.0.39)
+Requirement already satisfied: nvidia-cufile==1.15.0.42 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (1.15.0.42)
+Collecting triton==3.5.0 (from torch>=2.0->cupbearer==0.0.1)
+  Downloading triton-3.5.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (1.7 kB)
+Collecting aiohappyeyeballs>=2.5.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached aiohappyeyeballs-2.6.2-py3-none-any.whl.metadata (5.9 kB)
+Collecting aiosignal>=1.4.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+Collecting attrs>=17.3.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting frozenlist>=1.1.1 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+Collecting multidict<7.0,>=4.5 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached multidict-6.7.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+Collecting propcache>=0.2.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached propcache-0.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (16 kB)
+Collecting yarl<2.0,>=1.17.0 (from aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached yarl-1.24.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (94 kB)
+Collecting idna>=2.0 (from yarl<2.0,>=1.17.0->aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in ./cupenv/lib/python3.11/site-packages (from sympy>=1.13.3->torch>=2.0->cupbearer==0.0.1) (1.3.0)
+Requirement already satisfied: scipy>=0.14.0 in ./cupenv/lib/python3.11/site-packages (from torchattacks>=3.5->cupbearer==0.0.1) (1.17.1)
+Collecting requests~=2.25.1 (from torchattacks>=3.5->cupbearer==0.0.1)
+  Using cached requests-2.25.1-py2.py3-none-any.whl.metadata (4.2 kB)
+Collecting chardet<5,>=3.0.2 (from requests~=2.25.1->torchattacks>=3.5->cupbearer==0.0.1)
+  Using cached chardet-4.0.0-py2.py3-none-any.whl.metadata (3.5 kB)
+Collecting idna>=2.0 (from yarl<2.0,>=1.17.0->aiohttp!=4.0.0a0,!=4.0.0a1->fsspec[http]<2028.0,>=2022.5.0->lightning>=2.1->cupbearer==0.0.1)
+  Using cached idna-2.10-py2.py3-none-any.whl.metadata (9.1 kB)
+Requirement already satisfied: urllib3<1.27,>=1.21.1 in ./cupenv/lib/python3.11/site-packages (from requests~=2.25.1->torchattacks>=3.5->cupbearer==0.0.1) (1.26.20)
+Collecting certifi>=2017.4.17 (from requests~=2.25.1->torchattacks>=3.5->cupbearer==0.0.1)
+  Using cached certifi-2026.6.17-py3-none-any.whl.metadata (2.5 kB)
+Collecting torch>=2.0 (from cupbearer==0.0.1)
+  Using cached torch-2.12.1-cp311-cp311-manylinux_2_28_x86_64.whl.metadata (31 kB)
+Requirement already satisfied: setuptools<82 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (81.0.0)
+Requirement already satisfied: cuda-toolkit==13.0.2 in ./cupenv/lib/python3.11/site-packages (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch>=2.0->cupbearer==0.0.1) (13.0.2)
+Collecting nvidia-cublas (from nvidia-cudnn-cu13==9.13.0.50->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cublas-13.1.1.3-py3-none-manylinux_2_27_x86_64.whl.metadata (1.8 kB)
+Collecting cuda-bindings<14,>=13.0.3 (from torch>=2.0->cupbearer==0.0.1)
+  Using cached cuda_bindings-13.3.1-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (2.5 kB)
+Collecting nvidia-cudnn-cu13==9.20.0.48 (from torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cudnn_cu13-9.20.0.48-py3-none-manylinux_2_27_x86_64.whl.metadata (1.9 kB)
+Requirement already satisfied: nvidia-cusparselt-cu13==0.8.1 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (0.8.1)
+Collecting nvidia-nccl-cu13==2.29.7 (from torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_nccl_cu13-2.29.7-py3-none-manylinux_2_18_x86_64.whl.metadata (2.1 kB)
+Collecting nvidia-nvshmem-cu13==3.4.5 (from torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_nvshmem_cu13-3.4.5-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.1 kB)
+Requirement already satisfied: triton==3.7.1 in ./cupenv/lib/python3.11/site-packages (from torch>=2.0->cupbearer==0.0.1) (3.7.1)
+Collecting nvidia-cuda-runtime==13.0.96.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cuda_runtime-13.0.96-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+Collecting nvidia-cufft==12.0.0.61.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cufft-12.0.0.61-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.8 kB)
+Collecting nvidia-cufile==1.15.1.6.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cufile-1.15.1.6-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.7 kB)
+Collecting nvidia-cuda-cupti==13.0.85.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cuda_cupti-13.0.85-py3-none-manylinux_2_25_x86_64.whl.metadata (1.7 kB)
+Collecting nvidia-cusolver==12.0.4.66.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cusolver-12.0.4.66-py3-none-manylinux_2_27_x86_64.whl.metadata (1.8 kB)
+Collecting nvidia-cusparse (from nvidia-cusolver==12.0.3.29->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cusparse-12.6.3.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (1.8 kB)
+Collecting nvidia-nvjitlink (from nvidia-cufft==12.0.0.15->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_nvjitlink-13.0.88-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl.metadata (1.7 kB)
+Collecting nvidia-cuda-nvrtc==13.0.88.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_cuda_nvrtc-13.0.88-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl.metadata (1.7 kB)
+Collecting nvidia-nvtx==13.0.85.* (from cuda-toolkit[cudart,cufft,cufile,cupti,curand,cusolver,cusparse,nvjitlink,nvrtc,nvtx]==13.0.2; platform_system == "Linux"->torch>=2.0->cupbearer==0.0.1)
+  Using cached nvidia_nvtx-13.0.85-py3-none-manylinux1_x86_64.manylinux_2_5_x86_64.whl.metadata (1.8 kB)
+Collecting cuda-pathfinder>=1.4.2 (from cuda-bindings<14,>=13.0.3->torch>=2.0->cupbearer==0.0.1)
+  Using cached cuda_pathfinder-1.5.5-py3-none-any.whl.metadata (1.9 kB)
+Requirement already satisfied: pyarrow>=21.0.0 in ./cupenv/lib/python3.11/site-packages (from datasets->cupbearer==0.0.1) (24.0.0)
+Collecting dill<0.4.2,>=0.3.0 (from datasets->cupbearer==0.0.1)
+  Using cached dill-0.4.1-py3-none-any.whl.metadata (10 kB)
+Collecting pandas (from datasets->cupbearer==0.0.1)
+  Using cached pandas-3.0.3-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+INFO: pip is looking at multiple versions of datasets to determine which version is compatible with other requirements. This could take a while.
+Collecting datasets (from cupbearer==0.0.1)
+  Using cached datasets-4.8.5-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.8.4-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.8.3-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.8.2-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.8.1-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.8.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.7.0-py3-none-any.whl.metadata (19 kB)
+Collecting dill<0.4.1,>=0.3.0 (from datasets->cupbearer==0.0.1)
+  Using cached dill-0.4.0-py3-none-any.whl.metadata (10 kB)
+INFO: pip is still looking at multiple versions of datasets to determine which version is compatible with other requirements. This could take a while.
+Collecting datasets (from cupbearer==0.0.1)
+  Using cached datasets-4.6.1-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.6.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.5.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.4.2-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.4.1-py3-none-any.whl.metadata (19 kB)
+INFO: This is taking longer than usual. You might need to provide the dependency resolver with stricter constraints to reduce runtime. See https://pip.pypa.io/warnings/backtracking for guidance. If you want to abort this run, press Ctrl + C.
+  Using cached datasets-4.4.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-4.3.0-py3-none-any.whl.metadata (18 kB)
+  Using cached datasets-4.2.0-py3-none-any.whl.metadata (18 kB)
+  Using cached datasets-4.1.1-py3-none-any.whl.metadata (18 kB)
+  Using cached datasets-4.1.0-py3-none-any.whl.metadata (18 kB)
+  Using cached datasets-4.0.0-py3-none-any.whl.metadata (19 kB)
+Collecting dill<0.3.9,>=0.3.0 (from datasets->cupbearer==0.0.1)
+  Using cached dill-0.3.8-py3-none-any.whl.metadata (10 kB)
+Collecting datasets (from cupbearer==0.0.1)
+  Using cached datasets-3.6.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-3.5.1-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-3.5.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-3.4.1-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-3.4.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-3.3.2-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-3.3.1-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-3.3.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-3.2.0-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-3.1.0-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-3.0.2-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-3.0.1-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-3.0.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-2.21.0-py3-none-any.whl.metadata (21 kB)
+  Using cached datasets-2.20.0-py3-none-any.whl.metadata (19 kB)
+Collecting pyarrow-hotfix (from datasets->cupbearer==0.0.1)
+  Using cached pyarrow_hotfix-0.7-py3-none-any.whl.metadata (3.6 kB)
+Collecting datasets (from cupbearer==0.0.1)
+  Using cached datasets-2.19.2-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-2.19.1-py3-none-any.whl.metadata (19 kB)
+Requirement already satisfied: xxhash in ./cupenv/lib/python3.11/site-packages (from datasets->cupbearer==0.0.1) (3.7.0)
+Collecting multiprocess (from datasets->cupbearer==0.0.1)
+  Using cached multiprocess-0.70.19-py311-none-any.whl.metadata (7.5 kB)
+Collecting datasets (from cupbearer==0.0.1)
+  Using cached datasets-2.19.0-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-2.18.0-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-2.17.1-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-2.17.0-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-2.16.1-py3-none-any.whl.metadata (20 kB)
+Collecting dill<0.3.8,>=0.3.0 (from datasets->cupbearer==0.0.1)
+  Using cached dill-0.3.7-py3-none-any.whl.metadata (9.9 kB)
+Collecting datasets (from cupbearer==0.0.1)
+  Using cached datasets-2.16.0-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-2.15.0-py3-none-any.whl.metadata (20 kB)
+  Using cached datasets-2.14.7-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-2.14.6-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-2.14.5-py3-none-any.whl.metadata (19 kB)
+  Using cached datasets-2.14.4-py3-none-any.whl.metadata (19 kB)
+Collecting huggingface-hub<1.0.0,>=0.14.0 (from datasets->cupbearer==0.0.1)
+  Using cached huggingface_hub-0.36.2-py3-none-any.whl.metadata (15 kB)
+Collecting hf-xet<2.0.0,>=1.1.3 (from huggingface-hub<1.0.0,>=0.14.0->datasets->cupbearer==0.0.1)
+  Using cached hf_xet-1.5.1-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (4.9 kB)
+Requirement already satisfied: MarkupSafe>=2.0 in ./cupenv/lib/python3.11/site-packages (from jinja2->torch>=2.0->cupbearer==0.0.1) (3.0.3)
+Collecting contourpy>=1.0.1 (from matplotlib->cupbearer==0.0.1)
+  Using cached contourpy-1.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (5.5 kB)
+Collecting cycler>=0.10 (from matplotlib->cupbearer==0.0.1)
+  Using cached cycler-0.12.1-py3-none-any.whl.metadata (3.8 kB)
+Collecting fonttools>=4.22.0 (from matplotlib->cupbearer==0.0.1)
+  Using cached fonttools-4.63.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (118 kB)
+Collecting kiwisolver>=1.3.1 (from matplotlib->cupbearer==0.0.1)
+  Using cached kiwisolver-1.5.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (5.1 kB)
+Requirement already satisfied: pyparsing>=3 in ./cupenv/lib/python3.11/site-packages (from matplotlib->cupbearer==0.0.1) (3.3.2)
+Collecting python-dateutil>=2.7 (from matplotlib->cupbearer==0.0.1)
+  Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+Requirement already satisfied: six>=1.5 in ./cupenv/lib/python3.11/site-packages (from python-dateutil>=2.7->matplotlib->cupbearer==0.0.1) (1.17.0)
+INFO: pip is looking at multiple versions of multiprocess to determine which version is compatible with other requirements. This could take a while.
+Collecting multiprocess (from datasets->cupbearer==0.0.1)
+  Using cached multiprocess-0.70.18-py311-none-any.whl.metadata (7.5 kB)
+  Using cached multiprocess-0.70.17-py311-none-any.whl.metadata (7.2 kB)
+  Using cached multiprocess-0.70.16-py311-none-any.whl.metadata (7.2 kB)
+  Using cached multiprocess-0.70.15-py311-none-any.whl.metadata (7.2 kB)
+Collecting joblib>=1.4.0 (from scikit-learn->cupbearer==0.0.1)
+  Using cached joblib-1.5.3-py3-none-any.whl.metadata (5.5 kB)
+Collecting narwhals>=2.0.1 (from scikit-learn->cupbearer==0.0.1)
+  Using cached narwhals-2.22.1-py3-none-any.whl.metadata (15 kB)
+Requirement already satisfied: threadpoolctl>=3.5.0 in ./cupenv/lib/python3.11/site-packages (from scikit-learn->cupbearer==0.0.1) (3.6.0)
+Collecting absl-py>=0.4 (from tensorboard->cupbearer==0.0.1)
+  Using cached absl_py-2.4.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting grpcio>=1.48.2 (from tensorboard->cupbearer==0.0.1)
+  Using cached grpcio-1.81.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (3.7 kB)
+Collecting markdown>=2.6.8 (from tensorboard->cupbearer==0.0.1)
+  Using cached markdown-3.10.2-py3-none-any.whl.metadata (5.1 kB)
+Collecting protobuf!=4.24.0,>=3.19.6 (from tensorboard->cupbearer==0.0.1)
+  Using cached protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl.metadata (595 bytes)
+Requirement already satisfied: tensorboard-data-server<0.8.0,>=0.7.0 in ./cupenv/lib/python3.11/site-packages (from tensorboard->cupbearer==0.0.1) (0.7.2)
+Requirement already satisfied: werkzeug>=1.0.1 in ./cupenv/lib/python3.11/site-packages (from tensorboard->cupbearer==0.0.1) (3.1.8)
+Using cached lightning-2.6.5-py3-none-any.whl (848 kB)
+Using cached lightning_utilities-0.15.3-py3-none-any.whl (31 kB)
+Using cached torchmetrics-1.9.0-py3-none-any.whl (983 kB)
+Using cached aiohttp-3.14.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.8 MB)
+Using cached multidict-6.7.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (246 kB)
+Using cached yarl-1.24.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (106 kB)
+Using cached aiohappyeyeballs-2.6.2-py3-none-any.whl (15 kB)
+Using cached aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+Using cached attrs-26.1.0-py3-none-any.whl (67 kB)
+Using cached frozenlist-1.8.0-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (231 kB)
+Using cached pillow-12.2.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.1 MB)
+Using cached propcache-0.5.2-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (58 kB)
+Using cached torchattacks-3.5.1-py3-none-any.whl (142 kB)
+Using cached requests-2.25.1-py2.py3-none-any.whl (61 kB)
+Using cached chardet-4.0.0-py2.py3-none-any.whl (178 kB)
+Using cached idna-2.10-py2.py3-none-any.whl (58 kB)
+Using cached certifi-2026.6.17-py3-none-any.whl (133 kB)
+Using cached torchvision-0.27.1-cp311-cp311-manylinux_2_28_x86_64.whl (7.7 MB)
+Using cached torch-2.12.1-cp311-cp311-manylinux_2_28_x86_64.whl (532.2 MB)
+Using cached nvidia_cudnn_cu13-9.20.0.48-py3-none-manylinux_2_27_x86_64.whl (366.2 MB)
+Using cached nvidia_nccl_cu13-2.29.7-py3-none-manylinux_2_18_x86_64.whl (206.0 MB)
+Using cached nvidia_nvshmem_cu13-3.4.5-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (60.4 MB)
+Using cached cuda_bindings-13.3.1-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (6.7 MB)
+Using cached nvidia_cublas-13.1.1.3-py3-none-manylinux_2_27_x86_64.whl (423.1 MB)
+Using cached nvidia_cuda_cupti-13.0.85-py3-none-manylinux_2_25_x86_64.whl (10.7 MB)
+Using cached nvidia_cuda_nvrtc-13.0.88-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (90.2 MB)
+Using cached nvidia_cuda_runtime-13.0.96-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (2.2 MB)
+Using cached nvidia_cufft-12.0.0.61-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (214.1 MB)
+Using cached nvidia_cufile-1.15.1.6-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.2 MB)
+Using cached nvidia_cusolver-12.0.4.66-py3-none-manylinux_2_27_x86_64.whl (200.9 MB)
+Using cached nvidia_cusparse-12.6.3.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (145.9 MB)
+Using cached nvidia_nvjitlink-13.0.88-py3-none-manylinux2010_x86_64.manylinux_2_12_x86_64.whl (40.7 MB)
+Using cached nvidia_nvtx-13.0.85-py3-none-manylinux1_x86_64.manylinux_2_5_x86_64.whl (148 kB)
+Using cached cuda_pathfinder-1.5.5-py3-none-any.whl (51 kB)
+Using cached datasets-2.14.4-py3-none-any.whl (519 kB)
+Using cached dill-0.3.7-py3-none-any.whl (115 kB)
+Using cached huggingface_hub-0.36.2-py3-none-any.whl (566 kB)
+Using cached hf_xet-1.5.1-cp37-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (4.5 MB)
+Using cached loguru-0.7.3-py3-none-any.whl (61 kB)
+Using cached matplotlib-3.11.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (10.0 MB)
+Using cached contourpy-1.3.3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (355 kB)
+Using cached cycler-0.12.1-py3-none-any.whl (8.3 kB)
+Using cached fonttools-4.63.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (5.1 MB)
+Using cached kiwisolver-1.5.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (1.4 MB)
+Using cached python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+Using cached multiprocess-0.70.15-py311-none-any.whl (135 kB)
+Using cached pandas-3.0.3-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (11.3 MB)
+Using cached pytorch_lightning-2.6.5-py3-none-any.whl (852 kB)
+Using cached scikit_learn-1.9.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (9.3 MB)
+Using cached joblib-1.5.3-py3-none-any.whl (309 kB)
+Using cached narwhals-2.22.1-py3-none-any.whl (454 kB)
+Using cached tensorboard-2.20.0-py3-none-any.whl (5.5 MB)
+Using cached absl_py-2.4.0-py3-none-any.whl (135 kB)
+Using cached grpcio-1.81.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (6.8 MB)
+Using cached markdown-3.10.2-py3-none-any.whl (108 kB)
+Using cached protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl (327 kB)
+Building wheels for collected packages: cupbearer
+  Building editable for cupbearer (pyproject.toml): started
+  Building editable for cupbearer (pyproject.toml): finished with status 'done'
+  Created wheel for cupbearer: filename=cupbearer-0.0.1-0.editable-py3-none-any.whl size=3897 sha256=1f89b87caea7aa47245fe099c21b1229e0100f2263c3db4bbe37d73b0a562cf8
+  Stored in directory: /tmp/pip-ephem-wheel-cache-s1tihlhc/wheels/0a/fb/cd/d3dd8b5dab3ff753fd8e3c257ffe4d4aeb99b84fb5765dcb13
+Successfully built cupbearer
+WARNING: Ignoring invalid distribution ~vidia-nvshmem-cu13 (/mars-vol/marsv/dir9_ood/cupenv/lib/python3.11/site-packages)
+Installing collected packages: python-dateutil, protobuf, propcache, Pillow, nvidia-nvtx, nvidia-nvshmem-cu13, nvidia-nvjitlink, nvidia-nccl-cu13, nvidia-cufile, nvidia-cuda-runtime, nvidia-cuda-nvrtc, nvidia-cuda-cupti, narwhals, multidict, markdown, loguru, lightning-utilities, kiwisolver, joblib, idna, hf-xet, grpcio, frozenlist, fonttools, dill, cycler, cuda-pathfinder, contourpy, chardet, certifi, attrs, aiohappyeyeballs, absl-py, yarl, tensorboard, scikit-learn, requests, pandas, nvidia-cusparse, nvidia-cufft, nvidia-cublas, multiprocess, matplotlib, cuda-bindings, aiosignal, nvidia-cusolver, nvidia-cudnn-cu13, huggingface-hub, aiohttp, torch, datasets, torchvision, torchmetrics, torchattacks, pytorch-lightning, lightning, cupbearer
+  Attempting uninstall: nvidia-nvtx
+    WARNING: Ignoring invalid distribution ~vidia-cuda-runtime (/mars-vol/marsv/dir9_ood/cupenv/lib/python3.11/site-packages)
+    Found existing installation: nvidia-nvtx 13.0.85
+    Uninstalling nvidia-nvtx-13.0.85:
+      Successfully uninstalled nvidia-nvtx-13.0.85
+  Attempting uninstall: nvidia-nvshmem-cu13
+    WARNING: Ignoring invalid distribution ~vidia-cuda-nvrtc (/mars-vol/marsv/dir9_ood/cupenv/lib/python3.11/site-packages)
+    Found existing installation: nvidia-nvshmem-cu13 3.4.5
+    Uninstalling nvidia-nvshmem-cu13-3.4.5:
+      Successfully uninstalled nvidia-nvshmem-cu13-3.4.5
+  Attempting uninstall: nvidia-nvjitlink
+    Found existing installation: nvidia-nvjitlink 13.0.88
+    Uninstalling nvidia-nvjitlink-13.0.88:
+      Successfully uninstalled nvidia-nvjitlink-13.0.88
+  Attempting uninstall: nvidia-nccl-cu13
+    Found existing installation: nvidia-nccl-cu13 2.29.7
+    Uninstalling nvidia-nccl-cu13-2.29.7:
+      Successfully uninstalled nvidia-nccl-cu13-2.29.7
+  Attempting uninstall: nvidia-cufile
+    Found existing installation: nvidia-cufile 1.15.1.6
+    Uninstalling nvidia-cufile-1.15.1.6:
+      Successfully uninstalled nvidia-cufile-1.15.1.6
+  Attempting uninstall: nvidia-cuda-runtime
+    Found existing installation: nvidia-cuda-runtime 13.0.96
+    Uninstalling nvidia-cuda-runtime-13.0.96:
+      Successfully uninstalled nvidia-cuda-runtime-13.0.96
+  Attempting uninstall: nvidia-cuda-nvrtc
+    Found existing installation: nvidia-cuda-nvrtc 13.0.88
+    Uninstalling nvidia-cuda-nvrtc-13.0.88:
+      Successfully uninstalled nvidia-cuda-nvrtc-13.0.88
+  Attempting uninstall: nvidia-cuda-cupti
+    Found existing installation: nvidia-cuda-cupti 13.0.85
+    Uninstalling nvidia-cuda-cupti-13.0.85:
+      Successfully uninstalled nvidia-cuda-cupti-13.0.85
+Terminated

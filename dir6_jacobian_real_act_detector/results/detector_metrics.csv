@@ -1,0 +1,7 @@
+held_out_family,logreg_auroc,mlp_auroc
+iso_gauss,0.4896,0.6955
+cov_gauss,0.4772,0.5114
+shuffle_coord,0.9985,1.0
+norm_pert,0.7382,0.7313
+LOFO_MACRO,0.6759,0.7346
+HELD_IN_all4,0.6779,0.8476

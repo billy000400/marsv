@@ -1,0 +1,58 @@
+{
+  "layer": 6,
+  "n": 300,
+  "noise_s": 1.0,
+  "steps": 40,
+  "func_move_budget_mean": 83.57,
+  "rows": [
+    {
+      "method": "corrupted(start)",
+      "ext_KL_clean": 2.2028,
+      "ext_NLL_cleanargmax": 3.0231,
+      "move_from_corrupt": 0.0,
+      "dist_to_clean": 67.18,
+      "dist_to_mean": 82.31
+    },
+    {
+      "method": "maha_descent",
+      "ext_KL_clean": 6.8725,
+      "ext_NLL_cleanargmax": 8.5944,
+      "move_from_corrupt": 78.26,
+      "dist_to_clean": 63.65,
+      "dist_to_mean": 19.32
+    },
+    {
+      "method": "func_descent",
+      "ext_KL_clean": 14.5848,
+      "ext_NLL_cleanargmax": 15.4131,
+      "move_from_corrupt": 83.57,
+      "dist_to_clean": 107.3,
+      "dist_to_mean": 117.67
+    },
+    {
+      "method": "shrink_mean(matched)",
+      "ext_KL_clean": 6.3634,
+      "ext_NLL_cleanargmax": 8.1256,
+      "move_from_corrupt": 78.26,
+      "dist_to_clean": 64.35,
+      "dist_to_mean": 4.05
+    },
+    {
+      "method": "shrink_clean(oracle,matched)",
+      "ext_KL_clean": 0.0312,
+      "ext_NLL_cleanargmax": 0.8113,
+      "move_from_corrupt": 78.26,
+      "dist_to_clean": 11.08,
+      "dist_to_mean": 70.36
+    },
+    {
+      "method": "random_move(matched)",
+      "ext_KL_clean": 3.6104,
+      "ext_NLL_cleanargmax": 4.506,
+      "move_from_corrupt": 78.26,
+      "dist_to_clean": 103.25,
+      "dist_to_mean": 113.57
+    }
+  ],
+  "elapsed_s": 4.6
+}

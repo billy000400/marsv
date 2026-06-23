@@ -1,0 +1,31 @@
+matched param counts (spread=1024, 0.087%):
+  k=   2 h1= 576 params=1183106
+  k=   4 h1= 575 params=1182082
+  k=   8 h1= 574 params=1182084
+  k=  16 h1= 572 params=1182088
+  k=  24 h1= 570 params=1182092
+  k=  32 h1= 568 params=1182096
+  k=  48 h1= 564 params=1182104
+  k=  64 h1= 560 params=1182112
+  k= 128 h1= 544 params=1182144
+  k= 256 h1= 512 params=1182208
+[36s] seed=0 k=2 val_FVU=0.0887
+[73s] seed=0 k=4 val_FVU=0.0742
+[110s] seed=0 k=8 val_FVU=0.0665
+[148s] seed=0 k=16 val_FVU=0.0580
+[185s] seed=0 k=24 val_FVU=0.0540
+[223s] seed=0 k=32 val_FVU=0.0530
+[261s] seed=0 k=48 val_FVU=0.0490
+[317s] seed=0 k=64 val_FVU=0.0456
+ 0.087%):
+  k=   2 h1= 576 params=1183106
+  k=   4 h1= 575 params=1182082
+  k=   8 h1= 574 params=1182084
+  k=  16 h1= 572 params=1182088
+  k=  24 h1= 570 params=1182092
+  k=  32 h1= 568 params=1182096
+  k=  48 h1= 564 params=1182104
+  k=  64 h1= 560 params=1182112
+  k= 128 h1= 544 params=1182144
+  k= 256 h1= 512 params=1182208
+[82s] seed=0 k=64 val_FVU=0.0456

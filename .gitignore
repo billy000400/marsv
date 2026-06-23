@@ -1,0 +1,62 @@
+# ---------------------------------------------------------------------------
+# Keep:  scripts (.py/.sh), configs, docs, and results (*.json/*.csv/*.log)
+# Drop:  virtualenvs, datasets, model checkpoints, caches, and big binaries
+# ---------------------------------------------------------------------------
+
+# --- Virtual environments / installed packages -----------------------------
+cupenv/
+**/site-packages/
+.venv/
+venv/
+env/
+*.egg-info/
+
+# --- Python caches ---------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.so
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+
+# --- Datasets / large arrays (no big data files) ---------------------------
+*.npy
+*.npz
+*.mat
+*.h5
+*.hdf5
+*.parquet
+*.arrow
+*.feather
+*.pkl
+*.pickle
+*.tfrecord
+data/raw/
+# cached corpora dumps (e.g. fineweb_texts.json, fineweb_sample.txt)
+**/data/*.npy
+**/data/*.npz
+**/data/*.txt
+**/data/*.json
+
+# --- Model checkpoints / weights -------------------------------------------
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.onnx
+*.gguf
+
+# --- Misc large / generated artifacts --------------------------------------
+*.gz
+*.tar
+*.zip
+*.wav
+*.mp4
+*.tmp
+
+# --- Editor / OS junk ------------------------------------------------------
+.DS_Store
+.idea/
+.vscode/
+*.swp

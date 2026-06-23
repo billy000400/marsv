@@ -1,0 +1,35 @@
+{
+  "layer": 6,
+  "lofo": [
+    {
+      "held_out_family": "iso_gauss",
+      "logreg_auroc": 0.4896,
+      "mlp_auroc": 0.6955
+    },
+    {
+      "held_out_family": "cov_gauss",
+      "logreg_auroc": 0.4772,
+      "mlp_auroc": 0.5114
+    },
+    {
+      "held_out_family": "shuffle_coord",
+      "logreg_auroc": 0.9985,
+      "mlp_auroc": 1.0
+    },
+    {
+      "held_out_family": "norm_pert",
+      "logreg_auroc": 0.7382,
+      "mlp_auroc": 0.7313
+    }
+  ],
+  "lofo_macro": {
+    "logreg": 0.6759,
+    "mlp": 0.7346
+  },
+  "held_in_all4": {
+    "logreg_auroc": 0.6779,
+    "mlp_auroc": 0.8476
+  },
+  "knn_baseline_macro": 0.913,
+  "elapsed_s": 30.7
+}

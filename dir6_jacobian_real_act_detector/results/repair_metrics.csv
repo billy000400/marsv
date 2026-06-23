@@ -1,0 +1,7 @@
+method,ext_KL_clean,ext_NLL_cleanargmax,move_from_corrupt,dist_to_clean,dist_to_mean
+corrupted(start),2.2028,3.0231,0.0,67.18,82.31
+maha_descent,6.8725,8.5944,78.26,63.65,19.32
+func_descent,14.5848,15.4131,83.57,107.3,117.67
+shrink_mean(matched),6.3634,8.1256,78.26,64.35,4.05
+"shrink_clean(oracle,matched)",0.0312,0.8113,78.26,11.08,70.36
+random_move(matched),3.6104,4.506,78.26,103.25,113.57

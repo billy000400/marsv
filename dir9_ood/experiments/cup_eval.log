@@ -1,0 +1,12 @@
+=== import check ===
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+  File "/mars-vol/marsv/dir9_ood/vendor/cupbearer-main/src/cupbearer/__init__.py", line 1, in <module>
+    from . import data, detectors, models, scripts, tasks, utils
+  File "/mars-vol/marsv/dir9_ood/vendor/cupbearer-main/src/cupbearer/data/__init__.py", line 4, in <module>
+    from .backdoors import (
+  File "/mars-vol/marsv/dir9_ood/vendor/cupbearer-main/src/cupbearer/data/backdoors.py", line 13, in <module>
+    import transformers
+ModuleNotFoundError: No module named 'transformers'
+torch 2.9.0+cu130 cuda True
+IMPORT_FAILED

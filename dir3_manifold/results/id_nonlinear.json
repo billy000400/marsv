@@ -1,0 +1,162 @@
+[
+  {
+    "layer": 0,
+    "n": 10000,
+    "prep": "centered",
+    "twonn": 6.215955652018588,
+    "mle_invavg": 6.625246484756911,
+    "mle_meanpt": 17.460491995872122
+  },
+  {
+    "layer": 0,
+    "n": 10000,
+    "prep": "standardized",
+    "twonn": 6.339707806401344,
+    "mle_invavg": 6.569183449082082,
+    "mle_meanpt": 55.36762831436248
+  },
+  {
+    "layer": 0,
+    "n": 50000,
+    "prep": "centered",
+    "twonn": 6.101794070907937,
+    "mle_invavg": 5.797175981638828,
+    "mle_meanpt": 12.445950711152769
+  },
+  {
+    "layer": 0,
+    "n": 50000,
+    "prep": "standardized",
+    "twonn": 6.914320603935019,
+    "mle_invavg": 5.414229990775683,
+    "mle_meanpt": 27.42756706670074
+  },
+  {
+    "layer": 3,
+    "n": 10000,
+    "prep": "centered",
+    "twonn": 10.212369888172063,
+    "mle_invavg": 12.488094171941867,
+    "mle_meanpt": 25.04378661522521
+  },
+  {
+    "layer": 3,
+    "n": 10000,
+    "prep": "standardized",
+    "twonn": 9.70082468803501,
+    "mle_invavg": 12.430663137644416,
+    "mle_meanpt": 41.45510150851465
+  },
+  {
+    "layer": 3,
+    "n": 50000,
+    "prep": "centered",
+    "twonn": 9.195394546951702,
+    "mle_invavg": 9.862682560784288,
+    "mle_meanpt": 15.554012480642575
+  },
+  {
+    "layer": 3,
+    "n": 50000,
+    "prep": "standardized",
+    "twonn": 9.044861894155307,
+    "mle_invavg": 9.407204746308043,
+    "mle_meanpt": 21.28539646949456
+  },
+  {
+    "layer": 6,
+    "n": 10000,
+    "prep": "centered",
+    "twonn": 13.648400722991637,
+    "mle_invavg": 16.485941353751404,
+    "mle_meanpt": 25.134514465402095
+  },
+  {
+    "layer": 6,
+    "n": 10000,
+    "prep": "standardized",
+    "twonn": 13.188870465827206,
+    "mle_invavg": 16.464147987706543,
+    "mle_meanpt": 30.18181033830019
+  },
+  {
+    "layer": 6,
+    "n": 50000,
+    "prep": "centered",
+    "twonn": 11.786828836173266,
+    "mle_invavg": 13.297045246868288,
+    "mle_meanpt": 18.67228105642031
+  },
+  {
+    "layer": 6,
+    "n": 50000,
+    "prep": "standardized",
+    "twonn": 11.349583511978679,
+    "mle_invavg": 12.20370237668453,
+    "mle_meanpt": 19.693512426369907
+  },
+  {
+    "layer": 9,
+    "n": 10000,
+    "prep": "centered",
+    "twonn": 15.853099343923395,
+    "mle_invavg": 18.78069544417667,
+    "mle_meanpt": 24.506046611676506
+  },
+  {
+    "layer": 9,
+    "n": 10000,
+    "prep": "standardized",
+    "twonn": 15.501510807082184,
+    "mle_invavg": 18.260416652662368,
+    "mle_meanpt": 25.049139352665524
+  },
+  {
+    "layer": 9,
+    "n": 50000,
+    "prep": "centered",
+    "twonn": 12.295267855796062,
+    "mle_invavg": 15.703927466287645,
+    "mle_meanpt": 20.949253993984126
+  },
+  {
+    "layer": 9,
+    "n": 50000,
+    "prep": "standardized",
+    "twonn": 12.113151130569086,
+    "mle_invavg": 13.534733510884939,
+    "mle_meanpt": 20.768241720349717
+  },
+  {
+    "layer": 11,
+    "n": 10000,
+    "prep": "centered",
+    "twonn": 16.279804449078732,
+    "mle_invavg": 11.081813963790959,
+    "mle_meanpt": 14.539803914305184
+  },
+  {
+    "layer": 11,
+    "n": 10000,
+    "prep": "standardized",
+    "twonn": 16.015429874421976,
+    "mle_invavg": 21.34732534762357,
+    "mle_meanpt": 34.45639253154501
+  },
+  {
+    "layer": 11,
+    "n": 50000,
+    "prep": "centered",
+    "twonn": 16.756835847067013,
+    "mle_invavg": 12.885561550047148,
+    "mle_meanpt": 17.839481253147724
+  },
+  {
+    "layer": 11,
+    "n": 50000,
+    "prep": "standardized",
+    "twonn": 11.101344463493163,
+    "mle_invavg": 16.320006759375882,
+    "mle_meanpt": 26.552959603395518
+  }
+]

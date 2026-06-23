@@ -1,0 +1,153 @@
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:  11%|█▏        | 17/148 [00:00<00:05, 23.71it/s]Loading weights:  20%|██        | 30/148 [00:02<00:09, 12.81it/s]Loading weights:  24%|██▍       | 36/148 [00:02<00:09, 11.22it/s]Loading weights:  26%|██▌       | 38/148 [00:03<00:14,  7.46it/s]Loading weights:  30%|██▉       | 44/148 [00:04<00:13,  7.64it/s]Loading weights:  32%|███▏      | 47/148 [00:04<00:12,  7.84it/s]Loading weights:  41%|████      | 60/148 [00:05<00:07, 11.55it/s]Loading weights:  42%|████▏     | 62/148 [00:05<00:08, 10.56it/s]Loading weights:  52%|█████▏    | 77/148 [00:06<00:04, 14.86it/s]Loading weights:  57%|█████▋    | 84/148 [00:07<00:04, 13.15it/s]Loading weights:  68%|██████▊   | 100/148 [00:07<00:02, 19.11it/s]Loading weights:  94%|█████████▍| 139/148 [00:08<00:00, 32.09it/s]Loading weights: 100%|██████████| 148/148 [00:08<00:00, 17.61it/s]
+DEVICE=cuda N=200 SEQ=64 NDIRS=16 KHUT=4 NFIT=1000
+GPU: NVIDIA GeForce RTX 3090
+encoded 2000 ID seqs at seq_len=64
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (2287 > 1024). Running this sequence through the model will result in indexing errors
+id_test torch.Size([200, 64]) id_fit torch.Size([1000, 64]) | ood random(200, 64) shuffled(200, 64) code(200, 64)
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10037.30it/s]
+fit acts collected 36s
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9828.95it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8944.88it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9740.73it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9719.83it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9913.40it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 12102.89it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9505.65it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9240.34it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9569.54it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9333.99it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9012.28it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8991.40it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8969.70it/s]
+  scored id_test 69s
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9410.68it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9707.97it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9114.71it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9040.37it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10987.04it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 11810.89it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 11769.69it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 11722.79it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 11708.86it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 12026.21it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9196.94it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9143.97it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 7916.41it/s]
+  scored random 102s
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9526.36it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8072.89it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 15627.14it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 7897.57it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9493.15it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8556.38it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9177.09it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8823.84it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8854.80it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 17820.95it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10462.08it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10629.76it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9430.41it/s]
+  scored shuffled 136s
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10236.08it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10302.68it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10217.89it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10216.20it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9920.21it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10519.34it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 43201.13it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10400.03it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10155.04it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 10900.61it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9315.92it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9017.13it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 11785.33it/s]
+  scored code 169s
+
+wrote /mars-vol/marsv/dir9_ood/experiments/../results/auroc_table.csv (87 rows) in 189s
+['fineweb-vs', 'code', 'cup-RMD', 'resid6', 0.9178]
+['fineweb-vs', 'code', 'baseline-mahalanobis', 'resid6', 0.9126]
+['fineweb-vs', 'code', 'cup-RMD', 'resid9', 0.8998]
+['fineweb-vs', 'code', 'cup-RMD', 'resid3', 0.8917]
+['fineweb-vs', 'code', 'baseline-mahalanobis', 'resid9', 0.8878]
+['fineweb-vs', 'code', 'baseline-mahalanobis', 'resid3', 0.8848]
+['fineweb-vs', 'code', 'cup-RMD', 'input', 0.7133]
+['fineweb-vs', 'code', 'baseline-mahalanobis', 'input', 0.6791]
+['fineweb-vs', 'code', 'cup-QUE', 'resid3', 0.668]
+['fineweb-vs', 'code', 'plateau-jacFrob', 'input', 0.6487]
+['fineweb-vs', 'code', 'baseline-L2norm', 'resid6', 0.6387]
+['fineweb-vs', 'code', 'baseline-L2norm', 'resid3', 0.63]
+['fineweb-vs', 'code', 'cup-QUE', 'resid6', 0.628]
+['fineweb-vs', 'code', 'plateau-jacFrob', 'resid6', 0.6257]
+['fineweb-vs', 'code', 'plateau-jacFrob', 'resid3', 0.625]
+['fineweb-vs', 'code', 'plateau-jacFrob', 'resid9', 0.5819]
+['fineweb-vs', 'code', 'cup-QUE', 'input', 0.581]
+['fineweb-vs', 'code', 'baseline-L2norm', 'input', 0.5714]
+['fineweb-vs', 'code', 'cup-QUE', 'resid9', 0.5629]
+['fineweb-vs', 'code', 'selfNLL-grad', 'input', 0.5164]
+['fineweb-vs', 'code', 'plateau-perturbation', 'resid3', 0.5059]
+['fineweb-vs', 'code', 'plateau-perturbation', 'resid6', 0.498]
+['fineweb-vs', 'code', 'plateau-perturbation', 'input', 0.4915]
+['fineweb-vs', 'code', 'plateau-perturbation', 'resid9', 0.4867]
+['fineweb-vs', 'code', 'selfNLL-grad', 'resid3', 0.4737]
+['fineweb-vs', 'code', 'selfNLL-grad', 'resid6', 0.4657]
+['fineweb-vs', 'code', 'selfNLL-grad', 'resid9', 0.4631]
+['fineweb-vs', 'code', 'baseline-MSP', 'n/a', 0.3594]
+['fineweb-vs', 'code', 'baseline-L2norm', 'resid9', 0.3574]
+['fineweb-vs', 'random', 'baseline-MSP', 'n/a', 0.9316]
+['fineweb-vs', 'random', 'selfNLL-grad', 'input', 0.9234]
+['fineweb-vs', 'random', 'baseline-L2norm', 'input', 0.8585]
+['fineweb-vs', 'random', 'baseline-mahalanobis', 'input', 0.8336]
+['fineweb-vs', 'random', 'cup-RMD', 'input', 0.8124]
+['fineweb-vs', 'random', 'selfNLL-grad', 'resid3', 0.8122]
+['fineweb-vs', 'random', 'selfNLL-grad', 'resid9', 0.811]
+['fineweb-vs', 'random', 'selfNLL-grad', 'resid6', 0.8061]
+['fineweb-vs', 'random', 'cup-QUE', 'input', 0.7821]
+['fineweb-vs', 'random', 'cup-RMD', 'resid3', 0.7396]
+['fineweb-vs', 'random', 'baseline-mahalanobis', 'resid3', 0.7385]
+['fineweb-vs', 'random', 'plateau-jacFrob', 'input', 0.734]
+['fineweb-vs', 'random', 'cup-QUE', 'resid3', 0.7333]
+['fineweb-vs', 'random', 'cup-RMD', 'resid6', 0.7283]
+['fineweb-vs', 'random', 'baseline-mahalanobis', 'resid6', 0.7148]
+['fineweb-vs', 'random', 'cup-QUE', 'resid6', 0.7025]
+['fineweb-vs', 'random', 'plateau-perturbation', 'resid9', 0.6997]
+['fineweb-vs', 'random', 'cup-RMD', 'resid9', 0.6629]
+['fineweb-vs', 'random', 'plateau-perturbation', 'resid3', 0.6469]
+['fineweb-vs', 'random', 'baseline-L2norm', 'resid3', 0.6314]
+['fineweb-vs', 'random', 'baseline-mahalanobis', 'resid9', 0.6207]
+['fineweb-vs', 'random', 'cup-QUE', 'resid9', 0.6032]
+['fineweb-vs', 'random', 'plateau-perturbation', 'resid6', 0.5983]
+['fineweb-vs', 'random', 'baseline-L2norm', 'resid6', 0.4641]
+['fineweb-vs', 'random', 'plateau-perturbation', 'input', 0.4374]
+['fineweb-vs', 'random', 'plateau-jacFrob', 'resid3', 0.3271]
+['fineweb-vs', 'random', 'baseline-L2norm', 'resid9', 0.2242]
+['fineweb-vs', 'random', 'plateau-jacFrob', 'resid6', 0.2119]
+['fineweb-vs', 'random', 'plateau-jacFrob', 'resid9', 0.1445]
+['fineweb-vs', 'shuffled', 'baseline-MSP', 'n/a', 0.872]
+['fineweb-vs', 'shuffled', 'selfNLL-grad', 'resid3', 0.6546]
+['fineweb-vs', 'shuffled', 'selfNLL-grad', 'input', 0.6394]
+['fineweb-vs', 'shuffled', 'selfNLL-grad', 'resid6', 0.6014]
+['fineweb-vs', 'shuffled', 'selfNLL-grad', 'resid9', 0.5871]
+['fineweb-vs', 'shuffled', 'cup-RMD', 'resid6', 0.5475]
+['fineweb-vs', 'shuffled', 'baseline-mahalanobis', 'resid6', 0.5347]
+['fineweb-vs', 'shuffled', 'plateau-perturbation', 'resid3', 0.534]
+['fineweb-vs', 'shuffled', 'cup-QUE', 'resid6', 0.5236]
+['fineweb-vs', 'shuffled', 'cup-QUE', 'resid3', 0.5173]
+['fineweb-vs', 'shuffled', 'cup-RMD', 'resid3', 0.5167]
+['fineweb-vs', 'shuffled', 'baseline-mahalanobis', 'resid3', 0.5108]
+['fineweb-vs', 'shuffled', 'cup-RMD', 'input', 0.5088]
+['fineweb-vs', 'shuffled', 'cup-QUE', 'input', 0.5082]
+['fineweb-vs', 'shuffled', 'baseline-mahalanobis', 'input', 0.4988]
+['fineweb-vs', 'shuffled', 'cup-RMD', 'resid9', 0.4928]
+['fineweb-vs', 'shuffled', 'baseline-L2norm', 'input', 0.4917]
+['fineweb-vs', 'shuffled', 'cup-QUE', 'resid9', 0.4811]
+['fineweb-vs', 'shuffled', 'plateau-perturbation', 'resid9', 0.481]
+['fineweb-vs', 'shuffled', 'baseline-mahalanobis', 'resid9', 0.4646]
+['fineweb-vs', 'shuffled', 'baseline-L2norm', 'resid6', 0.4401]
+['fineweb-vs', 'shuffled', 'baseline-L2norm', 'resid9', 0.4338]
+['fineweb-vs', 'shuffled', 'plateau-perturbation', 'resid6', 0.4192]
+['fineweb-vs', 'shuffled', 'baseline-L2norm', 'resid3', 0.3827]
+['fineweb-vs', 'shuffled', 'plateau-jacFrob', 'input', 0.3704]
+['fineweb-vs', 'shuffled', 'plateau-perturbation', 'input', 0.326]
+['fineweb-vs', 'shuffled', 'plateau-jacFrob', 'resid3', 0.2366]
+['fineweb-vs', 'shuffled', 'plateau-jacFrob', 'resid6', 0.111]
+['fineweb-vs', 'shuffled', 'plateau-jacFrob', 'resid9', 0.0708]

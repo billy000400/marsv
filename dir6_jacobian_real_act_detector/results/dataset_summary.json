@@ -1,0 +1,30 @@
+{
+  "layer": 6,
+  "d_model": 768,
+  "n_total_rows": 200000,
+  "n_train": 50000,
+  "n_eval_per_class": 10000,
+  "gap": 5000,
+  "families": [
+    "iso_gauss",
+    "cov_gauss",
+    "shuffle_coord",
+    "norm_pert"
+  ],
+  "baselines": [
+    "norm",
+    "mean_l2",
+    "mahalanobis",
+    "pca_recon",
+    "coord_quantile",
+    "knn_distance"
+  ],
+  "pca_k": 64,
+  "shrink": 0.05,
+  "seed": 0,
+  "train_norm_mean": 101.289,
+  "real_eval_norm_mean": 100.83,
+  "norm_sign": 1.0,
+  "elapsed_s": 31.6,
+  "note": "real positives reused from dir3_manifold acts_layer6.npy; pos0 sink tokens (norm~3000) NOT filtered"
+}

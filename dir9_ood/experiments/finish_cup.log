@@ -1,0 +1,74 @@
+=== waiting for cupenv pip to finish (up to ~50 min) ===
+pip done after ~130s
+=== versions (shared base must stay torch 2.9.0+cu130 / numpy 2.3.3; cupenv is separate) ===
+cupenv numpy 1.26.4 torch 2.9.0+cu130 cuda True
+datasets 5.0.0 transformers 5.12.1
+CUPBEARER_IMPORT_OK from /mars-vol/marsv/dir9_ood/vendor/cupbearer-main/src/cupbearer/__init__.py
+=== run cup_eval.py (REAL cupbearer detectors on precomputed GPT-2 activations) ===
+cupbearer from /mars-vol/marsv/dir9_ood/vendor/cupbearer-main/src/cupbearer/__init__.py | device cuda
+  cup-maha@input FAILED: TypeError: ActivationBasedDetector.__init__() got an unexpected keyword argument 'relative'
+  cup-maha@resid3 FAILED: TypeError: ActivationBasedDetector.__init__() got an unexpected keyword argument 'relative'
+  cup-maha@resid6 FAILED: TypeError: ActivationBasedDetector.__init__() got an unexpected keyword argument 'relative'
+  cup-maha@resid9 FAILED: TypeError: ActivationBasedDetector.__init__() got an unexpected keyword argument 'relative'
+  cup-RMD@input FAILED: TypeError: ActivationBasedDetector.__init__() got an unexpected keyword argument 'relative'
+  cup-RMD@resid3 FAILED: TypeError: ActivationBasedDetector.__init__() got an unexpected keyword argument 'relative'
+  cup-RMD@resid6 FAILED: TypeError: ActivationBasedDetector.__init__() got an unexpected keyword argument 'relative'
+  cup-RMD@resid9 FAILED: TypeError: ActivationBasedDetector.__init__() got an unexpected keyword argument 'relative'
+2026-06-21 04:11:04.837 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on trusted data
+2026-06-21 04:11:04.851 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+input: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s] 12%|█▎        | 1/8 [00:00<00:01,  5.73it/s]100%|██████████| 8/8 [00:00<00:00, 44.91it/s]
+2026-06-21 04:11:05.036 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on untrusted data
+2026-06-21 04:11:05.036 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+input: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2337.80it/s]
+  cup-QUE@input: random=0.824 shuffled=0.496 code=0.696
+2026-06-21 04:11:06.407 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on trusted data
+2026-06-21 04:11:06.407 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid3: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2321.46it/s]
+2026-06-21 04:11:06.411 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on untrusted data
+2026-06-21 04:11:06.411 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid3: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2370.00it/s]
+  cup-QUE@resid3: random=0.740 shuffled=0.507 code=0.895
+2026-06-21 04:11:06.774 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on trusted data
+2026-06-21 04:11:06.774 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid6: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2288.06it/s]
+2026-06-21 04:11:06.778 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on untrusted data
+2026-06-21 04:11:06.778 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid6: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2412.60it/s]
+  cup-QUE@resid6: random=0.728 shuffled=0.545 code=0.910
+2026-06-21 04:11:07.140 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on trusted data
+2026-06-21 04:11:07.141 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid9: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2278.58it/s]
+2026-06-21 04:11:07.145 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on untrusted data
+2026-06-21 04:11:07.145 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid9: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2297.15it/s]
+  cup-QUE@resid9: random=0.633 shuffled=0.489 code=0.883
+2026-06-21 04:11:07.441 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on untrusted data
+2026-06-21 04:11:07.442 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+input: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2332.44it/s]
+  cup-spectral@input: random=0.780 shuffled=0.493 code=0.368
+2026-06-21 04:11:07.467 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on untrusted data
+2026-06-21 04:11:07.467 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid3: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2318.90it/s]
+  cup-spectral@resid3: random=0.650 shuffled=0.483 code=0.408
+2026-06-21 04:11:07.487 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on untrusted data
+2026-06-21 04:11:07.488 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid6: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2360.83it/s]
+  cup-spectral@resid6: random=0.371 shuffled=0.452 code=0.520
+2026-06-21 04:11:07.507 | DEBUG    | cupbearer.detectors.statistical.statistical:_train:58 - Collecting statistics on untrusted data
+2026-06-21 04:11:07.508 | DEBUG    | cupbearer.detectors.statistical.statistical:init_variables:104 - Activation sizes: 
+resid9: torch.Size([768])
+  0%|          | 0/8 [00:00<?, ?it/s]100%|██████████| 8/8 [00:00<00:00, 2360.66it/s]
+  cup-spectral@resid9: random=0.263 shuffled=0.418 code=0.501
+WROTE /mars-vol/marsv/dir9_ood/experiments/../results/auroc_cupbearer.csv (24 rows)
+=== EXIT 0 ===

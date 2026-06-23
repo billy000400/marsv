@@ -1,0 +1,6 @@
+family,n,norm_mean,norm_std
+iso_gauss,10000,223.65,5.629
+cov_gauss,10000,195.004,109.102
+shuffle_coord,10000,100.83,197.482
+norm_pert,10000,100.83,197.482
+real_eval,10000,100.83,197.482

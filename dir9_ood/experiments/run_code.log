@@ -1,0 +1,77 @@
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 7257.51it/s]
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (2287 > 1024). Running this sequence through the model will result in indexing errors
+N=40 seq=32 ndirs=8 | id_test torch.Size([40, 32]) id_fit torch.Size([40, 32])
+scoring id_fit (for mahalanobis)...
+scoring id_test... 26s
+    perturb input done 137s
+    perturb resid3 done 179s
+    perturb resid6 done 215s
+    perturb resid9 done 247s
+scoring ood=random... 247s
+    perturb input done 347s
+    perturb resid3 done 392s
+    perturb resid6 done 431s
+    perturb resid9 done 465s
+scoring ood=shuffled... 465s
+    perturb input done 553s
+    perturb resid3 done 587s
+    perturb resid6 done 616s
+    perturb resid9 done 646s
+scoring ood=code... 646s
+    perturb input done 718s
+    perturb resid3 done 748s
+    perturb resid6 done 786s
+    perturb resid9 done 816s
+
+wrote /mars-vol/marsv/dir9_ood/experiments/../results/auroc_table.csv (51 rows) in 818s
+['fineweb-vs', 'random', 'baseline-MSP', 'n/a', 0.9387]
+['fineweb-vs', 'random', 'baseline-mahalanobis', 'input', 0.885]
+['fineweb-vs', 'random', 'baseline-mahalanobis', 'resid3', 0.6731]
+['fineweb-vs', 'random', 'baseline-mahalanobis', 'resid6', 0.5038]
+['fineweb-vs', 'random', 'baseline-mahalanobis', 'resid9', 0.2444]
+['fineweb-vs', 'random', 'plateau-perturbation', 'input', 0.5481]
+['fineweb-vs', 'random', 'plateau-perturbation', 'resid3', 0.7944]
+['fineweb-vs', 'random', 'plateau-perturbation', 'resid6', 0.7169]
+['fineweb-vs', 'random', 'plateau-perturbation', 'resid9', 0.7369]
+['fineweb-vs', 'random', 'plateau-jacobian', 'input', 0.9694]
+['fineweb-vs', 'random', 'plateau-jacobian', 'resid3', 0.9244]
+['fineweb-vs', 'random', 'plateau-jacobian', 'resid6', 0.8938]
+['fineweb-vs', 'random', 'plateau-jacobian', 'resid9', 0.8387]
+['fineweb-vs', 'random', 'baseline-L2norm', 'input', 0.8781]
+['fineweb-vs', 'random', 'baseline-L2norm', 'resid3', 0.4788]
+['fineweb-vs', 'random', 'baseline-L2norm', 'resid6', 0.3994]
+['fineweb-vs', 'random', 'baseline-L2norm', 'resid9', 0.2275]
+['fineweb-vs', 'shuffled', 'baseline-MSP', 'n/a', 0.8394]
+['fineweb-vs', 'shuffled', 'baseline-mahalanobis', 'input', 0.5872]
+['fineweb-vs', 'shuffled', 'baseline-mahalanobis', 'resid3', 0.4506]
+['fineweb-vs', 'shuffled', 'baseline-mahalanobis', 'resid6', 0.3925]
+['fineweb-vs', 'shuffled', 'baseline-mahalanobis', 'resid9', 0.3331]
+['fineweb-vs', 'shuffled', 'plateau-perturbation', 'input', 0.4894]
+['fineweb-vs', 'shuffled', 'plateau-perturbation', 'resid3', 0.7625]
+['fineweb-vs', 'shuffled', 'plateau-perturbation', 'resid6', 0.6469]
+['fineweb-vs', 'shuffled', 'plateau-perturbation', 'resid9', 0.6012]
+['fineweb-vs', 'shuffled', 'plateau-jacobian', 'input', 0.815]
+['fineweb-vs', 'shuffled', 'plateau-jacobian', 'resid3', 0.8244]
+['fineweb-vs', 'shuffled', 'plateau-jacobian', 'resid6', 0.7519]
+['fineweb-vs', 'shuffled', 'plateau-jacobian', 'resid9', 0.6444]
+['fineweb-vs', 'shuffled', 'baseline-L2norm', 'input', 0.5503]
+['fineweb-vs', 'shuffled', 'baseline-L2norm', 'resid3', 0.2925]
+['fineweb-vs', 'shuffled', 'baseline-L2norm', 'resid6', 0.3356]
+['fineweb-vs', 'shuffled', 'baseline-L2norm', 'resid9', 0.54]
+['fineweb-vs', 'code', 'baseline-MSP', 'n/a', 0.4994]
+['fineweb-vs', 'code', 'baseline-mahalanobis', 'input', 0.5853]
+['fineweb-vs', 'code', 'baseline-mahalanobis', 'resid3', 0.6419]
+['fineweb-vs', 'code', 'baseline-mahalanobis', 'resid6', 0.6781]
+['fineweb-vs', 'code', 'baseline-mahalanobis', 'resid9', 0.6394]
+['fineweb-vs', 'code', 'plateau-perturbation', 'input', 0.5887]
+['fineweb-vs', 'code', 'plateau-perturbation', 'resid3', 0.6344]
+['fineweb-vs', 'code', 'plateau-perturbation', 'resid6', 0.6212]
+['fineweb-vs', 'code', 'plateau-perturbation', 'resid9', 0.6344]
+['fineweb-vs', 'code', 'plateau-jacobian', 'input', 0.6419]
+['fineweb-vs', 'code', 'plateau-jacobian', 'resid3', 0.6331]
+['fineweb-vs', 'code', 'plateau-jacobian', 'resid6', 0.6212]
+['fineweb-vs', 'code', 'plateau-jacobian', 'resid9', 0.6275]
+['fineweb-vs', 'code', 'baseline-L2norm', 'input', 0.5347]
+['fineweb-vs', 'code', 'baseline-L2norm', 'resid3', 0.5156]
+['fineweb-vs', 'code', 'baseline-L2norm', 'resid6', 0.5181]
+['fineweb-vs', 'code', 'baseline-L2norm', 'resid9', 0.385]
