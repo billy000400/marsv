@@ -23,8 +23,9 @@ fi
 [ -f run.sh ]    || echo "[new] WARNING: no run.sh in $(pwd) — run this from the project root."
 [ -f BUDGET.md ] || echo "[new] WARNING: no BUDGET.md in $(pwd) — the new direction expects one."
 
-mkdir -p "$DIR/experiments" "$DIR/results"
+mkdir -p "$DIR/experiments" "$DIR/results" "$DIR/plots"
 : > "$DIR/experiments/.gitkeep"
+: > "$DIR/plots/.gitkeep"
 
 # --- PLAN.md (dynamic header via printf, static body via quoted heredoc) -------
 printf '# PLAN — Direction: %s\n\n' "$TITLE"                                  >  "$DIR/PLAN.md"
@@ -34,12 +35,13 @@ printf '> is the only memory.\n\n'                                            >>
 cat >> "$DIR/PLAN.md" <<'EOF'
 ## Success criterion (definition of "done")
 TODO — the concrete artifact(s) that mean this direction is finished, e.g. "Produce <X> and <Y>
-in RESULTS.md, plus REPORT.md with a clear verdict." A null/negative result is still COMPLETE if
-the question is answered. When done, the loop writes an empty `STOP` file.
+in RESULTS.md, plus REPORT.md with a clear verdict and the supporting figures in plots/." A
+null/negative result is still COMPLETE if the question is answered. When done, the loop writes an
+empty `STOP` file.
 
 ## Fallback (if time runs short)
 TODO — the minimum acceptable deliverable. The wrapper reserves the final 20 min to finalize
-whatever exists into RESULTS.md + REPORT.md, then STOP.
+whatever exists into RESULTS.md + REPORT.md (with whatever plots/ figures exist), then STOP.
 
 ## Setup (fixed)
 - TODO — model / data / hook points. Default: GPT-2 small via HuggingFace `transformers` (already
@@ -47,6 +49,9 @@ whatever exists into RESULTS.md + REPORT.md, then STOP.
 - **Shared hardware + time limits live in `../BUDGET.md` — read it every iteration.** You share one
   GPU / RAM / CPU with another agent, so stay within your half: cap VRAM with
   `torch.cuda.set_per_process_memory_fraction`, memmap caches, keep batches small, halve on OOM.
+- **Visualize what you report.** Save every figure as a PNG under `plots/` (matplotlib is headless
+  via `MPLBACKEND=Agg`; use `plt.savefig` then `plt.close`, never `plt.show`) and reference each
+  filename in RESULTS.md/REPORT.md.
 - **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, or flax** — they
   downgrade and break the cluster's CUDA build. Use the existing env; add pure-python deps with
   `--no-deps`.
@@ -54,7 +59,7 @@ whatever exists into RESULTS.md + REPORT.md, then STOP.
 ## Stages (checklist — update marks each iteration)
 - [ ] S1 — TODO
 - [ ] S2 — TODO
-- [ ] S3 — TODO
+- [ ] S3 — TODO  (include a "produce + save figures to plots/" step for each reported metric)
 
 ## Out of scope (do NOT)
 - TODO — anything explicitly out of bounds for this direction.
@@ -85,12 +90,15 @@ cat >> "$DIR/RESULTS.md" <<'EOF'
 ## Metrics
 _(add result tables here as they are produced)_
 
+## Figures
+_(list each plots/*.png with a one-line caption as you create them)_
+
 ## Headline
 _(filled at finalize)_
 EOF
 
 # --- done ---------------------------------------------------------------------
-echo "[new] created $DIR/ with PLAN.md, JOURNAL.md, RESULTS.md, experiments/, results/"
+echo "[new] created $DIR/ with PLAN.md, JOURNAL.md, RESULTS.md, experiments/, results/, plots/"
 echo "[new] next:"
 echo "      1) edit $DIR/PLAN.md — fill every TODO (success criterion, stages, next step)"
 if [ -f BUDGET.md ]; then

@@ -1,31 +1,30 @@
 # BUDGET — shared resource & time limits (single source of truth)
 
-> Both research loops (`dir3_manifold` and `dir9_ood`) run **concurrently on ONE machine and
-> share all hardware below**. Each agent must stay within roughly **half** of every resource.
-> `run.sh` reads `HOURS` and `CPU_THREADS_PER_AGENT` from this file; every agent iteration is
-> told to read this file and respect the limits. **To retune, edit the values here — nothing
-> else needs to change.**
+> `run.sh` reads the INPUTS below and **derives** each agent's share at launch. The GPU is NOT
+> listed — `run.sh` auto-detects the current card with `nvidia-smi` every launch (the pod may get
+> a different GPU each time), and `set_per_process_memory_fraction` is a fraction of whatever card
+> is present, so it adapts automatically. **To retune, edit these values — nothing else changes.**
 
-## Knobs (keep the `KEY: value` format on these lines — `run.sh` greps them)
+## Inputs (keep the `KEY: value` format — run.sh greps these)
 HOURS: 5
-CPU_CORES_TOTAL: 8
-CPU_THREADS_PER_AGENT: 4
-RAM_TOTAL_GB: 32
-RAM_BUDGET_GB_PER_AGENT: 14
-GPU: 1x NVIDIA RTX 3090 (24 GB VRAM), shared by 2 agents
-GPU_VRAM_FRACTION_PER_AGENT: 0.45
+N_AGENTS: 3                 # how many loops you launch CONCURRENTLY — set to match reality
+CPU_CORES_TOTAL: 8          # static
+RAM_TOTAL_GB: 32            # static
+VRAM_HEADROOM_FRACTION: 0.1 # leave this fraction of the card free (shared headroom)
 
-## Rules for the agent — you are ONE of TWO agents sharing this box; assume the other is busy
-- **GPU (one 3090, shared).** At startup call
-  `torch.cuda.set_per_process_memory_fraction(0.45)` so you physically cannot starve the other
-  agent. Keep batches small, move tensors to CPU when done, and call `torch.cuda.empty_cache()`
-  between stages. GPT-2 small is tiny, so VRAM is ample as long as you don't accumulate.
-- **RAM (16 GB total ≈ 7 GB each).** Do NOT hold large activation matrices in RAM. Write caches
-  to disk with `np.memmap` / sharded `.npy` and stream them. If a step would exceed ~7 GB, cap
-  the number of cached samples or process one layer at a time.
-- **CPU (4 cores ≈ 2 each).** `torch.set_num_threads(2)` and DataLoader `num_workers <= 2`.
-  (`run.sh` also exports `OMP_NUM_THREADS` / `MKL_NUM_THREADS` from `CPU_THREADS_PER_AGENT`.)
-- **On CUDA OOM or the box swapping:** HALVE batch/sample size and retry — never re-run the
-  same size repeatedly.
-- **Time.** You have `HOURS` hours of wall-clock for the WHOLE run; the wrapper enforces it and
-  tells you the remaining minutes each iteration. Reserve the final 20 minutes to finalize.
+## Derived by run.sh from the above, and told to each agent every iteration:
+##   VRAM fraction / agent = (1 - VRAM_HEADROOM_FRACTION) / N_AGENTS
+##   CPU threads   / agent = CPU_CORES_TOTAL / N_AGENTS   (min 1)
+##   RAM budget    / agent = RAM_TOTAL_GB / N_AGENTS
+## (e.g. N_AGENTS=2, 4 CPU, 16 GB  ->  vram_frac 0.45, 2 threads, 8 GB RAM each)
+
+## Rules for the agent — you are 1 of N_AGENTS sharing this box; assume the others are busy
+- **GPU.** Call `torch.cuda.set_per_process_memory_fraction(<the fraction run.sh gives you>)` at
+  startup so you can't starve the others. Small batches; move tensors off-GPU when done;
+  `torch.cuda.empty_cache()` between stages.
+- **RAM.** Stay under your per-agent GB. Don't hold large activation matrices in RAM —
+  `np.memmap` / sharded `.npy` and stream.
+- **CPU.** `torch.set_num_threads(<your thread budget>)`; DataLoader `num_workers <= that`.
+- **On CUDA OOM / swapping:** HALVE batch/sample size and retry — never re-run the same size.
+- **Time.** You have `HOURS` hours total; the wrapper enforces it and reports remaining minutes.
+  Reserve the last 20 min to finalize.
