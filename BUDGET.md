@@ -6,8 +6,8 @@
 > is present, so it adapts automatically. **To retune, edit these values — nothing else changes.**
 
 ## Inputs (keep the `KEY: value` format — run.sh greps these)
-HOURS: 5
-N_AGENTS: 3                 # how many loops you launch CONCURRENTLY — set to match reality
+HOURS: 4
+N_AGENTS: 4                 # how many loops you launch CONCURRENTLY — set to match reality
 CPU_CORES_TOTAL: 8          # static
 RAM_TOTAL_GB: 32            # static
 VRAM_HEADROOM_FRACTION: 0.1 # leave this fraction of the card free (shared headroom)

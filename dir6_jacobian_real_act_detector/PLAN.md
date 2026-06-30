@@ -597,3 +597,9 @@ fail → H1 confirmed via functional geometry and Phase 3/5 become the core cont
 12. Attempt causal repair and steering validation only after the relevant decision gates pass.
 13. Update `RESULTS.md` after each completed phase; write `REPORT.md` and `STOP` only when the success
     criterion or fallback criterion is honestly met.
+
+## Consolidation pass — do this, then STOP
+Per CLAUDE.md: rewrite REPORT.md and RESULTS.md to CURRENT-BEST only — remove all version history,
+"changed after review" notes, and any weaker/superseded run of an experiment that a stronger run
+replaces. Move everything you remove into CHANGELOG.md as dated entries (old -> new numbers). Ensure
+REPORT.md has the Methods section: Data/Model/Layer, and every metric + baseline defined with $$LaTeX$$.

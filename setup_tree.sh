@@ -1,33 +1,28 @@
 #!/usr/bin/env bash
-# setup_tree.sh — SAFE bootstrap of SHARED INFRA only (run.sh, new_direction.sh, BUDGET.md, CLAUDE.md).
-# - Creates a file ONLY if it does not already exist (never clobbers your work).
-# - Does NOT touch any direction folder (dirN/PLAN.md etc.) — use ./new_direction.sh for those.
-# - FORCE=1 overwrites infra, but backs up the old file to <file>.bak.<epoch> first.
-# Usage:  bash setup_tree.sh [PROJECT_ROOT]            (default: current dir)
-#         FORCE=1 bash setup_tree.sh [PROJECT_ROOT]    (refresh infra, with backups)
+# setup_tree.sh — SAFE bootstrap of the executable TOOLING only (run.sh, new_direction.sh, launch.sh).
+# - Creates a script ONLY if absent (never clobbers). Does NOT touch direction folders.
+# - Does NOT seed CLAUDE.md or BUDGET.md: those are hand-owned, git-tracked source-of-truth.
+#   Edit them directly; there is no duplicate copy to keep in sync.
+# - FORCE=1 overwrites the scripts, backing up each to <file>.bak.<epoch> first.
+# Usage:  bash setup_tree.sh [PROJECT_ROOT]   |   FORCE=1 bash setup_tree.sh [PROJECT_ROOT]
 set -euo pipefail
 ROOT="${1:-.}"
 [ -d "$ROOT" ] || { echo "[setup] project root '$ROOT' not found"; exit 1; }
 cd "$ROOT"
 echo "[setup] target: $(pwd)   FORCE=${FORCE:-0}"
 
-write_if_absent() {            # usage: write_if_absent <path>   (content on stdin)
+write_if_absent() {
   local f="$1"
-  if [ -e "$f" ] && [ "${FORCE:-0}" != "1" ]; then
-    echo "[setup] skip (exists): $f"; cat >/dev/null; return 0
-  fi
-  if [ -e "$f" ]; then cp -a "$f" "$f.bak.$(date +%s)"; echo "[setup] backup+overwrite: $f";
-  else echo "[setup] create: $f"; fi
+  if [ -e "$f" ] && [ "${FORCE:-0}" != "1" ]; then echo "[setup] skip (exists): $f"; cat >/dev/null; return 0; fi
+  if [ -e "$f" ]; then cp -a "$f" "$f.bak.$(date +%s)"; echo "[setup] backup+overwrite: $f"; else echo "[setup] create: $f"; fi
   cat > "$f"
 }
 
 write_if_absent run.sh <<'__EOF_run__'
 #!/usr/bin/env bash
 # Iteration-loop wrapper for one autonomous research direction.
-# Usage:  ./run.sh <research-subdir> [hours]   (hours may be fractional, e.g. 4.5)
-# Example: ./run.sh dir3_manifold 4
-# Run under tmux + an outer `timeout` as a guaranteed hard kill:
-#   tmux new-session -d -s dir3 'timeout 14700 ./run.sh dir3_manifold 4'
+# Usage:  ./run.sh <research-subdir> [hours]
+# Example: ./run.sh dir3_manifold 4   (or launch via ./launch.sh dir3_manifold)
 set -uo pipefail
 
 export IS_SANDBOX=1              # allow --dangerously-skip-permissions as root on this disposable pod
@@ -35,10 +30,9 @@ export MPLBACKEND=Agg            # headless matplotlib: figures save to file, ne
 
 DIR="${1:?usage: run.sh <research-subdir> [hours]}"
 
-# Inputs live in BUDGET.md at the project root (this dir, before we cd).
 BUDGET_FILE="BUDGET.md"
 BUDGET_ABS="$(pwd)/$BUDGET_FILE"
-RULES_ABS="$(pwd)/CLAUDE.md"   # operator rules (read before write, etc.)
+RULES_ABS="$(pwd)/CLAUDE.md"     # operator rules (read before write, curation, report structure)
 read_budget() { grep -E "^$1:" "$BUDGET_FILE" 2>/dev/null | head -1 | sed -E "s/^$1:[[:space:]]*//; s/[[:space:]].*$//"; }
 
 HOURS="${2:-$(read_budget HOURS)}";              HOURS="${HOURS:-4}"
@@ -47,13 +41,11 @@ CPU_CORES="$(read_budget CPU_CORES_TOTAL)";      CPU_CORES="${CPU_CORES:-4}"
 RAM_TOTAL="$(read_budget RAM_TOTAL_GB)";         RAM_TOTAL="${RAM_TOTAL:-16}"
 HEADROOM="$(read_budget VRAM_HEADROOM_FRACTION)";HEADROOM="${HEADROOM:-0.1}"
 
-# Derived per-agent shares (total / N_AGENTS).
 CPU_THREADS=$(awk "BEGIN{n=$CPU_CORES/$N_AGENTS; if(n<1)n=1; printf \"%d\", n}")
 RAM_PER_AGENT=$(awk "BEGIN{printf \"%.1f\", $RAM_TOTAL/$N_AGENTS}")
 VRAM_FRACTION=$(awk "BEGIN{f=(1-$HEADROOM)/$N_AGENTS; if(f<=0)f=0.1; printf \"%.3f\", f}")
 export OMP_NUM_THREADS="$CPU_THREADS" MKL_NUM_THREADS="$CPU_THREADS"
 
-# Detect the CURRENT gpu (the pod may get a different card each launch).
 GPU_NAME="unknown"; GPU_VRAM_GB="?"; VRAM_PER_AGENT="?"
 if command -v nvidia-smi >/dev/null 2>&1; then
   _g=$(nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null | head -1)
@@ -73,7 +65,7 @@ cd "$DIR" || { echo "[run.sh] cannot cd into $DIR"; exit 1; }
 mkdir -p experiments results plots
 
 echo "[run.sh] start $(date '+%F %T')  dir=$DIR  budget=${HOURS}h  agents=${N_AGENTS}"
-echo "[run.sh] gpu='${GPU_NAME}' ${GPU_VRAM_GB}GB  | per-agent share: vram_frac=${VRAM_FRACTION} (~${VRAM_PER_AGENT}GB)  ram=${RAM_PER_AGENT}GB  threads=${CPU_THREADS}"
+echo "[run.sh] gpu='${GPU_NAME}' ${GPU_VRAM_GB}GB  | per-agent: vram_frac=${VRAM_FRACTION} (~${VRAM_PER_AGENT}GB)  ram=${RAM_PER_AGENT}GB  threads=${CPU_THREADS}"
 
 while [ "$(date +%s)" -lt "$END" ] && [ ! -f STOP ]; do
   REMAIN=$(( (END - $(date +%s)) / 60 ))
@@ -81,24 +73,27 @@ while [ "$(date +%s)" -lt "$END" ] && [ ! -f STOP ]; do
 
   claude -p "You are mid-project and your working memory RESETS every iteration. \
 FIRST read CLAUDE.md (operator rules, at ${RULES_ABS}) and BUDGET.md (at ${BUDGET_ABS}), then \
-PLAN.md, JOURNAL.md, and RESULTS.md in full. OBEY every rule in CLAUDE.md (e.g. 'read before write'). \
-SHARED-RESOURCE LIMITS (computed for THIS run): you are 1 of ${N_AGENTS} agents on GPU '${GPU_NAME}' \
-(${GPU_VRAM_GB} GB). Your share: call torch.cuda.set_per_process_memory_fraction(${VRAM_FRACTION}) \
-(~${VRAM_PER_AGENT} GB VRAM), keep RAM under ~${RAM_PER_AGENT} GB (memmap large caches), use \
-torch.set_num_threads(${CPU_THREADS}), and HALVE batch size on any OOM. \
+PLAN.md, JOURNAL.md, RESULTS.md, and CHANGELOG.md in full. OBEY every rule in CLAUDE.md. \
+KEY RULES: RESULTS.md and REPORT.md are FINAL, presentable deliverables — read them, then overwrite \
+to current-best ONLY (no version history, no 'changed after review', no weaker/superseded variant of \
+an experiment when a stronger one exists). Put ALL change history in CHANGELOG.md (append-only). \
+SHARED-RESOURCE LIMITS (this run): you are 1 of ${N_AGENTS} agents on GPU '${GPU_NAME}' (${GPU_VRAM_GB} GB); \
+call torch.cuda.set_per_process_memory_fraction(${VRAM_FRACTION}) (~${VRAM_PER_AGENT} GB), keep RAM under \
+~${RAM_PER_AGENT} GB (memmap caches), torch.set_num_threads(${CPU_THREADS}), HALVE batch on OOM. \
 You have ${REMAIN} minutes of wall-clock left. \
-If that number is <= ${FINALIZE_MIN}: do ONLY finalization — write the final summary and headline \
-into RESULTS.md, write/update REPORT.md from whatever exists (embed the plots/ figures by filename), \
-then create an empty STOP file and stop. \
-Otherwise do ONE focused iteration: advance the plan by the smallest useful step, write/modify code \
-under experiments/, RUN it, record any metrics in RESULTS.md AND save a PNG figure for every \
-quantitative result into plots/ with a descriptive name (use plt.savefig then plt.close — NEVER \
-plt.show — backend is headless Agg) and reference each figure's filename in RESULTS.md/REPORT.md, \
-then append to JOURNAL.md (what you did, what you learned, the revised next step) and update \
-PLAN.md's 'Current status', 'Next step', and stage checkboxes. \
-End the JOURNAL entry with the required one-line 'On track?' check. \
+If that number is <= ${FINALIZE_MIN}: do ONLY finalization — refresh RESULTS.md (current-best only) and \
+write a clean presentable REPORT.md per CLAUDE.md (Summary -> Methods -> Results -> Conclusion; the \
+Methods section MUST give Data/Model/Layer, and DEFINE every metric and baseline with rendered \$\$LaTeX\$\$ \
+equations; embed plots/ figures; current-best numbers only). Append a final CHANGELOG.md entry, then \
+create an empty STOP file and stop. \
+Otherwise do ONE focused iteration: advance the plan by the smallest useful step, write/modify code under \
+experiments/, RUN it, then CURATE RESULTS.md to current-best (read it, overwrite clean — no history) and \
+save a PNG for every quantitative result into plots/ (plt.savefig + plt.close, NEVER plt.show; headless Agg) \
+referenced from RESULTS.md/REPORT.md. APPEND to CHANGELOG.md what changed in the deliverables this iteration \
+(old -> new numbers if a result was superseded). Then append to JOURNAL.md (what you did, learned, next step) \
+and update PLAN.md 'Current status'/'Next step'/checkboxes. End the JOURNAL entry with the 'On track?' line. \
 Persist ALL state to disk before you finish; assume nothing carries over." \
-    --append-system-prompt "Obey the operator rules in CLAUDE.md every iteration (read before write; never clobber a file you haven't read). Durable state lives only on disk (PLAN.md, JOURNAL.md, RESULTS.md, experiments/, results/, plots/). You share one GPU/CPU/RAM with other agents — respect the per-agent share given in the prompt and BUDGET.md every iteration. VISUALIZE every result you report: save figures as PNGs in plots/ (plt.savefig + plt.close, never plt.show) and reference them in RESULTS.md/REPORT.md. Persist every iteration. Prefer small verifiable steps. If an experiment breaks, debug minimally or record the failure and fall back per PLAN.md rather than rabbit-holing." \
+    --append-system-prompt "Obey CLAUDE.md every iteration. File roles are STRICT: RESULTS.md and REPORT.md are curated, presentable, current-best — read then overwrite clean, NEVER keep history or superseded/weaker results in them. CHANGELOG.md and JOURNAL.md are append-only history. REPORT.md must have a Methods section defining every metric and baseline with \$\$LaTeX\$\$ equations plus the data/model/layer used. Visualize every reported result: PNGs in plots/ (savefig+close, never show). Read before write. Persist every iteration. Prefer small verifiable steps; on a broken experiment debug minimally or fall back per PLAN.md." \
     --dangerously-skip-permissions \
     2>&1 | tee -a session.log
 
@@ -116,168 +111,159 @@ __EOF_run__
 write_if_absent new_direction.sh <<'__EOF_new__'
 #!/usr/bin/env bash
 # new_direction.sh — scaffold ONE new research direction for the run.sh loop.
-# Run from the project root (where run.sh and BUDGET.md live).
-#
+# Run from the project root (where run.sh, BUDGET.md, CLAUDE.md live).
 # Usage:   ./new_direction.sh <dir_name> ["Title / one-line objective"]
-# Example: ./new_direction.sh dir7_proxy "A differentiable plateau proxy"
-#
-# Safe by design: refuses to overwrite an existing direction (no clobbering results).
+# Safe by design: refuses to overwrite an existing direction.
 set -euo pipefail
 
 DIR="${1:?usage: ./new_direction.sh <dir_name> [\"Title\"]}"
 TITLE="${2:-TODO — describe this direction}"
 
-# --- validation ---------------------------------------------------------------
-case "$DIR" in
-  */*|*" "*) echo "[new] '$DIR' must be a plain folder name (no spaces or slashes)"; exit 1 ;;
-esac
+case "$DIR" in */*|*" "*) echo "[new] '$DIR' must be a plain folder name"; exit 1 ;; esac
 if [ -e "$DIR/PLAN.md" ]; then
-  echo "[new] REFUSING: $DIR/PLAN.md already exists — would overwrite existing work."
-  echo "      Pick a different name, or edit that direction's files directly."
-  exit 1
+  echo "[new] REFUSING: $DIR/PLAN.md already exists — would overwrite existing work."; exit 1
 fi
-[ -f run.sh ]    || echo "[new] WARNING: no run.sh in $(pwd) — run this from the project root."
-[ -f BUDGET.md ] || echo "[new] WARNING: no BUDGET.md in $(pwd) — the new direction expects one."
+[ -f run.sh ]    || echo "[new] WARNING: no run.sh in $(pwd) — run from the project root."
+[ -f BUDGET.md ] || echo "[new] WARNING: no BUDGET.md in $(pwd)."
+[ -f CLAUDE.md ] || echo "[new] WARNING: no CLAUDE.md in $(pwd) — agents won't see the operator rules."
 
 mkdir -p "$DIR/experiments" "$DIR/results" "$DIR/plots"
-: > "$DIR/experiments/.gitkeep"
-: > "$DIR/plots/.gitkeep"
+: > "$DIR/experiments/.gitkeep"; : > "$DIR/plots/.gitkeep"
 
-# --- PLAN.md (dynamic header via printf, static body via quoted heredoc) -------
+# ---- PLAN.md ----
 printf '# PLAN — Direction: %s\n\n' "$TITLE"                                  >  "$DIR/PLAN.md"
-printf '> Working folder: `%s`. The agent REWRITES "Current status" and "Next step" and ticks\n' "$DIR" >> "$DIR/PLAN.md"
-printf '> the stage boxes every iteration. Disk (this file + JOURNAL.md + RESULTS.md + ../BUDGET.md)\n' >> "$DIR/PLAN.md"
-printf '> is the only memory.\n\n'                                            >> "$DIR/PLAN.md"
+printf '> Working folder: `%s`. Agent REWRITES "Current status"/"Next step" + ticks stages each\n' "$DIR" >> "$DIR/PLAN.md"
+printf '> iteration. Disk (PLAN/JOURNAL/RESULTS/CHANGELOG + ../BUDGET.md + ../CLAUDE.md) is the only memory.\n\n' >> "$DIR/PLAN.md"
 cat >> "$DIR/PLAN.md" <<'EOF'
 ## Success criterion (definition of "done")
-TODO — the concrete artifact(s) that mean this direction is finished, e.g. "Produce <X> and <Y>
-in RESULTS.md, plus REPORT.md with a clear verdict and the supporting figures in plots/." A
-null/negative result is still COMPLETE if the question is answered. When done, the loop writes an
-empty `STOP` file.
+TODO — concrete artifact(s) that mean done, e.g. "RESULTS.md has <X>/<Y> (current-best) and REPORT.md
+gives a clear verdict with Methods + figures." Null/negative results are COMPLETE if the question is
+answered. When done, the loop writes an empty `STOP` file.
 
 ## Fallback (if time runs short)
-TODO — the minimum acceptable deliverable. The wrapper reserves the final 20 min to finalize
-whatever exists into RESULTS.md + REPORT.md (with whatever plots/ figures exist), then STOP.
+TODO — minimum acceptable deliverable. The wrapper reserves the last 20 min to finalize + STOP.
 
 ## Setup (fixed)
-- TODO — model / data / hook points. Default: GPT-2 small via HuggingFace `transformers` (already
-  installed) + forward hooks; STREAM data, do not bulk-download.
-- **Shared hardware + time limits live in `../BUDGET.md` — read it every iteration.** You share one
-  GPU / RAM / CPU with another agent, so stay within your half: cap VRAM with
-  `torch.cuda.set_per_process_memory_fraction`, memmap caches, keep batches small, halve on OOM.
-- **Visualize what you report.** Save every figure as a PNG under `plots/` (matplotlib is headless
-  via `MPLBACKEND=Agg`; use `plt.savefig` then `plt.close`, never `plt.show`) and reference each
-  filename in RESULTS.md/REPORT.md.
-- **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, or flax** — they
-  downgrade and break the cluster's CUDA build. Use the existing env; add pure-python deps with
-  `--no-deps`.
+- TODO — model / data / hook points. Default: GPT-2 small via HuggingFace `transformers` + forward hooks; STREAM data.
+- **Shared limits in `../BUDGET.md`; operator rules in `../CLAUDE.md` — read both every iteration.**
+- **Deliverable hygiene (see CLAUDE.md):** RESULTS.md/REPORT.md = current-best only, no history; CHANGELOG.md = the history.
+- **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, flax** — they break the CUDA build.
 
-## Stages (checklist — update marks each iteration)
+## Stages (checklist)
 - [ ] S1 — TODO
 - [ ] S2 — TODO
-- [ ] S3 — TODO  (include a "produce + save figures to plots/" step for each reported metric)
+- [ ] S3 — TODO  (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
-- TODO — anything explicitly out of bounds for this direction.
-- Don't drift into other directions.
+- TODO. Don't drift into other directions.
 
 ## On-track check (required every iteration)
-End each JOURNAL.md entry with one line: `On track? <yes/no> — <stage, % done, blocker if any>`.
+End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
 (none yet — fresh start)
 
 ## Next step
-TODO — the first concrete action.
+TODO — first concrete action.
 EOF
 
-# --- JOURNAL.md ---------------------------------------------------------------
+# ---- JOURNAL.md (append-only working log) ----
 printf '# JOURNAL — Direction: %s\n\n' "$TITLE"                               >  "$DIR/JOURNAL.md"
 cat >> "$DIR/JOURNAL.md" <<'EOF'
-Append-only. One entry per iteration: what I did, what I learned, the revised next step,
+Append-only working log. One entry per iteration: what I did, what I learned, the revised next step,
 and a final line `On track? <yes/no> — <stage, % done, blocker>`.
 
 ---
 EOF
 
-# --- RESULTS.md ---------------------------------------------------------------
-printf '# RESULTS — Direction: %s\n\n' "$TITLE"                               >  "$DIR/RESULTS.md"
-cat >> "$DIR/RESULTS.md" <<'EOF'
-## Metrics
-_(add result tables here as they are produced)_
+# ---- CHANGELOG.md (append-only history of deliverable changes) ----
+printf '# CHANGELOG — Direction: %s\n\n' "$TITLE"                             >  "$DIR/CHANGELOG.md"
+cat >> "$DIR/CHANGELOG.md" <<'EOF'
+Append-only ledger of changes to RESULTS.md / REPORT.md. One dated entry per change: what changed,
+why, and — if a result was superseded — the old -> new numbers. This is the ONLY place history lives;
+RESULTS.md and REPORT.md themselves stay current-best with no history.
 
-## Figures
-_(list each plots/*.png with a one-line caption as you create them)_
-
-## Headline
-_(filled at finalize)_
+---
 EOF
 
-# --- done ---------------------------------------------------------------------
-echo "[new] created $DIR/ with PLAN.md, JOURNAL.md, RESULTS.md, experiments/, results/, plots/"
-echo "[new] next:"
-echo "      1) edit $DIR/PLAN.md — fill every TODO (success criterion, stages, next step)"
-if [ -f BUDGET.md ]; then
-  H=$(grep -E '^HOURS:' BUDGET.md 2>/dev/null | head -1 | sed -E 's/^HOURS:[[:space:]]*//;s/[[:space:]].*$//'); H="${H:-4}"
-  T=$(awk "BEGIN{printf \"%d\", $H*3600+300}")
-  echo "      2) launch:  tmux new-session -d -s $DIR 'timeout $T ./run.sh $DIR'"
-else
-  echo "      2) launch:  tmux new-session -d -s $DIR 'timeout <Hh+grace_sec> ./run.sh $DIR'"
-fi
+# ---- RESULTS.md (curated, current-best only) ----
+printf '# RESULTS — Direction: %s\n\n' "$TITLE"                               >  "$DIR/RESULTS.md"
+cat >> "$DIR/RESULTS.md" <<'EOF'
+> CURRENT-BEST ONLY. One row per experiment. No history, no superseded/weaker variants
+> (those live in CHANGELOG.md). Read this file before rewriting it.
+
+## Metrics
+_(current-best result table(s))_
+
+## Figures
+_(each plots/*.png with a one-line caption)_
+
+## Headline
+_(the single current takeaway)_
+EOF
+
+# ---- REPORT.md (presentable skeleton with required Methods section) ----
+printf '# REPORT — Direction: %s\n\n' "$TITLE"                               >  "$DIR/REPORT.md"
+cat >> "$DIR/REPORT.md" <<'EOF'
+> Final, presentable, current-best only (no history — see CHANGELOG.md). Read before rewriting.
+
+## Summary
+TODO — 2-4 sentences: the question, the headline result, the verdict.
+
+## Methods
+### Data & Model
+TODO — dataset, model (e.g. GPT-2 small, 124M), exact layer(s)/hook point, sample sizes.
+
+### Metrics
+TODO — define EACH metric with a rendered equation. Example:
+$$\mathrm{AUROC} = \Pr\big(s(x^{+}) > s(x^{-})\big)$$
+State exactly what `s(x)` scores and which direction means "more anomalous".
+
+### Baselines
+TODO — name and define EACH baseline. Example (Mahalanobis distance):
+$$d_M(x) = \sqrt{(x-\mu)^{\top}\,\Sigma^{-1}\,(x-\mu)}$$
+
+## Results
+TODO — current-best numbers only (one row per experiment), referencing figures in plots/.
+
+## Conclusion
+TODO — what the result implies; limitations.
+EOF
+
+echo "[new] created $DIR/ with PLAN, JOURNAL, RESULTS (curated), REPORT (skeleton+Methods), CHANGELOG, experiments/, results/, plots/"
+echo "[new] next: 1) fill the TODOs in $DIR/PLAN.md   2) ./launch.sh $DIR"
 __EOF_new__
 [ -f new_direction.sh ] && chmod +x new_direction.sh
 
-write_if_absent BUDGET.md <<'__EOF_budget__'
-# BUDGET — shared resource & time limits (single source of truth)
+write_if_absent launch.sh <<'__EOF_launch__'
+#!/usr/bin/env bash
+# launch.sh — start ONE research loop in tmux. Session name is parsed from the direction folder.
+# Usage:  ./launch.sh <direction_dir> [hours]
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")" && pwd)"; cd "$ROOT"
+[ -x run.sh ] || { echo "[launch] no executable run.sh in $ROOT — run from the project root."; exit 1; }
+RAW="${1:?usage: ./launch.sh <direction_dir> [hours]}"
+DIR="$(basename "${RAW%/}")"
+SESSION="$(printf '%s' "$DIR" | tr '.:' '__')"
+HOURS_ARG="${2:-}"
+[ -d "$DIR" ]         || { echo "[launch] no such direction: $DIR/  (create with ./new_direction.sh)"; exit 1; }
+[ -f "$DIR/PLAN.md" ] || { echo "[launch] $DIR/ has no PLAN.md — not a valid direction."; exit 1; }
+if tmux has-session -t "$SESSION" 2>/dev/null; then
+  echo "[launch] '$SESSION' already running.  attach: tmux attach -t $SESSION   kill: tmux kill-session -t $SESSION"; exit 1
+fi
+if [ -f "$DIR/STOP" ]; then
+  echo "[launch] $DIR/ already finished (STOP present). To continue:  rm $DIR/STOP  then relaunch."; exit 1
+fi
+read_budget(){ grep -E "^$1:" BUDGET.md 2>/dev/null | head -1 | sed -E "s/^$1:[[:space:]]*//;s/[[:space:]].*$//"; }
+HOURS="${HOURS_ARG:-$(read_budget HOURS)}"; HOURS="${HOURS:-4}"
+TLIMIT=$(awk "BEGIN{printf \"%d\", $HOURS*3600+300}")
+tmux new-session -d -s "$SESSION" "timeout $TLIMIT ./run.sh $DIR ${HOURS_ARG}"
+echo "[launch] started '$SESSION'  (dir=$DIR, ${HOURS}h, hard-kill ${TLIMIT}s)"
+echo "[launch] attach: tmux attach -t $SESSION    |    tail: tail -f $DIR/session.log"
+__EOF_launch__
+[ -f launch.sh ] && chmod +x launch.sh
 
-> `run.sh` reads the INPUTS below and **derives** each agent's share at launch. The GPU is NOT
-> listed — `run.sh` auto-detects the current card with `nvidia-smi` every launch (the pod may get
-> a different GPU each time), and `set_per_process_memory_fraction` is a fraction of whatever card
-> is present, so it adapts automatically. **To retune, edit these values — nothing else changes.**
-
-## Inputs (keep the `KEY: value` format — run.sh greps these)
-HOURS: 4
-N_AGENTS: 2                 # how many loops you launch CONCURRENTLY — set to match reality
-CPU_CORES_TOTAL: 4          # static
-RAM_TOTAL_GB: 16            # static
-VRAM_HEADROOM_FRACTION: 0.1 # leave this fraction of the card free (shared headroom)
-
-## Derived by run.sh from the above, and told to each agent every iteration:
-##   VRAM fraction / agent = (1 - VRAM_HEADROOM_FRACTION) / N_AGENTS
-##   CPU threads   / agent = CPU_CORES_TOTAL / N_AGENTS   (min 1)
-##   RAM budget    / agent = RAM_TOTAL_GB / N_AGENTS
-## (e.g. N_AGENTS=2, 4 CPU, 16 GB  ->  vram_frac 0.45, 2 threads, 8 GB RAM each)
-
-## Rules for the agent — you are 1 of N_AGENTS sharing this box; assume the others are busy
-- **GPU.** Call `torch.cuda.set_per_process_memory_fraction(<the fraction run.sh gives you>)` at
-  startup so you can't starve the others. Small batches; move tensors off-GPU when done;
-  `torch.cuda.empty_cache()` between stages.
-- **RAM.** Stay under your per-agent GB. Don't hold large activation matrices in RAM —
-  `np.memmap` / sharded `.npy` and stream.
-- **CPU.** `torch.set_num_threads(<your thread budget>)`; DataLoader `num_workers <= that`.
-- **On CUDA OOM / swapping:** HALVE batch/sample size and retry — never re-run the same size.
-- **Time.** You have `HOURS` hours total; the wrapper enforces it and reports remaining minutes.
-  Reserve the last 20 min to finalize.
-__EOF_budget__
-
-write_if_absent CLAUDE.md <<'__EOF_rules__'
-# CLAUDE.md — operator rules for every agent in this project
-
-> Read and follow these rules EVERY iteration, in addition to BUDGET.md and the direction's
-> PLAN.md. These are hard rules: when a rule conflicts with convenience or speed, the rule wins.
-> (This file is shared across all directions; it lives at the project root.)
-
-## Rules
-1. **Read before write.** Never overwrite or edit a file without first reading its current
-   contents. Prefer a targeted edit over a full rewrite; if you must rewrite, preserve everything
-   you are not deliberately changing. Never blank-truncate or clobber a file you have not read —
-   this includes RESULTS.md, JOURNAL.md, PLAN.md, and any cached data under experiments/.
-
-<!-- Add more rules below, one numbered item each. Examples you might enable:
-2. **Never delete results or cached data** without an explicit instruction in PLAN.md.
-3. **Append, don't replace** in JOURNAL.md.
-4. **Commit/checkpoint** after each completed stage.
--->
-__EOF_rules__
-
-echo "[setup] done. Infra in place. Add directions with:  ./new_direction.sh <dir_name> \"Title\""
+for cfg in CLAUDE.md BUDGET.md; do
+  [ -f "$cfg" ] || echo "[setup] NOTE: $cfg not found here — it is git-tracked, not seeded by this script. Restore it from git (git checkout $cfg) or your repo."
+done
+echo "[setup] done. Tooling in place. Add directions with:  ./new_direction.sh <dir_name> \"Title\""

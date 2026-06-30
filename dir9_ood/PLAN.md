@@ -106,3 +106,9 @@ both feedback files are renamed `*.addressed.md` on disk, every point logged in 
 and RESULTS.md/REPORT.md/checklist updated. Block removed iter 3 to end the STOP contradiction. The
 later Codex reviews (`*_20260621T031213Z` and `*_20260622T230658Z`) are likewise addressed and renamed
 `*.addressed.md`; see JOURNAL iters 4–5.)_
+
+## Consolidation pass — do this, then STOP
+Per CLAUDE.md: rewrite REPORT.md and RESULTS.md to CURRENT-BEST only — remove all version history,
+"changed after review" notes, and any weaker/superseded run of an experiment that a stronger run
+replaces. Move everything you remove into CHANGELOG.md as dated entries (old -> new numbers). Ensure
+REPORT.md has the Methods section: Data/Model/Layer, and every metric + baseline defined with $$LaTeX$$.

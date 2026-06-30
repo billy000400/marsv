@@ -537,3 +537,9 @@ alignment; Claude must resolve that in S1/S2 before running scientific compariso
 Implement `experiments/env_audit.py` and `experiments/sae_io.py`, verify a matching
 GPT-2 small SAE/hook point, and run the cheap smoke test in Experiment 1 before building
 the full activation-condition matrix.
+
+## Consolidation pass — do this, then STOP
+Per CLAUDE.md: rewrite REPORT.md and RESULTS.md to CURRENT-BEST only — remove all version history,
+"changed after review" notes, and any weaker/superseded run of an experiment that a stronger run
+replaces. Move everything you remove into CHANGELOG.md as dated entries (old -> new numbers). Ensure
+REPORT.md has the Methods section: Data/Model/Layer, and every metric + baseline defined with $$LaTeX$$.

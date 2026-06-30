@@ -1,110 +1,123 @@
 #!/usr/bin/env bash
 # new_direction.sh — scaffold ONE new research direction for the run.sh loop.
-# Run from the project root (where run.sh and BUDGET.md live).
-#
+# Run from the project root (where run.sh, BUDGET.md, CLAUDE.md live).
 # Usage:   ./new_direction.sh <dir_name> ["Title / one-line objective"]
-# Example: ./new_direction.sh dir7_proxy "A differentiable plateau proxy"
-#
-# Safe by design: refuses to overwrite an existing direction (no clobbering results).
+# Safe by design: refuses to overwrite an existing direction.
 set -euo pipefail
 
 DIR="${1:?usage: ./new_direction.sh <dir_name> [\"Title\"]}"
 TITLE="${2:-TODO — describe this direction}"
 
-# --- validation ---------------------------------------------------------------
-case "$DIR" in
-  */*|*" "*) echo "[new] '$DIR' must be a plain folder name (no spaces or slashes)"; exit 1 ;;
-esac
+case "$DIR" in */*|*" "*) echo "[new] '$DIR' must be a plain folder name"; exit 1 ;; esac
 if [ -e "$DIR/PLAN.md" ]; then
-  echo "[new] REFUSING: $DIR/PLAN.md already exists — would overwrite existing work."
-  echo "      Pick a different name, or edit that direction's files directly."
-  exit 1
+  echo "[new] REFUSING: $DIR/PLAN.md already exists — would overwrite existing work."; exit 1
 fi
-[ -f run.sh ]    || echo "[new] WARNING: no run.sh in $(pwd) — run this from the project root."
-[ -f BUDGET.md ] || echo "[new] WARNING: no BUDGET.md in $(pwd) — the new direction expects one."
+[ -f run.sh ]    || echo "[new] WARNING: no run.sh in $(pwd) — run from the project root."
+[ -f BUDGET.md ] || echo "[new] WARNING: no BUDGET.md in $(pwd)."
+[ -f CLAUDE.md ] || echo "[new] WARNING: no CLAUDE.md in $(pwd) — agents won't see the operator rules."
 
 mkdir -p "$DIR/experiments" "$DIR/results" "$DIR/plots"
-: > "$DIR/experiments/.gitkeep"
-: > "$DIR/plots/.gitkeep"
+: > "$DIR/experiments/.gitkeep"; : > "$DIR/plots/.gitkeep"
 
-# --- PLAN.md (dynamic header via printf, static body via quoted heredoc) -------
+# ---- PLAN.md ----
 printf '# PLAN — Direction: %s\n\n' "$TITLE"                                  >  "$DIR/PLAN.md"
-printf '> Working folder: `%s`. The agent REWRITES "Current status" and "Next step" and ticks\n' "$DIR" >> "$DIR/PLAN.md"
-printf '> the stage boxes every iteration. Disk (this file + JOURNAL.md + RESULTS.md + ../BUDGET.md)\n' >> "$DIR/PLAN.md"
-printf '> is the only memory.\n\n'                                            >> "$DIR/PLAN.md"
+printf '> Working folder: `%s`. Agent REWRITES "Current status"/"Next step" + ticks stages each\n' "$DIR" >> "$DIR/PLAN.md"
+printf '> iteration. Disk (PLAN/JOURNAL/RESULTS/CHANGELOG + ../BUDGET.md + ../CLAUDE.md) is the only memory.\n\n' >> "$DIR/PLAN.md"
 cat >> "$DIR/PLAN.md" <<'EOF'
 ## Success criterion (definition of "done")
-TODO — the concrete artifact(s) that mean this direction is finished, e.g. "Produce <X> and <Y>
-in RESULTS.md, plus REPORT.md with a clear verdict and the supporting figures in plots/." A
-null/negative result is still COMPLETE if the question is answered. When done, the loop writes an
-empty `STOP` file.
+TODO — concrete artifact(s) that mean done, e.g. "RESULTS.md has <X>/<Y> (current-best) and REPORT.md
+gives a clear verdict with Methods + figures." Null/negative results are COMPLETE if the question is
+answered. When done, the loop writes an empty `STOP` file.
 
 ## Fallback (if time runs short)
-TODO — the minimum acceptable deliverable. The wrapper reserves the final 20 min to finalize
-whatever exists into RESULTS.md + REPORT.md (with whatever plots/ figures exist), then STOP.
+TODO — minimum acceptable deliverable. The wrapper reserves the last 20 min to finalize + STOP.
 
 ## Setup (fixed)
-- TODO — model / data / hook points. Default: GPT-2 small via HuggingFace `transformers` (already
-  installed) + forward hooks; STREAM data, do not bulk-download.
-- **Shared hardware + time limits live in `../BUDGET.md` — read it every iteration.** You share one
-  GPU / RAM / CPU with another agent, so stay within your half: cap VRAM with
-  `torch.cuda.set_per_process_memory_fraction`, memmap caches, keep batches small, halve on OOM.
-- **Visualize what you report.** Save every figure as a PNG under `plots/` (matplotlib is headless
-  via `MPLBACKEND=Agg`; use `plt.savefig` then `plt.close`, never `plt.show`) and reference each
-  filename in RESULTS.md/REPORT.md.
-- **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, or flax** — they
-  downgrade and break the cluster's CUDA build. Use the existing env; add pure-python deps with
-  `--no-deps`.
+- TODO — model / data / hook points. Default: GPT-2 small via HuggingFace `transformers` + forward hooks; STREAM data.
+- **Shared limits in `../BUDGET.md`; operator rules in `../CLAUDE.md` — read both every iteration.**
+- **Deliverable hygiene (see CLAUDE.md):** RESULTS.md/REPORT.md = current-best only, no history; CHANGELOG.md = the history.
+- **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, flax** — they break the CUDA build.
 
-## Stages (checklist — update marks each iteration)
+## Stages (checklist)
 - [ ] S1 — TODO
 - [ ] S2 — TODO
-- [ ] S3 — TODO  (include a "produce + save figures to plots/" step for each reported metric)
+- [ ] S3 — TODO  (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
-- TODO — anything explicitly out of bounds for this direction.
-- Don't drift into other directions.
+- TODO. Don't drift into other directions.
 
 ## On-track check (required every iteration)
-End each JOURNAL.md entry with one line: `On track? <yes/no> — <stage, % done, blocker if any>`.
+End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
 (none yet — fresh start)
 
 ## Next step
-TODO — the first concrete action.
+TODO — first concrete action.
 EOF
 
-# --- JOURNAL.md ---------------------------------------------------------------
+# ---- JOURNAL.md (append-only working log) ----
 printf '# JOURNAL — Direction: %s\n\n' "$TITLE"                               >  "$DIR/JOURNAL.md"
 cat >> "$DIR/JOURNAL.md" <<'EOF'
-Append-only. One entry per iteration: what I did, what I learned, the revised next step,
+Append-only working log. One entry per iteration: what I did, what I learned, the revised next step,
 and a final line `On track? <yes/no> — <stage, % done, blocker>`.
 
 ---
 EOF
 
-# --- RESULTS.md ---------------------------------------------------------------
-printf '# RESULTS — Direction: %s\n\n' "$TITLE"                               >  "$DIR/RESULTS.md"
-cat >> "$DIR/RESULTS.md" <<'EOF'
-## Metrics
-_(add result tables here as they are produced)_
+# ---- CHANGELOG.md (append-only history of deliverable changes) ----
+printf '# CHANGELOG — Direction: %s\n\n' "$TITLE"                             >  "$DIR/CHANGELOG.md"
+cat >> "$DIR/CHANGELOG.md" <<'EOF'
+Append-only ledger of changes to RESULTS.md / REPORT.md. One dated entry per change: what changed,
+why, and — if a result was superseded — the old -> new numbers. This is the ONLY place history lives;
+RESULTS.md and REPORT.md themselves stay current-best with no history.
 
-## Figures
-_(list each plots/*.png with a one-line caption as you create them)_
-
-## Headline
-_(filled at finalize)_
+---
 EOF
 
-# --- done ---------------------------------------------------------------------
-echo "[new] created $DIR/ with PLAN.md, JOURNAL.md, RESULTS.md, experiments/, results/, plots/"
-echo "[new] next:"
-echo "      1) edit $DIR/PLAN.md — fill every TODO (success criterion, stages, next step)"
-if [ -f BUDGET.md ]; then
-  H=$(grep -E '^HOURS:' BUDGET.md 2>/dev/null | head -1 | sed -E 's/^HOURS:[[:space:]]*//;s/[[:space:]].*$//'); H="${H:-4}"
-  T=$(awk "BEGIN{printf \"%d\", $H*3600+300}")
-  echo "      2) launch:  tmux new-session -d -s $DIR 'timeout $T ./run.sh $DIR'"
-else
-  echo "      2) launch:  tmux new-session -d -s $DIR 'timeout <Hh+grace_sec> ./run.sh $DIR'"
-fi
+# ---- RESULTS.md (curated, current-best only) ----
+printf '# RESULTS — Direction: %s\n\n' "$TITLE"                               >  "$DIR/RESULTS.md"
+cat >> "$DIR/RESULTS.md" <<'EOF'
+> CURRENT-BEST ONLY. One row per experiment. No history, no superseded/weaker variants
+> (those live in CHANGELOG.md). Read this file before rewriting it.
+
+## Metrics
+_(current-best result table(s))_
+
+## Figures
+_(each plots/*.png with a one-line caption)_
+
+## Headline
+_(the single current takeaway)_
+EOF
+
+# ---- REPORT.md (presentable skeleton with required Methods section) ----
+printf '# REPORT — Direction: %s\n\n' "$TITLE"                               >  "$DIR/REPORT.md"
+cat >> "$DIR/REPORT.md" <<'EOF'
+> Final, presentable, current-best only (no history — see CHANGELOG.md). Read before rewriting.
+
+## Summary
+TODO — 2-4 sentences: the question, the headline result, the verdict.
+
+## Methods
+### Data & Model
+TODO — dataset, model (e.g. GPT-2 small, 124M), exact layer(s)/hook point, sample sizes.
+
+### Metrics
+TODO — define EACH metric with a rendered equation. Example:
+$$\mathrm{AUROC} = \Pr\big(s(x^{+}) > s(x^{-})\big)$$
+State exactly what `s(x)` scores and which direction means "more anomalous".
+
+### Baselines
+TODO — name and define EACH baseline. Example (Mahalanobis distance):
+$$d_M(x) = \sqrt{(x-\mu)^{\top}\,\Sigma^{-1}\,(x-\mu)}$$
+
+## Results
+TODO — current-best numbers only (one row per experiment), referencing figures in plots/.
+
+## Conclusion
+TODO — what the result implies; limitations.
+EOF
+
+echo "[new] created $DIR/ with PLAN, JOURNAL, RESULTS (curated), REPORT (skeleton+Methods), CHANGELOG, experiments/, results/, plots/"
+echo "[new] next: 1) fill the TODOs in $DIR/PLAN.md   2) ./launch.sh $DIR"
