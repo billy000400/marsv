@@ -118,36 +118,46 @@ Structure: `Summary -> Methods -> Results -> Conclusion`. The **Methods** sectio
 - **Baselines:** every baseline named and defined (equation where applicable).
 Results show current-best numbers only, with figures referenced from plots/.
 
-### 8a. Display-math inside lists — use a ` ```math ` fence, NOT `$$…$$`.
+### 8a. Display math must live at COLUMN 0 (top level), never nested in a list item.
 
-GitHub's Markdown+MathJax renderer only treats `$$…$$` as a display block when it is a **top-level
-paragraph** (column 0, blank line before it). Inside a `-`/`*`/`1.` list item — where our
-Methods/Baselines equations live — an indented `$$…$$` (especially one glued to the end of the
-preceding prose line with no blank line) is parsed as mid-paragraph inline, and GitHub **dumps the raw
-LaTeX source** instead of rendering it. This breaks silently: single-line and multi-line blocks alike,
-whether or not the first one you eyeballed happened to render. So for any equation inside a list item,
-do NOT use `$$…$$`. Instead:
+**The rule, verified against GitHub's own renderer (`POST https://api.github.com/markdown`):**
+keep every display equation — whether `$$…$$` or a ` ```math ` fence — as its own top-level block at
+**column 0, with a blank line before and after**. Do NOT put display math inside a `-`/`*`/`1.` list
+item. Inline `$…$` in a sentence is always fine and needs no change.
 
-1. Blank line after the prose.
-2. A fenced ```math block, indented to the bullet's content column (2 spaces under a `- ` bullet).
-   Put the LaTeX between the fences WITHOUT `$$` delimiters.
-3. Blank line before the trailing prose.
+**Why (the exact failure modes, both confirmed by reproduction):**
+1. A `$$…$$` block **glued** to the end of the preceding prose line (no blank line before `$$`) is
+   parsed as inline text and GitHub dumps the raw LaTeX — at column 0 too, not just in lists.
+2. **The subtle one that bit us:** an **indented ` ```math ` fence inside a list item renders as a
+   plain code block (gray box + copy icon), not math, whenever that same list item's text contains
+   any inline `$…$`** (e.g. `- **metric** with score $h$ …:` followed by a fence). Even one inline
+   `$…$` pair triggers it. Our Methods bullets are full of `$h$`, `$k=4$`, `$v_i$`, so **every** fence
+   silently degraded to a code block. An indented fence in a list item with NO inline `$…$` happens to
+   render, but do not rely on that — the safe rule is simply: **no display math inside list items.**
 
-Example (outer `~~~` used only so the inner triple-backtick fence shows literally):
+**So don't nest.** Write Methods/Baselines method entries as **bold run-in paragraphs**, not bullets,
+so the equation sits at column 0. Pattern (outer `~~~` only so the inner fence shows literally):
 
 ~~~
-- **metric** — one-line description ending in a colon:
+**metric** — one-line description; inline `$h$`, `$k$` here are fine, ending in a colon:
 
-  ```math
-  s(x) = \lVert \nabla_h \log p \rVert_F
-  ```
+```math
+s(x) = \lVert \nabla_h \log p \rVert_F
+```
 
-  Follow-up prose.
+Follow-up prose as its own paragraph.
 ~~~
 
-Inline `$…$` inside a sentence is fine and needs no change. A `$$…$$` block that is genuinely at
-column 0 as its own paragraph also renders — but the ```math fence works everywhere, so prefer it for
-all display math and avoid the trap entirely.
+Prefer the ` ```math ` fence over `$$…$$` for display blocks (no glued-delimiter trap), but at column 0
+either works. **Verify before committing:** pipe the file through the GitHub markdown API and confirm
+every display equation becomes a `math-renderer class="js-display-math"` element and NONE become
+`<pre lang="math">` code blocks:
+
+~~~
+python3 -c "import json;print(json.dumps({'mode':'gfm','text':open('REPORT.md').read()}))" \
+  | curl -s -X POST -H "Accept: application/vnd.github+json" -d @- https://api.github.com/markdown \
+  | grep -c 'js-display-math'   # must equal your display-equation count; grep -c '<pre lang="math"' must be 0
+~~~
 
 ---
 
