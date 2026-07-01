@@ -80,7 +80,7 @@ evaluated on the radius grid $r\in\lbrace 0,.0025,.005,.01,.02,.04,.08\rbrace$, 
 - **Direction family (primary):** isotropic Gaussian directions normalized to unit $\ell_2$
   (model-agnostic, available for every condition). Robustness to this choice is tested in
   **Stage B-dir** with single-column and sparse-sum SAE-decoder directions.
-- **Threshold $\tau$:** $\tau=\mathrm{median}_\text{real}\,\mathrm{KL}(r{=}0.02)$, calibrated on
+- **Threshold $\tau$:** $\tau=\mathrm{median}_\text{real}\thinspace\mathrm{KL}(r{=}0.02)$, calibrated on
   a **held-out real split** (sources $<N/2$) so $\tau$ never sees the scored activations
   ($\tau_\text{held-out}=1.33\times10^{-4}$).
 
@@ -93,7 +93,7 @@ evaluated on the radius grid $r\in\lbrace 0,.0025,.005,.01,.02,.04,.08\rbrace$, 
 | **naive** | independent latent composition: $k\sim$ empirical $L_0$, indices $\sim$ feature frequency, coefficients $\sim$ empirical active-coefficient marginal, then decoded |
 | **sparse_match** | naive but $k=$ source's own $L_0$ and coefficients rescaled to the source's active-coefficient RMS |
 | **norm_rand** | random direction rescaled to the real norm |
-| **iso_displace** ($\texttt{iso}\delta$) | $x_\text{real}+\delta\,d$, isotropic unit $d$, so distance $\equiv\delta$ exactly, at $\delta\in\{15,30,60,120\}$ — a **random off-manifold displacement** reference |
+| **iso_displace** ($\texttt{iso}\delta$) | $x_\text{real}+\delta\thinspace d$, isotropic unit $d$, so distance $\equiv\delta$ exactly, at $\delta\in\lbrace 15,30,60,120\rbrace$ — a **random off-manifold displacement** reference |
 
 ### Baselines
 
