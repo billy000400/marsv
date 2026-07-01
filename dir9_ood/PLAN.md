@@ -30,6 +30,17 @@ Minimum acceptable: one plateau variant (perturbation-sensitivity) computed at a
 End each JOURNAL.md entry with one line: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**DONE (iter 7, 2026-07-01) — DOCUMENTATION CLARITY PASS + STOP.** A new operator feedback file
+`human_feedback_07011019.md` arrived asking three *documentation* questions (no recomputation): name the
+best baseline/plateau variant in the headline plot, define "canonical split", and explain why MSP detects
+OOD. Addressed all three as a presentation-only pass — numbers unchanged (random plateau 0.734<MSP 0.932;
+shuffled 0.534<MSP 0.872; code 0.649<cup-RMD@resid6 0.918): regenerated `summary_best_per_set.png` with
+each bar annotated by its exact `method@point` (new reproducible `experiments/make_summary_plot.py`
+deriving best-per-set from `auroc_table.csv`); expanded the figure caption in RESULTS.md/REPORT.md;
+added a "canonical split" definition (REPORT Methods + RESULTS gloss) and a "why MSP detects OOD" note
+(REPORT baselines + RESULTS gloss). `check_md.py` clean (only the known results/-prefix WARN false
+positive, no ERROR). Feedback file renamed `*.addressed.md`; `STOP` re-created. _History below:_
+
 **DONE (iter 6, 2026-06-30) — FINAL CONSOLIDATION + STOP.** No open feedback (all `*.addressed.md`);
 science complete and unchanged. This iteration was CLAUDE.md deliverable hygiene only: (1) populated
 the previously-empty `CHANGELOG.md` with the full dated history (iter1→iter6, old→new numbers); (2)
@@ -94,8 +105,9 @@ value measuring internally. Clean NEGATIVE result (acceptable per plan). Feedbac
 
 ## Next step
 None — project complete and finalized; deliverables are CLAUDE.md-compliant (clean current-best,
-LaTeX Methods, full CHANGELOG history) and `STOP` is written. **all** operator feedback addressed (incl. the iter-5 Codex
-`CODEX_REVIEW_20260622T230658Z.md` canonical-split hygiene review), `STOP` written. If reopened, the
+LaTeX Methods, full CHANGELOG history) and `STOP` is written. **all** operator feedback addressed (incl.
+the iter-5 Codex `CODEX_REVIEW_20260622T230658Z.md` canonical-split hygiene review and the iter-7
+`human_feedback_07011019.md` documentation-clarity requests), `STOP` written. If reopened, the
 remaining ideas are all enhancements, not corrections: run cupbearer's **full task/data harness**
 end-to-end in `cupenv` (not just its detectors on precomputed acts) and refresh `auroc_cupbearer.csv`
 with a clean log; a multi-model sweep (Pythia/larger GPT-2); and a non-code domain shift to test whether

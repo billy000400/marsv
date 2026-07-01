@@ -198,3 +198,32 @@ any AUROC was needed (canonical-split values are current-best); this iteration c
 only. No GPU/RAM used beyond a trivial matplotlib call.
 **Next step:** None — STOP written; project complete and CLAUDE.md-compliant.
 On track? yes — S1+S2+S3 100% done; deliverables consolidated to current-best (clean RESULTS/REPORT, LaTeX Methods, full CHANGELOG history), headline figure added, all feedback addressed, STOP created.
+
+---
+
+## Iteration 7 (2026-07-01) — documentation clarity pass (human_feedback_07011019.md) + STOP
+**Did:** Reset into a finished project (STOP present, all prior feedback `*.addressed.md`). Found a NEW
+untracked operator feedback file `human_feedback_07011019.md` asking three documentation questions, not
+for any recomputation: (1) the headline plot should specify WHICH best baseline and best plateau variant
+each bar is; (2) define "canonical split" in the document; (3) explain under baselines why MSP can detect
+OOD. Addressed all three as a presentation-only pass (no AUROC recomputed — current-best numbers
+unchanged):
+- Wrote `experiments/make_summary_plot.py` (reproducible; derives best-per-set from `auroc_table.csv`)
+  and regenerated `results/plots/summary_best_per_set.png` so each bar is annotated with its exact
+  `method@point`. Verified the derivation matches the tables exactly: random plateau-jacFrob@input 0.734
+  / MSP 0.9316; shuffled plateau-perturbation@resid3 0.534 / MSP 0.872; code plateau-jacFrob@input 0.6487
+  / cup-RMD@resid6 0.9178.
+- Expanded the figure caption in RESULTS.md + REPORT.md to name each bar's method and note selfNLL-grad
+  (confidence control) is excluded from the plateau pool.
+- Added a "What canonical split means" paragraph to REPORT.md Methods and a one-line gloss to RESULTS.md.
+- Added a "Why it detects OOD" note under the MSP baseline in REPORT.md and a gloss in RESULTS.md
+  (confidence higher on ID; confidently-wrong failure on code).
+**Learned:** base env had lost `matplotlib` (recurring drift) — reinstalled matplotlib + contourpy/cycler/
+fonttools/kiwisolver/pyparsing/python-dateutil with `--no-deps`; torch 2.9.0+cu130 / numpy 2.3.3 verified
+untouched. `check_md.py` reports only a WARN (no ERROR): its W1 regex captures the `plots/...png`
+substring while the embed link stores the full `results/plots/...png` path, so they never match for
+figures under results/ — a checker false positive (E3 path-resolves passes, so the embed renders). This
+WARN is unavoidable given the layout and was present at iter-6 STOP; gate is clean (exit 0).
+**Next step:** Rename `human_feedback_07011019.md` → `*.addressed.md`, write STOP. Project remains a
+complete negative result; this iteration only clarified the writeup.
+On track? yes — S1+S2+S3 100% done; new operator doc-clarity feedback fully addressed (plot bars labeled, canonical split + MSP explained), numbers unchanged, STOP re-created.

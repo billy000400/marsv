@@ -14,6 +14,16 @@ A null result is complete and acceptable per PLAN.md.
 
 ![Best plateau variant vs best baseline per OOD set](results/plots/summary_best_per_set.png)
 
+**Figure — what each bar is.** For every OOD set the figure shows the single strongest *plateau
+variant* (red) against the single strongest *baseline* (blue), each bar annotated with the exact
+`method@measurement-point` it represents. Concretely: **random** — best plateau `plateau-jacFrob@input`
+(0.73) vs best baseline `MSP` (0.93); **shuffled** — `plateau-perturbation@resid3` (0.53) vs `MSP`
+(0.87); **code** — `plateau-jacFrob@input` (0.65) vs `cup-RMD@resid6` (0.92). "Plateau variants" are the
+methods under test (`plateau-jacFrob`, `plateau-perturbation`); the `selfNLL-grad` confidence *control*
+is excluded from the red bar. The baseline pool is {MSP, L2 norm, naive Mahalanobis, cup-RMD, cup-QUE}.
+The blue bar wins in every set. (Regenerate with `experiments/make_summary_plot.py`, which derives the
+best-per-set directly from `results/auroc_table.csv`.)
+
 ## Methods
 
 ### Data & Model
@@ -25,9 +35,19 @@ A null result is complete and acceptable per PLAN.md.
 - **Measurement points (4):** token-embedding input space, and the residual stream `resid_post` after
   transformer blocks **{3, 6, 9}**. The last-token activation $h \in \mathbb{R}^{768}$ is used.
 - **Sample sizes:** $N=200$ sequences per set, `seq_len=64`. Covariance baselines are fit on a separate
-  **1000** ID sequences. The ID split is the canonical `randperm(seed=7)` split (`fit=perm[:1000]`,
-  `test=perm[1000:1200]`), saved to `results/split/canonical_split.npz` and shared byte-for-byte by the
-  plateau table and the real-cupbearer table.
+  **1000** ID sequences. The ID split is the **canonical split** (see below), saved to
+  `results/split/canonical_split.npz` and shared byte-for-byte by the plateau table and the
+  real-cupbearer table.
+
+**What "canonical split" means.** The FineWeb ID pool is shuffled once with a fixed permutation
+`randperm(seed=7)` and cut into two disjoint index sets: the first 1000 sequences (`fit = perm[:1000]`)
+are the *reference* used to fit every ID statistic (the Gaussian $(\mu,\Sigma)$ for Mahalanobis, the
+cupbearer detectors), and the next 200 (`test = perm[1000:1200]`) are the held-out *ID test* examples
+scored against the OOD sets for AUROC. It is "canonical" because it is the **one fixed split every method
+and every table uses** — the plateau/standard-baseline table, the vendored-cupbearer table, and the
+real-cupbearer-package table all read these exact same indices. Fixing the seed makes the ID fit
+reproducible; sharing the indices byte-for-byte makes every method-vs-method comparison strictly
+apples-to-apples (same ID examples, same held-out set), which is what an earlier review required.
 
 ### Evaluation metric
 All scores are oriented *a priori* so that **higher = more OOD** (no post-hoc sign flipping). Detection
@@ -59,6 +79,13 @@ next-token distribution obtained by continuing the forward pass from $h$.
 ### Baselines
 - **MSP** — one minus the maximum softmax probability:
   $$ s_{\text{MSP}}(x) = 1 - \max_y p(y\mid x). $$
+  *Why it detects OOD:* a model trained on in-distribution text is, on average, **more confident** on
+  inputs like its training data — one next-token candidate takes most of the probability mass, so
+  $\max_y p$ is high and $s_{\text{MSP}}$ is low. On OOD inputs the model is more often uncertain, the
+  softmax is flatter, $\max_y p$ drops, and $s_{\text{MSP}}$ rises. So higher $s_{\text{MSP}}$ = more
+  OOD. This is the classic maximum-softmax-probability baseline (Hendrycks & Gimpel, 2017). Its failure
+  mode is exactly the `code` set: GPT-2 can be *confidently wrong* on a fluent but out-of-domain input,
+  which is why MSP collapses to 0.359 there while distance-based baselines still fire.
 - **L2 norm** — activation magnitude at the point: $\; s_{\text{L2}}(x) = \|h\|_2.$
 - **Mahalanobis** — squared distance to a Gaussian $(\mu,\Sigma)$ fit on 1000 ID activations:
   $$ s_{\text{maha}}(x) = (h-\mu)^\top \Sigma^{-1} (h-\mu). $$

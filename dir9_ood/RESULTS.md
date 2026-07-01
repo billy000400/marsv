@@ -20,6 +20,22 @@ after 16 unit perturbations (eps=6); `selfNLL-grad` = $\|\partial(-\log p[\arg\m
 
 ![Best plateau variant vs best baseline per OOD set](results/plots/summary_best_per_set.png)
 
+**Figure — what each bar is.** Each red bar is the strongest *plateau variant* for that OOD set, each
+blue bar the strongest *baseline*, both annotated with the exact `method@point`: **random**
+`plateau-jacFrob@input` 0.73 vs `MSP` 0.93; **shuffled** `plateau-perturbation@resid3` 0.53 vs `MSP`
+0.87; **code** `plateau-jacFrob@input` 0.65 vs `cup-RMD@resid6` 0.92. The plateau pool is
+{`plateau-jacFrob`, `plateau-perturbation`} (the `selfNLL-grad` confidence control is excluded); the
+baseline pool is {MSP, L2, naive-Mahalanobis, cup-RMD, cup-QUE}. Baselines win every set. Regenerate
+with `experiments/make_summary_plot.py` (derives best-per-set from `auroc_table.csv`).
+
+**Two concepts used below** (full definitions in REPORT.md). **Canonical split:** the one fixed ID
+partition — `randperm(seed=7)` over the FineWeb pool, `fit=perm[:1000]` (fits every ID statistic),
+`test=perm[1000:1200]` (held-out ID scored for AUROC) — reused *byte-for-byte* by every method and
+table, so all comparisons are apples-to-apples on identical ID examples. **Why MSP detects OOD:** the
+model is on average more confident (higher $\max_y p$) on in-distribution text and flatter/less confident
+on OOD, so $s_{\text{MSP}}=1-\max_y p$ rises for OOD — except when the model is *confidently wrong* on a
+fluent out-of-domain input (the `code` set), where MSP collapses to 0.359.
+
 ## AUROC pivot (rows = method@point, cols = OOD set; **bold** = best in column)
 | method@point | random | shuffled | code |
 |---|---|---|---|

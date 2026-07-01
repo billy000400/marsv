@@ -5,6 +5,25 @@ live in those files; this file records what moved and why.
 
 ---
 
+## 2026-07-01 — Documentation clarity pass (iter 7; `human_feedback_07011019.md`)
+- **Deliverable clarity only — no science changed, no numbers moved.** Addressed three operator
+  documentation requests:
+  1. **Headline figure now names the methods.** Regenerated `results/plots/summary_best_per_set.png`
+     via a new reproducible script `experiments/make_summary_plot.py` (derives best-per-set from
+     `auroc_table.csv`): each bar is annotated with its exact `method@point` — random
+     `plateau-jacFrob@input` 0.73 vs `MSP` 0.93; shuffled `plateau-perturbation@resid3` 0.53 vs `MSP`
+     0.87; code `plateau-jacFrob@input` 0.65 vs `cup-RMD@resid6` 0.92. Expanded the figure caption in
+     both RESULTS.md and REPORT.md to state which plateau variant / baseline each bar is and that the
+     `selfNLL-grad` control is excluded from the plateau pool.
+  2. **Defined "canonical split"** in REPORT.md Methods (and a short gloss in RESULTS.md): the one fixed
+     `randperm(seed=7)` ID partition (`fit=perm[:1000]`, `test=perm[1000:1200]`) reused byte-for-byte by
+     every method/table so comparisons are apples-to-apples.
+  3. **Explained why MSP detects OOD** under the MSP baseline in REPORT.md (and a gloss in RESULTS.md):
+     the model is more confident on ID than OOD, so $1-\max_y p$ rises for OOD; noted its
+     confidently-wrong failure on `code` (collapses to 0.359).
+- Env note: base env had again lost `matplotlib` — reinstalled it + pure-python deps with `--no-deps`
+  (torch 2.9.0+cu130 / numpy 2.3.3 verified untouched).
+
 ## 2026-06-30 — Final consolidation (iter 6)
 - **Deliverable hygiene only — no science changed.** Brought RESULTS.md / REPORT.md to CLAUDE.md
   current-best form: removed the inline version-history blockquotes ("iter-5 supersedes iter-2
