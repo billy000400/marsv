@@ -102,10 +102,9 @@ evaluated on the radius grid $r\in\lbrace 0,.0025,.005,.01,.02,.04,.08\rbrace$, 
   Spearman(plateau, distance) $=-0.64$).
 - **iso_displace reference** $R(\delta)$ = median `plateau_auc_low` of the random-displacement
   family as a function of distance $\delta$; for a condition at distance $\Delta$ its
-  **distance-matched residual** is
-  $\rho_c = \texttt{plateau\_auc\_low}(c) - R(\Delta_c)$
-  ($R$ interpolated in $\log$-distance). $\rho_c>0$ ⇒ flatter than a random point at equal
-  distance.
+  **distance-matched residual** is $\rho_c = s_c - R(\Delta_c)$, where $s_c$ is the condition's own
+  `plateau_auc_low` and $R$ is interpolated in $\log$-distance. $\rho_c>0$ ⇒ flatter than a random
+  point at equal distance.
 - **local sensitivity** $\texttt{locsens}=\log_{10}\big(\overline{\mathrm{KL}}(r{=}0.02)+10^{-8}\big)$,
   a *single* fixed-radius KL (the Direction-6 `plateau_kl`).
 
@@ -119,11 +118,11 @@ For a candidate $x_c$ paired to its source prompt, inject $x_c$ in full context 
 
 where $p_\text{real}$ is the next-token distribution with the **real** source activation in
 context. **Low `output_kl` = downstream-valid.** Predictive evaluation pools 7 candidate
-conditions $\times\,N=200$ (1400 rows), **splits by source prompt** (no source across both
+conditions $\times\thinspace N=200$ (1400 rows), **splits by source prompt** (no source across both
 folds), standardizes features on train, fits plain linear least squares to $\log_{10}$
 `output_kl`, and reports **held-out test $R^2$** and partial Spearman. The decisive comparison
-is $\Delta R^2$ from adding plateau, both beyond $\{$dist, norm$\}$ and beyond
-$\{$dist, norm, locsens$\}$.
+is $\Delta R^2$ from adding plateau, both beyond $\lbrace$dist, norm$\rbrace$ and beyond
+$\lbrace$dist, norm, locsens$\rbrace$.
 
 ### Statistics
 
