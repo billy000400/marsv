@@ -55,6 +55,13 @@ data/raw/
 *.mp4
 *.tmp
 
+# --- Vendored third-party source (checked out locally, not part of this repo) --
+vendor/
+
+# --- Per-run loop control / logs (local only; the wrapper commits everything else) --
+STOP
+session.log
+
 # --- Editor / OS junk ------------------------------------------------------
 .DS_Store
 .idea/

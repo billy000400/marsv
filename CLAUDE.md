@@ -8,6 +8,11 @@
 > below says "ask" or "stop and clarify", instead: pick the most standard option, record the
 > assumption AND the alternatives you rejected in JOURNAL.md, and continue. Never block the loop
 > waiting for input.
+>
+> **Version control is automatic — do NOT run git yourself.** After every iteration the wrapper
+> (`run.sh`) commits this direction's work and pushes it to GitHub, serialized across the concurrent
+> agents. Just persist your work to disk; the wrapper handles the rest. (If a git push ever fails on
+> SSH/auth, the wrapper self-heals by running `/mars-vol/setup_github_ssh.sh` and retrying.)
 
 ## File roles — know which are CURATED vs APPEND-ONLY
 | File         | Role                           | How to write it                                          |
@@ -109,9 +114,40 @@ result was superseded, the old -> new numbers. This is the ONLY place result/ver
 
 Structure: `Summary -> Methods -> Results -> Conclusion`. The **Methods** section MUST state:
 - **Data & Model:** dataset, model (e.g. GPT-2 small, 124M), and exactly which layer(s)/hook point and sample sizes.
-- **Metrics:** every metric defined with a RENDERED equation using `$$ ... $$` LaTeX, stating exactly what is scored.
+- **Metrics:** every metric defined with a RENDERED equation (see 8a for the correct fence), stating exactly what is scored.
 - **Baselines:** every baseline named and defined (equation where applicable).
 Results show current-best numbers only, with figures referenced from plots/.
+
+### 8a. Display-math inside lists — use a ` ```math ` fence, NOT `$$…$$`.
+
+GitHub's Markdown+MathJax renderer only treats `$$…$$` as a display block when it is a **top-level
+paragraph** (column 0, blank line before it). Inside a `-`/`*`/`1.` list item — where our
+Methods/Baselines equations live — an indented `$$…$$` (especially one glued to the end of the
+preceding prose line with no blank line) is parsed as mid-paragraph inline, and GitHub **dumps the raw
+LaTeX source** instead of rendering it. This breaks silently: single-line and multi-line blocks alike,
+whether or not the first one you eyeballed happened to render. So for any equation inside a list item,
+do NOT use `$$…$$`. Instead:
+
+1. Blank line after the prose.
+2. A fenced ```math block, indented to the bullet's content column (2 spaces under a `- ` bullet).
+   Put the LaTeX between the fences WITHOUT `$$` delimiters.
+3. Blank line before the trailing prose.
+
+Example (outer `~~~` used only so the inner triple-backtick fence shows literally):
+
+~~~
+- **metric** — one-line description ending in a colon:
+
+  ```math
+  s(x) = \lVert \nabla_h \log p \rVert_F
+  ```
+
+  Follow-up prose.
+~~~
+
+Inline `$…$` inside a sentence is fine and needs no change. A `$$…$$` block that is genuinely at
+column 0 as its own paragraph also renders — but the ```math fence works everywhere, so prefer it for
+all display math and avoid the trap entirely.
 
 ---
 

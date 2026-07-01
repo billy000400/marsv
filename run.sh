@@ -46,6 +46,56 @@ mkdir -p experiments results plots
 echo "[run.sh] start $(date '+%F %T')  dir=$DIR  budget=${HOURS}h  agents=${N_AGENTS}"
 echo "[run.sh] gpu='${GPU_NAME}' ${GPU_VRAM_GB}GB  | per-agent: vram_frac=${VRAM_FRACTION} (~${VRAM_PER_AGENT}GB)  ram=${RAM_PER_AGENT}GB  threads=${CPU_THREADS}"
 
+# --- git checkpoint --------------------------------------------------------
+# Commit THIS direction's work and push, after every iteration. Because up to
+# N_AGENTS loops share one repo, all git ops are serialized through a single
+# repo-wide flock and each commit is scoped to the current direction only
+# (never sibling dirs or shared root files). STOP/session.log are gitignored,
+# so the working tree is clean after the commit — the rebase-pull below never
+# needs to stash, so it can NEVER lose uncommitted work (a blocked pull just
+# skips this push and retries next iteration). If the push fails on SSH/auth
+# (e.g. the ephemeral pod restarted and lost its git-ssh config), it self-heals
+# by running /mars-vol/setup_github_ssh.sh once, then retries.
+SSH_SETUP="/mars-vol/setup_github_ssh.sh"
+git_sync() {
+  local phase="${1:-iter}" root branch lock
+  root="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "[git] $DIR: not a git repo — skip"; return 0; }
+  branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"; branch="${branch:-main}"
+  lock="$root/.git/marsv-git.lock"
+
+  flock "$lock" bash -c '
+    phase="$1"; branch="$2"; DIR="$3"; SSH_SETUP="$4"
+    # stage ONLY this direction (cwd = the dir); never sibling dirs / shared root files.
+    git add -A -- . >/dev/null 2>&1 || true
+
+    if git diff --cached --quiet; then
+      echo "[git] $DIR: nothing to commit ($phase)"
+    elif git commit -q -m "[$DIR] autoloop $phase $(date "+%F %T")"; then
+      echo "[git] $DIR: committed ($phase)"
+    else
+      echo "[git] $DIR: commit failed — skip push"; exit 0
+    fi
+
+    push() {
+      # fold in siblings other loops pushed. NO --autostash: never stash uncommitted
+      # work (that once lost edits) — if a rebase cannot proceed, abort and just retry
+      # the push; a blocked/behind push is harmless and re-attempted next iteration.
+      git pull --rebase origin "$branch" >/dev/null 2>&1 || git rebase --abort >/dev/null 2>&1 || true
+      git push origin "HEAD:$branch" 2>&1
+    }
+    fail_re="permission denied|host key verification|could not read from remote|authenticity of host|publickey|connection timed out"
+    out="$(push)"; echo "$out"
+    if printf "%s" "$out" | grep -qiE "$fail_re"; then
+      echo "[git] $DIR: push failed on ssh/auth -> running $SSH_SETUP"
+      bash "$SSH_SETUP" || true
+      out="$(push)"; echo "$out"
+      if printf "%s" "$out" | grep -qiE "$fail_re"; then
+        echo "[git] $DIR: push STILL failing after ssh setup — committed locally, will retry next iteration."
+      fi
+    fi
+  ' _ "$phase" "$branch" "$DIR" "$SSH_SETUP"
+}
+
 while [ "$(date +%s)" -lt "$END" ] && [ ! -f STOP ]; do
   REMAIN=$(( (END - $(date +%s)) / 60 ))
   echo "[run.sh] $(date '+%F %T')  ~${REMAIN} min left  -----------------------------"
@@ -76,8 +126,11 @@ Persist ALL state to disk before you finish; assume nothing carries over." \
     --dangerously-skip-permissions \
     2>&1 | tee -a session.log
 
+  git_sync iter || true          # checkpoint this iteration's investigation to GitHub
   sleep 2
 done
+
+git_sync final || true           # push the finished/deadline state (STOP + REPORT already written)
 
 if [ -f STOP ]; then
   echo "[run.sh] STOP file present — goal reached. Ended $(date '+%F %T')."
