@@ -74,7 +74,7 @@ low-response plateau area (higher = wider low-response plateau), is
 \mathrm{clip}\!\Big(1-\tfrac{\mathrm{KL}_{\uparrow,d}(r)}{\tau},\,0,\,1\Big)\,dr ,
 ```
 
-evaluated on the radius grid $r\in\{0,.0025,.005,.01,.02,.04,.08\}$, averaged over directions
+evaluated on the radius grid $r\in\lbrace 0,.0025,.005,.01,.02,.04,.08\rbrace$, averaged over directions
 **within** an activation (directions/radii are repeated measures, not independent samples).
 
 - **Direction family (primary):** isotropic Gaussian directions normalized to unit $\ell_2$
