@@ -4,6 +4,12 @@ Append-only. Records changes to the deliverables (RESULTS.md / REPORT.md) with o
 
 ---
 
+## 2026-07-01 — Fix inline-math escape stripping (no science changed)
+- **Rendering fix only — no numbers moved.** The two-sided AUROC note used inline
+  `$\max(\mathrm{AUROC},\,1-\mathrm{AUROC})$`; GitHub strips the backslash before punctuation inside
+  inline `$…$`, so `\,`→`,` (stray comma, lost thin-space). Replaced `\,` with `\thinspace`
+  (backslash-letter, survives). See new `CLAUDE.md` rule **8b**.
+
 ## 2026-07-01 — Bootstrap 95% CIs + reconcile missing Phase 2c into deliverables (iter11)
 Two changes. (a) **Bootstrap CIs (new, `experiments/bootstrap_ci.py`).** Put paired bootstrap 95% CIs
 (B=2000, N=2000/family, orientation fixed a-priori) on the Phase-3 capstone single scores. All headline
