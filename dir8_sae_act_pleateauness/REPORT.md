@@ -190,7 +190,7 @@ The ordering is identical under every family: recon sits essentially *on* the ra
 curve, while **naive and sparse_match sit clearly below it**. No family reverses the finding; the
 naive deficit is if anything *larger* along SAE decoder directions (sae_sparse −0.077 vs iso
 −0.061) — the opposite of SAE-specific plateau validity. Pooled Spearman(plateau, distance)
-$\in\{-0.64,-0.60,-0.62\}$ across families. **The Stage B null is direction-family robust, not an
+$\in\lbrace-0.64,-0.60,-0.62\rbrace$ across families. **The Stage B null is direction-family robust, not an
 isotropic artifact.**
 
 ![Stage B-dir](plots/plateau_stageB_dir.png)
