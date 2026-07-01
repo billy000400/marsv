@@ -36,7 +36,7 @@ GPT-2 continuation from the activation to next-token logits, $p=\mathrm{softmax}
 $$\mathrm{AUROC}=\Pr\!\big(s(x^-)<s(x^+)\big)=\frac{1}{n_+n_-}\sum_{i:y_i=1}\sum_{j:y_j=0}\Big(\mathbb{1}[s_i>s_j]+\tfrac12\mathbb{1}[s_i=s_j]\Big)$$
 
 Because a score's anomaly orientation is not always known a priori, single-score AUROCs are reported
-two-sided as $\max(\mathrm{AUROC},\,1-\mathrm{AUROC})$.
+two-sided as $\max(\mathrm{AUROC},\thinspace 1-\mathrm{AUROC})$.
 
 **Statistical baselines** (fit on TRAIN reals only; $\mu,\Sigma$ = train mean/covariance):
 
