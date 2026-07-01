@@ -4,6 +4,14 @@ Append-only.
 
 ---
 
+## 2026-07-01 — Fix inline-math escape stripping (no science changed)
+- **Rendering fix only — no numbers moved.** GitHub strips the backslash before punctuation inside
+  inline `$…$`, silently breaking every inline equation that used `\{`/`\}` (set braces), `\,` (thin
+  space), or `\texttt{…\_…}`. Fixed all of them: `\{`/`\}`→`\lbrace`/`\rbrace` (radius grid, δ set,
+  Spearman set, and the `{dist,norm}` cells), `\,`→`\thinspace` (threshold, iso_displace, `×N`), and
+  the distance-matched residual `ρ_c` rewritten to `$\rho_c = s_c - R(\Delta_c)$` with `s_c` defined via
+  a code span (no `\texttt{…\_…}` inline). See new `CLAUDE.md` rule **8b**.
+
 ## 2026-07-01 — Display-math STILL broke; real fix (no science changed)
 - **Rendering fix only — no numbers moved.** The earlier fix (below) was wrong: an indented ```math
   fence inside a bullet still renders as a gray code box (not math) when the bullet has any inline
