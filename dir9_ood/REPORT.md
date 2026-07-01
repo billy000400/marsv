@@ -53,8 +53,12 @@ apples-to-apples (same ID examples, same held-out set), which is what an earlier
 All scores are oriented *a priori* so that **higher = more OOD** (no post-hoc sign flipping). Detection
 quality is the area under the ROC curve, equal to the probability a random OOD example outscores a
 random ID example:
-$$ \mathrm{AUROC} = \Pr\big(s(x_{\text{OOD}}) > s(x_{\text{ID}})\big)
-   = \frac{1}{N_{\text{ID}}N_{\text{OOD}}}\sum_{i}\sum_{j} \mathbb{1}\!\left[s(x^{\text{OOD}}_j) > s(x^{\text{ID}}_i)\right]. $$
+
+```math
+\mathrm{AUROC} = \Pr\big(s(x_{\text{OOD}}) > s(x_{\text{ID}})\big)
+   = \frac{1}{N_{\text{ID}}N_{\text{OOD}}}\sum_{i}\sum_{j} \mathbb{1}\!\left[s(x^{\text{OOD}}_j) > s(x^{\text{ID}}_i)\right].
+```
+
 An $\mathrm{AUROC} < 0.5$ therefore means the signal is **reversed** for that set (ID scores higher than
 OOD). With $N=200$, sampling noise on AUROC is $\approx \pm 0.035$; gaps below ~0.05 are not significant.
 
@@ -62,66 +66,72 @@ OOD). With $N=200$, sampling noise on AUROC is $\approx \pm 0.035$; gaps below ~
 Let $h$ be the activation at the measurement point and $p(\cdot\mid x)=\mathrm{softmax}(f(h))$ the
 next-token distribution obtained by continuing the forward pass from $h$.
 
-- **plateau-jacFrob** (the genuine metric) — Frobenius norm of the Jacobian of the log-probabilities
-  w.r.t. $h$, via a Hutchinson estimator with $k=4$ random standard-Gaussian output directions $v_i$:
+**plateau-jacFrob** (the genuine metric) — Frobenius norm of the Jacobian of the log-probabilities
+w.r.t. $h$, via a Hutchinson estimator with $k=4$ random standard-Gaussian output directions $v_i$:
 
-  ```math
-  s_{\text{jacFrob}}(x) \;=\; \Big\| \tfrac{\partial \log p(\cdot\mid x)}{\partial h} \Big\|_F
-     \;\approx\; \sqrt{\tfrac{1}{k}\sum_{i=1}^{k}\Big\| \tfrac{\partial \langle v_i,\,\log p\rangle}{\partial h} \Big\|_2^2 }.
-  ```
+```math
+s_{\text{jacFrob}}(x) \;=\; \Big\| \tfrac{\partial \log p(\cdot\mid x)}{\partial h} \Big\|_F
+   \;\approx\; \sqrt{\tfrac{1}{k}\sum_{i=1}^{k}\Big\| \tfrac{\partial \langle v_i,\,\log p\rangle}{\partial h} \Big\|_2^2 }.
+```
 
-  A label-free measure of output-distribution flatness: **flatter (lower) = in-distribution**.
-- **plateau-perturbation** — mean next-token KL divergence after $M=16$ random unit perturbations of
-  fixed magnitude $\epsilon=6$ applied at $h$:
+A label-free measure of output-distribution flatness: **flatter (lower) = in-distribution**.
 
-  ```math
-  s_{\text{pert}}(x) \;=\; \frac{1}{M}\sum_{j=1}^{M} D_{\mathrm{KL}}\!\big(p(\cdot\mid h)\,\big\|\,p(\cdot\mid h+\epsilon u_j)\big),\qquad \|u_j\|_2=1.
-  ```
+**plateau-perturbation** — mean next-token KL divergence after $M=16$ random unit perturbations of
+fixed magnitude $\epsilon=6$ applied at $h$:
 
-  Sharper response (higher KL) = more OOD.
-- **selfNLL-grad** (transparency control = iter-1's mislabeled "jacobian") — gradient norm of the
-  model's own argmax negative log-likelihood; kept to show it is confidence-adjacent:
+```math
+s_{\text{pert}}(x) \;=\; \frac{1}{M}\sum_{j=1}^{M} D_{\mathrm{KL}}\!\big(p(\cdot\mid h)\,\big\|\,p(\cdot\mid h+\epsilon u_j)\big),\qquad \|u_j\|_2=1.
+```
 
-  ```math
-  s_{\text{selfNLL}}(x) \;=\; \Big\| \tfrac{\partial\,[-\log p(\hat y\mid x)]}{\partial h} \Big\|_2,
-     \qquad \hat y = \arg\max_y p(y\mid x).
-  ```
+Sharper response (higher KL) = more OOD.
+
+**selfNLL-grad** (transparency control = iter-1's mislabeled "jacobian") — gradient norm of the
+model's own argmax negative log-likelihood; kept to show it is confidence-adjacent:
+
+```math
+s_{\text{selfNLL}}(x) \;=\; \Big\| \tfrac{\partial\,[-\log p(\hat y\mid x)]}{\partial h} \Big\|_2,
+   \qquad \hat y = \arg\max_y p(y\mid x).
+```
 
 ### Baselines
-- **MSP** — one minus the maximum softmax probability:
+**MSP** — one minus the maximum softmax probability:
 
-  ```math
-  s_{\text{MSP}}(x) = 1 - \max_y p(y\mid x).
-  ```
+```math
+s_{\text{MSP}}(x) = 1 - \max_y p(y\mid x).
+```
 
-  *Why it detects OOD:* a model trained on in-distribution text is, on average, **more confident** on
-  inputs like its training data — one next-token candidate takes most of the probability mass, so
-  $\max_y p$ is high and $s_{\text{MSP}}$ is low. On OOD inputs the model is more often uncertain, the
-  softmax is flatter, $\max_y p$ drops, and $s_{\text{MSP}}$ rises. So higher $s_{\text{MSP}}$ = more
-  OOD. This is the classic maximum-softmax-probability baseline (Hendrycks & Gimpel, 2017). Its failure
-  mode is exactly the `code` set: GPT-2 can be *confidently wrong* on a fluent but out-of-domain input,
-  which is why MSP collapses to 0.359 there while distance-based baselines still fire.
-- **L2 norm** — activation magnitude at the point: $\; s_{\text{L2}}(x) = \|h\|_2.$
-- **Mahalanobis** — squared distance to a Gaussian $(\mu,\Sigma)$ fit on 1000 ID activations:
+*Why it detects OOD:* a model trained on in-distribution text is, on average, **more confident** on
+inputs like its training data — one next-token candidate takes most of the probability mass, so
+$\max_y p$ is high and $s_{\text{MSP}}$ is low. On OOD inputs the model is more often uncertain, the
+softmax is flatter, $\max_y p$ drops, and $s_{\text{MSP}}$ rises. So higher $s_{\text{MSP}}$ = more
+OOD. This is the classic maximum-softmax-probability baseline (Hendrycks & Gimpel, 2017). Its failure
+mode is exactly the `code` set: GPT-2 can be *confidently wrong* on a fluent but out-of-domain input,
+which is why MSP collapses to 0.359 there while distance-based baselines still fire.
 
-  ```math
-  s_{\text{maha}}(x) = (h-\mu)^\top \Sigma^{-1} (h-\mu).
-  ```
-- **cup-RMD** — cupbearer's relative Mahalanobis: the ID-class distance minus a background-class
-  distance $(\mu_0,\Sigma_0)$ fit on the pooled data, which cancels generic-norm effects:
+**L2 norm** — activation magnitude at the point: $\; s_{\text{L2}}(x) = \|h\|_2.$
 
-  ```math
-  s_{\text{RMD}}(x) = (h-\mu)^\top \Sigma^{-1}(h-\mu) \;-\; (h-\mu_0)^\top \Sigma_0^{-1}(h-\mu_0).
-  ```
-- **cup-QUE** — cupbearer's Quantum-Entropy / SPECTRE detector: a quadratic form on the ID-whitened
-  activation $\tilde h=\Sigma^{-1/2}(h-\mu)$ that up-weights directions of excess untrusted covariance
-  $\tilde\Sigma$,
+**Mahalanobis** — squared distance to a Gaussian $(\mu,\Sigma)$ fit on 1000 ID activations:
 
-  ```math
-  s_{\text{QUE}}(x) \;\propto\; \tilde h^\top\,\exp\!\big(\alpha(\tilde\Sigma - I)\big)\,\tilde h.
-  ```
+```math
+s_{\text{maha}}(x) = (h-\mu)^\top \Sigma^{-1} (h-\mu).
+```
 
-  It is fit **once** on the ID set (used as both trusted and untrusted reference) and applied uniformly.
+**cup-RMD** — cupbearer's relative Mahalanobis: the ID-class distance minus a background-class
+distance $(\mu_0,\Sigma_0)$ fit on the pooled data, which cancels generic-norm effects:
+
+```math
+s_{\text{RMD}}(x) = (h-\mu)^\top \Sigma^{-1}(h-\mu) \;-\; (h-\mu_0)^\top \Sigma_0^{-1}(h-\mu_0).
+```
+
+**cup-QUE** — cupbearer's Quantum-Entropy / SPECTRE detector: a quadratic form on the ID-whitened
+activation $\tilde h=\Sigma^{-1/2}(h-\mu)$ that up-weights directions of excess untrusted covariance
+$\tilde\Sigma$,
+
+```math
+s_{\text{QUE}}(x) \;\propto\; \tilde h^\top\,\exp\!\big(\alpha(\tilde\Sigma - I)\big)\,\tilde h.
+```
+
+It is fit **once** on the ID set (used as both trusted and untrusted reference) and applied uniformly.
 
 Baselines `cup-RMD` / `cup-QUE` are reported two ways: **vendored** (cupbearer's detector math copied
 verbatim into `experiments/cupbearer_helpers.py`, in `auroc_table.csv`) and from the **real cupbearer

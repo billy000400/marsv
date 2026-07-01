@@ -5,6 +5,31 @@ live in those files; this file records what moved and why.
 
 ---
 
+## 2026-07-01 — Display-math STILL broke; found real cause and fixed for good (no science changed)
+- **Rendering fix only — no numbers moved.** The previous fix (below) converted the list-nested
+  `$$…$$` blocks to indented ```math fences, but they *still* rendered as raw gray code boxes on
+  GitHub. Verified against GitHub's own renderer (`POST https://api.github.com/markdown`).
+- **Actual root cause (reproduced):** an indented ```math fence inside a `- ` list item renders as a
+  **code block, not math, whenever that same list item's text contains any inline `$…$`** — and every
+  Methods/Baselines bullet has `$h$`, `$k=4$`, `$v_i$`, etc. One inline `$…$` pair is enough. The
+  column-0 AUROC block separately broke because its `$$` was glued to the prior line with no blank line.
+- **Real fix:** lifted all display math to **column 0** by converting the Plateau-scores and Baselines
+  bullet lists to **bold run-in paragraphs**, each equation a top-level ```math fence; converted the
+  AUROC block to a top-level ```math fence with a blank line. API check now: 8/8 display equations →
+  `js-display-math`, 0 → `<pre lang="math">` code blocks.
+- **Rewrote rule 8a in `CLAUDE.md`** — the old version wrongly claimed indented ```math "works
+  everywhere". New rule: never nest display math in a list item; keep it at column 0; verify via the
+  markdown API before committing.
+
+## 2026-07-01 — Fix display-math rendering in REPORT.md (no science changed) [SUPERSEDED — did not work]
+- **Rendering fix only — no numbers moved.** The seven `$$…$$` display equations inside list items
+  in REPORT.md (`jacFrob`, `plateau-perturbation`, `selfNLL`, `MSP`, `Mahalanobis`, `cup-RMD`,
+  `cup-QUE`) were dumping raw LaTeX on GitHub because an indented `$$` inside a bullet is parsed as
+  inline, not a display block. Converted each to an indented ```math fence with surrounding blank
+  lines. The column-0 AUROC block was already correct and left as-is.
+- Added rule **8a** to project `CLAUDE.md` documenting this pitfall so future agents use ```math
+  fences for list-nested display math.
+
 ## 2026-07-01 — Documentation clarity pass (iter 7; `human_feedback_07011019.md`)
 - **Deliverable clarity only — no science changed, no numbers moved.** Addressed three operator
   documentation requests:
