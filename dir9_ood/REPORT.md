@@ -108,7 +108,7 @@ OOD. This is the classic maximum-softmax-probability baseline (Hendrycks & Gimpe
 mode is exactly the `code` set: GPT-2 can be *confidently wrong* on a fluent but out-of-domain input,
 which is why MSP collapses to 0.359 there while distance-based baselines still fire.
 
-**L2 norm** — activation magnitude at the point: $\; s_{\text{L2}}(x) = \|h\|_2.$
+**L2 norm** — activation magnitude at the point: $s_{\text{L2}}(x) = \Vert h\Vert_2.$
 
 **Mahalanobis** — squared distance to a Gaussian $(\mu,\Sigma)$ fit on 1000 ID activations:
 
