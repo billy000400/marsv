@@ -131,3 +131,40 @@ overturn the local-sensitivity verdict.
 
 On track? yes — Stages A(M1)+B(M2)+D(M4) done & decisive (~90% of plan; C/E intentionally
 skipped as the null is complete and names its cause). Project-level null finalized; STOP created.
+
+## 2026-07-01 (iter) — Stage B-dir curated: direction-family robustness of the null
+
+**Context on entry.** PLAN said FINALIZED/STOP, but STOP was absent (loop wrapper removed it) and
+git showed the last iteration had created+committed `experiments/stageB_directions.py` +
+`stageB_dir_*` artifacts **without curating them into RESULTS.md/REPORT.md** — both still listed
+"one direction family (isotropic)" and "SAE-decoder-direction robustness (not run)" as the biggest
+open caveat. So the deliverables did not reflect completed work (violates CLAUDE.md §6). The
+committed run was also the SMOKE config (N=24, 2 dirs, N_eval=12 — wide CIs).
+
+**Did.** Re-ran `stageB_directions.py --full` (N=200, N_eval=100, 8 dirs, 3 perturbation-direction
+families) — ~9 min, within GPU/RAM budget. Curated the result into RESULTS.md (new "Stage B-dir"
+section + updated H2 verdict + Scope paragraph) and REPORT.md (new Results subsection + Methods
+note + updated Conclusion scope). Appended CHANGELOG. Regenerated `plots/plateau_stageB_dir.png`.
+
+**Learned (decision-grade).** The Stage B "naive/sparse below random-displacement" deficit is
+**direction-family robust**. Distance-matched residual ρ (median [95% CI]):
+- iso: recon −0.015 [−0.025,+0.003], naive −0.061 [−0.068,−0.057], sparse −0.062 [−0.069,−0.052]
+- sae_single: recon −0.016 [−0.029,−0.003], naive −0.066 [−0.071,−0.058], sparse −0.062
+- sae_sparse: recon −0.015 [−0.032,+0.006], naive −0.077 [−0.084,−0.065], sparse −0.071
+Under every family recon sits ~on the random curve and naive/sparse sit clearly BELOW it; the
+naive deficit is if anything LARGER along SAE decoder directions (sae_sparse −0.077 vs iso −0.061)
+— the opposite of SAE-specific plateau validity. iso here also replicates primary Stage B
+(recon −0.015 vs −0.016; naive −0.061 vs −0.058). Pooled Spearman(plateau,dist) −0.64/−0.60/−0.62.
+So the project null is not an isotropic-direction artifact.
+
+**Assumptions logged (loop mode).** (1) sae_single = single unit-normed decoder column, j drawn
+from real-active features by frequency; sae_sparse = normalized signed sum of 8 active columns —
+standard "feature direction" choices; alternatives (encoder-row directions, gradient directions)
+not tested. (2) τ recalibrated per family on the held-out real split (matches Stage B protocol).
+
+**Next step.** Direction-family robustness now confirmed and curated. Project null complete and
+direction-robust; re-creating STOP. If reopened: Stage C (cycle/co-occurrence codes), then Stage E
+(alternate layer) — expected to scope, not overturn, the local-sensitivity verdict.
+
+On track? yes — biggest open caveat (direction-family robustness) closed & curated to current-best;
+Stages A+B+B-dir+D done & decisive; project-level null direction-robust and finalized. STOP created.

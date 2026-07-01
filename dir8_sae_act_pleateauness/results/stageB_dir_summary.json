@@ -1,9 +1,9 @@
 {
   "stage": "B_direction",
   "layer": "resid_pre@6",
-  "N": 24,
-  "n_eval": 12,
-  "n_dirs": 2,
+  "N": 200,
+  "n_eval": 100,
+  "n_dirs": 8,
   "sparse_k": 8,
   "r_grid": [
     0.0,
@@ -28,169 +28,169 @@
   ],
   "per_family": {
     "iso": {
-      "tau_heldout": 0.0001697584375506267,
+      "tau_heldout": 0.00013900670455768704,
       "iso_reference_plateau": {
-        "d=15": 0.22254,
-        "d=30": 0.18546,
-        "d=60": 0.14056,
-        "d=120": 0.09196
+        "d=15": 0.19354,
+        "d=30": 0.17548,
+        "d=60": 0.13244,
+        "d=120": 0.07996
       },
       "plateau_median": {
-        "real": 0.22377,
-        "recon": 0.19901,
-        "naive": 0.06057,
-        "sparse_match": 0.08393,
-        "iso15": 0.22254,
-        "iso30": 0.18546,
-        "iso60": 0.14056,
-        "iso120": 0.09196
+        "real": 0.19985,
+        "recon": 0.16685,
+        "naive": 0.06658,
+        "sparse_match": 0.06863,
+        "iso15": 0.19354,
+        "iso30": 0.17548,
+        "iso60": 0.13244,
+        "iso120": 0.07996
       },
       "distance_matched_residual": {
         "recon": {
-          "median_dist": 26.11,
-          "plateau_median": 0.19901,
-          "ref_at_matched_dist": 0.1929,
-          "residual_median": 0.01034,
+          "median_dist": 25.07,
+          "plateau_median": 0.16685,
+          "ref_at_matched_dist": 0.18016,
+          "residual_median": -0.01492,
           "residual_ci95": [
-            -0.0399,
-            0.03019
+            -0.02513,
+            0.00317
           ],
           "verdict": "indistinguishable from random displacement"
         },
         "naive": {
-          "median_dist": 63.42,
-          "plateau_median": 0.06057,
-          "ref_at_matched_dist": 0.13669,
-          "residual_median": -0.07359,
+          "median_dist": 64.05,
+          "plateau_median": 0.06658,
+          "ref_at_matched_dist": 0.12749,
+          "residual_median": -0.06066,
           "residual_ci95": [
-            -0.08532,
-            -0.06828
+            -0.06813,
+            -0.05663
           ],
           "verdict": "BELOW random-displacement"
         },
         "sparse_match": {
-          "median_dist": 64.64,
-          "plateau_median": 0.08393,
-          "ref_at_matched_dist": 0.13536,
-          "residual_median": -0.05404,
+          "median_dist": 64.14,
+          "plateau_median": 0.06863,
+          "ref_at_matched_dist": 0.12738,
+          "residual_median": -0.06184,
           "residual_ci95": [
-            -0.08521,
-            -0.01543
+            -0.06925,
+            -0.0515
           ],
           "verdict": "BELOW random-displacement"
         }
       },
-      "spearman_plateau_vs_dist_pooled_eval": -0.593
+      "spearman_plateau_vs_dist_pooled_eval": -0.639
     },
     "sae_single": {
-      "tau_heldout": 0.00016081966168712825,
+      "tau_heldout": 0.00016723410226404667,
       "iso_reference_plateau": {
-        "d=15": 0.2055,
-        "d=30": 0.19519,
-        "d=60": 0.1328,
-        "d=120": 0.08562
+        "d=15": 0.19757,
+        "d=30": 0.18077,
+        "d=60": 0.12977,
+        "d=120": 0.08363
       },
       "plateau_median": {
-        "real": 0.21121,
-        "recon": 0.19089,
-        "naive": 0.06178,
-        "sparse_match": 0.08772,
-        "iso15": 0.2055,
-        "iso30": 0.19519,
-        "iso60": 0.1328,
-        "iso120": 0.08562
+        "real": 0.20156,
+        "recon": 0.1676,
+        "naive": 0.06331,
+        "sparse_match": 0.06536,
+        "iso15": 0.19757,
+        "iso30": 0.18077,
+        "iso60": 0.12977,
+        "iso120": 0.08363
       },
       "distance_matched_residual": {
         "recon": {
-          "median_dist": 26.11,
-          "plateau_median": 0.19089,
-          "ref_at_matched_dist": 0.19726,
-          "residual_median": 0.00427,
+          "median_dist": 25.07,
+          "plateau_median": 0.1676,
+          "ref_at_matched_dist": 0.18512,
+          "residual_median": -0.01564,
           "residual_ci95": [
-            -0.06303,
-            0.03653
+            -0.02891,
+            -0.00339
           ],
-          "verdict": "indistinguishable from random displacement"
+          "verdict": "BELOW random-displacement"
         },
         "naive": {
-          "median_dist": 63.42,
-          "plateau_median": 0.06178,
-          "ref_at_matched_dist": 0.12905,
-          "residual_median": -0.06813,
+          "median_dist": 64.05,
+          "plateau_median": 0.06331,
+          "ref_at_matched_dist": 0.12542,
+          "residual_median": -0.06565,
           "residual_ci95": [
-            -0.08316,
-            -0.03352
+            -0.07046,
+            -0.05795
           ],
           "verdict": "BELOW random-displacement"
         },
         "sparse_match": {
-          "median_dist": 64.64,
-          "plateau_median": 0.08772,
-          "ref_at_matched_dist": 0.12776,
-          "residual_median": -0.04747,
+          "median_dist": 64.14,
+          "plateau_median": 0.06536,
+          "ref_at_matched_dist": 0.12533,
+          "residual_median": -0.06234,
           "residual_ci95": [
-            -0.06755,
-            -0.02983
+            -0.06805,
+            -0.05244
           ],
           "verdict": "BELOW random-displacement"
         }
       },
-      "spearman_plateau_vs_dist_pooled_eval": -0.581
+      "spearman_plateau_vs_dist_pooled_eval": -0.597
     },
     "sae_sparse": {
-      "tau_heldout": 0.0003340041439514607,
+      "tau_heldout": 0.00027356791542842984,
       "iso_reference_plateau": {
-        "d=15": 0.21293,
-        "d=30": 0.1928,
-        "d=60": 0.1411,
-        "d=120": 0.09289
+        "d=15": 0.22236,
+        "d=30": 0.20255,
+        "d=60": 0.14289,
+        "d=120": 0.09422
       },
       "plateau_median": {
-        "real": 0.21836,
-        "recon": 0.18438,
-        "naive": 0.05573,
-        "sparse_match": 0.06707,
-        "iso15": 0.21293,
-        "iso30": 0.1928,
-        "iso60": 0.1411,
-        "iso120": 0.09289
+        "real": 0.22849,
+        "recon": 0.18881,
+        "naive": 0.06722,
+        "sparse_match": 0.06974,
+        "iso15": 0.22236,
+        "iso30": 0.20255,
+        "iso60": 0.14289,
+        "iso120": 0.09422
       },
       "distance_matched_residual": {
         "recon": {
-          "median_dist": 26.11,
-          "plateau_median": 0.18438,
-          "ref_at_matched_dist": 0.19684,
-          "residual_median": -0.01194,
+          "median_dist": 25.07,
+          "plateau_median": 0.18881,
+          "ref_at_matched_dist": 0.20768,
+          "residual_median": -0.01485,
           "residual_ci95": [
-            -0.06906,
-            0.04902
+            -0.03146,
+            0.00594
           ],
           "verdict": "indistinguishable from random displacement"
         },
         "naive": {
-          "median_dist": 63.42,
-          "plateau_median": 0.05573,
-          "ref_at_matched_dist": 0.13727,
-          "residual_median": -0.07676,
+          "median_dist": 64.05,
+          "plateau_median": 0.06722,
+          "ref_at_matched_dist": 0.13831,
+          "residual_median": -0.07732,
           "residual_ci95": [
-            -0.0999,
-            -0.04134
+            -0.084,
+            -0.06468
           ],
           "verdict": "BELOW random-displacement"
         },
         "sparse_match": {
-          "median_dist": 64.64,
-          "plateau_median": 0.06707,
-          "ref_at_matched_dist": 0.13595,
-          "residual_median": -0.07339,
+          "median_dist": 64.14,
+          "plateau_median": 0.06974,
+          "ref_at_matched_dist": 0.13821,
+          "residual_median": -0.07139,
           "residual_ci95": [
-            -0.09263,
-            -0.03707
+            -0.07635,
+            -0.06294
           ],
           "verdict": "BELOW random-displacement"
         }
       },
-      "spearman_plateau_vs_dist_pooled_eval": -0.521
+      "spearman_plateau_vs_dist_pooled_eval": -0.62
     }
   }
 }

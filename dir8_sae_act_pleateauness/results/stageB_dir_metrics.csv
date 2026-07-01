@@ -1,10 +1,10 @@
 family,condition,median_dist,plateau_median,ref_at_matched_dist,residual_median,ci_lo,ci_hi,verdict
-iso,recon,26.11,0.19901,0.1929,0.01034,-0.0399,0.03019,indistinguishable from random displacement
-iso,naive,63.42,0.06057,0.13669,-0.07359,-0.08532,-0.06828,BELOW random-displacement
-iso,sparse_match,64.64,0.08393,0.13536,-0.05404,-0.08521,-0.01543,BELOW random-displacement
-sae_single,recon,26.11,0.19089,0.19726,0.00427,-0.06303,0.03653,indistinguishable from random displacement
-sae_single,naive,63.42,0.06178,0.12905,-0.06813,-0.08316,-0.03352,BELOW random-displacement
-sae_single,sparse_match,64.64,0.08772,0.12776,-0.04747,-0.06755,-0.02983,BELOW random-displacement
-sae_sparse,recon,26.11,0.18438,0.19684,-0.01194,-0.06906,0.04902,indistinguishable from random displacement
-sae_sparse,naive,63.42,0.05573,0.13727,-0.07676,-0.0999,-0.04134,BELOW random-displacement
-sae_sparse,sparse_match,64.64,0.06707,0.13595,-0.07339,-0.09263,-0.03707,BELOW random-displacement
+iso,recon,25.07,0.16685,0.18016,-0.01492,-0.02513,0.00317,indistinguishable from random displacement
+iso,naive,64.05,0.06658,0.12749,-0.06066,-0.06813,-0.05663,BELOW random-displacement
+iso,sparse_match,64.14,0.06863,0.12738,-0.06184,-0.06925,-0.0515,BELOW random-displacement
+sae_single,recon,25.07,0.1676,0.18512,-0.01564,-0.02891,-0.00339,BELOW random-displacement
+sae_single,naive,64.05,0.06331,0.12542,-0.06565,-0.07046,-0.05795,BELOW random-displacement
+sae_single,sparse_match,64.14,0.06536,0.12533,-0.06234,-0.06805,-0.05244,BELOW random-displacement
+sae_sparse,recon,25.07,0.18881,0.20768,-0.01485,-0.03146,0.00594,indistinguishable from random displacement
+sae_sparse,naive,64.05,0.06722,0.13831,-0.07732,-0.084,-0.06468,BELOW random-displacement
+sae_sparse,sparse_match,64.14,0.06974,0.13821,-0.07139,-0.07635,-0.06294,BELOW random-displacement

@@ -537,6 +537,10 @@ Scripts: `experiments/smoke_plateau.py` (A), `stageB_distance.py` (B), `stageD_v
 - Stage B (N_eval=100, 6 dirs, held-out τ=1.33e-4): iso_displace random-displacement reference
   0.184/0.173/0.128/0.078 at dist 15/30/60/120. Distance-matched residual: recon −0.016, naive
   −0.058, sparse_match −0.063. **No SAE-decoded condition ABOVE the random curve.** H2 negative.
+- Stage B-dir (N=200, N_eval=100, 8 dirs; `stageB_directions.py` full config): distance-matched
+  residual under 3 perturbation-direction families. recon ≈0 on all; naive/sparse BELOW random
+  everywhere — iso −0.061/−0.062, sae_single −0.066/−0.062, sae_sparse −0.077/−0.071. **Direction-
+  family robust**; deficit slightly LARGER along SAE-decoder dirs. Closes the biggest open caveat.
 - Stage D (1400 rows, split by source): held-out R² for log10 output_kl — baseline(dist,norm)
   0.795, +plateau 0.869, baseline+locsens 0.873, all 0.878. **ΔR² plateau beyond {dist,norm}
   =+0.073 (partial ρ −0.65) but beyond {dist,norm,locsens} =+0.005 (partial ρ −0.16).** Plateau's
@@ -548,7 +552,7 @@ Env note: transformers/tokenizers/safetensors/huggingface_hub pip-installed `--n
 (tokenizers 0.22.2); torch/CUDA untouched. matplotlib present.
 
 ## Next step
-DONE. RESULTS.md curated, REPORT.md written (Summary→Methods→Results→Conclusion, every metric/
-baseline in $$LaTeX$$), CHANGELOG + JOURNAL appended, STOP created. If reopened: SAE-decoder-
-direction robustness (Stage B leftover) then Stage C cycle/co-occurrence codes — both expected to
-scope, not overturn, the local-sensitivity null.
+DONE. RESULTS.md + REPORT.md now include Stage B-dir (direction-family robustness, full config)
+curated to current-best; CHANGELOG + JOURNAL appended; STOP re-created. If reopened: Stage C
+cycle/co-occurrence codes then Stage E alternate-layer — both expected to scope, not overturn,
+the local-sensitivity null (direction-family robustness now confirmed).

@@ -94,6 +94,40 @@ Pooled Spearman(plateau, distance) over the SAE + iso conditions (eval half) = *
 
 ![Stage B: plateau vs distance and distance-matched residual](plots/plateau_stageB.png)
 
+## Stage B-dir — is the below-random deficit isotropic-only? (direction-family robustness)
+
+Stage B used **isotropic** perturbation directions. If SAE-decoder directions *reversed* the
+finding (SAE-decoded conditions flatter than random along their own feature directions), the
+metric would be direction-dependent and the null would need scoping. We recompute the exact
+Stage B distance-matched residual under three perturbation-direction families, apples-to-apples
+in one run (N=200, N_eval=100, 8 directions, held-out τ per family):
+
+- **iso** — isotropic Gaussian unit directions (primary; reproduces Stage B);
+- **sae_single** — each direction is a single unit-normed SAE decoder column `W_dec[j]`, `j`
+  drawn from real-code-active features by frequency;
+- **sae_sparse** — each direction is a normalized signed sum of 8 random active decoder columns.
+
+Distance-matched residual `ρ_c` (median over eval sources, 95% bootstrap CI). `<0` = **less**
+flat than a random displacement at equal distance:
+
+| family | recon `ρ` | naive `ρ` | sparse_match `ρ` |
+|---|---|---|---|
+| iso (primary) | −0.015 [−0.025, +0.003] | −0.061 [−0.068, −0.057] | −0.062 [−0.069, −0.052] |
+| sae_single | −0.016 [−0.029, −0.003] | −0.066 [−0.071, −0.058] | −0.062 [−0.068, −0.052] |
+| sae_sparse | −0.015 [−0.032, +0.006] | **−0.077** [−0.084, −0.065] | **−0.071** [−0.076, −0.063] |
+
+Pooled Spearman(plateau, distance) over the SAE + iso conditions: iso −0.64, sae_single −0.60,
+sae_sparse −0.62 — distance dominates plateau under every family.
+
+**Reading:** the finding is **direction-family robust**. Across all three families the ordering
+is identical — recon sits essentially *on* the random-displacement curve (residual ≈ −0.015,
+CI straddling or barely below 0), while **naive and sparse_match sit clearly below random**. No
+family reverses the conclusion; if anything the naive below-random deficit is *larger* along SAE
+decoder directions (sae_sparse −0.077 vs iso −0.061), the opposite of SAE-specific plateau
+validity. The Stage B null is therefore not an isotropic artifact.
+
+![Stage B-dir: distance-matched residual by perturbation-direction family](plots/plateau_stageB_dir.png)
+
 ## Stage D — does plateau predict downstream validity *beyond baselines*? (the project gate)
 
 **Independent downstream-validity target.** For each candidate activation `x_c` paired to a
@@ -148,7 +182,9 @@ dist +0.75, norm −0.22.
 - **H2 (Stage B):** the plateau gap **does not survive distance-to-source matching as an
   SAE-validity signal.** recon's advantage is explained by closeness to the real activation;
   no SAE-decoded condition is flatter than a random displacement at equal distance; and
-  sparsity/coefficient matching does not recover plateau.
+  sparsity/coefficient matching does not recover plateau. **This is direction-family robust**
+  (Stage B-dir): the naive/sparse below-random deficit persists — slightly stronger — along
+  single- and sparse-sum SAE-decoder directions, so it is not an isotropic artifact.
 - **H4 (Stage D):** plateau predicts the independent downstream-validity target beyond
   distance+norm, **but this is fully explained by local sensitivity** — plateau adds nothing
   beyond a single fixed-radius KL. So plateau-ness measures **local robustness**, not
@@ -163,12 +199,14 @@ evidence says plateau-ness is **mere local robustness** plus distance-to-real. T
 consistent with Direction 9 (plateau-as-OOD weak) and Direction 6 (plateau predicts downstream
 KL but only as local sensitivity).
 
-_Scope / open:_ one primary metric, one direction family (isotropic), one layer/SAE. Not run:
-SAE-decoder-direction robustness (whether the naive below-random deficit is isotropic-only),
-cycle-consistent / co-occurrence-aware codes (Stage C), and an alternate-layer generalization
-(Stage E). These could *scope* the conclusion but, given the local-sensitivity result, are not
-expected to overturn the project-level null.
+_Scope / open:_ one primary metric, one layer/SAE. Direction-family robustness is **confirmed**
+(Stage B-dir: isotropic + single-column + sparse-sum SAE-decoder directions all give the same
+below-random deficit). Not run: cycle-consistent / co-occurrence-aware synthetic codes (Stage C)
+and an alternate-layer generalization (Stage E). Given the local-sensitivity and
+direction-robustness results, these could *scope* the conclusion but are not expected to overturn
+the project-level null.
 
 _Artifacts:_ `results/plateau_metrics.csv`, `results/plateau_summary.json` (Stage A);
 `results/stageB_metrics.csv`, `results/stageB_summary.json` (Stage B);
+`results/stageB_dir_metrics.csv`, `results/stageB_dir_summary.json` (Stage B-dir);
 `results/stageD_metrics.csv`, `results/stageD_summary.json` (Stage D).

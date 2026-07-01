@@ -39,8 +39,8 @@ sensitivity).
   ($d_\text{in}=768$, $d_\text{sae}=24576$). Encoder convention chosen empirically by
   reconstruction error (mean $\lVert \hat{x}-x\rVert$ = 27.7 with `b_dec` subtracted before
   encoding vs 380.8 without ⇒ `apply_b_dec_to_input=True`):
-  $$z=\mathrm{ReLU}\big((x-b_\text{dec})W_\text{enc}+b_\text{enc}\big),\qquad
-  \hat{x}=zW_\text{dec}+b_\text{dec}.$$
+  $z=\mathrm{ReLU}\big((x-b_\text{dec})W_\text{enc}+b_\text{enc}\big)$ and
+  $\hat{x}=zW_\text{dec}+b_\text{dec}$.
 - **Data:** FineWeb text cache (`../dir3_manifold/data/fineweb_texts.json`), sequence length 64,
   prompts with $\ge 16$ real tokens. **N = 200** source prompts (Stages A/B/D). Stage B/D score
   on a **held-out half** (sources $\ge N/2$).
@@ -51,22 +51,35 @@ sensitivity).
 
 For an activation $x$ and a unit direction $d$ ($\lVert d\rVert_2=1$) we perturb along a
 norm-relative radius $r$:
-$$x(r) = x + r\,\lVert x\rVert_2\, d .$$
+
+```math
+x(r) = x + r\,\lVert x\rVert_2\, d .
+```
+
 The **downstream response** is the last-token next-token KL between the unperturbed and
 perturbed candidate, both placed in the same prompt context:
-$$\mathrm{KL}(r) = \mathrm{KL}\big(p_{x}\;\Vert\;p_{x(r)}\big)
-=\sum_{v} p_{x}(v)\,\log\frac{p_{x}(v)}{p_{x(r)}(v)} .$$
+
+```math
+\mathrm{KL}(r) = \mathrm{KL}\big(p_{x}\;\Vert\;p_{x(r)}\big)
+=\sum_{v} p_{x}(v)\,\log\frac{p_{x}(v)}{p_{x(r)}(v)} .
+```
+
 To handle non-monotone curves we take the cumulative max
 $\mathrm{KL}_{\uparrow}(r)=\max_{r'\le r}\mathrm{KL}(r')$. The **primary metric**, normalized
 low-response plateau area (higher = wider low-response plateau), is
-$$\texttt{plateau\_auc\_low}
+
+```math
+\texttt{plateau\_auc\_low}
 = \frac{1}{r_{\max}}\,\mathbb{E}_{d}\!\int_{0}^{r_{\max}}
-\mathrm{clip}\!\Big(1-\tfrac{\mathrm{KL}_{\uparrow,d}(r)}{\tau},\,0,\,1\Big)\,dr ,$$
+\mathrm{clip}\!\Big(1-\tfrac{\mathrm{KL}_{\uparrow,d}(r)}{\tau},\,0,\,1\Big)\,dr ,
+```
+
 evaluated on the radius grid $r\in\{0,.0025,.005,.01,.02,.04,.08\}$, averaged over directions
 **within** an activation (directions/radii are repeated measures, not independent samples).
 
 - **Direction family (primary):** isotropic Gaussian directions normalized to unit $\ell_2$
-  (model-agnostic, available for every condition).
+  (model-agnostic, available for every condition). Robustness to this choice is tested in
+  **Stage B-dir** with single-column and sparse-sum SAE-decoder directions.
 - **Threshold $\tau$:** $\tau=\mathrm{median}_\text{real}\,\mathrm{KL}(r{=}0.02)$, calibrated on
   a **held-out real split** (sources $<N/2$) so $\tau$ never sees the scored activations
   ($\tau_\text{held-out}=1.33\times10^{-4}$).
@@ -90,7 +103,7 @@ evaluated on the radius grid $r\in\{0,.0025,.005,.01,.02,.04,.08\}$, averaged ov
 - **iso_displace reference** $R(\delta)$ = median `plateau_auc_low` of the random-displacement
   family as a function of distance $\delta$; for a condition at distance $\Delta$ its
   **distance-matched residual** is
-  $$\rho_c = \texttt{plateau\_auc\_low}(c) - R(\Delta_c),$$
+  $\rho_c = \texttt{plateau\_auc\_low}(c) - R(\Delta_c)$
   ($R$ interpolated in $\log$-distance). $\rho_c>0$ ⇒ flatter than a random point at equal
   distance.
 - **local sensitivity** $\texttt{locsens}=\log_{10}\big(\overline{\mathrm{KL}}(r{=}0.02)+10^{-8}\big)$,
@@ -99,7 +112,11 @@ evaluated on the radius grid $r\in\{0,.0025,.005,.01,.02,.04,.08\}$, averaged ov
 ### Independent downstream-validity target (Stage D)
 
 For a candidate $x_c$ paired to its source prompt, inject $x_c$ in full context and score
-$$\texttt{output\_kl}(x_c)=\mathrm{KL}\big(p_\text{real}\;\Vert\;p_{x_c}\big),$$
+
+```math
+\texttt{output\_kl}(x_c)=\mathrm{KL}\big(p_\text{real}\;\Vert\;p_{x_c}\big),
+```
+
 where $p_\text{real}$ is the next-token distribution with the **real** source activation in
 context. **Low `output_kl` = downstream-valid.** Predictive evaluation pools 7 candidate
 conditions $\times\,N=200$ (1400 rows), **splits by source prompt** (no source across both
@@ -155,6 +172,30 @@ random point at equal distance; sparsity/coefficient matching does not recover p
 
 ![Stage B](plots/plateau_stageB.png)
 
+### Stage B-dir — direction-family robustness of the below-random deficit
+
+Stage B used isotropic perturbation directions. To rule out an isotropic artifact we recompute
+the distance-matched residual $\rho_c$ under three perturbation-direction families in one run
+(N=200, N_eval=100, 8 directions, held-out $\tau$ per family): **iso** (isotropic Gaussian unit
+directions), **sae_single** (a single unit-normed SAE decoder column $W_\text{dec}[j]$, $j$ drawn
+from real-active features by frequency), and **sae_sparse** (a normalized signed sum of 8 active
+decoder columns). $\rho_c<0$ ⇒ **less** flat than a random displacement at equal distance.
+
+| family | recon $\rho$ | naive $\rho$ | sparse_match $\rho$ |
+|---|---|---|---|
+| iso (primary) | −0.015 [−0.025, +0.003] | −0.061 [−0.068, −0.057] | −0.062 [−0.069, −0.052] |
+| sae_single | −0.016 [−0.029, −0.003] | −0.066 [−0.071, −0.058] | −0.062 [−0.068, −0.052] |
+| sae_sparse | −0.015 [−0.032, +0.006] | **−0.077** [−0.084, −0.065] | **−0.071** [−0.076, −0.063] |
+
+The ordering is identical under every family: recon sits essentially *on* the random-displacement
+curve, while **naive and sparse_match sit clearly below it**. No family reverses the finding; the
+naive deficit is if anything *larger* along SAE decoder directions (sae_sparse −0.077 vs iso
+−0.061) — the opposite of SAE-specific plateau validity. Pooled Spearman(plateau, distance)
+$\in\{-0.64,-0.60,-0.62\}$ across families. **The Stage B null is direction-family robust, not an
+isotropic artifact.**
+
+![Stage B-dir](plots/plateau_stageB_dir.png)
+
 ### Stage D — does plateau predict downstream validity beyond baselines? (project gate)
 
 Held-out test $R^2$ for predicting $\log_{10}$ `output_kl`:
@@ -202,9 +243,10 @@ identifies plateau-ness as **mere local robustness, plus distance-to-real**. Thi
 null that names its cause and is consistent with the neighboring directions (D9: plateau-as-OOD
 weak; D6: plateau predicts downstream KL but as local sensitivity, and is reward-hackable).
 
-**Scope and caveats.** One primary metric (`plateau_auc_low`), one direction family
-(isotropic), one layer/SAE (resid_pre@6, jbloom 24k). Not run: SAE-decoder-direction robustness
-(whether the naive below-random deficit is isotropic-only), cycle-consistent / co-occurrence-
-aware synthetic codes (Stage C), and an alternate-layer generalization (Stage E). Given the
-local-sensitivity result these would *scope* the conclusion rather than overturn it; a future
-pass should confirm direction-family robustness before any broader claim.
+**Scope and caveats.** One primary metric (`plateau_auc_low`), one layer/SAE (resid_pre@6,
+jbloom 24k). **Direction-family robustness is confirmed** (Stage B-dir): the naive/sparse
+below-random deficit holds — slightly stronger — under single-column and sparse-sum SAE-decoder
+perturbation directions, not just isotropic ones, so the null is not a direction artifact. Not
+run: cycle-consistent / co-occurrence-aware synthetic codes (Stage C) and an alternate-layer
+generalization (Stage E). Given the local-sensitivity and direction-robustness results these
+would *scope* the conclusion rather than overturn it.

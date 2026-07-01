@@ -4,6 +4,39 @@ Append-only.
 
 ---
 
+## 2026-07-01 — Display-math STILL broke; real fix (no science changed)
+- **Rendering fix only — no numbers moved.** The earlier fix (below) was wrong: an indented ```math
+  fence inside a bullet still renders as a gray code box (not math) when the bullet has any inline
+  `$…$`. On top of the 2 nested fences, the 4 column-0 `$$` blocks (`x(r)`, `KL(r)`,
+  `plateau_auc_low`, `output_kl`) were glued to the prior line and rendered as raw text. Verified via
+  `POST api.github.com/markdown`.
+- **Fix:** the 4 top-level `$$` blocks → column-0 ```math fences with blank lines; the 2 short
+  nested equations (SAE encode/decode, distance-matched residual `ρ_c`) → inline `$…$` (keeps the
+  bullet lists intact). API check: 4/4 display equations render, 0 code blocks, 0 raw `$$`.
+- See rewritten project `CLAUDE.md` rule **8a**: never nest display math in a list item; keep it at
+  column 0; verify via the markdown API before committing.
+
+## 2026-07-01 — Stage B-dir curated into deliverables (direction-family robustness)
+
+- Prior iteration ran `experiments/stageB_directions.py` (created + committed) but **did not
+  curate the result into RESULTS.md/REPORT.md**; they still listed "SAE-decoder-direction
+  robustness (not run)" and "one direction family (isotropic)" as an open caveat. Re-ran the
+  script at **full config** (N=200, N_eval=100, 8 dirs; prior committed artifact was the smoke
+  N=24 / 2-dir run) and curated both deliverables.
+- **New Stage B-dir section** (RESULTS.md + REPORT.md): distance-matched residual $\rho_c$ under
+  three perturbation-direction families. Full-config medians [95% CI]:
+  - iso: recon −0.015 [−0.025,+0.003], naive −0.061 [−0.068,−0.057], sparse −0.062 [−0.069,−0.052]
+  - sae_single: recon −0.016 [−0.029,−0.003], naive −0.066 [−0.071,−0.058], sparse −0.062 [−0.068,−0.052]
+  - sae_sparse: recon −0.015 [−0.032,+0.006], naive −0.077 [−0.084,−0.065], sparse −0.071 [−0.076,−0.063]
+  - Pooled Spearman(plateau, distance): iso −0.64, sae_single −0.60, sae_sparse −0.62.
+- **Finding:** the Stage B null is **direction-family robust** — recon ≈ on the random curve and
+  naive/sparse sit BELOW random under every family; the naive deficit is if anything *larger*
+  along SAE decoder directions. Closes the biggest open caveat.
+- Updated H2 verdict (added "direction-family robust") and Scope paragraph (moved
+  SAE-decoder-direction robustness from "not run" to "confirmed") in both deliverables. No
+  earlier numbers superseded (new section). Plot `plots/plateau_stageB_dir.png` (full config);
+  artifacts `results/stageB_dir_summary.json`, `results/stageB_dir_metrics.csv`.
+
 ## 2026-06-30 — Stage A reproduction (first results)
 - Built `experiments/smoke_plateau.py`: end-to-end plateau pipeline (GPT-2 small + jbloom
   resid_pre@6 SAE, in-context forward-hook plateau sweep). Installed `transformers`,
