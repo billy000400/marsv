@@ -1,0 +1,1 @@
+In two NN, where are the two points live in? What is the F()?

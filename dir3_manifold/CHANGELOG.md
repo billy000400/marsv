@@ -5,6 +5,17 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-01 — Display-math STILL broke; real fix (no science changed)
+- **Rendering fix only — no numbers moved.** The earlier fix (below) was wrong: an indented ```math
+  fence inside a bullet still renders as a gray code box (not math) when the bullet has any inline
+  `$…$`. Also the three Metrics `$$` blocks (FVU, TwoNN, MLE), though at column 0, were glued to the
+  prior line with no blank line and rendered as raw text. Verified via `POST api.github.com/markdown`.
+- **Fix:** Metrics `$$` blocks → column-0 ```math fences with blank lines; the two short Baselines
+  equations (`PR`, `d_q`) → inline `$…$` (keeps the bullet list intact). API check: 3/3 display
+  equations render, 0 code blocks, 0 raw `$$`.
+- See rewritten project `CLAUDE.md` rule **8a**: never nest display math in a list item; keep it at
+  column 0; verify via the markdown API before committing.
+
 ## 2026-06-30 — Figures added; report/results history migrated here (consolidation pass)
 - **plots/ was empty; matplotlib was not installed.** Installed `matplotlib==3.11.0` with
   numpy/torch pinned (numpy 2.3.3 / torch 2.9.0+cu130 unchanged — verified). Added

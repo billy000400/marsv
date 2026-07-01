@@ -49,7 +49,11 @@ Let $x \in \mathbb{R}^{768}$ be a residual-stream vector, $\hat{x}$ its AE recon
 $\mu_{\text{train}}$ the training mean.
 
 **Fraction of variance unexplained (AE reconstruction quality), scored on held-out val:**
-$$\mathrm{FVU} = \frac{\mathbb{E}\,\lVert x - \hat{x}\rVert^2}{\mathbb{E}\,\lVert x - \mu_{\text{train}}\rVert^2}, \qquad \text{var\_expl} = 1 - \mathrm{FVU}.$$
+
+```math
+\mathrm{FVU} = \frac{\mathbb{E}\,\lVert x - \hat{x}\rVert^2}{\mathbb{E}\,\lVert x - \mu_{\text{train}}\rVert^2}, \qquad \text{var\_expl} = 1 - \mathrm{FVU}.
+```
+
 The reported AE signal is the **bend location** $k^\star$ (where added latents stop paying off), found
 by Kneedle on $\mathrm{FVU}$ vs $\log_2 k$, plus the per-doubling marginal gain
 $\Delta\mathrm{FVU}(k) = \mathrm{FVU}(k/2) - \mathrm{FVU}(k)$ used to test for a plateau.
@@ -57,20 +61,24 @@ $\Delta\mathrm{FVU}(k) = \mathrm{FVU}(k/2) - \mathrm{FVU}(k)$ used to test for a
 **TwoNN (Facco et al.) local ID.** For each point let $r_1, r_2$ be the distances to its 1st and 2nd
 nearest neighbours and $\mu = r_2/r_1$. Under a locally uniform density of dimension $d$, $\mu$ is
 Pareto, so $d$ is the slope of the empirical log–log CDF (upper 10% tail discarded):
-$$\log\!\big(1 - F(\mu)\big) = -\,d\,\log \mu .$$
+
+```math
+\log\!\big(1 - F(\mu)\big) = -\,d\,\log \mu .
+```
 
 **MLE (Levina–Bickel) local ID.** Using the $k$ nearest-neighbour distances $T_j(x)$ ($k = 20$),
 the per-point estimator and the reported (MacKay–Ghahramani inverse-average) aggregate are
-$$\hat{d}_k(x) = \Bigg[\frac{1}{k-1}\sum_{j=1}^{k-1}\log\frac{T_k(x)}{T_j(x)}\Bigg]^{-1}, \qquad \hat{d} = \Bigg[\frac{1}{N}\sum_{i=1}^{N}\hat{d}_k(x_i)^{-1}\Bigg]^{-1}.$$
+
+```math
+\hat{d}_k(x) = \Bigg[\frac{1}{k-1}\sum_{j=1}^{k-1}\log\frac{T_k(x)}{T_j(x)}\Bigg]^{-1}, \qquad \hat{d} = \Bigg[\frac{1}{N}\sum_{i=1}^{N}\hat{d}_k(x_i)^{-1}\Bigg]^{-1}.
+```
 
 ### Baselines
 - **Ambient dimension** $d_{\text{model}} = 768$ — trivial upper bound.
 - **Linear PCA participation ratio** (effective number of significant PCs), with eigenvalues
-  $\lambda_i$ of the covariance:
-  $$\mathrm{PR} = \frac{\big(\sum_i \lambda_i\big)^2}{\sum_i \lambda_i^2}.$$
+  $\lambda_i$ of the covariance: $\mathrm{PR} = \big(\sum_i \lambda_i\big)^2 \big/ \sum_i \lambda_i^2$.
 - **Linear PCA d95 / d99** — smallest number of principal components whose cumulative variance ratio
-  reaches 95% / 99%:
-  $$d_q = \min\Big\{ m : \textstyle\sum_{i=1}^{m}\lambda_i \big/ \sum_i \lambda_i \ge q \Big\}, \quad q \in \{0.95, 0.99\}.$$
+  reaches 95% / 99%: $d_q = \min\big\{ m : \sum_{i=1}^{m}\lambda_i \big/ \sum_i \lambda_i \ge q \big\}$, $q \in \{0.95, 0.99\}$.
 - **Synthetic-Gaussian validation** — isotropic Gaussians of known dimension $d \in \{5,10,20,50\}$
   linearly embedded in 768-d, run through the same TwoNN/MLE code, to calibrate estimator bias.
 - **AE param-count control** — a parameter-matched AE that holds total params fixed (spread 0.087%)
