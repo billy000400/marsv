@@ -1,0 +1,17 @@
+family,score,auroc,ci_lo,ci_hi,sig_above_chance
+cov_gauss,mahalanobis,0.5504,0.5304,0.5706,True
+cov_gauss,knn,0.9743,0.9705,0.978,True
+cov_gauss,entropy,0.9557,0.9497,0.9612,True
+cov_gauss,plateau_kl,0.7618,0.7471,0.7759,True
+norm_pert,mahalanobis,0.8641,0.8532,0.8752,True
+norm_pert,knn,0.6793,0.663,0.6959,True
+norm_pert,entropy,0.5641,0.5466,0.5821,True
+norm_pert,plateau_kl,0.5709,0.5529,0.5879,True
+interp,mahalanobis,0.6848,0.6677,0.7009,True
+interp,knn,0.5004,0.4821,0.5189,False
+interp,entropy,0.599,0.5809,0.6161,True
+interp,plateau_kl,0.6141,0.5965,0.6304,True
+tangent_pert,mahalanobis,0.5799,0.5619,0.598,True
+tangent_pert,knn,0.6687,0.6524,0.6846,True
+tangent_pert,entropy,0.5626,0.5435,0.5802,True
+tangent_pert,plateau_kl,0.5743,0.5573,0.591,True

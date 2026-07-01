@@ -8,7 +8,8 @@
   gap 5000, EVAL = next 10000.
 - Baselines fit on TRAIN positives only; negatives matched to EVAL positives (10000 each).
 - Pure-numpy pipeline (no sklearn/scipy/transformers in env). `experiments/mvp_benchmark.py`, 32s.
-- Caveat: pos-0 "attention-sink" tokens (norm~3000) NOT filtered → norm/Mahalanobis confound.
+- pos-0 "attention-sink" tokens (norm~3000) are pooled in; their confounding effect on norm/Mahalanobis
+  is explicitly tested in **Phase 2c** (document-level split, sink-stratified) below.
 
 ## Phase 2 — baseline AUROC (label=1 = fake/anomaly)
 | baseline | iso_gauss | cov_gauss | shuffle_coord | norm_pert | MACRO |
@@ -36,6 +37,36 @@ Negative-family norms: iso_gauss 224±6, cov_gauss 195±109, shuffle_coord & nor
   cannot reproduce it, which is itself a "realness" signal.
 - **Gate 2 verdict: baselines do NOT solve all hard negatives** → richer scores justified, but the
   bar to beat is kNN-density macro 0.913 (esp. norm_pert), NOT just Gaussian negatives.
+
+## Phase 2c — token-position (attention-sink) confound control + document-level split
+`experiments/position_stratified.py`. Uses Direction-3's position-indexed L6 cache
+(`acts_layer6_pos.npy` + `acts_layer6_posidx.npy`, document-major: each doc is a contiguous run of
+positions 0,1,2,…). This enables a **genuine document-level split** (even docs train / odd docs eval,
+366 docs, 40k train / 12k-per-class eval, no token shared) and a re-run of the Phase-2 benchmark
+(same 4 families, 6 baselines) in two conditions: **WITHSINK** (all positions) vs **NONSINK** (pos≥1).
+Sink magnitude: pos-0 norm 3041 vs 88 elsewhere (366/80000 = 0.46% of rows).
+
+| baseline | WITHSINK macro | NONSINK macro | cov_gauss WITH→NON |
+|---|---|---|---|
+| norm            | 0.721 | **0.506** | 0.887 → 0.503 |
+| mean_l2         | 0.899 | **0.669** | 0.935 → 0.510 |
+| mahalanobis     | 0.847 | **0.848** | 0.518 → 0.518 |
+| pca_recon       | 0.832 | 0.791 | 0.585 → 0.499 |
+| coord_quantile  | 0.748 | 0.672 | 0.507 → 0.501 |
+| **knn_distance**| **0.913** | **0.830** | 0.975 → **0.781** |
+
+![Phase 2c sink-confound control (doc-level split)](plots/fig9_position_stratified.png)
+
+- **norm and mean_l2 were largely a SINK ARTIFACT.** Removing pos-0 collapses norm macro 0.721→0.506
+  and mean_l2 0.899→0.669 to ~chance on the Gaussian families: the sinks inflated the fitted global
+  σ/covariance, so Gaussian negatives were generated with unrealistic variance and were trivially "too
+  far" (real-eval vs cov_gauss norm 103 vs 195 WITHSINK → 88 vs 88 NONSINK). Strengthens "norm is a shortcut."
+- **Mahalanobis (0.847→0.848) and kNN (0.913→0.830) are ROBUST** — covariance and density are REAL
+  signals, not sink confounds (rebuts the standing Mahalanobis-artifact caveat). kNN stays best and
+  remains the ONLY baseline beating chance on realistic cov-matched Gaussians without variance inflation
+  (0.781; every other baseline ≈0.50 NONSINK).
+- The document-level split reproduces the qualitative Phase-2 story → the main pipeline's contiguous+gap
+  heuristic did not distort conclusions.
 
 ## Phase 4 — learned detectors, LEAVE-ONE-FAMILY-OUT (Gate 4)
 `experiments/train_detectors.py`. Detector sees ONLY standardized raw acts (no metadata).
@@ -142,6 +173,30 @@ fine (0.50 — it's near real neighbors), so the signal is GLOBAL (distance-from
   corruptions cannot transfer to interpolation-style negatives. It does generalize well to
   cov_gauss (0.999) where the held-in families share knn/entropy signal.
 
+### Bootstrap 95% CIs — are the borderline single-score AUROCs real?
+`experiments/bootstrap_ci.py`. The load-bearing claims rest on borderline AUROCs, so we put a paired
+bootstrap 95% CI on each single score (same eval set, N=2000/family, B=2000 resamples of the real and
+family rows; orientation fixed a-priori from the full sample → two-sided reporting, no near-0.5 upward
+bias). CI = [2.5, 97.5] percentile of resampled AUROC; "sig" = CI lower bound > 0.50.
+
+| family | mahalanobis | knn | entropy | plateau_kl |
+|---|---|---|---|---|
+| cov_gauss    | 0.55 [0.53,0.57] | **0.97 [0.97,0.98]** | 0.96 [0.95,0.96] | 0.76 [0.75,0.78] |
+| norm_pert    | **0.86 [0.85,0.88]** | 0.68 [0.66,0.70] | 0.56 [0.55,0.58] | 0.57 [0.55,0.59] |
+| **interp**   | **0.69 [0.67,0.70]** | 0.50 [0.48,0.52] *n.s.* | 0.60 [0.58,0.62] | 0.61 [0.60,0.63] |
+| tangent_pert | 0.58 [0.56,0.60] | **0.67 [0.65,0.69]** | 0.56 [0.54,0.58] | 0.57 [0.56,0.59] |
+
+![Phase-3 capstone AUROC with bootstrap 95% CIs](plots/fig10_bootstrap_ci.png)
+
+- **The weak `interp` signals are statistically REAL, not noise.** Functional entropy [0.58,0.62] and
+  plateau_kl [0.60,0.63] both EXCLUDE 0.50 — the "only scores beating chance on interpolations" claim
+  survives with error bars. Two-sided Mahalanobis on interp [0.67,0.70] is significantly the strongest
+  and its CI does NOT overlap the functional CIs, confirming the too-central signal is global.
+- **kNN on interp is genuinely at chance** [0.48,0.52] — the one CI that straddles 0.50, confirming
+  interpolations are invisible to *local density* (the anomaly is global distance-from-center).
+- **kNN uniquely owns cov_gauss** [0.97,0.98] with a CI that does NOT overlap Mahalanobis [0.53,0.57];
+  it also significantly beats entropy [0.95,0.96] there. All headline orderings survive bootstrapping.
+
 ## Phase 5 — CONTEXT-AWARE prediction of downstream degradation (claim 3) — CORRECTED in-context
 `experiments/context_validation_v2.py` (canonical). **Correction (codex review 20260623T024606Z,
 finding #1):** the first version (`context_validation.py`) continued the forward pass by feeding a
@@ -226,7 +281,9 @@ along different axes:
   (L3≈L6≈L9): together they detect isotropic/cov-matched Gaussian, coordinate-shuffled, and most
   perturbation negatives (AUROC 0.86–1.0), each covering the other's blind spot (kNN owns cov-matched
   Gaussians; Mahalanobis owns low-variance-direction moves). **Norm alone is a shortcut**, fully
-  defeated by norm-matched families.
+  defeated by norm-matched families — and on a document-level split its residual discrimination is
+  largely a pos-0 attention-sink artifact (macro 0.72→0.51 once sinks are removed; Phase 2c), whereas
+  Mahalanobis/kNN survive sink removal.
 - A **learned discriminative** real-vs-fake detector MEMORIZES generator shortcuts and FAILS to
   generalize to held-out corruption families (LOFO macro 0.68–0.74 < unsupervised kNN 0.91). Realness
   is better framed as a one-class/density property than a classification boundary.
@@ -235,8 +292,9 @@ along different axes:
   neighbors — but it is **anomalous by being too CENTRAL**: a TWO-SIDED global Mahalanobis catches it
   at ~0.68 (interp mean dist 658 vs real 803). Real activations occupy a characteristic-distance shell;
   averaging falls into the over-typical interior. An independent **FUNCTIONAL probe** (next-token
-  entropy / plateau-KL from continuing the model forward) also catches it (~0.61), confirming a genuine
-  functional component of realness that statistics need a two-sided view to see.
+  entropy / plateau-KL from continuing the model forward) also catches it (~0.61, bootstrap 95% CI
+  [0.58,0.62]/[0.60,0.63] — excludes chance), confirming a genuine functional component of realness
+  that statistics need a two-sided view to see. kNN alone is at chance on interp (CI [0.48,0.52]).
 - Because interpolation is anomalous in the OPPOSITE direction from ordinary corruptions, a combined
   detector trained on standard families does NOT transfer to it (combined LOFO 0.54) — a concrete
   generalization limit for any realness score.

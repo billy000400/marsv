@@ -1,0 +1,139 @@
+{
+  "layer": 6,
+  "n_eval": 2000,
+  "n_boot": 2000,
+  "seed_family": 0,
+  "seed_boot": 12345,
+  "orientation": "fixed from full-sample directed AUROC (two-sided reporting)",
+  "rows": [
+    {
+      "family": "cov_gauss",
+      "score": "mahalanobis",
+      "auroc": 0.5504,
+      "ci_lo": 0.5304,
+      "ci_hi": 0.5706,
+      "sig_above_chance": true
+    },
+    {
+      "family": "cov_gauss",
+      "score": "knn",
+      "auroc": 0.9743,
+      "ci_lo": 0.9705,
+      "ci_hi": 0.978,
+      "sig_above_chance": true
+    },
+    {
+      "family": "cov_gauss",
+      "score": "entropy",
+      "auroc": 0.9557,
+      "ci_lo": 0.9497,
+      "ci_hi": 0.9612,
+      "sig_above_chance": true
+    },
+    {
+      "family": "cov_gauss",
+      "score": "plateau_kl",
+      "auroc": 0.7618,
+      "ci_lo": 0.7471,
+      "ci_hi": 0.7759,
+      "sig_above_chance": true
+    },
+    {
+      "family": "norm_pert",
+      "score": "mahalanobis",
+      "auroc": 0.8641,
+      "ci_lo": 0.8532,
+      "ci_hi": 0.8752,
+      "sig_above_chance": true
+    },
+    {
+      "family": "norm_pert",
+      "score": "knn",
+      "auroc": 0.6793,
+      "ci_lo": 0.663,
+      "ci_hi": 0.6959,
+      "sig_above_chance": true
+    },
+    {
+      "family": "norm_pert",
+      "score": "entropy",
+      "auroc": 0.5641,
+      "ci_lo": 0.5466,
+      "ci_hi": 0.5821,
+      "sig_above_chance": true
+    },
+    {
+      "family": "norm_pert",
+      "score": "plateau_kl",
+      "auroc": 0.5709,
+      "ci_lo": 0.5529,
+      "ci_hi": 0.5879,
+      "sig_above_chance": true
+    },
+    {
+      "family": "interp",
+      "score": "mahalanobis",
+      "auroc": 0.6848,
+      "ci_lo": 0.6677,
+      "ci_hi": 0.7009,
+      "sig_above_chance": true
+    },
+    {
+      "family": "interp",
+      "score": "knn",
+      "auroc": 0.5004,
+      "ci_lo": 0.4821,
+      "ci_hi": 0.5189,
+      "sig_above_chance": false
+    },
+    {
+      "family": "interp",
+      "score": "entropy",
+      "auroc": 0.599,
+      "ci_lo": 0.5809,
+      "ci_hi": 0.6161,
+      "sig_above_chance": true
+    },
+    {
+      "family": "interp",
+      "score": "plateau_kl",
+      "auroc": 0.6141,
+      "ci_lo": 0.5965,
+      "ci_hi": 0.6304,
+      "sig_above_chance": true
+    },
+    {
+      "family": "tangent_pert",
+      "score": "mahalanobis",
+      "auroc": 0.5799,
+      "ci_lo": 0.5619,
+      "ci_hi": 0.598,
+      "sig_above_chance": true
+    },
+    {
+      "family": "tangent_pert",
+      "score": "knn",
+      "auroc": 0.6687,
+      "ci_lo": 0.6524,
+      "ci_hi": 0.6846,
+      "sig_above_chance": true
+    },
+    {
+      "family": "tangent_pert",
+      "score": "entropy",
+      "auroc": 0.5626,
+      "ci_lo": 0.5435,
+      "ci_hi": 0.5802,
+      "sig_above_chance": true
+    },
+    {
+      "family": "tangent_pert",
+      "score": "plateau_kl",
+      "auroc": 0.5743,
+      "ci_lo": 0.5573,
+      "ci_hi": 0.591,
+      "sig_above_chance": true
+    }
+  ],
+  "elapsed_s": 28.7
+}

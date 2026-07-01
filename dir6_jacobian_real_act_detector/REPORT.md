@@ -29,16 +29,56 @@ first two moments, and do those properties generalize across hard synthetic nega
 - **Protocols:** per-family AUROC/AUPRC; leave-one-corruption-family-out (LOFO) for learned and combined
   detectors; cross-depth replication at layers 3/6/9.
 
+## Methods — metric & baseline definitions
+All discrimination uses **AUROC** with label $y=1$ = fake/anomaly, $y=0$ = real; $f$ denotes the frozen
+GPT-2 continuation from the activation to next-token logits, $p=\mathrm{softmax}(f(x))$.
+
+$$\mathrm{AUROC}=\Pr\!\big(s(x^-)<s(x^+)\big)=\frac{1}{n_+n_-}\sum_{i:y_i=1}\sum_{j:y_j=0}\Big(\mathbb{1}[s_i>s_j]+\tfrac12\mathbb{1}[s_i=s_j]\Big)$$
+
+Because a score's anomaly orientation is not always known a priori, single-score AUROCs are reported
+two-sided as $\max(\mathrm{AUROC},\,1-\mathrm{AUROC})$.
+
+**Statistical baselines** (fit on TRAIN reals only; $\mu,\Sigma$ = train mean/covariance):
+
+$$s_\text{norm}(x)=\lVert x\rVert_2,\qquad s_\text{mean\_l2}(x)=\lVert x-\mu\rVert_2$$
+$$s_\text{maha}(x)=(x-\mu)^\top \Sigma_s^{-1}(x-\mu),\quad \Sigma_s=(1-\gamma)\Sigma+\gamma\,\mathrm{diag}(\Sigma)+\epsilon I,\ \gamma=0.05$$
+$$s_\text{pca}(x)=\big\lVert (x-\mu)-V_kV_k^\top(x-\mu)\big\rVert_2\ \ (\text{top-}k\text{ PCs}),\qquad s_\text{knn}(x)=\min_{r\in R}\lVert x-r\rVert_2$$
+
+where $R$ is a 5 000-sample reference set of train reals (1-NN density). `coord_quantile` sums
+per-coordinate empirical tail probabilities under the train marginal.
+
+**Functional scores** (single forward from the activation; Phase 3):
+
+$$\text{entropy}=-\sum_v p_v\log p_v,\qquad \text{MSP}=\max_v p_v,\qquad \text{logit\_max}=\max_v f(x)_v$$
+$$\text{plateau-KL}=\frac1M\sum_{m=1}^{M}\mathrm{KL}\!\big(p\,\Vert\,p_m'\big),\quad p_m'=\mathrm{softmax}\!\big(f(x+\epsilon\lVert x\rVert u_m)\big),\ \epsilon=0.02,\ M=4$$
+
+with $u_m$ i.i.d. unit-random directions.
+
+**Downstream degradation** (Phases 5–6, genuinely in-context): corrupt only the last-token
+resid_post@L6 via a forward hook over the full prompt, then
+
+$$\mathrm{KL}_\downarrow=\mathrm{KL}\!\big(p_\text{clean}\,\Vert\,p_\text{corrupt}\big)\ \text{at the last position.}$$
+
+**Prediction** uses Spearman rank correlation $\rho$ and the **partial** Spearman controlling
+distance-to-original $d=\lVert x-x_0\rVert$ (rank-residualize score and $\mathrm{KL}_\downarrow$ on $d$,
+then correlate). **Causal repair** compares external $\mathrm{KL}_\downarrow$ and clean-argmax NLL at
+matched L2 move budget. **Bootstrap CIs** (Phase 3 capstone) are percentile intervals $[q_{2.5},q_{97.5}]$
+over $B=2000$ resamples of the real and family rows (with replacement), with orientation fixed from the
+full sample.
+
 ## Figures
-All figures regenerated from the cached result CSVs by `experiments/make_plots.py` (pure PIL — the
-environment has no matplotlib).
+Figures 1–8 are rendered from cached result CSVs by `experiments/make_plots.py` (pure PIL); figure 9
+(Phase 2c) by `experiments/plot_fig9.py` and figure 10 (bootstrap CIs) by `experiments/bootstrap_ci.py`
+(matplotlib) — all from the cached `results/*.csv`.
 
 ![Phase 2 baseline AUROC by family @ L6](plots/fig1_baselines_L6.png)
 ![Phase 2b baseline AUROC heatmap @ L6 (interp defeats every statistic)](plots/fig3_baselines_L6_heatmap.png)
 ![interp AUROC across layers ~ chance](plots/fig4_interp_across_layers.png)
+![Phase 2c sink-confound control, document-level split](plots/fig9_position_stratified.png)
 ![Phase 4 learned detectors LOFO vs unsupervised kNN](plots/fig2_detectors_lofo.png)
 ![Phase 3 functional probe AUROC](plots/fig5_functional_probe.png)
 ![Phase 3 capstone combined LOFO detector vs single scores](plots/fig6_combined_score.png)
+![Phase 3 capstone single-score AUROC with bootstrap 95% CIs](plots/fig10_bootstrap_ci.png)
 ![Phase 5 partial Spearman of scores with in-context KL controlling distance](plots/fig7_prediction_partial_rho.png)
 ![Phase 6 causal repair external downstream KL by method](plots/fig8_causal_repair_KL.png)
 
@@ -50,6 +90,13 @@ environment has no matplotlib).
    Mahalanobis cannot see by construction, 0.53). Mahalanobis owns low-variance-direction moves
    (shuffle 1.0, orth_pert 0.88–0.92, norm_pert 0.86). Together they cover Gaussian/shuffle/perturbation
    negatives at AUROC 0.86–1.0 across all three layers.
+   - **Sink-confound control (Phase 2c, `position_stratified.py`).** On a genuine document-level split
+     (even/odd docs, no shared token) that removes pos-0 attention-sink tokens (norm 3041 vs 88
+     elsewhere, 0.46% of rows), the norm/mean_l2 baselines COLLAPSE (macro 0.72→0.51, 0.90→0.67) — their
+     apparent discrimination was largely a sink artifact that inflated the fitted Gaussian variance —
+     while **Mahalanobis (0.847→0.848) and kNN (0.913→0.830) are robust**, confirming covariance/density
+     are real signals and not sink confounds. kNN remains the only baseline beating chance on realistic
+     cov-matched Gaussians after sink removal (0.781).
 3. **Learned discriminative detectors memorize generators and do NOT generalize.** Logistic/MLP trained
    on three families and tested on a held-out fourth give LOFO macro 0.68/0.74 — *below* the
    unsupervised kNN baseline (0.91) — collapsing to ~chance on unseen covariance-matched Gaussian
@@ -62,7 +109,12 @@ environment has no matplotlib).
    Mahalanobis detects it at ~0.68. Real activations occupy a characteristic-distance *shell*;
    averaging falls into the over-typical interior (high-dimensional Gaussian-annulus intuition). An
    independent **functional probe** (entropy / plateau-KL) also catches interpolation at ~0.61,
-   evidencing a genuine functional component of realness.
+   evidencing a genuine functional component of realness. **Bootstrap 95% CIs** (Phase-3 capstone,
+   B=2000, `bootstrap_ci.py`) confirm these borderline signals are not noise: on interp, entropy
+   [0.58,0.62], plateau-KL [0.60,0.63], and two-sided Mahalanobis [0.67,0.70] all exclude chance,
+   whereas kNN [0.48,0.52] straddles 0.50 (interpolation is invisible to *local* density). The
+   Mahalanobis CI does not overlap the functional CIs (it is significantly the strongest interp
+   discriminator), and kNN's cov_gauss CI [0.97,0.98] does not overlap Mahalanobis [0.53,0.57].
 5. **Opposite-direction anomalies break combined detectors.** Because interpolation is anomalous in the
    opposite direction from ordinary corruptions, a combined logistic over {Mahalanobis, kNN, entropy,
    plateau-KL} trained LOFO generalizes to covariance-matched Gaussian (0.999) but FAILS on interpolation
@@ -141,10 +193,13 @@ survive the correction:**
 - The combined-detector LOFO AUROC uses held-out-label orientation (diagnostic, not orientation-fixed).
 - Partial-correlation evidence for prediction uses approximate rank-residual partials; the consistent
   positive functional partials are robust, the exact magnitudes are not.
-- Activations pool all token positions, including pos-0 "attention-sink" tokens (norm ≈ 3000), an
-  un-stratified confound for norm/Mahalanobis. Token-position stratification is future work.
+- The main pipeline pools all token positions, including pos-0 "attention-sink" tokens (norm ≈ 3000).
+  This confound is now controlled in Phase 2c (document-level split, sink-stratified): it inflates the
+  norm/mean_l2 baselines but leaves Mahalanobis/kNN unchanged. A sink-stratified re-run of the
+  cross-depth Phase-2b and the functional phases is still future work.
 - GPT-2 small only; single model. No cross-model transfer.
-- N (≈2k–10k per family) gives stable AUROCs but bootstrap CIs were not computed.
+- Bootstrap 95% CIs are reported for the Phase-3 capstone single scores (Phase-3 CI table); the
+  cross-depth, LOFO-detector, prediction, and causal-repair numbers do not yet carry CIs.
 
 ## Implications for Direction 1 (steering)
 Two-sided global Mahalanobis is a good *diagnostic* for the "too-central"/over-shrunk regime that
@@ -157,9 +212,11 @@ data tangent), and any steering correction must be evaluated against in-context 
 *matched achieved steering effect*, with reward-hacking checked via metrics outside the objective.
 
 ## Reproduce
-`experiments/mvp_benchmark.py` (Phase 2 L6) · `train_detectors.py` (LOFO detectors) ·
+`experiments/mvp_benchmark.py` (Phase 2 L6) · `position_stratified.py` (Phase 2c sink-confound control,
+doc-level split) · `train_detectors.py` (LOFO detectors) ·
 `baselines_layers.py` (cross-depth + hard negatives) · `functional_features.py` (functional probe) ·
-`combined_score.py` (combined + interp correction) · `context_validation_v2.py` (Phase-5 CORRECTED
+`combined_score.py` (combined + interp correction) · `bootstrap_ci.py` (Phase-3 capstone bootstrap CIs) ·
+`context_validation_v2.py` (Phase-5 CORRECTED
 in-context prediction) · `causal_repair_v2.py` (Phase-6 CORRECTED in-context causal repair, negative
 result). The pre-correction single-position versions (`context_validation.py`, `causal_repair.py`) are
 retained for provenance. Results in `results/*.csv`, `results/*.json` (the `_v2` files are canonical

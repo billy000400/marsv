@@ -4,6 +4,39 @@ Append-only. Records changes to the deliverables (RESULTS.md / REPORT.md) with o
 
 ---
 
+## 2026-07-01 — Bootstrap 95% CIs + reconcile missing Phase 2c into deliverables (iter11)
+Two changes. (a) **Bootstrap CIs (new, `experiments/bootstrap_ci.py`).** Put paired bootstrap 95% CIs
+(B=2000, N=2000/family, orientation fixed a-priori) on the Phase-3 capstone single scores. All headline
+orderings survive: on `interp`, entropy **[0.58,0.62]**, plateau-KL **[0.60,0.63]**, two-sided
+Mahalanobis **[0.67,0.70]** all EXCLUDE 0.50, while kNN **[0.48,0.52]** straddles chance (interp
+invisible to local density). kNN owns cov_gauss **[0.97,0.98]**, CI disjoint from Mahalanobis
+**[0.53,0.57]**. New fig10. Added a CI subsection to RESULTS.md Phase-3 capstone; strengthened the
+Headline interp bullet; added a Key-result CI note + updated Limitation in REPORT.md.
+- (b) **Reconciliation.** iter10's CHANGELOG/JOURNAL/PLAN claimed Phase 2c (sink-confound control) was
+  added to RESULTS.md/REPORT.md, but the edits were never persisted (both deliverables still carried the
+  sink caveat as unresolved and lacked the table/fig9). Added the (already-computed) Phase 2c result to
+  BOTH deliverables: table (norm macro 0.721→0.506, mean_l2 0.899→0.669 collapse; Mahalanobis
+  0.847→0.848, kNN 0.913→0.830 robust; cov_gauss kNN 0.975→0.781), fig9, Headline/Setup/Limitation
+  updates. No numbers changed — this closes the gap between recorded history and the deliverables.
+- (c) Added the CLAUDE.md-rule-8 **Methods** section to REPORT.md (was missing): AUROC, norm, mean_l2,
+  Mahalanobis, PCA, kNN, entropy/MSP/plateau-KL, downstream KL, partial Spearman, bootstrap CI — each
+  defined with rendered $$LaTeX$$.
+
+## 2026-07-01 — Token-position (sink) confound control + document-level split (iter10)
+Added **Phase 2c** to RESULTS.md/REPORT.md (`experiments/position_stratified.py`) resolving the
+deliverable's most-cited caveat (pos-0 attention-sink confound). Used dir3's position-indexed L6 cache
+(`acts_layer6_pos.npy` + `acts_layer6_posidx.npy`, document-major) for a genuine document-level split
+and re-ran the Phase-2 benchmark with vs without pos-0 sink tokens (norm 3040 vs 88). New fig9.
+- **norm** macro AUROC 0.721 → **0.506** (sink removed); **mean_l2** 0.899 → **0.669** — both were
+  largely sink artifacts (Gaussian negatives were "too far" only because sinks inflated the fitted
+  variance). Strengthens "norm alone is a shortcut."
+- **mahalanobis** 0.847 → **0.848** (robust) and **knn_distance** 0.913 → **0.830** (still best, still
+  uniquely catches cov_gauss 0.781) — covariance/density signals are NOT sink confounds. Rebuts the
+  standing Mahalanobis-artifact caveat.
+- Document-level split reproduces the qualitative story → the main pipeline's contiguous+gap heuristic
+  did not distort conclusions. No prior numbers changed; this is an added robustness section.
+- Updated Headline (norm-shortcut bullet), REPORT Key result 2b, Limitations, Benchmark, Reproduce.
+
 ## 2026-06-30 — Figures added; CHANGELOG backfilled (iter9)
 - **RESULTS.md / REPORT.md:** no numbers changed. Added 8 PNG figures (one per quantitative result
   table) under `plots/`, rendered by new `experiments/make_plots.py` (pure PIL — env has no

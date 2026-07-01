@@ -1,0 +1,42 @@
+{
+  "layer": 6,
+  "d_model": 768,
+  "n_rows": 80000,
+  "n_docs": 366,
+  "split": "document-level (even docs train / odd docs eval); no token shared across split",
+  "sink_token_pos0_count": 366,
+  "sink_pos0_norm_mean": 3040.8,
+  "nonsink_norm_mean": 87.8,
+  "n_train": 40000,
+  "n_eval_per_class": 12000,
+  "seed": 0,
+  "macro_auroc": {
+    "WITHSINK": {
+      "norm": 0.7205,
+      "mean_l2": 0.8994,
+      "mahalanobis": 0.8465,
+      "pca_recon": 0.8323,
+      "coord_quantile": 0.7477,
+      "knn_distance": 0.9129
+    },
+    "NONSINK": {
+      "norm": 0.5061,
+      "mean_l2": 0.669,
+      "mahalanobis": 0.8478,
+      "pca_recon": 0.7913,
+      "coord_quantile": 0.6718,
+      "knn_distance": 0.83
+    }
+  },
+  "norm_info": {
+    "WITHSINK": {
+      "real_eval_norm_mean": 102.54,
+      "cov_gauss_norm_mean": 194.83
+    },
+    "NONSINK": {
+      "real_eval_norm_mean": 87.99,
+      "cov_gauss_norm_mean": 87.92
+    }
+  },
+  "elapsed_s": 106.6
+}

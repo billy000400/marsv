@@ -508,13 +508,48 @@ Correction/steering metrics:
 - [ ] S9 — Validate on steering while preserving achieved steering effect. (NOT done — blocked by S8's
       negative; a manifold/denoising-prior objective is needed first. Documented as future work.)
 - [x] S10 — Finalize RESULTS.md, REPORT.md, JOURNAL.md, and STOP. (iter7; iter8 re-finalized after
-      review; iter9 added the 8 result figures under plots/ + backfilled CHANGELOG.md)
+      review; iter9 added the 8 result figures under plots/ + backfilled CHANGELOG.md; iter10 added
+      Phase 2c sink control; iter11 added bootstrap 95% CIs (fig10) + reconciled the un-persisted
+      Phase 2c into both deliverables + added the rule-8 Methods LaTeX section to REPORT.md)
 
 ## On-track check (required every iteration)
 End each JOURNAL.md entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
-## Current status (after iter9 — FIGURES added, CHANGELOG backfilled, re-FINALIZED)
+## Current status (after iter11 — BOOTSTRAP CIs added + Phase-2c/Methods reconciled into deliverables)
+Iter11 did three things. (1) Closed the PLAN's open "small-N → bootstrap CIs" risk:
+`experiments/bootstrap_ci.py` puts paired bootstrap 95% CIs (B=2000, orientation fixed) on the Phase-3
+capstone single scores. Every headline ordering survives: interp entropy [0.58,0.62], plateau-KL
+[0.60,0.63], two-sided Mahalanobis [0.67,0.70] all exclude chance; kNN interp [0.48,0.52] straddles 0.50
+(interp invisible to local density); kNN cov_gauss [0.97,0.98] disjoint from Mahalanobis [0.53,0.57].
+New fig10. (2) Fixed an iter10 curation bug — iter10 claimed Phase 2c (sink control) was in
+RESULTS.md/REPORT.md but never persisted the edits; added the already-computed Phase 2c result (fig9 +
+table: norm 0.72→0.51, kNN 0.913→0.830 robust) to BOTH deliverables. (3) Added the missing rule-8
+Methods LaTeX section to REPORT.md. Verdict UNCHANGED: (1) discrimination YES multi-axis (now
+CI-backed); (2) generalization PARTIAL; (3) prediction PARTIAL/functional (in-context); (4) causality
+NO/reward-hacks; (5) steering untested. H1 supported. Project DONE, now internally consistent +
+CI-annotated + rule-8 compliant. Remaining future work: manifold/denoising-prior causal objective,
+in-context DISCRIMINATION benchmark, cross-model transfer, CIs on cross-depth/LOFO/prediction/repair
+numbers, sink-stratified re-run of Phase-2b/functional.
+
+## (prior) Current status (after iter10 — SINK-CONFOUND CONTROL added; key caveat resolved)
+Iter10 resolved the deliverable's most-cited caveat (pos-0 attention-sink confound on norm/Mahalanobis)
+— previously listed only as future work. Env was reset again (transformers + matplotlib absent), so I
+chose a model-free strengthening. Found & used dir3's unused position-indexed L6 cache
+(`acts_layer6_pos.npy` + `acts_layer6_posidx.npy`, document-major) for `experiments/position_stratified.py`:
+a GENUINE document-level split (even/odd docs) re-running Phase-2 with vs without pos-0 sink tokens
+(norm 3040 vs 88). RESULT (Phase 2c, new fig9): norm macro 0.72→0.51 and mean_l2 0.90→0.67 collapse to
+~chance on Gaussian families — the norm shortcut was LARGELY a sink artifact (strengthens the claim);
+Mahalanobis (0.847→0.848) and kNN (0.913→0.830, still uniquely catches cov_gauss 0.78) are ROBUST —
+real covariance/density signals, not sink confounds. Doc-level split reproduces the story → the
+contiguous+gap heuristic didn't distort conclusions. No prior numbers changed. Verdict UNCHANGED:
+(1) discrimination YES multi-axis; (2) generalization PARTIAL; (3) prediction PARTIAL/functional
+(in-context); (4) causality NO/reward-hacks; (5) steering untested. H1 supported. Project DONE.
+Remaining future work (all model-dependent, blocked this resume): manifold/denoising-prior causal
+objective, in-context DISCRIMINATION benchmark, cross-model transfer, bootstrap CIs, sink-stratified
+re-run of Phase-2b/functional phases.
+
+## (prior) Current status (after iter9 — FIGURES added, CHANGELOG backfilled, re-FINALIZED)
 The science was complete after iter8 but two operator-rule gaps remained: `plots/` was empty (no
 figures) and `CHANGELOG.md` was a stub. Iter9 closed both. Wrote `experiments/make_plots.py` (pure
 PIL — env has no matplotlib) rendering 8 PNGs, one per quantitative result table; embedded them in
