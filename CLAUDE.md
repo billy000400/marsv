@@ -123,7 +123,8 @@ Results show current-best numbers only, with figures referenced from plots/.
 **The rule, verified against GitHub's own renderer (`POST https://api.github.com/markdown`):**
 keep every display equation — whether `$$…$$` or a ` ```math ` fence — as its own top-level block at
 **column 0, with a blank line before and after**. Do NOT put display math inside a `-`/`*`/`1.` list
-item. Inline `$…$` in a sentence is always fine and needs no change.
+item. Inline `$…$` in a sentence is fine for its *placement* — but its *contents* have a separate
+trap; see **8b**.
 
 **Why (the exact failure modes, both confirmed by reproduction):**
 1. A `$$…$$` block **glued** to the end of the preceding prose line (no blank line before `$$`) is
@@ -158,6 +159,32 @@ python3 -c "import json;print(json.dumps({'mode':'gfm','text':open('REPORT.md').
   | curl -s -X POST -H "Accept: application/vnd.github+json" -d @- https://api.github.com/markdown \
   | grep -c 'js-display-math'   # must equal your display-equation count; grep -c '<pre lang="math"' must be 0
 ~~~
+
+This check confirms *placement* (delimiters recognized) but does **not** compile the LaTeX — so it will
+pass even when the equation itself is broken by **8b**. Do both checks.
+
+### 8b. Inside inline `$…$`, GitHub strips the backslash before ASCII punctuation — so `\_ \{ \} \| \, \; \!` etc. break.
+
+Verified against `POST api.github.com/markdown`: GitHub applies Markdown backslash-escaping to the
+*inside* of an inline `$…$`. Any backslash immediately followed by ASCII punctuation
+(`_ { } | , ; ! : % # & ~ ^` …) has its backslash removed **before** the LaTeX reaches KaTeX. Fenced
+` ```math ` blocks are literal and do NOT suffer this — everything is preserved.
+
+Consequences (each reproduced): inline `$\texttt{plateau\_auc\_low}$` → KaTeX sees `\texttt{plateau_auc_low}`
+→ red error `'_' allowed only in math mode`; inline `$\min\big\{x\big\}$` → `\min\big{x\big}` → broken
+`\big{`; inline `$\|h\|$` → `|h|` (single bars, wrong norm); inline `$a\,b$` → `a,b` (stray comma, lost
+thin-space). None of these show up in the js-display-math check above — they fail silently or as a KaTeX
+box in the browser.
+
+**Rules for inline math:**
+- If the expression needs any `\`-escaped punctuation, **put it in a ` ```math ` fence** (at column 0),
+  not inline. Fences preserve everything.
+- If it must stay inline (table cell, mid-sentence), use the backslash-**letter** macro that survives
+  Markdown: `\{`→`\lbrace`, `\}`→`\rbrace`, `\|`→`\Vert` (and `\lVert`/`\rVert`), `\,`→`\thinspace`,
+  `\;`→`\thickspace`, `\!`→`\!`… has no letter form, so drop it or fence. Bare subscripts in math mode
+  (`x_c`, `\lambda_i`) are fine — the trap is only a *backslash* before punctuation.
+- **Grep before committing** for the hazard in inline math (outside fences):
+  `grep -nP '\$[^$\n]*\\[,;!:{}|_%#&][^$\n]*\$' REPORT.md` — every hit is a latent break.
 
 ---
 
