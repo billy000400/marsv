@@ -5,6 +5,12 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-01 — Fix inline-math escape stripping (no science changed)
+- **Rendering fix only — no numbers moved.** GitHub strips the backslash before punctuation inside
+  inline `$…$`, so the Baselines set-notation `\{…\}` (PCA `d_q` bounds and the `{5,10,20,50}` /
+  `{0.95,0.99}` sets) rendered without braces. Replaced `\{`/`\}` with `\lbrace`/`\rbrace`
+  (backslash-letter, survives). See new `CLAUDE.md` rule **8b**.
+
 ## 2026-07-01 — Display-math STILL broke; real fix (no science changed)
 - **Rendering fix only — no numbers moved.** The earlier fix (below) was wrong: an indented ```math
   fence inside a bullet still renders as a gray code box (not math) when the bullet has any inline
