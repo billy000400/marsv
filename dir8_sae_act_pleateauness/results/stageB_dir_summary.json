@@ -1,0 +1,196 @@
+{
+  "stage": "B_direction",
+  "layer": "resid_pre@6",
+  "N": 24,
+  "n_eval": 12,
+  "n_dirs": 2,
+  "sparse_k": 8,
+  "r_grid": [
+    0.0,
+    0.0025,
+    0.005,
+    0.01,
+    0.02,
+    0.04,
+    0.08
+  ],
+  "sub_bdec": true,
+  "iso_deltas": [
+    15.0,
+    30.0,
+    60.0,
+    120.0
+  ],
+  "families": [
+    "iso",
+    "sae_single",
+    "sae_sparse"
+  ],
+  "per_family": {
+    "iso": {
+      "tau_heldout": 0.0001697584375506267,
+      "iso_reference_plateau": {
+        "d=15": 0.22254,
+        "d=30": 0.18546,
+        "d=60": 0.14056,
+        "d=120": 0.09196
+      },
+      "plateau_median": {
+        "real": 0.22377,
+        "recon": 0.19901,
+        "naive": 0.06057,
+        "sparse_match": 0.08393,
+        "iso15": 0.22254,
+        "iso30": 0.18546,
+        "iso60": 0.14056,
+        "iso120": 0.09196
+      },
+      "distance_matched_residual": {
+        "recon": {
+          "median_dist": 26.11,
+          "plateau_median": 0.19901,
+          "ref_at_matched_dist": 0.1929,
+          "residual_median": 0.01034,
+          "residual_ci95": [
+            -0.0399,
+            0.03019
+          ],
+          "verdict": "indistinguishable from random displacement"
+        },
+        "naive": {
+          "median_dist": 63.42,
+          "plateau_median": 0.06057,
+          "ref_at_matched_dist": 0.13669,
+          "residual_median": -0.07359,
+          "residual_ci95": [
+            -0.08532,
+            -0.06828
+          ],
+          "verdict": "BELOW random-displacement"
+        },
+        "sparse_match": {
+          "median_dist": 64.64,
+          "plateau_median": 0.08393,
+          "ref_at_matched_dist": 0.13536,
+          "residual_median": -0.05404,
+          "residual_ci95": [
+            -0.08521,
+            -0.01543
+          ],
+          "verdict": "BELOW random-displacement"
+        }
+      },
+      "spearman_plateau_vs_dist_pooled_eval": -0.593
+    },
+    "sae_single": {
+      "tau_heldout": 0.00016081966168712825,
+      "iso_reference_plateau": {
+        "d=15": 0.2055,
+        "d=30": 0.19519,
+        "d=60": 0.1328,
+        "d=120": 0.08562
+      },
+      "plateau_median": {
+        "real": 0.21121,
+        "recon": 0.19089,
+        "naive": 0.06178,
+        "sparse_match": 0.08772,
+        "iso15": 0.2055,
+        "iso30": 0.19519,
+        "iso60": 0.1328,
+        "iso120": 0.08562
+      },
+      "distance_matched_residual": {
+        "recon": {
+          "median_dist": 26.11,
+          "plateau_median": 0.19089,
+          "ref_at_matched_dist": 0.19726,
+          "residual_median": 0.00427,
+          "residual_ci95": [
+            -0.06303,
+            0.03653
+          ],
+          "verdict": "indistinguishable from random displacement"
+        },
+        "naive": {
+          "median_dist": 63.42,
+          "plateau_median": 0.06178,
+          "ref_at_matched_dist": 0.12905,
+          "residual_median": -0.06813,
+          "residual_ci95": [
+            -0.08316,
+            -0.03352
+          ],
+          "verdict": "BELOW random-displacement"
+        },
+        "sparse_match": {
+          "median_dist": 64.64,
+          "plateau_median": 0.08772,
+          "ref_at_matched_dist": 0.12776,
+          "residual_median": -0.04747,
+          "residual_ci95": [
+            -0.06755,
+            -0.02983
+          ],
+          "verdict": "BELOW random-displacement"
+        }
+      },
+      "spearman_plateau_vs_dist_pooled_eval": -0.581
+    },
+    "sae_sparse": {
+      "tau_heldout": 0.0003340041439514607,
+      "iso_reference_plateau": {
+        "d=15": 0.21293,
+        "d=30": 0.1928,
+        "d=60": 0.1411,
+        "d=120": 0.09289
+      },
+      "plateau_median": {
+        "real": 0.21836,
+        "recon": 0.18438,
+        "naive": 0.05573,
+        "sparse_match": 0.06707,
+        "iso15": 0.21293,
+        "iso30": 0.1928,
+        "iso60": 0.1411,
+        "iso120": 0.09289
+      },
+      "distance_matched_residual": {
+        "recon": {
+          "median_dist": 26.11,
+          "plateau_median": 0.18438,
+          "ref_at_matched_dist": 0.19684,
+          "residual_median": -0.01194,
+          "residual_ci95": [
+            -0.06906,
+            0.04902
+          ],
+          "verdict": "indistinguishable from random displacement"
+        },
+        "naive": {
+          "median_dist": 63.42,
+          "plateau_median": 0.05573,
+          "ref_at_matched_dist": 0.13727,
+          "residual_median": -0.07676,
+          "residual_ci95": [
+            -0.0999,
+            -0.04134
+          ],
+          "verdict": "BELOW random-displacement"
+        },
+        "sparse_match": {
+          "median_dist": 64.64,
+          "plateau_median": 0.06707,
+          "ref_at_matched_dist": 0.13595,
+          "residual_median": -0.07339,
+          "residual_ci95": [
+            -0.09263,
+            -0.03707
+          ],
+          "verdict": "BELOW random-displacement"
+        }
+      },
+      "spearman_plateau_vs_dist_pooled_eval": -0.521
+    }
+  }
+}
