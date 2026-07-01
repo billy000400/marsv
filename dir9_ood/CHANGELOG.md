@@ -5,6 +5,12 @@ live in those files; this file records what moved and why.
 
 ---
 
+## 2026-07-01 — Fix inline-math escape stripping (no science changed)
+- **Rendering fix only — no numbers moved.** The **L2 norm** baseline used inline `$\; s_{\text{L2}}(x)
+  = \|h\|_2.$`; GitHub strips the backslash before punctuation inside inline `$…$`, so `\|`→`|` (single
+  bars, wrong norm) and `\;`→`;` (stray semicolon). Rewrote as `$s_{\text{L2}}(x) = \Vert h\Vert_2.$`
+  (`\Vert` is backslash-letter and survives). See new `CLAUDE.md` rule **8b**.
+
 ## 2026-07-01 — Display-math STILL broke; found real cause and fixed for good (no science changed)
 - **Rendering fix only — no numbers moved.** The previous fix (below) converted the list-nested
   `$$…$$` blocks to indented ```math fences, but they *still* rendered as raw gray code boxes on
