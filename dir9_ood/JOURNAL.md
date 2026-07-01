@@ -172,3 +172,29 @@ rabbit-holing per BUDGET). The Medium "fresh log" item is documented rather than
 **Next step:** Rename `CODEX_REVIEW_20260622T230658Z.md` → `*.addressed.md` and write STOP — every
 review point handled, success criterion still met, conclusion unchanged and now hygienic.
 On track? yes — S1+S2+S3 100% done; Codex 2026-06-22 review fully addressed (canonical split verified at value level, conclusion unchanged, writeups cleaned, shared env untouched); marking feedback addressed + STOP.
+
+---
+
+## Iteration 6 (2026-06-30) — final consolidation pass + STOP
+**Did:** Reset into a nominally-finished project. Checked for open feedback — none (all five review/
+human files are `*.addressed.md`); no STOP on disk. The science is complete and was verified across
+iters 2–5 (clean negative result, canonical split). The outstanding work was the PLAN.md "Consolidation
+pass" — pure CLAUDE.md deliverable hygiene, which had real gaps: (1) **CHANGELOG.md was essentially
+empty** (just a header — a standing rule-7 violation despite five iterations of result changes); (2)
+RESULTS.md and REPORT.md still carried inline **version-history blockquotes** ("iter-5 supersedes iter-2
+supersedes iter-1", "rewritten after operator review") — a rule-6 violation; (3) REPORT.md's metric/
+baseline definitions used backtick inline code, **not the required `$$LaTeX$$` equations**, and it
+lacked the `Summary → Methods → Results → Conclusion` structure. Fixed all: populated CHANGELOG.md with
+dated iter1→iter6 entries (old→new numbers); rewrote REPORT.md to the required structure with a Methods
+section giving Data/Model/Layer and rendered `$$LaTeX$$` for every metric (jacFrob/perturbation/
+selfNLL-grad), every baseline (MSP/L2/Mahalanobis/cup-RMD/cup-QUE), and the AUROC estimator; rewrote
+RESULTS.md to current-best with the version-history removed. Added a headline figure
+`results/plots/summary_best_per_set.png` (best plateau vs best baseline per OOD set), generated from
+`auroc_table.csv` (CPU-only matplotlib, no GPU), referenced from both deliverables.
+**Learned:** Verified the best-per-set numbers directly from `auroc_table.csv` before writing: random
+plateau-jacFrob@input 0.734 < MSP 0.932; shuffled plateau-perturbation@resid3 0.534 < MSP 0.872; code
+plateau-jacFrob@input 0.649 < cup-RMD@resid6 0.918 — exactly matching the tables. No recomputation of
+any AUROC was needed (canonical-split values are current-best); this iteration changed presentation
+only. No GPU/RAM used beyond a trivial matplotlib call.
+**Next step:** None — STOP written; project complete and CLAUDE.md-compliant.
+On track? yes — S1+S2+S3 100% done; deliverables consolidated to current-best (clean RESULTS/REPORT, LaTeX Methods, full CHANGELOG history), headline figure added, all feedback addressed, STOP created.

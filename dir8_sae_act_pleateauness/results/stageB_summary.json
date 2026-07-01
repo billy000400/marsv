@@ -1,0 +1,131 @@
+{
+  "stage": "B",
+  "layer": "resid_pre@6",
+  "N": 200,
+  "n_eval": 100,
+  "n_dirs": 6,
+  "r_grid": [
+    0.0,
+    0.0025,
+    0.005,
+    0.01,
+    0.02,
+    0.04,
+    0.08
+  ],
+  "tau_heldout": 0.00013275997480377555,
+  "sub_bdec": true,
+  "iso_deltas": [
+    15.0,
+    30.0,
+    60.0,
+    120.0
+  ],
+  "iso_reference_plateau": {
+    "d=15": 0.1838,
+    "d=30": 0.17312,
+    "d=60": 0.12839,
+    "d=120": 0.07849
+  },
+  "groups_eval": {
+    "real": {
+      "plateau_median": 0.19861,
+      "dist_median": 0.0,
+      "l0_median": 32.5
+    },
+    "recon": {
+      "plateau_median": 0.15715,
+      "dist_median": 25.07,
+      "l0_median": 32.5
+    },
+    "naive": {
+      "plateau_median": 0.06547,
+      "dist_median": 64.05,
+      "l0_median": 34.5
+    },
+    "sparse_match": {
+      "plateau_median": 0.06792,
+      "dist_median": 64.14,
+      "l0_median": 32.5
+    },
+    "iso15": {
+      "plateau_median": 0.1838,
+      "dist_median": 15.0,
+      "l0_median": 0.0
+    },
+    "iso30": {
+      "plateau_median": 0.17312,
+      "dist_median": 30.0,
+      "l0_median": 0.0
+    },
+    "iso60": {
+      "plateau_median": 0.12839,
+      "dist_median": 60.0,
+      "l0_median": 0.0
+    },
+    "iso120": {
+      "plateau_median": 0.07849,
+      "dist_median": 120.0,
+      "l0_median": 0.0
+    }
+  },
+  "raw_gap_vs_real_eval": {
+    "recon": {
+      "median_gap": 0.01971,
+      "ci95": [
+        0.01213,
+        0.03069
+      ]
+    },
+    "naive": {
+      "median_gap": 0.13197,
+      "ci95": [
+        0.10763,
+        0.15173
+      ]
+    },
+    "sparse_match": {
+      "median_gap": 0.1233,
+      "ci95": [
+        0.11226,
+        0.14935
+      ]
+    }
+  },
+  "distance_matched_residual": {
+    "recon": {
+      "median_dist": 25.07,
+      "plateau_median": 0.15715,
+      "ref_at_matched_dist": 0.17589,
+      "residual_median": -0.01589,
+      "residual_ci95": [
+        -0.02112,
+        -0.00325
+      ],
+      "verdict": "BELOW"
+    },
+    "naive": {
+      "median_dist": 64.05,
+      "plateau_median": 0.06547,
+      "ref_at_matched_dist": 0.12369,
+      "residual_median": -0.05806,
+      "residual_ci95": [
+        -0.06477,
+        -0.05292
+      ],
+      "verdict": "BELOW"
+    },
+    "sparse_match": {
+      "median_dist": 64.14,
+      "plateau_median": 0.06792,
+      "ref_at_matched_dist": 0.12358,
+      "residual_median": -0.06272,
+      "residual_ci95": [
+        -0.06722,
+        -0.04924
+      ],
+      "verdict": "BELOW"
+    }
+  },
+  "spearman_plateau_vs_dist_pooled_eval": -0.639
+}

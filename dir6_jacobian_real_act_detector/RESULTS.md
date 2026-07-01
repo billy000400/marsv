@@ -23,6 +23,8 @@
 Negative-family norms: iso_gauss 224±6, cov_gauss 195±109, shuffle_coord & norm_pert 101±197
 (=real_eval, norm preserved exactly). cov_gauss norm-std 109 ≠ real 197 → norm gets a 0.89 handle.
 
+![Phase 2 baseline AUROC by family](plots/fig1_baselines_L6.png)
+
 ## Findings (so far)
 - **kNN local density is the strongest single baseline (macro 0.913)** and the only one that
   catches cov-matched Gaussians (0.976) — i.e. real activations carry local-density structure
@@ -49,6 +51,8 @@ the exact perturbed activation). Train on 3 families, test on the held-out 4th.
 | **LOFO macro** | **0.676** | **0.735** |
 | held-IN (all 4) | 0.678 | 0.848 |
 
+![Phase 4 LOFO detectors vs kNN](plots/fig2_detectors_lofo.png)
+
 - **Gate 4 FAILS for learned discriminative detectors**: LOFO macro (logreg 0.68, mlp 0.74) is
   well BELOW the unsupervised kNN-density baseline (0.913). They collapse to ~chance on unseen
   cov_gauss (0.48–0.51) and iso_gauss (logreg 0.49) → generator-shortcut memorization, not realness.
@@ -71,6 +75,9 @@ the exact perturbed activation). Train on 3 families, test on the held-out 4th.
 | **interp**    | **0.54 / 0.54** | **0.49 / 0.50** | **0.44 / 0.50** |
 | tangent_pert  | 0.69 / 0.69 (knn) | 0.66 / 0.67 | 0.75 / 0.75 (knn) |
 | orth_pert     | 0.70 / 0.91 (maha) | 0.68 / 0.88 (maha) | 0.77 / 0.92 (maha) |
+
+![Phase 2b baseline AUROC heatmap @ L6](plots/fig3_baselines_L6_heatmap.png)
+![interp AUROC across layers](plots/fig4_interp_across_layers.png)
 
 - **`interp` (convex combo of two reals, renormed) DEFEATS EVERY statistical baseline at every
   layer (AUROC ≈ 0.44–0.54 ≈ chance), kNN included.** Averages of real activations are
@@ -97,6 +104,8 @@ under eps=0.02·‖x‖ perturbation, 4 draws), logit_max. AUROC real-vs-family 
 | **interp**   | **0.603** | 0.581 | **0.613** | 0.515 |
 | tangent_pert | 0.560 | 0.557 | 0.567 | 0.526 |
 
+![Phase 3 functional probe AUROC](plots/fig5_functional_probe.png)
+
 - **On `interp` — where EVERY statistical baseline was ≈0.50 (chance) — functional features reach
   ~0.61** (entropy, plateau_kl). Weak, but the ONLY signal that beats chance on interpolations.
   This is direct evidence (H1/H3) of a FUNCTIONAL component of realness not captured by any
@@ -118,6 +127,8 @@ family-out. AUROC (single scores ORIENTED two-sided; COMBINED is LOFO):
 | norm_pert    | 0.86 | 0.68 | 0.56 | 0.57 | 0.612 |
 | **interp**   | **0.68** | 0.50 | 0.60 | 0.62 | 0.538 |
 | tangent_pert | 0.58 | 0.67 | 0.56 | 0.58 | 0.694 |
+
+![Phase 3 capstone combined score](plots/fig6_combined_score.png)
 
 **IMPORTANT CORRECTION to the Phase-2b `interp` claim:** the earlier "interp ≈ chance for all
 baselines" used a fixed ONE-SIDED orientation (anomaly = far). `interp` is in fact anomalous in the
@@ -155,6 +166,8 @@ PARTIAL Spearman controlling dist_to_orig.
 | interp | maha_twosided | −0.016 | +0.238 |
 | interp | knn_distance  | −0.014 | −0.243 |
 
+![Phase 5 prediction partial rho](plots/fig7_prediction_partial_rho.png)
+
 - **Conclusion survives the correction (and is slightly strengthened).** FUNCTIONAL scores (plateau_kl,
   entropy) predict in-context downstream KL BEYOND distance-to-original — positive partial ρ in BOTH
   sweeps (+0.51/+0.35 noise, +0.25/+0.19 interp). Raw plateau_kl Spearman actually *rises* in-context
@@ -186,6 +199,8 @@ objective-free metrics KL(clean‖x) and NLL of clean argmax at PER-DESCENT matc
 | random_move (maha-matched)| 1.99 | 3.80 | 78.3 | 103| 113 |
 | random_move (func-matched)| 2.20 | 4.09 | 85.4 | 109| 119 |
 | **shrink_clean (oracle, matched)** | **0.009** | **1.32** | 78.3 | 11 | 70 |
+
+![Phase 6 causal repair external KL](plots/fig8_causal_repair_KL.png)
 
 - **Claim 4 FAILS (in-context, with properly move-matched controls).** Optimizing EITHER realness score
   makes downstream behavior WORSE than the corrupted start AND worse than a random move of the SAME size:

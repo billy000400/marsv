@@ -35,3 +35,31 @@ I also corrected the wording for findings #3 (combined-LOFO uses held-out-label 
 Updated `RESULTS.md` (new in-context tables + correction notes), `REPORT.md` (Correction section + verdict edits addressing all 5 findings), `PLAN.md` (iter8 status, S7/S8 stage notes), appended the iter8 `JOURNAL.md` entry, and **re-created `STOP`**. The pre-correction scripts are retained for provenance; the `_v2` outputs are canonical.
 
 The core scientific verdict was confirmed, not overturned, under the corrected method.
+Done. This iteration closed the two remaining operator-rule gaps without changing any science.
+
+## What I did (iter9 — deliverable-hygiene finalize)
+
+The research was complete after iter8 (full 5-claim ladder addressed), but two CLAUDE.md rules were still violated on resume:
+- **`plots/` was empty** — rule requires a figure for every reported result.
+- **`CHANGELOG.md` was a 4-line stub** — rule 7 requires all history there.
+
+**Figures.** The environment has no matplotlib (only numpy + PIL 11.3), so I wrote `experiments/make_plots.py` to render figures with pure PIL (a grouped-bar helper supporting negative values + dashed reference lines, and a diverging heatmap). It produced **8 PNGs** from the cached result CSVs — CPU-only, no GPU/model needed:
+
+| fig | content |
+|---|---|
+| 1 | Phase-2 baseline AUROC by family @ L6 |
+| 2 | Phase-4 LOFO detectors vs unsupervised kNN |
+| 3 | Phase-2b L6 heatmap (7 families × 6 baselines) |
+| 4 | interp one-sided AUROC across layers (~chance) |
+| 5 | Phase-3 functional probe |
+| 6 | Phase-3 combined-score capstone |
+| 7 | Phase-5 partial-ρ (in-context KL \| distance) |
+| 8 | Phase-6 causal-repair external KL |
+
+I verified figures visually (read 4 back as images), fixed em-dash missing-glyph boxes and a y-label overlap, confirmed every plotted number matches the curated RESULTS.md tables, and embedded all 8 in RESULTS.md beside their tables plus a Figures section in REPORT.md (8 references each).
+
+**CHANGELOG.md** backfilled with the iter1–9 deliverable history (old→new numbers).
+
+**State persisted:** PLAN.md status + S10 checkbox updated, JOURNAL.md entry appended with the `On track?` line, `STOP` re-created.
+
+No result numbers changed; the verdict stands: (1) discrimination YES via multi-axis score, (2) generalization PARTIAL, (3) prediction PARTIAL/functional, (4) causality NO/reward-hacks, (5) steering untested. H1 supported. The deliverable is now figure-complete and rule-compliant.

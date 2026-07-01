@@ -1,0 +1,63 @@
+{
+  "stage": "D",
+  "layer": "resid_pre@6",
+  "N": 200,
+  "n_dirs": 6,
+  "n_train_rows": 700,
+  "n_test_rows": 700,
+  "candidate_conditions": [
+    "recon",
+    "naive",
+    "sparse_match",
+    "iso15",
+    "iso30",
+    "iso60",
+    "iso120"
+  ],
+  "tau_heldout": 0.00013275997480377555,
+  "target": "output_kl = KL(p_real || p_candidate), in-context last-token; lower=valid",
+  "split": "by source prompt: train sources <N//2, test sources >=N//2",
+  "models_heldout": {
+    "baseline(dist,norm)": {
+      "test_R2": 0.7953,
+      "test_spearman_pred_vs_true": 0.8735
+    },
+    "plateau_only": {
+      "test_R2": 0.4975,
+      "test_spearman_pred_vs_true": 0.8511
+    },
+    "combined(dist,norm,plateau)": {
+      "test_R2": 0.8686,
+      "test_spearman_pred_vs_true": 0.9151
+    },
+    "baseline+locsens(dist,norm,locsens)": {
+      "test_R2": 0.873,
+      "test_spearman_pred_vs_true": 0.9237
+    },
+    "all(dist,norm,locsens,plateau)": {
+      "test_R2": 0.8781,
+      "test_spearman_pred_vs_true": 0.9237
+    }
+  },
+  "delta_R2_plateau_beyond_dist_norm": 0.0733,
+  "delta_R2_plateau_beyond_dist_norm_locsens": 0.0051,
+  "partial_spearman_plateau_beyond_dist_norm": -0.6497,
+  "partial_spearman_plateau_beyond_dist_norm_locsens": -0.1565,
+  "marginal_spearman_test": {
+    "spearman_plateau_vs_logkl": -0.8511,
+    "spearman_dist_vs_logkl": 0.7486,
+    "spearman_norm_vs_logkl": -0.2166,
+    "spearman_locsens_vs_logkl": 0.843
+  },
+  "output_kl_median_by_condition": {
+    "recon": 0.05115,
+    "naive": 3.41935,
+    "sparse_match": 3.54653,
+    "iso15": 0.01123,
+    "iso30": 0.04107,
+    "iso60": 0.22659,
+    "iso120": 1.26668
+  },
+  "verdict_vs_dist_norm": "plateau ADDS held-out validity prediction beyond dist+norm",
+  "verdict_vs_local_sensitivity": "plateau adds ~nothing beyond local sensitivity -> robustness, NOT interpretability validity"
+}

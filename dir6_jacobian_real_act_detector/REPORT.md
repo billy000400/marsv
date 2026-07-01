@@ -29,6 +29,19 @@ first two moments, and do those properties generalize across hard synthetic nega
 - **Protocols:** per-family AUROC/AUPRC; leave-one-corruption-family-out (LOFO) for learned and combined
   detectors; cross-depth replication at layers 3/6/9.
 
+## Figures
+All figures regenerated from the cached result CSVs by `experiments/make_plots.py` (pure PIL — the
+environment has no matplotlib).
+
+![Phase 2 baseline AUROC by family @ L6](plots/fig1_baselines_L6.png)
+![Phase 2b baseline AUROC heatmap @ L6 (interp defeats every statistic)](plots/fig3_baselines_L6_heatmap.png)
+![interp AUROC across layers ~ chance](plots/fig4_interp_across_layers.png)
+![Phase 4 learned detectors LOFO vs unsupervised kNN](plots/fig2_detectors_lofo.png)
+![Phase 3 functional probe AUROC](plots/fig5_functional_probe.png)
+![Phase 3 capstone combined LOFO detector vs single scores](plots/fig6_combined_score.png)
+![Phase 5 partial Spearman of scores with in-context KL controlling distance](plots/fig7_prediction_partial_rho.png)
+![Phase 6 causal repair external downstream KL by method](plots/fig8_causal_repair_KL.png)
+
 ## Key results
 1. **No single statistic is "realness."** Norm is a shortcut (AUROC 0.50 on the two norm-matched
    families). Each strong baseline has a structural blind spot.

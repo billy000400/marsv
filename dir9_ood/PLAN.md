@@ -30,6 +30,16 @@ Minimum acceptable: one plateau variant (perturbation-sensitivity) computed at a
 End each JOURNAL.md entry with one line: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**DONE (iter 6, 2026-06-30) — FINAL CONSOLIDATION + STOP.** No open feedback (all `*.addressed.md`);
+science complete and unchanged. This iteration was CLAUDE.md deliverable hygiene only: (1) populated
+the previously-empty `CHANGELOG.md` with the full dated history (iter1→iter6, old→new numbers); (2)
+rewrote `REPORT.md` to the required `Summary → Methods → Results → Conclusion → Limitations` structure
+with Data/Model/Layer and **`$$LaTeX$$` equations for every metric and baseline** + the AUROC
+estimator; (3) stripped the inline version-history blockquotes from `RESULTS.md`/`REPORT.md` (rule 6)
+into CHANGELOG; (4) added headline figure `results/plots/summary_best_per_set.png`. Numbers unchanged
+(canonical split): random plateau 0.734<MSP 0.932; shuffled 0.534<MSP 0.872; code 0.649<cup-RMD@resid6
+0.918. `STOP` written. _History below:_
+
 **DONE (iter 5, 2026-06-23) — Codex review `CODEX_REVIEW_20260622T230658Z.md` addressed: CANONICAL
 SPLIT.** That review confirmed the negative conclusion is faithful but flagged comparison hygiene —
 chiefly (High) that the plateau table and the real-cupbearer table used *different* ID splits (first-N
@@ -83,7 +93,8 @@ value measuring internally. Clean NEGATIVE result (acceptable per plan). Feedbac
 *.addressed.md.
 
 ## Next step
-None — project complete, **all** operator feedback addressed (incl. the iter-5 Codex
+None — project complete and finalized; deliverables are CLAUDE.md-compliant (clean current-best,
+LaTeX Methods, full CHANGELOG history) and `STOP` is written. **all** operator feedback addressed (incl. the iter-5 Codex
 `CODEX_REVIEW_20260622T230658Z.md` canonical-split hygiene review), `STOP` written. If reopened, the
 remaining ideas are all enhancements, not corrections: run cupbearer's **full task/data harness**
 end-to-end in `cupenv` (not just its detectors on precomputed acts) and refresh `auroc_cupbearer.csv`

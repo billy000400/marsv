@@ -177,3 +177,16 @@ A new Codex review (`CODEX_REVIEW_20260622T230658Z.md`, Jun 22) had appeared wit
 **Env note:** the base env had again lost `transformers`/`tokenizers`/`httpx`; reinstalled with `--no-deps` (pinned `tokenizers==0.22.2`). **torch 2.9.0+cu130 / numpy 2.3.3 verified untouched.**
 
 On track? Yes — all feedback addressed, conclusion unchanged and now strictly apples-to-apples, STOP written.
+Done. This was a finalization/consolidation iteration — the science (Direction #9) was already complete and verified across iterations 2–5, with no open feedback. The work brought the deliverables into full CLAUDE.md compliance and wrote STOP.
+
+**What I found:** The project was scientifically finished (clean negative result, canonical split, all reviews `*.addressed.md`) but had three standing CLAUDE.md hygiene gaps and a missing STOP.
+
+**What I did (presentation only — no AUROC recomputed):**
+1. **CHANGELOG.md was empty** (rule 7 violation) → populated with dated iter1→iter6 history including old→new number shifts (e.g. iter-1 "strong jacobian" 0.92–0.97 → revealed as `selfNLL-grad`; genuine plateau-jacFrob weak ≤0.73; vendored cup-QUE 0.572 → real 0.910).
+2. **RESULTS.md / REPORT.md carried inline version-history blockquotes** (rule 6 violation) → stripped them; history now lives only in CHANGELOG.
+3. **REPORT.md lacked structure + LaTeX** (rule 8) → rewrote to `Summary → Methods → Results → Conclusion → Limitations` with Data/Model/Layer and rendered `$$LaTeX$$` for every metric (jacFrob, perturbation, selfNLL-grad), every baseline (MSP, L2, Mahalanobis, cup-RMD, cup-QUE), and the AUROC estimator.
+4. Added headline figure `results/plots/summary_best_per_set.png` (best plateau vs best baseline per OOD set), generated from `auroc_table.csv` and referenced from both deliverables.
+
+**Verdict (unchanged, verified against the CSV):** plateau-ness loses on every OOD set — random 0.734 < MSP 0.932; shuffled 0.534 < MSP 0.872; code 0.649 < cup-RMD@resid6 0.918. Internal measurement buys nothing over input-space.
+
+PLAN.md updated, JOURNAL.md appended, **STOP written.** Project complete.

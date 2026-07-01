@@ -178,3 +178,16 @@ A new operator review (`CODEX_REVIEW_20260623T001526Z.md`, dated today) had appe
 Updated RESULTS.md, REPORT.md, PLAN.md, JOURNAL.md; renamed the review to `.addressed.md`; recreated STOP. ~235 min budget used.
 
 **On track? yes — S1–S5c complete, all three reviews addressed, STOP written, no blocker.**
+All done. Iteration complete and the direction is finalized.
+
+## Summary
+
+On re-entry the direction was substantively complete (S1–S5c, three reviews addressed) but had **two unmet CLAUDE.md hard requirements**: `plots/` was **empty** (every quantitative result must be visualized — a gap deferred since Iter 1 because matplotlib wasn't installed), and the mandated **consolidation pass** was incomplete (CHANGELOG.md was an empty header while REPORT.md still carried "What changed after review" version-history blocks, violating rules 6–7).
+
+This iteration closed both, with **no result numbers changed**:
+
+1. **Figures.** Installed `matplotlib==3.11.0` with numpy/torch pinned via a constraints file (verified numpy 2.3.3 / torch 2.9.0+cu130 untouched; matplotlib isn't on PLAN's forbidden list). Wrote `experiments/make_plots.py`, which renders **6 figures from the saved `results/*.json` with no recompute** (headless Agg, savefig+close): per-layer ID vs d95 vs d_model, AE FVU sweep (raw/matched/standardized), AE marginal-gain (no-plateau), synthetic-estimator validation, ID-by-token-position, and ID bootstrap-CI/self-masking diagnostics. All six are now referenced from RESULTS.md and REPORT.md (12 embeds).
+
+2. **Consolidation.** Rewrote REPORT.md as a clean `Summary → Methods → Results → Conclusion` with a proper **Methods** section: Data/Model/Layer plus every metric (FVU, var_expl, TwoNN, MLE) and baseline (d_model, PCA PR, d95/d99, synthetic validation, param-match) defined in rendered `$$LaTeX$$`. Moved all "What changed after review" history out of REPORT.md into dated **CHANGELOG.md** entries.
+
+Updated PLAN.md (new S6 box, status, next step), appended the Iter 8 JOURNAL entry ending with the on-track line, and **wrote the STOP file**. The headline stands: GPT-2 layer-6 residual stream has a low local intrinsic dimension ≈ 11–15 (suggestive low-dim, not a demonstrated curved manifold).

@@ -1,5 +1,65 @@
-# CHANGELOG — Direction
+# CHANGELOG — Direction #6: What makes real activations "real"?
 
-Append-only.
+Append-only. Records changes to the deliverables (RESULTS.md / REPORT.md) with old → new numbers.
 
 ---
+
+## 2026-06-30 — Figures added; CHANGELOG backfilled (iter9)
+- **RESULTS.md / REPORT.md:** no numbers changed. Added 8 PNG figures (one per quantitative result
+  table) under `plots/`, rendered by new `experiments/make_plots.py` (pure PIL — env has no
+  matplotlib). RESULTS.md now embeds figs 1–8 next to their tables; REPORT.md adds a Figures section.
+  - fig1 Phase-2 baseline AUROC @ L6; fig2 Phase-4 LOFO detectors vs kNN; fig3 Phase-2b L6 heatmap
+    (7 families × 6 baselines); fig4 interp one-sided AUROC across layers; fig5 functional probe;
+    fig6 combined-score capstone; fig7 Phase-5 partial-ρ; fig8 Phase-6 causal-repair external KL.
+- **CHANGELOG.md:** backfilled the iter1–8 deliverable history below (the file had only been a stub).
+
+## 2026-06-23 — Phases 5 & 6 re-run genuinely in-context (iter8, codex review correction)
+External review (`codex_review_20260623T024606Z.md`) flagged that the first Phase-5/6 "in-context"
+continuation fed a single position through the late blocks (no prompt attention). Re-ran both with a
+forward hook overwriting only the last-token resid_post@L6 during a FULL forward (sanity severity-0
+KL = 0.0000 exactly). Verdicts UNCHANGED.
+- **Claim 3 (RESULTS Phase 5 table):** plateau_kl partial-ρ 0.57/0.20 (single-pos) → **+0.510/+0.252**
+  (in-context, noise/interp); entropy +0.49/+0.17 → **+0.347/+0.188**. Raw plateau_kl Spearman rose
+  in-context (0.55→0.79 noise, 0.13→0.52 interp). Density scores stay negative-partial (proximity proxy).
+- **Claim 4 (RESULTS Phase 6 table):** corrupted-start KL 2.20 (single-pos) → **0.78** (in-context);
+  maha_descent 6.87 → **3.33** (vs matched random **1.99**); func_descent 14.58 → **8.82** (vs its OWN
+  func-matched random **2.20**); oracle 0.03 → **0.009**. Added per-descent move-matched random controls
+  (review finding #2). Both descents still worse than matched random → reward-hacking confirmed.
+- REPORT.md: added Correction section; reworded combined-LOFO orientation caveat (#3), single-position
+  discrimination-probe phrasing (#4), contiguous-split leakage caveat (#5).
+
+## 2026-06-23 — Causal repair (Phase 6, claim 4): NEGATIVE result + first finalize (iter7)
+- Added Phase-6 table to RESULTS.md/REPORT.md. maha_descent KL 2.20→6.87, func_descent →14.58, both
+  worse than corrupted start and matched random (3.61); oracle recovers (0.03). Verdict: realness
+  scores are invalid causal objectives. (Superseded by the iter8 in-context re-run above.)
+
+## 2026-06-23 — Context-aware downstream prediction (Phase 5, claim 3) + REPORT.md (iter6)
+- Wrote REPORT.md (full 5-claim verdict). Added Phase-5 prediction table: functional plateau_kl/entropy
+  predict downstream KL beyond distance (partial ρ +0.57/+0.20 single-position). Density scores add
+  nothing over proximity. Claim 3 = PARTIAL/YES (functional axis). (Numbers superseded by iter8.)
+
+## 2026-06-23 — Combined score + interp orientation correction (iter5)
+- Added Phase-3 capstone (combined LOFO) table. **Correction:** the iter3 "interp ≈ chance for all
+  baselines" used a one-sided orientation. interp is anomalous by being too CENTRAL: two-sided
+  Mahalanobis 658 vs real 803 → **AUROC ~0.68** (was reported ~0.50). kNN stays 0.50 (signal is global,
+  not local). Combined LOFO catches cov_gauss (0.999) but FAILS interp (0.54). RESULTS Headline rewritten.
+
+## 2026-06-23 — Functional probe where statistics fail (iter4)
+- Added Phase-3/5 functional table. On interp (≈0.50 for all statistics) entropy/plateau_kl reach
+  **~0.61** — first signal beating chance → functional component of realness (H1). Complementary, not
+  dominant (≈kNN on cov_gauss 0.95; beaten on norm_pert/tangent_pert).
+
+## 2026-06-23 — Baselines across layers {3,6,9} + harder negatives (iter3)
+- Added Phase-2b cross-depth table + 3 norm-matched hard families (interp, tangent_pert, orth_pert).
+  **interp defeats every statistical baseline at every layer (AUROC 0.44–0.54).** kNN(density) ⊕
+  Mahalanobis(covariance) confirmed complementary and depth-stable.
+
+## 2026-06-23 — Learned detectors, leave-one-family-out (iter2)
+- Added Phase-4 table. LOFO macro logreg **0.676**, mlp **0.735** — both BELOW unsupervised kNN
+  **0.913**; collapse to chance on unseen cov_gauss (0.48/0.51). Gate 4 fails for discriminative
+  detectors → realness reframed as one-class density.
+
+## 2026-06-23 — Audit + MVP benchmark + Phase-2 baselines (iter1)
+- Initial RESULTS.md. Real positives reused from dir3 cache (GPT-2 small resid_post L6, FineWeb).
+  4 negative families, 6 baselines. **kNN macro AUROC 0.913** (best; only one catching cov_gauss 0.976);
+  norm a shortcut (0.50 on norm-matched families). Gate 2: baselines do not solve all hard negatives.

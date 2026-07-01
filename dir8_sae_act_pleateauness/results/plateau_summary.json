@@ -1,0 +1,66 @@
+{
+  "layer": "resid_pre@6",
+  "N": 200,
+  "n_dirs": 8,
+  "r_grid": [
+    0.0,
+    0.0025,
+    0.005,
+    0.01,
+    0.02,
+    0.04,
+    0.08
+  ],
+  "tau": 0.00013060089258942753,
+  "sub_bdec": true,
+  "recon_err_mean": 27.691,
+  "groups": {
+    "real": {
+      "plateau_auc_low_median": 0.20048,
+      "norm_median": 79.48,
+      "l0_median": 32.5
+    },
+    "recon": {
+      "plateau_auc_low_median": 0.1623,
+      "norm_median": 68.368,
+      "l0_median": 32.5
+    },
+    "naive": {
+      "plateau_auc_low_median": 0.06646,
+      "norm_median": 59.95,
+      "l0_median": 34.5
+    },
+    "norm_rand": {
+      "plateau_auc_low_median": 0.03486,
+      "norm_median": 79.48,
+      "l0_median": 0.0
+    }
+  },
+  "real_minus": {
+    "recon": {
+      "median_gap": 0.01689,
+      "ci95": [
+        0.01014,
+        0.02398
+      ]
+    },
+    "naive": {
+      "median_gap": 0.12211,
+      "ci95": [
+        0.10805,
+        0.13815
+      ]
+    },
+    "norm_rand": {
+      "median_gap": 0.15999,
+      "ci95": [
+        0.1475,
+        0.17636
+      ]
+    }
+  },
+  "covariate_spearman_pooled": {
+    "plateau_vs_norm": 0.061,
+    "plateau_vs_dist_to_source": -0.821
+  }
+}

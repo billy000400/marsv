@@ -1,6 +1,12 @@
 # RESULTS — Direction #3 (Manifold)
 
+> Figures for every quantitative result are in `plots/` (rendered by
+> `experiments/make_plots.py` from the saved `results/*.json`) and embedded in the relevant
+> sections below.
+
 ## Intrinsic dimension estimates
+
+![Per-layer nonlinear ID (TwoNN/MLE) vs linear PCA d95 vs ambient d_model=768](plots/id_per_layer.png)
 
 ### Linear PCA (S2a, full 200k vectors/layer, mean-centered) — done
 PR = participation ratio (Σλ)²/Σλ²; dXX = #dims for XX% cumulative variance; top1 = variance fraction in the single largest PC.
@@ -50,7 +56,11 @@ everywhere" is **false**; agreement is layer-dependent.
 **Synthetic validation (saved artifact — `results/id_validation.json`).** The same
 hand-rolled `twonn()`/`mle()` run on isotropic Gaussians of known dimension linearly
 embedded in 768-d (n=20k): true_d 5→TwoNN 5.16/MLE 5.09; 10→9.98/9.68; 20→17.7/16.9;
-50→35.1/32.0. Exact at low d, with the known downward bias at large d. **Scope
+50→35.1/32.0. Exact at low d, with the known downward bias at large d.
+
+![Estimator validation: estimated vs true dimension on synthetic Gaussians](plots/id_validation.png)
+
+**Scope
 correction (Codex review):** this validation uses *isotropic Gaussian subspaces linearly
 embedded* in 768-d — much easier than curved, anisotropic, clustered real residual-stream
 data. It confirms the estimators are accurate *on that synthetic family* and that the
@@ -64,7 +74,10 @@ main cache pools all token positions; to check that *coarse absolute position* d
 drive the result we re-collected layer-6 resid_post *with* absolute position (80k
 vectors) and estimated ID per position bucket: early(1–15) TwoNN 9.60/MLE 8.65;
 mid(16–63) 9.83/12.76; late(64–127) 9.89/13.26; tail(128–255) 10.03/13.09 (pos 0 too
-few points). **ID is low across all buckets, but the agreement is estimator-dependent**:
+few points).
+
+![Layer-6 ID per token-position bucket (TwoNN/MLE)](plots/id_by_position.png)
+ **ID is low across all buckets, but the agreement is estimator-dependent**:
 TwoNN is genuinely stable (~9.6–10 everywhere), while MLE ranges ~8.65→13.26, so the
 honest statement is "roughly similar, with estimator-dependent variation," **not**
 "stable across position." **Scope correction (Codex review):** this controls only coarse
@@ -159,6 +172,10 @@ one dominant dimension being captured early** — it is *not* a robust, preproce
 invariant signature of a low-dim bottleneck. (The TwoNN/MLE *local* ID, by contrast,
 stays low ~11–12 at layer 6 even standardized — see above.)
 
+![AE held-out FVU vs k: CPU vs GPU-raw (seed-mean) vs param-matched vs standardized (knee gone)](plots/ae_fvu_sweep.png)
+
+![Marginal ΔFVU per doubling (raw): no plateau out to k=256](plots/ae_marginal_gain.png)
+
 **(c) Parameter count is NOT held constant (REVIEW overclaim #4).** Exact counts rise
 **monotonically** with k: 1,051,906 (k=2) → 1,054,984 (k=8) → 1,059,088 (k=16) →
 1,182,208 (k=256), a ~12% spread. We report rather than control this; crucially the
@@ -211,6 +228,8 @@ still has no plateau on raw data and still vanishes under standardization per (b
 ### ID diagnostics: duplicates, self-masking, bootstrap CIs (S5c) — done (Codex review 2026-06-23 #4 / rec#5)
 `results/id_diagnostics.json`, `experiments/id_diagnostics.py` (GPU). Two checks on the
 layer-6 local-ID estimate the review asked for.
+
+![Bootstrap 95% CIs (left) and naive-vs-robust self-masking (right) for layer-6 ID](plots/id_diagnostics.png)
 
 **(a) Duplicate / self-masking fragility (#4) — does NOT move the estimate.** The original
 `knn_dists` drops the smallest topk distance as "self," which can leak a *distinct*

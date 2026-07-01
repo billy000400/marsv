@@ -184,3 +184,29 @@ an in-context DISCRIMINATION benchmark (Phase 3 negatives generated in-context),
 token-position stratification (pos-0 sink), and bootstrap CIs.
 On track? yes — review corrections applied, claims 3 & 4 re-verified in-context (conclusions unchanged),
 deliverable complete & self-consistent; re-creating STOP. Stage S10 done (re-finalized).
+
+## Iter 9 (2026-06-30) — Figures for every result + CHANGELOG backfill (deliverable-hygiene finalize)
+**Did:** Re-audited on resume (STOP had been removed again). Science was complete after iter8, but two
+operator-rule (CLAUDE.md) gaps remained: `plots/` was EMPTY (rule: "visualize every reported result")
+and `CHANGELOG.md` was a 4-line stub (rule 7: all history lives there). Env has NO matplotlib (only
+numpy + PIL 11.3; transformers/scipy/pandas also absent on this resume). Rather than risk a --no-deps
+matplotlib install (compiled deps: kiwisolver/contourpy), wrote `experiments/make_plots.py` rendering
+figures with pure PIL (grouped_bars supporting negative values + dashed reference lines, and a
+diverging heatmap; Pillow 11.3 `load_default(size)` for scalable text). Generated 8 PNGs from the
+cached result CSVs (no GPU/model needed, CPU-only, <1s): fig1 Phase-2 baselines @L6, fig2 Phase-4 LOFO
+detectors vs kNN, fig3 Phase-2b L6 heatmap (7 fam × 6 base), fig4 interp one-sided AUROC across layers,
+fig5 functional probe, fig6 combined-score capstone, fig7 Phase-5 partial-ρ, fig8 Phase-6 causal-repair
+KL. Verified figures render correctly (read 4 of them back as images; fixed em-dash missing-glyph boxes
+→ '-', and a y-label/tick overlap). Embedded fig1–8 in RESULTS.md beside each table; added a Figures
+section to REPORT.md. Backfilled CHANGELOG.md with the iter1–9 deliverable history (old→new numbers).
+**Learned:** No NEW science — all numbers verified to match the curated RESULTS.md tables exactly
+(read every source CSV: baseline_metrics, baseline_layers, detector_metrics, functional_metrics,
+combined_metrics, functional_prediction_v2, repair_metrics_v2). The deliverable is now figure-complete
+and the change history is recorded as CLAUDE.md requires. PIL is a viable matplotlib substitute for
+bar/heatmap result figures in this stripped env.
+**Next:** Project finalized and now fully rule-compliant. Genuine remaining future work (unchanged):
+manifold/denoising-prior causal objective (Phase-6 alternative), in-context DISCRIMINATION benchmark
+(Phase-3 negatives generated in-context), cross-model transfer, token-position stratification (pos-0
+sink confound), bootstrap CIs. Re-creating STOP.
+On track? yes — deliverable complete, figure-complete, and history recorded; S10 done (re-finalized
+with figures+CHANGELOG); blocker: none.

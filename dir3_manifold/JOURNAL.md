@@ -150,3 +150,36 @@ a forward hook; AE with the massive-activation dim removed; matched-sample-size 
 buckets; second model/corpus. None are blockers.
 
 On track? yes — S1–S5c complete, all three operator reviews addressed + logged, STOP written; no blocker. ~235 min budget used.
+
+## Iter 8 (2026-06-30) — figures + consolidation pass (deliverable hygiene)
+**Did:** Found the directory in a near-final but non-finalized state on re-entry: STOP absent,
+`plots/` EMPTY, and `CHANGELOG.md` only a header — i.e. the long-standing "produce plots"
+requirement (flagged as deferred since Iter 1: "no matplotlib — install --no-deps later") was
+never done, and the mandated consolidation pass (CLAUDE.md rules 6–7) was incomplete.
+(a) Installed `matplotlib==3.11.0` with numpy/torch **pinned** via a constraints file
+(verified numpy 2.3.3 / torch 2.9.0+cu130 unchanged after install; matplotlib is not on PLAN's
+forbidden list). (b) Wrote `experiments/make_plots.py` — renders SIX figures from the saved
+`results/*.json` with **no recompute** (headless Agg, savefig+close): `id_per_layer.png`,
+`ae_fvu_sweep.png`, `ae_marginal_gain.png`, `id_validation.png`, `id_by_position.png`,
+`id_diagnostics.png`. (c) Referenced all six in RESULTS.md and REPORT.md.
+(d) Consolidation: rewrote REPORT.md to clean Summary→Methods→Results→Conclusion with a proper
+**Methods** section — Data/Model/Layer + every metric (FVU, var_expl, TwoNN, MLE) and baseline
+(d_model, PCA PR, d95/d99, synthetic validation, param-match) defined in rendered `$$LaTeX$$`.
+Moved the two "What changed after review" / "Status note" history blocks OUT of REPORT.md into
+dated CHANGELOG.md entries (rules 6–7). **No numbers changed** — pure hygiene + visualization.
+
+**Learned:** The deliverables had been carefully curated for honesty across 3 reviews but had
+ZERO figures and an empty changelog — a hard CLAUDE.md gap. matplotlib installs cleanly under a
+numpy/torch constraints pin without disturbing the cu130 torch. The `id_per_layer` figure makes
+the key subtlety visual: nonlinear ID is a flat low band (~6–16) while the linear d95 baseline
+zig-zags (collapses at L3/L11), so "nonlinear ≪ linear" is genuinely layer-6-specific. The
+`ae_fvu_sweep` figure shows at a glance that the standardized curve (knee-gone) lives in a
+totally different FVU regime than the raw/matched curves — the AE "elbow" really is a
+raw-variance artifact.
+
+**Next step:** None — success criterion met (3-estimator per-layer ID; AE bottleneck sweep with
+identified bend; REPORT.md comparison), all 3 reviews addressed, figures now exist for every
+result, history consolidated to CHANGELOG, STOP written. If reopened: raw block-11 resid_post via
+a forward hook (current L11 is post-ln_f); AE on outlier-dim-removed activations; second model/corpus.
+
+On track? yes — 100% done; S1–S5c complete + plots + consolidation; STOP written; no blocker.

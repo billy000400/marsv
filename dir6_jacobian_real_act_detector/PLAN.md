@@ -507,13 +507,25 @@ Correction/steering metrics:
       only oracle clean-direction recovers (0.009). Realness scores ≠ valid causal objectives.)
 - [ ] S9 — Validate on steering while preserving achieved steering effect. (NOT done — blocked by S8's
       negative; a manifold/denoising-prior objective is needed first. Documented as future work.)
-- [x] S10 — Finalize RESULTS.md, REPORT.md, JOURNAL.md, and STOP. (iter7; iter8 re-finalized after review)
+- [x] S10 — Finalize RESULTS.md, REPORT.md, JOURNAL.md, and STOP. (iter7; iter8 re-finalized after
+      review; iter9 added the 8 result figures under plots/ + backfilled CHANGELOG.md)
 
 ## On-track check (required every iteration)
 End each JOURNAL.md entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
-## Current status (after iter8 — REVIEW CORRECTIONS applied, re-FINALIZED, STOP re-created)
+## Current status (after iter9 — FIGURES added, CHANGELOG backfilled, re-FINALIZED)
+The science was complete after iter8 but two operator-rule gaps remained: `plots/` was empty (no
+figures) and `CHANGELOG.md` was a stub. Iter9 closed both. Wrote `experiments/make_plots.py` (pure
+PIL — env has no matplotlib) rendering 8 PNGs, one per quantitative result table; embedded them in
+RESULTS.md beside each table and added a Figures section to REPORT.md. Backfilled CHANGELOG.md with
+the iter1–9 deliverable history (old→new numbers). No result numbers changed. Verdict UNCHANGED:
+(1) discrimination YES via multi-axis score; (2) generalization PARTIAL; (3) prediction
+PARTIAL/functional (in-context); (4) causality NO/reward-hacks; (5) steering untested. H1 supported.
+Project DONE. Future work: manifold/denoising-prior causal objective, in-context DISCRIMINATION
+benchmark, cross-model transfer, token-position stratification (pos-0 sink), bootstrap CIs.
+
+## (prior) Current status (after iter8 — REVIEW CORRECTIONS applied, re-FINALIZED, STOP re-created)
 Addressed external codex review (codex_review_20260623T024606Z.md). Its main valid finding: Phase-5/6
 "in-context" continuation actually fed a SINGLE position through the late blocks (no prompt attention).
 Re-ran BOTH phases genuinely in-context (forward hook overwrites only the last-token resid@L6 during a

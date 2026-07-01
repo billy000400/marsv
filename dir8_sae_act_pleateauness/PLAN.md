@@ -505,15 +505,16 @@ and headline verdicts. Speculation and future-work brainstorming belong in `PLAN
 | Real and all synthetic conditions have similar plateaus. | The motivating result fails here; either synthetic construction is better than expected or plateau metric lacks power. |
 
 ## Stages (checklist — update marks each iteration)
-- [ ] S1 — Audit environment, repo status, nearby reusable code, and SAE availability.
-- [ ] S2 — Implement/load SAE and prompt-aligned activation capture.
-- [ ] S3 — Smoke-test full-context plateau pipeline on real and random controls.
-- [ ] S4 — Stage A: real/reconstruction/naive synthetic reproduction.
-- [ ] S5 — Stage B: core covariate and direction controls.
-- [ ] S6 — Stage C: improved synthetic latent constructions.
-- [ ] S7 — Stage D: independent downstream-validity prediction.
-- [ ] S8 — Stage E: one limited generalization check.
-- [ ] S9 — Finalize `RESULTS.md`, `REPORT.md`, `JOURNAL.md`, and `STOP` if complete.
+- [x] S1 — Audit environment, repo status, nearby reusable code, and SAE availability.
+- [x] S2 — Implement/load SAE and prompt-aligned activation capture.
+- [x] S3 — Smoke-test full-context plateau pipeline on real and random controls.
+- [x] S4 — Stage A: real/reconstruction/naive synthetic reproduction.
+- [x] S5 — Stage B: distance-to-source matched control + sparsity/coef matching + held-out τ
+      (direction-family control still pending within Stage B).
+- [ ] S6 — Stage C: improved synthetic latent constructions. (skipped — null complete & named)
+- [x] S7 — Stage D: independent downstream-validity prediction. (H4 negative beyond local sensitivity)
+- [ ] S8 — Stage E: one limited generalization check. (skipped — null complete & named)
+- [x] S9 — Finalize `RESULTS.md`, `REPORT.md`, `JOURNAL.md`, and `STOP`.
 
 ## Out of scope (do NOT)
 - Do not claim plateau-ness is a manifold detector unless controls support that specific interpretation.
@@ -528,18 +529,26 @@ End each `JOURNAL.md` entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-Planning complete. Direction 8 itself has no code or results yet. The plan is grounded in
-existing nearby GPT-2 activation caches, corrected in-context hook methodology, and prior
-baseline warnings. The main blocker for implementation is SAE availability and hook
-alignment; Claude must resolve that in S1/S2 before running scientific comparisons.
+**FINALIZED — project-level null complete & names its cause; STOP created.** Stages A (M1) +
+B (M2) + D (M4) done & decisive. SAE = jbloom resid_pre@6 (d_sae=24576), hook = block-5 output.
+Scripts: `experiments/smoke_plateau.py` (A), `stageB_distance.py` (B), `stageD_validity.py` (D).
+- Stage A (N=200, 8 dirs): plateau_auc_low real 0.200, recon 0.162, naive 0.066, norm_rand
+  0.035; all paired gaps exclude 0; NOT a norm artifact (Spearman(plateau,norm)=+0.06).
+- Stage B (N_eval=100, 6 dirs, held-out τ=1.33e-4): iso_displace random-displacement reference
+  0.184/0.173/0.128/0.078 at dist 15/30/60/120. Distance-matched residual: recon −0.016, naive
+  −0.058, sparse_match −0.063. **No SAE-decoded condition ABOVE the random curve.** H2 negative.
+- Stage D (1400 rows, split by source): held-out R² for log10 output_kl — baseline(dist,norm)
+  0.795, +plateau 0.869, baseline+locsens 0.873, all 0.878. **ΔR² plateau beyond {dist,norm}
+  =+0.073 (partial ρ −0.65) but beyond {dist,norm,locsens} =+0.005 (partial ρ −0.16).** Plateau's
+  validity prediction = local sensitivity; marginal ρ: plateau −0.85 ≈ locsens +0.84.
+- **Project verdict (null):** plateau-ness = closeness-to-real (B) + local robustness (D), NOT
+  an SAE interpretability-validity diagnostic. Of {provenance, OOD, downstream-invalidity, mere
+  local robustness} → **mere local robustness** + distance-to-real. Matches D9 & D6.
+Env note: transformers/tokenizers/safetensors/huggingface_hub pip-installed `--no-deps`
+(tokenizers 0.22.2); torch/CUDA untouched. matplotlib present.
 
 ## Next step
-Implement `experiments/env_audit.py` and `experiments/sae_io.py`, verify a matching
-GPT-2 small SAE/hook point, and run the cheap smoke test in Experiment 1 before building
-the full activation-condition matrix.
-
-## Consolidation pass — do this, then STOP
-Per CLAUDE.md: rewrite REPORT.md and RESULTS.md to CURRENT-BEST only — remove all version history,
-"changed after review" notes, and any weaker/superseded run of an experiment that a stronger run
-replaces. Move everything you remove into CHANGELOG.md as dated entries (old -> new numbers). Ensure
-REPORT.md has the Methods section: Data/Model/Layer, and every metric + baseline defined with $$LaTeX$$.
+DONE. RESULTS.md curated, REPORT.md written (Summary→Methods→Results→Conclusion, every metric/
+baseline in $$LaTeX$$), CHANGELOG + JOURNAL appended, STOP created. If reopened: SAE-decoder-
+direction robustness (Stage B leftover) then Stage C cycle/co-occurrence codes — both expected to
+scope, not overturn, the local-sensitivity null.
