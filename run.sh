@@ -7,6 +7,17 @@ set -uo pipefail
 export IS_SANDBOX=1              # allow --dangerously-skip-permissions as root on this disposable pod
 export MPLBACKEND=Agg            # headless matplotlib: figures save to file, never try to display
 
+# Don't depend on the launching shell's PATH: the claude CLI lives in ~/.local/bin
+# (e.g. /mars-vol/.local/bin), which tmux/cron/non-login shells may not have. Prepend it,
+# then fail LOUDLY if claude is still missing — otherwise every iteration silently prints
+# 'claude: command not found' and the loop spins for hours doing nothing.
+export PATH="${HOME:-/mars-vol}/.local/bin:/mars-vol/.local/bin:$PATH"
+command -v claude >/dev/null 2>&1 || {
+  echo "[run.sh] FATAL: 'claude' not found on PATH (looked in ~/.local/bin and /mars-vol/.local/bin)." >&2
+  echo "[run.sh] Install/symlink claude or fix PATH, then relaunch. Aborting instead of spin-failing." >&2
+  exit 127
+}
+
 DIR="${1:?usage: run.sh <research-subdir> [hours]}"
 
 BUDGET_FILE="BUDGET.md"
