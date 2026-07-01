@@ -78,8 +78,8 @@ the per-point estimator and the reported (MacKay–Ghahramani inverse-average) a
 - **Linear PCA participation ratio** (effective number of significant PCs), with eigenvalues
   $\lambda_i$ of the covariance: $\mathrm{PR} = \big(\sum_i \lambda_i\big)^2 \big/ \sum_i \lambda_i^2$.
 - **Linear PCA d95 / d99** — smallest number of principal components whose cumulative variance ratio
-  reaches 95% / 99%: $d_q = \min\big\{ m : \sum_{i=1}^{m}\lambda_i \big/ \sum_i \lambda_i \ge q \big\}$, $q \in \{0.95, 0.99\}$.
-- **Synthetic-Gaussian validation** — isotropic Gaussians of known dimension $d \in \{5,10,20,50\}$
+  reaches 95% / 99%: $d_q = \min\big\lbrace m : \sum_{i=1}^{m}\lambda_i \big/ \sum_i \lambda_i \ge q \big\rbrace$, $q \in \lbrace 0.95, 0.99\rbrace$.
+- **Synthetic-Gaussian validation** — isotropic Gaussians of known dimension $d \in \lbrace 5,10,20,50\rbrace$
   linearly embedded in 768-d, run through the same TwoNN/MLE code, to calibrate estimator bias.
 - **AE param-count control** — a parameter-matched AE that holds total params fixed (spread 0.087%)
   by trading outer hidden width $h_1$ against bottleneck width $k$, isolating $k$ from capacity drift.
