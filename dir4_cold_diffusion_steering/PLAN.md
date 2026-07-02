@@ -27,9 +27,10 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 - [x] S1 — Motivating phenomenon: raw steering `h+αv` goes off-manifold (D_M, norm, ΔLM vs α). DONE.
 - [x] S2 — `projections.py` (project_orthogonal / retain_projection_update / cov_aligned_shift) +
         unit tests DONE. (ColdSteerResidualCorrector MLP class deferred to S3-learned.)
-- [~] S3 — Corrector evaluation at matched projection DONE for the ANALYTIC Gaussian-optimal
-        corrector + norm-clip + naive-inversion control: it lowers `D_M` but WORSENS `ΔLM` (decisive
-        negative/decoupling result). REMAINING: train a learned `r_θ` on the DOWNSTREAM LM loss.
+- [x] S3 — Corrector evaluation at matched projection DONE. (a) ANALYTIC Gaussian-optimal corrector
+        lowers `D_M` but WORSENS `ΔLM` (decoupling/negative). (b) LEARNED `r_θ` MLP trained on the
+        DOWNSTREAM LM loss BEATS raw at every α — ΔLM +2.78→+0.44 at α=8 (84% recovery), matched
+        projection, moving FURTHER off the Gaussian manifold. Decisive POSITIVE; success criterion met.
 - [ ] S4 — Generalization + Pareto: held-out α / prompts; concept-strength vs fluency frontier; figs.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
@@ -42,21 +43,23 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-S1 + S2 complete; S3 core delivered. Beyond the S1 phenomenon, the analytic
-projection-preserving corrector `ĥ=z+P_{v⊥}Δ` with `Δ=Σv̂·α|v|/(v̂ᵀΣv̂)` LOWERS off-manifold
-distance (`D_M` 49.0→38.1 at α=8) and preserves projection exactly, yet WORSENS `ΔLM`
-(+4.20 vs raw +2.78 at α=8; +3.31 vs +0.08 at α=1). Decisive finding: statistical on-manifold
-distance and real LM damage are DECOUPLED — a manifold-distance surrogate is the wrong training
-target; the corrector must see the downstream LM loss. Artifacts: `experiments/projections.py`
-(tests PASS), `experiments/02_corrector.py`, `results/02_corrector.json`,
-`plots/02_corrector.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified.
+S1 + S2 + S3 complete — success criterion MET. Full three-experiment arc: (1) raw steering goes
+off-manifold and breaks the LM (ΔLM +2.78 at α=8); (2) analytic Gaussian-optimal corrector lowers
+`D_M` but WORSENS `ΔLM` to +4.20 (decoupling/negative); (3) a LEARNED 4-layer MLP `r_θ` trained on
+the DOWNSTREAM LM loss (frozen LM, h detached, α~U(0.5,8), matched projection) BEATS raw at every α
+— ΔLM +2.78→**+0.44** at α=8 (84% recovery), while moving FURTHER off the Gaussian manifold
+(`D_M` 49.0→79.5). The LM-safe correction is off the statistical manifold; only a downstream
+objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corrector.py,
+03_learned_corrector.py}`, `results/03_learned_corrector.json`, `plots/03_learned_corrector.png`.
+RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-S3-learned: implement `ColdSteerResidualCorrector` (4-layer MLP, `ĥ=z+P_{v⊥}r_θ`) and train
-`r_θ` against the DOWNSTREAM LM loss (backprop the patched-activation loss through frozen upper
-6 GPT-2 blocks; detach `h`; small batch under 0.18 VRAM frac) + stay-near-`z` term. Evaluate vs
-raw at matched projection on `ΔLM`/`D_M`; success = beat raw `ΔLM` at high α while preserving
-projection. Now well-motivated by the Exp-2 decoupling result.
+S4 — generalization + Pareto (polish; core result already delivered). Options, any one a clean
+iteration: (i) hold out α BEYOND the training range (10, 12) to test extrapolation of the learned
+corrector; (ii) a held-out steering vector / second behavior family to show it isn't overfit to the
+sentiment direction; (iii) add a text-level concept-strength readout so the frontier is
+behavior-vs-fluency, not just ΔLM (projection along v is held fixed by construction, so concept
+strength is controlled — measure generated-text quality/repetition alongside).
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

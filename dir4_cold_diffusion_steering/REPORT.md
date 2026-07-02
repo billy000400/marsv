@@ -12,7 +12,7 @@ away from the region of activations the model actually produces on real text —
 **off-manifold** — and the model's fluency collapses.
 
 This direction asks whether a small **corrector** can preserve the intended steering effect
-while pulling the activation back onto the manifold. This report covers two steps.
+while making the activation safe for the model. This report covers three steps.
 
 **Step 1 — quantifying the failure mode.** Using GPT-2 small and a sentiment steering
 direction, we show that as steering strength `α` grows, the steered activation moves
@@ -27,10 +27,20 @@ for a Gaussian model of the manifold — the shift that lowers the Mahalanobis d
 at matched projection. It does lower that distance (by 22% at `α=8`) and preserves the
 projection to the digit. **Yet it makes the language model dramatically worse**, not better:
 `ΔLM` rises to +4.2 nats, and even at weak steering where raw steering is nearly harmless
-(+0.08 nats) the "corrected" activation is catastrophic (+3.31 nats). The lesson is sharp and
-useful: **statistical "on-manifold" and "safe for the LM" are decoupled** — you can reduce the
-off-manifold distance while multiplying LM loss ~40×. An effective corrector must be trained
-against the **downstream LM objective**, not a manifold-distance surrogate.
+(+0.08 nats) the "corrected" activation is catastrophic (+3.31 nats). The lesson is sharp:
+**statistical "on-manifold" and "safe for the LM" are decoupled** — you can reduce the
+off-manifold distance while multiplying LM loss ~40×.
+
+**Step 3 — the corrector that works.** We keep the exact same projection-preserving form but
+replace the Gaussian-optimal shift with a small **MLP trained end-to-end against the downstream
+LM loss** (the frozen model's next-token cross-entropy), with `α` sampled during training. This
+learned corrector **beats raw steering at every strength** and, at `α=8`, cuts the fluency damage
+from +2.78 nats to **+0.44 nats — an 84% reduction** — while preserving the full steering edit
+along `v`. Strikingly, it does so by moving *further* off the Gaussian manifold, not closer
+(the exact opposite of Step 2). The two lessons combine into the direction's thesis: the correction
+that keeps a strongly-steered activation fluent exists and is easy to learn, but it lives
+**off** the statistical manifold, so only a **downstream-LM objective** — never a manifold-distance
+surrogate — can find it.
 
 ## Methods
 
@@ -139,18 +149,39 @@ projection exactly.
 projection retention is 0 and there is no LM damage; it exists only to confirm the evaluation
 is not "rewarded" for silently erasing the steer.
 
+### The learned corrector (Experiment 3)
+
+**`learned` — an MLP trained on the downstream LM loss.** Same parameterization
+`ĥ = z + P_{v⊥}r_θ(h, z, α)`, but `r_θ` is now a **4-layer MLP** (hidden width 1024, GELU,
+4.46M parameters; inputs `h`, `z`, `α` scaled to `O(1)`; last layer zero-initialised so the
+corrector starts equal to raw steering). We freeze all GPT-2 weights and train `r_θ` end-to-end
+against the **real next-token cross-entropy of the frozen model**: each step patches `ĥ` into
+resid_post at block 6, runs the forward pass, and backpropagates the LM loss into `r_θ` only
+(the clean activation `h` is detached, so no gradient reaches the lower blocks). The training
+objective is
+
+```math
+\mathcal{L} = \mathrm{CE}_{\text{next-token}}(\hat{h}) \;+\; \lambda_{\text{near}}\, \big\langle \lVert P_{v^{\perp}} r_\theta \rVert^2 \big\rangle
+```
+
+with `λ_near = 0.05` a light penalty preferring a minimal correction. Steering strength is
+sampled `α ∼ U(0.5, 8)` per step so one corrector serves all strengths. Trained for 6 epochs
+(≈230 steps) on **300 FineWeb documents** (64 tokens each), disjoint from the fit and evaluation
+sets. Because the correction is still orthogonal to `v`, projection retention stays `α|v|` —
+identical to raw steering — so Experiment 3 is again a **matched-projection** comparison, now
+against both raw steering and the analytic `cov_corr` of Experiment 2.
+
 ### Baselines
 
-This first experiment has no learned method yet — it characterizes the phenomenon. The
-**reference points** are:
+The **reference points** shared across experiments are:
 
 - **Unsteered activation (`α = 0`)** — the clean baseline for `ΔLM` (zero by construction)
   and for norm (ratio ≈ 1).
 - **Real-activation Mahalanobis (`D_M = 27.3`)** — the on-manifold reference line. A steered
   activation is "off-manifold" precisely when its `D_M` climbs above this.
-
-A learned corrector (next iterations) will be judged on whether it lowers `D_M` and `ΔLM`
-at a given steering strength **while preserving the projection of the edit along `v`**.
+- **Raw steering (`z = h + α v`)** — the method to beat: the learned and analytic correctors
+  are judged on whether they lower `ΔLM` at a given `α` **while preserving the projection of the
+  edit along `v`** (matched projection).
 
 ## Results
 
@@ -211,31 +242,64 @@ in the operative regime. Any corrector that optimizes a statistical manifold sur
 Mahalanobis, and likely PCA/whitening variants that share the same geometry) can be actively
 harmful. The corrector must instead see the downstream LM loss.
 
+### Experiment 3 — the learned, LM-supervised corrector recovers most of the fluency
+
+![learned corrector vs raw steering](plots/03_learned_corrector.png)
+
+Trained against the downstream LM loss — same projection-preserving form, matched projection —
+the learned corrector reverses the Experiment-2 outcome and beats raw steering everywhere:
+
+| α | ΔLM raw (nats) | ΔLM cov_corr | **ΔLM learned** | `D_M` raw | `D_M` learned | retention (all matched) |
+|---|----------------|--------------|------------------|-----------|----------------|--------------------------|
+| 1 | +0.08 | +3.31 | **−0.07** | 27.8 | 31.9 | 11.1 |
+| 2 | +0.33 | +3.84 | **−0.05** | 29.2 | 36.1 | 22.2 |
+| 4 | +1.22 | +4.09 | **+0.06** | 34.1 | 49.9 | 44.3 |
+| 6 | +2.11 | +4.18 | **+0.22** | 41.0 | 65.4 | 66.5 |
+| 8 | +2.78 | +4.20 | **+0.44** | 49.0 | 79.5 | 88.6 |
+
+**Interpretation.** At `α=8` the learned corrector cuts the fluency damage from +2.78 nats to
+**+0.44 nats — an 84% reduction** — while holding the steering projection identical to raw (88.6).
+At weak-to-medium steering it is essentially free, and slightly *better* than doing nothing
+(`ΔLM ≈ −0.05` at `α=1,2`; a small effect, within noise of zero but consistently non-positive on
+held-out text). The `D_M` column is the punchline: the learned corrector's activations are
+**further** from the Gaussian manifold than raw steering (49.0→79.5 at `α=8`), the exact opposite
+of the `cov_corr` corrector that moved *toward* the manifold and broke the LM. The LM-safe
+correction lives off the statistical manifold, and only a downstream-supervised objective locates
+it. A single MLP, trained on 300 documents with `α` sampled during training, generalizes across
+the full strength range on held-out text.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
 measurable way: the stronger the steer, the further off-manifold the activation and the worse
-the language model behaves. But the natural fix — pulling the activation back toward the
-statistical manifold while preserving the steering projection — **backfires**. A
+the language model behaves. The natural fix — pulling the activation back toward the
+statistical manifold while preserving the steering projection — **backfires**: a
 provably-optimal Gaussian-manifold corrector lowers the off-manifold distance by 22% yet
 raises LM loss to +4.2 nats, because it moves along the LM's most sensitive (high-variance)
-directions. Statistical "on-manifold" and "safe for the LM" are decoupled.
+directions. But keeping the *same* projection-preserving form and instead training the
+correction against the **downstream LM loss** works decisively: the learned corrector recovers
+**84%** of the fluency lost at strong steering (`ΔLM` +2.78→+0.44 at `α=8`) with the steering
+edit fully intact. It does so by moving *further* from the Gaussian manifold — confirming that
+statistical "on-manifold" and "safe for the LM" are not just decoupled but that the LM-safe
+correction is genuinely off-manifold.
 
-The concrete consequence for ColdSteer: keep the projection-preserving parameterization
+The takeaway for on-manifold steering methods: keep the projection-preserving parameterization
 
 ```math
 \hat{h} = z + P_{v^{\perp}}\, r_\theta(h, z, v, \alpha)
 ```
 
-but train `r_θ` (a small MLP) against the **downstream LM loss** (plus a stay-near-`z` term),
-rather than any manifold-distance surrogate. Experiment 2 shows why that supervision signal is
-not optional but essential — it is the only one that reflects the quantity we actually care
-about.
+but supervise `r_θ` with the **downstream LM objective**, never a manifold-distance surrogate.
+Experiments 2 and 3 are the two halves of one claim: the surrogate points the wrong way, and the
+downstream loss points the right way — to a correction that is easy to learn (one small MLP,
+300 documents) and generalizes across steering strength on held-out text.
 
 **Limitations.** (1) The manifold is modeled as a single Gaussian, so `D_M` captures
-scale/correlation but not multimodal or nonlinear structure — though Experiment 2 shows this is
-a feature-defining flaw of the *metric as a training target*, not merely a modeling nicety.
-(2) Off-manifold distance and `ΔLM` are activation- and loss-level proxies; they do not yet
-measure downstream *concept strength* or generated-text quality, which later iterations will
-add. (3) One layer, one steering direction so far. (4) The corrector tested here is analytic;
-the learned downstream-supervised corrector is the next step.
+scale/correlation but not multimodal or nonlinear structure — Experiments 2 and 3 show this is a
+defining flaw of the *metric as a training target*, not merely a modeling nicety. (2) `ΔLM` is a
+fluency/loss-level proxy; it does not yet measure downstream *concept strength* or generated-text
+quality on the steered behavior, which is the natural next evaluation (the projection along `v` is
+preserved exactly, so concept strength is held fixed by construction, but text-level effects are
+unmeasured). (3) One layer, one steering direction, one model so far; held-out-vector and
+held-out-prompt-family generalization remain to test. (4) The small non-positive `ΔLM` at low `α`
+is within noise of zero and should not be over-read as the corrector "improving" the base model.

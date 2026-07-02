@@ -79,3 +79,47 @@ matched projection on ΔLM/`D_M`; target: beat raw ΔLM at high α. This is now 
 
 On track? yes — S2 done + S3 core delivered as a decisive negative/decoupling result
 (~55% of direction); no blocker; learned downstream corrector is the clear next build.
+
+## 2026-07-02 — Iter 3: learned downstream-supervised corrector (S3-learned) — POSITIVE
+
+**Did.** Wrote `experiments/03_learned_corrector.py`: a `Corrector` 4-layer MLP (4.46M params,
+last layer zero-init → starts = raw steering) producing `r_θ(h,z,α)`, applied as
+`ĥ = z + P_{v⊥}r_θ` (projection preserved by construction). Trained end-to-end against the FROZEN
+GPT-2's real next-token cross-entropy via the FuncPatcher hook: inside the hook `h` is detached
+(no grad to lower blocks) and all LM weights are frozen (`requires_grad_(False)`), so only `r_θ`
+learns. α~U(0.5,8) per step, +λ_near·⟨‖P⊥r‖²⟩ (0.05) minimal-correction penalty. 6 epochs /
+~230 steps on 300 FineWeb docs (seq 64, batch 8), evaluated on the same held-out 100 docs as
+Exp 1/2. Ran clean on GPU (0.18 frac), ~90s total.
+
+**Learned (the headline — a decisive POSITIVE).** The learned corrector BEATS raw steering at
+every α at matched projection. ΔLM at α=8: raw +2.78 → learned **+0.44 nats (84% recovery)**;
+at low α it is essentially free (−0.07 at α=1, −0.05 at α=2). And it does this while moving
+FURTHER off the Gaussian manifold than raw (`D_M` 49.0→79.5 at α=8) — the exact mirror of Exp 2,
+where the manifold-optimal cov_corr moved TOWARD the manifold and broke the LM. So the three
+experiments now form a complete arc: (1) raw steering breaks the LM off-manifold; (2) a Gaussian
+manifold surrogate is anti-correlated with LM safety; (3) the SAME projection-preserving form,
+supervised by the downstream LM loss, recovers most fluency — and the safe correction is itself
+off the statistical manifold. This satisfies the PLAN success criterion (corrector beats raw at
+matched projection on ΔLM, with verdict + Methods equations + figures).
+
+**Assumption/decision logged.** (a) Trained via the full-model hook with `h` detached rather than
+caching upper-block inputs and reimplementing `upper_forward` — guaranteed identical to the eval
+path (same FuncPatcher), at the cost of recomputing lower blocks each step (negligible, ~90s
+total). (b) Chose a single α-conditioned corrector (α sampled in training) over per-α correctors,
+so one model generalizes across the strength sweep on held-out text — it does. (c) λ_near kept
+small (0.05); the LM loss is self-regularizing (huge orthogonal moves also raise ΔLM), so heavy
+near-z weighting wasn't needed. Rejected: a stay-near-`z` L2 on the full residual (would fight the
+correction); orthogonal-target/paired supervision (Strategy 1) — unnecessary now that direct
+downstream supervision works cleanly.
+
+**Deliverables.** RESULTS.md + REPORT.md curated to the three-experiment current-best; new figure
+`plots/03_learned_corrector.png`; `results/03_learned_corrector.json`. REPORT math re-verified via
+GitHub API (9/9 js-display-math, 0 broken, 0 inline hazards). CHANGELOG appended.
+
+**Next step (S4).** Generalization + Pareto: (i) hold out α *beyond* the training range (e.g. 10,12)
+to test extrapolation; (ii) a held-out steering vector / second behavior family to test the
+corrector isn't overfit to one direction; (iii) add a text-level concept-strength readout so the
+frontier is behavior-vs-fluency, not just ΔLM. Any one of these is a clean next iteration.
+
+On track? yes — S3 fully delivered as a decisive positive result (~85% of direction); success
+criterion met; no blocker. S4 generalization/Pareto is the remaining polish.
