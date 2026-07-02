@@ -80,6 +80,25 @@ manifold than raw steering (`D_M` 49.0→79.5 at α=8), not closer — the mirro
 only a downstream-supervised objective can find it. A statistical manifold prior would have
 pushed in exactly the wrong direction.
 
+**Experiment 4 — Generalization: the corrector extrapolates beyond its training range.**
+The learned corrector was trained with steering strength sampled `α ∼ U(0.5, 8)`. Here we
+evaluate the *same* corrector at `α = 10` and `α = 12` — strictly **beyond** what it ever saw
+in training — on the same held-out 100 docs, at matched projection.
+
+| α | in-training-range? | ΔLM raw (nats) | **ΔLM learned** | reduction | `D_M` raw | `D_M` learned |
+|---|--------------------|----------------|------------------|-----------|-----------|----------------|
+| 8 | yes (boundary) | +2.78 | **+0.44** | 84% | 49.0 | 79.5 |
+| 10 | **no (extrap.)** | +3.31 | **+0.76** | 77% | 57.7 | 91.2 |
+| 12 | **no (extrap.)** | +3.74 | **+1.50** | 60% | 66.8 | 101.2 |
+
+**Reading it:** the corrector keeps helping well outside its training range. At `α=10` it still
+removes **77%** of raw steering's fluency damage, and even at `α=12` — 50% past the training
+ceiling — it removes **60%**. The recovery fraction shrinks gradually as α leaves the training
+region (84%→77%→60%), so the corrector **degrades gracefully rather than collapsing** at
+unseen strengths. In-range α values (1–8) reproduce Experiment 3 to the digit (same seed, same
+data). This is evidence the MLP learned a genuine correction rule that transfers, not a lookup
+table over the trained α grid.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -90,6 +109,9 @@ pushed in exactly the wrong direction.
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the
   Gaussian manifold.
+- `plots/04_generalization.png` — (a) ΔLM, (b) `D_M` vs α for raw steering and the learned
+  corrector, with the shaded region marking α>8 (beyond training). The learned ΔLM stays far below
+  raw across the extrapolation region, its advantage narrowing smoothly.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78

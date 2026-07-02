@@ -123,3 +123,40 @@ frontier is behavior-vs-fluency, not just ΔLM. Any one of these is a clean next
 
 On track? yes — S3 fully delivered as a decisive positive result (~85% of direction); success
 criterion met; no blocker. S4 generalization/Pareto is the remaining polish.
+
+## 2026-07-02 — Iter 4: generalization — α-extrapolation beyond training range (S4a)
+
+**Did.** Wrote `experiments/04_generalization.py`, which reuses Exp 3's Corrector / training loop /
+eval helpers verbatim (imported via importlib to stay DRY and guarantee an identical training path),
+trains the corrector identically (α~U(0.5,8), same seed/data), then evaluates it UNCHANGED at
+α∈{1,2,4,6,8,10,12}. α=10,12 are strictly beyond the training ceiling of 8, so they measure
+extrapolation. Figure shades the α>8 region. ~90s on GPU (0.18 frac).
+
+**Learned (headline).** The learned corrector extrapolates gracefully. Fluency recovered vs raw:
+α=8 (boundary) 84%; α=10 77% (ΔLM raw +3.31→learned +0.76); α=12 60% (raw +3.74→+1.50). Recovery
+declines smoothly (84→77→60%) instead of collapsing at unseen strengths — evidence the MLP learned a
+transferable correction rule, not a lookup over the trained α grid. In-range α (1–8) reproduce Exp 3
+to the digit (same seed/data), a clean reproducibility check. D_M learned stays above raw throughout
+(91.2, 101.2 at α=10,12) — same off-Gaussian-manifold signature as Exp 3, now confirmed to persist
+out of range.
+
+**Assumption/decision logged.** Chose α-extrapolation as the S4 step over held-out-vector or a
+text-level concept readout because it is the cheapest, lowest-risk generalization probe that reuses
+the exact trained model (no new vector-bank or generation pipeline), and directly answers the most
+immediate practitioner worry ("does it still work if I dial α past the training strengths?").
+Rejected for this iter: (a) held-out vector — needs a second concept vector + is more likely to be a
+partial-negative that needs careful framing; queued as the next step. (b) concept-strength text
+readout — needs a generation+scoring harness; heavier. Both remain open in PLAN Next step.
+
+**Deliverables.** RESULTS.md + REPORT.md curated: added Experiment 4 table/interpretation, new
+figure `plots/04_generalization.png`, refined REPORT Limitation (3) (strength-generalization now
+shown; held-out-vector/multi-layer still open). `results/04_generalization.json`. CHANGELOG appended.
+REPORT math re-verified via GitHub API (9/9 js-display-math, 0 broken, 0 inline hazards).
+
+**Next step.** S4(b): held-out steering vector — build a second DiffMean concept direction and test
+whether the sentiment-trained corrector still lowers ΔLM at matched projection on it (real overfit
+probe; the corrector sees v only through z). Alternatively a text-level concept-strength readout for
+a behavior-vs-fluency frontier.
+
+On track? yes — success criterion met since Iter 3; S4(a) generalization delivered (~90% of
+direction); no blocker. Remaining S4(b) held-out-vector / Pareto is optional polish.

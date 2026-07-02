@@ -57,3 +57,22 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - New figure `plots/03_learned_corrector.png` (ΔLM, D_M, projection retention vs α; raw / analytic
   cov-aligned / learned).
 - REPORT math re-verified via GitHub API: 9/9 js-display-math, 0 broken `<pre lang=math>`, 0 inline hazards.
+
+## 2026-07-02 — Experiment 4: generalization / α-extrapolation of the learned corrector (S4)
+- Added Experiment 4 to RESULTS.md and REPORT.md: the Exp-3 learned corrector (trained with
+  α~U(0.5,8)) evaluated UNCHANGED at α=10 and α=12 — strictly beyond its training range — on the
+  same held-out 100 docs, matched projection.
+- **Result (new):** the corrector extrapolates. Fluency recovered vs raw steering: α=8 (boundary)
+  84%; α=10 (extrap.) 77% (ΔLM raw +3.31 → learned +0.76); α=12 (extrap.) 60% (ΔLM raw +3.74 →
+  learned +1.50). Recovery declines smoothly (84→77→60%) — graceful degradation, not collapse.
+  In-range α (1–8) reproduce Exp 3 to the digit (same seed/data), confirming reproducibility.
+  D_M learned rises above raw throughout (91.2, 101.2 at α=10,12) — same off-Gaussian-manifold
+  signature as Exp 3.
+- Interpretation captured: the 4.46M-param MLP learned a transferable correction rule, not a
+  lookup over the trained α grid — a sanity check before trusting the method past fitted strengths.
+- REPORT Limitation (3) refined: strength-generalization now demonstrated (α up to 12); held-out
+  vector / prompt-family / multi-layer still open.
+- New code: `experiments/04_generalization.py` (reuses Exp-3 Corrector/training/eval via import).
+- New figure `plots/04_generalization.png` (ΔLM and D_M vs α, α>8 shaded as extrapolation region);
+  results in `results/04_generalization.json`.
+- REPORT math re-verified via GitHub API: 9/9 js-display-math, 0 broken, 0 inline hazards.

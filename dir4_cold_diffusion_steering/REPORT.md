@@ -171,6 +171,15 @@ sets. Because the correction is still orthogonal to `v`, projection retention st
 identical to raw steering — so Experiment 3 is again a **matched-projection** comparison, now
 against both raw steering and the analytic `cov_corr` of Experiment 2.
 
+### Generalization eval (Experiment 4)
+
+To test whether the corrector learned a transferable rule or merely fit the trained strengths,
+we take the **same trained corrector** (α sampled `U(0.5, 8)`) and evaluate it at
+`α ∈ {1, 2, 4, 6, 8, 10, 12}` on the same held-out documents. The values `α = 10` and `α = 12`
+are strictly **outside the training range** (the corrector never saw `α > 8`), so they measure
+extrapolation. Everything else — parameterization, projection, metrics — is unchanged, so this is
+still a matched-projection comparison against raw steering.
+
 ### Baselines
 
 The **reference points** shared across experiments are:
@@ -268,6 +277,27 @@ correction lives off the statistical manifold, and only a downstream-supervised 
 it. A single MLP, trained on 300 documents with `α` sampled during training, generalizes across
 the full strength range on held-out text.
 
+### Experiment 4 — the corrector generalizes beyond its training range
+
+![generalization beyond training range](plots/04_generalization.png)
+
+The corrector was trained only on `α ∼ U(0.5, 8)`. Evaluated past that ceiling it keeps working:
+
+| α | in training range? | ΔLM raw (nats) | **ΔLM learned** | fluency recovered | `D_M` raw | `D_M` learned |
+|---|--------------------|----------------|------------------|-------------------|-----------|----------------|
+| 8 | yes (boundary) | +2.78 | **+0.44** | 84% | 49.0 | 79.5 |
+| 10 | **no (extrapolation)** | +3.31 | **+0.76** | 77% | 57.7 | 91.2 |
+| 12 | **no (extrapolation)** | +3.74 | **+1.50** | 60% | 66.8 | 101.2 |
+
+**Interpretation.** At `α = 10` — a strength never seen in training — the learned corrector still
+removes **77%** of raw steering's fluency damage, and even at `α = 12` (50% beyond the training
+ceiling) it removes **60%**. The recovered fraction declines smoothly as `α` leaves the training
+region (84% → 77% → 60%) rather than dropping off a cliff, so the corrector **degrades gracefully**
+on unseen strengths. In-range points (`α ≤ 8`) reproduce Experiment 3 exactly (same seed, same
+data). This indicates the 4.46M-parameter MLP learned an actual correction rule that transfers to
+stronger steering, not a memorized response on the trained `α` grid — an important sanity check
+before trusting the method at strengths a practitioner might dial past those used to fit it.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -300,6 +330,7 @@ defining flaw of the *metric as a training target*, not merely a modeling nicety
 fluency/loss-level proxy; it does not yet measure downstream *concept strength* or generated-text
 quality on the steered behavior, which is the natural next evaluation (the projection along `v` is
 preserved exactly, so concept strength is held fixed by construction, but text-level effects are
-unmeasured). (3) One layer, one steering direction, one model so far; held-out-vector and
-held-out-prompt-family generalization remain to test. (4) The small non-positive `ΔLM` at low `α`
+unmeasured). (3) Generalization is tested across steering *strength* — the corrector extrapolates to α up to 12,
+50% beyond its training ceiling (Experiment 4) — but still on one layer, one steering direction, and
+one model; held-out-vector and held-out-prompt-family generalization remain to test. (4) The small non-positive `ΔLM` at low `α`
 is within noise of zero and should not be over-read as the corrector "improving" the base model.

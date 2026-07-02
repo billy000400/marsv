@@ -31,7 +31,10 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         lowers `D_M` but WORSENS `ΔLM` (decoupling/negative). (b) LEARNED `r_θ` MLP trained on the
         DOWNSTREAM LM loss BEATS raw at every α — ΔLM +2.78→+0.44 at α=8 (84% recovery), matched
         projection, moving FURTHER off the Gaussian manifold. Decisive POSITIVE; success criterion met.
-- [ ] S4 — Generalization + Pareto: held-out α / prompts; concept-strength vs fluency frontier; figs.
+- [~] S4 — Generalization + Pareto. (a) α-EXTRAPOLATION DONE: corrector trained on α~U(0.5,8)
+        evaluated at α=10,12 (beyond range) still recovers 77%/60% of raw's ΔLM damage — graceful
+        degradation, not collapse; in-range α reproduce Exp 3 to the digit. (b) held-out vector /
+        concept-strength Pareto still open.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -43,6 +46,14 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1 + S2 + S3 complete + S4(a) α-extrapolation delivered — success criterion MET.
+**S4(a):** the Exp-3 learned corrector (trained α~U(0.5,8)) generalizes BEYOND its training range:
+evaluated unchanged at α=10,12 it recovers 77% / 60% of raw steering's ΔLM damage (raw +3.31→+0.76,
++3.74→+1.50), recovery declining smoothly (84→77→60%) — graceful degradation, not collapse; in-range
+α reproduce Exp 3 to the digit. Artifacts: `experiments/04_generalization.py`,
+`results/04_generalization.json`, `plots/04_generalization.png`. RESULTS/REPORT/CHANGELOG curated;
+REPORT math verified (9/9).
+<!-- prior -->
 S1 + S2 + S3 complete — success criterion MET. Full three-experiment arc: (1) raw steering goes
 off-manifold and breaks the LM (ΔLM +2.78 at α=8); (2) analytic Gaussian-optimal corrector lowers
 `D_M` but WORSENS `ΔLM` to +4.20 (decoupling/negative); (3) a LEARNED 4-layer MLP `r_θ` trained on
@@ -54,12 +65,13 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-S4 — generalization + Pareto (polish; core result already delivered). Options, any one a clean
-iteration: (i) hold out α BEYOND the training range (10, 12) to test extrapolation of the learned
-corrector; (ii) a held-out steering vector / second behavior family to show it isn't overfit to the
-sentiment direction; (iii) add a text-level concept-strength readout so the frontier is
-behavior-vs-fluency, not just ΔLM (projection along v is held fixed by construction, so concept
-strength is controlled — measure generated-text quality/repetition alongside).
+S4 remaining polish (core + α-extrapolation already delivered). Best next options, any one a clean
+iteration: (i) held-out steering vector / second behavior family — build a second DiffMean concept
+vector and test whether the sentiment-trained corrector still helps at matched projection on that
+direction (tests overfit to one v; the corrector sees v only implicitly through z, so this is a real
+generalization probe and either outcome is informative); (ii) text-level concept-strength readout so
+the frontier is behavior-vs-fluency, not just ΔLM (projection along v is fixed by construction, so
+concept strength is controlled — measure generated-text repetition/quality alongside ΔLM).
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 
