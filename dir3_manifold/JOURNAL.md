@@ -310,3 +310,17 @@ If reopened: raw block-11 resid_post via a forward hook (current L11 is post-ln_
 outlier-dim-removed activations; second model/corpus; TDA persistent homology on a layer-6 subsample.
 
 On track? yes — 100% done; S1–S6 + all SIX operator feedback items addressed; new pca_cumvar figure rendered + embedded; STOP written; no blocker.
+
+## Iter 13 (2026-07-02) — Operator feedback: non-log-scale PCA variance plot
+Addressed `human_feedback_07021113.md`: *"for the PCA variance plot, also add a non log scale
+version."* Added a Fig-6b block to `experiments/make_plots.py` that renders the same per-layer
+cumulative-variance curves (`results/pca_cumvar.json`) on a **linear** x-axis →
+`plots/pca_cumvar_linear.png` (95% ● / 99% □ crossings marked, matching the log version). Embedded
+it in RESULTS.md right below the existing log-x figure with a one-line reading. matplotlib 3.11.0
+was still present (no reinstall needed); ran `make_plots.py` clean (all 7 PNGs, incl. the new one).
+No result numbers changed — pure visualization of the already-reported d95/d99. CHANGELOG appended,
+feedback renamed `→ .addressed.md`, STOP re-written.
+Next step: none; reopen only for a new *REVIEW*/*feedback* file or the stretch items.
+
+On track? yes — 100% done; S1–S6 + all SEVEN operator feedback items addressed; new linear-x
+pca_cumvar figure rendered + embedded; STOP written; no blocker.

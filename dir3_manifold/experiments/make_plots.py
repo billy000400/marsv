@@ -210,4 +210,28 @@ ax.legend(fontsize=8, loc="lower right")
 ax.grid(alpha=0.3, which="both")
 save(fig, "pca_cumvar.png")
 
+# ---- Fig 6b: same curves, LINEAR x-axis (operator request 2026-07-02) ----
+fig, ax = plt.subplots(figsize=(7.5, 4.8))
+for r in cv:
+    L = r["layer"]
+    cum = np.array(r["cumvar"])
+    c = colors[L]
+    ax.plot(dims, cum, "-", color=c, lw=1.6,
+            label=f"L{L}  (d95={r['d95']}, d99={r['d99']})")
+    ax.plot(r["d95"], cum[r["d95"] - 1], "o", color=c, ms=5)
+    ax.plot(r["d99"], cum[r["d99"] - 1], "s", color=c, ms=5, mfc="none")
+ax.axhline(0.95, color="k", ls="--", lw=0.9)
+ax.axhline(0.99, color="k", ls=":", lw=0.9)
+ax.text(772, 0.95, "95%", va="center", ha="left", fontsize=8)
+ax.text(772, 0.99, "99%", va="center", ha="left", fontsize=8)
+ax.set_xlim(0, 768)
+ax.set_ylim(0, 1.02)
+ax.set_xlabel("number of principal components (linear scale)")
+ax.set_ylabel("cumulative variance explained")
+ax.set_title("Cumulative PCA variance, GPT-2 small residual stream (linear x)\n"
+             "● = 95% crossing, □ = 99% crossing  (L11 is post-final-layernorm)")
+ax.legend(fontsize=8, loc="lower right")
+ax.grid(alpha=0.3)
+save(fig, "pca_cumvar_linear.png")
+
 print("done")

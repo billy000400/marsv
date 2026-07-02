@@ -30,7 +30,14 @@ mean-centered 768×768 covariance eigen-spectrum as the table). It makes the two
 their d95 is dominated by whether that one dim alone already clears the threshold (L3/L11 reach
 95% within 5–6 PCs; L6 needs 94).
 
-![Cumulative PCA variance per layer with 95%/99% crossings marked](plots/pca_cumvar.png)
+![Cumulative PCA variance per layer with 95%/99% crossings marked (log x-axis)](plots/pca_cumvar.png)
+
+The same curves on a **linear** x-axis (operator request, 2026-07-02) make the
+sharpness of the low-PC rise directly comparable across layers: L3/6/11 hit ≳0.8 at
+the first PC and are visually vertical there, while L0 rises gradually across hundreds
+of components.
+
+![Cumulative PCA variance per layer, linear x-axis, with 95%/99% crossings marked](plots/pca_cumvar_linear.png)
 
 ### Nonlinear estimators (TwoNN + MLE, pure-numpy/torch, CPU) — done (S2b)
 Hand-rolled (no skdim): TwoNN = Facco distance-ratio fit (10% tail discarded);

@@ -5,6 +5,17 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-02 — Add linear-x-axis version of the cumulative-PCA-variance plot (operator request; no numbers changed)
+- **Operator request** (`human_feedback_07021113.md`): *"for the PCA variance plot, also add a non
+  log scale version."*
+- Added a Fig-6b block to `experiments/make_plots.py` rendering the **same** per-layer cumulative-
+  variance curves (from `results/pca_cumvar.json`) on a **linear** x-axis → new figure
+  `plots/pca_cumvar_linear.png` (95% ● / 99% □ crossings marked, same as the log version).
+- Embedded it in RESULTS.md's linear-PCA section directly below the existing log-x figure, with a
+  one-line reading (L3/6/11 near-vertical at PC 1; L0 gradual).
+- **No result numbers changed** — pure visualization of the already-reported d95/d99.
+- Renamed `human_feedback_07021113.md` → `human_feedback_07021113.addressed.md`.
+
 ## 2026-07-02 — Add cumulative-PCA-variance plot (operator request; no numbers changed)
 - **Operator request** (`human_feedback_07021056.md`): *"make a plot of accumulated PCA variance
   and mark the 95% and 99% points."*
