@@ -51,7 +51,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         transfers best (51→7%). In-bank recovery falls with internal correlation (diffuse67>exp6 48>cur30).
         ⇒ bank ANGULAR DIVERSITY, not target coverage, drives transfer; per-direction native corrector
         (78–142%) remains the reliable route. Third corrective negative (dirs/params/curation all fail).
-        (d) concept-strength text Pareto still open (opt).
+        (d) BEHAVIORAL text Pareto DONE (Exp 10): scored the flagship sentiment corrector on GENERATED
+        text (not teacher-forced ΔLM) — sentiment effect B(α) on a clean re-encode + distinct-2
+        degeneration. CORRECTIVE: matched layer-6 projection ≠ matched behavioral steering. Raw steers
+        hard then collapses to repetition (distinct-2 0.78→0.32 @α=8); the corrector stays fluent
+        (0.64–0.72) but is only weakly steered (effect ~1/6 of raw). P_{v⊥}r is ⟂v in activation space
+        but not to the downstream readout ⇒ the ΔLM win partly reflects a weaker propagated edit. Exp 3's
+        "full edit intact" qualified to "layer-6 projection intact"; Limitation (2) fixed.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -63,6 +69,22 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
+direction-conditional-bank + S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL
+text Pareto (Exp 10) delivered — success criterion MET; direction complete on all planned axes (~99%).
+**S4(d) Experiment 10 (new):** the one unmeasured axis — all 9 prior experiments scored ΔLM (fluency) at
+matched projection; none checked behavioral steering on GENERATED text. Greedy-generated under raw vs the
+flagship sentiment corrector; scored sentiment effect B(α) (clean re-encode proj onto v̂) + distinct-2
+degeneration. CORRECTIVE finding: matched layer-6 projection ≠ matched behavioral steering. Raw steers
+hard (effect +2.97 @α=2) then collapses to repetition (distinct-2 0.78→0.32 @α=8); the corrector stays
+fluent at all α (0.64–0.72 ≈ baseline 0.70) but is only weakly steered (effect +0.15–0.48, ~1/6 of raw).
+Mechanism: P_{v⊥}r ⟂ v in activation space but NOT to the downstream sentiment readout, so minimizing LM
+loss yields near-normal lightly-steered text ⇒ the ΔLM win of Exp 3–9 partly reflects a weaker propagated
+edit, not costless cleanup. Qualified Exp 3's "full edit intact"→"layer-6 projection intact"; fixed
+Limitation (2)'s false "concept strength held fixed by construction". Artifacts:
+`experiments/10_behavioral_pareto.py`, `results/10_behavioral_pareto.json`, `plots/10_behavioral_pareto.png`.
+RESULTS/REPORT/CHANGELOG curated; REPORT math verified (12/12 js-display-math, 0 broken, 0 inline hazards).
+<!-- prior: S4(c follow-up #3) curated-bank Exp 9 -->
 S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
 direction-conditional-bank + S4(c-follow-up) bank-SCALING (Exp 7) + S4(c-follow-up #2) capacity-SCALING
 (Exp 8) + S4(c-follow-up #3) CURATED-BANK (Exp 9) delivered — success criterion MET; direction complete
@@ -153,13 +175,15 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-Core arc + all generalization axes delivered; the amortization story is now CLOSED on all three scaling
-axes — more directions (Exp 7), more parameters (Exp 8), and target-aligned bank curation (Exp 9) ALL
-fail to close the held-out gap. Optional remaining polish, any one a clean iteration: (i) test bank
-DIVERSITY directly as the POSITIVE lever — build a maximally-orthogonal 3-bank and check in-bank +
-held-out transfer vs the collinear curated bank (Exp 9 implies diversity helps; verify constructively);
-(ii) text-level concept-strength readout so the frontier is behavior-vs-fluency, not just ΔLM;
-(iii) multi-layer or a second model. All optional; success criterion long met.
+Core arc + all generalization axes + the behavioral axis delivered. Amortization story CLOSED on three
+scaling axes (Exp 7/8/9 all negative), and the flagship fluency story now has its behavioral reality-check
+(Exp 10: matched layer-6 projection ≠ matched behavioral steering — the corrector stays fluent but under-
+steers in generation). Optional remaining polish, any one a clean iteration: (i) train a corrector with an
+explicit BEHAVIORAL-preservation term (match the downstream v̂-projection of the GENERATION, not just the
+layer-6 projection) and test whether the effect–fluency Pareto of Exp 10 can be pushed outward — the
+highest-value follow-up, directly attacking Exp 10's tradeoff; (ii) confirm the bank-diversity lever
+directly (max-orthogonal 3-bank vs collinear curated); (iii) multi-layer or a second model. All optional;
+success criterion long met.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

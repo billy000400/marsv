@@ -362,3 +362,42 @@ in-bank + held-out vs the collinear curated bank; (ii) S4(d) concept-strength TE
 fluency, not just ΔLM); (iii) multi-layer or a second model. All optional.
 On track? yes — S4(c) fully closed on all three scaling axes (Exp 7 bank-size, Exp 8 capacity, Exp 9
 curation — all corrective/negative); direction ~99% complete, deliverables curated + math-verified. No blocker.
+
+## 2026-07-02 20:2x — Experiment 10: behavioral reality-check (does the corrected steer still steer generated text?)
+**Did:** Every prior experiment (1–9) scored the corrector on teacher-forced ΔLM at MATCHED PROJECTION
+along v — a single-layer proxy that never verified the corrected steer, used to GENERATE, still moves the
+output text. Wrote `experiments/10_behavioral_pareto.py` (imports Exp 3 Corrector/train_corrector/
+make_hat/FuncPatcher via importlib; retrains the flagship sentiment corrector identically). Greedy-
+generate 30 tokens from 48 held-out 12-token prompts with the steer at resid_post b6 every position, raw
+vs corrected. On a CLEAN re-encode of output: sentiment effect B(α)−B(0) (proj onto v̂, B0=+0.34) and
+degeneration distinct-2 (unique-bigram ratio, baseline 0.70). Ran ~2 min, no OOM under 0.18 frac.
+**Learned (important, corrective):** the corrector's fluency win is NOT a free lunch — it trades away the
+behavioral steer, which matched-projection ΔLM hid. Raw steers hard (effect +2.97 @α=2) then COLLAPSES
+into repetition/gibberish (distinct-2 0.78→0.32 @α=8; sample "the second-t-t-t-t-t-t"). The corrector
+STAYS coherent/fluent at all α (distinct-2 0.64–0.72 ≈ baseline 0.70; sample "It is located in the heart
+of the city … watch the city's skyline") but is only WEAKLY steered (effect +0.15–0.48, ~1/6 of raw's).
+Neither dominates the effect-vs-fluency Pareto. Mechanism: P_{v⊥}r is orthogonal to v in ACTIVATION space
+but NOT to the downstream sentiment READOUT, so minimizing LM loss drives the corrector to near-normal,
+lightly-steered generations. ⇒ matched layer-6 projection ≠ matched behavioral steering; the big ΔLM
+recoveries of Exp 3–9 partly reflect a weaker propagated edit, not costless cleanup.
+**Assumption/decision logged.** (a) Chose PLAN Next-step (ii) the S4(d) behavioral/text axis over
+(i) diversity-confirmation / (iii) multi-layer because it is the single UNMEASURED axis (all 9 prior
+metrics are ΔLM/fluency; none the behavioral effect) and it directly tests the flagship "keeps the full
+edit" claim — the most reviewer-obvious gap and highest-value question. (b) Behavioral effect measured by
+projecting a CLEAN re-encode of the generated text onto v̂ (not the steered acts) — non-circular: it asks
+whether the produced TEXT reads steered on its own. (c) Degeneration via distinct-2 (unique-bigram ratio)
+rather than self-perplexity, because repetition/gibberish (the actual strong-steer failure mode) gives
+LOW self-perplexity — distinct-2 captures it correctly. (d) Greedy decoding for determinism/reproducibility.
+(e) Reported the deflating tradeoff HONESTLY and qualified Exp 3's "steering edit fully intact" (true only
+for the layer-6 projection) + corrected Limitation (2)'s false "concept strength held fixed by
+construction" — this reframing IS the finding; hiding it would violate faithful reporting.
+**Deliverables:** RESULTS.md +Exp 10 (table + reading) + figure entry + Headline behavioral-caveat para +
+qualified flagship sentence; REPORT.md +Exp 10 Methods (B(α), distinct-2, gen protocol) + Results + Summary
++ Conclusion caveats + fixed Limitation (2); plots/10_behavioral_pareto.png; results/10_behavioral_pareto.json
+(incl. sample gens); CHANGELOG appended. REPORT math re-verified (12/12 js-display-math, 0 broken, 0 inline hazards).
+**Next step (optional; success criterion long met, all planned axes done):** any one a clean iter —
+(i) train a corrector with an explicit behavioral-preservation term (e.g. match downstream v̂-projection of
+generation, not just layer-6) and see if the effect–fluency Pareto can be pushed out; (ii) confirm the
+diversity lever directly (max-orthogonal 3-bank vs collinear); (iii) multi-layer / second model. All optional.
+On track? yes — S4(d) behavioral axis delivered (corrective: matched projection ≠ matched steering);
+direction ~99% complete on all planned axes, deliverables curated + math-verified. No blocker.

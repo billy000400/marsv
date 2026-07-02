@@ -312,6 +312,48 @@ reproducibility check. The native oracle (78–142%) is unchanged — the direct
 per-direction; amortizing it across directions is capped by the **training signal**, of which bank
 composition is now shown to matter through *diversity*, not target alignment.
 
+**Experiment 10 — Behavioral reality-check: matched projection ≠ matched steering in generation.**
+Experiments 2–9 all score the corrector on `ΔLM` (fluency) at *matched projection* — the corrector
+holds the layer-6 edit along `v` fixed to `α|v|` by construction. But matched projection **at one
+layer** is a proxy: it does not prove that when you use the corrected activation to actually *generate*
+text, the text (a) still moves in the steered direction, or (b) reads more fluently than raw-steered
+text. We test both directly. Using the flagship sentiment corrector (Exp 3, retrained identically), we
+greedily generate 30-token continuations from 48 held-out prompts with the steer applied at resid_post
+block 6 at **every** generated position, under raw steering vs. the corrector, and measure two
+quantities on a **clean re-encode** of the generated text: the **sentiment effect** `B(α)−B(0)` (mean
+projection of the continuation's block-6 activations onto `v̂`, relative to the unsteered greedy
+continuation `B(0)=+0.34`; higher = more strongly steered) and **degeneration** via **distinct-2** (the
+unique-bigram ratio of the generated tokens; the unsteered baseline is `0.70`, and lower = more
+repetitive/collapsed text).
+
+| α | effect raw `B−B₀` | effect corr `B−B₀` | distinct-2 raw | distinct-2 corr |
+|---|-------------------|--------------------|----------------|-----------------|
+| 2 | **+2.97** | +0.17 | 0.78 | 0.65 |
+| 4 | **+2.31** | +0.19 | 0.72 | 0.72 |
+| 6 | **+2.47** | +0.15 | 0.54 | 0.71 |
+| 8 | +1.77 | +0.48 | **0.32** | **0.64** |
+
+**Reading it: the corrector's fluency win is real but is NOT a free lunch — it comes partly at the cost
+of the behavioral steer, a tradeoff the matched-projection `ΔLM` metric hid.** Three things happen.
+**(1) Raw steering genuinely steers, then degenerates.** Raw steering swings the generated text's
+sentiment hard (`+2.97` at α=2 — e.g. "the weather is perfect. The temperature is perfect") but as α
+grows the text collapses into repetition/gibberish: distinct-2 falls `0.78 → 0.32` (α=8 sample:
+"the Southern-the-Bt and the second-t-t-t-t-t-t"). **(2) The corrector fixes the degeneration.** Its
+generations stay coherent and near-baseline-diverse at every strength (distinct-2 `0.64–0.72`, vs the
+unsteered `0.70`; α=8 sample: "It is located in the heart of the city … a place to watch the city's
+skyline") — no collapse. **(3) But the corrector's text is barely steered.** Its sentiment effect is
+`+0.15–0.48` — roughly one-sixth of raw's pre-collapse effect. So the correction, though orthogonal to
+`v` in *activation* space, is **not** orthogonal to the downstream sentiment *readout*: minimizing LM
+loss at matched layer-6 projection drives the corrector to a solution that produces near-normal,
+lightly-steered text. On the effect-vs-fluency Pareto the two methods do **not** dominate each
+other — raw buys behavioral effect at the price of fluency; the corrector buys fluency at the price of
+behavioral effect. **The practical caveat:** the large `ΔLM` recoveries of Experiments 3–9 measure how
+much the corrector reduces the *disruption a steer causes to processing real text* (teacher-forced), and
+that is genuine; but a substantial part of that reduction reflects a **weaker propagated edit in
+generation**, not a costless cleanup. "Matched projection at one layer" does **not** guarantee "matched
+behavioral steering," and any deployment of ColdSteer must measure the behavioral effect on generated
+text — not just `ΔLM` — before trusting the correction.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -347,15 +389,21 @@ composition is now shown to matter through *diversity*, not target alignment.
   oracle; (b) held-out recovery at α=1 and α=8 vs bank mean `|cos|` to the target — the headline
   curve, showing transfer PEAKS at moderate alignment and COLLAPSES (negative at weak steering) for
   the most target-aligned bank. Curating toward the subspace backfires; diversity governs transfer.
+- `plots/10_behavioral_pareto.png` — behavioral test on generated text (sentiment corrector). (a)
+  sentiment effect `B(α)−B(0)` vs α for raw vs corrected steering; (b) distinct-2 (unique-bigram ratio)
+  vs α; (c) the effect-vs-fluency Pareto (points labelled by α). Raw traces high-effect→collapsing-
+  fluency; the corrector clusters at low-effect→high-fluency — neither dominates. Matched layer-6
+  projection does not translate into matched behavioral steering in generation.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
 nats at α=8). Correcting toward the **Gaussian manifold backfires** — an analytic projection-
 preserving corrector cuts off-manifold distance 22% but *worsens* LM loss to +4.2 nats. But a
-**learned corrector supervised by the LM loss** — same projection-preserving form, so the steering
-edit is untouched — **recovers 84% of the damage** (ΔLM +2.78→+0.44 at α=8) while moving *further*
-from the Gaussian manifold. Statistical "on-manifold" and "LM-safe" are decoupled; only the
-downstream objective finds the safe, on-behavior correction. The correction is **direction-specific**
+**learned corrector supervised by the LM loss** — same projection-preserving form, so the layer-6
+steering projection is untouched — **recovers 84% of the teacher-forced fluency damage** (ΔLM
++2.78→+0.44 at α=8) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
+"LM-safe" are decoupled; only the downstream objective finds the fluent correction. The correction is
+**direction-specific**
 — a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe
 generalizes**: retraining it on a new formality direction recovers 83–104% of the damage there too.
 Making the corrector **direction-conditional** (feed `v̂`) and training it on a **bank** of directions
@@ -374,3 +422,13 @@ its directions), not coverage of the target's subspace. So amortized cross-direc
 capped not by coverage, parameter count, or subspace alignment but by the **training signal** — the
 correction is fundamentally direction-specific, and the reliable route to a genuinely unseen direction
 remains the **per-direction native corrector** (78–142% recovery).
+
+**A behavioral caveat on the fluency story (Exp 10).** The `ΔLM` recoveries above are measured at
+*matched projection at one layer* — a proxy. When the sentiment corrector is used to actually *generate*
+text, it keeps generation fluent (distinct-2 near baseline while raw steering collapses into repetition,
+0.78→0.32 at α=8) but its output is only weakly steered (sentiment effect ~one-sixth of raw's). The
+projection-preserving correction is orthogonal to `v` in *activation* space yet **not** orthogonal to the
+downstream sentiment *readout*, so minimizing LM loss produces near-normal, lightly-steered text. There
+is a genuine **effect–fluency tradeoff** the matched-projection metric hid: the corrector's fluency win
+is not costless — part of it is a weaker propagated edit. Matched layer-6 projection ≠ matched behavioral
+steering; any use of ColdSteer must verify the behavioral effect on generated text, not only `ΔLM`.

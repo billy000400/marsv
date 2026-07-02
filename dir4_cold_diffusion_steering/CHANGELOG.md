@@ -208,3 +208,30 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   (held-out recovery vs α per bank + oracle; held-out recovery @α=1,8 vs bank |cos| alignment). Results in
   `results/09_curated_bank.json`.
 - REPORT math re-verified via GitHub API: 10/10 js-display-math, 0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-02 (Experiment 10 — behavioral reality-check: matched projection ≠ matched steering in generation)
+- **New experiment (corrective/caveat to the flagship fluency story).** All prior experiments score the
+  corrector on teacher-forced `ΔLM` at *matched projection at one layer* — a proxy that never checked
+  whether the corrected steer, used to GENERATE, still steers the text. Exp 10 tests it directly.
+- **Setup:** flagship sentiment corrector (Exp 3, retrained identically). Greedy-generate 30 tokens from
+  48 held-out 12-token prompts with the steer applied at resid_post block 6 at every position, raw vs
+  corrected. On a CLEAN re-encode of the output: sentiment effect `B(α)−B(0)` (proj onto v̂; baseline
+  B0=+0.34) and degeneration distinct-2 (unique-bigram ratio; baseline 0.70).
+- **Result:** the corrector's fluency win is NOT free — it trades away the behavioral steer, which the
+  matched-projection metric hid. Raw steers hard (effect +2.97 @α=2) then collapses into repetition
+  (distinct-2 0.78→0.32 @α=8; "the second-t-t-t-t-t-t"). The corrector STAYS fluent at all α (distinct-2
+  0.64–0.72, near baseline 0.70) but is only weakly steered (effect +0.15–0.48, ~1/6 of raw's). Neither
+  method dominates the effect-vs-fluency Pareto. Mechanism: P_{v⊥}r is orthogonal to v in ACTIVATION
+  space but NOT to the downstream sentiment READOUT, so minimizing LM loss yields near-normal,
+  lightly-steered text.
+- **Superseded framing:** Exp 3/Summary/Conclusion "recovers 84% ... with the steering edit fully intact"
+  → qualified to "with the layer-6 steering PROJECTION intact"; the behavioral edit in generation is
+  weakened. Limitation (2) corrected: it previously claimed "concept strength is held fixed by
+  construction" (FALSE for generation) → now states matched layer-6 projection ≠ matched behavioral
+  steering, and behavioral effect must be measured directly. RESULTS Headline + REPORT Summary/Conclusion
+  gain a behavioral-caveat paragraph.
+- New code: `experiments/10_behavioral_pareto.py` (imports Exp 3 Corrector/train_corrector/make_hat/
+  FuncPatcher via importlib). New figure `plots/10_behavioral_pareto.png` (effect vs α; distinct-2 vs α;
+  effect-vs-fluency Pareto). Results in `results/10_behavioral_pareto.json` (incl. sample generations).
+- REPORT math re-verified via GitHub API: 12/12 js-display-math (added B(α) + distinct-2 fences),
+  0 broken (<pre lang=math>), 0 inline hazards.
