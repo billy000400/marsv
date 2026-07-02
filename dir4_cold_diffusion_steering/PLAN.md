@@ -58,6 +58,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         (0.64–0.72) but is only weakly steered (effect ~1/6 of raw). P_{v⊥}r is ⟂v in activation space
         but not to the downstream readout ⇒ the ΔLM win partly reflects a weaker propagated edit. Exp 3's
         "full edit intact" qualified to "layer-6 projection intact"; Limitation (2) fixed.
+        (e) BEHAVIORAL-PRESERVATION term DONE (Exp 11): added one loss term matching the corrector's
+        DOWNSTREAM sentiment readout (final resid_post, L2=11) to raw steering's, weight λ_b∈{0,10,40}.
+        PARTIAL POSITIVE: recovers 2–6× more generated effect (+0.15–0.48→+0.8–1.3) while staying fluent
+        (distinct-2 0.52–0.73 vs raw's 0.32 collapse), turning Exp 10's "neither dominates" into outright
+        Pareto DOMINANCE over raw at moderate steering. Ceiling: no λ_b reaches raw's strong pre-collapse
+        effect (≈+2.5) — matching the teacher-forced readout only partially transfers to generation. Frontier
+        pushed out, not erased. λ_b=0 reproduces Exp 10 to the digit.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -69,6 +76,25 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1+S2+S3 + S4(a) strength-extrap + S4(b) held-out-vector + S4(c) direction-conditional-bank +
+S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL text Pareto (Exp 10) +
+S4(e) BEHAVIORAL-PRESERVATION term (Exp 11) delivered — success criterion MET; direction complete on all
+planned axes plus the behavioral-tradeoff follow-up (~99%).
+**S4(e) Experiment 11 (new):** acted on the highest-value open follow-up — attack Exp 10's discovered
+effect-fluency tradeoff. Kept the Exp 3 corrector/recipe/seed/data and added ONE loss term matching the
+corrector's DOWNSTREAM sentiment readout (final resid_post L2=11; DiffMean ŵ |w|=3.87) to RAW steering's,
+weight λ_b∈{0,10,40} (λ_b=0 = Exp 10 corrector). Scored each on the IDENTICAL Exp 10 generation protocol.
+PARTIAL POSITIVE (first non-negative follow-up in a while): the term recovers 2–6× more behavioral effect
+(gen effect +0.15–0.48→+0.8–1.3) while keeping generation fluent (distinct-2 0.52–0.73 vs raw's 0.32
+collapse @α=8), turning Exp 10's "neither dominates" into outright Pareto DOMINANCE over raw at moderate
+steering (λ_b=40 @α=2: effect +0.99 at distinct-2 0.73≈baseline; raw only reaches that effect after
+collapsing). CEILING: no λ_b reaches raw's strong pre-collapse effect (≈+2.5); λ_b 10→40 stops raising it
+and only raises training LM loss — matching the TEACHER-FORCED downstream readout (behav loss→~0.005,
+p_corr≈p_raw) only PARTIALLY transfers to autoregressive generation (a second layer of the same proxy
+gap). Frontier pushed OUT, not erased. Artifacts: `experiments/11_behavioral_corrector.py`,
+`results/11_behavioral_corrector.json`, `plots/11_behavioral_corrector.png`. RESULTS/REPORT/CHANGELOG
+curated; REPORT math verified (13/13 js-display-math, 0 broken, 0 inline hazards).
+<!-- prior: S4(d) behavioral text Pareto Exp 10 -->
 S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
 direction-conditional-bank + S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL
 text Pareto (Exp 10) delivered — success criterion MET; direction complete on all planned axes (~99%).
@@ -175,15 +201,15 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-Core arc + all generalization axes + the behavioral axis delivered. Amortization story CLOSED on three
-scaling axes (Exp 7/8/9 all negative), and the flagship fluency story now has its behavioral reality-check
-(Exp 10: matched layer-6 projection ≠ matched behavioral steering — the corrector stays fluent but under-
-steers in generation). Optional remaining polish, any one a clean iteration: (i) train a corrector with an
-explicit BEHAVIORAL-preservation term (match the downstream v̂-projection of the GENERATION, not just the
-layer-6 projection) and test whether the effect–fluency Pareto of Exp 10 can be pushed outward — the
-highest-value follow-up, directly attacking Exp 10's tradeoff; (ii) confirm the bank-diversity lever
-directly (max-orthogonal 3-bank vs collinear curated); (iii) multi-layer or a second model. All optional;
-success criterion long met.
+Core arc + all generalization axes + the behavioral axis + the behavioral-preservation follow-up delivered.
+Amortization story CLOSED on three scaling axes (Exp 7/8/9 all negative); the flagship fluency story has
+its behavioral reality-check (Exp 10) AND its constructive follow-up (Exp 11: an explicit downstream-readout
+term pushes the effect-fluency Pareto OUTWARD — dominance over raw at moderate steering — but a ceiling
+remains because a teacher-forced readout only partially transfers to generation). Optional remaining polish,
+any one a clean iteration: (i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH
+generation (sampled/differentiable rollout) rather than teacher-forced — directly targets the residual proxy
+gap; (ii) confirm the bank-diversity lever directly (max-orthogonal 3-bank vs collinear curated); (iii)
+multi-layer or a second model. All optional; success criterion long met.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

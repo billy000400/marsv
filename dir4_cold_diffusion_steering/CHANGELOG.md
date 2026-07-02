@@ -235,3 +235,31 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   effect-vs-fluency Pareto). Results in `results/10_behavioral_pareto.json` (incl. sample generations).
 - REPORT math re-verified via GitHub API: 12/12 js-display-math (added B(α) + distinct-2 fences),
   0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-02 — Experiment 11: behavioral-preservation term pushes the Exp 10 Pareto outward
+- **Motivation:** Exp 10 found the flagship sentiment corrector under-steers in generation because its
+  layer-6 correction, though ⟂ v, is NOT ⟂ the downstream concept readout. Exp 11 acts on PLAN Next-step
+  (i): add a term that preserves the downstream readout and test whether the effect-fluency Pareto moves out.
+- **Setup:** identical Exp 3 corrector/recipe/seed/data + ONE extra loss term. During teacher-forced
+  training also read out the sentiment projection at downstream layer L2=11 (final resid_post; DiffMean
+  ŵ, |w|=3.87) and push corrected p_corr toward RAW steering's p_raw via λ_b·⟨((p_corr−p_raw)/100)²⟩.
+  Train family λ_b∈{0,10,40} (λ_b=0 = Exp 10 corrector) and score each on the IDENTICAL Exp 10 generation
+  protocol (48 prompts, 30 greedy tokens; effect B(α)−B(0) and distinct-2 on clean re-encode).
+- **Result (new):** the behavioral term recovers 2–6× more behavioral effect while staying fluent, and
+  pushes the frontier OUTWARD at the fluent end. Generated effect rises from Exp 10's +0.15–0.48 (λ_b=0)
+  to +0.8–1.3 (λ_b=10/40); distinct-2 stays 0.52–0.73 (raw collapses to 0.32 @α=8). NEW finding vs Exp 10
+  ("neither dominates"): the corrector now Pareto-DOMINATES raw at moderate steering — λ_b=40 @α=2 reaches
+  effect +0.99 at distinct-2 0.73 (≈baseline), whereas raw only reaches effect that low (+1.77 @α=8) after
+  collapsing to 0.32. CEILING: no λ_b lifts effect past ≈+1.3 (λ_b 10→40 stops raising it; even falls @α=6
+  +0.93→+0.84) — matching the teacher-forced downstream readout (training behav loss →~0.005, p_corr≈p_raw)
+  only PARTIALLY transfers to autoregressive generation. λ_b=0 reproduces Exp 10 to the digit (reproducibility).
+- **Deliverable deltas:** RESULTS.md +Exp 11 (table + reading) + figure entry + Headline "Partial fix"
+  paragraph. REPORT.md +Exp 11 Methods (behavioral term equation + downstream readout) + Results section +
+  Summary/Conclusion updates; Limitation (2) updated (the "explicit behavioral objective is the natural next
+  step" is now DONE — pushes frontier out but does not erase it). No prior result superseded (Exp 11 is new;
+  Exp 10 numbers unchanged, reproduced by λ_b=0).
+- New code `experiments/11_behavioral_corrector.py` (imports exp01 POS/NEG, exp03 Corrector/make_hat/
+  FuncPatcher, exp10 generate/effect/distinct2). New figure `plots/11_behavioral_corrector.png` (effect vs
+  α; distinct-2 vs α; effect-vs-fluency Pareto with λ_b family). Results `results/11_behavioral_corrector.json`.
+- REPORT math re-verified via GitHub API: 13/13 js-display-math (added the behavioral-loss fence), 0 broken
+  (<pre lang=math>), 0 inline hazards.

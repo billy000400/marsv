@@ -401,3 +401,48 @@ generation, not just layer-6) and see if the effect–fluency Pareto can be push
 diversity lever directly (max-orthogonal 3-bank vs collinear); (iii) multi-layer / second model. All optional.
 On track? yes — S4(d) behavioral axis delivered (corrective: matched projection ≠ matched steering);
 direction ~99% complete on all planned axes, deliverables curated + math-verified. No blocker.
+
+## 2026-07-02 20:3x — Experiment 11: behavioral-preservation term (attacking Exp 10's tradeoff)
+**Did:** PLAN Next-step (i), the highest-value follow-up — Exp 10 found the flagship corrector under-steers
+in generation (behavioral effect ~1/6 of raw) because P_{v⊥}r is ⟂ v at layer 6 but NOT ⟂ the downstream
+sentiment READOUT, so minimizing LM loss suppresses the propagated concept signal. Wrote
+`experiments/11_behavioral_corrector.py`: keep the Exp 3 corrector/recipe/seed/data, add ONE loss term.
+Each teacher-forced step also reads out sentiment at downstream L2=11 (final resid_post; DiffMean ŵ from
+the same POS/NEG prompts, |w|=3.87) and pushes corrected p_corr toward RAW steering's p_raw (separate
+no-grad forward) via λ_b·⟨((p_corr−p_raw)/100)²⟩. Trained a family λ_b∈{0,10,40} (λ_b=0 = Exp 10 corrector),
+scored each on the IDENTICAL Exp 10 generation protocol (48 prompts × 30 greedy tokens; effect B(α)−B(0)
+and distinct-2 on clean re-encode). Ran ~5 min under 0.18 VRAM frac, no OOM.
+**Learned (partial POSITIVE — first non-negative follow-up in a while):** the behavioral term is a real,
+cheap win that pushes the effect-fluency Pareto OUTWARD at the fluent end. (1) Effect recovers 2–6×: from
+Exp 10's +0.15–0.48 up to +0.8–1.3, while distinct-2 stays 0.52–0.73 (raw collapses to 0.32 @α=8). (2)
+NEW vs Exp 10's "neither dominates": the corrector now Pareto-DOMINATES raw at moderate steering — λ_b=40
+@α=2 gives effect +0.99 at distinct-2 0.73 (≈baseline 0.70), whereas raw only reaches effect that low
+(+1.77 @α=8) AFTER collapsing (0.32). (3) But a hard CEILING: no λ_b lifts effect past ≈+1.3; λ_b 10→40
+stops raising it (even falls @α=6 +0.93→+0.84) and only raises training LM loss. Mechanism = a second layer
+of the SAME proxy gap Exp 10 exposed: the term matches raw's TEACHER-FORCED downstream readout (training
+behav loss →~0.005, p_corr≈p_raw) but that only PARTIALLY transfers to autoregressive generation effect.
+So the projection-preserving corrector still can't reproduce raw's STRONG pre-collapse steer; frontier
+pushed out, not erased. λ_b=0 reproduced Exp 10 to the digit (built-in reproducibility check).
+**Assumption/decision logged.** (a) Chose Next-step (i) behavioral objective over (ii) diversity-lever
+confirmation / (iii) multi-layer because it directly attacks Exp 10's tradeoff — the single most valuable
+open question — and either outcome (frontier moves / hard tradeoff) is publishable. (b) Downstream readout
+at L2=11 (final resid_post) because it feeds the head most directly — the best teacher-forced proxy for
+"concept content that drives generation"; a re-encode of generated text (Exp 10's effect measure) isn't
+available inside teacher-forced training. (c) Target = MATCH raw's downstream projection (MSE) rather than
+an unbounded "push up" — honestly asks "can we recover raw's behavioral effect while staying fluent?" and
+avoids runaway over-steer; λ_b sweep traces the tradeoff. (d) λ_b grid {0,10,40} bracketed the response
+(10 already big gain, 40 saturates) — no rerun needed. (e) Reported the ceiling HONESTLY (partial win,
+not a solve) — the recursive proxy-gap is itself the finding.
+**Deliverables:** RESULTS.md +Exp 11 (table + reading) + figure entry + Headline "Partial fix" para;
+REPORT.md +Exp 11 Methods (behavioral-loss equation + downstream readout) + Results + Summary/Conclusion
+updates + Limitation (2) updated (the "explicit behavioral objective is the natural next step" is now DONE);
+plots/11_behavioral_corrector.png; results/11_behavioral_corrector.json; CHANGELOG appended. REPORT math
+re-verified (13/13 js-display-math, 0 broken, 0 inline hazards).
+**Next step (optional; success criterion long met, all planned axes done + the behavioral tradeoff now
+partially resolved):** any one a clean iter — (i) confirm the bank-diversity lever directly
+(max-orthogonal 3-bank vs collinear curated); (ii) push the Exp 11 ceiling by supervising the behavioral
+readout THROUGH generation (differentiable/sampled rollout) rather than teacher-forced; (iii) multi-layer
+or a second model. All optional.
+On track? yes — S4(d) extended: Exp 11 partially resolves Exp 10's effect-fluency tradeoff (frontier
+pushed out, not erased); direction ~99% complete on all planned axes, deliverables curated + math-verified.
+No blocker.

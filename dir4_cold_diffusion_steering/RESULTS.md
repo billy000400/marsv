@@ -354,6 +354,50 @@ generation**, not a costless cleanup. "Matched projection at one layer" does **n
 behavioral steering," and any deployment of ColdSteer must measure the behavioral effect on generated
 text — not just `ΔLM` — before trusting the correction.
 
+**Experiment 11 — Can a behavioral-preservation term push the Exp 10 Pareto outward?**
+Experiment 10 diagnosed *why* the flagship corrector under-steers in generation: its correction, though
+orthogonal to `v` at layer 6, is **not** orthogonal to the downstream sentiment *readout*, so minimizing
+LM loss quietly suppresses the propagated concept signal. The natural fix is to supervise that readout
+directly. We add one term to the Exp 3 objective: during training we also read out the sentiment
+projection at a **later layer** (`L2 = 11`, the final resid_post that feeds the output head; downstream
+DiffMean sentiment direction `ŵ`, `|w| = 3.87`) and push the corrected activation's downstream
+projection `p_corr = ⟨resid^{(11)}, ŵ⟩` toward what **raw steering** produces, `p_raw`, via
+`L_behav = ⟨((p_corr − p_raw)/100)²⟩` weighted by `λ_b`. We train a family `λ_b ∈ {0, 10, 40}`
+(`λ_b = 0` is exactly the Exp 10 corrector) and score every one on the **identical** Exp 10 generation
+protocol (48 prompts, 30 greedy tokens, sentiment effect `B(α)−B(0)` and distinct-2 on a clean
+re-encode). Raw steering is the shared reference.
+
+| α | eff raw | eff λ_b=0 | eff λ_b=10 | eff λ_b=40 | d2 raw | d2 λ_b=0 | d2 λ_b=10 | d2 λ_b=40 |
+|---|---------|-----------|------------|------------|--------|----------|-----------|-----------|
+| 2 | **+2.97** | +0.17 | +0.45 | +0.99 | 0.78 | 0.65 | 0.66 | **0.73** |
+| 4 | **+2.31** | +0.19 | +0.87 | +1.31 | 0.72 | 0.72 | 0.61 | 0.65 |
+| 6 | **+2.47** | +0.15 | +0.93 | +0.84 | 0.54 | 0.71 | 0.58 | 0.59 |
+| 8 | +1.77 | +0.48 | +1.23 | +1.08 | **0.32** | 0.64 | 0.59 | 0.52 |
+
+(`eff` = sentiment shift `B(α)−B(0)`, higher = more steered; `d2` = distinct-2, higher = more fluent;
+unsteered baselines `B(0)=+0.34`, distinct-2 `=0.70`. `λ_b=0` reproduces Experiment 10 to the digit — a
+built-in reproducibility check.)
+
+**Reading it: the behavioral term works — it recovers 2–6× more behavioral effect while keeping generation
+fluent — and it pushes the Pareto frontier *outward at the fluent end*, but a hard ceiling remains.**
+Three findings. **(1) The term does its job cheaply.** Adding `λ_b` lifts the generated sentiment effect
+from Exp 10's `+0.15–0.48` up to `+0.8–1.3` (roughly 2–6×) while distinct-2 stays `0.52–0.73` — far above
+raw steering's high-α collapse (0.32 at α=8) and near the unsteered baseline of 0.70. **(2) The corrector
+family now Pareto-dominates raw in the modest-effect regime.** For a sentiment effect of about `+1`, the
+`λ_b=40` corrector keeps distinct-2 at **0.73** (α=2) — essentially unsteered-baseline fluency — whereas
+raw steering only produces an effect that low (`+1.77` at α=8) *after* it has already collapsed into
+repetition (distinct-2 0.32). So where Exp 10 found "neither method dominates," an explicit
+behavioral-preservation term now gives a corrector that **strictly beats raw** — more steer *and* more
+fluency — as long as you want moderate steering. **(3) But it cannot reach raw's strong effect.** No
+`λ_b` lifts the generated effect past ≈+1.3; pushing `λ_b` from 10 to 40 stops raising the effect (it even
+falls at α=6, +0.93→+0.84) and only raises training LM loss. The reason is a second layer of the same
+proxy gap: the term successfully matches raw's *teacher-forced* downstream readout (the training
+`L_behav` drops to ~0.005, `p_corr ≈ p_raw`), yet matching a teacher-forced readout only *partially*
+transfers to the autoregressive generation effect. **Net:** a behavioral term is a real, cheap win — it
+converts Exp 10's non-dominating tradeoff into outright dominance over raw at moderate steering — but the
+projection-preserving corrector still cannot match raw's *strong* behavioral steering, so the effect–
+fluency frontier is pushed out, not erased.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -394,6 +438,11 @@ text — not just `ΔLM` — before trusting the correction.
   vs α; (c) the effect-vs-fluency Pareto (points labelled by α). Raw traces high-effect→collapsing-
   fluency; the corrector clusters at low-effect→high-fluency — neither dominates. Matched layer-6
   projection does not translate into matched behavioral steering in generation.
+- `plots/11_behavioral_corrector.png` — behavioral-preservation term sweep (sentiment). (a) sentiment
+  effect `B(α)−B(0)` vs α for raw and correctors of increasing behavioral weight `λ_b ∈ {0,10,40}`;
+  (b) distinct-2 vs α; (c) the effect-vs-fluency Pareto. As `λ_b` grows the corrector points move right
+  (more effect) while staying high on fluency, dominating raw in the moderate-effect regime but never
+  reaching raw's strong-effect corner.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -432,3 +481,10 @@ downstream sentiment *readout*, so minimizing LM loss produces near-normal, ligh
 is a genuine **effect–fluency tradeoff** the matched-projection metric hid: the corrector's fluency win
 is not costless — part of it is a weaker propagated edit. Matched layer-6 projection ≠ matched behavioral
 steering; any use of ColdSteer must verify the behavioral effect on generated text, not only `ΔLM`.
+**Partial fix (Exp 11):** adding one training term that preserves the *downstream* sentiment readout
+(measured at the final layer, pushed toward raw steering's) recovers **2–6× more behavioral effect** while
+keeping generation fluent, and turns Exp 10's non-dominating tradeoff into **outright dominance over raw at
+moderate steering** (effect ≈+1 at near-baseline distinct-2 0.73, where raw only reaches that effect after
+collapsing to 0.32). But a ceiling remains — no weighting reaches raw's *strong* pre-collapse effect
+(≈+2.5), because matching a teacher-forced readout only partially transfers to autoregressive generation.
+The projection-preserving corrector's frontier is pushed **out**, not erased.

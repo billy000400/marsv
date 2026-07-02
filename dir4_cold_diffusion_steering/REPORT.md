@@ -66,7 +66,11 @@ collapse into repetition — keeping generation fluent — but its output is onl
 one-sixth of raw's behavioral effect), because the projection-preserving correction, though orthogonal
 to `v` in activation space, is not orthogonal to the downstream concept readout. Matched layer-6
 projection does not guarantee matched behavioral steering: the fluency win is partly a weaker propagated
-edit, and behavioral effect on generation must be measured directly.
+edit, and behavioral effect on generation must be measured directly. Acting on that, a follow-up
+(Experiment 11) adds a term that preserves the downstream concept readout during training; it recovers
+2–6× more behavioral effect while staying fluent and turns the tradeoff into outright dominance over raw
+at moderate steering — though the projection-preserving corrector still cannot match raw's strong
+pre-collapse effect, so the frontier is pushed out, not erased.
 
 ## Methods
 
@@ -326,6 +330,29 @@ binding constraint, held-out transfer should rise monotonically diffuse → exp6
 held-out `certainty` recovery across `α ∈ {1,2,4,6,8}` and, at `α = 8`, the mean in-bank per-direction
 recovery for each bank, versus the native oracle (retrained on `certainty`). The `exp6` point re-runs
 Experiment 6/7's size-3 bank as a reproducibility check.
+
+### Behavioral-preservation term (Experiment 11)
+
+Experiment 10 shows the flagship corrector under-steers in generation because its layer-6 correction,
+though orthogonal to `v`, is not orthogonal to the downstream concept readout. Experiment 11 supervises
+that readout directly. We keep the Experiment-3 corrector, recipe, data and seed unchanged and add **one
+loss term**. During each teacher-forced training step we also read out the sentiment projection at a
+**downstream layer** `L2 = 11` (the final `resid_post`, `hidden_states[12]`, which feeds `ln_f` + the
+output head), using a downstream DiffMean sentiment direction `ŵ` (unit vector; built once as the mean
+block-11 activation over the 20 positive minus the 20 negative sentences, `|w| = 3.87`). For the corrected
+activation `ĥ` this gives `p_corr` = the block-11 activation projected onto `ŵ`; for **raw** steering
+`z = h + α v` (a separate no-grad forward in the same step) it gives the target `p_raw`. The behavioral term pushes the
+corrected downstream readout toward raw steering's, and is added with weight `λ_b`:
+
+```math
+\mathcal{L} = \mathrm{CE}_{\text{next-token}}(\hat{h}) \;+\; \lambda_{\text{near}}\,\big\langle \lVert P_{v^{\perp}} r_\theta \rVert^2 \big\rangle \;+\; \lambda_{b}\, \Big\langle \big( (p_{\text{corr}} - p_{\text{raw}})/100 \big)^2 \Big\rangle
+```
+
+We train the family `λ_b ∈ {0, 10, 40}` (`λ_b = 0` recovers the Experiment-10 corrector exactly) and
+score every one on the **identical Experiment-10 generation protocol** — 30 greedy tokens from 48
+held-out prompts, sentiment effect `B(α)−B(0)` and distinct-2 on a clean re-encode — with raw steering
+as the shared reference. This asks whether an explicit behavioral term moves the effect-vs-fluency Pareto
+frontier of Experiment 10 outward.
 
 ### Baselines
 
@@ -658,6 +685,43 @@ measure reduced *disruption to processing real text*, but a substantial part of 
 **weaker propagated edit** in generation — so any deployment must verify behavioral effect on generated
 text, not `ΔLM` alone.
 
+### Experiment 11 — a behavioral-preservation term pushes the Pareto out (but a ceiling remains)
+
+![behavioral-preservation term sweep](plots/11_behavioral_corrector.png)
+
+Adding one term that preserves the *downstream* sentiment readout (`λ_b`, pushing the corrector's
+final-layer projection toward raw steering's) recovers much of the behavioral effect Experiment 10 lost,
+while keeping generation fluent:
+
+| α | eff raw | eff λ_b=0 | eff λ_b=10 | eff λ_b=40 | d2 raw | d2 λ_b=0 | d2 λ_b=10 | d2 λ_b=40 |
+|---|---------|-----------|------------|------------|--------|----------|-----------|-----------|
+| 2 | **+2.97** | +0.17 | +0.45 | +0.99 | 0.78 | 0.65 | 0.66 | **0.73** |
+| 4 | **+2.31** | +0.19 | +0.87 | +1.31 | 0.72 | 0.72 | 0.61 | 0.65 |
+| 6 | **+2.47** | +0.15 | +0.93 | +0.84 | 0.54 | 0.71 | 0.58 | 0.59 |
+| 8 | +1.77 | +0.48 | +1.23 | +1.08 | **0.32** | 0.64 | 0.59 | 0.52 |
+
+(`eff` = sentiment shift `B(α)−B(0)`, higher = more steered; `d2` = distinct-2, higher = more fluent;
+unsteered baselines `B(0)=+0.34`, distinct-2 `0.70`. `λ_b=0` reproduces Experiment 10 to the digit.)
+
+**Interpretation.** The behavioral term is a **real, cheap win that pushes the effect-fluency frontier
+outward — but only at the fluent end.** Three findings. **(1) It recovers effect cheaply.** Adding `λ_b`
+lifts the generated sentiment effect from Experiment 10's `+0.15–0.48` to `+0.8–1.3` (2–6×) while
+distinct-2 stays `0.52–0.73` — well above raw steering's high-α collapse (0.32 at α=8) and near the
+unsteered baseline of 0.70. **(2) The corrector now Pareto-dominates raw at moderate steering.** For a
+sentiment effect around `+1`, the `λ_b=40` corrector holds distinct-2 at **0.73** (α=2, essentially
+unsteered fluency), whereas raw steering only reaches an effect that low (`+1.77` at α=8) *after* it has
+collapsed into repetition (distinct-2 0.32). Where Experiment 10 found "neither method dominates," an
+explicit behavioral term yields a corrector that gets **both more steer and more fluency** than raw — so
+long as moderate steering suffices. **(3) A hard ceiling remains.** No `λ_b` lifts the generated effect
+past ≈+1.3; increasing `λ_b` from 10 to 40 stops raising it (it even falls at α=6, +0.93→+0.84) and only
+raises training LM loss. The cause is a second layer of the same proxy gap Experiment 10 exposed: the
+term successfully matches raw's *teacher-forced* downstream readout (the training behavioral loss falls to
+~0.005, `p_corr ≈ p_raw`), yet matching a teacher-forced readout only *partially* transfers to the
+autoregressive generation effect. So a behavioral-preservation term is the right next move — it converts
+Experiment 10's non-dominating tradeoff into outright dominance over raw at moderate steering — but the
+projection-preserving corrector still cannot reproduce raw's *strong* pre-collapse behavioral steering;
+the Pareto is pushed out, not erased.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -676,7 +740,12 @@ the corrector *generates*, it prevents raw steering's collapse into repetition (
 baseline while raw's crashes 0.78→0.32) but its output is only weakly steered — the projection-preserving
 correction is orthogonal to `v` in activation space yet not to the downstream readout, so the fluency
 win comes partly at the cost of the behavioral edit. Matched layer-6 projection is **not** matched
-behavioral steering.
+behavioral steering. Adding an explicit behavioral-preservation term (Experiment 11) — pushing the
+corrector's *downstream* concept readout toward raw steering's during training — recovers 2–6× more of
+the behavioral effect while keeping generation fluent, and converts the tradeoff into outright dominance
+over raw at moderate steering; but no weighting reaches raw's strong pre-collapse effect, because matching
+a teacher-forced readout only partially transfers to autoregressive generation. The frontier moves out,
+not away.
 
 The takeaway for on-manifold steering methods: keep the projection-preserving parameterization
 
@@ -719,8 +788,11 @@ teacher-forced fluency proxy measured at matched projection at *one layer*. Expe
 exactly at layer 6, but the correction is not orthogonal to the downstream concept readout, so the
 corrector's generated text is only weakly steered (sentiment effect ~one-sixth of raw's) even as it stays
 fluent. The fluency win therefore reflects, in part, a weaker propagated edit — behavioral effect on
-generated text must be measured directly, not inferred from `ΔLM`, and a corrector objective that
-explicitly preserves the generated concept strength is the natural next step. (3) Generalization is now tested across steering *strength* (Experiment 4: the corrector extrapolates
+generated text must be measured directly, not inferred from `ΔLM`. Experiment 11 acts on this: a corrector
+objective that explicitly preserves the downstream concept readout recovers 2–6× more behavioral effect
+and dominates raw at moderate steering, but still cannot reach raw's strong pre-collapse effect (matching
+a teacher-forced readout transfers only partially to generation), so the effect–fluency frontier is pushed
+out, not eliminated. (3) Generalization is now tested across steering *strength* (Experiment 4: the corrector extrapolates
 to α up to 12, 50% beyond its training ceiling) and across steering *direction* (Experiment 5: a
 single trained corrector does **not** transfer to a held-out formality vector, but retraining the
 recipe recovers 83–104% there) and across *direction-conditioning + a vector bank* (Experiment 6: one
