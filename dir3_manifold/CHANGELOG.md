@@ -5,6 +5,23 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-02 — Add cumulative-PCA-variance plot (operator request; no numbers changed)
+- **Operator request** (`human_feedback_07021056.md`): *"make a plot of accumulated PCA variance
+  and mark the 95% and 99% points."*
+- New artifact `results/pca_cumvar.json` (`experiments/pca_cumvar.py`): the full cumulative-
+  variance-explained curve (768 values) per layer {0,3,6,9,11}, from the **same** mean-centered
+  768×768 covariance eigen-spectrum as the existing `pca_pr.json` table — recomputed only to save
+  the full curve (the summary table saved only d90/d95/d99). d95/d99 reproduce the table exactly
+  (L0 396/591, L3 6/318, L6 94/479, L9 329/630, L11 5/104).
+- New figure `plots/pca_cumvar.png` (added a Fig-6 block to `experiments/make_plots.py`):
+  cumulative variance vs #PCs (log x), one curve per layer, with the 95% crossing (●) and 99%
+  crossing (□) marked on each. Referenced from RESULTS.md linear-PCA section with a paragraph
+  reading the two regimes (L0 broad; L3/6/11 one-dim-dominated).
+- **No result numbers changed** — pure visualization of already-reported d95/d99.
+- matplotlib was absent from the env again (reset since Iter 8); reinstalled `matplotlib==3.11.0`
+  with numpy/torch pinned via constraints (numpy 2.3.3 / torch 2.9.0+cu130 verified unchanged).
+- Renamed `human_feedback_07021056.md` → `human_feedback_07021056.addressed.md`.
+
 ## 2026-07-02 — Address operator feedback: pooling / Kneedle / MLE / isotropic-Gaussian / "the raw bend" (no numbers changed)
 - **Operator questions** (`human_feedback_07010525.md`): (1) *why pooled FineWeb activation & where is
   it pooled?*, (2) *what is Kneedle?*, (3) *what does MLE stand for?*, (4) *why emphasize isotropic

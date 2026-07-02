@@ -20,6 +20,18 @@ PR = participation ratio (Σλ)²/Σλ²; dXX = #dims for XX% cumulative varianc
 
 **Key caveat:** from layer 3 on, a single "massive-activation" outlier dimension carries 78–94% of total variance, so the raw participation ratio collapses to ~1 and is **not** a useful ID estimate by itself. The d95/d99 columns (dims after the dominant one) are the informative linear signal: layer 6 needs 94 dims for 95% and 479 for 99% — far below d_model=768 but far above 1. Nonlinear estimators (TwoNN/MLE) and a PR computed after removing/standardizing the outlier dim are the next step.
 
+**Cumulative-variance curves (operator request, 2026-07-02).** The figure below plots the
+cumulative fraction of variance explained vs. number of principal components (log x-axis) for
+each layer, with the 95% crossing (●) and 99% crossing (□) marked — i.e. a visual reading of
+the d95/d99 columns above (`results/pca_cumvar.json`, `experiments/pca_cumvar.py`; same
+mean-centered 768×768 covariance eigen-spectrum as the table). It makes the two regimes visible:
+**layer 0** climbs slowly from PC 1 (top1 = 0.17) and needs 396 PCs for 95%, whereas **layers
+3/6/11** jump to 78–94% at the *first* PC (the massive-activation dim) and then rise slowly — so
+their d95 is dominated by whether that one dim alone already clears the threshold (L3/L11 reach
+95% within 5–6 PCs; L6 needs 94).
+
+![Cumulative PCA variance per layer with 95%/99% crossings marked](plots/pca_cumvar.png)
+
 ### Nonlinear estimators (TwoNN + MLE, pure-numpy/torch, CPU) — done (S2b)
 Hand-rolled (no skdim): TwoNN = Facco distance-ratio fit (10% tail discarded);
 MLE (**Maximum Likelihood Estimation**) = Levina-Bickel k=20, MacKay-Ghahramani

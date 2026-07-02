@@ -181,4 +181,33 @@ ax.legend(fontsize=8)
 ax.grid(alpha=0.3, axis="y")
 save(fig, "id_diagnostics.png")
 
+# ---- Fig 6: cumulative PCA variance per layer with 95%/99% crossings ----
+cv = load("pca_cumvar.json")
+colors = {0: "C0", 3: "C1", 6: "C2", 9: "C4", 11: "C3"}
+fig, ax = plt.subplots(figsize=(7.5, 4.8))
+dims = np.arange(1, 769)
+for r in cv:
+    L = r["layer"]
+    cum = np.array(r["cumvar"])
+    c = colors[L]
+    ax.plot(dims, cum, "-", color=c, lw=1.6,
+            label=f"L{L}  (d95={r['d95']}, d99={r['d99']})")
+    # mark the 95% and 99% crossing points on each curve
+    ax.plot(r["d95"], cum[r["d95"] - 1], "o", color=c, ms=5)
+    ax.plot(r["d99"], cum[r["d99"] - 1], "s", color=c, ms=5, mfc="none")
+ax.axhline(0.95, color="k", ls="--", lw=0.9)
+ax.axhline(0.99, color="k", ls=":", lw=0.9)
+ax.text(770, 0.95, "95%", va="center", ha="left", fontsize=8)
+ax.text(770, 0.99, "99%", va="center", ha="left", fontsize=8)
+ax.set_xscale("log")
+ax.set_xlim(1, 900)
+ax.set_ylim(0, 1.02)
+ax.set_xlabel("number of principal components (log scale)")
+ax.set_ylabel("cumulative variance explained")
+ax.set_title("Cumulative PCA variance, GPT-2 small residual stream\n"
+             "● = 95% crossing, □ = 99% crossing  (L11 is post-final-layernorm)")
+ax.legend(fontsize=8, loc="lower right")
+ax.grid(alpha=0.3, which="both")
+save(fig, "pca_cumvar.png")
+
 print("done")

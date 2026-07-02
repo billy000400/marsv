@@ -277,3 +277,36 @@ a forward hook (current L11 is post-ln_f); AE on outlier-dim-removed activations
 TDA persistent homology on a layer-6 subsample.
 
 On track? yes — 100% done; S1–S6 + all FIVE operator feedback items addressed; deliverables verified-rendering this iter; STOP written; no blocker.
+
+## Iter 12 (2026-07-02) — operator request: cumulative-PCA-variance plot with 95%/99% marks
+**Did:** Re-entered a COMPLETE directory; STOP absent again; found a **new unaddressed** feedback
+file `human_feedback_07021056.md` (10:56 today): *"make a plot of accumulated PCA variance and mark
+the 95% and 99% points."* The saved `results/pca_pr.json` stored only summary stats (d90/d95/d99,
+PR, top1) — not the full spectrum — so I wrote `experiments/pca_cumvar.py` to recompute the full
+per-layer cumulative-variance curve from the **same** mean-centered 768×768 covariance eigvalsh
+spectrum as `pca_pr.py` (one layer at a time, RAM-safe, no GPU; ~40s). d95/d99 reproduce the
+existing table **exactly** (L0 396/591, L3 6/318, L6 94/479, L9 329/630, L11 5/104) → methodology
+consistent. Saved `results/pca_cumvar.json` (768-value curve/layer). Added a Fig-6 block to
+`experiments/make_plots.py` → `plots/pca_cumvar.png`: cumulative variance vs #PCs (log x), one
+curve/layer, 95% crossing ● and 99% crossing □ marked on each, dashed/dotted 95%/99% guide lines.
+Embedded it in RESULTS.md's linear-PCA section with a two-regime reading (L0 broad/slow; L3/6/11
+jump to 78–94% at PC 1 then rise slowly). matplotlib was gone from the env again (reset since
+Iter 8) — reinstalled `matplotlib==3.11.0` with numpy/torch pinned via a constraints file; verified
+numpy 2.3.3 / torch 2.9.0+cu130 unchanged after install. Appended CHANGELOG, updated PLAN
+(status + review log), renamed feedback `→ .addressed.md`, wrote STOP.
+
+**Learned:** The request was a straightforward visualization of an already-reported result, but the
+full spectrum had never been persisted (only the d95/d99 summary), so it needed a recompute — which
+doubled as a cross-check that the new curve's crossings match the old table exactly. The figure
+makes the "massive-activation dim" story visual: L3/6/11 curves start at 0.78–0.94 at PC 1 (one dim
+carries most variance) while L0 starts at 0.17 and climbs gradually, which is exactly why d95 is
+tiny (5–6) at L3/L11 but large (94/396) at L6/L0. matplotlib keeps disappearing across relaunches —
+the numpy/torch-pinned constraints reinstall is now the standard recovery.
+
+**Next step:** None — success criterion met (3-estimator per-layer ID; AE bottleneck sweep with
+identified bend; REPORT.md comparison); all SIX operator reviews/feedback addressed; figures exist
+for every reported result (now incl. cumulative PCA variance); history in CHANGELOG; STOP written.
+If reopened: raw block-11 resid_post via a forward hook (current L11 is post-ln_f); AE on
+outlier-dim-removed activations; second model/corpus; TDA persistent homology on a layer-6 subsample.
+
+On track? yes — 100% done; S1–S6 + all SIX operator feedback items addressed; new pca_cumvar figure rendered + embedded; STOP written; no blocker.
