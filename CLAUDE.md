@@ -189,3 +189,15 @@ box in the browser.
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying assumptions are logged before implementation rather than discovered after mistakes, and RESULTS.md/REPORT.md always read as a clean current-best paper with all history in CHANGELOG.md.
+
+## 9. Write RESULTS.md and REPORT.md for a newcomer to technical AI safety research.
+
+Key points it instructs agents to follow:
+- **Reader model:** a strong ML engineer / first-year grad student who has *not* read the subfield's papers.
+- **Lead with the "why"** — open with the safety question and stakes before method detail.
+- **Define jargon on first use** and spell out acronyms (OOD, SAE, AUROC, probe, logit lens, …).
+- **Explain every metric in words next to its equation** (what it measures, how to read it, higher-is-better, etc.) — additive to rule 8's equation requirement.
+- **Interpret the numbers** — say whether a result is strong/weak/surprising and what it implies.
+- **Plain words, short sentences, active voice.**
+- **Keep rigor intact** — accessible means well-explained, not vague; don't drop caveats/CIs/sample sizes to sound friendlier.
+- A one-line **test**: could a capable ML engineer new to the subfield read REPORT.md and correctly explain what you did, why it matters, and what you found, without another source?
