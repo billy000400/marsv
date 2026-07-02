@@ -484,3 +484,43 @@ generation rather than teacher-forced; (ii) confirm the bank-diversity lever dir
 vs collinear); (iii) a second model (GPT-2 medium) for cross-model generality. All optional.
 On track? yes — Exp 12 adds layer-robustness (blocks 3/6/9, recovery 90/84/76% @α=8, off-Gaussian at every
 layer; block 6 reproduces Exp 3 exactly); direction ~99% complete, deliverables curated + math-verified. No blocker.
+
+## 2026-07-02 21:0x — Experiment 13: cross-model generality (GPT-2 medium)
+**Did:** acted on PLAN Next-step (iii, a second model for cross-model generality) — the highest-value
+remaining external-validity axis after Exp 12's layer robustness. A reviewer's obvious next question
+after "is it a block-6 artifact?" (answered no) is "is it a GPT-2-small artifact?". Wrote
+`experiments/13_cross_model.py`: replicate the EXACT flagship Exp 3 pipeline on GPT-2 MEDIUM (355M, 24
+blocks, d=1024) at its mid layer block 12/24 (depth analogue of small's block 6/12), changing ONLY the
+model. Reuse trick: loaded medium once via transformers and overwrote common._model/_tok so every
+imported Exp-3 helper (resid_post/train_corrector/lm_loss_fn/make_hat/corrector_acts, all fetch the model
+through common.load_model()'s cache) transparently runs on medium; instantiated Corrector(d=1024). Trained
+at batch=4 / seq=64 to fit the 0.18 VRAM frac. Confirmed medium downloads+loads (24L, d=1024). Ran clean,
+no OOM, ~5 min, GPU was free.
+**Learned (POSITIVE — clean cross-model generality):** both headline facts replicate. (P) raw steering
+breaks medium: ΔLM +0.04/+0.15/+0.74/+2.72 @α=1/2/4/8, D_M 31.5→55.1. (C) identical LM-supervised
+corrector recovers it at matched projection: ΔLM −0.12/−0.09/−0.01/+0.30, **recovery 89% @α=8, 101% @α=4**
+(>100% at α≤2: learned ΔLM slightly below unsteered baseline, same free-or-better weak-α as small; ratio
+unstable because raw damage ≈0 there). α=8 recovery (89%) ≈ small's 84% — if anything a touch higher. The
+Exp 2/3 decoupling holds AGAIN: corrected D_M > raw at every α (79.9 vs 55.1 @α=8) — off-Gaussian-but-LM-safe
+carries to the larger model. So the projection-preserving recipe is MODEL-robust as well as layer-robust.
+**Assumptions/decisions logged.** (a) Chose (iii) cross-model over (i) rollout-through-generation and
+(ii) diversity-lever confirmation because it answers the single biggest remaining external-validity question
+in one clean iteration and the flagship pipeline was directly reusable via the model-cache swap (low risk,
+~5 min). (i) is higher-risk (differentiable/sampled rollout could eat the budget). (b) GPT-2 medium (not
+large/xl) because it's the standard next size, fits the VRAM budget, and one size increase already
+establishes model-robustness; still-larger models logged as open. (c) Block 12/24 = mid = the honest depth
+analogue of block 6/12; rebuilt v at that layer (steering vectors are layer- and model-specific) → matched
+projection α|v| per model. (d) batch=4 for medium's larger memory; halve-on-OOM was ready but not needed.
+(e) Kept cov_corr out (raw-vs-learned carries the generality story; cov_corr's negative is already in Exp 2)
+— same choice as Exp 12.
+**Deliverables:** RESULTS.md +Exp 13 (table + reading) + figure entry + Headline "model-robust" sentence;
+REPORT.md +Exp 13 Methods (cross-model setup, reuses Exp 12 recovery eq) + Results (table + interpretation)
++ Summary/Conclusion "model-robust" sentences + Limitation (3) updated (multi-model now DONE);
+plots/13_cross_model.png; results/13_cross_model.json; CHANGELOG appended. REPORT math re-verified via
+GitHub API (14/14 js-display-math, 0 broken, 0 inline hazards).
+**Next step (optional; success criterion long met, now layer- AND model-robust):** any one a clean iter —
+(i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH sampled/differentiable generation
+rather than teacher-forced; (ii) confirm the bank-diversity lever directly (max-orthogonal 3-bank vs
+collinear); (iii) held-out-prompt-family generalization or a still-larger model (GPT-2 large). All optional.
+On track? yes — Exp 13 adds cross-model generality (GPT-2 medium, recovery 89% @α=8 / 101% @α=4, off-Gaussian
+at every α; ≈ small's 84%); direction ~99% complete, deliverables curated + math-verified. No blocker.

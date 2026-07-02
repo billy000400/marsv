@@ -1,0 +1,29 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 5710.63it/s]
+model=gpt2-medium n_layer=24 d=1024 device=cuda
+|v|=19.57 mean|h|=226.20 clean D_M=31.45
+corrector params: 5.25M
+  ep0 step  25 a= 1.9 LM=4.007 near=0.191
+  ep0 step  50 a= 4.2 LM=3.441 near=0.340
+  ep0 step  75 a= 2.2 LM=3.596 near=0.136
+  ep1 step 100 a= 4.6 LM=3.656 near=0.656
+  ep1 step 125 a= 0.6 LM=3.711 near=0.108
+  ep1 step 150 a= 7.4 LM=3.890 near=1.712
+  ep2 step 175 a= 0.7 LM=3.458 near=0.275
+  ep2 step 200 a= 3.1 LM=3.401 near=0.615
+  ep2 step 225 a= 3.2 LM=3.644 near=0.411
+  ep3 step 250 a= 7.8 LM=4.234 near=1.195
+  ep3 step 275 a= 2.5 LM=3.261 near=0.400
+  ep3 step 300 a= 5.0 LM=3.666 near=0.769
+  ep4 step 325 a= 7.7 LM=3.847 near=1.363
+  ep4 step 350 a= 4.6 LM=4.502 near=0.637
+  ep4 step 375 a= 2.8 LM=3.087 near=0.485
+  ep5 step 400 a= 6.5 LM=3.263 near=1.336
+  ep5 step 425 a= 1.7 LM=3.334 near=0.252
+  ep5 step 450 a= 1.7 LM=3.591 near=0.408
+clean eval loss = 3.450
+a= 1.0 raw ΔLM=+0.037 learned=-0.118 rec=420% D_M raw=32.0 learn=36.6
+a= 2.0 raw ΔLM=+0.150 learned=-0.094 rec=162% D_M raw=33.5 learn=40.0
+a= 4.0 raw ΔLM=+0.738 learned=-0.006 rec=101% D_M raw=38.8 learn=51.9
+a= 8.0 raw ΔLM=+2.718 learned=+0.301 rec=89% D_M raw=55.1 learn=79.9
+saved figure + results

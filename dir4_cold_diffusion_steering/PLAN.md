@@ -70,6 +70,10 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         fluency recovery @α=8 = 90/84/76% (≥91% @α=4), corrected activation off the Gaussian manifold at
         EVERY layer (Exp 2/3 decoupling is layer-robust). Block 6 reproduces Exp 3 to the digit. NOT a
         block-6 artifact.
+        (g) CROSS-MODEL generality DONE (Exp 13): replicated the EXACT flagship Exp 3 pipeline on GPT-2
+        MEDIUM (355M, 24 blocks, d=1024) at mid layer block 12/24 (only the model changes). POSITIVE — both
+        headline facts replicate: recovery 89% @α=8 / 101% @α=4, corrected off the Gaussian manifold at every
+        α (79.9 vs 55.1 @α=8); ≈ small's 84%. NOT a GPT-2-small artifact. Result is layer- AND model-robust.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -83,9 +87,22 @@ End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker 
 ## Current status
 S1+S2+S3 + S4(a) strength-extrap + S4(b) held-out-vector + S4(c) direction-conditional-bank +
 S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL text Pareto (Exp 10) +
-S4(e) BEHAVIORAL-PRESERVATION term (Exp 11) + S4(f) LAYER ROBUSTNESS (Exp 12) delivered — success criterion
-MET; direction complete on all planned axes plus behavioral-tradeoff + layer-generality follow-ups (~99%).
-**S4(f) Experiment 12 (new):** answered the most obvious external-validity question — is the whole result a
+S4(e) BEHAVIORAL-PRESERVATION term (Exp 11) + S4(f) LAYER ROBUSTNESS (Exp 12) + S4(g) CROSS-MODEL
+generality (Exp 13) delivered — success criterion MET; direction complete on all planned axes plus
+behavioral-tradeoff + layer- + model-generality follow-ups (~99%).
+**S4(g) Experiment 13 (new):** answered the second obvious external-validity question — is the result a
+GPT-2-*small* artifact? Replicated the EXACT flagship Exp 3 pipeline on GPT-2 MEDIUM (355M, 24 blocks,
+d=1024) at mid layer block 12/24, changing ONLY the model (reused the Exp-3 helpers by installing medium in
+common's model cache; Corrector at d=1024, batch 4 for VRAM). POSITIVE, clean generality result — both
+headline facts replicate: raw steering breaks the LM (ΔLM→+2.72 @α=8, D_M 31.5→55.1) and the identical
+LM-supervised corrector recovers it at matched projection (recovery **89% @α=8, 101% @α=4**; ΔLM slightly
+negative at α≤2 = free-or-better weak-α, as on small), with the corrected activation sitting FURTHER off the
+Gaussian manifold than raw at every α (79.9 vs 55.1 @α=8). α=8 recovery (89%) ≈ small's 84%. The core result
+is layer- AND model-robust. Artifacts: `experiments/13_cross_model.py`, `results/13_cross_model.json`,
+`plots/13_cross_model.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified (14/14 js-display-math,
+0 broken, 0 inline hazards).
+<!-- prior: S4(f) layer robustness Exp 12 -->
+**S4(f) Experiment 12:** answered the most obvious external-validity question — is the whole result a
 block-6 artifact? Replicated the EXACT flagship Exp 3 pipeline (same prompts/data/seed/recipe) at blocks 3
 (early), 6 (mid = Exp 3), 9 (late), changing ONLY the hook layer (reused exp03 helpers by swapping the
 module-global LAYER; POS/NEG from exp01). POSITIVE, clean generality result: both headline facts replicate
@@ -223,13 +240,14 @@ RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math v
 
 ## Next step
 Core arc + all generalization axes + behavioral axis + behavioral-preservation follow-up + LAYER-ROBUSTNESS
-(Exp 12: fluency result replicates at blocks 3/6/9, 90/84/76% @α=8, off-Gaussian at every layer — not a
-block-6 artifact) delivered. Amortization story CLOSED on three scaling axes (Exp 7/8/9 negative); flagship
-fluency story has its behavioral reality-check (Exp 10), constructive follow-up (Exp 11), and layer-generality
-check (Exp 12). Optional remaining polish, any one a clean iteration: (i) push the Exp 11 ceiling by supervising
-the behavioral readout THROUGH sampled/differentiable generation rather than teacher-forced; (ii) confirm the
-bank-diversity lever directly (max-orthogonal 3-bank vs collinear curated); (iii) a SECOND MODEL (GPT-2 medium)
-for cross-model generality. All optional; success criterion long met.
+(Exp 12: 90/84/76% @α=8 at blocks 3/6/9) + CROSS-MODEL generality (Exp 13: GPT-2 medium, 89% @α=8 / 101% @α=4,
+off-Gaussian at every α) delivered — flagship fluency result now layer- AND model-robust. Amortization story
+CLOSED on three scaling axes (Exp 7/8/9 negative); flagship story has its behavioral reality-check (Exp 10),
+constructive follow-up (Exp 11), layer-generality (Exp 12), and model-generality (Exp 13) checks. Optional
+remaining polish, any one a clean iteration: (i) push the Exp 11 ceiling by supervising the behavioral readout
+THROUGH sampled/differentiable generation rather than teacher-forced; (ii) confirm the bank-diversity lever
+directly (max-orthogonal 3-bank vs collinear curated); (iii) held-out-prompt-family generalization, or a
+still-larger model (GPT-2 large). All optional; success criterion long met.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

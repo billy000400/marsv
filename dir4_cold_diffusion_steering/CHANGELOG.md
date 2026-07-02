@@ -288,3 +288,27 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   `results/12_layer_robustness.json`.
 - REPORT math re-verified via GitHub API: 14/14 js-display-math (added the recovery fence), 0 broken
   (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-02 — Experiment 13: cross-model generality (GPT-2 medium) — POSITIVE
+- Added Experiment 13 to RESULTS.md and REPORT.md: replicated the flagship Exp-3 pipeline
+  UNCHANGED on GPT-2 **medium** (355M, 24 blocks, d=1024), steering/correcting at its mid layer
+  (block 12 of 24 — depth analogue of block 6 of 12 in small). Same DiffMean sentiment prompts,
+  400-doc Gaussian fit, 300-doc train / held-out 100-doc eval, 4-layer corrector (now d=1024,
+  5.25M params), seed, α∼U(0.5,8), hyperparams; only the MODEL changes (|v|=19.6, mean|h|=226.2,
+  clean D_M=31.5). Reuse: loaded medium once and installed it in common's model cache so the
+  imported Exp-3 helpers run on it; corrector trained at batch 4 for the VRAM budget.
+- **Result (new):** both headline facts replicate on the larger model — NOT a GPT-2-small artifact.
+  (P) raw steering breaks the LM: ΔLM +0.04/+0.15/+0.74/+2.72 at α=1/2/4/8, D_M 31.5→55.1.
+  (C) the identical LM-supervised corrector recovers it at matched projection: ΔLM
+  −0.12/−0.09/−0.01/+0.30, **recovery 89% @α=8, 101% @α=4** (>100% at α≤2 = learned ΔLM slightly
+  below the unsteered baseline, as on small; raw denominator near zero). Signature decoupling holds:
+  corrected D_M > raw at every α (79.9 vs 55.1 @α=8) — off-Gaussian-but-LM-safe on medium too.
+  α=8 recovery (89%) ≈ small's 84%.
+- Added figure `plots/13_cross_model.png` (ΔLM raw vs corrected; recovery vs α; D_M raw vs corrected).
+- RESULTS.md: +Exp 13 block + figure entry + Headline "model-robust" sentence.
+  REPORT.md: +Exp 13 Methods (cross-model setup; reuses Exp 12 recovery equation) + Results
+  (table + interpretation) + Summary/Conclusion "model-robust" sentences + Limitation (3) updated
+  (multi-model generalization now DONE; only held-out-prompt-family and still-larger models open).
+- Code: `experiments/13_cross_model.py`; results `results/13_cross_model.json`.
+- REPORT math re-verified via GitHub API: 14/14 js-display-math (no new equations; Exp 13 reuses the
+  recovery fence), 0 broken (<pre lang=math>), 0 inline hazards.
