@@ -509,7 +509,10 @@ Correction/steering metrics:
       causal objectives. **iter13: the manifold/denoising-prior alternative RESOLVED** — a fractional kNN
       manifold-projection step (t≈0.25) is the FIRST objective-free repair to IMPROVE KL 0.785→0.566,
       below corrupted start AND matched random 0.863; full projection overshoots (2.14>1.93). Claim 4
-      upgraded NO→PARTIAL. `experiments/manifold_repair.py`, Phase 6b, fig12.)
+      upgraded NO→PARTIAL. `experiments/manifold_repair.py`, Phase 6b, fig12.
+      iter14: PAIRED-BOOTSTRAP CIs (`manifold_repair_ci.py`, B=5000, fig13) — t=0.25 beats matched
+      random ΔKL +0.297 [+0.246,+0.350] and corrupted start +0.219 [+0.177,+0.262], both 95%-CI sig;
+      full-step vs random n.s. [−0.49,+0.07] → "loses manifold advantage", not sig-worse.)
 - [ ] S9 — Validate on steering while preserving achieved steering effect. (NOT done — but the objective
       it needs is now identified: iter13's fractional kNN manifold-projection step (Phase 6b), NOT a
       scalar-score penalty. Applying it to a real Direction-1 steering vector at matched achieved effect
@@ -523,7 +526,26 @@ Correction/steering metrics:
 End each JOURNAL.md entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
-## Current status (after iter13 — MANIFOLD/denoising-prior causal repair; claim 4 upgraded NO→PARTIAL)
+## Current status (after iter14 — PAIRED-BOOTSTRAP CIs on the Phase-6b manifold-repair KL deltas)
+Iter14 closed the last listed statistical-rigor gap: the iter13 claim-4 upgrade rested on point
+estimates over N=300 prompts. Added per-prompt KL persistence to `manifold_repair.py` (re-ran, table
+reproduces iter13 exactly) and `experiments/manifold_repair_ci.py` — a PAIRED bootstrap (B=5000 over
+the shared 300 prompt indices) of the mean KL delta ΔKL = KL(reference) − KL(kNN step). **Both headline
+positive claims are 95%-CI significant**: the fractional kNN step (t=0.25) beats a matched-size RANDOM
+move by ΔKL +0.297 [+0.246,+0.350] and the corrupted start by +0.219 [+0.177,+0.262] — both CIs exclude
+0. The margin over random grows with the fractional step (t=0.10→0.50: +0.19→+0.47). CI nuance: the
+full-projection "overshoot loses to random" point estimate (2.14>1.93) is NOT significant (t=1.00 vs
+matched random ΔKL −0.21, CI [−0.49,+0.07] straddles 0) → the honest statement is the full step *loses
+the manifold advantage* (indistinguishable from random), not significantly worse. New fig13. Curated
+RESULTS.md (Phase-6b CI subsection + table + fig13, strengthened claim-4 Headline), REPORT.md (fig13, CI
+values in Causality finding, paired-bootstrap Methods def, Reproduce), appended CHANGELOG. All 8 REPORT
+display equations still render (0 degraded). No prior numbers changed. Verdict on the 5-claim ladder
+UNCHANGED; claim 4 (score-dependent partial YES) now CI-backed. Env note: transformers reinstalled via
+--no-deps with pins (huggingface_hub==1.21.0 + httpx chain, tokenizers==0.22.1); torch/numpy unchanged.
+Remaining future work: apply the Phase-6b step to a REAL Direction-1 steering vector at matched effect
+(S9); trust-region auto-selection; in-context-PROCESS negatives; cross-model transfer.
+
+## (prior) Current status (after iter13 — MANIFOLD/denoising-prior causal repair; claim 4 upgraded NO→PARTIAL)
 Iter13 ran the PLAN's single genuine remaining scientific lever — the manifold/denoising-prior causal
 objective (Phase 6 listed it as the alternative to the failed scalar-score descent). `experiments/
 manifold_repair.py` (in-context forward-hook harness identical to Phase 6; norm-matched noise s=1, N=300)
@@ -642,15 +664,15 @@ layer (AUROC ≈ 0.44–0.54 ≈ chance) — decisive evidence (H1) that realnes
 and local density. Phase 4 LOFO: learned discriminative detectors do NOT generalize (< kNN). So the
 generalizing statistical signal is one-class density, and it has a HARD CEILING at `interp`/`tangent_pert`.
 
-## Next step (UPDATED iter13 — all five claims now have a verdict; project complete)
+## Next step (UPDATED iter14 — all five claims verdicted + claim 4 now CI-backed; project complete)
 The 5-claim ladder is fully answered: (1) discrimination YES via multi-axis score, (2) generalization
 PARTIAL, (3) prediction PARTIAL/YES (functional axis), (4) causality SCORE-DEPENDENT — scalar-score
-descent fails but a fractional kNN manifold-projection step partially succeeds (iter13, Phase 6b),
-(5) steering NOT tested but its objective is now identified (the Phase-6b manifold step). Deliverable is
-curated + figure-complete (12 figs) + rule-8/8a/8b compliant. Re-creating STOP. Highest-value future
-work if resumed: apply the Phase-6b manifold-projection step to a REAL Direction-1 steering vector at
-matched achieved effect (closes S9), then trust-region auto-selection and paired-bootstrap CIs on the
-Phase-6b KL deltas.
+descent fails but a fractional kNN manifold-projection step partially succeeds, now with 95%-CI
+significance (iter13 Phase 6b + iter14 paired-bootstrap CIs), (5) steering NOT tested but its objective
+is identified (the Phase-6b manifold step). Deliverable is curated + figure-complete (13 figs) +
+rule-8/8a/8b compliant. Re-creating STOP. Highest-value future work if resumed: apply the Phase-6b
+manifold-projection step to a REAL Direction-1 steering vector at matched achieved effect (closes S9,
+the only unchecked stage), then trust-region / step-size auto-selection (line search).
 
 ### (history, iter4) Next step — core verdict reached; remaining work optional strengthening + REPORT
 Iter4 ran the functional probe: on `interp` (≈chance for all stats) entropy/plateau_kl reach ~0.61,

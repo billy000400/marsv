@@ -1,0 +1,62 @@
+{
+  "n_prompts": 300,
+  "B": 5000,
+  "method": "paired bootstrap of mean KL delta; delta = KL(ref) - KL(trt); >0 => treatment lower KL",
+  "rows": [
+    {
+      "comparison": "t=0.10 vs random-matched",
+      "ref_KL": 0.863,
+      "trt_KL": 0.673,
+      "delta_KL": 0.19,
+      "ci_lo": 0.1525,
+      "ci_hi": 0.2312,
+      "frac_boot_delta_gt0": 1.0,
+      "sig_treatment_better": true,
+      "note": "scaled"
+    },
+    {
+      "comparison": "t=0.25 vs random-matched",
+      "ref_KL": 0.863,
+      "trt_KL": 0.5655,
+      "delta_KL": 0.2975,
+      "ci_lo": 0.2458,
+      "ci_hi": 0.3502,
+      "frac_boot_delta_gt0": 1.0,
+      "sig_treatment_better": true,
+      "note": "direction test"
+    },
+    {
+      "comparison": "t=0.50 vs random-matched",
+      "ref_KL": 1.1029,
+      "trt_KL": 0.629,
+      "delta_KL": 0.4739,
+      "ci_lo": 0.3681,
+      "ci_hi": 0.5783,
+      "frac_boot_delta_gt0": 1.0,
+      "sig_treatment_better": true,
+      "note": "direction test"
+    },
+    {
+      "comparison": "t=1.00 vs random-matched",
+      "ref_KL": 1.9319,
+      "trt_KL": 2.1427,
+      "delta_KL": -0.2108,
+      "ci_lo": -0.4932,
+      "ci_hi": 0.0666,
+      "frac_boot_delta_gt0": 0.0614,
+      "sig_treatment_better": false,
+      "note": "overshoot: random should win"
+    },
+    {
+      "comparison": "t=0.25 vs corrupted-start",
+      "ref_KL": 0.7847,
+      "trt_KL": 0.5655,
+      "delta_KL": 0.2192,
+      "ci_lo": 0.1768,
+      "ci_hi": 0.2618,
+      "frac_boot_delta_gt0": 1.0,
+      "sig_treatment_better": true,
+      "note": "repair beats doing nothing"
+    }
+  ]
+}

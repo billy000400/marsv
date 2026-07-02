@@ -328,3 +328,36 @@ injected vector-space negatives; (d) cross-model transfer (only gpt2 cached); (e
 KL deltas (paired bootstrap over the 300 prompts). Re-creating STOP.
 On track? yes — resolved the last open scientific lever; claim 4 upgraded NO→PARTIAL with a clean
 sweet-spot result; deliverable curated + figure-complete (12 figs), self-consistent; blocker: none.
+
+## Iter 14 (2026-07-02) — Paired-bootstrap 95% CIs on the Phase-6b manifold-repair KL deltas
+**Did:** On resume STOP was gone again; science was complete after iter13 but the claim-4 upgrade (the
+project's newest and most consequential result) rested on point estimates over N=300 prompts — the top
+listed remaining-rigor gap ("CIs on the Phase-6b KL deltas, paired bootstrap over the 300 prompts").
+Env reset AGAIN: torch+CUDA+matplotlib+numpy present but transformers absent. Reinstalled via
+`--no-deps` (transformers 5.12.1); this time the chain needed pins — huggingface_hub==1.21.0 (which
+pulls httpx: also installed httpx/httpcore/h11/sniffio/anyio/certifi/idna --no-deps) and
+tokenizers==0.22.1 (0.23.1 was too new for transformers 5.12.1, and 0.23.0 not on the index). Verified
+numpy 2.3.3 / torch 2.9.0+cu130 UNCHANGED after. Added per-prompt KL persistence to `manifold_repair.py`
+(2-line edit → `manifold_repair_perprompt_kl.npz`); re-ran it (55s GPU, VRAM 0.225) — table reproduces
+iter13 EXACTLY (t=0.25 KL 0.5655, random 0.863, corrupted 0.785). Wrote `experiments/manifold_repair_ci.py`
+(paired bootstrap B=5000 of the mean KL delta over the shared 300 prompt indices) + `plot_fig13.py`.
+**Learned:** Both headline positive claims are 95%-CI SIGNIFICANT. The fractional kNN step (t=0.25)
+beats a matched-size RANDOM move by ΔKL +0.297 [+0.246,+0.350] and beats the corrupted start by +0.219
+[+0.177,+0.262] — both CIs exclude 0, so "the manifold supplies a valid repair *direction*" survives
+paired resampling, not a point-estimate artifact. The advantage over random GROWS with the fractional
+step (t=0.10→0.50: +0.19→+0.47). IMPORTANT nuance the CIs add: the full-projection "overshoot loses to
+random" point estimate (2.14>1.93) is NOT significant — t=1.00 vs matched random is ΔKL −0.21 with CI
+[−0.49,+0.07] straddling 0. So the honest, CI-backed trust-region statement is that the full projection
+*loses the manifold advantage* (becomes indistinguishable from a same-size random move), rather than
+being significantly worse than random. Curated RESULTS.md (Phase-6b CI subsection + table + fig13,
+strengthened claim-4 Headline), REPORT.md (fig13, CI values in Causality finding, paired-bootstrap
+Methods def, Reproduce), appended CHANGELOG. All 8 REPORT display equations still render (0 degraded),
+no inline-math escape hazard.
+**Next:** The last listed statistical gap is now closed. Genuine remaining future work (unchanged):
+apply the Phase-6b manifold step to a REAL Direction-1 steering vector at matched achieved effect (S9,
+the only unchecked stage; needs a steering vector build); trust-region / step-size auto-selection (line
+search); in-context-PROCESS negatives (steered/SAE acts produced during a forward); cross-model transfer
+(only gpt2 cached — needs a download). Re-creating STOP.
+On track? yes — closed the last rigor gap (Phase-6b CIs); claim-4 upgrade now CI-backed and
+trust-region nuance corrected; deliverable curated + figure-complete (13 figs), self-consistent; S10
+re-finalized (iter14); blocker: none.

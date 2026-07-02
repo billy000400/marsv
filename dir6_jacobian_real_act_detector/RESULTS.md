@@ -353,6 +353,35 @@ of clean argmax (lower = better).
   with a small trust region* (a fractional step toward nearby real activations), NOT gradient descent on
   a scalar realness score and NOT a full projection — both leave the data shell.
 
+### Paired bootstrap 95% CIs — are the Phase-6b KL gaps statistically real?
+`experiments/manifold_repair_ci.py`. The claim-4 upgrade rested on point estimates over N=300 prompts.
+Because every method's KL is measured on the SAME prompt (via the shared forward hook), we put a
+**paired** bootstrap 95% CI on each KL delta (B=5000 resamples of the 300 prompt indices; delta =
+KL(reference) − KL(kNN step), so **delta > 0 means the kNN step has lower — better — downstream KL**).
+"sig" = 95% CI excludes 0.
+
+| comparison | ref KL | kNN-step KL | ΔKL | 95% CI | sig |
+|---|---|---|---|---|---|
+| t=0.10 vs random-matched   | 0.863 | 0.673 | +0.190 | [+0.152, +0.231] | **YES** |
+| **t=0.25 vs random-matched** | 0.863 | 0.566 | **+0.297** | **[+0.246, +0.350]** | **YES** |
+| t=0.50 vs random-matched   | 1.103 | 0.629 | +0.474 | [+0.368, +0.578] | **YES** |
+| t=1.00 vs random-matched   | 1.932 | 2.143 | −0.211 | [−0.493, +0.067] | no (n.s.) |
+| **t=0.25 vs corrupted-start** | 0.785 | 0.566 | **+0.219** | **[+0.177, +0.262]** | **YES** |
+
+![Phase 6b manifold-repair KL deltas with paired-bootstrap 95% CIs](plots/fig13_manifold_repair_ci.png)
+
+- **Both headline positive claims are statistically significant.** The fractional kNN step at t=0.25
+  beats a matched-size RANDOM move by ΔKL +0.297 [+0.246, +0.350] and beats the corrupted start by
+  +0.219 [+0.177, +0.262] — both CIs are comfortably above 0. So "the manifold supplies a valid repair
+  *direction*" is not a point-estimate artifact: it holds across the 300 prompts.
+- **The advantage over random grows with the (still-fractional) step** (t=0.10→0.50: ΔKL +0.19→+0.47),
+  then **collapses at the full projection**: t=1.00 vs matched-random is ΔKL −0.211 with CI
+  [−0.493, +0.067] that **straddles 0** — i.e. the full-step "overshoot loses to random" point estimate
+  (2.14 > 1.93) is *not* statistically significant. The honest, CI-backed statement is that the full
+  projection merely **loses the manifold advantage** (becomes indistinguishable from a random move of
+  the same size), while every fractional step keeps a significant edge. This sharpens the trust-region
+  conclusion without over-claiming the overshoot.
+
 ## Headline
 **What makes real activations real?** For GPT-2 small residual activations, no single statistic equals
 "realness"; it is a COMBINATION of complementary structures, and different corruptions are anomalous
@@ -397,9 +426,11 @@ plateau-KL) makes downstream behavior WORSE than the corrupted start and worse t
 move-matched random move (reward-hacking / shell-distance trap; Phase 6). BUT a *nonparametric manifold*
 objective — a **fractional (t≈0.25) kNN projection toward nearby real activations** — is the first
 objective-free repair that causally IMPROVES behaviour: it lowers in-context KL below both the corrupted
-start (0.78→0.57) and a matched-size random move (0.86), because the real-activation manifold supplies a
-valid repair *direction* that scalar scores lack (Phase 6b). The step must stay in a small trust region:
-the FULL kNN projection overshoots into the over-central interior and again loses to random. Oracle
+start (0.78→0.57, paired-bootstrap ΔKL +0.22 [+0.18,+0.26]) and a matched-size random move (0.86, ΔKL
++0.30 [+0.25,+0.35]) — both gaps 95%-CI significant over N=300 — because the real-activation manifold
+supplies a valid repair *direction* that scalar scores lack (Phase 6b). The step must stay in a small
+trust region: the FULL kNN projection overshoots into the over-central interior and loses the manifold
+advantage (t=1.00 vs matched-random ΔKL not significant, CI straddles 0). Oracle
 movement toward the true clean activation is the ceiling (KL→0.003). (5) Steering — NOT tested, but the
 Phase-6b sweet-spot (small manifold-projection step) is the concrete objective a Direction-1 repair
 should use, whereas a scalar-score penalty is contraindicated.

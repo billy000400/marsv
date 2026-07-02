@@ -4,6 +4,26 @@ Append-only. Records changes to the deliverables (RESULTS.md / REPORT.md) with o
 
 ---
 
+## 2026-07-02 — Paired-bootstrap 95% CIs on the Phase-6b manifold-repair KL deltas (iter14)
+Put statistical rigor under iter13's claim-4 upgrade, which rested on point estimates over N=300 prompts.
+Added per-prompt KL persistence to `manifold_repair.py` (new `manifold_repair_perprompt_kl.npz`) and a
+new `experiments/manifold_repair_ci.py`: a **paired** bootstrap (B=5000 resamples of the 300 prompt
+indices, shared across methods since each method's KL is measured on the same prompt) of the mean KL
+delta ΔKL = KL(reference) − KL(kNN step). New **fig13** (`plot_fig13.py`). No prior numbers changed;
+this adds CIs to the existing Phase-6b table.
+- **Both headline positive claims are 95%-CI significant.** kNN step (t=0.25) beats a matched-size
+  RANDOM move by ΔKL **+0.297 [+0.246, +0.350]** and beats the corrupted start by **+0.219
+  [+0.177, +0.262]** — both CIs exclude 0. The manifold repair *direction* advantage is real, not a
+  point-estimate artifact.
+- The margin over random grows with the fractional step (t=0.10→0.50: ΔKL +0.19→+0.47), then the full
+  projection (t=1.00) vs matched random is ΔKL **−0.21 with CI [−0.49, +0.07] straddling 0** —
+  **not significant**. Sharpened the trust-region claim: the full projection *loses the manifold
+  advantage* (becomes indistinguishable from random), rather than being significantly worse.
+- Deliverable edits: RESULTS.md Phase 6b — added a paired-bootstrap CI subsection + table + fig13;
+  strengthened the Headline claim-4 verdict with CI values. REPORT.md — added fig13, CI values in the
+  Causality finding, a paired-bootstrap definition in Methods, and `manifold_repair_ci.py`/`plot_fig13.py`
+  to Reproduce. All 8 display equations still render (GitHub markdown API check).
+
 ## 2026-07-02 — Manifold/denoising-prior causal repair (Phase 6b): claim 4 upgraded NO → PARTIAL (iter13)
 Ran the PLAN's last open lever (`experiments/manifold_repair.py`, GPU A10, in-context forward-hook
 harness identical to Phase 6). Tested a nonparametric **kNN manifold projection** repair (move corrupted

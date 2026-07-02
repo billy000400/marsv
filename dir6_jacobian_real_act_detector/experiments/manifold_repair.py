@@ -149,8 +149,10 @@ def main():
         print(f"[{time.time()-t0:.0f}s] batch {bi+1}/{len(ids_all)} (knn1 move {budget1.mean():.1f})", flush=True)
 
     rows = []
+    perprompt_kl = {}
     for name, parts in agg.items():
         M = np.concatenate(parts, 0)
+        perprompt_kl[name] = M[:, 0].astype(np.float32)   # per-prompt KL(clean||x) for paired bootstrap
         rows.append({"method": name, "ext_KL_clean": round(float(M[:, 0].mean()), 4),
                      "ext_NLL_cleanargmax": round(float(M[:, 1].mean()), 4),
                      "move_from_corrupt": round(float(M[:, 2].mean()), 2),
@@ -158,6 +160,7 @@ def main():
                      "dist_to_mean": round(float(M[:, 4].mean()), 2)})
     with open(os.path.join(RES, "manifold_repair_metrics.csv"), "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(rows[0].keys())); w.writeheader(); [w.writerow(r) for r in rows]
+    np.savez(os.path.join(RES, "manifold_repair_perprompt_kl.npz"), **perprompt_kl)
     with open(os.path.join(RES, "manifold_repair_summary.json"), "w") as f:
         json.dump({"layer": LAYER, "n": Np, "noise_s": NOISE_S, "k": K, "meanshift_steps": MS_STEPS,
                    "n_train": N_TRAIN, "method": "in-context full-model forward hook; kNN manifold projection",
