@@ -212,3 +212,25 @@ resid_post via a forward hook (current L11 is post-ln_f); AE on outlier-dim-remo
 second model/corpus; TDA persistent homology on a layer-6 subsample.
 
 On track? yes — 100% done; S1–S6 + all operator feedback addressed; deliverables verified-rendering; STOP written; no blocker.
+
+## Iter 10 (2026-07-02) — re-entry integrity check + STOP
+**Did:** Re-entered a COMPLETE directory (S1–S6 done; all 4 operator reviews/feedback are
+`*.addressed.md`; no unaddressed `*REVIEW*`/`*feedback*` file present). Found `STOP` absent again
+on disk (it keeps not persisting across relaunches). Rather than reopen finalized, quadruple-reviewed
+deliverables — the success criterion (3-estimator per-layer ID; AE bottleneck sweep with identified
+bend; REPORT.md comparison) is fully met — I re-verified deliverable integrity and re-wrote STOP.
+Checks: REPORT.md via GitHub markdown API → **4 `js-display-math`, 0 `<pre lang="math">`**; inline
+backslash-punct hazard grep → **0**; `plots/` holds all 6 referenced PNGs; `results/` holds every
+referenced JSON. No deliverable numbers changed; RESULTS.md/REPORT.md already current-best, so no
+curation edit needed.
+
+**Learned:** STOP does not survive relaunch (4th consecutive re-entry finds it missing), so the loop
+will keep re-entering; the correct standing response for a complete+fully-reviewed directory is a
+cheap integrity re-verify + STOP, NOT a new experiment that would churn finalized work. Stretch items
+(raw block-11 resid_post via forward hook; AE on outlier-dim-removed activations; second model/corpus;
+TDA persistent homology) remain genuinely optional future work and are out of scope while no review
+requests them.
+
+**Next step:** None — deliverables verified-rendering and complete; STOP written.
+
+On track? yes — 100% done; S1–S6 + all operator feedback addressed; deliverables verified-rendering this iter; STOP written; no blocker.
