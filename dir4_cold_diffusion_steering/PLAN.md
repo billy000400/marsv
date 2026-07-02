@@ -25,10 +25,11 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 
 ## Stages (checklist)
 - [x] S1 — Motivating phenomenon: raw steering `h+αv` goes off-manifold (D_M, norm, ΔLM vs α). DONE.
-- [ ] S2 — `projections.py` (project_orthogonal / retain_projection_update) + unit tests; implement
-        `ColdSteerResidualCorrector` (4-layer MLP, `ĥ=z+P_{v⊥}r_θ`).
-- [ ] S3 — Train corrector via paired sentiment targets (h⁻→h⁺; orthogonal+near losses); evaluate
-        `D_M`/`ΔLM` at matched projection vs raw steering + norm-clip baseline + naive-inversion control.
+- [x] S2 — `projections.py` (project_orthogonal / retain_projection_update / cov_aligned_shift) +
+        unit tests DONE. (ColdSteerResidualCorrector MLP class deferred to S3-learned.)
+- [~] S3 — Corrector evaluation at matched projection DONE for the ANALYTIC Gaussian-optimal
+        corrector + norm-clip + naive-inversion control: it lowers `D_M` but WORSENS `ΔLM` (decisive
+        negative/decoupling result). REMAINING: train a learned `r_θ` on the DOWNSTREAM LM loss.
 - [ ] S4 — Generalization + Pareto: held-out α / prompts; concept-strength vs fluency frontier; figs.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
@@ -41,14 +42,21 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-S1 complete. Established that raw steering `z=h+αv` (GPT-2 layer 6, sentiment DiffMean) goes
-monotonically off-manifold: α=0→8 gives `D_M` 27.3→49.0, norm 0.98→1.30, ΔLM 0→+2.78 nats.
-Artifacts: `experiments/common.py`, `experiments/01_offmanifold_phenomenon.py`,
-`data/sentiment_vec_layer6.npz`, `plots/01_offmanifold_phenomenon.png`. RESULTS/REPORT/CHANGELOG updated.
+S1 + S2 complete; S3 core delivered. Beyond the S1 phenomenon, the analytic
+projection-preserving corrector `ĥ=z+P_{v⊥}Δ` with `Δ=Σv̂·α|v|/(v̂ᵀΣv̂)` LOWERS off-manifold
+distance (`D_M` 49.0→38.1 at α=8) and preserves projection exactly, yet WORSENS `ΔLM`
+(+4.20 vs raw +2.78 at α=8; +3.31 vs +0.08 at α=1). Decisive finding: statistical on-manifold
+distance and real LM damage are DECOUPLED — a manifold-distance surrogate is the wrong training
+target; the corrector must see the downstream LM loss. Artifacts: `experiments/projections.py`
+(tests PASS), `experiments/02_corrector.py`, `results/02_corrector.json`,
+`plots/02_corrector.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified.
 
 ## Next step
-S2: write `experiments/projections.py` + tests, then `ColdSteerResidualCorrector`, and stand up
-paired-target extraction (contrastive sentiment prompts → h⁻, h⁺ at layer 6).
+S3-learned: implement `ColdSteerResidualCorrector` (4-layer MLP, `ĥ=z+P_{v⊥}r_θ`) and train
+`r_θ` against the DOWNSTREAM LM loss (backprop the patched-activation loss through frozen upper
+6 GPT-2 blocks; detach `h`; small batch under 0.18 VRAM frac) + stay-near-`z` term. Evaluate vs
+raw at matched projection on `ΔLM`/`D_M`; success = beat raw `ΔLM` at high α while preserving
+projection. Now well-motivated by the Exp-2 decoupling result.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

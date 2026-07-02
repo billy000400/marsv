@@ -17,3 +17,22 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - Added figure `plots/01_offmanifold_phenomenon.png` (3 panels: D_M, norm inflation, ΔLM vs α).
 - REPORT Methods define all three metrics with rendered `math` fences (verified via GitHub
   markdown API: 5/5 js-display-math, 0 broken).
+
+## 2026-07-02 — Experiment 2: projection-preserving corrector (analytic) — negative result
+- Added Experiment 2 to RESULTS.md and REPORT.md: tested the ColdSteer parameterization
+  `ĥ = z + P_{v⊥}r` with the analytic optimal Gaussian correction
+  `Δ = Σv̂·α|v|/(v̂ᵀΣv̂)` (min whitened-movement shift at matched projection), plus
+  norm-clip and naive-inversion baselines.
+- **Result (new):** the corrector LOWERS off-manifold distance (`D_M` 49.0→38.1 at α=8) and
+  preserves the steering projection exactly (retention 88.6 = raw), but WORSENS LM loss:
+  ΔLM +4.20 nats vs raw +2.78 at α=8, and +3.31 vs +0.08 at α=1. Norm-clip gives ~no ΔLM
+  gain and inflates `D_M` on clean acts. Decisive finding: statistical on-manifold distance
+  and real LM damage are DECOUPLED (D_M down while LM loss up ~40× at low α) — the
+  Mahalanobis-minimizing direction `Σv̂` loads onto GPT-2 high-variance outlier dims the LM is
+  most sensitive to.
+- Implication captured in REPORT Conclusion: corrector must be trained on the DOWNSTREAM LM
+  objective, not a manifold-distance surrogate. This reframes/upgrades the motivation.
+- New figure `plots/02_corrector.png` (D_M, ΔLM, projection retention vs α, 4 methods).
+- New code: `experiments/projections.py` (utilities + `cov_aligned_shift`, unit tests PASS),
+  `experiments/02_corrector.py`; results in `results/02_corrector.json`.
+- REPORT math re-verified via GitHub API: 8/8 js-display-math, 0 broken, 0 inline hazards.

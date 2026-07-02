@@ -39,3 +39,43 @@ whether it lowers `D_M`/`ΔLM` at matched projection vs raw steering. Add a norm
 
 On track? yes — S1 done (~20% of direction), no blocker; phenomenon + metrics + reusable
 artifacts in place.
+
+## 2026-07-02 — Iter 2: analytic projection-preserving corrector (S2 + core of S3)
+
+**Did.** Wrote `experiments/projections.py` (normalize_vector, apply_steering,
+projection_along, project_orthogonal, retain_projection_update, and the analytic
+`cov_aligned_shift`) with unit tests (all PASS: alpha=0 identity, P_perp orthogonal,
+retain preserves ⟨ĥ-h,v⟩, cov shift matches projection AND provably lowers Mahalanobis
+penalty via Kantorovich). Then `experiments/02_corrector.py` evaluates, at matched
+projection, raw steering vs the analytic corrector `ĥ=z+P_{v⊥}Δ` with
+`Δ=Σv̂·α|v|/(v̂ᵀΣv̂)` (the min whitened-movement shift), plus norm-clip and naive-inversion
+controls, on `D_M`, ΔLM, and projection retention. Added a per-token `FuncPatcher` +
+`lm_loss_fn` so per-token correctors (norm-clip) route through the real LM.
+
+**Learned (the headline).** The corrector does what it's designed to: lowers `D_M`
+(49.0→38.1 at α=8) and preserves projection exactly (retention 88.6 = raw). But it makes
+the LM MUCH worse: ΔLM +4.20 vs raw +2.78 at α=8, and a brutal +3.31 vs +0.08 at α=1.
+So **statistical on-manifold distance and real LM damage are decoupled** — you can lower
+`D_M` while raising LM loss ~40×. Mechanism: the Mahalanobis-minimizing direction `Σv̂`
+concentrates in GPT-2's high-variance outlier dims — cheap in whitened cost but exactly the
+dims the LM reads sharpest. Norm-clip: ~no ΔLM gain, worse `D_M` on clean acts.
+
+**Why it's a good result.** It's an honest, well-supported negative result that satisfies
+the PLAN's "corrector cannot beat raw steering at matched projection (via a manifold prior)"
+branch AND sharply reframes the direction: a corrector MUST be supervised by the downstream
+LM loss, not a manifold-distance surrogate. Deliverables (RESULTS/REPORT/CHANGELOG/plots)
+curated to current-best; REPORT math re-verified (8/8 js-display-math, 0 broken).
+
+**Assumption/decision logged.** Chose the analytic Gaussian-optimal corrector first (fast,
+parameter-free, provable) instead of jumping straight to a trained MLP — it isolates whether
+the *manifold-projection idea itself* works before spending compute on training. It doesn't,
+which is more informative than a null MLP would have been.
+
+**Next step (S3 learned).** Implement `ColdSteerResidualCorrector` (4-layer MLP) and train
+`r_θ` against the DOWNSTREAM LM loss (backprop into the delta through the frozen upper 6
+GPT-2 blocks; detach h to avoid backprop into lower layers; small batch under 0.18 VRAM
+frac) + a stay-near-`z` term, projection preserved by construction. Evaluate vs raw at
+matched projection on ΔLM/`D_M`; target: beat raw ΔLM at high α. This is now well-motivated.
+
+On track? yes — S2 done + S3 core delivered as a decisive negative/decoupling result
+(~55% of direction); no blocker; learned downstream corrector is the clear next build.
