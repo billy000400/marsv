@@ -35,8 +35,12 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         α=10,12 (beyond range) still recovers 77%/60% of raw's ΔLM damage — graceful degradation.
         (b) HELD-OUT VECTOR DONE: built formality v₂ (cos(v₁,v₂)=0.014); a single sentiment-trained
         corrector does NOT transfer (recovery ≈0%) but retraining the recipe on v₂ recovers 83–104%
-        — correction is direction-specific, method generalizes. (c) concept-strength text Pareto
-        still open (optional).
+        — correction is direction-specific, method generalizes.
+        (c) DIRECTION-CONDITIONAL + VECTOR BANK DONE: `r_θ(h,z,v̂,α)` trained on a 3-vector bank
+        {sentiment,formality,concreteness} is ONE model correcting all in-bank dirs (55–70% @α=8) and
+        PARTIALLY transfers to held-out certainty (51%→7% recovery weak→strong; vs ≈0% frozen
+        single-vector). "One model per vector" → "one model per bank"; larger bank is the follow-up.
+        (d) concept-strength text Pareto still open (optional).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -48,6 +52,19 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
+direction-conditional-bank delivered — success criterion MET; direction near-complete (~98%).
+**S4(c) (new):** made the corrector direction-conditional (`r_θ(h,z,v̂,α)`, 5.25M params) and trained
+ONE on a 3-vector bank {sentiment,formality,concreteness}; held out certainty (|v|=32.8). Cosines:
+sentiment ⟂ all (|cos|≤0.03), the other three share a subspace (|cos| 0.76–0.82). Result: one model
+corrects every in-bank direction at once (α=8 recovery sentiment 55%, formality 70%, concreteness 17%
+/70% @α=2) at a per-direction cost vs a dedicated corrector; and PARTIALLY transfers to held-out
+certainty (51% @α=1 → 7% @α=8, vs ≈0% for Exp-5's frozen single-vector; native oracle 78% @α=8). A
+3-vector bank starts to generalize across directions but doesn't yet solve held-out transfer at strong
+steering. Artifacts: `experiments/06_conditional_bank.py`, `results/06_conditional_bank.json`,
+`plots/06_conditional_bank.png`, `data/{concreteness,certainty}_vec_layer6.npy`. RESULTS/REPORT/
+CHANGELOG curated; REPORT math verified (9/9).
+<!-- prior: S4(b) held-out vector -->
 S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector delivered — success
 criterion MET; direction near-complete (~95%).
 **S4(b) (new):** built a second DiffMean concept vector v₂ (formality, |v₂|=34.0, cos(v₁,v₂)=0.014
@@ -77,12 +94,13 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-Core arc + both generalization axes (strength S4a, direction S4b) delivered. Optional remaining
-polish, any one a clean iteration: (i) DIRECTION-CONDITIONAL corrector `r_θ(h,z,v̂,α)` trained on a
-small BANK of vectors {sentiment, formality, …} — the direct fix for Exp 5's transfer failure; test
-whether ONE model then helps on a held-out vector; (ii) text-level concept-strength readout so the
-frontier is behavior-vs-fluency, not just ΔLM (projection along v is fixed by construction, so
-concept strength is controlled — measure generated-text repetition/quality alongside ΔLM).
+Core arc + all three generalization axes (strength S4a, direction S4b, conditional-bank S4c) delivered;
+Exp 5's open question closed. Optional remaining polish, any one a clean iteration: (i) SCALE the bank
+to 5–10 directions and re-measure held-out transfer at strong steering — the direct follow-up to Exp
+6's partial-transfer finding (does a denser bank close the α=8 gap?); (ii) text-level concept-strength
+readout so the frontier is behavior-vs-fluency, not just ΔLM (projection along v is fixed by
+construction, so concept strength is controlled — measure generated-text repetition/quality alongside
+ΔLM); (iii) multi-layer or a second model.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

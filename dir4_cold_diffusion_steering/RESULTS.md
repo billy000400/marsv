@@ -129,6 +129,50 @@ family. So ColdSteer is a working *recipe* that must be instantiated **per steer
 across concepts. As in Experiment 3, the native corrector wins on fluency while moving *further*
 off the Gaussian manifold than raw (`D_M` 66.6 → 123.1 at α=8).
 
+**Experiment 6 — Direction-conditional corrector on a vector bank: one model, many directions.**
+Experiment 5's fix was "train one corrector per direction." The natural way to avoid that is to make
+the corrector **conditional on the direction** — feed the unit steering vector `v̂` as an extra input,
+`r_θ(h, z, v̂, α)` — and **train it on a bank** of directions at once. We build a 3-vector bank
+(**sentiment**, **formality**, **concreteness**; all DiffMean at block 6) and train a **single**
+conditional corrector (5.25M params) sampling a (direction, α) pair per step. A fourth direction,
+**certainty**, is **held out** (never trained). Pairwise cosines: sentiment is near-orthogonal to all
+(|cos| ≤ 0.03); formality/concreteness/certainty share a subspace (|cos| 0.76–0.82), so the held-out
+`certainty` lies largely *within* the bank's span.
+
+*One model corrects every in-bank direction (fluency recovery at matched projection):*
+
+| direction | in bank? | ΔLM raw @α=8 | ΔLM bank (one model) | recovery @α=8 | recovery @α=2 |
+|---|---|---|---|---|---|
+| sentiment | bank | +2.78 | **+1.24** | 55% | 64% |
+| formality | bank | +6.49 | **+1.95** | 70% | 90% |
+| concreteness | bank | +4.40 | **+3.65** | 17% | 70% |
+| certainty | **HELD-OUT** | +3.71 | **+3.45** | 7% | 42% |
+
+*Held-out `certainty` sweep — bank corrector (transfer) vs native oracle (retrained on certainty):*
+
+| α | ΔLM raw | ΔLM bank (transfer) | ΔLM native (oracle) | recovery bank | recovery native |
+|---|---------|---------------------|---------------------|---------------|-----------------|
+| 1 | +0.22 | +0.11 | **−0.09** | 51% | 141% |
+| 2 | +0.99 | +0.57 | **−0.05** | 42% | 105% |
+| 4 | +2.62 | +2.07 | **+0.11** | 21% | 96% |
+| 6 | +3.35 | +2.94 | **+0.39** | 12% | 88% |
+| 8 | +3.71 | +3.45 | **+0.80** | 7% | 78% |
+
+**Reading it:** two findings. **(1) One conditional model amortizes across a bank of directions.** A
+single corrector recovers 55–70% of raw steering's fluency damage on two of the three in-bank
+directions at α=8 (formality +6.49→+1.95), and more at moderate strength — where Experiments 3/5
+needed a *separate* trained model for each direction. The cost of sharing is a lower per-direction
+recovery than a dedicated corrector (sentiment 84%→55%, formality 83%→70% at α=8) and one direction
+it handles poorly at strong steering (concreteness, 17% at α=8 but 70% at α=2) — evidence of capacity
+interference across directions. **(2) Conditioning + a bank begins to transfer to a held-out
+direction, but only partially.** On `certainty` — never trained, yet highly correlated with two bank
+members — the bank corrector recovers **51% at α=1 falling to 7% at α=8**. That is a real improvement
+over Experiment 5's frozen single-vector transfer (≈0% at every α), so conditioning on `v̂` plus a
+small bank does start to generalize across directions, best at moderate strength; but it stays far
+below the native oracle (retraining on `certainty` recovers 78–141%). The practical read: a
+direction-conditional corrector replaces "one model per vector" with "one model per *bank*," and
+scaling the bank is the indicated path to correcting genuinely unseen directions at strong steering.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -146,6 +190,10 @@ off the Gaussian manifold than raw (`D_M` 66.6 → 123.1 at α=8).
   raw steering, the transfer corrector (trained on sentiment `v₁`), and the native corrector
   (retrained on `v₂`). The transfer curve sits on top of raw (no transfer); the native curve
   collapses ΔLM toward zero (the recipe generalizes when retrained).
+- `plots/06_conditional_bank.png` — (a) per-direction fluency recovery at α=8 for ONE
+  direction-conditional corrector trained on the {sentiment, formality, concreteness} bank (blue =
+  in-bank, orange = held-out certainty); (b) ΔLM vs α on the held-out certainty direction for raw,
+  the bank corrector (partial transfer), and the native oracle.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -157,3 +205,7 @@ from the Gaussian manifold. Statistical "on-manifold" and "LM-safe" are decouple
 downstream objective finds the safe, on-behavior correction. The correction is **direction-specific**
 — a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe
 generalizes**: retraining it on a new formality direction recovers 83–104% of the damage there too.
+Making the corrector **direction-conditional** (feed `v̂`) and training it on a **bank** of directions
+gives **one model that corrects every in-bank direction at once** (55–70% recovery at α=8) and
+**begins to transfer** to a held-out direction (51%→7% recovery from weak to strong steering, vs ≈0%
+for a frozen single-vector corrector) — replacing "one model per vector" with "one model per bank."

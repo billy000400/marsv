@@ -98,3 +98,29 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - New figure `plots/05_heldout_vector.png` (ΔLM and D_M vs α on v₂: raw / transfer / native);
   results in `results/05_heldout_vector.json`.
 - REPORT math re-verified via GitHub API: 9/9 js-display-math, 0 broken, 0 inline hazards.
+
+## 2026-07-02 — Experiment 6: direction-conditional corrector on a vector bank (S4c)
+- Added Experiment 6 to RESULTS.md and REPORT.md: the direct fix for Exp 5's transfer failure —
+  make the corrector CONDITIONAL on the direction (`r_θ(h,z,v̂,α)`, feed the unit vector v̂ as input;
+  arch 3d+1, 5.25M params) and train ONE such model on a BANK of 3 DiffMean directions
+  {sentiment |v|=11.1, formality 34.0, concreteness 64.5}, sampling (direction, α~U(0.5,8)) per step,
+  8 epochs, same frozen-LM objective/seed/data. A 4th direction (certainty, |v|=32.8) is HELD OUT.
+  Cosines: sentiment ⟂ all (|cos|≤0.03); formality/concreteness/certainty share a subspace
+  (|cos| 0.76–0.82) so the held-out certainty lies largely IN the bank's span.
+- **Result (new):** (1) ONE conditional model corrects every in-bank direction at once — recovery at
+  α=8: sentiment 55%, formality 70% (ΔLM +6.49→+1.95), concreteness 17% (but 70% at α=2). Cost of
+  sharing vs a dedicated single-vector corrector: sentiment 84%→55%, formality 83%→70% at α=8 (capacity
+  interference; concreteness weakest at strong steering). (2) Conditioning + bank PARTIALLY transfers
+  to the held-out certainty: recovery 51% @α=1 → 7% @α=8 — a real gain over Exp 5's frozen single-vector
+  transfer (≈0% at every α), but far below the native oracle retrained on certainty (78% @α=8, 141% @α=1).
+  A 3-vector bank does not yet solve held-out transfer at strong steering; scaling the bank is indicated.
+- Practical framing captured in REPORT: replaces "one model per vector" (Exp 5) with "one model per
+  bank," and the path to a reusable corrector is a LARGER bank, not a frozen operator.
+- Updated RESULTS Headline + REPORT Summary/Conclusion/Limitation(3) (direction-conditional/vector-bank
+  now shown; larger bank + multi-layer/model/prompt-family still open).
+- New code: `experiments/06_conditional_bank.py` (reuses Exp-3 machinery + Exp-5 diffmean via import;
+  new CondCorrector + train_cond; builds concreteness/certainty vectors, persisted to
+  `data/{concreteness,certainty}_vec_layer6.npy`). New figure `plots/06_conditional_bank.png`
+  (per-direction recovery bars @α=8; held-out certainty ΔLM sweep raw/bank/native).
+  Results in `results/06_conditional_bank.json`.
+- REPORT math re-verified via GitHub API: 9/9 js-display-math, 0 broken, 0 inline hazards.

@@ -202,3 +202,51 @@ test whether ONE model then transfers to a held-out vector — the direct fix fo
 On track? yes — success criterion met since Iter 3; S4(a) strength + S4(b) direction generalization
 both delivered (~95% of direction); no blocker. Remaining is optional (vector-bank corrector / text
 Pareto).
+
+## 2026-07-02 — Iter 6: direction-conditional corrector on a vector bank (S4c)
+
+**Did.** Wrote `experiments/06_conditional_bank.py` — the direct fix for Exp 5's transfer failure.
+Made the corrector CONDITIONAL on the direction: `CondCorrector` takes v̂ as an extra input
+(`r_θ(h,z,v̂,α)`, input dim 3d+1, 5.25M params, zero-init last layer → starts = raw), and a new
+`train_cond` samples a (direction, α~U(0.5,8)) pair per step from a BANK. Reused Exp-3's LM-loss
+hook/eval verbatim + Exp-5's diffmean_vector (importlib). Bank = {sentiment |v|=11.1, formality 34.0,
+concreteness 64.5}; held out certainty |v|=32.8. Built concreteness/certainty DiffMean vectors from
+16 contrastive pairs each (persisted to data/). Trained ONE bank corrector + ONE native oracle on the
+held-out direction (8 epochs each), evaluated at matched projection on all 4 directions. ~11 min on
+GPU (0.18 frac).
+
+**Learned (headline — a nuanced two-part answer).** Cosines were informative: sentiment ⟂ everything
+(|cos|≤0.03), but formality/concreteness/certainty share a subspace (|cos| 0.76–0.82), so the held-out
+certainty sits largely IN the bank's span. (1) ONE conditional model corrects every in-bank direction
+at once — α=8 recovery: sentiment 55%, formality 70% (+6.49→+1.95), concreteness 17% (70% at α=2). The
+cost of sharing vs a dedicated corrector is real (sentiment 84%→55%, formality 83%→70%; concreteness
+worst at strong steering — capacity interference). (2) Conditioning + bank PARTIALLY transfers to the
+held-out certainty: 51% @α=1 → 7% @α=8 — a genuine gain over Exp 5's ≈0% frozen single-vector transfer,
+but far under the native oracle (78% @α=8, 141% @α=1). So a 3-vector bank starts to generalize across
+directions (best at moderate strength) but doesn't yet solve held-out transfer at strong steering.
+Practical framing: "one model per vector" → "one model per bank"; path to reuse is a LARGER bank.
+
+**Assumption/decision logged.** (a) Chose the direction-conditional + bank experiment (PLAN Next-step
+(i)) over the text-level concept-strength Pareto (ii) because it directly closes Exp 5's open question
+and REPORT Limitation (3), reuses all existing machinery (no new generation/scoring harness), and is
+cheaper/lower-risk. (b) Bank size 3 (+1 held-out): needed only 2 new concept pair-sets (concreteness,
+certainty) — reused saved sentiment/formality vectors — keeping it a single clean iteration; a larger
+bank is the obvious follow-up now that the interference/partial-transfer tradeoff is quantified.
+(c) Trained a native oracle on the held-out direction so the transfer number is interpretable against a
+ceiling (as in Exp 5). (d) Honest reporting of the weak spots (concreteness 17% @α=8; held-out 7%
+@α=8) rather than cherry-picking — the capacity/transfer tradeoff is the actual finding. Rejected:
+bigger bank / feeding α-embedding / per-direction loss weighting this iter (scope creep).
+
+**Deliverables.** RESULTS.md + REPORT.md curated: added Experiment 6 (two tables + interpretation),
+updated Headline/Summary/Conclusion/Limitation(3), new figure `plots/06_conditional_bank.png`;
+`results/06_conditional_bank.json`; `data/{concreteness,certainty}_vec_layer6.npy`. REPORT math
+re-verified via GitHub API (9/9 js-display-math, 0 broken, 0 inline hazards). CHANGELOG appended.
+
+**Next step.** Direction near-complete. Optional remaining polish, any one a clean iter: (i) SCALE the
+bank (5–10 directions) and re-measure held-out transfer at strong steering — the direct follow-up to
+Exp 6's partial-transfer finding; (ii) text-level concept-strength readout for a behavior-vs-fluency
+Pareto (heavier: needs a generation+scoring harness); (iii) multi-layer or a second model.
+
+On track? yes — success criterion met since Iter 3; S4 (a)+(b)+(c) all delivered, Exp 5's open
+question closed (~98% of direction); no blocker. Remaining is optional (larger bank / text Pareto /
+multi-layer).
