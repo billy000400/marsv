@@ -259,6 +259,31 @@ dist +0.75, norm −0.22.
 
 ![Stage D](plots/plateau_stageD.png)
 
+### Stage E — cross-layer generalization (resid_pre@9)
+
+We rerun the decisive Stage B distance-matched test at a **later** layer,
+`blocks.9.hook_resid_pre` (output of block 8), with its own matching jbloom SAE
+($d_\text{sae}=24576$; `b_dec` subtracted, recon error 59.2 vs 904.6), identical logic
+($\tau_\text{held-out}=2.36\times10^{-4}$, iso_displace reference, distance-matched residual, bootstrap
+CIs); N=200, N_eval=100, 6 directions. The reference decays more gently with distance than at L6
+(0.195 / 0.189 / 0.163 / 0.145 at $\delta=15/30/60/120$).
+
+| condition | median dist | plateau | ref @ dist | residual $\rho_c$ | 95% CI | verdict |
+|---|---|---|---|---|---|---|
+| recon | 47.0 | 0.199 | 0.172 | **+0.030** | [+0.017, +0.047] | **above** random (survives dist-match) |
+| naive | 97.8 | 0.100 | 0.150 | **−0.050** | [−0.056, −0.046] | **below** random |
+| sparse_match | 100.9 | 0.103 | 0.149 | **−0.048** | [−0.055, −0.040] | **below** random |
+
+Pooled Spearman(plateau, distance) $=-0.46$. **The synthetic-composition null generalizes:**
+`naive` and `sparse_match` plateau clearly below the random-displacement reference at L9 too, so no
+*constructed* SAE code beats a random point at equal distance and distance still dominates. The one
+cross-layer change is that **`recon` now plateaus *above* the reference** (+0.030 vs −0.016 at L6):
+a faithful reconstruction is a genuine real-derived activation and at this later layer earns
+above-random plateau credit — sharpening the Stage C real-manifold-membership reading rather than
+overturning the null.
+
+![Stage E](plots/plateau_stageE_L9.png)
+
 ## Conclusion
 
 In this GPT-2-small resid_pre@6 / public-SAE setup, plateau-ness is **not** an independent
@@ -283,6 +308,9 @@ below-random deficit holds — slightly stronger — under single-column and spa
 perturbation directions, not just isotropic ones. **Improved synthetic constructions are tested
 and do not overturn the null** (Stage C): co-occurrence-aware and cycle-consistent codes stay
 below the random-displacement curve; only genuine real-derived codes exceed it, so the deficit is
-not a marginal-code-statistics artifact but a real-manifold-membership one. Not run: an
-alternate-layer generalization (Stage E); given the local-sensitivity, direction-robustness, and
-improved-code results it would *scope* the conclusion rather than overturn it.
+not a marginal-code-statistics artifact but a real-manifold-membership one. **Cross-layer
+generalization is confirmed** (Stage E, resid_pre@9): the synthetic-composition null holds at a
+second layer (naive/sparse below random), with the one change being that a faithful SAE
+reconstruction earns above-random plateau at the later layer (+0.030 vs ≈0 at L6) — a layer-
+dependent *reconstruction* effect that sharpens, rather than overturns, the real-manifold-membership
+reading. The project-level null thus holds across two layers under one primary metric.

@@ -224,6 +224,51 @@ dist +0.75, norm −0.22.
 
 ![Stage D: validity target vs plateau, and held-out R² with/without local sensitivity](plots/plateau_stageD.png)
 
+## Stage E — does the null generalize to another layer? (resid_pre@9)
+
+The primary study is one layer/SAE (resid_pre@6). Stage E reruns the **decisive Stage B
+distance-matched test at a later layer**, `blocks.9.hook_resid_pre` (= output of block 8), with
+its own matching jbloom SAE (`d_sae=24576`; `b_dec` subtracted before encoding, recon error 59.2
+vs 904.6 without). All logic is identical for an apples-to-apples comparison (held-out
+`τ=2.36e-4`, iso_displace random-displacement reference, distance-matched residual, bootstrap CIs);
+N=200, N_eval=100, 6 directions.
+
+**iso_displace reference** at resid_pre@9 (decays more gently with distance than L6 — later-layer
+residuals are larger-norm and less locally sensitive):
+
+| δ (distance) | 15 | 30 | 60 | 120 |
+|---|---|---|---|---|
+| iso_displace plateau_auc_low | 0.195 | 0.189 | 0.163 | 0.145 |
+
+**Distance-matched residual** `ρ_c` (median over eval sources, 95% bootstrap CI; `>0` = flatter
+than a random displacement at equal distance):
+
+| condition | median dist | plateau | ref @ dist | residual `ρ_c` | 95% CI | verdict |
+|---|---|---|---|---|---|---|
+| recon        | 47.0 | 0.199 | 0.172 | **+0.030** | [+0.017, +0.047] | **ABOVE** random (survives dist-match) |
+| naive        | 97.8 | 0.100 | 0.150 | **−0.050** | [−0.056, −0.046] | **below** random |
+| sparse_match | 100.9 | 0.103 | 0.149 | **−0.048** | [−0.055, −0.040] | **below** random |
+
+Pooled Spearman(plateau, distance) over the SAE + iso conditions (eval half) = **−0.46**.
+
+**Readings:**
+- **The synthetic-composition null generalizes.** At resid_pre@9, `naive` and `sparse_match` SAE
+  compositions again plateau **clearly below** the random-displacement reference at matched
+  distance (−0.050 / −0.048; both CIs exclude 0), exactly as at L6. No *constructed* SAE code beats
+  a random point at equal distance, and sparsity/coefficient matching again fails to help — H2/H3
+  hold across layers.
+- **Reconstruction plateau credit is layer-dependent.** Unlike L6 (where `recon` sat essentially
+  *on* the random curve, −0.016), at L9 **`recon` plateaus ABOVE the reference** (+0.030, CI
+  excludes 0). A reconstruction is a genuine real-derived activation, so this *strengthens* — not
+  overturns — the Stage C reading: the ingredient that earns above-random plateau is
+  **real-activation manifold membership**, and at this later layer the SAE reconstruction is
+  faithful enough to inherit it (`cooc_full`-like behavior).
+- **Net:** Stage E **scopes** the reconstruction result (recon's above-/on-curve status varies by
+  layer) but **confirms** the project-level null for synthetic codes and the distance-dominates
+  finding.
+
+![Stage E: resid_pre@9 distance-matched residual](plots/plateau_stageE_L9.png)
+
 ## Current verdict (project-level)
 - **H1 (Stage A):** supported — real/recon activations plateau more than naive synthetic
   compositions, and this is not a norm artifact (norm-matched random is *flattest*; pooled
@@ -254,15 +299,19 @@ evidence says plateau-ness is **mere local robustness** plus distance-to-real. T
 consistent with Direction 9 (plateau-as-OOD weak) and Direction 6 (plateau predicts downstream
 KL but only as local sensitivity).
 
-_Scope / open:_ one primary metric, one layer/SAE. Direction-family robustness is **confirmed**
-(Stage B-dir). **Improved synthetic constructions are tested and do not overturn the null**
-(Stage C: co-occurrence-aware and cycle-consistent codes stay below random; only genuine
-real-derived codes plateau above it). Not run: an alternate-layer generalization (Stage E) — given
-the local-sensitivity, direction-robustness, and improved-code results, it would *scope* the
-conclusion but is not expected to overturn the project-level null.
+_Scope / open:_ one primary metric. Direction-family robustness is **confirmed** (Stage B-dir).
+**Improved synthetic constructions are tested and do not overturn the null** (Stage C:
+co-occurrence-aware and cycle-consistent codes stay below random; only genuine real-derived codes
+plateau above it). **An alternate-layer generalization is now run** (Stage E, resid_pre@9): the
+synthetic-composition null generalizes — `naive`/`sparse_match` again plateau clearly below the
+random-displacement reference — while the *reconstruction* residual is layer-dependent (recon
++0.030 above random at L9 vs ≈0 at L6), which sharpens rather than overturns the real-manifold-
+membership reading. The project-level null therefore holds across two layers; the only cross-layer
+change is that a faithful SAE reconstruction can earn above-random plateau at a later layer.
 
 _Artifacts:_ `results/plateau_metrics.csv`, `results/plateau_summary.json` (Stage A);
 `results/stageB_metrics.csv`, `results/stageB_summary.json` (Stage B);
 `results/stageB_dir_metrics.csv`, `results/stageB_dir_summary.json` (Stage B-dir);
 `results/stageC_metrics.csv`, `results/stageC_summary.json` (Stage C);
-`results/stageD_metrics.csv`, `results/stageD_summary.json` (Stage D).
+`results/stageD_metrics.csv`, `results/stageD_summary.json` (Stage D);
+`results/stageE_L9_metrics.csv`, `results/stageE_L9_summary.json` (Stage E).

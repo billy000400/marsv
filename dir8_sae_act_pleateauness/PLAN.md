@@ -514,7 +514,9 @@ and headline verdicts. Speculation and future-work brainstorming belong in `PLAN
 - [x] S6 — Stage C: improved synthetic latent constructions. (H3 negative: co-occurrence &
       cycle-consistent codes stay BELOW random; only genuine real-derived codes exceed it)
 - [x] S7 — Stage D: independent downstream-validity prediction. (H4 negative beyond local sensitivity)
-- [ ] S8 — Stage E: one limited generalization check. (skipped — null complete & named)
+- [x] S8 — Stage E: one limited generalization check (resid_pre@9). Synthetic-composition null
+      GENERALIZES (naive/sparse below random); recon residual is layer-dependent (+0.030 above
+      random @L9 vs ≈0 @L6) — sharpens real-manifold-membership reading, does not overturn null.
 - [x] S9 — Finalize `RESULTS.md`, `REPORT.md`, `JOURNAL.md`, and `STOP`.
 
 ## Out of scope (do NOT)
@@ -530,11 +532,11 @@ End each `JOURNAL.md` entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**FINALIZED — project-level null complete, direction-robust AND improved-code-robust; STOP created.**
-Stages A (M1) + B (M2) + B-dir + C (M3) + D (M4) done & decisive. SAE = jbloom resid_pre@6
-(d_sae=24576), hook = block-5 output. Scripts: `experiments/smoke_plateau.py` (A),
-`stageB_distance.py` (B), `stageB_directions.py` (B-dir), `stageC_synthetic.py` (C),
-`stageD_validity.py` (D).
+**FINALIZED — project-level null complete; direction-robust, improved-code-robust, AND cross-layer
+generalized (Stage E); STOP created.** Stages A (M1) + B (M2) + B-dir + C (M3) + D (M4) + E (M5)
+done & decisive. SAE = jbloom resid_pre@6 (d_sae=24576), hook = block-5 output. Scripts:
+`experiments/smoke_plateau.py` (A), `stageB_distance.py` (B), `stageB_directions.py` (B-dir),
+`stageC_synthetic.py` (C), `stageD_validity.py` (D), `stageE_generalize.py` (E).
 - Stage A (N=200, 8 dirs): plateau_auc_low real 0.200, recon 0.162, naive 0.066, norm_rand
   0.035; all paired gaps exclude 0; NOT a norm artifact (Spearman(plateau,norm)=+0.06).
 - Stage B (N_eval=100, 6 dirs, held-out τ=1.33e-4): iso_displace random-displacement reference
@@ -555,16 +557,26 @@ Stages A (M1) + B (M2) + B-dir + C (M3) + D (M4) done & decisive. SAE = jbloom r
   neither support co-occurrence nor encode–decode cycle-consistency recovers plateau; the missing
   ingredient is real-activation manifold membership. cooc_full above = positive control Stage B
   lacked. Cycle filter: real-code p75 cycle err τ_cyc=0.342, naive pass rate 0.56%.
+- Stage E (N=200, N_eval=100, 6 dirs; `stageE_generalize.py`, resid_pre@9 = block-8 out; own jbloom
+  SAE, recon err 59.2; held-out τ=2.36e-4): distance-matched residual ρ_c — naive −0.050
+  [−0.056,−0.046], sparse_match −0.048 [−0.055,−0.040] both BELOW random (null GENERALIZES); recon
+  **+0.030** [+0.017,+0.047] ABOVE random (layer-dependent: was −0.016 @L6). iso ref
+  0.195/0.189/0.163/0.145; Spearman(plateau,dist)=−0.46. Synthetic-composition null holds across two
+  layers; only cross-layer change = faithful recon earns above-random plateau at the later layer.
 - **Project verdict (null):** plateau-ness = closeness-to-real (B) + local robustness (D), NOT
   an SAE interpretability-validity diagnostic, and NOT recoverable by improved SAE codes (C). Of
   {provenance, OOD, downstream-invalidity, mere local robustness} → **mere local robustness** +
-  distance-to-real / real-manifold membership. Matches D9 & D6.
+  distance-to-real / real-manifold membership. Cross-layer generalized (E). Matches D9 & D6.
 Env note: transformers/tokenizers/safetensors/huggingface_hub pip-installed `--no-deps`
 (tokenizers 0.22.2); torch/CUDA untouched. matplotlib present.
 
 ## Next step
-DONE — nothing outstanding. Deliverables re-verified current-best (REPORT 4/4 display eqs render, 0
-degraded, 0 inline-8b hazards; RESULTS references all 5 plots) and **STOP confirmed on disk** after a
-kill/relaunch checkpoint (0eb405d) had dropped it. Only Stage E (one alternate-layer generalization)
-remains optional, expected to scope not overturn the local-sensitivity null (already direction-family
+DONE — nothing outstanding. Stage E (resid_pre@9) is now integrated into RESULTS.md + REPORT.md +
+CHANGELOG; both deliverables re-verified current-best (REPORT 4/4 display eqs render, 0 degraded, 0
+inline-8b hazards; RESULTS references all 6 plots including plateau_stageE_L9.png) and **STOP
+re-created on disk** (a prior loop ran Stage E at 00:32 but was cut before integrating it / before
+re-creating STOP). Project null now generalizes across two layers; nothing remains. (Legacy note re
+kill/relaunch checkpoint 0eb405d that had dropped STOP earlier — already recovered.) Prior status
+line kept below for history was: expected to scope not overturn the local-sensitivity null (already
+direction-family
 robust AND improved-code robust).

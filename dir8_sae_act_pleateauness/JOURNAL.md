@@ -232,3 +232,52 @@ must be confirmed on disk (`ls STOP`) after any checkpoint recovery, not assumed
 
 On track? yes — FINALIZED (Stages A(M1)+B(M2)+B-dir+C(M3)+D(M4) done; E intentionally skipped);
 project-level null complete, direction- and improved-code-robust; deliverables verified; STOP on disk.
+
+## 2026-07-02 — Stage E integration (resid_pre@9); STOP re-created
+**Context on reset.** Read CLAUDE.md/BUDGET.md/PLAN/JOURNAL/RESULTS/CHANGELOG. Found the project
+FINALIZED as a null, BUT: (a) STOP was again missing on disk, and (b) orphan Stage E artifacts
+existed — `results/stageE_L9_{metrics,summary}.json/csv`, `plots/plateau_stageE_L9.png`,
+`experiments/stageE_generalize.py`, all from commit 3e96b08 (00:38) — with NO corresponding entry in
+JOURNAL/CHANGELOG and NO integration into RESULTS/REPORT/PLAN. So a prior loop ran Stage E but was
+cut before curating it. ~215 min budget, so did the focused iteration: integrate the real Stage E
+result rather than re-finalize blindly.
+
+**Verified first (not assumed).** Read `stageE_generalize.py` — it is a direct parametrized copy of
+`stageB_distance.py` (same held-out τ, iso_displace reference R(δ), distance-matched residual,
+bootstrap CIs), layer 9 = `blocks.9.hook_resid_pre` (block-8 output), own jbloom SAE (recon err 59.2
+sub vs 904.6 nosub → b_dec subtracted, matching L6 convention). Viewed the plot; it matches the
+summary. Result is legitimate and apples-to-apples with Stage B.
+
+**Learned (decision-grade). The synthetic-composition null GENERALIZES; recon is layer-dependent.**
+Distance-matched residual ρ_c (median [95% CI], >0 = flatter than random at equal distance):
+- naive −0.050 [−0.056,−0.046], sparse_match −0.048 [−0.055,−0.040] — both clearly BELOW the
+  random-displacement reference at L9, exactly as at L6 (−0.058 / −0.063). No CONSTRUCTED SAE code
+  beats a random point at equal distance at either layer; sparsity/coef matching again fails. H2/H3
+  hold across two layers.
+- recon +0.030 [+0.017,+0.047] — ABOVE random at L9, whereas at L6 it sat ~on the curve (−0.016).
+  A reconstruction is a genuine real-derived activation, so this STRENGTHENS the Stage C reading:
+  the ingredient that earns above-random plateau is real-activation MANIFOLD MEMBERSHIP, and at a
+  later layer the SAE recon is faithful enough to inherit it (cooc_full-like).
+- iso ref decays more gently @L9 (0.195/0.189/0.163/0.145) — later-layer residuals larger-norm, less
+  locally sensitive. Spearman(plateau,dist) eval = −0.46 (still distance-dominated, weaker than L6's
+  −0.64). Net: Stage E SCOPES the recon result but CONFIRMS the project null for synthetic codes.
+
+**Did (curate).** Inserted Stage E section into RESULTS.md (before "Current verdict") and REPORT.md
+(after Stage D); updated both Scope/Conclusion paragraphs ("Not run" → "run, null generalizes");
+added Stage E artifacts to RESULTS list. Updated PLAN: S8 ticked, Current status/verdict/Next step.
+Appended CHANGELOG. Re-verified REPORT via GitHub markdown API (4/4 display eqs render as
+js-display-math, 0 degraded, 0 inline-8b hazards; RESULTS 0 hazards, references all 6 plots).
+Re-created empty STOP file.
+
+**Assumptions logged (loop mode).** (1) Trusted the orphan Stage E artifacts as valid after reading
+the script + plot (did NOT re-run — same config as Stage B, 3000-resample bootstrap already baked in;
+re-running would cost ~5 min GPU with no expected change and risk desync). (2) Chose layer 9 as the
+prior loop did (a clearly *later* layer than block-5) — one axis per PLAN §13.8; did not test a
+second alternate layer (budget + M5 = "one additional layer").
+
+**Next step.** None — project complete and now cross-layer generalized (M5 met). Deliverables clean,
+STOP on disk. If a future loop wakes: confirm STOP present (ls STOP) before assuming done.
+
+On track? yes — FINALIZED (Stages A(M1)+B(M2)+B-dir+C(M3)+D(M4)+E(M5) done & decisive); project-level
+null complete, direction-robust, improved-code-robust, AND cross-layer generalized; deliverables
+verified current-best; STOP re-created on disk.

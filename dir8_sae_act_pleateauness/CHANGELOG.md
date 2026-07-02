@@ -145,3 +145,29 @@ Append-only.
     (stageA/stageB/stageB_dir/stageC/stageD).
 - Re-created the empty STOP file (project-level null was already complete: Stages
   A/B/B-dir/C/D done & decisive; Stage E intentionally skipped as scope-not-overturn).
+
+## 2026-07-02 — Stage E (resid_pre@9) integrated into deliverables
+- A prior loop iteration (commit 3e96b08, 00:38) RAN Stage E — `experiments/stageE_generalize.py`
+  at `blocks.9.hook_resid_pre` (block-8 output), own matching jbloom SAE (d_sae=24576, recon err
+  59.2 vs 904.6, b_dec subtracted), held-out τ=2.36e-4, N=200/N_eval=100, 6 dirs — producing
+  `results/stageE_L9_{metrics.csv,summary.json}` and `plots/plateau_stageE_L9.png`, but was cut
+  before writing the result into RESULTS.md/REPORT.md/PLAN and before re-creating STOP. This entry
+  integrates it (no earlier numbers changed).
+- RESULTS.md: added "Stage E — does the null generalize to another layer? (resid_pre@9)" section
+  (iso reference table, distance-matched residual table, readings, plot); updated Scope paragraph
+  from "Not run (Stage E)" → "now run, null generalizes"; added Stage E artifacts to the list.
+- REPORT.md: added "Stage E — cross-layer generalization" results subsection + plot; updated
+  Conclusion scope from "Not run" → "Cross-layer generalization is confirmed".
+- Numbers (distance-matched residual ρ_c, median [95% CI], >0 = flatter than random at equal dist):
+    recon **+0.030** [+0.017, +0.047] — ABOVE random (layer-dependent: was −0.016 @L6);
+    naive **−0.050** [−0.056, −0.046] — BELOW random (as @L6);
+    sparse_match **−0.048** [−0.055, −0.040] — BELOW random (as @L6).
+  iso_displace reference @L9: 0.195/0.189/0.163/0.145 at δ=15/30/60/120; Spearman(plateau,dist)=−0.46.
+- Interpretation: the synthetic-composition null (H2/H3) GENERALIZES across layers — no constructed
+  SAE code beats a random displacement at equal distance at L9 either. The one cross-layer change is
+  that a faithful SAE reconstruction (a real-derived activation) earns above-random plateau at the
+  later layer, sharpening (not overturning) the Stage C real-manifold-membership reading.
+- PLAN.md: S8 checkbox ticked; Current status + verdict updated (E done, M5 met); Next step updated.
+- REPORT.md re-verified via GitHub markdown API: 4/4 display eqs render as js-display-math, 0
+  degraded to `<pre lang="math">`, 0 inline-8b hazards (also RESULTS.md 0 hazards).
+- STOP re-created on disk (project-level null complete: A/B/B-dir/C/D/E all done & decisive).
