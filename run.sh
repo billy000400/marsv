@@ -72,9 +72,14 @@ git_sync() {
   local phase="${1:-iter}" root branch lock
   root="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "[git] $DIR: not a git repo — skip"; return 0; }
   branch="$(git rev-parse --abbrev-ref HEAD 2>/dev/null)"; branch="${branch:-main}"
-  lock="$root/.git/marsv-git.lock"
+  # Lock MUST live on a LOCAL fs (/tmp is overlay), NOT on the CephFS repo: CephFS
+  # distributed flock can wedge in the kernel (ceph_lock_wait_for_completion) and stall
+  # every loop's commit indefinitely. All loops share this pod, so /tmp is shared among them.
+  lock="/tmp/marsv-git.lock"
 
-  flock "$lock" bash -c '
+  # -w 30: never block forever. If the lock can't be acquired in 30s, flock exits non-zero,
+  # git_sync returns non-zero, the caller's `|| true` swallows it, and we retry next iteration.
+  flock -w 30 "$lock" bash -c '
     phase="$1"; branch="$2"; DIR="$3"; SSH_SETUP="$4"
     # stage ONLY this direction (cwd = the dir); never sibling dirs / shared root files.
     git add -A -- . >/dev/null 2>&1 || true
