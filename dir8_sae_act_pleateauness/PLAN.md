@@ -563,7 +563,8 @@ Env note: transformers/tokenizers/safetensors/huggingface_hub pip-installed `--n
 (tokenizers 0.22.2); torch/CUDA untouched. matplotlib present.
 
 ## Next step
-DONE. RESULTS.md + REPORT.md now include Stage C (improved synthetic codes, H3 negative) curated
-to current-best; CHANGELOG + JOURNAL appended; STOP re-created. Only Stage E (one alternate-layer
-generalization) remains, expected to scope not overturn the local-sensitivity null (which is now
-direction-family robust AND improved-code robust).
+DONE — nothing outstanding. Deliverables re-verified current-best (REPORT 4/4 display eqs render, 0
+degraded, 0 inline-8b hazards; RESULTS references all 5 plots) and **STOP confirmed on disk** after a
+kill/relaunch checkpoint (0eb405d) had dropped it. Only Stage E (one alternate-layer generalization)
+remains optional, expected to scope not overturn the local-sensitivity null (already direction-family
+robust AND improved-code robust).

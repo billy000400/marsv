@@ -216,3 +216,19 @@ Re-creating STOP.
 
 On track? yes — Stages A(M1)+B(M2)+B-dir+C(M3)+D(M4) done & decisive (~95% of plan; only E left,
 optional); project-level null complete and now improved-code-robust. STOP re-created.
+
+## 2026-07-02 — Finalization re-verify + STOP recovery
+**Did.** Resumed after a kill/relaunch (ceph-flock wedge; checkpoint commit 0eb405d). Confirmed the
+project was already FINALIZED (RESULTS.md + REPORT.md current-best, Stages A/B/B-dir/C/D complete,
+null named) but the STOP file had been dropped by the checkpoint. Re-verified both deliverables:
+REPORT.md renders 4/4 display equations as `js-display-math` with 0 `<pre lang="math">` and 0 inline
+8b hazards via the GitHub markdown API; RESULTS.md has 0 inline hazards and references all 5 plots.
+No result numbers changed. Re-created the empty STOP file; appended CHANGELOG.
+
+**Learned.** The prior iteration's "STOP re-created" line did not survive the kill/relaunch — STOP
+must be confirmed on disk (`ls STOP`) after any checkpoint recovery, not assumed from the log.
+
+**Next step.** None — project complete. Deliverables clean, STOP present.
+
+On track? yes — FINALIZED (Stages A(M1)+B(M2)+B-dir+C(M3)+D(M4) done; E intentionally skipped);
+project-level null complete, direction- and improved-code-robust; deliverables verified; STOP on disk.

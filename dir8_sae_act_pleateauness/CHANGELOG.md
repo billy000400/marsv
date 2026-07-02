@@ -135,3 +135,13 @@ Append-only.
   layer/SAE, every metric and baseline with $$LaTeX$$ (plateau_auc_low, output_kl, distance,
   norm, iso_displace reference, locsens). Plot `plots/plateau_stageD.png` added.
 - Artifacts: `results/stageD_summary.json`, `results/stageD_metrics.csv`.
+
+## 2026-07-02 — Finalization re-verify + STOP recovery (no deliverable change)
+- No result numbers changed. Deliverables re-verified as current-best after the ceph-flock
+  kill/relaunch checkpoint (commit 0eb405d) had dropped the STOP file:
+  - REPORT.md: GitHub markdown API check passes — 4/4 display-math fences render as
+    `js-display-math`, 0 degraded to `<pre lang="math">`, 0 inline-escape (8b) hazards.
+  - RESULTS.md: 0 inline-escape hazards; references all 5 plots
+    (stageA/stageB/stageB_dir/stageC/stageD).
+- Re-created the empty STOP file (project-level null was already complete: Stages
+  A/B/B-dir/C/D done & decisive; Stage E intentionally skipped as scope-not-overturn).
