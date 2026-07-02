@@ -62,15 +62,25 @@ $$\mathrm{KL}_\downarrow=\mathrm{KL}\!\big(p_\text{clean}\,\Vert\,p_\text{corrup
 **Prediction** uses Spearman rank correlation $\rho$ and the **partial** Spearman controlling
 distance-to-original $d=\lVert x-x_0\rVert$ (rank-residualize score and $\mathrm{KL}_\downarrow$ on $d$,
 then correlate). **Causal repair** compares external $\mathrm{KL}_\downarrow$ and clean-argmax NLL at
-matched L2 move budget. **Bootstrap CIs** (Phase 3 capstone) are percentile intervals $[q_{2.5},q_{97.5}]$
+matched L2 move budget, across repair operators: *scalar-score descent* (Adam on Mahalanobis or
+plateau-KL; Phase 6) and the Phase-6b *nonparametric manifold projection* — a partial step of fraction
+$t$ toward the mean of the $k{=}16$ nearest real train activations,
+
+```math
+x_t \;=\; x_\text{corrupt} + t\,\big(\bar{\mathrm{NN}}_k(x_\text{corrupt}) - x_\text{corrupt}\big),\qquad \bar{\mathrm{NN}}_k(x)=\tfrac1k\!\!\sum_{i\in\mathrm{NN}_k(x)}\!\! x_i^{\text{real}}
+```
+
+using no reference to the clean target — each step is compared to a random move of identical L2 size and
+to the oracle move toward the true clean activation. **Bootstrap CIs** (Phase 3 capstone) are percentile intervals $[q_{2.5},q_{97.5}]$
 over $B=2000$ resamples of the real and family rows (with replacement), with orientation fixed from the
 full sample.
 
 ## Figures
 Figures 1–8 are rendered from cached result CSVs by `experiments/make_plots.py` (pure PIL); figure 9
 (Phase 2c) by `experiments/plot_fig9.py`, figure 10 (bootstrap CIs) by `experiments/bootstrap_ci.py`,
-and figure 11 (Phase 3c in-context discrimination) by `experiments/plot_fig11.py` (matplotlib) — all
-from the cached `results/*.csv`.
+figure 11 (Phase 3c in-context discrimination) by `experiments/plot_fig11.py`, and figure 12 (Phase 6b
+manifold-projection repair) by `experiments/plot_fig12.py` (matplotlib) — all from the cached
+`results/*.csv`.
 
 ![Phase 2 baseline AUROC by family @ L6](plots/fig1_baselines_L6.png)
 ![Phase 2b baseline AUROC heatmap @ L6 (interp defeats every statistic)](plots/fig3_baselines_L6_heatmap.png)
@@ -83,6 +93,7 @@ from the cached `results/*.csv`.
 ![Phase 5 partial Spearman of scores with in-context KL controlling distance](plots/fig7_prediction_partial_rho.png)
 ![Phase 6 causal repair external downstream KL by method](plots/fig8_causal_repair_KL.png)
 ![Phase 3c in-context vs out-of-context plateau-KL discrimination](plots/fig11_incontext_discrimination.png)
+![Phase 6b manifold-projection repair: KL vs move, kNN direction vs matched random](plots/fig12_manifold_repair.png)
 
 ## Key results
 1. **No single statistic is "realness."** Norm is a shortcut (AUROC 0.50 on the two norm-matched
@@ -138,12 +149,16 @@ from the cached `results/*.csv`.
    distance-to-original (partial ρ +0.17…+0.57, positive in both noise and interp sweeps), while
    Mahalanobis/kNN add nothing over proximity. So the property best for *discriminating* interpolations
    (two-sided Mahalanobis) differs from the property best for *predicting* downstream harm (functional).
-7. **No realness score is a valid CAUSAL repair objective (negative result).** Gradient descent on
-   Mahalanobis or plateau-KL to "repair" a corrupted activation makes downstream KL WORSE than the
-   corrupted start and worse than a matched random move (Mahalanobis → over-central shell-trap;
-   plateau-KL → Goodhart degenerate region), while the oracle move toward the true clean activation
-   recovers behavior (in-context KL 0.78→0.009). Discriminative/predictive ≠ causal; naive descent
-   reward-hacks these.
+7. **No scalar realness SCORE is a valid causal objective, but a nonparametric MANIFOLD projection is
+   (Phases 6 & 6b).** Gradient descent on Mahalanobis or plateau-KL to "repair" a corrupted activation
+   makes downstream KL WORSE than the corrupted start and worse than a matched random move (Mahalanobis
+   → over-central shell-trap; plateau-KL → Goodhart degenerate region). BUT a *fractional* kNN
+   manifold-projection step (t≈0.25 toward the mean of the 16 nearest real activations, objective-free)
+   is the first repair to causally IMPROVE behaviour — in-context KL 0.78→**0.57**, below both the
+   corrupted start and a matched-size random move (0.86) — because the manifold gives a valid *direction*
+   scalar scores lack. It must stay in a small trust region: the full projection overshoots the shell
+   (KL 2.14 > random 1.93). The oracle move toward the true clean activation is the ceiling (KL→0.003).
+   Discriminative/predictive ≠ causal for scalar scores; the manifold prior partially closes the gap.
 
 ## Correction (post-review, codex 20260623T024606Z): genuinely in-context re-run of Phases 5 & 6
 An external review correctly flagged that the first Phase-5/6 scripts continued the forward pass by
@@ -180,15 +195,22 @@ survive the correction:**
   over proximity (negative partials on the noise sweep). The *functional* axis carries the incremental
   predictive signal, the *density* axis is a proximity proxy. (Verified on the corrected in-context
   re-run, `context_validation_v2.py`.)
-- **Causality — NO (negative result).** Gradient-descending a corrupted activation to improve EITHER a
-  density (Mahalanobis) or functional (plateau-KL) realness score makes the true downstream KL WORSE
-  than the corrupted start and worse than a *move-matched* random move: Mahalanobis-descent collapses
-  into the over-central interior (the shell-distance trap), func-descent Goodharts the flatness score
-  into a degenerate region. The oracle move toward the true clean activation recovers behavior
-  (in-context KL 0.78→0.009 at the same budget), so the failure is the score, not the optimizer. These
-  realness scores are valid *detectors/predictors* but invalid *causal repair objectives*. (Confirmed
-  on the corrected in-context re-run with per-descent move-matched random controls,
-  `causal_repair_v2.py`.)
+- **Causality — SCORE-DEPENDENT (scalar scores fail; a nonparametric manifold step partially succeeds).**
+  Gradient-descending a corrupted activation to improve EITHER a density (Mahalanobis) or functional
+  (plateau-KL) *scalar* realness score makes the true downstream KL WORSE than the corrupted start and
+  worse than a *move-matched* random move: Mahalanobis-descent collapses into the over-central interior
+  (the shell-distance trap), func-descent Goodharts the flatness score into a degenerate region
+  (`causal_repair_v2.py`, per-descent move-matched controls). BUT Phase 6b (`manifold_repair.py`) tests
+  the PLAN's open alternative — a *nonparametric manifold projection* toward the mean of the k=16 nearest
+  real activations (objective-free: no reference to the clean target) — and finds a **fractional (t≈0.25)
+  step is the first repair that causally IMPROVES behaviour**, lowering in-context KL below both the
+  corrupted start (0.78→0.57) and a matched-size random move (0.86). The real-activation manifold thus
+  supplies a valid repair *direction* that scalar scores lack; the step must stay in a small trust region
+  (the full kNN projection overshoots the shell and again loses to random, KL 2.14 > 1.93). The oracle
+  move toward the true clean activation is the ceiling (in-context KL 0.78→0.003 at full budget), so the
+  scalar-score failure is the score, not the optimizer. Net: these realness *scalars* are valid
+  detectors/predictors but invalid causal objectives, whereas a small manifold-projection step is a
+  valid (if incomplete) one.
 - **Steering preservation — NOT TESTED**, but (4)'s failure implies a steering-repair regularizer built
   on these scalar scores would degrade behavior; a usable objective must respect the data shell.
 - **H1 — SUPPORTED.** Real activations carry geometric (shell-distance) and functional (model-sensitivity)
@@ -220,9 +242,13 @@ naive small-alpha steering produces (real activations occupy a characteristic-di
 interior). BUT Phase 6 is a clear warning: do NOT use these scalar realness scores as *optimization
 objectives* for steering repair — gradient descent on Mahalanobis or plateau-KL reward-hacks them and
 degrades behavior below even a random move. A usable causal objective must constrain movement toward
-the data shell/manifold (e.g. a learned generative/denoising prior, or projection onto the local
-data tangent), and any steering correction must be evaluated against in-context downstream KL at
-*matched achieved steering effect*, with reward-hacking checked via metrics outside the objective.
+the data shell/manifold — and Phase 6b shows what that looks like concretely: a **fractional kNN
+manifold-projection step** (move partway toward nearby real activations, small trust region) is the
+first objective-free repair that beats both the corrupted start and a matched random move, whereas a
+full projection overshoots the shell. So a Direction-1 repair should use a small nonparametric
+manifold-projection step, NOT a scalar-score penalty and NOT a full projection. Any steering correction
+must still be evaluated against in-context downstream KL at *matched achieved steering effect*, with
+reward-hacking checked via metrics outside the objective.
 
 ## Reproduce
 `experiments/mvp_benchmark.py` (Phase 2 L6) · `position_stratified.py` (Phase 2c sink-confound control,
@@ -231,7 +257,8 @@ doc-level split) · `train_detectors.py` (LOFO detectors) ·
 `combined_score.py` (combined + interp correction) · `bootstrap_ci.py` (Phase-3 capstone bootstrap CIs) ·
 `incontext_discrimination.py` (Phase-3c in-context vs out-of-context functional discrimination) ·
 `context_validation_v2.py` (Phase-5 CORRECTED
-in-context prediction) · `causal_repair_v2.py` (Phase-6 CORRECTED in-context causal repair, negative
-result). The pre-correction single-position versions (`context_validation.py`, `causal_repair.py`) are
+in-context prediction) · `causal_repair_v2.py` (Phase-6 CORRECTED in-context scalar-score causal repair,
+negative result) · `manifold_repair.py` (Phase-6b kNN manifold-projection repair, partial positive) ·
+`plot_fig12.py` (fig12). The pre-correction single-position versions (`context_validation.py`, `causal_repair.py`) are
 retained for provenance. Results in `results/*.csv`, `results/*.json` (the `_v2` files are canonical
 for Phases 5/6).

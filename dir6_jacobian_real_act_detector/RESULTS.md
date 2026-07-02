@@ -307,6 +307,52 @@ objective-free metrics KL(clean‖x) and NLL of clean argmax at PER-DESCENT matc
   functional-sensitivity; that degrades behavior. A causal realness objective must penalize movement
   away from the data shell in a way these scalar scores do not.
 
+## Phase 6b — MANIFOLD / denoising-prior causal repair (claim 4, the open lever)
+`experiments/manifold_repair.py` (GPU, A10; same in-context forward-hook harness and norm-matched
+noise corruption s=1 as Phase 6, N=300 prompts). Phase 6 showed *scalar-score* descent fails as a
+causal objective. Here we test the PLAN's remaining alternative: a **nonparametric manifold projection**
+— move the corrupted activation toward the mean of its **k=16 nearest REAL train activations** (a
+mean-shift / denoising step using the empirical real-activation manifold as the prior, with **no
+reference to the clean target** → objective-free). We sweep the step fraction `t` (fraction of the way
+to the kNN mean) and compare each step against a **random move of the identical L2 size** (the direction
+test) and the oracle (same size toward the true clean act). Metrics are in-context KL(clean‖x) and NLL
+of clean argmax (lower = better).
+
+| method | ext KL(clean‖x) | ext NLL | move | dist_to_clean | dist_to_mean |
+|---|---|---|---|---|---|
+| corrupted (start)                 | 0.785 | 2.37 | 0.0  | 67 | 82 |
+| **knn_project (t=0.25)**          | **0.566** | **2.13** | 18.1 | 55 | 67 |
+| knn_project (t=0.10)              | 0.673 | 2.24 | 7.2  | 62 | 76 |
+| knn_project (t=0.50)              | 0.629 | 2.25 | 36.2 | 47 | 53 |
+| knn_project (t=1.00, full mean)   | 2.143 | 4.17 | 72.4 | 50 | 38 |
+| knn_meanshift (k16, 3 steps)      | 3.825 | 6.21 | 79.1 | 59 | 42 |
+| random_move (t=0.25-matched)      | 0.863 | 2.47 | 18.1 | 70 | 84 |
+| random_move (t=0.50-matched)      | 1.103 | 2.77 | 36.2 | 76 | 90 |
+| random_move (full-matched)        | 1.932 | 3.82 | 72.4 | 99 | 109 |
+| shrink_clean (oracle, t=0.25)     | 0.279 | 1.73 | 18.1 | 49 | 73 |
+| shrink_clean (oracle, full)       | 0.003 | 1.31 | 72.4 | 5  | 68 |
+
+![Phase 6b manifold-projection repair: KL vs move, kNN direction vs matched random](plots/fig12_manifold_repair.png)
+
+- **Claim 4 is UPGRADED from a flat NO to a PARTIAL YES — the first objective-free repair in the whole
+  project that causally improves downstream behaviour.** A *fractional* kNN-manifold step (t≈0.25)
+  reduces in-context KL BELOW the corrupted start (0.785 → **0.566**, −28%) and, at the identical move
+  size (18.1), beats a **random** move (0.863) decisively → the real-activation manifold supplies a valid
+  causal repair **direction**, which no scalar realness score (Phase 6: maha 3.33, func 8.82) and no
+  random move ever did. It is the ONLY repair here that also *reduces* distance-to-clean without
+  peeking at the clean target (67 → 55).
+- **But it must be a SMALL step: the full kNN-mean projection (t=1.00) overshoots** into the over-central
+  interior (dist_to_mean 82 → 38 — the same shell-distance trap that sinks maha_descent) and its KL
+  (2.143) rises *above* the matched random move (1.932). Iterated mean-shift is worse still (3.825): the
+  kNN mean is a shrunk estimate, so repeatedly projecting collapses onto the data centroid.
+- The oracle at the same t=0.25 move (0.279) shows the manifold direction captures ~½ of the achievable
+  KL reduction at that budget — genuine but incomplete. The story is a clean **sweet-spot**: KL is
+  U-shaped in the manifold step (fig12), minimised near t≈0.25, and the kNN curve lies strictly below
+  the matched-random curve until the full-step overshoot.
+- **Direction-1 refinement:** a usable realness-repair objective is *nonparametric manifold projection
+  with a small trust region* (a fractional step toward nearby real activations), NOT gradient descent on
+  a scalar realness score and NOT a full projection — both leave the data shell.
+
 ## Headline
 **What makes real activations real?** For GPT-2 small residual activations, no single statistic equals
 "realness"; it is a COMBINATION of complementary structures, and different corruptions are anomalous
@@ -346,11 +392,17 @@ by the in-context functional probe, so the ceiling is higher than a "nothing gen
 reading — though still short of clean separation. (3) Prediction — PARTIAL/YES for the FUNCTIONAL axis: in a genuinely
 in-context severity sweep, plateau-KL/entropy predict true in-context downstream KL beyond
 distance-to-original (partial ρ up to +0.51), whereas density scores add nothing over proximity. (4)
-Causality — NO: naive gradient descent on either a density (Mahalanobis) or functional (plateau-KL)
-realness score makes downstream behavior WORSE than the corrupted start and worse than a per-descent
-move-matched random move (reward-hacking / shell-distance trap); only the oracle move toward the true
-clean activation recovers it (in-context KL 0.78→0.009). (5) Steering — NOT tested, but (4)'s failure
-means these scores are not yet usable as steering-repair objectives.
+Causality — SCORE-DEPENDENT: naive gradient descent on a *scalar* realness score (Mahalanobis or
+plateau-KL) makes downstream behavior WORSE than the corrupted start and worse than a per-descent
+move-matched random move (reward-hacking / shell-distance trap; Phase 6). BUT a *nonparametric manifold*
+objective — a **fractional (t≈0.25) kNN projection toward nearby real activations** — is the first
+objective-free repair that causally IMPROVES behaviour: it lowers in-context KL below both the corrupted
+start (0.78→0.57) and a matched-size random move (0.86), because the real-activation manifold supplies a
+valid repair *direction* that scalar scores lack (Phase 6b). The step must stay in a small trust region:
+the FULL kNN projection overshoots into the over-central interior and again loses to random. Oracle
+movement toward the true clean activation is the ceiling (KL→0.003). (5) Steering — NOT tested, but the
+Phase-6b sweet-spot (small manifold-projection step) is the concrete objective a Direction-1 repair
+should use, whereas a scalar-score penalty is contraindicated.
 [Phases 5 & 6 re-verified genuinely in-context (forward hook, full context) per external review
 20260623T024606Z; conclusions for claims 3 and 4 are unchanged. The single-position pre-correction
 numbers remain in git history.]

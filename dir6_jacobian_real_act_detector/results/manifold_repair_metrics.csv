@@ -1,0 +1,12 @@
+method,ext_KL_clean,ext_NLL_cleanargmax,move_from_corrupt,dist_to_clean,dist_to_mean
+corrupted(start),0.7847,2.3691,0.0,67.18,82.31
+knn_project(t=0.10),0.673,2.2439,7.23,62.05,76.01
+knn_project(t=0.25),0.5655,2.1347,18.09,55.22,66.89
+knn_project(t=0.50),0.629,2.2481,36.17,47.17,53.09
+knn_project(t=1.00),2.1427,4.1715,72.35,49.76,37.83
+"knn_meanshift(k16,3step)",3.8252,6.2129,79.08,59.2,41.91
+random_move(t=0.25-matched),0.863,2.4737,18.09,69.51,84.22
+random_move(t=0.50-matched),1.1029,2.7689,36.17,76.18,89.82
+random_move(knn1-matched),1.9319,3.8222,72.35,98.55,109.45
+"shrink_clean(oracle,t=0.25-matched)",0.2787,1.7336,18.09,49.09,72.58
+"shrink_clean(oracle,knn1-matched)",0.0028,1.311,72.35,5.27,68.33

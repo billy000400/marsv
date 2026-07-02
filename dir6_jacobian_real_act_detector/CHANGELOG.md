@@ -4,6 +4,24 @@ Append-only. Records changes to the deliverables (RESULTS.md / REPORT.md) with o
 
 ---
 
+## 2026-07-02 — Manifold/denoising-prior causal repair (Phase 6b): claim 4 upgraded NO → PARTIAL (iter13)
+Ran the PLAN's last open lever (`experiments/manifold_repair.py`, GPU A10, in-context forward-hook
+harness identical to Phase 6). Tested a nonparametric **kNN manifold projection** repair (move corrupted
+last-token resid@L6 a fraction `t` toward the mean of its k=16 nearest REAL train activations,
+objective-free) against random moves of matched L2 size and the oracle.
+- **Claim 4 verdict CHANGED: `Causality — NO` → `Causality — SCORE-DEPENDENT (scalar fails; manifold
+  step partial YES)`** in both RESULTS.md Headline and REPORT.md Verdict. A fractional step (t≈0.25)
+  lowers in-context KL(clean‖x) **0.785 → 0.566** (−28%), below the corrupted start AND below a
+  matched-size random move (**0.863**) — the FIRST objective-free repair in the project to causally
+  improve behaviour. It is also the only repair that reduces distance-to-clean (67→55) without peeking.
+- The FULL kNN projection (t=1.00) overshoots into the over-central interior (dist_to_mean 82→38) and
+  its KL (2.143) rises above matched random (1.932) — shell-distance trap; iterated mean-shift worse
+  (3.825). Oracle ceiling KL→0.003 (full) / 0.279 (t=0.25).
+- Added Phase 6b section + table to RESULTS.md; new **fig12** (`plot_fig12.py`, matplotlib: KL vs move,
+  kNN-direction vs matched-random vs oracle). REPORT.md: updated Causality verdict bullet, key-finding
+  #7, Direction-1 Implications, Methods (added kNN-projection $x_t$ definition, math fence), Figures,
+  Reproduce. No prior numbers changed; this is an added phase that resolves the standing open item.
+
 ## 2026-07-02 — IN-CONTEXT discrimination benchmark: context sharpens the functional signal (iter12)
 - **New result (Phase 3c, `experiments/incontext_discrimination.py`, fig11).** Resolves the top-cited
   open limitation — all prior discrimination scored standalone vectors, and the functional probe that

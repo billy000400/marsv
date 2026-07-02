@@ -1,0 +1,100 @@
+{
+  "layer": 6,
+  "n": 300,
+  "noise_s": 1.0,
+  "k": 16,
+  "meanshift_steps": 3,
+  "n_train": 30000,
+  "method": "in-context full-model forward hook; kNN manifold projection",
+  "rows": [
+    {
+      "method": "corrupted(start)",
+      "ext_KL_clean": 0.7847,
+      "ext_NLL_cleanargmax": 2.3691,
+      "move_from_corrupt": 0.0,
+      "dist_to_clean": 67.18,
+      "dist_to_mean": 82.31
+    },
+    {
+      "method": "knn_project(t=0.10)",
+      "ext_KL_clean": 0.673,
+      "ext_NLL_cleanargmax": 2.2439,
+      "move_from_corrupt": 7.23,
+      "dist_to_clean": 62.05,
+      "dist_to_mean": 76.01
+    },
+    {
+      "method": "knn_project(t=0.25)",
+      "ext_KL_clean": 0.5655,
+      "ext_NLL_cleanargmax": 2.1347,
+      "move_from_corrupt": 18.09,
+      "dist_to_clean": 55.22,
+      "dist_to_mean": 66.89
+    },
+    {
+      "method": "knn_project(t=0.50)",
+      "ext_KL_clean": 0.629,
+      "ext_NLL_cleanargmax": 2.2481,
+      "move_from_corrupt": 36.17,
+      "dist_to_clean": 47.17,
+      "dist_to_mean": 53.09
+    },
+    {
+      "method": "knn_project(t=1.00)",
+      "ext_KL_clean": 2.1427,
+      "ext_NLL_cleanargmax": 4.1715,
+      "move_from_corrupt": 72.35,
+      "dist_to_clean": 49.76,
+      "dist_to_mean": 37.83
+    },
+    {
+      "method": "knn_meanshift(k16,3step)",
+      "ext_KL_clean": 3.8252,
+      "ext_NLL_cleanargmax": 6.2129,
+      "move_from_corrupt": 79.08,
+      "dist_to_clean": 59.2,
+      "dist_to_mean": 41.91
+    },
+    {
+      "method": "random_move(t=0.25-matched)",
+      "ext_KL_clean": 0.863,
+      "ext_NLL_cleanargmax": 2.4737,
+      "move_from_corrupt": 18.09,
+      "dist_to_clean": 69.51,
+      "dist_to_mean": 84.22
+    },
+    {
+      "method": "random_move(t=0.50-matched)",
+      "ext_KL_clean": 1.1029,
+      "ext_NLL_cleanargmax": 2.7689,
+      "move_from_corrupt": 36.17,
+      "dist_to_clean": 76.18,
+      "dist_to_mean": 89.82
+    },
+    {
+      "method": "random_move(knn1-matched)",
+      "ext_KL_clean": 1.9319,
+      "ext_NLL_cleanargmax": 3.8222,
+      "move_from_corrupt": 72.35,
+      "dist_to_clean": 98.55,
+      "dist_to_mean": 109.45
+    },
+    {
+      "method": "shrink_clean(oracle,t=0.25-matched)",
+      "ext_KL_clean": 0.2787,
+      "ext_NLL_cleanargmax": 1.7336,
+      "move_from_corrupt": 18.09,
+      "dist_to_clean": 49.09,
+      "dist_to_mean": 72.58
+    },
+    {
+      "method": "shrink_clean(oracle,knn1-matched)",
+      "ext_KL_clean": 0.0028,
+      "ext_NLL_cleanargmax": 1.311,
+      "move_from_corrupt": 72.35,
+      "dist_to_clean": 5.27,
+      "dist_to_mean": 68.33
+    }
+  ],
+  "elapsed_s": 17.7
+}

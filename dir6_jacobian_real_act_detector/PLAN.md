@@ -503,11 +503,17 @@ Correction/steering metrics:
       KL beyond dist-to-orig, partial ρ +0.51/+0.35 noise +0.25/+0.19 interp; density scores are
       proximity proxies. Claim 3 = PARTIAL/YES for functional axis — verified in-context.)
 - [x] S8 — Test causal realness-improving repair against matched controls. (iter7 + iter8 CORRECTION:
-      NEGATIVE, in-context with per-descent move-matched controls — descent on Mahalanobis/plateau-KL
-      makes downstream KL WORSE than corrupted & worse than its OWN matched random (3.33>1.99, 8.82>2.20);
-      only oracle clean-direction recovers (0.009). Realness scores ≠ valid causal objectives.)
-- [ ] S9 — Validate on steering while preserving achieved steering effect. (NOT done — blocked by S8's
-      negative; a manifold/denoising-prior objective is needed first. Documented as future work.)
+      scalar-score descent NEGATIVE, in-context with per-descent move-matched controls — descent on
+      Mahalanobis/plateau-KL makes downstream KL WORSE than corrupted & worse than its OWN matched random
+      (3.33>1.99, 8.82>2.20); only oracle clean-direction recovers (0.009). Scalar realness scores ≠ valid
+      causal objectives. **iter13: the manifold/denoising-prior alternative RESOLVED** — a fractional kNN
+      manifold-projection step (t≈0.25) is the FIRST objective-free repair to IMPROVE KL 0.785→0.566,
+      below corrupted start AND matched random 0.863; full projection overshoots (2.14>1.93). Claim 4
+      upgraded NO→PARTIAL. `experiments/manifold_repair.py`, Phase 6b, fig12.)
+- [ ] S9 — Validate on steering while preserving achieved steering effect. (NOT done — but the objective
+      it needs is now identified: iter13's fractional kNN manifold-projection step (Phase 6b), NOT a
+      scalar-score penalty. Applying it to a real Direction-1 steering vector at matched achieved effect
+      remains future work.)
 - [x] S10 — Finalize RESULTS.md, REPORT.md, JOURNAL.md, and STOP. (iter7; iter8 re-finalized after
       review; iter9 added the 8 result figures under plots/ + backfilled CHANGELOG.md; iter10 added
       Phase 2c sink control; iter11 added bootstrap 95% CIs (fig10) + reconciled the un-persisted
@@ -517,7 +523,26 @@ Correction/steering metrics:
 End each JOURNAL.md entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
-## Current status (after iter12 — IN-CONTEXT discrimination benchmark; top-cited limitation resolved)
+## Current status (after iter13 — MANIFOLD/denoising-prior causal repair; claim 4 upgraded NO→PARTIAL)
+Iter13 ran the PLAN's single genuine remaining scientific lever — the manifold/denoising-prior causal
+objective (Phase 6 listed it as the alternative to the failed scalar-score descent). `experiments/
+manifold_repair.py` (in-context forward-hook harness identical to Phase 6; norm-matched noise s=1, N=300)
+repairs a corrupted last-token resid@L6 by a nonparametric **kNN manifold projection** — move a fraction
+`t` toward the mean of the k=16 nearest REAL train activations (objective-free) — swept t vs random moves
+of matched L2 size and the oracle. **Result: a fractional step (t≈0.25) is the FIRST objective-free
+repair to causally IMPROVE downstream behaviour**: in-context KL(clean‖x) 0.785→**0.566** (−28%), below
+the corrupted start AND a matched-size random move (0.863); it is also the only repair that reduces
+distance-to-clean (67→55) without peeking. But it needs a small trust region — the FULL projection
+overshoots into the over-central interior (dist_to_mean 82→38) and loses to random (KL 2.14>1.93);
+iterated mean-shift collapses (3.825). Oracle ceiling 0.279 (t=0.25) / 0.003 (full). Claim 4 flips from
+flat NO to SCORE-DEPENDENT (scalar fails; small manifold step partial YES). New fig12. Curated RESULTS.md
+(Phase 6b + rewritten claim-4 Headline/verdict), REPORT.md (Causality bullet, finding #7, Methods $x_t$
+math fence, Direction-1 Implications, Figures, Reproduce), appended CHANGELOG. All 8 REPORT display
+equations still render (GitHub API check). No prior numbers changed. Remaining future work: apply the
+manifold step to a REAL Direction-1 steering vector at matched effect (S9), trust-region auto-selection,
+in-context-PROCESS negatives, cross-model transfer, paired-bootstrap CIs on the Phase-6b KL deltas.
+
+## (prior) Current status (after iter12 — IN-CONTEXT discrimination benchmark; top-cited limitation resolved)
 Iter12 ran the top open model-dependent item now that the env was restored (torch+CUDA, transformers,
 matplotlib — all absent iters 9-11). `experiments/incontext_discrimination.py` re-injects each candidate
 at the real last-token position during a FULL forward over its native prompt (forward hook) and scores by
@@ -617,7 +642,17 @@ layer (AUROC ≈ 0.44–0.54 ≈ chance) — decisive evidence (H1) that realnes
 and local density. Phase 4 LOFO: learned discriminative detectors do NOT generalize (< kNN). So the
 generalizing statistical signal is one-class density, and it has a HARD CEILING at `interp`/`tangent_pert`.
 
-## Next step (UPDATED iter4 — core verdict reached; remaining work is optional strengthening + REPORT)
+## Next step (UPDATED iter13 — all five claims now have a verdict; project complete)
+The 5-claim ladder is fully answered: (1) discrimination YES via multi-axis score, (2) generalization
+PARTIAL, (3) prediction PARTIAL/YES (functional axis), (4) causality SCORE-DEPENDENT — scalar-score
+descent fails but a fractional kNN manifold-projection step partially succeeds (iter13, Phase 6b),
+(5) steering NOT tested but its objective is now identified (the Phase-6b manifold step). Deliverable is
+curated + figure-complete (12 figs) + rule-8/8a/8b compliant. Re-creating STOP. Highest-value future
+work if resumed: apply the Phase-6b manifold-projection step to a REAL Direction-1 steering vector at
+matched achieved effect (closes S9), then trust-region auto-selection and paired-bootstrap CIs on the
+Phase-6b KL deltas.
+
+### (history, iter4) Next step — core verdict reached; remaining work optional strengthening + REPORT
 Iter4 ran the functional probe: on `interp` (≈chance for all stats) entropy/plateau_kl reach ~0.61,
 the only signal beating chance → functional component of realness confirmed (weak). RESULTS.md Headline
 written. Remaining options before finalize: (a) incremental-value logistic over [kNN, Mahalanobis,
