@@ -1,0 +1,144 @@
+{
+  "stage": "E",
+  "layer": "resid_pre@9",
+  "hook_block": 8,
+  "sae_pre": "blocks.9.hook_resid_pre",
+  "d_sae": 24576,
+  "recon_err_sub": 59.23,
+  "recon_err_nosub": 904.6,
+  "N": 200,
+  "n_eval": 100,
+  "n_dirs": 6,
+  "r_grid": [
+    0.0,
+    0.0025,
+    0.005,
+    0.01,
+    0.02,
+    0.04,
+    0.08
+  ],
+  "tau_heldout": 0.00023559233522973955,
+  "sub_bdec": true,
+  "iso_deltas": [
+    15.0,
+    30.0,
+    60.0,
+    120.0
+  ],
+  "iso_reference_plateau": {
+    "d=15": 0.19538,
+    "d=30": 0.18854,
+    "d=60": 0.16345,
+    "d=120": 0.14474
+  },
+  "groups_eval": {
+    "real": {
+      "plateau_median": 0.19709,
+      "dist_median": 0.0,
+      "norm_median": 121.06,
+      "l0_median": 115.0
+    },
+    "recon": {
+      "plateau_median": 0.19905,
+      "dist_median": 46.96,
+      "norm_median": 125.2,
+      "l0_median": 115.0
+    },
+    "naive": {
+      "plateau_median": 0.10002,
+      "dist_median": 97.81,
+      "norm_median": 95.82,
+      "l0_median": 112.0
+    },
+    "sparse_match": {
+      "plateau_median": 0.10263,
+      "dist_median": 100.87,
+      "norm_median": 98.32,
+      "l0_median": 115.0
+    },
+    "iso15": {
+      "plateau_median": 0.19538,
+      "dist_median": 15.0,
+      "norm_median": 122.18,
+      "l0_median": 0.0
+    },
+    "iso30": {
+      "plateau_median": 0.18854,
+      "dist_median": 30.0,
+      "norm_median": 124.51,
+      "l0_median": 0.0
+    },
+    "iso60": {
+      "plateau_median": 0.16345,
+      "dist_median": 60.0,
+      "norm_median": 135.42,
+      "l0_median": 0.0
+    },
+    "iso120": {
+      "plateau_median": 0.14474,
+      "dist_median": 120.0,
+      "norm_median": 170.61,
+      "l0_median": 0.0
+    }
+  },
+  "raw_gap_vs_real_eval": {
+    "recon": {
+      "median_gap": -0.00306,
+      "ci95": [
+        -0.01022,
+        0.00267
+      ]
+    },
+    "naive": {
+      "median_gap": 0.09073,
+      "ci95": [
+        0.07847,
+        0.10772
+      ]
+    },
+    "sparse_match": {
+      "median_gap": 0.09044,
+      "ci95": [
+        0.07642,
+        0.10475
+      ]
+    }
+  },
+  "distance_matched_residual": {
+    "recon": {
+      "median_dist": 46.96,
+      "plateau_median": 0.19905,
+      "ref_at_matched_dist": 0.17232,
+      "residual_median": 0.0304,
+      "residual_ci95": [
+        0.01719,
+        0.04667
+      ],
+      "verdict": "ABOVE random-displacement (survives dist-match)"
+    },
+    "naive": {
+      "median_dist": 97.81,
+      "plateau_median": 0.10002,
+      "ref_at_matched_dist": 0.15026,
+      "residual_median": -0.04952,
+      "residual_ci95": [
+        -0.05633,
+        -0.04607
+      ],
+      "verdict": "BELOW"
+    },
+    "sparse_match": {
+      "median_dist": 100.87,
+      "plateau_median": 0.10263,
+      "ref_at_matched_dist": 0.14943,
+      "residual_median": -0.04848,
+      "residual_ci95": [
+        -0.05451,
+        -0.04041
+      ],
+      "verdict": "BELOW"
+    }
+  },
+  "spearman_plateau_vs_dist_pooled_eval": -0.463
+}
