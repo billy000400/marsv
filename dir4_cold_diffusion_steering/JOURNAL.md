@@ -446,3 +446,41 @@ or a second model. All optional.
 On track? yes — S4(d) extended: Exp 11 partially resolves Exp 10's effect-fluency tradeoff (frontier
 pushed out, not erased); direction ~99% complete on all planned axes, deliverables curated + math-verified.
 No blocker.
+
+## 2026-07-02 20:5x — Experiment 12: layer robustness (blocks 3, 6, 9)
+**Did:** acted on PLAN Next-step (iii, layer generality) — the highest-value untested axis. All 11 prior
+experiments hook resid_post block 6; a reviewer's first question is "is this a block-6 artifact?" Wrote
+`experiments/12_layer_robustness.py`: replicate the EXACT flagship Exp 3 pipeline at blocks 3 (early),
+6 (mid = Exp 3), 9 (late), changing ONLY the hook layer. Reused exp03's Corrector / train_corrector /
+make_hat / corrector_acts / lm_loss_fn / gaussian_stats / mahalanobis by importing the module and swapping
+its module-global LAYER per layer (train_corrector reads the global at call time — clean reuse, no fork).
+POS/NEG sentiment prompts imported from exp01. Per layer: rebuild DiffMean v, fit Gaussian on 400 docs,
+train the identical 4-layer corrector on the same 300 docs vs downstream LM loss (same seed/α∼U(0.5,8)),
+eval ΔLM/D_M/retention on the same held-out 100 docs at matched projection α|v|. Ran ~4 min under 0.18 VRAM
+frac, no OOM.
+**Learned (POSITIVE — clean generality result):** both headline facts replicate at every depth. Fluency
+recovery @α=8 = 90% / 84% / 76% (blocks 3/6/9), ≥91% @α=4, ΔLM near zero at weak steering. The corrected
+activation sits FURTHER off the Gaussian manifold than raw at EVERY layer (D_M corrected > raw) — the
+Exp 2/3 decoupling ("LM-safe but off-Gaussian") is layer-robust, not a block-6 quirk. Recovery declines
+mildly with depth (90→84→76%): |v| grows toward the output (6.75→11.08→23.16) so a fixed-capacity corrector
+faces a larger absolute edit late. Block 6 reproduced Exp 3 TO THE DIGIT (raw +2.78 → learned +0.44, 84%) —
+a built-in reproducibility check that the refactored layer-swept pipeline is faithful.
+**Assumption/decision logged.** (a) Chose (iii) layer generality over (i) rollout-through-generation and
+(ii) diversity-lever confirmation because it answers the single most obvious external-validity question
+("is the whole paper a one-layer artifact?") in one clean iteration, and the flagship pipeline was directly
+reusable via LAYER-swap (low risk, ~4 min). (i) is higher-risk (differentiable rollout could eat the budget).
+(b) Layers {3,6,9} span early/mid/late while keeping 6 as the reproducibility anchor; skipped very-early
+(0-2) and very-late (10-11) to keep runtime bounded — the three chosen depths already establish robustness.
+(c) Rebuilt v per layer (not reusing block-6 v) because a steering vector is layer-specific; matched
+projection α|v| per layer is the honest comparison. (d) Kept cov_corr out of Exp 12 (the raw-vs-learned
+contrast carries the generality story; cov_corr's negative result is already established in Exp 2).
+**Deliverables:** RESULTS.md +Exp 12 (table + reading) + figure entry + Headline sentence; REPORT.md +Exp 12
+Methods (recovery-fraction fence) + Results (table + interpretation) + Summary/Conclusion sentences;
+plots/12_layer_robustness.png; results/12_layer_robustness.json; CHANGELOG appended. REPORT math re-verified
+via GitHub API (14/14 js-display-math, 0 broken, 0 inline hazards).
+**Next step (optional; success criterion long met, now with layer-robustness generality added):** any one a
+clean iter — (i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH sampled/differentiable
+generation rather than teacher-forced; (ii) confirm the bank-diversity lever directly (max-orthogonal 3-bank
+vs collinear); (iii) a second model (GPT-2 medium) for cross-model generality. All optional.
+On track? yes — Exp 12 adds layer-robustness (blocks 3/6/9, recovery 90/84/76% @α=8, off-Gaussian at every
+layer; block 6 reproduces Exp 3 exactly); direction ~99% complete, deliverables curated + math-verified. No blocker.

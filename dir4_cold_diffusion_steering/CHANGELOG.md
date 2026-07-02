@@ -263,3 +263,28 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   α; distinct-2 vs α; effect-vs-fluency Pareto with λ_b family). Results `results/11_behavioral_corrector.json`.
 - REPORT math re-verified via GitHub API: 13/13 js-display-math (added the behavioral-loss fence), 0 broken
   (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-02 — Experiment 12: layer robustness (blocks 3, 6, 9) — the fluency result is not a block-6 artifact
+- **Motivation:** every prior experiment hooks resid_post block 6. A reviewer's first question is whether
+  the two headline facts — raw steering breaks the LM, the LM-supervised corrector recovers it — are
+  specific to that layer. Acts on PLAN Next-step (iii, layer generality).
+- **Setup:** replicated the EXACT Exp 3 pipeline at blocks 3 (early), 6 (mid = Exp 3), 9 (late); only the
+  hook layer changes. Per layer: rebuild DiffMean sentiment v (|v| = 6.75 / 11.08 / 23.16), fit clean
+  Gaussian on 400 docs, train the identical 4-layer corrector on the same 300 docs vs downstream LM loss
+  (same seed/hyperparams/α∼U(0.5,8)), eval ΔLM / D_M / retention on the same held-out 100 docs at matched
+  projection α|v|.
+- **Result (new):** both facts replicate at every depth. Fluency recovery @α=8 = 90% / 84% / 76% (blocks
+  3/6/9), ≥91% @α=4, ΔLM near zero at weak steering. The corrected activation sits FURTHER off the Gaussian
+  manifold than raw at every layer (D_M corrected > raw), so "LM-safe but off-Gaussian" is layer-robust.
+  Recovery declines mildly with depth (fixed-capacity corrector faces larger |v| toward the output). Block 6
+  reproduces Exp 3 TO THE DIGIT (raw +2.78 → learned +0.44, 84%) — built-in reproducibility check of the
+  refactored layer-swept pipeline. No prior result superseded (Exp 12 is new; layer-6 row = Exp 3 reproduced).
+- **Deliverable deltas:** RESULTS.md +Exp 12 (table + reading) + figure entry + Headline layer-robustness
+  sentence. REPORT.md +Exp 12 Methods (recovery-fraction equation) + Results section (table + interpretation)
+  + Summary and Conclusion layer-robustness sentences.
+- New code `experiments/12_layer_robustness.py` (reuses exp03 Corrector/train_corrector/eval helpers by
+  swapping module-global LAYER; POS/NEG from exp01). New figure `plots/12_layer_robustness.png` (ΔLM raw vs
+  corrected per layer; recovery vs α per layer; D_M raw vs corrected per layer). Results
+  `results/12_layer_robustness.json`.
+- REPORT math re-verified via GitHub API: 14/14 js-display-math (added the recovery fence), 0 broken
+  (<pre lang=math>), 0 inline hazards.

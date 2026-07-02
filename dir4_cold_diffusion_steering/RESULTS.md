@@ -398,6 +398,38 @@ converts Exp 10's non-dominating tradeoff into outright dominance over raw at mo
 projection-preserving corrector still cannot match raw's *strong* behavioral steering, so the effect–
 fluency frontier is pushed out, not erased.
 
+**Experiment 12 — Layer robustness: is the result a block-6 artifact?**
+Every experiment above steers and corrects at resid_post block 6. The obvious question is whether the
+two headline facts — **(P)** raw steering breaks the LM, and **(C)** the LM-supervised
+projection-preserving corrector recovers it — are specific to that layer. We replicate the flagship
+Experiment-3 pipeline **unchanged** (same DiffMean sentiment prompts, same 400-doc Gaussian fit, same
+300-doc training set, same held-out 100-doc eval, same 4-layer corrector, same seed / hyper-parameters —
+*only the hook layer changes*) at **block 3 (early)**, **block 6 (mid, = Exp 3)**, and **block 9 (late)**.
+The sentiment vector is rebuilt at each layer; its raw norm grows with depth (`|v|` = 6.75 / 11.08 / 23.16),
+as does the mean activation norm (`|h|` = 88.8 / 112.2 / 176.5), so each layer is compared at its own
+matched projection `α|v|`.
+
+| layer | ΔLM raw @α=8 | **ΔLM learned @α=8** | recovery @α=8 | recovery @α=4 | `D_M` raw / learned @α=8 |
+|---|---|---|---|---|---|
+| block 3 (early) | +2.56 | **+0.25** | **90%** | 100% | 44.1 / 74.3 |
+| block 6 (mid, = Exp 3) | +2.78 | **+0.44** | **84%** | 95% | 49.0 / 79.5 |
+| block 9 (late) | +2.34 | **+0.55** | **76%** | 91% | 49.2 / 70.9 |
+
+**Reading it: both facts replicate at every layer — the result is not a block-6 artifact.** At all three
+depths, (P) raw steering drives `ΔLM` up monotonically with α (to +2.3–2.6 nats at α=8) and inflates the
+Mahalanobis distance, and (C) the identical LM-supervised corrector removes the bulk of that damage at
+matched projection — **recovering 76–90% at α=8 and ≥91% at α=4**, with `ΔLM` essentially zero or slightly
+negative at weak steering (recovery >100% at α≤2, as in Exp 3). The block-6 point reproduces Experiment 3
+**to the digit** (raw +2.78 → learned +0.44, 84%), a built-in reproducibility check that the refactored
+layer-swept pipeline is faithful. Two second-order trends are worth noting: recovery at α=8 falls slightly
+with depth (90%→84%→76%), consistent with a fixed-capacity corrector facing a larger absolute edit as `|v|`
+grows toward the output; and the signature decoupling of Experiments 2–3 holds **at every layer** — the
+corrected activation sits *further* off the Gaussian manifold than raw (`D_M` corrected > raw at all three
+depths), confirming that "LM-safe but off-Gaussian" is a general property of the learned correction, not a
+quirk of one layer. So the core ColdSteer claim — *a downstream-supervised, projection-preserving corrector
+buys back most of raw steering's fluency damage while moving off the statistical manifold* — is a
+**layer-robust** phenomenon across the early, middle, and late residual stream.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -443,6 +475,11 @@ fluency frontier is pushed out, not erased.
   (b) distinct-2 vs α; (c) the effect-vs-fluency Pareto. As `λ_b` grows the corrector points move right
   (more effect) while staying high on fluency, dominating raw in the moderate-effect regime but never
   reaching raw's strong-effect corner.
+- `plots/12_layer_robustness.png` — layer-robustness replication of the flagship result at blocks 3, 6, 9
+  (color = layer). (a) ΔLM vs α, raw (dashed) vs corrected (solid) — corrected sits near zero at every
+  layer while raw climbs; (b) fluency recovery vs α per layer — all three curves ≥76% at α=8, ≥91% at α=4;
+  (c) `D_M` vs α, raw vs corrected — corrected exceeds raw at every layer (off-Gaussian-but-LM-safe holds
+  throughout the residual stream). Block 6 reproduces Experiment 3 exactly.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -470,7 +507,11 @@ angularly *diverse* bank transfers best (Exp 9). The real lever is bank **divers
 its directions), not coverage of the target's subspace. So amortized cross-direction correction is
 capped not by coverage, parameter count, or subspace alignment but by the **training signal** — the
 correction is fundamentally direction-specific, and the reliable route to a genuinely unseen direction
-remains the **per-direction native corrector** (78–142% recovery).
+remains the **per-direction native corrector** (78–142% recovery). The core fluency result is **not a
+block-6 artifact**: replicating the exact flagship pipeline at the early, middle, and late residual stream
+(blocks 3 / 6 / 9) recovers **90% / 84% / 76%** of raw steering's fluency damage at α=8 (≥91% at α=4), with
+the corrected activation sitting *further* off the Gaussian manifold than raw at every layer (Exp 12) — the
+"LM-safe but off-Gaussian" correction is a layer-robust property.
 
 **A behavioral caveat on the fluency story (Exp 10).** The `ΔLM` recoveries above are measured at
 *matched projection at one layer* — a proxy. When the sentiment corrector is used to actually *generate*

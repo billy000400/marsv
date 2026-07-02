@@ -65,6 +65,11 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         Pareto DOMINANCE over raw at moderate steering. Ceiling: no λ_b reaches raw's strong pre-collapse
         effect (≈+2.5) — matching the teacher-forced readout only partially transfers to generation. Frontier
         pushed out, not erased. λ_b=0 reproduces Exp 10 to the digit.
+        (f) LAYER ROBUSTNESS DONE (Exp 12): replicated the EXACT flagship Exp 3 pipeline at blocks 3/6/9
+        (only the hook layer changes). POSITIVE generality — both headline facts replicate at every depth:
+        fluency recovery @α=8 = 90/84/76% (≥91% @α=4), corrected activation off the Gaussian manifold at
+        EVERY layer (Exp 2/3 decoupling is layer-robust). Block 6 reproduces Exp 3 to the digit. NOT a
+        block-6 artifact.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -76,6 +81,22 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1+S2+S3 + S4(a) strength-extrap + S4(b) held-out-vector + S4(c) direction-conditional-bank +
+S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL text Pareto (Exp 10) +
+S4(e) BEHAVIORAL-PRESERVATION term (Exp 11) + S4(f) LAYER ROBUSTNESS (Exp 12) delivered — success criterion
+MET; direction complete on all planned axes plus behavioral-tradeoff + layer-generality follow-ups (~99%).
+**S4(f) Experiment 12 (new):** answered the most obvious external-validity question — is the whole result a
+block-6 artifact? Replicated the EXACT flagship Exp 3 pipeline (same prompts/data/seed/recipe) at blocks 3
+(early), 6 (mid = Exp 3), 9 (late), changing ONLY the hook layer (reused exp03 helpers by swapping the
+module-global LAYER; POS/NEG from exp01). POSITIVE, clean generality result: both headline facts replicate
+at every depth — fluency recovery @α=8 = 90% / 84% / 76% (≥91% @α=4), ΔLM≈0 at weak steering, and the
+corrected activation sits FURTHER off the Gaussian manifold than raw at EVERY layer (the Exp 2/3 "LM-safe
+but off-Gaussian" decoupling is layer-robust). Recovery declines mildly with depth (|v| grows 6.75→11.08→
+23.16 toward the output). Block 6 reproduced Exp 3 to the digit (raw +2.78 → learned +0.44, 84%) — built-in
+reproducibility check. Artifacts: `experiments/12_layer_robustness.py`, `results/12_layer_robustness.json`,
+`plots/12_layer_robustness.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified (14/14
+js-display-math, 0 broken, 0 inline hazards).
+<!-- prior: S4(e) behavioral-preservation term Exp 11 -->
 S1+S2+S3 + S4(a) strength-extrap + S4(b) held-out-vector + S4(c) direction-conditional-bank +
 S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL text Pareto (Exp 10) +
 S4(e) BEHAVIORAL-PRESERVATION term (Exp 11) delivered — success criterion MET; direction complete on all
@@ -201,15 +222,14 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-Core arc + all generalization axes + the behavioral axis + the behavioral-preservation follow-up delivered.
-Amortization story CLOSED on three scaling axes (Exp 7/8/9 all negative); the flagship fluency story has
-its behavioral reality-check (Exp 10) AND its constructive follow-up (Exp 11: an explicit downstream-readout
-term pushes the effect-fluency Pareto OUTWARD — dominance over raw at moderate steering — but a ceiling
-remains because a teacher-forced readout only partially transfers to generation). Optional remaining polish,
-any one a clean iteration: (i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH
-generation (sampled/differentiable rollout) rather than teacher-forced — directly targets the residual proxy
-gap; (ii) confirm the bank-diversity lever directly (max-orthogonal 3-bank vs collinear curated); (iii)
-multi-layer or a second model. All optional; success criterion long met.
+Core arc + all generalization axes + behavioral axis + behavioral-preservation follow-up + LAYER-ROBUSTNESS
+(Exp 12: fluency result replicates at blocks 3/6/9, 90/84/76% @α=8, off-Gaussian at every layer — not a
+block-6 artifact) delivered. Amortization story CLOSED on three scaling axes (Exp 7/8/9 negative); flagship
+fluency story has its behavioral reality-check (Exp 10), constructive follow-up (Exp 11), and layer-generality
+check (Exp 12). Optional remaining polish, any one a clean iteration: (i) push the Exp 11 ceiling by supervising
+the behavioral readout THROUGH sampled/differentiable generation rather than teacher-forced; (ii) confirm the
+bank-diversity lever directly (max-orthogonal 3-bank vs collinear curated); (iii) a SECOND MODEL (GPT-2 medium)
+for cross-model generality. All optional; success criterion long met.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 
