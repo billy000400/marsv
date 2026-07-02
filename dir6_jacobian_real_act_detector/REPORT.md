@@ -33,31 +33,48 @@ first two moments, and do those properties generalize across hard synthetic nega
 All discrimination uses **AUROC** with label $y=1$ = fake/anomaly, $y=0$ = real; $f$ denotes the frozen
 GPT-2 continuation from the activation to next-token logits, $p=\mathrm{softmax}(f(x))$.
 
-$$\mathrm{AUROC}=\Pr\!\big(s(x^-)<s(x^+)\big)=\frac{1}{n_+n_-}\sum_{i:y_i=1}\sum_{j:y_j=0}\Big(\mathbb{1}[s_i>s_j]+\tfrac12\mathbb{1}[s_i=s_j]\Big)$$
+```math
+\mathrm{AUROC}=\Pr\!\big(s(x^-)<s(x^+)\big)=\frac{1}{n_+n_-}\sum_{i:y_i=1}\sum_{j:y_j=0}\Big(\mathbb{1}[s_i>s_j]+\tfrac12\mathbb{1}[s_i=s_j]\Big)
+```
 
 Because a score's anomaly orientation is not always known a priori, single-score AUROCs are reported
 two-sided as $\max(\mathrm{AUROC},\thinspace 1-\mathrm{AUROC})$.
 
 **Statistical baselines** (fit on TRAIN reals only; $\mu,\Sigma$ = train mean/covariance):
 
-$$s_\text{norm}(x)=\lVert x\rVert_2,\qquad s_\text{mean\_l2}(x)=\lVert x-\mu\rVert_2$$
-$$s_\text{maha}(x)=(x-\mu)^\top \Sigma_s^{-1}(x-\mu),\quad \Sigma_s=(1-\gamma)\Sigma+\gamma\,\mathrm{diag}(\Sigma)+\epsilon I,\ \gamma=0.05$$
-$$s_\text{pca}(x)=\big\lVert (x-\mu)-V_kV_k^\top(x-\mu)\big\rVert_2\ \ (\text{top-}k\text{ PCs}),\qquad s_\text{knn}(x)=\min_{r\in R}\lVert x-r\rVert_2$$
+```math
+s_\text{norm}(x)=\lVert x\rVert_2,\qquad s_\text{mean\_l2}(x)=\lVert x-\mu\rVert_2
+```
+
+```math
+s_\text{maha}(x)=(x-\mu)^\top \Sigma_s^{-1}(x-\mu),\quad \Sigma_s=(1-\gamma)\Sigma+\gamma\,\mathrm{diag}(\Sigma)+\epsilon I,\ \gamma=0.05
+```
+
+```math
+s_\text{pca}(x)=\big\lVert (x-\mu)-V_kV_k^\top(x-\mu)\big\rVert_2\ \ (\text{top-}k\text{ PCs}),\qquad s_\text{knn}(x)=\min_{r\in R}\lVert x-r\rVert_2
+```
 
 where $R$ is a 5 000-sample reference set of train reals (1-NN density). `coord_quantile` sums
 per-coordinate empirical tail probabilities under the train marginal.
 
 **Functional scores** (single forward from the activation; Phase 3):
 
-$$\text{entropy}=-\sum_v p_v\log p_v,\qquad \text{MSP}=\max_v p_v,\qquad \text{logit\_max}=\max_v f(x)_v$$
-$$\text{plateau-KL}=\frac1M\sum_{m=1}^{M}\mathrm{KL}\!\big(p\,\Vert\,p_m'\big),\quad p_m'=\mathrm{softmax}\!\big(f(x+\epsilon\lVert x\rVert u_m)\big),\ \epsilon=0.02,\ M=4$$
+```math
+\text{entropy}=-\sum_v p_v\log p_v,\qquad \text{MSP}=\max_v p_v,\qquad \text{logit\_max}=\max_v f(x)_v
+```
+
+```math
+\text{plateau-KL}=\frac1M\sum_{m=1}^{M}\mathrm{KL}\!\big(p\,\Vert\,p_m'\big),\quad p_m'=\mathrm{softmax}\!\big(f(x+\epsilon\lVert x\rVert u_m)\big),\ \epsilon=0.02,\ M=4
+```
 
 with $u_m$ i.i.d. unit-random directions.
 
 **Downstream degradation** (Phases 5–6, genuinely in-context): corrupt only the last-token
 resid_post@L6 via a forward hook over the full prompt, then
 
-$$\mathrm{KL}_\downarrow=\mathrm{KL}\!\big(p_\text{clean}\,\Vert\,p_\text{corrupt}\big)\ \text{at the last position.}$$
+```math
+\mathrm{KL}_\downarrow=\mathrm{KL}\!\big(p_\text{clean}\,\Vert\,p_\text{corrupt}\big)\ \text{at the last position.}
+```
 
 **Prediction** uses Spearman rank correlation $\rho$ and the **partial** Spearman controlling
 distance-to-original $d=\lVert x-x_0\rVert$ (rank-residualize score and $\mathrm{KL}_\downarrow$ on $d$,
