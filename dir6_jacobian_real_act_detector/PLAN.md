@@ -493,7 +493,8 @@ Correction/steering metrics:
       LOFO in iter2; iter3 added interp/tangent_pert/orth_pert harder norm-matched families)
 - [x] S4 — Run statistical/density baselines and decide whether richer scores are justified. (iter1)
 - [x] S5 — Run local functional/geometric feature study beyond scalar Jacobian norm. (iter4:
-      entropy/MSP/plateau-KL functional probe; uniquely catches interp ~0.61 where stats are chance)
+      entropy/MSP/plateau-KL functional probe; uniquely catches interp ~0.61 where stats are chance.
+      iter12: IN-CONTEXT re-run — plateau-KL rises to 0.776 on interp, the best interp detector found.)
 - [x] S6 — Train and evaluate learned realness detectors under leave-one-family-out protocols.
       (iter2: logreg/MLP FAIL to generalize, LOFO macro 0.68/0.74 < kNN 0.913 → Gate 4 fails for
       discriminative detectors; realness = local density, a one-class property)
@@ -516,7 +517,21 @@ Correction/steering metrics:
 End each JOURNAL.md entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
-## Current status (after iter11 — BOOTSTRAP CIs added + Phase-2c/Methods reconciled into deliverables)
+## Current status (after iter12 — IN-CONTEXT discrimination benchmark; top-cited limitation resolved)
+Iter12 ran the top open model-dependent item now that the env was restored (torch+CUDA, transformers,
+matplotlib — all absent iters 9-11). `experiments/incontext_discrimination.py` re-injects each candidate
+at the real last-token position during a FULL forward over its native prompt (forward hook) and scores by
+the intrinsic functional plateau-KL. Native context SHARPENS the signal by +0.15 AUROC on both hard
+norm-matched families: interp 0.63→**0.776** (now the best interp detector in the project, > two-sided
+Mahalanobis 0.69; interp defeats all local/statistical baselines), tangent_pert 0.58→**0.73**, cov_gauss
+0.94→**0.98**. entropy/msp don't orient consistently (0.12–0.45) → plateau_kl is load-bearing. New fig11.
+Curated RESULTS.md (Phase 3c + updated Headline/verdict), REPORT.md (fig11 + Key-result #4 + Limitation
+now done), appended CHANGELOG. Verdict on the 5-claim ladder UNCHANGED; H1 further supported, now via
+in-context DISCRIMINATION (not only prediction). No prior numbers changed. Remaining future work:
+in-context-PROCESS negatives (steered/SAE acts produced during a forward), a manifold/denoising-prior
+causal objective (S9's real blocker), CIs on the Phase-3c AUROCs, cross-model transfer (needs a download).
+
+## (prior) Current status (after iter11 — BOOTSTRAP CIs added + Phase-2c/Methods reconciled into deliverables)
 Iter11 did three things. (1) Closed the PLAN's open "small-N → bootstrap CIs" risk:
 `experiments/bootstrap_ci.py` puts paired bootstrap 95% CIs (B=2000, orientation fixed) on the Phase-3
 capstone single scores. Every headline ordering survives: interp entropy [0.58,0.62], plateau-KL

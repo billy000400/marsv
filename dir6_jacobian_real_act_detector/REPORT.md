@@ -68,8 +68,9 @@ full sample.
 
 ## Figures
 Figures 1–8 are rendered from cached result CSVs by `experiments/make_plots.py` (pure PIL); figure 9
-(Phase 2c) by `experiments/plot_fig9.py` and figure 10 (bootstrap CIs) by `experiments/bootstrap_ci.py`
-(matplotlib) — all from the cached `results/*.csv`.
+(Phase 2c) by `experiments/plot_fig9.py`, figure 10 (bootstrap CIs) by `experiments/bootstrap_ci.py`,
+and figure 11 (Phase 3c in-context discrimination) by `experiments/plot_fig11.py` (matplotlib) — all
+from the cached `results/*.csv`.
 
 ![Phase 2 baseline AUROC by family @ L6](plots/fig1_baselines_L6.png)
 ![Phase 2b baseline AUROC heatmap @ L6 (interp defeats every statistic)](plots/fig3_baselines_L6_heatmap.png)
@@ -81,6 +82,7 @@ Figures 1–8 are rendered from cached result CSVs by `experiments/make_plots.py
 ![Phase 3 capstone single-score AUROC with bootstrap 95% CIs](plots/fig10_bootstrap_ci.png)
 ![Phase 5 partial Spearman of scores with in-context KL controlling distance](plots/fig7_prediction_partial_rho.png)
 ![Phase 6 causal repair external downstream KL by method](plots/fig8_causal_repair_KL.png)
+![Phase 3c in-context vs out-of-context plateau-KL discrimination](plots/fig11_incontext_discrimination.png)
 
 ## Key results
 1. **No single statistic is "realness."** Norm is a shortcut (AUROC 0.50 on the two norm-matched
@@ -115,6 +117,15 @@ Figures 1–8 are rendered from cached result CSVs by `experiments/make_plots.py
    whereas kNN [0.48,0.52] straddles 0.50 (interpolation is invisible to *local* density). The
    Mahalanobis CI does not overlap the functional CIs (it is significantly the strongest interp
    discriminator), and kNN's cov_gauss CI [0.97,0.98] does not overlap Mahalanobis [0.53,0.57].
+   **In-context discrimination (Phase 3c, `incontext_discrimination.py`) makes the functional axis the
+   strongest interp detector of all.** Re-injecting each candidate at the last-token position during a
+   full forward over its native prompt (forward hook, so late-layer attention sees real context) and
+   scoring by the *intrinsic* plateau-KL raises interp AUROC from 0.63 (out-of-context) to **0.776**,
+   above two-sided Mahalanobis (0.69); tangent_pert rises 0.58→0.73 and cov_gauss 0.94→0.98. Native
+   context is what makes the functional plateau load-bearing — the functional realness structure is a
+   property of the activation *in context*, understated when the activation is scored in isolation.
+   (`entropy`/`msp` do not orient consistently across families; plateau-KL is the discriminating
+   functional feature.)
 5. **Opposite-direction anomalies break combined detectors.** Because interpolation is anomalous in the
    opposite direction from ordinary corruptions, a combined logistic over {Mahalanobis, kNN, entropy,
    plateau-KL} trained LOFO generalizes to covariance-matched Gaussian (0.999) but FAILS on interpolation
@@ -186,10 +197,12 @@ survive the correction:**
   *two-sided* view and a complementary functional probe to capture realness.
 
 ## Limitations
-- The discrimination functional probe (Phase 3) treats each activation as a single-position input
-  (intrinsic model sensitivity, not in-context fidelity). Phases 5 & 6 (PREDICTION, CAUSAL) now use a
-  genuinely in-context method (forward hook over the full prompt); a fully context-aware
-  *discrimination* benchmark (negatives generated in-context) is still future work.
+- The Phase-3 discrimination functional probe treats each activation as a single-position input
+  (intrinsic model sensitivity, not in-context fidelity). This is now addressed: Phase 3c re-scores the
+  functional features genuinely in-context (forward hook, full prompt) and finds context *strengthens*
+  the plateau-KL discriminator (interp 0.63→0.78). The remaining gap is that Phase 3c injects
+  vector-space negatives at the real last position rather than generating negatives from an in-context
+  process (e.g. steered/SAE activations produced during a forward); that fuller benchmark is future work.
 - The combined-detector LOFO AUROC uses held-out-label orientation (diagnostic, not orientation-fixed).
 - Partial-correlation evidence for prediction uses approximate rank-residual partials; the consistent
   positive functional partials are robust, the exact magnitudes are not.
@@ -216,6 +229,7 @@ data tangent), and any steering correction must be evaluated against in-context 
 doc-level split) · `train_detectors.py` (LOFO detectors) ·
 `baselines_layers.py` (cross-depth + hard negatives) · `functional_features.py` (functional probe) ·
 `combined_score.py` (combined + interp correction) · `bootstrap_ci.py` (Phase-3 capstone bootstrap CIs) ·
+`incontext_discrimination.py` (Phase-3c in-context vs out-of-context functional discrimination) ·
 `context_validation_v2.py` (Phase-5 CORRECTED
 in-context prediction) · `causal_repair_v2.py` (Phase-6 CORRECTED in-context causal repair, negative
 result). The pre-correction single-position versions (`context_validation.py`, `causal_repair.py`) are

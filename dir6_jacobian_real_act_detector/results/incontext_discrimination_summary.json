@@ -1,0 +1,159 @@
+{
+  "layer": 6,
+  "n_prompts": 300,
+  "families": [
+    "cov_gauss",
+    "interp",
+    "tangent_pert"
+  ],
+  "n_plateau": 6,
+  "eps_plateau": 0.02,
+  "method": "forward-hook inject at last real-token pos (in-context) vs single-position late blocks (out-of-context)",
+  "rows": [
+    {
+      "family": "cov_gauss",
+      "score": "maha_twosided",
+      "context": "n/a",
+      "auroc": 0.588
+    },
+    {
+      "family": "cov_gauss",
+      "score": "knn_distance",
+      "context": "n/a",
+      "auroc": 0.849
+    },
+    {
+      "family": "cov_gauss",
+      "score": "entropy",
+      "context": "in_context",
+      "auroc": 0.1166
+    },
+    {
+      "family": "cov_gauss",
+      "score": "entropy",
+      "context": "out_of_context",
+      "auroc": 0.1212
+    },
+    {
+      "family": "cov_gauss",
+      "score": "msp",
+      "context": "in_context",
+      "auroc": 0.1789
+    },
+    {
+      "family": "cov_gauss",
+      "score": "msp",
+      "context": "out_of_context",
+      "auroc": 0.1139
+    },
+    {
+      "family": "cov_gauss",
+      "score": "plateau_kl",
+      "context": "in_context",
+      "auroc": 0.9842
+    },
+    {
+      "family": "cov_gauss",
+      "score": "plateau_kl",
+      "context": "out_of_context",
+      "auroc": 0.9373
+    },
+    {
+      "family": "interp",
+      "score": "maha_twosided",
+      "context": "n/a",
+      "auroc": 0.514
+    },
+    {
+      "family": "interp",
+      "score": "knn_distance",
+      "context": "n/a",
+      "auroc": 0.48
+    },
+    {
+      "family": "interp",
+      "score": "entropy",
+      "context": "in_context",
+      "auroc": 0.3498
+    },
+    {
+      "family": "interp",
+      "score": "entropy",
+      "context": "out_of_context",
+      "auroc": 0.384
+    },
+    {
+      "family": "interp",
+      "score": "msp",
+      "context": "in_context",
+      "auroc": 0.3789
+    },
+    {
+      "family": "interp",
+      "score": "msp",
+      "context": "out_of_context",
+      "auroc": 0.4078
+    },
+    {
+      "family": "interp",
+      "score": "plateau_kl",
+      "context": "in_context",
+      "auroc": 0.7756
+    },
+    {
+      "family": "interp",
+      "score": "plateau_kl",
+      "context": "out_of_context",
+      "auroc": 0.6288
+    },
+    {
+      "family": "tangent_pert",
+      "score": "maha_twosided",
+      "context": "n/a",
+      "auroc": 0.4554
+    },
+    {
+      "family": "tangent_pert",
+      "score": "knn_distance",
+      "context": "n/a",
+      "auroc": 0.6758
+    },
+    {
+      "family": "tangent_pert",
+      "score": "entropy",
+      "context": "in_context",
+      "auroc": 0.433
+    },
+    {
+      "family": "tangent_pert",
+      "score": "entropy",
+      "context": "out_of_context",
+      "auroc": 0.4297
+    },
+    {
+      "family": "tangent_pert",
+      "score": "msp",
+      "context": "in_context",
+      "auroc": 0.448
+    },
+    {
+      "family": "tangent_pert",
+      "score": "msp",
+      "context": "out_of_context",
+      "auroc": 0.4371
+    },
+    {
+      "family": "tangent_pert",
+      "score": "plateau_kl",
+      "context": "in_context",
+      "auroc": 0.726
+    },
+    {
+      "family": "tangent_pert",
+      "score": "plateau_kl",
+      "context": "out_of_context",
+      "auroc": 0.5791
+    }
+  ],
+  "elapsed_s": 60.6
+}

@@ -188,6 +188,40 @@ bias). CI = [2.5, 97.5] percentile of resampled AUROC; "sig" = CI lower bound > 
 
 ![Phase-3 capstone AUROC with bootstrap 95% CIs](plots/fig10_bootstrap_ci.png)
 
+## Phase 3c — IN-CONTEXT discrimination: does native context sharpen the functional signal?
+`experiments/incontext_discrimination.py` (GPU, A10). The Phase-3 functional probe scored each
+activation OUT-OF-CONTEXT (a single position pushed through the late GPT-2 blocks — the same
+single-position simplification the external review flagged for the prediction/causality phases). Here
+we test the top-cited open limitation directly: capture the real last-token resid@L6 of N=300 FineWeb
+prompts (real positives), build matched norm-preserving negatives from them, then re-inject each
+candidate at the last-token position **during a full forward over its native prompt** (forward hook)
+so late-layer attention sees the real context. We score only INTRINSIC functional features (no
+reference to the clean activation): next-token `entropy`, `msp`, and `plateau_kl` (local output
+sensitivity to an eps=0.02·‖x‖ perturbation, 6 draws). AUROC real-vs-family, in-context vs
+out-of-context on the identical candidate sets:
+
+| family | maha_two (stat) | knn (stat) | plateau_kl OUT-of-ctx | plateau_kl **IN-CONTEXT** |
+|---|---|---|---|---|
+| **interp**   | 0.51 | 0.48 | 0.629 | **0.776** |
+| tangent_pert | 0.46 | 0.68 | 0.579 | **0.726** |
+| cov_gauss    | 0.59 | 0.85 | 0.937 | **0.984** |
+
+![Phase 3c in-context vs out-of-context plateau-KL discrimination](plots/fig11_incontext_discrimination.png)
+
+- **Native context SHARPENS the functional plateau-KL realness signal by +0.15 AUROC on BOTH hard
+  norm-matched families** (interp 0.63→0.78, tangent_pert 0.58→0.73) and pushes cov_gauss to
+  near-perfect (0.94→0.98). The functional plateau — real activations sit where the model's output is
+  locally INSENSITIVE to perturbation, corrupted ones on a cliff — is a real property of the activation
+  *in its context*, and evaluating it out-of-context understates it.
+- **In-context plateau-KL is the single best `interp` detector found across the whole project (0.776)**,
+  clearly beating the previous best (two-sided Mahalanobis 0.69) on the family that defeats every
+  local/statistical baseline. Discrimination of the too-central interpolation negative is therefore not
+  merely a prediction/prod-hoc effect — it is an in-context *classification* result.
+- `entropy`/`msp` do NOT reliably discriminate (AUROC 0.12–0.45, family-dependent sign): real
+  activations produce *more confident* next-token distributions than cov_gauss but the effect does not
+  orient consistently across families. **plateau_kl (functional stability) is the load-bearing
+  functional feature**, and context makes it decisively stronger.
+
 - **The weak `interp` signals are statistically REAL, not noise.** Functional entropy [0.58,0.62] and
   plateau_kl [0.60,0.63] both EXCLUDE 0.50 — the "only scores beating chance on interpolations" claim
   survives with error bars. Two-sided Mahalanobis on interp [0.67,0.70] is significantly the strongest
@@ -291,18 +325,25 @@ along different axes:
   invisible to one-sided "too-far" scores and to local density (kNN 0.50) because it sits among real
   neighbors — but it is **anomalous by being too CENTRAL**: a TWO-SIDED global Mahalanobis catches it
   at ~0.68 (interp mean dist 658 vs real 803). Real activations occupy a characteristic-distance shell;
-  averaging falls into the over-typical interior. An independent **FUNCTIONAL probe** (next-token
-  entropy / plateau-KL from continuing the model forward) also catches it (~0.61, bootstrap 95% CI
-  [0.58,0.62]/[0.60,0.63] — excludes chance), confirming a genuine functional component of realness
-  that statistics need a two-sided view to see. kNN alone is at chance on interp (CI [0.48,0.52]).
+  averaging falls into the over-typical interior. An independent **FUNCTIONAL probe** (plateau-KL — how
+  insensitive the model's output is to perturbing the injected activation) also catches it, and does so
+  BEST when the activation is evaluated **in its native context**: in-context plateau-KL reaches AUROC
+  **0.776** on interp (Phase 3c), the strongest interp detector in the project, versus 0.63
+  out-of-context and 0.69 for two-sided Mahalanobis. kNN alone is at chance on interp (CI [0.48,0.52]) —
+  interpolations are invisible to local density; the anomaly is global (distance-from-center) and
+  functional (output-sensitivity), not local.
 - Because interpolation is anomalous in the OPPOSITE direction from ordinary corruptions, a combined
   detector trained on standard families does NOT transfer to it (combined LOFO 0.54) — a concrete
   generalization limit for any realness score.
 
 **Verdict on the 5-claim ladder:** (1) Discrimination — YES, but only via a multi-axis score
-(density ⊕ two-sided covariance ⊕ functional), not any single statistic. (2) Generalization — PARTIAL:
-generalizes across Gaussian/shuffle/perturbation and across layers, but NOT to opposite-direction
-interpolation negatives. (3) Prediction — PARTIAL/YES for the FUNCTIONAL axis: in a genuinely
+(density ⊕ two-sided covariance ⊕ functional), not any single statistic. The strongest single detector
+of the hardest (interpolation) negative is the **in-context functional plateau-KL (AUROC 0.78, Phase
+3c)** — evaluating the activation in its native prompt is what makes the functional axis load-bearing.
+(2) Generalization — PARTIAL: generalizes across Gaussian/shuffle/perturbation and across layers;
+opposite-direction interpolation negatives evade all local/one-sided statistics but ARE caught (0.78)
+by the in-context functional probe, so the ceiling is higher than a "nothing generalizes to interp"
+reading — though still short of clean separation. (3) Prediction — PARTIAL/YES for the FUNCTIONAL axis: in a genuinely
 in-context severity sweep, plateau-KL/entropy predict true in-context downstream KL beyond
 distance-to-original (partial ρ up to +0.51), whereas density scores add nothing over proximity. (4)
 Causality — NO: naive gradient descent on either a density (Mahalanobis) or functional (plateau-KL)
