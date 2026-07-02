@@ -298,3 +298,29 @@ held-out target and see if transfer beats the 5-direction bank; (iii) text-level
 On track? yes — success criterion met since Iter 3; S4 (a)+(b)+(c) delivered and Exp 6's follow-up now
 resolved (Exp 7); ~99% of direction. No blocker. Remaining is optional (capacity/curation ablation,
 text Pareto, multi-layer).
+
+## 2026-07-02 20:0x — Experiment 8: does more MODEL CAPACITY close the held-out gap? (S4c follow-up #2)
+**Did:** Exp 7 concluded held-out transfer fails to improve with a bigger bank because of "capacity
+interference," and prescribed "more model capacity and/or a curated bank" — but never varied capacity.
+Tested that claim directly. Wrote `experiments/08_capacity_scaling.py` (reuses Exp 6 CondCorrector
+which already takes a `hidden` arg, + train_cond/make_hat_cond + Exp 3 lm_loss_fn/LAYER via import).
+Held the BANK fixed at Exp 7's size-5 set (its worst-transfer bank), scaled corrector width
+hidden∈{1024,2048,4096} = 5.2M/14.7M/46.2M params (9× range), identical recipe/seed/data. Ran in ~2 min
+total (4 trainings incl. native oracle) under the 0.18 VRAM fraction, no OOM.
+**Learned:** more capacity does NOT close the gap. (1) Mean in-bank recovery @α=8 SATURATES ~45% across
+9× params (45.4→43.8→46.3) — not width-starved. (2) Held-out `certainty` @α=8 flat-to-falling 3→2→1%;
+at weak steering the 46M model OVERFITS and harms the unseen dir (α=1 rec −1→−22→−146%). ⇒ the ceiling
+on amortized cross-direction correction is the TRAINING SIGNAL, not parameter count. hidden=1024
+reproduced Exp 7's size-5 to the digit (good reproducibility check). Native oracle unchanged 78–142%.
+This corrects Exp 7's optimistic "scale the model" reading: neither more directions nor more parameters
+amortizes the correction; it is fundamentally direction-specific and the per-direction native corrector
+remains the reliable route.
+**Deliverables:** RESULTS.md +Exp 8 (2 tables) + updated Exp-7 closing + Headline; REPORT.md +Exp 8
+Methods/Results + updated Summary/Exp-7-interp/Conclusion/Limitation(3); plots/08_capacity_scaling.png;
+results/08_capacity_scaling.json; CHANGELOG appended. REPORT math re-verified (10/10 js-display-math,
+0 broken, 0 inline hazards).
+**Next step (optional):** the two open axes now well-motivated by Exp 7+8 — (a) bank CURATED toward a
+target subspace vs a diffuse bank (does subspace-matched curation beat capacity/size?), or (b) the
+S4(d) concept-strength TEXT Pareto (does preserving projection preserve generated-text concept strength?).
+Both are optional; success criterion long met.
+On track? yes — S4(c) fully closed (bank-size Exp 7 + capacity Exp 8 both negative/corrective); direction ~99% complete, deliverables curated + math-verified.

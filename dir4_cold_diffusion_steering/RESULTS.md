@@ -213,12 +213,54 @@ with the held-out direction — extra "coverage" that should help transfer. The 
 in-bank: under the size-5 model, per-direction recovery at α=8 is *lower* than the size-3 model
 delivered (formality 70%→45%, concreteness 17%→13%), while the two new directions land at 41–72%. So a
 fixed-capacity 5.25M corrector, asked to correct five directions instead of three, does **each**
-direction worse — the held-out one included. **Capacity interference, not coverage, is the binding
-constraint.** This revises Experiment 6's optimistic reading: closing the held-out gap at strong
-steering needs **model-capacity scaling and/or bank curation toward the target's subspace**, not simply
-more directions poured into the same-size model. The native oracle retrained on `certainty` still
-recovers 78–142%, so the direction is fully correctable — the gap is a property of amortization, not of
-`certainty` being intrinsically hard.
+direction worse — the held-out one included. **Coverage is not the binding constraint** (extra
+directions hurt); the tempting next hypothesis is that raw model capacity is. This revises
+Experiment 6's optimistic reading: closing the held-out gap at strong steering needs **bank curation
+toward the target's subspace and/or a stronger training signal**, not simply more directions poured
+into the same-size model — and, as **Experiment 8** shows, not simply a bigger model either. The
+native oracle retrained on `certainty` still recovers 78–142%, so the direction is fully correctable —
+the gap is a property of amortization, not of `certainty` being intrinsically hard.
+
+**Experiment 8 — Does more model capacity close the held-out gap? Scaling the corrector.**
+Experiment 7 blamed the bank-scaling failure on *capacity interference* — directions competing for a
+fixed 5.25M-param MLP — a causal claim about model size that Exp 7 never varied. We test it directly:
+**hold the bank fixed** at the size-5 set {sentiment, formality, concreteness, politeness, complexity}
+(the exact bank that gave Exp 7's *worst* held-out transfer) and **scale the corrector's width**,
+`hidden ∈ {1024, 2048, 4096}` → **5.2M / 14.7M / 46.2M params** (a 9× range), same recipe/seed/data/eval.
+The native oracle (retrained on `certainty`) is the ceiling. The `hidden=1024` point re-runs Exp 7's
+size-5 model and reproduces it to the digit.
+
+*Held-out `certainty` fluency recovery vs corrector capacity (native = oracle retrained on certainty):*
+
+| corrector capacity | rec @α=1 | @α=2 | @α=4 | @α=6 | @α=8 |
+|---|---|---|---|---|---|
+| 5.2M (hid 1024) | −1% | 9% | 6% | 4% | **3%** |
+| 14.7M (hid 2048) | −22% | 20% | 6% | 3% | **2%** |
+| 46.2M (hid 4096) | −146% | −22% | −2% | 0% | **1%** |
+| native oracle | 142% | 105% | 96% | 88% | **78%** |
+
+*In-bank per-direction recovery @α=8 vs corrector capacity (all five trained together):*
+
+| capacity | sentiment | formality | concreteness | politeness | complexity | **mean** |
+|---|---|---|---|---|---|---|
+| 5.2M | 57% | 45% | 13% | 72% | 41% | **45.4%** |
+| 14.7M | 63% | 38% | 7% | 73% | 38% | **43.8%** |
+| 46.2M | 59% | 42% | 24% | 75% | 32% | **46.3%** |
+
+**Reading it: more capacity does NOT close the held-out gap either — simple width scaling is not the
+fix.** Two signals. **(1) In-bank recovery saturates.** Mean in-bank recovery at α=8 is essentially
+flat across a 9× capacity increase (**45.4% → 43.8% → 46.3%**); the shared MLP was not width-starved,
+and adding parameters does not let it correct the five *training* directions any better. **(2) Held-out
+transfer does not improve and degrades at weak steering.** At α=8, held-out recovery is flat-to-falling
+(3%→2%→1%); and at the weak α where the correction should be nearly the identity, the widest model
+*actively damages* the unseen direction — recovery goes −1% → −22% → **−146%** at α=1 (the 46M model
+adds +0.32 nats to a nearly-harmless weak steer). That is textbook overfitting: extra capacity is spent
+memorizing the bank directions, which hurts an unseen one. So Experiment 7's "capacity interference"
+reading is only half right — the ceiling on amortized cross-direction correction is set by the
+**training signal (which directions are in the bank, how the corrector is conditioned, the objective),
+not by parameter count.** The native oracle (78–142%) is unchanged and remains the only reliable route
+to a genuinely unseen direction: **the correction is fundamentally direction-specific**, and neither
+more directions (Exp 7) nor more parameters (Exp 8) amortizes it away.
 
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
@@ -245,6 +287,11 @@ recovers 78–142%, so the direction is fully correctable — the gap is a prope
   {1, 3, 5} plus the native oracle; (b) held-out recovery at α=1 and α=8 vs bank size — the headline
   curve, showing transfer peaks at bank size 3 and drops when the bank grows to 5 (capacity
   interference at fixed model size).
+- `plots/08_capacity_scaling.png` — (a) held-out `certainty` fluency recovery vs α for corrector
+  capacities {5.2M, 14.7M, 46.2M params} on the FIXED size-5 bank, plus the native oracle;
+  (b) recovery at α=8 vs capacity (log axis) for the held-out direction and the mean in-bank
+  direction — both flat/falling as capacity grows, with the native oracle far above. More width
+  does not close the held-out gap or improve in-bank recovery.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -260,8 +307,12 @@ Making the corrector **direction-conditional** (feed `v̂`) and training it on a
 gives **one model that corrects every in-bank direction at once** (55–70% recovery at α=8) and
 **begins to transfer** to a held-out direction (51%→7% recovery from weak to strong steering, vs ≈0%
 for a frozen single-vector corrector) — replacing "one model per vector" with "one model per bank."
-But **naively enlarging that bank does not close the held-out gap**: at fixed model capacity, growing
-the training bank from 3 to 5 directions *lowers* transfer to the held-out direction (α=8 recovery
-7%→3%) and lowers per-direction in-bank recovery too — capacity interference, not coverage, binds. The
-route to a reusable corrector is **more model capacity and/or a curated bank**, not merely more
-directions.
+But **neither more directions nor more parameters closes the held-out gap.** Enlarging the training
+bank from 3 to 5 directions *lowers* transfer to the held-out direction (α=8 recovery 7%→3%) and lowers
+per-direction in-bank recovery (Exp 7); and scaling the *model* 9× wider (5.2M→46.2M params) on a fixed
+5-direction bank leaves in-bank recovery flat (~45%) and *worsens* weak-steering held-out transfer
+through overfitting (α=1 recovery −1%→−146%) (Exp 8). So amortized cross-direction correction is capped
+not by coverage or parameter count but by the **training signal** — the correction is fundamentally
+direction-specific, and the reliable route to a genuinely unseen direction remains the **per-direction
+native corrector** (78–142% recovery); curating the bank toward the target subspace and/or conditioning
+harder is the open path, not simply a larger bank or a larger model.

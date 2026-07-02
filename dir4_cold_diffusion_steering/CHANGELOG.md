@@ -155,3 +155,28 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   `results/07_bank_scaling.json`.
 - REPORT math re-verified via GitHub API: 10/10 js-display-math (added the recovery-fraction eq),
   0 broken, 0 inline hazards.
+
+## 2026-07-02 — Experiment 8: scaling MODEL CAPACITY on a fixed bank (S4c follow-up #2)
+- Added Experiment 8 to RESULTS.md and REPORT.md: directly tests Exp 7's causal claim ("capacity
+  interference between directions competing for a fixed 5.25M MLP binds"), which Exp 7 never varied.
+  Held the BANK fixed at Exp 7's size-5 set {sentiment, formality, concreteness, politeness, complexity}
+  (its WORST-transfer bank) and scaled corrector WIDTH hidden∈{1024,2048,4096} = 5.2M/14.7M/46.2M params
+  (9× range), identical recipe/seed/data/8 epochs. Native oracle (retrained on certainty, 5.25M) = ceiling.
+- **Result (new, corrective):** more capacity does NOT close the held-out gap either — simple width
+  scaling is not the fix. (1) Mean in-bank recovery @α=8 SATURATES at ~45% across the 9× range
+  (45.4%→43.8%→46.3%) — the MLP was not width-starved. (2) Held-out `certainty` transfer @α=8 is
+  flat-to-falling (3%→2%→1%) and at weak steering the widest model OVERFITS, actively harming the unseen
+  direction: α=1 recovery −1%→−22%→−146% (46.2M model adds +0.32 nats to a near-harmless weak steer).
+  ⇒ the amortization ceiling is set by the TRAINING SIGNAL (bank composition / conditioning / objective),
+  NOT by parameter count. Native oracle unchanged (78–142%); correction is fundamentally direction-specific.
+- hidden=1024 point reproduces Exp 7's size-5 model to the digit (held-out rec [-1,9,6,4,3]; in-bank@8
+  {sent57,form45,conc13,pol72,cplx41}) — built-in reproducibility check passed.
+- **Superseded framing:** Exp 7's "closing the gap needs more MODEL CAPACITY and/or a curated bank" →
+  corrected to "needs bank CURATION toward the target subspace and/or a stronger training signal — NOT
+  simply a bigger model (Exp 8) or more directions (Exp 7)." Updated RESULTS Headline + Exp-7 closing
+  sentence; REPORT Summary + Exp-7 interpretation + Conclusion + Limitation (3).
+- New code: `experiments/08_capacity_scaling.py` (reuses Exp 6 CondCorrector[hidden]/train_cond/
+  make_hat_cond + Exp 3 LM-loss/layer via import; loads all 5 persisted pool vectors + certainty).
+  New figure `plots/08_capacity_scaling.png` (held-out recovery vs α per capacity + oracle; recovery @α=8
+  vs capacity for held-out + mean in-bank). Results in `results/08_capacity_scaling.json`.
+- REPORT math re-verified via GitHub API: 10/10 js-display-math, 0 broken (<pre lang=math>), 0 inline hazards.

@@ -1,0 +1,50 @@
+device: cuda
+cos(dir, certainty): {'sentiment': 0.03, 'formality': 0.767, 'concreteness': -0.82, 'politeness': -0.353, 'complexity': -0.801}
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 9465.64it/s]
+clean eval loss = 3.731
+held-out raw ΔLM: [0.219, 0.987, 2.619, 3.35, 3.708]
+
+=== training size-5 bank, WIDTH hidden=1024 ===
+  cond corrector params: 5.25M
+  ep1 step  40 a= 3.9 LM=6.664
+  ep2 step  80 a= 1.5 LM=4.936
+  ep3 step 120 a= 1.4 LM=3.893
+  ep4 step 160 a= 2.2 LM=4.579
+  ep5 step 200 a= 1.0 LM=3.997
+  ep6 step 240 a= 6.6 LM=4.599
+  ep7 step 280 a= 4.0 LM=6.323
+  hid=1024: held-out rec [-1.0, 9.0, 6.0, 4.0, 3.0]  in-bank@8 rec {sentiment:57, formality:45, concreteness:13, politeness:72, complexity:41}
+
+=== training size-5 bank, WIDTH hidden=2048 ===
+  cond corrector params: 14.69M
+  ep1 step  40 a= 3.9 LM=6.787
+  ep2 step  80 a= 1.5 LM=4.814
+  ep3 step 120 a= 1.4 LM=3.892
+  ep4 step 160 a= 2.2 LM=4.594
+  ep5 step 200 a= 1.0 LM=4.224
+  ep6 step 240 a= 6.6 LM=5.198
+  ep7 step 280 a= 4.0 LM=6.000
+  hid=2048: held-out rec [-22.0, 20.0, 6.0, 3.0, 2.0]  in-bank@8 rec {sentiment:63, formality:38, concreteness:7, politeness:73, complexity:38}
+
+=== training size-5 bank, WIDTH hidden=4096 ===
+  cond corrector params: 46.15M
+  ep1 step  40 a= 3.9 LM=7.203
+  ep2 step  80 a= 1.5 LM=5.038
+  ep3 step 120 a= 1.4 LM=3.864
+  ep4 step 160 a= 2.2 LM=4.959
+  ep5 step 200 a= 1.0 LM=4.174
+  ep6 step 240 a= 6.6 LM=4.663
+  ep7 step 280 a= 4.0 LM=7.014
+  hid=4096: held-out rec [-146.0, -22.0, -2.0, 0.0, 1.0]  in-bank@8 rec {sentiment:59, formality:42, concreteness:24, politeness:75, complexity:32}
+
+=== training NATIVE oracle on held-out 'certainty' (hidden=1024) ===
+  ep1 step  40 a= 5.6 LM=5.510
+  ep2 step  80 a= 3.1 LM=4.384
+  ep3 step 120 a= 7.3 LM=5.288
+  ep4 step 160 a= 6.3 LM=4.428
+  ep5 step 200 a= 5.5 LM=4.578
+  ep6 step 240 a= 7.1 LM=4.636
+  ep7 step 280 a= 3.4 LM=3.788
+  native held-out rec [142.0, 105.0, 96.0, 88.0, 78.0]
+saved figure + results

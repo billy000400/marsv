@@ -41,8 +41,11 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         PARTIALLY transfers to held-out certainty (51%→7% recovery weak→strong; vs ≈0% frozen
         single-vector). "One model per vector" → "one model per bank".
         (c-follow-up) BANK-SCALING DONE (Exp 7): a LARGER bank at fixed capacity does NOT close the
-        held-out gap — transfer peaks at bank size 3, drops at 5 (capacity interference, not coverage).
-        Corrected path = more capacity / curated bank. (d) concept-strength text Pareto still open (opt).
+        held-out gap — transfer peaks at bank size 3, drops at 5 (coverage is not the constraint).
+        (c-follow-up #2) CAPACITY-SCALING DONE (Exp 8): scaling the corrector 9× wider (5.2M→46.2M) on a
+        fixed bank ALSO does not close the gap — in-bank recovery saturates ~45%, held-out overfits at
+        weak α (rec −1%→−146%). ⇒ ceiling is the TRAINING SIGNAL, not directions or params; per-direction
+        native corrector remains the reliable route. (d) concept-strength text Pareto still open (opt).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -54,6 +57,20 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
+direction-conditional-bank + S4(c-follow-up) bank-SCALING (Exp 7) + S4(c-follow-up #2) capacity-SCALING
+(Exp 8) delivered — success criterion MET; direction complete on all planned axes (~99%).
+**S4(c follow-up #2) Experiment 8 (new):** tested Exp 7's causal claim (capacity interference binds) by
+holding the size-5 bank fixed and scaling corrector WIDTH hidden∈{1024,2048,4096}=5.2M/14.7M/46.2M params
+(9× range), identical recipe/seed/data. Result — CORRECTIVE: more capacity does NOT close the held-out
+gap. In-bank recovery @α=8 SATURATES ~45% across 9× params (45.4→43.8→46.3); held-out `certainty` @α=8
+flat-falling 3→2→1%; at weak steering the 46M model OVERFITS (α=1 rec −1→−22→−146%). ⇒ ceiling is the
+TRAINING SIGNAL (bank composition/conditioning/objective), not parameter count. hidden=1024 reproduces
+Exp 7's size-5 to the digit. Native oracle unchanged 78–142% (direction fully correctable). Corrects Exp
+7's "scale the model" prescription. Artifacts: `experiments/08_capacity_scaling.py`,
+`results/08_capacity_scaling.json`, `plots/08_capacity_scaling.png`. RESULTS/REPORT/CHANGELOG curated;
+REPORT math verified (10/10 js-display-math, 0 broken, 0 inline hazards).
+<!-- prior: S4(c follow-up) bank-scaling Exp 7 -->
 S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
 direction-conditional-bank + S4(c-follow-up) bank-SCALING delivered — success criterion MET; direction
 complete on all planned axes (~99%).
