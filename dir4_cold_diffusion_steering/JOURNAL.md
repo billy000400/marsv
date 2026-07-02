@@ -160,3 +160,45 @@ a behavior-vs-fluency frontier.
 
 On track? yes — success criterion met since Iter 3; S4(a) generalization delivered (~90% of
 direction); no blocker. Remaining S4(b) held-out-vector / Pareto is optional polish.
+
+## 2026-07-02 — Iter 5: held-out steering vector — cross-direction generalization (S4b)
+
+**Did.** Wrote `experiments/05_heldout_vector.py`. Built a SECOND DiffMean vector v₂ (formality:
+20 formal vs 20 informal sentences) at layer 6: |v₂|=34.0, cos(v₁_sentiment,v₂)=0.014 (nearly
+orthogonal — a genuinely different behavior family). Reused Exp 3's Corrector/training/eval verbatim
+(importlib). Trained TWO correctors identically (α~U(0.5,8), same seed/data): TRANSFER on sentiment
+v₁, NATIVE on v₂. Evaluated both + raw on v₂ at matched projection α|v₂| for α∈{1,2,4,6,8}. ~2min×2
+trainings on GPU (0.18 frac). (Fixed a wrong figure suptitle that pre-supposed transfer succeeded.)
+
+**Learned (headline — a clean two-part answer).** The corrector r_θ(h,z,α) never sees v explicitly
+(only through z), so this is a real overfit probe. (1) The correction is DIRECTION-SPECIFIC: the
+sentiment-trained corrector gives ~zero benefit on formality — ΔLM transfer lies on top of raw at
+every α (α=8 raw +6.49 → transfer +6.53; recovery ≈0%, slightly negative at high α). That is exactly
+proposal Failure Mode 4 (overfits to one vector). (2) The RECIPE generalizes: retraining the same
+4.46M MLP on v₂ recovers 83–104% of raw's fluency damage (α=8 +6.49→+1.12; 104/97/92/87/83% across
+α=1..8) — reproducing Exp 3 on a larger, near-orthogonal concept, again by moving FURTHER off the
+Gaussian manifold (D_M 66.6→123.1). So ColdSteer is a working recipe to instantiate per direction,
+not a frozen operator to reuse across concepts.
+
+**Assumption/decision logged.** (a) Chose formality as the second concept (clearly distinct from
+sentiment, easy contrastive pairs, no new data pipeline) and DiffMean to match v₁'s construction.
+(b) Added a NATIVE (retrained-on-v₂) corrector as the oracle/ceiling so the transfer failure is
+interpretable — it isolates "single corrector doesn't transfer" from "method doesn't work here";
+without it a reader couldn't tell which. (c) Kept the exact Exp-3 recipe/seed so native-vs-Exp-3
+is an apples-to-apples reproduction on a new direction. Rejected: feeding v to r_θ this iter (would
+change the architecture and conflate the overfit finding) — noted as the natural fix for future work.
+
+**Deliverables.** RESULTS.md + REPORT.md curated: added Experiment 5 table/interpretation, updated
+Headline/Summary/Conclusion/Limitation(3) (direction-generalization now shown). New figure
+`plots/05_heldout_vector.png`; `results/05_heldout_vector.json`; `data/formality_vec_layer6.npy`.
+REPORT math re-verified via GitHub API (9/9 js-display-math, 0 broken, 0 inline hazards). CHANGELOG
+appended.
+
+**Next step.** Optional remaining polish, any one a clean iter: (i) a DIRECTION-CONDITIONAL corrector
+`r_θ(h,z,v,α)` (feed v̂ as input) trained on a small BANK of vectors {sentiment, formality, …} and
+test whether ONE model then transfers to a held-out vector — the direct fix for Exp 5's failure;
+(ii) text-level concept-strength readout for a behavior-vs-fluency Pareto (heavier: needs generation).
+
+On track? yes — success criterion met since Iter 3; S4(a) strength + S4(b) direction generalization
+both delivered (~95% of direction); no blocker. Remaining is optional (vector-bank corrector / text
+Pareto).

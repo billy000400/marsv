@@ -42,6 +42,12 @@ that keeps a strongly-steered activation fluent exists and is easy to learn, but
 **off** the statistical manifold, so only a **downstream-LM objective** — never a manifold-distance
 surrogate — can find it.
 
+Two generalization checks close the report. The learned corrector **extrapolates** past its training
+strengths (still removing 60% of the fluency damage at `α = 12`, 50% beyond the trained ceiling), and
+it is **direction-specific**: a corrector trained on the sentiment direction gives no benefit on a
+near-orthogonal formality direction, but retraining the identical recipe on that direction recovers
+83–104% of the damage — so ColdSteer generalizes as a *recipe*, applied per steering vector.
+
 ## Methods
 
 ### Data & Model
@@ -180,6 +186,24 @@ are strictly **outside the training range** (the corrector never saw `α > 8`), 
 extrapolation. Everything else — parameterization, projection, metrics — is unchanged, so this is
 still a matched-projection comparison against raw steering.
 
+### Held-out steering vector (Experiment 5)
+
+To test whether the corrector overfits to the one direction it was trained on, we build a
+**second** DiffMean steering vector `v₂` for an unrelated concept — **formality** — as the mean
+block-6 activation over 20 formal sentences minus the mean over 20 informal sentences. In raw units
+`|v₂| = 34.0`, and it is nearly orthogonal to the sentiment vector (`cos(v₁, v₂) = 0.014`), so it is
+a genuinely different behavior family. Crucially, `r_θ` never takes `v` as an explicit input — it
+sees the direction only through `z = h + α v` — so evaluating on `v₂` a corrector trained on `v₁` is
+a true held-out-vector test. We compare three methods on `v₂` at matched projection `α|v₂|`:
+
+- **`raw`** — `z = h + α v₂`, the baseline damage on the new direction.
+- **`transfer`** — the Experiment-3 corrector, **trained on the sentiment vector `v₁`** and applied
+  **unchanged** to `v₂`'s steered activations. This measures cross-direction generalization of a
+  single frozen corrector.
+- **`native`** — the identical architecture and training recipe **retrained on `v₂`** (α ∼ U(0.5, 8),
+  same seed/data/steps). This is the direction-specific oracle: it measures whether the *method*
+  reproduces on a new direction.
+
 ### Baselines
 
 The **reference points** shared across experiments are:
@@ -298,6 +322,34 @@ data). This indicates the 4.46M-parameter MLP learned an actual correction rule 
 stronger steering, not a memorized response on the trained `α` grid — an important sanity check
 before trusting the method at strengths a practitioner might dial past those used to fit it.
 
+### Experiment 5 — the correction rule is direction-specific, but the recipe generalizes
+
+![held-out steering vector](plots/05_heldout_vector.png)
+
+Evaluated on the held-out **formality** direction `v₂` (nearly orthogonal to sentiment,
+`cos = 0.014`), the two ways of reusing the method diverge sharply:
+
+| α | ΔLM raw (nats) | ΔLM transfer | **ΔLM native** | recovery transfer | recovery native | `D_M` raw | `D_M` native |
+|---|----------------|--------------|----------------|-------------------|-----------------|-----------|--------------|
+| 1 | +0.57 | +0.53 | **−0.03** | 7% | 104% | 28.4 | 32.4 |
+| 2 | +2.09 | +2.02 | **+0.07** | 4% | 97% | 31.3 | 38.7 |
+| 4 | +4.47 | +4.52 | **+0.35** | −1% | 92% | 40.9 | 61.5 |
+| 6 | +5.78 | +5.82 | **+0.73** | −1% | 87% | 53.2 | 91.8 |
+| 8 | +6.49 | +6.53 | **+1.12** | −1% | 83% | 66.6 | 123.1 |
+
+**Interpretation.** The **transfer** corrector — trained on sentiment, applied to formality — gives
+essentially no benefit: its ΔLM lies on top of raw steering (recovery ≈ 0%, marginally negative at
+strong steering). A single trained corrector is therefore **overfit to its steering direction**,
+exactly the proposal's Failure Mode 4. But the **native** corrector — the same 4-layer MLP and the
+same LM-supervised recipe, retrained on `v₂` — recovers **83–104%** of raw steering's fluency damage
+(ΔLM +6.49 → +1.12 at α=8), reproducing Experiment 3's result on a larger, unrelated behavior family,
+and again by moving *further* off the Gaussian manifold (`D_M` 66.6 → 123.1). So ColdSteer is a
+working **recipe** that generalizes across concepts, but must be **instantiated per steering
+direction** — or made direction-conditional (feed `v` to `r_θ`) or trained on a bank of vectors —
+rather than reused as one frozen operator. This is the expected consequence of `r_θ` seeing the
+direction only through `z`: it learns the correction geometry of the *specific* `z`-distribution it
+trained on.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -322,7 +374,11 @@ The takeaway for on-manifold steering methods: keep the projection-preserving pa
 but supervise `r_θ` with the **downstream LM objective**, never a manifold-distance surrogate.
 Experiments 2 and 3 are the two halves of one claim: the surrogate points the wrong way, and the
 downstream loss points the right way — to a correction that is easy to learn (one small MLP,
-300 documents) and generalizes across steering strength on held-out text.
+300 documents) and generalizes across steering strength on held-out text. Experiment 5 sharpens the
+scope: this correction is **direction-specific** — a corrector trained on one concept does not
+transfer to a near-orthogonal one — but the *recipe* reproduces on a new direction (83–104% recovery
+on a formality vector), so ColdSteer should be trained per steering vector (or made
+direction-conditional / trained on a vector bank), not reused frozen across concepts.
 
 **Limitations.** (1) The manifold is modeled as a single Gaussian, so `D_M` captures
 scale/correlation but not multimodal or nonlinear structure — Experiments 2 and 3 show this is a
@@ -330,7 +386,10 @@ defining flaw of the *metric as a training target*, not merely a modeling nicety
 fluency/loss-level proxy; it does not yet measure downstream *concept strength* or generated-text
 quality on the steered behavior, which is the natural next evaluation (the projection along `v` is
 preserved exactly, so concept strength is held fixed by construction, but text-level effects are
-unmeasured). (3) Generalization is tested across steering *strength* — the corrector extrapolates to α up to 12,
-50% beyond its training ceiling (Experiment 4) — but still on one layer, one steering direction, and
-one model; held-out-vector and held-out-prompt-family generalization remain to test. (4) The small non-positive `ΔLM` at low `α`
+unmeasured). (3) Generalization is now tested across steering *strength* (Experiment 4: the corrector extrapolates
+to α up to 12, 50% beyond its training ceiling) and across steering *direction* (Experiment 5: a
+single trained corrector does **not** transfer to a held-out formality vector, but retraining the
+recipe recovers 83–104% there). Still open: multi-layer, multi-model, held-out-prompt-family
+generalization, and a direction-conditional / vector-bank corrector that would avoid per-vector
+retraining. (4) The small non-positive `ΔLM` at low `α`
 is within noise of zero and should not be over-read as the corrector "improving" the base model.

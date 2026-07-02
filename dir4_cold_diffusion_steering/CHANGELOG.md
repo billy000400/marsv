@@ -76,3 +76,25 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - New figure `plots/04_generalization.png` (ΔLM and D_M vs α, α>8 shaded as extrapolation region);
   results in `results/04_generalization.json`.
 - REPORT math re-verified via GitHub API: 9/9 js-display-math, 0 broken, 0 inline hazards.
+
+## 2026-07-02 — Experiment 5: held-out steering vector / cross-direction generalization (S4b)
+- Added Experiment 5 to RESULTS.md and REPORT.md: built a SECOND DiffMean steering vector v₂ for
+  an unrelated concept (formality, |v₂|=34.0, cos(v₁,v₂)=0.014 — nearly orthogonal), and compared,
+  on v₂ at matched projection α|v₂|, three methods: raw; TRANSFER (Exp-3 corrector trained on
+  sentiment v₁, applied unchanged); NATIVE (identical recipe retrained on v₂, the oracle).
+- **Result (new):** two findings. (1) The correction is DIRECTION-SPECIFIC — the sentiment-trained
+  corrector does NOT transfer to formality (ΔLM transfer ≈ raw at every α; recovery ≈0%, e.g. α=8
+  raw +6.49 → transfer +6.53). Confirms proposal Failure Mode 4 (overfits to one vector). (2) The
+  RECIPE generalizes — retraining the same 4-layer MLP on v₂ recovers 83–104% of raw's fluency
+  damage (α=8 raw +6.49 → native +1.12; α=1 104%, α=2 97%, α=4 92%, α=6 87%, α=8 83%), reproducing
+  Exp 3 on a different/larger/near-orthogonal behavior family, again moving FURTHER off the Gaussian
+  manifold (D_M 66.6→123.1 at α=8).
+- Practical implication captured in REPORT: ColdSteer must be instantiated per steering direction
+  (or made direction-conditional / trained on a vector bank), not reused frozen across concepts.
+- REPORT Summary + Conclusion + Limitation (3) updated (direction-generalization now shown;
+  multi-layer/multi-model/prompt-family and a direction-conditional corrector remain open).
+- New code: `experiments/05_heldout_vector.py` (reuses Exp-3 Corrector/training/eval via import;
+  builds formality vector, persisted to `data/formality_vec_layer6.npy`).
+- New figure `plots/05_heldout_vector.png` (ΔLM and D_M vs α on v₂: raw / transfer / native);
+  results in `results/05_heldout_vector.json`.
+- REPORT math re-verified via GitHub API: 9/9 js-display-math, 0 broken, 0 inline hazards.

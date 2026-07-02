@@ -31,10 +31,12 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         lowers `D_M` but WORSENS `ΔLM` (decoupling/negative). (b) LEARNED `r_θ` MLP trained on the
         DOWNSTREAM LM loss BEATS raw at every α — ΔLM +2.78→+0.44 at α=8 (84% recovery), matched
         projection, moving FURTHER off the Gaussian manifold. Decisive POSITIVE; success criterion met.
-- [~] S4 — Generalization + Pareto. (a) α-EXTRAPOLATION DONE: corrector trained on α~U(0.5,8)
-        evaluated at α=10,12 (beyond range) still recovers 77%/60% of raw's ΔLM damage — graceful
-        degradation, not collapse; in-range α reproduce Exp 3 to the digit. (b) held-out vector /
-        concept-strength Pareto still open.
+- [x] S4 — Generalization. (a) α-EXTRAPOLATION DONE: corrector trained on α~U(0.5,8) evaluated at
+        α=10,12 (beyond range) still recovers 77%/60% of raw's ΔLM damage — graceful degradation.
+        (b) HELD-OUT VECTOR DONE: built formality v₂ (cos(v₁,v₂)=0.014); a single sentiment-trained
+        corrector does NOT transfer (recovery ≈0%) but retraining the recipe on v₂ recovers 83–104%
+        — correction is direction-specific, method generalizes. (c) concept-strength text Pareto
+        still open (optional).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -46,6 +48,16 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector delivered — success
+criterion MET; direction near-complete (~95%).
+**S4(b) (new):** built a second DiffMean concept vector v₂ (formality, |v₂|=34.0, cos(v₁,v₂)=0.014
+— nearly orthogonal). On v₂ at matched projection: the sentiment-trained corrector does NOT transfer
+(ΔLM ≈ raw, recovery ≈0%), but retraining the SAME recipe on v₂ recovers 83–104% of raw's fluency
+damage (α=8 +6.49→+1.12). ⇒ the correction is direction-specific, the METHOD generalizes → train
+per-vector (or condition on v / vector-bank). Artifacts: `experiments/05_heldout_vector.py`,
+`results/05_heldout_vector.json`, `plots/05_heldout_vector.png`, `data/formality_vec_layer6.npy`.
+RESULTS/REPORT/CHANGELOG curated; REPORT math verified (9/9).
+<!-- prior: S4(a) α-extrapolation -->
 S1 + S2 + S3 complete + S4(a) α-extrapolation delivered — success criterion MET.
 **S4(a):** the Exp-3 learned corrector (trained α~U(0.5,8)) generalizes BEYOND its training range:
 evaluated unchanged at α=10,12 it recovers 77% / 60% of raw steering's ΔLM damage (raw +3.31→+0.76,
@@ -65,12 +77,11 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-S4 remaining polish (core + α-extrapolation already delivered). Best next options, any one a clean
-iteration: (i) held-out steering vector / second behavior family — build a second DiffMean concept
-vector and test whether the sentiment-trained corrector still helps at matched projection on that
-direction (tests overfit to one v; the corrector sees v only implicitly through z, so this is a real
-generalization probe and either outcome is informative); (ii) text-level concept-strength readout so
-the frontier is behavior-vs-fluency, not just ΔLM (projection along v is fixed by construction, so
+Core arc + both generalization axes (strength S4a, direction S4b) delivered. Optional remaining
+polish, any one a clean iteration: (i) DIRECTION-CONDITIONAL corrector `r_θ(h,z,v̂,α)` trained on a
+small BANK of vectors {sentiment, formality, …} — the direct fix for Exp 5's transfer failure; test
+whether ONE model then helps on a held-out vector; (ii) text-level concept-strength readout so the
+frontier is behavior-vs-fluency, not just ΔLM (projection along v is fixed by construction, so
 concept strength is controlled — measure generated-text repetition/quality alongside ΔLM).
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering

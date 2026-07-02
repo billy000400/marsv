@@ -99,6 +99,36 @@ unseen strengths. In-range α values (1–8) reproduce Experiment 3 to the digit
 data). This is evidence the MLP learned a genuine correction rule that transfers, not a lookup
 table over the trained α grid.
 
+**Experiment 5 — Held-out steering vector: is the corrector overfit to one direction?**
+The corrector `r_θ(h, z, α)` never receives the steering vector `v` as an input — it sees the
+direction only implicitly through `z = h + α·v`. So the sharpest overfit test is a **new**
+direction. We build a second DiffMean vector `v₂` for a semantically unrelated concept —
+**formality** (formal ↔ informal), `|v₂| = 34.0`, nearly orthogonal to the sentiment vector
+(`cos(v₁, v₂) = 0.014`) — and evaluate three methods on `v₂` at matched projection:
+raw steering; the **transfer** corrector (trained on *sentiment* `v₁`, applied unchanged to `v₂`);
+and a **native** corrector (the identical architecture/recipe retrained on `v₂` — the
+direction-specific oracle).
+
+| α | ΔLM raw (nats) | ΔLM transfer | ΔLM native | recovery transfer | recovery native |
+|---|----------------|--------------|------------|-------------------|-----------------|
+| 1 | +0.57 | +0.53 | **−0.03** | 7% | 104% |
+| 2 | +2.09 | +2.02 | **+0.07** | 4% | 97% |
+| 4 | +4.47 | +4.52 | **+0.35** | −1% | 92% |
+| 6 | +5.78 | +5.82 | **+0.73** | −1% | 87% |
+| 8 | +6.49 | +6.53 | **+1.12** | −1% | 83% |
+
+**Reading it:** two findings, both informative. **(1) The correction rule is direction-specific.**
+The sentiment-trained corrector does **not** transfer to the formality direction — its ΔLM is
+indistinguishable from raw steering (recovery ≈ 0%, even slightly negative at high α). This
+confirms proposal Failure Mode 4: a single trained corrector overfits to the one vector it saw.
+**(2) The *method* generalizes.** Retraining the *same* 4-layer MLP with the *same* recipe on the
+new direction recovers **83–104%** of raw steering's fluency damage (ΔLM +6.49 → +1.12 at α=8) —
+reproducing Experiment 3's result on a completely different, larger, near-orthogonal behavior
+family. So ColdSteer is a working *recipe* that must be instantiated **per steering direction**
+(or conditioned on `v` / trained on a vector bank), not a single frozen operator you can reuse
+across concepts. As in Experiment 3, the native corrector wins on fluency while moving *further*
+off the Gaussian manifold than raw (`D_M` 66.6 → 123.1 at α=8).
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -112,6 +142,10 @@ table over the trained α grid.
 - `plots/04_generalization.png` — (a) ΔLM, (b) `D_M` vs α for raw steering and the learned
   corrector, with the shaded region marking α>8 (beyond training). The learned ΔLM stays far below
   raw across the extrapolation region, its advantage narrowing smoothly.
+- `plots/05_heldout_vector.png` — (a) ΔLM, (b) `D_M` vs α on the held-out formality vector `v₂` for
+  raw steering, the transfer corrector (trained on sentiment `v₁`), and the native corrector
+  (retrained on `v₂`). The transfer curve sits on top of raw (no transfer); the native curve
+  collapses ΔLM toward zero (the recipe generalizes when retrained).
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -120,4 +154,6 @@ preserving corrector cuts off-manifold distance 22% but *worsens* LM loss to +4.
 **learned corrector supervised by the LM loss** — same projection-preserving form, so the steering
 edit is untouched — **recovers 84% of the damage** (ΔLM +2.78→+0.44 at α=8) while moving *further*
 from the Gaussian manifold. Statistical "on-manifold" and "LM-safe" are decoupled; only the
-downstream objective finds the safe, on-behavior correction.
+downstream objective finds the safe, on-behavior correction. The correction is **direction-specific**
+— a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe
+generalizes**: retraining it on a new formality direction recovers 83–104% of the damage there too.
