@@ -35,6 +35,14 @@ of a globally low-dimensional curved manifold.**
   is **layer 6**.
 - **Data:** FineWeb (CC-MAIN-2013-20), streamed via the HuggingFace datasets-server REST API (no full
   download). 912 sequences × seq_len 256 → **200,000 pooled token vectors per layer**, stored fp16.
+  **What "pooled" means and where it happens:** at collection time we take `hidden_states[L+1]` and
+  keep the residual vector at **every non-padding token position of every sequence**
+  (`hidden_states[L+1][attention_mask]`), concatenating them all into one combined point cloud — so
+  each token is its own data point. This is **not** per-sequence mean-pooling (we never average
+  positions into a single per-document vector). We pool across positions because intrinsic dimension
+  and the AE bottleneck are properties of the *set* of residual vectors the model emits, and pooling
+  maximizes the sample size (200k) the kNN-based estimators need; the token-position-stratified check
+  (Results) confirms coarse absolute position is not what drives the estimate.
 - **Subsamples:** ID estimators use n = 10k / 20k / 50k subsamples; the AE sweep uses all 200k with a
   90/10 train/val split.
 - **Compute:** activation collection + all ID estimators on **CPU (2 threads)**. The AE sweep ran on
@@ -57,6 +65,10 @@ $\mu_{\text{train}}$ the training mean.
 The reported AE signal is the **bend location** $k^\star$ (where added latents stop paying off), found
 by Kneedle on $\mathrm{FVU}$ vs $\log_2 k$, plus the per-doubling marginal gain
 $\Delta\mathrm{FVU}(k) = \mathrm{FVU}(k/2) - \mathrm{FVU}(k)$ used to test for a plateau.
+(**Kneedle** — Satopää et al. 2011 — locates a curve's "knee" as the point of maximum distance below
+the straight chord joining the curve's first and last points, after normalizing both axes to
+$[0,1]$; here that curve is $\mathrm{FVU}$ vs $\log_2 k$. It only reports *where* a curve turns; it
+does not certify that a sharp turn exists — see the honest reading of the bend in Results.)
 
 **TwoNN (Facco et al.) local ID.** Every point and its neighbours live in the **ambient
 768-dimensional residual-stream space** $\mathbb{R}^{768}$ (the raw captured activation vectors),
@@ -80,7 +92,7 @@ heavy-tail robustness:
 -\log\!\big(1 - F(\mu)\big) = d\,\log \mu .
 ```
 
-**MLE (Levina–Bickel) local ID.** Using the $k$ nearest-neighbour distances $T_j(x)$ ($k = 20$),
+**MLE — Maximum Likelihood Estimation (Levina–Bickel) local ID.** Using the $k$ nearest-neighbour distances $T_j(x)$ ($k = 20$),
 the per-point estimator and the reported (MacKay–Ghahramani inverse-average) aggregate are
 
 ```math
@@ -126,7 +138,14 @@ dimension carries 78–94% of total variance, collapsing $\mathrm{PR}$ to ≈ 1.
 On isotropic Gaussians of known dimension linearly embedded in 768-d (n = 20k), TwoNN/MLE are exact at
 low d and acquire the known mild downward bias at high d (d = 50 → ~32–35). The layer-6 numbers
 (~12–15) sit in the regime where the estimators were exact, **but this calibrates accuracy only on
-that synthetic family** — real residual activations are curved, anisotropic and clustered.
+that synthetic family** — real residual activations are curved, anisotropic and clustered. We
+emphasize the **"isotropic Gaussian"** qualifier deliberately: an isotropic Gaussian on a flat linear
+subspace is the *easiest possible* input for these estimators (uniform local density, no curvature,
+no anisotropy, no clustering), so passing it is necessary but far from sufficient. It shows our
+hand-rolled TwoNN/MLE code is correct and unbiased *in the regime the layer-6 estimate falls in* — it
+does **not** prove the estimators are accurate on the harder real-activation geometry. Reading it as
+"the estimators are validated" (full stop) would overclaim; "validated on synthetic linear-Gaussian
+data" is the honest scope.
 
 ![Estimator validation on synthetic data](plots/id_validation.png)
 
@@ -153,9 +172,16 @@ At a CPU budget (1200 steps) the Kneedle elbow is k ≈ 16; on GPU with **8.3× 
 tightens to k ≈ 8 and the FVU floor drops 0.051 → 0.033. Where it exists, the bend overlaps the
 nonlinear ID band (12–13). But three checks show the AE signal is **fragile**, not strong:
 
-1. **No plateau.** Past k ≈ 8 the marginal $\Delta\mathrm{FVU}$ per doubling stays ~0.006–0.0075 with
-   no decay out to k = 256 (e.g. 128→256 ≥ 8→16). The original "flattens after k ≈ 16" claim is
-   withdrawn — k = 16 is a soft Kneedle output, not a clear knee.
+1. **No plateau, and barely a bend at all.** Read honestly, the raw GPU curve is close to a straight
+   line in $\log_2 k$: **only the very first doubling is visibly steep** ($\Delta\mathrm{FVU}$: 2→4
+   = 0.0202), after which *every* later doubling is a flat, irregular ~0.006–0.009 (4→8 0.0089,
+   8→16 0.0060, 16→24 0.0073, … 128→256 0.0067) with **no decay** out to k = 256 (e.g. 128→256 ≥
+   8→16). So the "bend" is generous language — there is one steep step followed by a near-log-linear
+   tail, not a knee where the curve turns and then plateaus. The original "flattens after k ≈ 16"
+   claim is withdrawn; k = 8–16 is a **soft Kneedle output** (Kneedle always returns *some* point of
+   maximum chord-distance even for a nearly straight curve), not a sharp knee. **This weak, hard-to-see
+   bend is exactly why the AE is only "consistent with," not "evidence for," the ID** — a genuinely
+   low-dimensional bottleneck would show a clear elbow followed by a plateau, and this does not.
 2. **Disappears under standardization.** On z-scored activations FVU falls almost linearly in
    $\log k$ (var_expl 25% → 72% over k = 2→256) with **no knee at all**. The raw-data bend is mostly
    the AE capturing the one dominant dimension first (k = 2 already explains 90% of raw variance), not

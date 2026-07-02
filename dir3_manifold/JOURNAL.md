@@ -234,3 +234,46 @@ requests them.
 **Next step:** None — deliverables verified-rendering and complete; STOP written.
 
 On track? yes — 100% done; S1–S6 + all operator feedback addressed; deliverables verified-rendering this iter; STOP written; no blocker.
+
+## Iter 11 (2026-07-02) — address operator feedback: pooling / Kneedle / MLE / isotropic-Gaussian / "the raw bend"
+**Did:** Re-entered a COMPLETE directory; STOP absent again; found a **new unaddressed** feedback file
+`human_feedback_07010525.md` (00:25 today) with 5 short questions. Verified each answer against the
+actual code before editing (`collect_acts.py` line 104: `sel = hs[L+1][m]` where `m`=attention mask →
+pooling = every non-pad token from every seq kept as its own point, concatenated; `analyze_matched.py`
+line 37 = Kneedle = max distance below the first→last chord on the normalized log₂-k curve). Then made
+**surgical Methods-clarity edits** (like Iter 9, no science change):
+- **(1) pooling** — REPORT Methods→Data got a "what pooled means / where it happens" paragraph
+  (`hidden_states[L+1][attention_mask]` at collection, every token = own data point, NOT per-seq
+  mean-pooling; why: ID/AE are set properties, maximizes kNN sample size to 200k); RESULTS
+  token-position paragraph got a matching one-line clarification + pointer.
+- **(2) Kneedle** — defined in REPORT Metrics (Satopää et al. 2011; max chord-distance on normalized
+  FVU-vs-log₂k; reports *where* a curve turns, does not certify a turn exists).
+- **(3) MLE** — expanded first use to **Maximum Likelihood Estimation** (Levina–Bickel) in REPORT +
+  RESULTS.
+- **(4) isotropic Gaussian** — REPORT validation Results got a *why we emphasize it* clause: easiest
+  possible input (uniform density, no curvature/anisotropy/clustering) → necessary-not-sufficient;
+  "validated on synthetic linear-Gaussian data," not "validated" full stop.
+- **(5) "raw bend doesn't look like a bend"** — **agreed with the operator** and strengthened the
+  honest framing in both REPORT (AE point 1) and RESULTS (GPU section): only k=2→4 is visibly steep
+  (ΔFVU 0.0202), every later doubling flat ~0.006–0.009, so on the FVU-vs-log₂k plot it's ~a straight
+  line with one steep first step, not a knee-then-plateau; k≈8–16 is a **soft** Kneedle output (Kneedle
+  always returns *some* point even for a near-straight curve). This is exactly why the AE is rated
+  *consistent with* (not evidence *for*) the ID — reinforces the existing conclusion, no numbers moved.
+Re-verified render via GitHub markdown API: **4 js-display-math, 0 `<pre lang="math">`, 0 inline
+backslash-punct hazards** in REPORT.md and RESULTS.md. Appended CHANGELOG, updated PLAN
+(status + review log), renamed feedback `→ .addressed.md`, wrote STOP.
+
+**Learned:** #5 was the only non-expository item and it *agrees with* our own honest conclusion — the
+reviewer independently noticed the raw AE curve barely bends, which is precisely the reason we already
+downgraded the AE to "consistent with, not evidence for." Making that visual honesty explicit in the
+text (only the first doubling is steep) closes the gap between what the figure shows and what the prose
+claims. The other four were pure definitional/scoping clarity; the right response is a surgical Methods
+edit answering each in the canonical REPORT Methods plus a RESULTS pointer, never a recompute.
+
+**Next step:** None — success criterion met (3-estimator per-layer ID; AE bottleneck sweep with
+identified bend; REPORT.md comparison); all FIVE operator reviews/feedback addressed; figures exist for
+every result; history consolidated to CHANGELOG; STOP written. If reopened: raw block-11 resid_post via
+a forward hook (current L11 is post-ln_f); AE on outlier-dim-removed activations; second model/corpus;
+TDA persistent homology on a layer-6 subsample.
+
+On track? yes — 100% done; S1–S6 + all FIVE operator feedback items addressed; deliverables verified-rendering this iter; STOP written; no blocker.

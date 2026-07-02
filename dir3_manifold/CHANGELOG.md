@@ -5,6 +5,32 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-02 — Address operator feedback: pooling / Kneedle / MLE / isotropic-Gaussian / "the raw bend" (no numbers changed)
+- **Operator questions** (`human_feedback_07010525.md`): (1) *why pooled FineWeb activation & where is
+  it pooled?*, (2) *what is Kneedle?*, (3) *what does MLE stand for?*, (4) *why emphasize isotropic
+  Gaussian?*, (5) *this raw bend doesn't look like a bend?* — all Methods/interpretation clarity, **no
+  result numbers changed.**
+- **REPORT.md Methods → Data:** added a "what pooled means and where it happens" paragraph — every
+  non-pad token position of every sequence kept as its own point (`hidden_states[L+1][attention_mask]`
+  at collection), **not** per-sequence mean-pooling; why (ID/AE are set properties; maximizes kNN
+  sample size to 200k).
+- **REPORT.md Methods → Metrics:** defined **Kneedle** (Satopää et al. 2011 — max distance below the
+  first→last chord on the normalized $\mathrm{FVU}$-vs-$\log_2 k$ curve; reports *where* a curve turns,
+  does not certify a turn exists). Expanded **MLE** first use to **Maximum Likelihood Estimation**
+  (Levina–Bickel) in both REPORT and RESULTS.
+- **REPORT.md Results → validation:** added *why we emphasize "isotropic Gaussian"* — an isotropic
+  Gaussian on a flat subspace is the easiest possible input (uniform density, no curvature/anisotropy/
+  clustering), so passing it is necessary-not-sufficient; "validated on synthetic linear-Gaussian data"
+  is the honest scope, not "validated" full stop.
+- **REPORT.md + RESULTS.md AE sections (#5, honest strengthening):** stated explicitly that the raw
+  GPU curve is close to a straight line in $\log_2 k$ — only k=2→4 is visibly steep (ΔFVU 0.0202),
+  every later doubling is a flat ~0.006–0.009 — so "bend" is generous and k≈8–16 is a **soft** Kneedle
+  output, which is precisely why the AE is rated *consistent with* (not evidence *for*) the ID. Agrees
+  with the operator's observation; reinforces the existing honest conclusion, no numbers moved.
+- Render re-verified via GitHub markdown API: **4 `js-display-math`, 0 `<pre lang="math">`, 0 inline
+  backslash-punct hazards** in REPORT.md and RESULTS.md.
+- Renamed `human_feedback_07010525.md` → `human_feedback_07010525.addressed.md`.
+
 ## 2026-07-01 — Address operator feedback: clarify TwoNN space & F() (no numbers changed)
 - **Operator question** (`human_feedback_07010347.md`): *"In TwoNN, where do the two points live?
   What is the F()?"* — answered in REPORT.md Methods and RESULTS.md; no result changed.

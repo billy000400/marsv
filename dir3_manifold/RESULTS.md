@@ -22,7 +22,8 @@ PR = participation ratio (Σλ)²/Σλ²; dXX = #dims for XX% cumulative varianc
 
 ### Nonlinear estimators (TwoNN + MLE, pure-numpy/torch, CPU) — done (S2b)
 Hand-rolled (no skdim): TwoNN = Facco distance-ratio fit (10% tail discarded);
-MLE = Levina-Bickel k=20, MacKay-Ghahramani inverse-average. Chunked brute-force
+MLE (**Maximum Likelihood Estimation**) = Levina-Bickel k=20, MacKay-Ghahramani
+inverse-average. Chunked brute-force
 kNN via torch.cdist. **What TwoNN operates on (operator Q, 2026-07-01):** the two
 points are each reference vector's 1st and 2nd nearest neighbours, living in the
 *ambient 768-d residual-stream space* under Euclidean distance (no projection); `F`
@@ -75,7 +76,10 @@ estimators" should be read as "validated on synthetic linear-Gaussian data," not
 guarantee of accuracy on the residual stream. (Script: `experiments/validate_estimators.py`.)
 
 **Token-position-stratified ID (saved artifact — `results/id_by_position.json`).** The
-main cache pools all token positions; to check that *coarse absolute position* doesn't
+main cache **pools** all token positions — i.e. it keeps every non-pad token's residual
+vector from every sequence as a separate point in one combined cloud (`hidden_states[L+1][mask]`
+at collection time), **not** a per-sequence average (operator Q, 2026-07-02; full definition in
+REPORT.md Methods → Data). To check that *coarse absolute position* doesn't
 drive the result we re-collected layer-6 resid_post *with* absolute position (80k
 vectors) and estimated ID per position bucket: early(1–15) TwoNN 9.60/MLE 8.65;
 mid(16–63) 9.83/12.76; late(64–127) 9.89/13.26; tail(128–255) 10.03/13.09 (pos 0 too
@@ -153,6 +157,14 @@ at k=4, near-tie at k=8): the steep regime is now k=2→8 (ΔFVU 0.020 then 0.00
 which the curve becomes an almost **log-linear tail** (~0.006–0.007 per doubling) with
 **no second knee** out to k=256. So there is no hard capacity ceiling at k=16 — better
 optimization keeps paying off slowly — but the *bend* from steep-to-shallow sits at k≈8.
+**"This raw bend doesn't look like a bend" (operator Q, 2026-07-02) — correct, and we
+agree.** Read honestly, only the **first doubling (k=2→4, ΔFVU 0.0202)** is visibly steep;
+every later doubling is a flat, irregular ~0.006–0.009, so on the FVU-vs-log₂k plot the raw
+curve is close to a straight line with one steep first step, **not** a clear knee-then-plateau.
+Kneedle still returns *some* point (it always does, even for a near-straight curve), which is
+why we call k≈8–16 a **soft** output. This barely-a-bend shape is exactly why we rate the AE as
+only *consistent with* the ID, never as evidence *for* it — a genuinely low-dim bottleneck would
+show a sharp elbow followed by a plateau, and this does not.
 (3) train/val still track within 0.002 → still no overfitting.
 
 ### AE robustness checks (S3-redux-v2) — done (REVIEW follow-ups 1, 2, 3)
