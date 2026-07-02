@@ -4,6 +4,36 @@ Append-only.
 
 ---
 
+## 2026-07-02 — Stage C: improved synthetic codes (H3) — null holds, with positive control
+
+- Built `experiments/stageC_synthetic.py` (reuses the Stage B distance-matched framework: same
+  iso_displace random-displacement reference, held-out τ, 6 directions, N=200/N_eval=100). Tests
+  whether higher-order synthetic codes climb **above** the random-displacement reference at matched
+  distance. New conditions: **cooc** (real support + marginal coefs — isolates co-occurrence),
+  **cycle_consistent** (naive filtered to encode–decode self-consistency below the real-code-p75
+  cycle-error quantile τ_cyc=0.342; pass rate 0.56%, 36 000 generated → 200 kept), and **cooc_full**
+  (genuine real-derived code = recon of another real example; positive control, reuses recon curves).
+  - Note: an initial "iterate `z←encode(decode(z))` to a fixed point" cycle construction **diverged**
+    (encode–decode is expansive off-manifold; distances → 3e5), so it was replaced by the PLAN's
+    filter definition. Recorded as an incidental observation.
+- RESULTS.md + REPORT.md: **new Stage C section** (inserted before Stage D), condition rows added to
+  the Methods table, H3 added to the verdict list and Summary, and the Scope paragraph updated
+  (Stage C moved from "not run" to "tested, does not overturn the null"). No earlier numbers
+  superseded (additive section). Distance-matched residual $\rho_c$ (median [95% CI]):
+  - recon −0.012 [−0.028,−0.004] (≈ on curve; replicates Stage B −0.016)
+  - naive −0.054 [−0.061,−0.048] (below; replicates Stage B −0.058)
+  - **cooc −0.044** [−0.049,−0.036] — support co-occurrence does NOT recover plateau
+  - **cycle_consistent −0.043** [−0.049,−0.040] — self-consistency does NOT recover plateau
+  - **cooc_full +0.043** [+0.035,+0.056] — genuine real-derived code IS above random
+- **Finding (H3 negative):** neither co-occurrence-aware supports nor encode–decode cycle-consistent
+  codes reach the random-displacement curve; only a genuine real-derived activation exceeds it. The
+  missing ingredient is **real-activation manifold membership**, not latent-code marginal realism or
+  self-consistency (matches the a-priori H3 null interpretation). `cooc_full` above random is the
+  positive control Stage B lacked — a real, downstream-valid activation is flatter than a random
+  displacement at *any* matched distance, consistent with Stage D's local-robustness result.
+- Plot `plots/plateau_stageC.png`; artifacts `results/stageC_summary.json`,
+  `results/stageC_metrics.csv`. Project-level null unchanged and now sharper; M3 closed as negative.
+
 ## 2026-07-01 — Fix inline-math escape stripping (no science changed)
 - **Rendering fix only — no numbers moved.** GitHub strips the backslash before punctuation inside
   inline `$…$`, silently breaking every inline equation that used `\{`/`\}` (set braces), `\,` (thin

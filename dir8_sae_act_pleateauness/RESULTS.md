@@ -128,6 +128,55 @@ validity. The Stage B null is therefore not an isotropic artifact.
 
 ![Stage B-dir: distance-matched residual by perturbation-direction family](plots/plateau_stageB_dir.png)
 
+## Stage C — do *improved* synthetic codes recover plateau? (H3)
+
+Stage B left one escape hatch: maybe naive compositions plateau below random only because they
+lack **higher-order** latent structure. Stage C asks whether **co-occurrence-aware** or
+**cycle-consistent** synthetic codes climb *above* the same random-displacement reference at
+matched distance (N=200, N_eval=100, 6 directions, held-out τ). Three new conditions:
+
+- **cooc** — take a *real* example's active feature **set** (support), assign coefficients from
+  the empirical active-coefficient marginal (exactly as `naive`). Isolates **support
+  co-occurrence** as the only change over `naive` (which draws indices independently by frequency).
+- **cycle_consistent** — **filter** naive candidates to encode–decode self-consistency: keep only
+  those with relative cycle error `||encode(decode(z))−z|| / ||z||` below the **75th percentile of
+  real-code cycle error** (τ_cyc = 0.342). Real codes: median cycle error 0.239; naive: 0.780;
+  pass rate 0.56% (36 000 generated → 200 kept, selected median 0.307).
+- **cooc_full** — a genuine **real-derived** code (SAE reconstruction of *another* real example),
+  paired to the source only for distance. A positive control: an actual on-manifold activation
+  placed *far* from the paired source.
+
+Distance-matched residual `ρ_c` = (condition plateau) − (random-displacement reference at that
+condition's distance). `>0` = flatter than a random point at equal distance. Median, 95% CI:
+
+| condition | median dist | plateau | ref @ dist | residual `ρ_c` | 95% CI | verdict |
+|---|---|---|---|---|---|---|
+| recon (ref) | 25.1 | 0.164 | 0.176 | −0.012 | [−0.028, −0.004] | ≈ on the random curve |
+| naive (ref) | 64.0 | 0.068 | 0.121 | −0.054 | [−0.061, −0.048] | **below** random |
+| **cooc** | 67.3 | 0.070 | 0.117 | **−0.044** | [−0.049, −0.036] | **below** random |
+| **cycle_consistent** | 64.9 | 0.077 | 0.120 | **−0.043** | [−0.049, −0.040] | **below** random |
+| **cooc_full** | 69.8 | 0.159 | 0.115 | **+0.043** | [+0.035, +0.056] | **ABOVE** random |
+
+**Readings:**
+- **Neither improved construction recovers plateau.** Co-occurrence support (`cooc`, −0.044) and
+  encode–decode cycle-consistency (`cycle_consistent`, −0.043) both stay **clearly below** the
+  random-displacement curve — only marginally above `naive` (−0.054) and nowhere near it. Enforcing
+  realistic support co-occurrence or self-consistency under the SAE map is **not** enough to make a
+  synthetic code as downstream-flat as a random point at equal distance. **H3 is negative** for
+  constructible synthetic codes.
+- **The one thing that works is a genuine real activation.** `cooc_full` — a real-derived SAE
+  reconstruction — sits **above** the random reference (+0.043), even at a large distance from the
+  paired source. This is the positive control Stage B lacked: a real, downstream-valid activation is
+  flatter than a random displacement at *any* matched distance, so plateau tracks genuine-activation
+  validity, not merely distance to the specific source.
+- **The missing ingredient is real-activation (manifold) membership, which code-space constraints do
+  not synthesize.** Consistent with the PLAN's H3 null interpretation: the gap "may require
+  higher-order model-computation compatibility," not latent marginal realism or self-consistency.
+  Also consistent with Stage D (a real activation occupies a locally-robust region; a constructed
+  code does not).
+
+![Stage C: improved synthetic codes vs random-displacement reference](plots/plateau_stageC.png)
+
 ## Stage D — does plateau predict downstream validity *beyond baselines*? (the project gate)
 
 **Independent downstream-validity target.** For each candidate activation `x_c` paired to a
@@ -185,6 +234,12 @@ dist +0.75, norm −0.22.
   sparsity/coefficient matching does not recover plateau. **This is direction-family robust**
   (Stage B-dir): the naive/sparse below-random deficit persists — slightly stronger — along
   single- and sparse-sum SAE-decoder directions, so it is not an isotropic artifact.
+- **H3 (Stage C):** **improved synthetic codes do not recover plateau.** Neither co-occurrence
+  support matching nor encode–decode cycle-consistency lifts a synthetic code above the
+  random-displacement reference at matched distance (both ≈ −0.04, still below random). Only a
+  genuine real-derived code (`cooc_full`) plateaus *above* random (+0.043) — so the missing
+  ingredient is real-activation manifold membership, not latent-code marginal realism or
+  self-consistency.
 - **H4 (Stage D):** plateau predicts the independent downstream-validity target beyond
   distance+norm, **but this is fully explained by local sensitivity** — plateau adds nothing
   beyond a single fixed-radius KL. So plateau-ness measures **local robustness**, not
@@ -200,13 +255,14 @@ consistent with Direction 9 (plateau-as-OOD weak) and Direction 6 (plateau predi
 KL but only as local sensitivity).
 
 _Scope / open:_ one primary metric, one layer/SAE. Direction-family robustness is **confirmed**
-(Stage B-dir: isotropic + single-column + sparse-sum SAE-decoder directions all give the same
-below-random deficit). Not run: cycle-consistent / co-occurrence-aware synthetic codes (Stage C)
-and an alternate-layer generalization (Stage E). Given the local-sensitivity and
-direction-robustness results, these could *scope* the conclusion but are not expected to overturn
-the project-level null.
+(Stage B-dir). **Improved synthetic constructions are tested and do not overturn the null**
+(Stage C: co-occurrence-aware and cycle-consistent codes stay below random; only genuine
+real-derived codes plateau above it). Not run: an alternate-layer generalization (Stage E) — given
+the local-sensitivity, direction-robustness, and improved-code results, it would *scope* the
+conclusion but is not expected to overturn the project-level null.
 
 _Artifacts:_ `results/plateau_metrics.csv`, `results/plateau_summary.json` (Stage A);
 `results/stageB_metrics.csv`, `results/stageB_summary.json` (Stage B);
 `results/stageB_dir_metrics.csv`, `results/stageB_dir_summary.json` (Stage B-dir);
+`results/stageC_metrics.csv`, `results/stageC_summary.json` (Stage C);
 `results/stageD_metrics.csv`, `results/stageD_summary.json` (Stage D).

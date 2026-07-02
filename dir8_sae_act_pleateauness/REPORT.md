@@ -16,7 +16,11 @@ cause**:
    distance from a real activation, no SAE-decoded condition is flatter than a *random*
    displacement; reconstructions sit *on* the random-displacement curve and naive compositions
    sit *below* it. Sparsity/coefficient matching does not help.
-3. **(H4, negative once controlled)** Plateau predicts an independent downstream-validity target
+3. **(H3, negative)** *Improved* synthetic codes do not recover plateau either: co-occurrence-aware
+   supports and encode–decode cycle-consistent codes both stay **below** the random-displacement
+   reference at matched distance. Only a genuine real-derived code plateaus *above* it — the missing
+   ingredient is real-activation manifold membership, not better latent-code statistics.
+4. **(H4, negative once controlled)** Plateau predicts an independent downstream-validity target
    (output-KL) beyond distance+norm — **but this predictive value is entirely local
    sensitivity.** A single fixed-radius KL captures it; plateau's plateau-*shape* adds nothing.
 
@@ -94,6 +98,9 @@ evaluated on the radius grid $r\in\lbrace 0,.0025,.005,.01,.02,.04,.08\rbrace$, 
 | **sparse_match** | naive but $k=$ source's own $L_0$ and coefficients rescaled to the source's active-coefficient RMS |
 | **norm_rand** | random direction rescaled to the real norm |
 | **iso_displace** ($\texttt{iso}\delta$) | $x_\text{real}+\delta\thinspace d$, isotropic unit $d$, so distance $\equiv\delta$ exactly, at $\delta\in\lbrace 15,30,60,120\rbrace$ — a **random off-manifold displacement** reference |
+| **cooc** (Stage C) | a *real* example's active feature **set** (support) + coefficients from the empirical marginal — isolates support co-occurrence over `naive` |
+| **cycle_consistent** (Stage C) | naive candidates **filtered** to $\lVert\mathrm{encode}(\mathrm{decode}(z))-z\rVert/\lVert z\rVert$ below the 75th percentile of real-code cycle error ($\tau_\text{cyc}=0.342$; pass rate 0.56%) |
+| **cooc_full** (Stage C) | a genuine **real-derived** code (SAE reconstruction of *another* real example), paired to the source only for distance — positive control |
 
 ### Baselines
 
@@ -195,6 +202,34 @@ isotropic artifact.**
 
 ![Stage B-dir](plots/plateau_stageB_dir.png)
 
+### Stage C — do improved synthetic codes recover plateau? (H3)
+
+Do *higher-order* synthetic codes climb above the random-displacement reference at matched
+distance? We test **cooc** (real support + marginal coefficients), **cycle_consistent** (naive
+candidates filtered to encode–decode self-consistency at the real-code-p75 cycle-error quantile),
+and a **cooc_full** positive control (a genuine real-derived code at large distance). Same
+distance-matched residual $\rho_c$ as Stage B; $\rho_c>0$ ⇒ flatter than random at equal distance.
+
+| condition | median dist | plateau | ref @ dist | residual $\rho_c$ | 95% CI | verdict |
+|---|---|---|---|---|---|---|
+| recon (ref) | 25.1 | 0.164 | 0.176 | −0.012 | [−0.028, −0.004] | ≈ on random curve |
+| naive (ref) | 64.0 | 0.068 | 0.121 | −0.054 | [−0.061, −0.048] | below random |
+| **cooc** | 67.3 | 0.070 | 0.117 | **−0.044** | [−0.049, −0.036] | **below** random |
+| **cycle_consistent** | 64.9 | 0.077 | 0.120 | **−0.043** | [−0.049, −0.040] | **below** random |
+| **cooc_full** | 69.8 | 0.159 | 0.115 | **+0.043** | [+0.035, +0.056] | **above** random |
+
+Neither improved construction recovers plateau: **cooc** and **cycle_consistent** stay clearly
+below the random-displacement curve ($\approx-0.04$), only marginally above naive. Realistic support
+co-occurrence and encode–decode self-consistency are **not** sufficient. The one condition that
+plateaus *above* random is **cooc_full** — a genuine real-derived activation ($+0.043$, even at a
+large distance from the paired source). So **H3 is negative for constructible codes**: the missing
+ingredient is genuine real-activation manifold membership, which code-space constraints do not
+synthesize (matching the a-priori H3 null: "may require higher-order model-computation
+compatibility"). This is the positive control Stage B lacked — a real, downstream-valid activation
+is flatter than a random displacement at any matched distance.
+
+![Stage C](plots/plateau_stageC.png)
+
 ### Stage D — does plateau predict downstream validity beyond baselines? (project gate)
 
 Held-out test $R^2$ for predicting $\log_{10}$ `output_kl`:
@@ -245,7 +280,9 @@ weak; D6: plateau predicts downstream KL but as local sensitivity, and is reward
 **Scope and caveats.** One primary metric (`plateau_auc_low`), one layer/SAE (resid_pre@6,
 jbloom 24k). **Direction-family robustness is confirmed** (Stage B-dir): the naive/sparse
 below-random deficit holds — slightly stronger — under single-column and sparse-sum SAE-decoder
-perturbation directions, not just isotropic ones, so the null is not a direction artifact. Not
-run: cycle-consistent / co-occurrence-aware synthetic codes (Stage C) and an alternate-layer
-generalization (Stage E). Given the local-sensitivity and direction-robustness results these
-would *scope* the conclusion rather than overturn it.
+perturbation directions, not just isotropic ones. **Improved synthetic constructions are tested
+and do not overturn the null** (Stage C): co-occurrence-aware and cycle-consistent codes stay
+below the random-displacement curve; only genuine real-derived codes exceed it, so the deficit is
+not a marginal-code-statistics artifact but a real-manifold-membership one. Not run: an
+alternate-layer generalization (Stage E); given the local-sensitivity, direction-robustness, and
+improved-code results it would *scope* the conclusion rather than overturn it.

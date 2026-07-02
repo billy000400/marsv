@@ -168,3 +168,51 @@ direction-robust; re-creating STOP. If reopened: Stage C (cycle/co-occurrence co
 
 On track? yes — biggest open caveat (direction-family robustness) closed & curated to current-best;
 Stages A+B+B-dir+D done & decisive; project-level null direction-robust and finalized. STOP created.
+
+## 2026-07-02 (iter) — Stage C: improved synthetic codes (H3/M3) — the last untested hypothesis
+
+**Context on entry.** Project was FINALIZED (A+B+B-dir+D decisive null), STOP absent (wrapper
+removes it each iter). ~240 min budget, so did one focused *scientific* iteration rather than
+re-finalizing: closed the only remaining untested hypothesis, **H3** (Stage C, "not run" in PLAN).
+
+**Did.** Built `experiments/stageC_synthetic.py` on the Stage B distance-matched scaffold (same
+iso_displace random-displacement reference R(δ), held-out τ, N=200/N_eval=100, 6 dirs). Three new
+conditions asking whether *higher-order* synthetic codes plateau ABOVE R(δ) at matched distance:
+`cooc` (real support + marginal coefs — isolates support co-occurrence over naive), `cycle_consistent`
+(naive filtered to encode–decode self-consistency below real-code-p75 cycle error τ_cyc=0.342), and
+`cooc_full` (genuine real-derived code = recon of another real example; positive control, reuses recon
+curves). First cycle attempt iterated z←encode(decode(z)) to a fixed point and DIVERGED (encode–decode
+is expansive off-manifold, dist→3e5); replaced with PLAN's filter definition (measured feasibility
+first: real cycle relerr median 0.239, naive 0.780, filter passes 0.56% of naive at real-p75). ~5 min.
+
+**Learned (decision-grade). H3 NEGATIVE for constructible codes.** Distance-matched residual ρ_c
+(median [95% CI], >0 = flatter than random at equal distance):
+- cooc −0.044 [−0.049,−0.036], cycle_consistent −0.043 [−0.049,−0.040] — both clearly BELOW random,
+  only marginally above naive (−0.054). Neither support co-occurrence nor encode–decode
+  self-consistency recovers plateau.
+- cooc_full +0.043 [+0.035,+0.056] — the ONLY condition ABOVE random: a genuine real-derived
+  activation is flatter than a random displacement even at a large distance from the paired source.
+- recon −0.012 / naive −0.054 replicate Stage B (−0.016 / −0.058), confirming the framework.
+- **Reading:** the missing ingredient is real-activation MANIFOLD MEMBERSHIP, not latent-code
+  marginal realism or self-consistency — matches the a-priori H3 null. cooc_full above random is the
+  positive control Stage B lacked (plateau tracks genuine-activation validity, not merely distance to
+  THE source), and is consistent with Stage D (real activations occupy locally-robust regions).
+
+**Did (curate).** Inserted Stage C section into RESULTS.md + REPORT.md (before Stage D), added
+condition rows to REPORT Methods table, added H3 to both verdict lists + Summary, updated Scope
+(Stage C "not run"→"tested, does not overturn null"). Verified REPORT via GitHub markdown API
+(4/4 display eqs render, 0 code blocks, 0 inline-escape hazards). Appended CHANGELOG. Plot
+`plots/plateau_stageC.png`; artifacts `results/stageC_{summary.json,metrics.csv}`.
+
+**Assumptions logged (loop mode).** (1) cycle filter threshold = real-code p75 cycle error (0.342)
+= "as self-consistent as 75% of real codes"; looser/stricter quantiles not swept. (2) cooc uses the
+empirical-marginal coefficients (matches naive) so the ONLY change vs naive is support co-occurrence;
+a coefficient-conditional co-occurrence variant not tested. (3) cooc_full = recon of another example
+(derangement pairing); reuses recon plateau curves since plateau is intrinsic to the activation.
+
+**Next step.** H3/M3 now closed as negative; only Stage E (alternate layer) remains, expected to
+scope not overturn. Project-level null complete, direction-robust, and improved-code-robust.
+Re-creating STOP.
+
+On track? yes — Stages A(M1)+B(M2)+B-dir+C(M3)+D(M4) done & decisive (~95% of plan; only E left,
+optional); project-level null complete and now improved-code-robust. STOP re-created.

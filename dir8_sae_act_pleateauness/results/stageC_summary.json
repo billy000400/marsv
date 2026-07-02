@@ -1,0 +1,147 @@
+{
+  "stage": "C",
+  "layer": "resid_pre@6",
+  "N": 200,
+  "n_eval": 100,
+  "n_dirs": 6,
+  "r_grid": [
+    0.0,
+    0.0025,
+    0.005,
+    0.01,
+    0.02,
+    0.04,
+    0.08
+  ],
+  "tau_heldout": 0.0001307669881498441,
+  "sub_bdec": true,
+  "iso_deltas": [
+    15.0,
+    30.0,
+    60.0,
+    120.0
+  ],
+  "cycle_filter_thresh_real_p75": 0.3415,
+  "cycle_filter_pass_rate": 0.00561,
+  "cycle_generated": 36000,
+  "cycle_selected": 200,
+  "cycle_sel_relerr_median": 0.3071,
+  "real_relerr_median": 0.239,
+  "naive_relerr_median": 0.7795,
+  "iso_reference_plateau": {
+    "d=15": 0.19195,
+    "d=30": 0.16984,
+    "d=60": 0.12552,
+    "d=120": 0.07499
+  },
+  "groups_eval": {
+    "real": {
+      "plateau_median": 0.19665,
+      "dist_median": 0.0,
+      "l0_median": 32.5
+    },
+    "recon": {
+      "plateau_median": 0.16375,
+      "dist_median": 25.07,
+      "l0_median": 32.5
+    },
+    "naive": {
+      "plateau_median": 0.06782,
+      "dist_median": 64.05,
+      "l0_median": 34.5
+    },
+    "cooc": {
+      "plateau_median": 0.07024,
+      "dist_median": 67.35,
+      "l0_median": 32.0
+    },
+    "cycle_consistent": {
+      "plateau_median": 0.07714,
+      "dist_median": 64.92,
+      "l0_median": 22.0
+    },
+    "iso15": {
+      "plateau_median": 0.19195,
+      "dist_median": 15.0,
+      "l0_median": 0.0
+    },
+    "iso30": {
+      "plateau_median": 0.16984,
+      "dist_median": 30.0,
+      "l0_median": 0.0
+    },
+    "iso60": {
+      "plateau_median": 0.12552,
+      "dist_median": 60.0,
+      "l0_median": 0.0
+    },
+    "iso120": {
+      "plateau_median": 0.07499,
+      "dist_median": 120.0,
+      "l0_median": 0.0
+    },
+    "cooc_full": {
+      "plateau_median": 0.15939,
+      "dist_median": 69.8,
+      "l0_median": 32.5
+    }
+  },
+  "distance_matched_residual": {
+    "recon": {
+      "median_dist": 25.07,
+      "plateau_median": 0.16375,
+      "ref_at_matched_dist": 0.17557,
+      "residual_median": -0.0124,
+      "residual_ci95": [
+        -0.02793,
+        -0.00413
+      ],
+      "verdict": "BELOW"
+    },
+    "naive": {
+      "median_dist": 64.05,
+      "plateau_median": 0.06782,
+      "ref_at_matched_dist": 0.12077,
+      "residual_median": -0.05434,
+      "residual_ci95": [
+        -0.06058,
+        -0.04824
+      ],
+      "verdict": "BELOW"
+    },
+    "cooc": {
+      "median_dist": 67.35,
+      "plateau_median": 0.07024,
+      "ref_at_matched_dist": 0.1171,
+      "residual_median": -0.04383,
+      "residual_ci95": [
+        -0.04892,
+        -0.03634
+      ],
+      "verdict": "BELOW"
+    },
+    "cycle_consistent": {
+      "median_dist": 64.92,
+      "plateau_median": 0.07714,
+      "ref_at_matched_dist": 0.11978,
+      "residual_median": -0.04342,
+      "residual_ci95": [
+        -0.04944,
+        -0.0399
+      ],
+      "verdict": "BELOW"
+    },
+    "cooc_full": {
+      "median_dist": 69.8,
+      "plateau_median": 0.15939,
+      "ref_at_matched_dist": 0.1145,
+      "residual_median": 0.04308,
+      "residual_ci95": [
+        0.03525,
+        0.05622
+      ],
+      "verdict": "ABOVE random-displacement (recovers plateau)"
+    }
+  },
+  "spearman_plateau_vs_dist_pooled_eval": -0.473
+}
