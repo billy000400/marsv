@@ -74,6 +74,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         MEDIUM (355M, 24 blocks, d=1024) at mid layer block 12/24 (only the model changes). POSITIVE — both
         headline facts replicate: recovery 89% @α=8 / 101% @α=4, corrected off the Gaussian manifold at every
         α (79.9 vs 55.1 @α=8); ≈ small's 84%. NOT a GPT-2-small artifact. Result is layer- AND model-robust.
+        (h) BANK-DIVERSITY LEVER — CAUSAL confirmation DONE (Exp 14): controlled third-member swap removes
+        Exp 9's confound (all size-3 banks share {sentiment,formality} anchor; only 3rd member's collinearity
+        varies). POSITIVE: the swapped member's OWN recovery collapses as it collinearizes (politeness 69%→
+        complexity 40%→concreteness 17% @α=8), and the confound-free isolate `sentiment` (⟂ all dirs AND ⟂
+        target) is corrected WORSE in more collinear banks (63→61→55% @α=8) — pure separability, cannot be
+        target coverage. Turns Exp 9's correlation into a controlled causal result; positive counterpart to
+        the Exp 7/8/9 scaling negatives.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -88,9 +95,25 @@ End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker 
 S1+S2+S3 + S4(a) strength-extrap + S4(b) held-out-vector + S4(c) direction-conditional-bank +
 S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL text Pareto (Exp 10) +
 S4(e) BEHAVIORAL-PRESERVATION term (Exp 11) + S4(f) LAYER ROBUSTNESS (Exp 12) + S4(g) CROSS-MODEL
-generality (Exp 13) delivered — success criterion MET; direction complete on all planned axes plus
-behavioral-tradeoff + layer- + model-generality follow-ups (~99%).
-**S4(g) Experiment 13 (new):** answered the second obvious external-validity question — is the result a
+generality (Exp 13) + S4(h) BANK-DIVERSITY causal confirmation (Exp 14) delivered — success criterion MET;
+direction complete on all planned axes plus behavioral-tradeoff + layer- + model-generality follow-ups and
+the amortization story now closed with 3 scaling negatives + 1 controlled positive lever (~99%).
+**S4(h) Experiment 14 (new):** acted on Next-step (ii) — confirm the bank-diversity lever directly. Exp 9
+only *inferred* that bank angular diversity (not target-subspace coverage) drives conditional-corrector
+recovery, because its banks confounded alignment with internal collinearity (held-out `certainty` lives in
+the collinear cluster). Exp 14 removes the confound with a CONTROLLED THIRD-MEMBER SWAP: three size-3 banks,
+capacity fixed 5.25M, all sharing the {sentiment,formality} anchor; only the 3rd member's collinearity with
+formality varies (div=+politeness 0.07 / mid=+complexity 0.57 / coll=+concreteness 0.76). POSITIVE, causal:
+(1) the swapped member's OWN recovery collapses as it collinearizes — 69%→40%→17% @α=8 (a member confusable
+with a neighbor can't be specialized); (2) the confound-free isolate `sentiment` (⟂ every dir AND ⟂ target)
+is corrected WORSE in more collinear banks — 63%→61%→55% @α=8 — which can ONLY be reduced separability, not
+target coverage. `formality` (gains the collinear neighbor) holds ~69–70% (corrector collapses the pair onto
+the dominant larger-norm member). Turns Exp 9's correlation into a controlled causal result; the positive
+counterpart to Exp 7/8/9's three scaling negatives. Artifacts: `experiments/14_diversity_lever.py`,
+`results/14_diversity_lever.json`, `plots/14_diversity_lever.png`. RESULTS/REPORT/CHANGELOG curated; REPORT
+math verified (14/14 js-display-math, 0 broken, 0 inline hazards).
+<!-- prior: S4(g) cross-model Exp 13 -->
+**S4(g) Experiment 13 (prior):** answered the second obvious external-validity question — is the result a
 GPT-2-*small* artifact? Replicated the EXACT flagship Exp 3 pipeline on GPT-2 MEDIUM (355M, 24 blocks,
 d=1024) at mid layer block 12/24, changing ONLY the model (reused the Exp-3 helpers by installing medium in
 common's model cache; Corrector at d=1024, batch 4 for VRAM). POSITIVE, clean generality result — both
@@ -240,14 +263,13 @@ RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math v
 
 ## Next step
 Core arc + all generalization axes + behavioral axis + behavioral-preservation follow-up + LAYER-ROBUSTNESS
-(Exp 12: 90/84/76% @α=8 at blocks 3/6/9) + CROSS-MODEL generality (Exp 13: GPT-2 medium, 89% @α=8 / 101% @α=4,
-off-Gaussian at every α) delivered — flagship fluency result now layer- AND model-robust. Amortization story
-CLOSED on three scaling axes (Exp 7/8/9 negative); flagship story has its behavioral reality-check (Exp 10),
-constructive follow-up (Exp 11), layer-generality (Exp 12), and model-generality (Exp 13) checks. Optional
-remaining polish, any one a clean iteration: (i) push the Exp 11 ceiling by supervising the behavioral readout
-THROUGH sampled/differentiable generation rather than teacher-forced; (ii) confirm the bank-diversity lever
-directly (max-orthogonal 3-bank vs collinear curated); (iii) held-out-prompt-family generalization, or a
-still-larger model (GPT-2 large). All optional; success criterion long met.
+(Exp 12: 90/84/76% @α=8 at blocks 3/6/9) + CROSS-MODEL generality (Exp 13: GPT-2 medium, 89% @α=8 / 101% @α=4)
++ BANK-DIVERSITY causal confirmation (Exp 14) delivered — flagship fluency result layer- AND model-robust; the
+amortization story is now closed with THREE scaling negatives (Exp 7/8/9) AND one controlled positive lever
+(Exp 14: bank angular diversity, confound removed). Optional remaining polish, any one a clean iteration:
+(i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH sampled/differentiable generation
+rather than teacher-forced; (ii) held-out-prompt-family generalization; (iii) a still-larger model (GPT-2
+large). All optional; success criterion long met.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

@@ -524,3 +524,53 @@ rather than teacher-forced; (ii) confirm the bank-diversity lever directly (max-
 collinear); (iii) held-out-prompt-family generalization or a still-larger model (GPT-2 large). All optional.
 On track? yes — Exp 13 adds cross-model generality (GPT-2 medium, recovery 89% @α=8 / 101% @α=4, off-Gaussian
 at every α; ≈ small's 84%); direction ~99% complete, deliverables curated + math-verified. No blocker.
+
+## 2026-07-02 21:1x — Experiment 14: direct/causal confirmation of the bank-DIVERSITY lever
+**Did:** acted on PLAN Next-step (ii) — "confirm the bank-diversity lever directly" — the cleanest,
+lowest-risk open item and the POSITIVE counterpart to the Exp 7/8/9 scaling negatives. Exp 9 only
+*inferred* that bank angular diversity (separability), not target-subspace coverage, drives a conditional
+corrector's recovery: in that pool the held-out `certainty` sits inside the collinear cluster, so a bank's
+alignment-to-target and its internal collinearity co-vary and can't be separated. Wrote
+`experiments/14_diversity_lever.py`: a CONTROLLED THIRD-MEMBER SWAP that decouples them. Three size-3 banks,
+capacity fixed 5.25M, ALL sharing the anchor pair {sentiment, formality}; only the THIRD member changes,
+picked to be ever more collinear with formality — div=+politeness(|cos|0.07,D0.13), mid=+complexity(0.57,
+0.21), coll=+concreteness(0.76,0.26). First computed the full 6-dir pairwise |cos| matrix to design the
+banks (sentiment ⟂ everything ≤0.03; {formality,concreteness,complexity,certainty} collinear 0.76–0.82;
+politeness weak). Reused Exp 6 CondCorrector/train_cond/make_hat_cond + Exp 3 LM-loss via import. Ran ~1.5
+min (3 trainings), no OOM under 0.18 frac.
+**Learned (POSITIVE — turns Exp 9's correlation into a controlled causal result):** bank diversity is a
+causal lever. Two monotone signals @α=8: (1) the swapped 3rd member's OWN recovery collapses as it
+collinearizes with formality — politeness 69% → complexity 40% → concreteness 17% (α=4: 75/57/34) — a
+member confusable with a neighbor can't be specialized (corrector is fed v̂, can't separate near-parallel
+dirs); (2) the CONFOUND-FREE isolate `sentiment` (⟂ every dir AND ⟂ the target, |cos|≤0.03) is corrected
+WORSE in more collinear banks — 63% → 61% → 55% — which CANNOT be a target-coverage effect since nothing
+about sentiment's geometry/relation-to-target changed across runs; it can only be reduced bank
+separability. `formality` (the anchor that gains the collinear neighbor) holds ~69–70%: the corrector
+collapses the near-parallel pair onto the dominant larger-norm member, so the neighbor loses recovery and
+the anchor keeps it. Held-out certainty transfer flat (9/5/7%) as designed (this experiment varies internal
+separability, not target coverage). Weak-α recovery omitted (raw ΔLM≈0 at α=1 → unstable ratio, as
+throughout).
+**Assumption/decision logged.** (a) Chose Next-step (ii) diversity-lever confirmation over (i)
+rollout-through-generation and (iii) larger-model/held-out-prompt-family because it is the cheapest,
+lowest-risk open item, reuses ALL Exp 6/9 machinery (no new harness), and supplies the one MISSING positive
+lever to complement the three scaling negatives — highest value-per-risk. (i) is higher-risk
+(differentiable/sampled rollout could eat the budget). (b) Controlled third-member swap with a FIXED
+{sentiment,formality} anchor (rather than 3 arbitrary banks) so the anchor's recovery is directly
+comparable across banks and the ONLY thing changing is the 3rd member's collinearity — this is what
+removes Exp 9's confound. (c) Used `sentiment` as the confound-free isolate BECAUSE it is ⟂ everything and
+⟂ the target — its degradation is unambiguous evidence for the separability mechanism with no
+target-alignment or member-identity explanation. (d) Reported the weak-α instability honestly and headlined
+α=8 (α=4 for the 3rd member) where denominators are large. (e) Fixed a missing-glyph (⟂) in a plot title →
+"orthogonal to" before finalizing the figure.
+**Deliverables:** RESULTS.md +Exp 14 (table + reading) + figure entry + Headline diversity-lever sentence
+now cites the causal confirmation; REPORT.md +Exp 14 Methods (controlled-swap + confound-free-isolate
+rationale) + Results (table + interpretation) + Conclusion (Exp 9 sentence now "confirmed causally") +
+Limitation (3); plots/14_diversity_lever.png; results/14_diversity_lever.json; CHANGELOG appended. REPORT
+math re-verified via GitHub API (14/14 js-display-math, 0 broken, 0 inline hazards).
+**Next step (optional; success criterion long met — flagship result is layer- + model-robust, amortization
+story closed on 3 negatives + now 1 positive lever):** any one a clean iter — (i) push the Exp 11 ceiling by
+supervising the behavioral readout THROUGH sampled/differentiable generation rather than teacher-forced;
+(ii) held-out-prompt-family generalization; (iii) a still-larger model (GPT-2 large). All optional.
+On track? yes — Exp 14 confirms the bank-diversity lever causally (confound removed), the positive
+counterpart to Exp 7/8/9; direction ~99% complete on all planned axes, deliverables curated +
+math-verified. No blocker.

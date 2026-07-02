@@ -461,6 +461,41 @@ ColdSteer claim — *a downstream-supervised, projection-preserving corrector bu
 steering's fluency damage while moving off the statistical manifold* — is **model-robust** as well as
 layer-robust: it holds on GPT-2 medium, a 3× larger model with a different width and depth.
 
+**Experiment 14 — Direct confirmation: bank angular *diversity* is the causal lever (confound removed).**
+Experiment 9 *inferred* that bank angular diversity — not coverage of the target's subspace — governs a
+direction-conditional corrector's per-direction recovery, but it could not isolate the two: in that pool
+the held-out `certainty` sits *inside* the collinear cluster, so the most target-aligned bank was also the
+most internally collinear. This experiment removes the confound with a **controlled third-member swap**.
+Every bank is size 3, capacity fixed at 5.25M, and shares the **same anchor pair {sentiment, formality}**;
+only the **third** member changes, chosen to be increasingly collinear with `formality`. We measure the
+recovery of the *shared* anchor pair. The key control: **sentiment is orthogonal to every other direction
+*and* to the held-out target** (`|cos| ≤ 0.03`), so its recovery cannot depend on target coverage or on
+the third member's identity — only on the bank's internal separability.
+
+| bank | internal collinearity \|cos\| (↑ = less diverse) | **sentiment** rec @α=8 (⟂-isolate) | **formality** rec @α=8 | swapped 3rd member (\|cos\| to formality) | **3rd member** rec @α=8 (α=4) | held-out `certainty` rec @α=8 |
+|---|---|---|---|---|---|---|
+| div  | 0.13 | **63%** | 69% | politeness (0.07) | **69%** (75%) | 9% |
+| mid  | 0.21 | **61%** | 69% | complexity (0.57) | **40%** (57%) | 5% |
+| coll | 0.26 | **55%** | 70% | concreteness (0.76) | **17%** (34%) | 7% |
+
+**Reading it: bank diversity is a *causal* lever, confirmed with the target-alignment confound removed.**
+Two complementary signals, both monotone in the bank's internal collinearity. **(1) A bank member
+confusable with a neighbor cannot be specialized.** As the third member is made ever more collinear with
+`formality`, *its own* recovery collapses — politeness 69% → complexity 40% → concreteness 17% at α=8
+(75% → 57% → 34% at α=4) — because the direction-conditional corrector receives `v̂` and cannot tell two
+near-parallel directions apart. **(2) Collinearity anywhere in the bank raises interference for
+*everyone*, and this cannot be a target-coverage effect.** The confound-free isolate `sentiment` — which
+is orthogonal to every bank member *and* to the held-out `certainty` — is nonetheless corrected **worse**
+in the more collinear banks (63% → 61% → 55% at α=8), even though nothing about sentiment's own geometry
+or its relation to any target changed. Its degradation can *only* be reduced bank separability. Meanwhile
+`formality` — the anchor that *gains* the collinear neighbor — holds ~69–70% throughout: when the
+corrector cannot disambiguate two near-parallel directions it collapses them onto the dominant
+(larger-norm, and here better-corrected) one, so `formality` keeps its recovery while its weaker neighbor
+loses. (Weak-α recovery is omitted here: raw `ΔLM` is near zero at α=1 so the recovery ratio is unstable,
+as throughout.) This turns Experiment 9's *correlational* claim into a *controlled* one: **angular
+diversity (separability), not target-subspace coverage, is what a shared corrector needs** — the positive
+counterpart to the three scaling negatives (Exp 7/8/9).
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -515,6 +550,11 @@ layer-robust: it holds on GPT-2 medium, a 3× larger model with a different widt
   block 12/24). (a) ΔLM vs α, raw (dashed) vs corrected (solid) — corrected sits near zero while raw
   climbs to +2.72; (b) fluency recovery vs α — 89% at α=8, ≥101% at α≤4; (c) `D_M` vs α, raw vs corrected
   — corrected exceeds raw at every α (off-Gaussian-but-LM-safe holds on the larger model too).
+- `plots/14_diversity_lever.png` — controlled third-member swap isolating bank diversity (all size-3 banks
+  share the {sentiment, formality} anchor; only the 3rd member's collinearity varies). (a) anchor-pair
+  recovery @α=8 vs the bank's internal collinearity — falls as the bank loses angular diversity; (b)
+  sentiment recovery vs α, one line per bank — sentiment (⟂ every direction and ⟂ the target) is the
+  confound-free isolate and is corrected worse in more collinear banks, confirming diversity is causal.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -539,7 +579,11 @@ recovery −1%→−146%) (Exp 8); and — the tempting last lever — *curating
 subspace backfires worst of all: at fixed size and capacity, the most target-aligned bank transfers
 *catastrophically* (α=1 recovery −183%, net-negative at every strength), while a moderately-aligned,
 angularly *diverse* bank transfers best (Exp 9). The real lever is bank **diversity** (separability of
-its directions), not coverage of the target's subspace. So amortized cross-direction correction is
+its directions), not coverage of the target's subspace — and a controlled third-member swap **confirms
+this causally** (Exp 14): holding a shared {sentiment, formality} anchor and varying only a third member's
+collinearity, the confound-free isolate `sentiment` (⟂ every direction *and* ⟂ the target) is corrected
+worse as the bank collinearizes (63%→55% @α=8), and a member made collinear with a neighbor cannot be
+specialized (its own recovery collapses 69%→17%). So amortized cross-direction correction is
 capped not by coverage, parameter count, or subspace alignment but by the **training signal** — the
 correction is fundamentally direction-specific, and the reliable route to a genuinely unseen direction
 remains the **per-direction native corrector** (78–142% recovery). The core fluency result is **not a

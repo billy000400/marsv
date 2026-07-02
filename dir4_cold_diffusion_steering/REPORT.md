@@ -336,6 +336,28 @@ held-out `certainty` recovery across `α ∈ {1,2,4,6,8}` and, at `α = 8`, the 
 recovery for each bank, versus the native oracle (retrained on `certainty`). The `exp6` point re-runs
 Experiment 6/7's size-3 bank as a reproducibility check.
 
+### Controlled test of the bank-diversity lever (Experiment 14)
+
+Experiment 9 concluded that bank **angular diversity** (separability of the training directions), not
+coverage of the held-out target's subspace, governs a direction-conditional corrector's recovery — but
+it could only *infer* this, because in that vector pool the held-out `certainty` lies inside the collinear
+cluster, so a bank's alignment to the target and its internal collinearity move together. Experiment 14
+decouples them with a **controlled third-member swap**. Every bank has size 3, capacity fixed at 5.25M
+(`H = 1024`), and shares the **same anchor pair** `[sentiment, formality]`; only the **third** member
+changes, chosen to be increasingly collinear with `formality`:
+
+- **div** — `[sentiment, formality, politeness]`, third `|cos(·, formality)| = 0.07`, internal `D = 0.13`;
+- **mid** — `[sentiment, formality, complexity]`, third `|cos(·, formality)| = 0.57`, internal `D = 0.21`;
+- **coll** — `[sentiment, formality, concreteness]`, third `|cos(·, formality)| = 0.76`, internal `D = 0.26`.
+
+Here internal diversity is summarized by `D`, the mean pairwise absolute cosine among the three members
+(higher `D` = more collinear = less diverse). We report the fluency recovery (same recovery equation as
+Experiments 7–9) of each bank's members and of the held-out `certainty`, using the identical recipe / seed
+/ data / eval as Experiments 6–9. The decisive control is that **`sentiment` is orthogonal to every other
+direction *and* to the held-out `certainty`** (`|cos| ≤ 0.03`): its recovery therefore cannot depend on
+target coverage or on which third member is present — only on the bank's internal separability — so any
+change in sentiment's recovery across banks isolates the diversity mechanism free of confounds.
+
 ### Behavioral-preservation term (Experiment 11)
 
 Experiment 10 shows the flagship corrector under-steers in generation because its layer-6 correction,
@@ -811,6 +833,37 @@ off-Gaussian," the extrapolation and recovery magnitudes, and the whole projecti
 over intact to a 3× larger model with a different width (`d = 1024`) and depth (24 blocks). The core
 ColdSteer result is **model-robust** as well as layer-robust.
 
+### Experiment 14 — bank diversity is a causal lever (controlled test, confound removed)
+
+![controlled third-member swap isolating bank diversity](plots/14_diversity_lever.png)
+
+Holding a shared `[sentiment, formality]` anchor in every size-3 bank and varying only the third member's
+collinearity with `formality`, both the swapped member and the confound-free isolate degrade monotonically
+as the bank collinearizes:
+
+| bank | internal \|cos\| (D) | **sentiment** rec @α=8 (⟂-isolate) | **formality** rec @α=8 | swapped 3rd member (\|cos\| to formality) | **3rd member** rec @α=8 (α=4) | held-out `certainty` rec @α=8 |
+|---|---|---|---|---|---|---|
+| div  | 0.13 | **63%** | 69% | politeness (0.07) | **69%** (75%) | 9% |
+| mid  | 0.21 | **61%** | 69% | complexity (0.57) | **40%** (57%) | 5% |
+| coll | 0.26 | **55%** | 70% | concreteness (0.76) | **17%** (34%) | 7% |
+
+**Interpretation.** This converts Experiment 9's *correlational* diversity claim into a *causal* one, with
+the target-alignment confound removed. Two monotone signals. **(1) A member confusable with a neighbor
+cannot be specialized:** as the third member is made ever more collinear with `formality`, *its own*
+recovery collapses — politeness 69% → complexity 40% → concreteness 17% at α=8 (75% → 57% → 34% at α=4) —
+because the corrector receives `v̂` and cannot separate two near-parallel directions. **(2) Collinearity
+anywhere in the bank hurts *everyone*, independent of the target:** the isolate `sentiment` — orthogonal to
+every bank member *and* to the held-out `certainty` — is corrected worse in the more collinear banks
+(63% → 61% → 55% at α=8) even though nothing about sentiment's geometry or its relation to any target
+changed across the three runs. That degradation can *only* be reduced bank separability, so it cannot be a
+target-coverage effect. Meanwhile `formality`, the anchor that *gains* the collinear neighbor, holds
+~69–70% throughout: when two directions are near-parallel the conditional corrector collapses them onto the
+dominant (larger-norm) one, so the neighbor loses recovery while the anchor keeps it. Held-out `certainty`
+transfer is essentially flat across these banks (9/5/7% at α=8), as expected — this experiment varies
+internal separability, not target coverage. So bank **angular diversity (separability of its directions),
+not coverage of the target's subspace, is the causal lever** — the positive counterpart to the three
+scaling negatives (Experiments 7/8/9).
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -865,11 +918,16 @@ weak-steering held-out transfer through overfitting (`α=1` recovery −1%→−
 lever — *curating* the bank **toward** the target's subspace (Experiment 9) — is the worst move of all:
 at fixed size and capacity the most target-aligned bank transfers *catastrophically* (`α=1` recovery
 −183%, net-negative at every strength), while a moderately-aligned, angularly *diverse* bank transfers
-best, because near-collinear bank directions cannot be disambiguated by the conditional corrector. So
-the path to a reusable corrector is neither "more directions," "a bigger model," nor "a target-aligned
-bank": amortized cross-direction correction is capped by the **training signal** — with bank composition
-mattering through *diversity*, not target alignment — and the reliable route to a genuinely unseen
-direction remains the **per-direction native corrector** (78–142% recovery). Stronger direction
+best, because near-collinear bank directions cannot be disambiguated by the conditional corrector.
+Experiment 14 confirms this diversity lever **causally**, with the target-alignment confound removed: in a
+controlled third-member swap (fixed `[sentiment, formality]` anchor, only the third member's collinearity
+varied), a member made collinear with a neighbor cannot be specialized (its own recovery collapses
+69%→17% at α=8), and the confound-free isolate `sentiment` — orthogonal to every bank member *and* to the
+target — is nonetheless corrected worse as the bank collinearizes (63%→55%), which can only be reduced
+separability. So the path to a reusable corrector is neither "more directions," "a bigger model," nor "a
+target-aligned bank": amortized cross-direction correction is capped by the **training signal** — with
+bank composition mattering through *diversity* (separability), not target alignment — and the reliable
+route to a genuinely unseen direction remains the **per-direction native corrector** (78–142% recovery). Stronger direction
 conditioning, diverse (not target-clustered) banks, and a richer objective are the open directions for
 follow-up work.
 
@@ -894,7 +952,9 @@ held-out direction, 51%→7% recovery from weak to strong steering; Experiment 7
 3 to 5 directions does **not** close that gap and in fact lowers transfer; Experiment 8: scaling the
 corrector 9× wider does not close it either, and overfits at weak steering; Experiment 9: curating the
 bank *toward* the target's subspace at fixed size/capacity backfires — the most target-aligned bank
-transfers catastrophically, and bank *diversity* rather than target alignment drives transfer). Held-out
+transfers catastrophically, and bank *diversity* rather than target alignment drives transfer, a lever
+Experiment 14 then confirms causally with a controlled third-member swap that removes the
+target-alignment confound). Held-out
 transfer at strong steering thus remains unsolved by bank-size, model-size, **or** target-aligned bank
 curation alone (the native per-direction oracle is still needed); stronger direction-conditioning, a
 richer training objective, and diverse-bank composition remain open. The flagship fluency result is now

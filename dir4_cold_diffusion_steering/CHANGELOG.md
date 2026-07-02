@@ -312,3 +312,34 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - Code: `experiments/13_cross_model.py`; results `results/13_cross_model.json`.
 - REPORT math re-verified via GitHub API: 14/14 js-display-math (no new equations; Exp 13 reuses the
   recovery fence), 0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-02 — Experiment 14: direct/causal confirmation of the bank-DIVERSITY lever (S4c follow-up #4)
+- Added Experiment 14 to RESULTS.md and REPORT.md: turns Exp 9's *correlational* claim ("bank angular
+  diversity, not target-subspace coverage, drives a conditional corrector's recovery") into a *controlled*
+  one. Exp 9 could not isolate diversity from target-alignment because the held-out `certainty` lives
+  inside the collinear cluster, so alignment and internal collinearity co-varied. Exp 14 removes the
+  confound with a CONTROLLED THIRD-MEMBER SWAP: three size-3 banks, capacity fixed 5.25M, all sharing the
+  anchor pair {sentiment, formality}; only the THIRD member varies in collinearity with formality —
+  div=+politeness (|cos| 0.07, internal D=0.13), mid=+complexity (0.57, D=0.21), coll=+concreteness
+  (0.76, D=0.26). Decisive control: `sentiment` is ⟂ every direction AND ⟂ the held-out target
+  (|cos|≤0.03), so its recovery can only depend on the bank's internal separability.
+- **Result (new, POSITIVE — the positive counterpart to Exp 7/8/9's three negatives):** bank angular
+  diversity is a CAUSAL lever. Two monotone signals @α=8: (1) the swapped 3rd member's OWN recovery
+  collapses as it collinearizes with formality — politeness 69% → complexity 40% → concreteness 17%
+  (α=4: 75/57/34) — a member confusable with a neighbor can't be specialized (corrector gets v̂, can't
+  separate near-parallel dirs); (2) the confound-free isolate `sentiment` is corrected WORSE in more
+  collinear banks — 63% → 61% → 55% — which cannot be a target-coverage effect (sentiment ⟂ target).
+  `formality` (the anchor that gains the collinear neighbor) holds ~69–70%: the corrector collapses the
+  near-parallel pair onto the dominant larger-norm member, so the neighbor loses recovery, the anchor
+  keeps it. Held-out certainty transfer flat (9/5/7%) as designed (this varies internal separability, not
+  target coverage). No prior result superseded (Exp 14 is new; corroborates & causally upgrades Exp 9).
+- **Deliverable deltas:** RESULTS.md +Exp 14 (table + reading) + figure entry + Headline diversity-lever
+  sentence now cites the causal confirmation. REPORT.md +Exp 14 Methods (controlled-swap design +
+  confound-free-isolate rationale) + Results (table + interpretation) + Conclusion (Exp 9 sentence now
+  "confirmed causally by Exp 14") + Limitation (3) updated.
+- New code `experiments/14_diversity_lever.py` (reuses Exp 6 CondCorrector/train_cond/make_hat_cond +
+  Exp 3 LM-loss/LAYER via import; loads all 6 persisted pool vectors). New figure
+  `plots/14_diversity_lever.png` (anchor-pair recovery @α=8 vs internal collinearity; sentiment recovery
+  vs α per bank). Results `results/14_diversity_lever.json`.
+- REPORT math re-verified via GitHub API: 14/14 js-display-math (Exp 14 reuses the recovery fence, no new
+  equation), 0 broken (<pre lang=math>), 0 inline hazards.
