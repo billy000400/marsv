@@ -574,3 +574,52 @@ supervising the behavioral readout THROUGH sampled/differentiable generation rat
 On track? yes — Exp 14 confirms the bank-diversity lever causally (confound removed), the positive
 counterpart to Exp 7/8/9; direction ~99% complete on all planned axes, deliverables curated +
 math-verified. No blocker.
+
+## 2026-07-02 21:2x — Experiment 15: held-out prompt-family generalization
+**Did:** acted on PLAN Next-step (ii) — "held-out-prompt-family generalization" — the last untested
+external-validity axis and the cheapest/lowest-risk open item. Every prior experiment (1–14) both TRAINS
+and EVALUATES the corrector on FineWeb web text, so a reviewer's obvious question is whether the corrector
+overfit the FineWeb prompt distribution rather than learning a general correction rule. Wrote
+`experiments/15_prompt_family.py`: train the flagship sentiment corrector EXACTLY as Exp 3 (same
+vector/seed/recipe/300 FineWeb train docs, via importlib reuse of exp03's Corrector/train_corrector/
+make_hat/lm_loss_fn/gaussian_stats/mahalanobis/LAYER), then evaluate it UNCHANGED, at matched projection
+α|v|, on three held-out prompt families of increasing distribution shift: fineweb (in-dist, = Exp 3
+held-out 100 docs), markdown (100 chunks of this project's own .md research prose), code (100 chunks of
+numpy/torch/transformers Python source, gathered from local site-packages — no network). Also computed
+each family's clean-activation Mahalanobis D_M under the FineWeb Gaussian to make "distribution shift"
+concrete. Ran ~2 min under 0.18 VRAM frac, no OOM.
+**Learned (POSITIVE — clean prompt-generalization result):** the corrector is NOT overfit to FineWeb. It
+recovers 84% (fineweb) / 77% (markdown) / 60% (code) of raw steering's fluency damage @α=8 (95/87/78% @α=4)
+— the FineWeb-trained corrector still removes the majority of the damage on genuinely different, even
+non-natural-language, prompt families. The key structure: recovery tracks the activation shift MONOTONICALLY
+(clean D_M 27.5→30.1→37.4 ⇒ recovery 84→77→60% @α=8), i.e. graceful degradation with distribution shift (the
+prompt-axis analogue of Exp 4's strength extrapolation), not collapse. The in-distribution fineweb row
+reproduced Exp 3 TO THE DIGIT (raw +2.778 → learned +0.435, 84%) — built-in reproducibility check the reuse
+path is faithful. (Aside: code's clean LM loss is actually LOW, 2.9 vs fineweb's 3.7 — GPT-2 finds library
+boilerplate predictable — while markdown's is high, 5.2; but ΔLM/recovery is what matters and is well-defined
+on each.) So the flagship fluency result is now shown robust on FOUR axes: strength (Exp 4), direction/recipe
+(Exp 5), layer (Exp 12), model (Exp 13), and now prompt family (Exp 15).
+**Assumption/decision logged.** (a) Chose Next-step (ii) prompt-family over (i) rollout-through-generation
+and (iii) still-larger-model because it is the cheapest, lowest-risk remaining external-validity axis, reuses
+ALL Exp-3 machinery (no new harness, just new eval corpora), and closes the last open item in REPORT
+Limitation (3). (i) is higher-risk (differentiable/sampled rollout could eat the budget); (iii) is heavier
+(GPT-2 large VRAM). (b) Picked THREE families spanning a distribution-shift GRADIENT (in-dist FineWeb → mild
+markdown prose → strong-OOD code) rather than one OOD set, so the result is "recovery tracks shift," a
+mechanism, not a single point. (c) Sourced code from installed library .py files and markdown from the
+project's own docs — both abundant and available with NO network. (d) Quantified shift by clean-activation
+D_M under the FineWeb Gaussian (already-defined metric) so "how OOD" is measured, not asserted. (e) Kept the
+recovery-ratio instability at α=1 honest (raw ΔLM≈0 → >100%/inflated ratios) by headlining α=4–8 where
+denominators are large. (f) Reported the code clean-loss quirk in the journal but not the report (it's an
+aside; recovery is the finding).
+**Deliverables:** RESULTS.md +Exp 15 (two tables + reading) + figure entry + Headline "prompt-family-robust"
+sentence; REPORT.md +Exp 15 Methods + Results (two tables + interpretation) + Summary/Conclusion sentences +
+Limitation (3) updated (prompt-family now DONE; only still-larger models open); plots/15_prompt_family.png;
+results/15_prompt_family.json; CHANGELOG appended. REPORT math re-verified via GitHub API (14/14
+js-display-math, 0 broken, 0 inline hazards).
+**Next step (optional; success criterion long met — flagship result now robust on strength/direction/layer/
+model/prompt-family axes):** any one a clean iter — (i) push the Exp 11 ceiling by supervising the behavioral
+readout THROUGH sampled/differentiable generation rather than teacher-forced (the one substantive open lever);
+(ii) a still-larger model (GPT-2 large). Both optional.
+On track? yes — Exp 15 adds prompt-family robustness (FineWeb-trained corrector recovers 84/77/60% @α=8 on
+fineweb/markdown/code, graceful degradation tracking activation shift); direction ~99% complete, all planned
+generalization axes now covered, deliverables curated + math-verified. No blocker.

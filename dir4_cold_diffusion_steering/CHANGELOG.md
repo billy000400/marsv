@@ -343,3 +343,30 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   vs α per bank). Results `results/14_diversity_lever.json`.
 - REPORT math re-verified via GitHub API: 14/14 js-display-math (Exp 14 reuses the recovery fence, no new
   equation), 0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-02 — Experiment 15: held-out prompt-family generalization (S4 follow-up) — POSITIVE
+- Added Experiment 15 to RESULTS.md and REPORT.md: every prior experiment both TRAINS and EVALUATES on
+  FineWeb web text, so the corrector could be overfit to that prompt distribution. Tested directly.
+  Trained the flagship sentiment corrector EXACTLY as Exp 3 (same vector/seed/recipe/300 FineWeb train docs),
+  then evaluated its fluency recovery UNCHANGED, at matched projection α|v|, on three held-out prompt families
+  of increasing distribution shift from FineWeb: fineweb (in-dist, = Exp 3 held-out 100 docs), markdown (100
+  chunks of this project's own .md research prose), code (100 chunks of numpy/torch/transformers Python source).
+  Quantified each family's shift by the mean Mahalanobis distance of its CLEAN activations under the FineWeb
+  Gaussian: D_M 27.5 (fineweb) / 30.1 (markdown) / 37.4 (code).
+- **Result (new, POSITIVE):** the corrector is NOT overfit to the FineWeb prompt distribution — it transfers
+  to genuinely different families and degrades gracefully with distribution shift. Recovery @α=8: fineweb 84%,
+  markdown 77%, code 60% (@α=4: 95/87/78%). Recovery tracks the activation shift monotonically (D_M 27.5→30.1
+  →37.4 ⇒ 84→77→60%), i.e. smooth graceful degradation (as for strength extrapolation in Exp 4), not collapse.
+  The in-distribution fineweb row reproduces Exp 3 TO THE DIGIT (raw +2.78 → learned +0.44, 84%) — built-in
+  reproducibility check. No prior result superseded (Exp 15 is new; fineweb row = Exp 3 reproduced).
+- **Deliverable deltas:** RESULTS.md +Exp 15 (two tables + reading) + figure entry + Headline
+  "prompt-family-robust" sentence. REPORT.md +Exp 15 Methods (held-out-prompt-family setup; reuses Exp 12
+  recovery equation and the Exp-1 D_M definition — no new display equation) + Results (two tables +
+  interpretation) + Summary/Conclusion "prompt-family-robust" sentences + Limitation (3) updated
+  (held-out-prompt-family generalization now DONE; only still-larger models open).
+- New code `experiments/15_prompt_family.py` (imports exp03 Corrector/train_corrector/make_hat/lm_loss_fn/
+  gaussian_stats/mahalanobis/LAYER; builds markdown+code corpora from local files). New figure
+  `plots/15_prompt_family.png` (ΔLM raw vs corrected per family; recovery vs α per family; clean-activation
+  shift bar). Results `results/15_prompt_family.json`.
+- REPORT math re-verified via GitHub API: 14/14 js-display-math (Exp 15 reuses the recovery fence, no new
+  equation), 0 broken (<pre lang=math>), 0 inline hazards.

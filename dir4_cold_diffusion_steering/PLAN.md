@@ -81,6 +81,12 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         target) is corrected WORSE in more collinear banks (63→61→55% @α=8) — pure separability, cannot be
         target coverage. Turns Exp 9's correlation into a controlled causal result; positive counterpart to
         the Exp 7/8/9 scaling negatives.
+        (i) PROMPT-FAMILY robustness DONE (Exp 15): trained the flagship Exp-3 sentiment corrector on FineWeb,
+        evaluated it UNCHANGED on 3 held-out prompt families of increasing distribution shift (fineweb in-dist /
+        markdown research prose / Python code). POSITIVE: recovery @α=8 = 84/77/60% (95/87/78% @α=4), tracking
+        the clean-activation shift under the FineWeb Gaussian (D_M 27.5→30.1→37.4) — graceful degradation, not a
+        FineWeb-prompt artifact. fineweb row reproduces Exp 3 to the digit. Flagship result now robust on 5 axes
+        (strength/direction/layer/model/prompt).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -95,10 +101,23 @@ End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker 
 S1+S2+S3 + S4(a) strength-extrap + S4(b) held-out-vector + S4(c) direction-conditional-bank +
 S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL text Pareto (Exp 10) +
 S4(e) BEHAVIORAL-PRESERVATION term (Exp 11) + S4(f) LAYER ROBUSTNESS (Exp 12) + S4(g) CROSS-MODEL
-generality (Exp 13) + S4(h) BANK-DIVERSITY causal confirmation (Exp 14) delivered — success criterion MET;
-direction complete on all planned axes plus behavioral-tradeoff + layer- + model-generality follow-ups and
-the amortization story now closed with 3 scaling negatives + 1 controlled positive lever (~99%).
-**S4(h) Experiment 14 (new):** acted on Next-step (ii) — confirm the bank-diversity lever directly. Exp 9
+generality (Exp 13) + S4(h) BANK-DIVERSITY causal confirmation (Exp 14) + S4(i) PROMPT-FAMILY robustness
+(Exp 15) delivered — success criterion MET; direction complete on all planned axes, the flagship fluency
+result now robust on FIVE generalization axes (strength/direction/layer/model/prompt-family) and the
+amortization story closed with 3 scaling negatives + 1 controlled positive lever (~99%).
+**S4(i) Experiment 15 (new):** acted on Next-step (ii) — held-out-prompt-family generalization, the last
+untested external-validity axis. Every prior experiment both trains AND evaluates on FineWeb web text, so
+the corrector could be overfit to that prompt distribution. Trained the flagship Exp-3 sentiment corrector on
+FineWeb, evaluated it UNCHANGED (matched projection) on 3 held-out families of increasing distribution shift:
+fineweb (in-dist), markdown (this project's research prose), code (numpy/torch/transformers Python source).
+POSITIVE: NOT overfit — recovery @α=8 = 84/77/60% (95/87/78% @α=4), and recovery tracks each family's
+clean-activation Mahalanobis shift under the FineWeb Gaussian MONOTONICALLY (D_M 27.5→30.1→37.4 ⇒ 84→77→60%)
+— graceful degradation, the prompt-axis analogue of Exp 4's strength extrapolation. fineweb row reproduces
+Exp 3 to the digit (raw +2.78 → learned +0.44, 84%). Artifacts: `experiments/15_prompt_family.py`,
+`results/15_prompt_family.json`, `plots/15_prompt_family.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math
+verified (14/14 js-display-math, 0 broken, 0 inline hazards).
+<!-- prior: S4(h) bank-diversity causal Exp 14 -->
+**S4(h) Experiment 14 (prior):** acted on Next-step (ii) — confirm the bank-diversity lever directly. Exp 9
 only *inferred* that bank angular diversity (not target-subspace coverage) drives conditional-corrector
 recovery, because its banks confounded alignment with internal collinearity (held-out `certainty` lives in
 the collinear cluster). Exp 14 removes the confound with a CONTROLLED THIRD-MEMBER SWAP: three size-3 banks,
@@ -264,12 +283,13 @@ RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math v
 ## Next step
 Core arc + all generalization axes + behavioral axis + behavioral-preservation follow-up + LAYER-ROBUSTNESS
 (Exp 12: 90/84/76% @α=8 at blocks 3/6/9) + CROSS-MODEL generality (Exp 13: GPT-2 medium, 89% @α=8 / 101% @α=4)
-+ BANK-DIVERSITY causal confirmation (Exp 14) delivered — flagship fluency result layer- AND model-robust; the
-amortization story is now closed with THREE scaling negatives (Exp 7/8/9) AND one controlled positive lever
-(Exp 14: bank angular diversity, confound removed). Optional remaining polish, any one a clean iteration:
-(i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH sampled/differentiable generation
-rather than teacher-forced; (ii) held-out-prompt-family generalization; (iii) a still-larger model (GPT-2
-large). All optional; success criterion long met.
++ BANK-DIVERSITY causal confirmation (Exp 14) + PROMPT-FAMILY robustness (Exp 15: FineWeb-trained corrector
+recovers 84/77/60% @α=8 on fineweb/markdown/code) delivered — the flagship fluency result is now robust on
+FIVE generalization axes (strength/direction/layer/model/prompt-family), and the amortization story is closed
+with THREE scaling negatives (Exp 7/8/9) AND one controlled positive lever (Exp 14). Optional remaining polish,
+any one a clean iteration: (i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH
+sampled/differentiable generation rather than teacher-forced (the one substantive open lever left);
+(ii) a still-larger model (GPT-2 large). All optional; success criterion long met.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

@@ -63,7 +63,11 @@ exact flagship pipeline at the early, middle, and late residual stream (blocks 3
 **90% / 84% / 76%** of raw steering's fluency damage at α=8, with the corrected activation off the Gaussian
 manifold at every layer (Experiment 12); nor a GPT-2-*small* artifact: replicating it on **GPT-2 medium
 (355M, block 12 / 24)** recovers **89%** of the damage at α=8 (101% at α=4), again off the Gaussian
-manifold — so the core result is **model-robust** too (Experiment 13).
+manifold — so the core result is **model-robust** too (Experiment 13). It is also **not a FineWeb-prompt
+artifact**: a corrector trained only on FineWeb still recovers **77%** of the damage at α=8 on held-out
+technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at α=4), with
+recovery declining smoothly as the family's clean activations drift off the FineWeb manifold — so it is
+**prompt-family-robust** as well (Experiment 15).
 
 One caveat frames all of the above. The `ΔLM` recoveries are measured at matched projection at a single
 layer. A behavioral test on *generated* text (Experiment 10) shows the corrector prevents raw steering's
@@ -417,6 +421,28 @@ Experiment-3 helpers fetch the model through a shared cache, so medium is loaded
 the corrector is trained at batch 4 to fit the larger model in the per-agent VRAM budget.) We report `ΔLM`,
 `D_M`, and the fluency recovery of Experiment 12's equation across `α ∈ {1, 2, 4, 8}`, at matched
 projection `α|v|`, versus raw steering.
+
+### Held-out prompt family (Experiment 15)
+
+Experiments 4, 5, 12 and 13 vary the steering strength, direction, layer and model; every one of them,
+however, both *trains* and *evaluates* the corrector on FineWeb web text. Experiment 15 varies the **prompt
+family** to test whether the corrector fit that text distribution rather than a general correction rule. We
+train the flagship sentiment corrector **exactly as Experiment 3** — same DiffMean sentiment vector, seed,
+recipe, and 300 FineWeb training documents — and then evaluate its fluency recovery, unchanged and at matched
+projection `α|v|`, on three held-out prompt families spanning increasing distribution shift from FineWeb:
+
+- **fineweb** — the same held-out 100 FineWeb documents as Experiment 3 (in-distribution; reproduces Exp 3);
+- **markdown** — 100 chunks of this project's own technical research prose (its `.md` files), a different
+  natural-language register (equations, headers, jargon);
+- **code** — 100 chunks of Python source from the numpy / torch / transformers libraries, non-natural-language
+  and strongly out-of-distribution for a web-text-trained model.
+
+Each family is scored with the same recovery metric (Experiment 12's equation) across `α ∈ {1, 2, 4, 6, 8}`.
+To make "distribution shift" concrete rather than nominal, we also report each family's **clean-activation**
+Mahalanobis distance `D_M` under the FineWeb Gaussian (the same fit used throughout): a family whose clean
+`resid_post` activations sit further from the FineWeb activation cloud is more out-of-distribution *for the
+corrector*, since the corrector is a function of those activations. The `fineweb` family re-runs Experiment 3
+and is the built-in reproducibility check.
 
 ### Baselines
 
@@ -864,6 +890,42 @@ internal separability, not target coverage. So bank **angular diversity (separab
 not coverage of the target's subspace, is the causal lever** — the positive counterpart to the three
 scaling negatives (Experiments 7/8/9).
 
+### Experiment 15 — the fluency result replicates across prompt families (not a FineWeb-prompt artifact)
+
+![held-out prompt-family generalization](plots/15_prompt_family.png)
+
+A corrector trained only on FineWeb, evaluated unchanged on genuinely different prompt families, still
+recovers most of the fluency damage — degrading smoothly as the family gets more out-of-distribution:
+
+| α | fineweb (in-dist, clean `D_M` 27.5) | markdown (`D_M` 30.1) | code (`D_M` 37.4) |
+|---|-------------------------------------|-----------------------|-------------------|
+| 2 | 116% | 101% | 99% |
+| 4 | 95% | 87% | 78% |
+| 6 | 89% | 82% | 71% |
+| 8 | **84%** | **77%** | **60%** |
+
+Absolute `ΔLM` at α=8, with each family's clean-activation shift under the FineWeb Gaussian:
+
+| family | clean `D_M` | ΔLM raw @α=8 | ΔLM learned @α=8 | recovery @α=8 |
+|---|---|---|---|---|
+| fineweb (in-distribution) | 27.5 | +2.78 | **+0.44** | 84% |
+| markdown (technical prose) | 30.1 | +2.67 | **+0.61** | 77% |
+| code (Python source) | 37.4 | +3.31 | **+1.31** | 60% |
+
+**Interpretation.** The corrector is **not overfit to the FineWeb prompt distribution**. Trained only on
+FineWeb, it still removes **77%** of raw steering's fluency damage on held-out Markdown prose and **60%** on
+strongly out-of-distribution Python code at α=8 (87% / 78% at α=4), versus 84% on in-distribution FineWeb.
+Recovery tracks the activation shift **monotonically**: as a family's clean activations sit further off the
+FineWeb Gaussian (`D_M` 27.5 → 30.1 → 37.4, code ~36% further out than in-distribution text), recovery falls
+smoothly (84% → 77% → 60% at α=8) rather than dropping off a cliff — the correction rule is being applied to
+activations it never trained on and still works, just less perfectly the further those activations drift from
+the training distribution. This is the same **graceful degradation** seen for strength extrapolation
+(Experiment 4), now along the prompt axis. The `fineweb` family reproduces Experiment 3 **to the digit**
+(raw +2.78 → learned +0.44, 84%), confirming the pipeline is faithful. So the flagship fluency result
+generalizes across the prompt distribution as well as across strength, layer, and model: it is **not a
+FineWeb-prompt artifact**, and a single trained corrector stays useful on out-of-domain text — most so when
+that text's activations remain near the distribution the corrector was fit on.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -881,7 +943,11 @@ correction is genuinely off-manifold. This is **not a block-6 artifact**: replic
 at the early, middle, and late residual stream (blocks 3 / 6 / 9) recovers 90% / 84% / 76% of the fluency
 damage at α=8, off the Gaussian manifold at every layer (Experiment 12); and **not a GPT-2-small artifact**:
 the same pipeline on GPT-2 medium (355M, block 12 / 24) recovers 89% at α=8 (101% at α=4), likewise off the
-Gaussian manifold (Experiment 13) — the result is layer- and model-robust. A behavioral reality-check (Experiment 10) qualifies this: when
+Gaussian manifold (Experiment 13) — the result is layer- and model-robust. Nor is it a **FineWeb-prompt
+artifact**: the same FineWeb-trained corrector recovers 77% of the fluency damage at α=8 on held-out
+technical-prose and 60% on out-of-distribution Python code (Experiment 15), degrading smoothly as the prompt
+family's clean activations drift off the training manifold — so the correction is prompt-family-robust too.
+A behavioral reality-check (Experiment 10) qualifies this: when
 the corrector *generates*, it prevents raw steering's collapse into repetition (distinct-2 stays near
 baseline while raw's crashes 0.78→0.32) but its output is only weakly steered — the projection-preserving
 correction is orthogonal to `v` in activation space yet not to the downstream readout, so the fluency
@@ -958,8 +1024,9 @@ target-alignment confound). Held-out
 transfer at strong steering thus remains unsolved by bank-size, model-size, **or** target-aligned bank
 curation alone (the native per-direction oracle is still needed); stronger direction-conditioning, a
 richer training objective, and diverse-bank composition remain open. The flagship fluency result is now
-shown **layer-robust** (Experiment 12: blocks 3 / 6 / 9 of GPT-2 small) **and model-robust** (Experiment
-13: GPT-2 medium, 355M, recovers 89% at α=8); held-out-prompt-family generalization and still-larger
-models remain open. (4) The small
+shown **layer-robust** (Experiment 12: blocks 3 / 6 / 9 of GPT-2 small), **model-robust** (Experiment
+13: GPT-2 medium, 355M, recovers 89% at α=8), and **prompt-family-robust** (Experiment 15: a FineWeb-trained
+corrector recovers 77% on held-out technical prose and 60% on out-of-distribution Python code at α=8,
+degrading smoothly with distribution shift); still-larger models remain open. (4) The small
 non-positive `ΔLM` at low `α`
 is within noise of zero and should not be over-read as the corrector "improving" the base model.

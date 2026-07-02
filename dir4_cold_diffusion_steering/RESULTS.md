@@ -496,6 +496,49 @@ as throughout.) This turns Experiment 9's *correlational* claim into a *controll
 diversity (separability), not target-subspace coverage, is what a shared corrector needs** — the positive
 counterpart to the three scaling negatives (Exp 7/8/9).
 
+**Experiment 15 — Held-out prompt-family generalization: is the corrector overfit to FineWeb text?**
+Every experiment above both *trains* and *evaluates* on FineWeb web text, so the corrector could have
+fit that prompt distribution rather than a general correction rule. We test this directly. We train the
+flagship sentiment corrector **exactly as Experiment 3** (same vector, seed, recipe, 300 FineWeb training
+docs), then evaluate its fluency recovery at matched projection on three held-out prompt families of
+increasing distribution shift away from FineWeb: **fineweb** (held-out FineWeb docs — *in-distribution*,
+reproduces Exp 3), **markdown** (this project's own technical research prose — a different natural-language
+register), and **code** (Python source from the numpy / torch / transformers libraries — non-natural-language,
+strongly out-of-distribution). We quantify *how* out-of-distribution each family is by the mean Mahalanobis
+distance of its **clean** activations under the FineWeb Gaussian (the same manifold fit used throughout):
+`D_M` = 27.5 (fineweb) / 30.1 (markdown) / 37.4 (code) — code activations sit ~36% further off the FineWeb
+manifold than in-distribution text.
+
+*Fluency recovery vs α, by prompt family (same FineWeb-trained corrector; matched projection α|v|):*
+
+| α | fineweb (in-dist, `D_M` 27.5) | markdown (`D_M` 30.1) | code (`D_M` 37.4) |
+|---|-------------------------------|-----------------------|-------------------|
+| 2 | 116% | 101% | 99% |
+| 4 | 95% | 87% | 78% |
+| 6 | 89% | 82% | 71% |
+| 8 | **84%** | **77%** | **60%** |
+
+*Absolute ΔLM at α=8 (nats), with each family's clean-activation shift:*
+
+| family | clean `D_M` (under FineWeb Gaussian) | ΔLM raw @α=8 | ΔLM learned @α=8 | recovery @α=8 |
+|---|---|---|---|---|
+| fineweb (in-distribution) | 27.5 | +2.78 | **+0.44** | 84% |
+| markdown (technical prose) | 30.1 | +2.67 | **+0.61** | 77% |
+| code (Python source) | 37.4 | +3.31 | **+1.31** | 60% |
+
+**Reading it: the corrector is not overfit to the FineWeb prompt distribution — it transfers to genuinely
+different prompt families, degrading gracefully as the family gets more out-of-distribution.** A corrector
+that never saw Markdown or code still removes **77%** and **60%** of raw steering's fluency damage on those
+families at α=8 (and 87% / 78% at α=4), versus 84% on in-distribution FineWeb. Recovery tracks the
+activation shift monotonically: as a family's clean activations sit further off the FineWeb Gaussian
+(`D_M` 27.5 → 30.1 → 37.4), recovery falls smoothly (84% → 77% → 60% at α=8) rather than collapsing — the
+correction rule is applied to activations it was never trained on and still works, just less perfectly the
+further those activations drift from the training distribution. The in-distribution `fineweb` row reproduces
+Experiment 3 **to the digit** (raw +2.78 → learned +0.44, 84%), a built-in reproducibility check. So the
+corrector generalizes across the *prompt* axis (in addition to steering strength, Exp 4; and layer/model,
+Exp 12/13): the fluency result is **not a FineWeb-prompt artifact**, and a single trained corrector remains
+useful on out-of-domain text — most so when that text's activations stay near the distribution it was fit on.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -555,6 +598,11 @@ counterpart to the three scaling negatives (Exp 7/8/9).
   recovery @α=8 vs the bank's internal collinearity — falls as the bank loses angular diversity; (b)
   sentiment recovery vs α, one line per bank — sentiment (⟂ every direction and ⟂ the target) is the
   confound-free isolate and is corrected worse in more collinear banks, confirming diversity is causal.
+- `plots/15_prompt_family.png` — held-out prompt-family generalization of the FineWeb-trained corrector.
+  (a) ΔLM vs α, raw (dashed) vs corrected (solid), one color per family (fineweb / markdown / code) —
+  corrected sits near zero for all three while raw climbs; (b) fluency recovery vs α per family — all
+  three ≥60% at α=8, ordered by distribution shift; (c) bar of each family's clean-activation Mahalanobis
+  distance under the FineWeb Gaussian, showing code is the most out-of-distribution and recovery tracks it.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -593,7 +641,11 @@ the corrected activation sitting *further* off the Gaussian manifold than raw at
 "LM-safe but off-Gaussian" correction is a layer-robust property. It is also **not a GPT-2-*small* artifact**:
 replicating the exact flagship pipeline on **GPT-2 medium (355M, block 12/24)** recovers **89%** of raw
 steering's fluency damage at α=8 (**101%** at α=4), again by moving *further* off the Gaussian manifold than
-raw — so the core result is **model-robust** as well (Exp 13).
+raw — so the core result is **model-robust** as well (Exp 13). It is likewise **not a FineWeb-prompt
+artifact**: a corrector trained only on FineWeb still recovers **77%** of the fluency damage at α=8 on
+held-out technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at
+α=4), with recovery declining smoothly as the family's clean activations drift further off the FineWeb
+Gaussian (`D_M` 27.5→30.1→37.4) — so the correction is **prompt-family-robust** too (Exp 15).
 
 **A behavioral caveat on the fluency story (Exp 10).** The `ΔLM` recoveries above are measured at
 *matched projection at one layer* — a proxy. When the sentiment corrector is used to actually *generate*
