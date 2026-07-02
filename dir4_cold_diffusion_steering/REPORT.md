@@ -53,10 +53,12 @@ to a held-out direction (51% recovery at weak steering, fading to 7% at strong),
 per vector" into "one model per bank." Neither scaling axis, however, closes the held-out gap: enlarging
 the bank from three to five directions *lowers* both held-out transfer and per-direction recovery, and
 scaling the corrector itself 9× wider (5.2M → 46.2M parameters) leaves in-bank recovery flat (~45%) and
-overfits at weak steering. So amortized cross-direction correction is capped not by coverage or
-parameter count but by the **training signal** — the reliable route to a genuinely unseen direction
-remains a **per-direction native corrector**, with curating the bank toward the target subspace as the
-open path.
+overfits at weak steering; and *curating* the bank **toward** the target subspace backfires worst of all —
+at fixed size and capacity the most target-aligned bank transfers catastrophically (α=1 recovery −183%),
+while a diverse bank transfers best, so bank **diversity**, not target alignment, is what matters. So
+amortized cross-direction correction is capped not by coverage, parameter count, or subspace alignment
+but by the **training signal** — and the reliable route to a genuinely unseen direction remains a
+**per-direction native corrector**.
 
 ## Methods
 
@@ -277,6 +279,24 @@ range — under the identical recipe / seed / data / 8 epochs. We report held-ou
 across `α ∈ {1,2,4,6,8}` and, at `α = 8`, the per-direction in-bank recovery averaged over the five
 bank directions, versus capacity. The native oracle (retrained on `certainty`, 5.25M) is the ceiling;
 the `H = 1024` point re-runs Experiment 7's size-5 model as a reproducibility check.
+
+### Curating the bank toward the target subspace (Experiment 9)
+
+Experiments 7 and 8 both point to the same untested lever: curate the training bank *toward* the
+held-out target's subspace. Experiment 9 tests it in the cleanest controlled way — **fix the bank size
+at 3 and the corrector at 5.25M parameters** (`H = 1024`), and vary only *which* three of the five pool
+directions are trained, ranked by their mean absolute cosine to the held-out `certainty`:
+
+- **diffuse** — `[sentiment, politeness, formality]`, mean `|cos|` to certainty ≈ 0.38 (angularly spread);
+- **exp6** — `[sentiment, formality, concreteness]`, mean `|cos|` ≈ 0.54 (Experiment 6/7's bank);
+- **curated** — `[formality, concreteness, complexity]`, mean `|cos|` ≈ 0.80 (aligned to the target).
+
+`diffuse` and `curated` share exactly one member (formality) and differ only in the other two, so the
+contrast isolates alignment at fixed size and capacity. If *subspace coverage* of the target were the
+binding constraint, held-out transfer should rise monotonically diffuse → exp6 → curated. We report
+held-out `certainty` recovery across `α ∈ {1,2,4,6,8}` and, at `α = 8`, the mean in-bank per-direction
+recovery for each bank, versus the native oracle (retrained on `certainty`). The `exp6` point re-runs
+Experiment 6/7's size-3 bank as a reproducibility check.
 
 ### Baselines
 
@@ -534,6 +554,48 @@ remains the only reliable route to a genuinely unseen direction: the correction 
 direction-specific, and neither more directions (Experiment 7) nor more parameters (Experiment 8)
 amortizes it away.
 
+### Experiment 9 — curating the bank toward the target backfires; bank diversity, not alignment, drives transfer
+
+![curating the bank toward the target subspace](plots/09_curated_bank.png)
+
+At fixed size (3) and fixed capacity (5.25M), transfer to the held-out `certainty` does **not** rise
+with the bank's alignment to it — it *collapses* at the most-aligned bank:
+
+| α | ΔLM raw | rec diffuse (\|cos\| 0.38) | rec exp6 (\|cos\| 0.54) | rec curated (\|cos\| 0.80) | rec native (oracle) |
+|---|---------|----------------------------|-------------------------|----------------------------|---------------------|
+| 1 | +0.22 | 38% | **51%** | **−183%** | 142% |
+| 2 | +0.99 | 28% | **42%** | −15% | 105% |
+| 4 | +2.62 | 13% | **21%** | 3% | 96% |
+| 6 | +3.35 | 7% | **12%** | −5% | 88% |
+| 8 | +3.71 | 6% | **7%** | −12% | 78% |
+
+Mean in-bank per-direction recovery at `α=8` tells the mechanism — it *falls* as the bank's own
+directions grow more internally correlated:
+
+| bank | mean \|cos\| to certainty | member recoveries @α=8 | mean in-bank recovery |
+|---|---|---|---|
+| diffuse | 0.38 | sentiment 65%, politeness 74%, formality 60% | **67%** |
+| exp6 | 0.54 | sentiment 55%, formality 70%, concreteness 17% | **48%** |
+| curated | 0.80 | formality 37%, concreteness 17%, complexity 35% | **30%** |
+
+**Interpretation.** Curating the bank *toward* the target's subspace does **not** close the gap — it
+makes transfer *catastrophically worse*. Held-out recovery is **non-monotone in bank→target alignment**
+and collapses at the most-aligned `curated` bank, which is net-negative at every strength and *actively
+damages* the unseen direction at weak steering (`α=1` recovery **−183%**: it adds +0.40 nats to a
+near-harmless +0.22-nat steer). The moderately-aligned, angularly *diverse* `exp6` bank transfers best.
+The in-bank table gives the cause: the three `curated` directions are pairwise near-collinear
+(`|cos|` 0.76–0.82), so the direction-conditional corrector cannot disambiguate them from its `v̂` input
+and cannot specialize — it learns a single shared-subspace correction that over-fires on any nearby
+unseen direction. Correcting *any* one direction well needs the bank's directions to be *separable*, not
+clustered; a diverse bank (diffuse: 67% mean in-bank) beats an aligned one (curated: 30%). So the real
+lever is bank **angular diversity**, not coverage of the target subspace — curating toward the target is
+exactly the wrong move. This is the third corrective negative in a row: neither more directions
+(Experiment 7), more parameters (Experiment 8), nor a target-aligned bank (Experiment 9) amortizes the
+correction away. The `exp6` bank reproduces Experiment 6/7's size-3 model to the digit (recovery
+51/42/21/12/7), and the native oracle (78–142%) is unchanged — the correction remains fully available
+per-direction, and the ceiling on *sharing* it is set by the training signal, with bank composition
+mattering through diversity rather than alignment.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -570,12 +632,17 @@ direction-specific oracle at strong steering. Experiments 7 and 8 then test the 
 next moves and reject both. Adding *directions* (Experiment 7: bank 3→5) *lowers* held-out transfer
 (`α=8` recovery 7%→3%) and per-direction in-bank recovery. Adding *parameters* (Experiment 8: a 9×
 wider corrector, 5.2M→46.2M, on the same bank) leaves in-bank recovery flat (~45%) and worsens
-weak-steering held-out transfer through overfitting (`α=1` recovery −1%→−146%). So the path to a
-reusable corrector is neither "more directions" nor "a bigger model": amortized cross-direction
-correction is capped by the **training signal**, and the reliable route to a genuinely unseen direction
-remains the **per-direction native corrector** (78–142% recovery). Curating the bank toward the target
-subspace and/or conditioning the corrector harder is the open direction for follow-up work — not simply
-a larger bank or a larger model.
+weak-steering held-out transfer through overfitting (`α=1` recovery −1%→−146%). And the tempting last
+lever — *curating* the bank **toward** the target's subspace (Experiment 9) — is the worst move of all:
+at fixed size and capacity the most target-aligned bank transfers *catastrophically* (`α=1` recovery
+−183%, net-negative at every strength), while a moderately-aligned, angularly *diverse* bank transfers
+best, because near-collinear bank directions cannot be disambiguated by the conditional corrector. So
+the path to a reusable corrector is neither "more directions," "a bigger model," nor "a target-aligned
+bank": amortized cross-direction correction is capped by the **training signal** — with bank composition
+mattering through *diversity*, not target alignment — and the reliable route to a genuinely unseen
+direction remains the **per-direction native corrector** (78–142% recovery). Stronger direction
+conditioning, diverse (not target-clustered) banks, and a richer objective are the open directions for
+follow-up work.
 
 **Limitations.** (1) The manifold is modeled as a single Gaussian, so `D_M` captures
 scale/correlation but not multimodal or nonlinear structure — Experiments 2 and 3 show this is a
@@ -590,9 +657,12 @@ recipe recovers 83–104% there) and across *direction-conditioning + a vector b
 conditional corrector corrects three in-bank directions at 55–70% and partially transfers to a
 held-out direction, 51%→7% recovery from weak to strong steering; Experiment 7: enlarging the bank from
 3 to 5 directions does **not** close that gap and in fact lowers transfer; Experiment 8: scaling the
-corrector 9× wider does not close it either, and overfits at weak steering). Held-out transfer at strong
-steering thus remains unsolved by bank-size **or** model-size alone (the native per-direction oracle is
-still needed); curating the bank toward the target subspace and/or stronger direction-conditioning,
-plus multi-layer, multi-model and held-out-prompt-family generalization, remain open. (4) The small
+corrector 9× wider does not close it either, and overfits at weak steering; Experiment 9: curating the
+bank *toward* the target's subspace at fixed size/capacity backfires — the most target-aligned bank
+transfers catastrophically, and bank *diversity* rather than target alignment drives transfer). Held-out
+transfer at strong steering thus remains unsolved by bank-size, model-size, **or** target-aligned bank
+curation alone (the native per-direction oracle is still needed); stronger direction-conditioning, a
+richer training objective, diverse-bank composition, plus multi-layer, multi-model and
+held-out-prompt-family generalization, remain open. (4) The small
 non-positive `ΔLM` at low `α`
 is within noise of zero and should not be over-read as the corrector "improving" the base model.

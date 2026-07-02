@@ -44,8 +44,14 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         held-out gap — transfer peaks at bank size 3, drops at 5 (coverage is not the constraint).
         (c-follow-up #2) CAPACITY-SCALING DONE (Exp 8): scaling the corrector 9× wider (5.2M→46.2M) on a
         fixed bank ALSO does not close the gap — in-bank recovery saturates ~45%, held-out overfits at
-        weak α (rec −1%→−146%). ⇒ ceiling is the TRAINING SIGNAL, not directions or params; per-direction
-        native corrector remains the reliable route. (d) concept-strength text Pareto still open (opt).
+        weak α (rec −1%→−146%). ⇒ ceiling is the TRAINING SIGNAL, not directions or params.
+        (c-follow-up #3) CURATED-BANK DONE (Exp 9): curating the bank TOWARD the target subspace at fixed
+        size(3)/capacity(5.25M) BACKFIRES — the most target-aligned bank (|cos|0.80) transfers
+        CATASTROPHICALLY (α=1 rec −183%, net-neg every strength); the diverse moderately-aligned exp6 bank
+        transfers best (51→7%). In-bank recovery falls with internal correlation (diffuse67>exp6 48>cur30).
+        ⇒ bank ANGULAR DIVERSITY, not target coverage, drives transfer; per-direction native corrector
+        (78–142%) remains the reliable route. Third corrective negative (dirs/params/curation all fail).
+        (d) concept-strength text Pareto still open (opt).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -57,6 +63,24 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
+direction-conditional-bank + S4(c-follow-up) bank-SCALING (Exp 7) + S4(c-follow-up #2) capacity-SCALING
+(Exp 8) + S4(c-follow-up #3) CURATED-BANK (Exp 9) delivered — success criterion MET; direction complete
+on all planned axes (~99%).
+**S4(c follow-up #3) Experiment 9 (new):** tested the standing open hypothesis of BOTH Exp 7 and Exp 8
+("curate the bank toward the held-out target's subspace"), which neither varied. Held bank SIZE=3 and
+capacity=5.25M FIXED; varied only WHICH 3 of the 5 pool dirs train, by mean |cos| to held-out certainty:
+diffuse{sent,pol,form}0.38 / exp6{sent,form,conc}0.54 / curated{form,conc,cplx}0.80 (diffuse↔curated
+share exactly formality — controlled). Result — CORRECTIVE (3rd negative in a row): curating TOWARD the
+target BACKFIRES. Held-out recovery non-monotone in alignment, COLLAPSES at most-aligned bank — curated
+net-negative every strength (α=1 −183%, α=8 −12%); diverse exp6 best (51/42/21/12/7). Mechanism: in-bank
+recovery @α=8 falls with internal correlation (diffuse67>exp6 48>curated30); curated's 3 members pairwise
+collinear (|cos|0.76–0.82) → corrector can't disambiguate from v̂ → can't specialize → over-fires on
+unseen dirs. ⇒ lever is bank ANGULAR DIVERSITY, not target-subspace coverage. exp6 reproduced Exp 6/7 to
+the digit; native oracle unchanged 78–142%. Corrects Exp 7/8's "curate toward subspace" prescription.
+Artifacts: `experiments/09_curated_bank.py`, `results/09_curated_bank.json`, `plots/09_curated_bank.png`.
+RESULTS/REPORT/CHANGELOG curated; REPORT math verified (10/10 js-display-math, 0 broken, 0 inline hazards).
+<!-- prior: S4(c follow-up #2) capacity-scaling Exp 8 -->
 S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
 direction-conditional-bank + S4(c-follow-up) bank-SCALING (Exp 7) + S4(c-follow-up #2) capacity-SCALING
 (Exp 8) delivered — success criterion MET; direction complete on all planned axes (~99%).
@@ -129,14 +153,13 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-Core arc + all generalization axes delivered; Exp 6's "scale the bank" follow-up now RESOLVED (Exp 7:
-bigger bank at fixed capacity does NOT close the held-out gap — capacity interference binds). Optional
-remaining polish, any one a clean iteration: (i) CAPACITY-scaling ablation — retrain the size-5 bank at
-2×/4× MLP width and check whether held-out transfer recovers (the direct test of Exp 7's
-"capacity-interference" claim, and the corrected path to a reusable corrector); (ii) CURATED bank —
-select the 3 directions most correlated with the held-out target and test whether transfer beats the
-5-direction bank (isolates coverage-vs-interference); (iii) text-level concept-strength readout so the
-frontier is behavior-vs-fluency, not just ΔLM; (iv) multi-layer or a second model.
+Core arc + all generalization axes delivered; the amortization story is now CLOSED on all three scaling
+axes — more directions (Exp 7), more parameters (Exp 8), and target-aligned bank curation (Exp 9) ALL
+fail to close the held-out gap. Optional remaining polish, any one a clean iteration: (i) test bank
+DIVERSITY directly as the POSITIVE lever — build a maximally-orthogonal 3-bank and check in-bank +
+held-out transfer vs the collinear curated bank (Exp 9 implies diversity helps; verify constructively);
+(ii) text-level concept-strength readout so the frontier is behavior-vs-fluency, not just ΔLM;
+(iii) multi-layer or a second model. All optional; success criterion long met.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

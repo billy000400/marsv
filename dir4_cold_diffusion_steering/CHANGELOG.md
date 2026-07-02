@@ -180,3 +180,31 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   New figure `plots/08_capacity_scaling.png` (held-out recovery vs α per capacity + oracle; recovery @α=8
   vs capacity for held-out + mean in-bank). Results in `results/08_capacity_scaling.json`.
 - REPORT math re-verified via GitHub API: 10/10 js-display-math, 0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-02 — Experiment 9: curating the bank TOWARD the target subspace (S4c follow-up #3)
+- Added Experiment 9 to RESULTS.md and REPORT.md: directly tests the open path that BOTH Exp 7 and Exp 8
+  named ("curate the bank toward the held-out target's subspace"), which neither had varied. Held bank
+  SIZE fixed at 3 and corrector CAPACITY fixed at 5.25M (hidden=1024); varied only WHICH 3 of the 5 pool
+  directions are trained, by mean |cos| to held-out `certainty`: diffuse {sentiment,politeness,formality}
+  0.38 / exp6 {sentiment,formality,concreteness} 0.54 / curated {formality,concreteness,complexity} 0.80.
+  diffuse & curated share exactly one member (formality) — controlled contrast. Identical recipe/seed/data.
+- **Result (new, corrective — third negative in a row):** curating TOWARD the target subspace does NOT
+  close the gap; it makes transfer CATASTROPHICALLY worse. Held-out `certainty` recovery is non-monotone
+  in bank→target alignment and COLLAPSES at the most-aligned bank: curated is net-negative at every
+  strength (α=1 rec −183%: adds +0.40 nats to a +0.22-nat steer; α=8 −12%), while the moderately-aligned,
+  angularly DIVERSE exp6 bank transfers BEST (51/42/21/12/7). Mechanism from in-bank recovery @α=8: it
+  FALLS as the bank's own directions grow internally correlated — diffuse 67% (sent65,pol74,form60) >
+  exp6 48% (sent55,form70,conc17) > curated 30% (form37,conc17,cplx35). The curated members are pairwise
+  near-collinear (|cos| 0.76–0.82), so the conditional corrector can't disambiguate them from v̂ and can't
+  specialize. ⇒ the lever is bank ANGULAR DIVERSITY (separability), NOT coverage of the target subspace;
+  curating toward the target is exactly the wrong move.
+- exp6 bank reproduces Exp 6/7's size-3 model to the digit (rec 51/42/21/12/7) — reproducibility check.
+  Native oracle unchanged (78–142%); correction remains fully available per-direction.
+- **Superseded framing:** Exp 7/8's parting "curate the bank toward the target subspace is the open path"
+  → corrected to "curating TOWARD the target backfires; bank DIVERSITY (not target alignment) governs
+  transfer." Updated RESULTS Headline + Exp-8 closing; REPORT Summary + Conclusion + Limitation (3).
+- New code: `experiments/09_curated_bank.py` (reuses Exp 6 CondCorrector/train_cond/make_hat_cond + Exp 3
+  LM-loss/layer via import; loads all 5 pool vectors + certainty). New figure `plots/09_curated_bank.png`
+  (held-out recovery vs α per bank + oracle; held-out recovery @α=1,8 vs bank |cos| alignment). Results in
+  `results/09_curated_bank.json`.
+- REPORT math re-verified via GitHub API: 10/10 js-display-math, 0 broken (<pre lang=math>), 0 inline hazards.

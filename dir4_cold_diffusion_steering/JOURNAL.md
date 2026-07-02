@@ -324,3 +324,41 @@ target subspace vs a diffuse bank (does subspace-matched curation beat capacity/
 S4(d) concept-strength TEXT Pareto (does preserving projection preserve generated-text concept strength?).
 Both are optional; success criterion long met.
 On track? yes — S4(c) fully closed (bank-size Exp 7 + capacity Exp 8 both negative/corrective); direction ~99% complete, deliverables curated + math-verified.
+
+## 2026-07-02 20:1x — Experiment 9: does CURATING the bank toward the target subspace close the gap? (S4c follow-up #3)
+**Did:** Exp 7 (more directions) and Exp 8 (more params) both ended by naming the SAME untested open
+path — "curate the bank toward the held-out target's subspace." Tested it directly, the clean controlled
+way. Wrote `experiments/09_curated_bank.py` (reuses Exp 6 CondCorrector/train_cond/make_hat_cond + Exp 3
+LM-loss/LAYER via import). Held bank SIZE=3 and capacity=5.25M (hidden=1024) FIXED; varied only WHICH 3
+of the 5 pool directions train, by mean |cos| to held-out `certainty`: diffuse 0.38 / exp6 0.54 /
+curated 0.80. diffuse & curated share exactly formality — controlled. Ran in ~1.5 min (4 trainings incl.
+native oracle), no OOM under 0.18 frac.
+**Learned:** curating TOWARD the target subspace does NOT close the gap — it makes transfer
+CATASTROPHICALLY WORSE. Held-out recovery is non-monotone in alignment and COLLAPSES at the most-aligned
+bank: curated net-negative every strength (α=1 rec −183%, α=8 −12%), while diverse moderately-aligned
+exp6 transfers BEST (51/42/21/12/7). Mechanism: in-bank recovery @α=8 FALLS as bank directions grow
+internally correlated (diffuse 67% > exp6 48% > curated 30%). curated's 3 members are pairwise collinear
+(|cos| 0.76–0.82) → conditional corrector can't disambiguate from v̂ → can't specialize → over-fires on
+nearby unseen dirs (weak-α blow-up on certainty). ⇒ lever is bank ANGULAR DIVERSITY, not target-subspace
+coverage. Third corrective negative in a row (Exp 7 dirs, Exp 8 params, Exp 9 curation). exp6 reproduced
+Exp 6/7 to the digit. Native oracle unchanged 78–142%.
+**Assumption/decision logged.** (a) Chose PLAN Next-step (ii) CURATED-bank over (iii) text-Pareto /
+(iv) multi-layer because it directly closes the standing open hypothesis of BOTH Exp 7 & 8 (highest-value
+question) and reuses all machinery — one clean iteration. (b) Used a 3-point alignment gradient
+(diffuse/exp6/curated) with diffuse↔curated sharing exactly one member so the contrast isolates
+alignment at fixed size & capacity; rejected a 2-point (aligned vs anti-aligned) design as less
+informative given the non-monotone risk. (c) Kept size & capacity FIXED on purpose — that is what makes
+"alignment, not size/params" the isolated variable. (d) Reported the surprising catastrophic reversal
+honestly and CORRECTED Exp 7/8's "curate toward subspace" prescription rather than burying it — that is
+the finding.
+**Deliverables:** RESULTS.md +Exp 9 (2 tables + interp) + updated Headline + figure entry; REPORT.md
++Exp 9 Methods/Results + updated Summary/Conclusion/Limitation(3); plots/09_curated_bank.png;
+results/09_curated_bank.json; CHANGELOG appended. REPORT math re-verified (10/10 js-display-math,
+0 broken, 0 inline hazards).
+**Next step (optional, success criterion long met):** the amortization story is now closed on all three
+scaling axes (directions/params/curation, all negative). Remaining optional polish, any one a clean iter:
+(i) test bank DIVERSITY directly as the positive lever — build a maximally-orthogonal 3-bank and check
+in-bank + held-out vs the collinear curated bank; (ii) S4(d) concept-strength TEXT Pareto (behavior vs
+fluency, not just ΔLM); (iii) multi-layer or a second model. All optional.
+On track? yes — S4(c) fully closed on all three scaling axes (Exp 7 bank-size, Exp 8 capacity, Exp 9
+curation — all corrective/negative); direction ~99% complete, deliverables curated + math-verified. No blocker.
