@@ -170,8 +170,55 @@ members — the bank corrector recovers **51% at α=1 falling to 7% at α=8**. T
 over Experiment 5's frozen single-vector transfer (≈0% at every α), so conditioning on `v̂` plus a
 small bank does start to generalize across directions, best at moderate strength; but it stays far
 below the native oracle (retraining on `certainty` recovers 78–141%). The practical read: a
-direction-conditional corrector replaces "one model per vector" with "one model per *bank*," and
-scaling the bank is the indicated path to correcting genuinely unseen directions at strong steering.
+direction-conditional corrector replaces "one model per vector" with "one model per *bank*." Whether
+simply *enlarging* the bank closes the remaining held-out gap at strong steering is tested — and
+answered negatively — in Experiment 7.
+
+**Experiment 7 — Does a denser bank close the held-out gap? Scaling the vector bank.**
+Experiment 6 suggested "scaling the bank is the indicated path" to correct a genuinely unseen
+direction at strong steering. We test that directly. Holding **certainty** out as before, we train the
+**same** direction-conditional corrector (5.25M params, identical recipe / seed / data) on **nested**
+training banks of size **1** (sentiment), **3** (sentiment, formality, concreteness — Experiment 6's
+bank), and **5** (+ two new DiffMean directions: **politeness** `|v|=15.6`, **complexity** `|v|=58.4`),
+and measure transfer to the held-out `certainty` at matched projection. Cosines to `certainty`:
+formality +0.77, concreteness −0.82, complexity −0.80 (all strongly related), politeness −0.35
+(weakly), sentiment +0.03 (orthogonal) — so growing 3→5 adds one strongly-correlated direction
+(complexity) plus one weakly-correlated one (politeness).
+
+*Held-out `certainty` fluency recovery vs training-bank size (native = oracle retrained on certainty):*
+
+| α | ΔLM raw | rec bank=1 | rec bank=3 | rec bank=5 | rec native (oracle) |
+|---|---------|-----------|-----------|-----------|---------------------|
+| 1 | +0.22 | 14% | **51%** | −1% | 142% |
+| 2 | +0.99 | 8% | **42%** | 9% | 105% |
+| 4 | +2.62 | 1% | **21%** | 6% | 96% |
+| 6 | +3.35 | 0% | **12%** | 4% | 88% |
+| 8 | +3.71 | 0% | **7%** | 3% | 78% |
+
+*In-bank per-direction recovery @α=8 under the SINGLE size-5 corrector (all five trained together):*
+
+| direction | cos to certainty | ΔLM raw @α=8 | ΔLM size-5 bank | recovery @α=8 |
+|---|---|---|---|---|
+| sentiment | +0.03 | +2.78 | +1.21 | 57% |
+| formality | +0.77 | +6.49 | +3.55 | 45% |
+| concreteness | −0.82 | +4.40 | +3.84 | 13% |
+| politeness | −0.35 | +4.47 | +1.27 | 72% |
+| complexity | −0.80 | +5.39 | +3.18 | 41% |
+
+**Reading it: naively enlarging the bank does NOT close the held-out gap — at fixed model capacity it
+makes transfer *worse*.** Transfer to the held-out `certainty` is **non-monotone in bank size and peaks
+at size 3**, not size 5: going 3→5 dropped recovery at every strength (α=1 51%→−1%, α=8 7%→3%). This
+happens even though one of the two added directions (complexity, |cos|=0.80) is strongly correlated
+with the held-out direction — extra "coverage" that should help transfer. The corroborating signal is
+in-bank: under the size-5 model, per-direction recovery at α=8 is *lower* than the size-3 model
+delivered (formality 70%→45%, concreteness 17%→13%), while the two new directions land at 41–72%. So a
+fixed-capacity 5.25M corrector, asked to correct five directions instead of three, does **each**
+direction worse — the held-out one included. **Capacity interference, not coverage, is the binding
+constraint.** This revises Experiment 6's optimistic reading: closing the held-out gap at strong
+steering needs **model-capacity scaling and/or bank curation toward the target's subspace**, not simply
+more directions poured into the same-size model. The native oracle retrained on `certainty` still
+recovers 78–142%, so the direction is fully correctable — the gap is a property of amortization, not of
+`certainty` being intrinsically hard.
 
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
@@ -194,6 +241,10 @@ scaling the bank is the indicated path to correcting genuinely unseen directions
   direction-conditional corrector trained on the {sentiment, formality, concreteness} bank (blue =
   in-bank, orange = held-out certainty); (b) ΔLM vs α on the held-out certainty direction for raw,
   the bank corrector (partial transfer), and the native oracle.
+- `plots/07_bank_scaling.png` — (a) held-out `certainty` fluency recovery vs α for training-bank sizes
+  {1, 3, 5} plus the native oracle; (b) held-out recovery at α=1 and α=8 vs bank size — the headline
+  curve, showing transfer peaks at bank size 3 and drops when the bank grows to 5 (capacity
+  interference at fixed model size).
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -209,3 +260,8 @@ Making the corrector **direction-conditional** (feed `v̂`) and training it on a
 gives **one model that corrects every in-bank direction at once** (55–70% recovery at α=8) and
 **begins to transfer** to a held-out direction (51%→7% recovery from weak to strong steering, vs ≈0%
 for a frozen single-vector corrector) — replacing "one model per vector" with "one model per bank."
+But **naively enlarging that bank does not close the held-out gap**: at fixed model capacity, growing
+the training bank from 3 to 5 directions *lowers* transfer to the held-out direction (α=8 recovery
+7%→3%) and lowers per-direction in-bank recovery too — capacity interference, not coverage, binds. The
+route to a reusable corrector is **more model capacity and/or a curated bank**, not merely more
+directions.

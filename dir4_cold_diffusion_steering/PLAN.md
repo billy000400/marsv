@@ -39,8 +39,10 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         (c) DIRECTION-CONDITIONAL + VECTOR BANK DONE: `r_θ(h,z,v̂,α)` trained on a 3-vector bank
         {sentiment,formality,concreteness} is ONE model correcting all in-bank dirs (55–70% @α=8) and
         PARTIALLY transfers to held-out certainty (51%→7% recovery weak→strong; vs ≈0% frozen
-        single-vector). "One model per vector" → "one model per bank"; larger bank is the follow-up.
-        (d) concept-strength text Pareto still open (optional).
+        single-vector). "One model per vector" → "one model per bank".
+        (c-follow-up) BANK-SCALING DONE (Exp 7): a LARGER bank at fixed capacity does NOT close the
+        held-out gap — transfer peaks at bank size 3, drops at 5 (capacity interference, not coverage).
+        Corrected path = more capacity / curated bank. (d) concept-strength text Pareto still open (opt).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -52,6 +54,22 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
+direction-conditional-bank + S4(c-follow-up) bank-SCALING delivered — success criterion MET; direction
+complete on all planned axes (~99%).
+**S4(c follow-up) Experiment 7 (new):** directly tested Exp 6's parting prescription ("scale the bank").
+Held `certainty` out; trained the SAME conditional corrector (5.25M, identical recipe) on NESTED banks
+of size 1/3/5 (size 5 adds new DiffMean politeness |v|=15.6, complexity |v|=58.4). Result — CORRECTIVE:
+enlarging the bank does NOT close the held-out gap; at fixed capacity it makes transfer WORSE. Held-out
+recovery is non-monotone and PEAKS at size 3 (α=8: bank1 0% / bank3 7% / bank5 3%), even though size-5
+adds a strongly-correlated direction (complexity |cos|=0.80). In-bank per-direction recovery @α=8 also
+dropped size3→size5 (formality 70%→45%). ⇒ capacity interference, not coverage, binds; the route to a
+reusable corrector is more MODEL CAPACITY and/or a CURATED bank, not more directions. Native oracle
+78–142% (direction fully correctable). Size-3 reproduces Exp 6 exactly. Artifacts:
+`experiments/07_bank_scaling.py`, `results/07_bank_scaling.json`, `plots/07_bank_scaling.png`,
+`data/{politeness,complexity}_vec_layer6.npy`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified
+(10/10 js-display-math, 0 broken, 0 inline hazards).
+<!-- prior: S4(c) direction-conditional bank -->
 S1 + S2 + S3 complete + S4(a) strength-extrapolation + S4(b) held-out-vector + S4(c)
 direction-conditional-bank delivered — success criterion MET; direction near-complete (~98%).
 **S4(c) (new):** made the corrector direction-conditional (`r_θ(h,z,v̂,α)`, 5.25M params) and trained
@@ -94,13 +112,14 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-Core arc + all three generalization axes (strength S4a, direction S4b, conditional-bank S4c) delivered;
-Exp 5's open question closed. Optional remaining polish, any one a clean iteration: (i) SCALE the bank
-to 5–10 directions and re-measure held-out transfer at strong steering — the direct follow-up to Exp
-6's partial-transfer finding (does a denser bank close the α=8 gap?); (ii) text-level concept-strength
-readout so the frontier is behavior-vs-fluency, not just ΔLM (projection along v is fixed by
-construction, so concept strength is controlled — measure generated-text repetition/quality alongside
-ΔLM); (iii) multi-layer or a second model.
+Core arc + all generalization axes delivered; Exp 6's "scale the bank" follow-up now RESOLVED (Exp 7:
+bigger bank at fixed capacity does NOT close the held-out gap — capacity interference binds). Optional
+remaining polish, any one a clean iteration: (i) CAPACITY-scaling ablation — retrain the size-5 bank at
+2×/4× MLP width and check whether held-out transfer recovers (the direct test of Exp 7's
+"capacity-interference" claim, and the corrected path to a reusable corrector); (ii) CURATED bank —
+select the 3 directions most correlated with the held-out target and test whether transfer beats the
+5-direction bank (isolates coverage-vs-interference); (iii) text-level concept-strength readout so the
+frontier is behavior-vs-fluency, not just ΔLM; (iv) multi-layer or a second model.
 
 # Research Proposal: Cold-Steer â Steering-Corruption Meta-Models for On-Manifold Activation Steering
 

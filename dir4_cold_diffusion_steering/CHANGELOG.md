@@ -124,3 +124,34 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   (per-direction recovery bars @α=8; held-out certainty ΔLM sweep raw/bank/native).
   Results in `results/06_conditional_bank.json`.
 - REPORT math re-verified via GitHub API: 9/9 js-display-math, 0 broken, 0 inline hazards.
+
+## 2026-07-02 — Experiment 7: scaling the vector bank / does a denser bank close the held-out gap? (S4c follow-up)
+- Added Experiment 7 to RESULTS.md and REPORT.md: directly tests Exp 6's closing prescription
+  ("scaling the bank is the indicated path"). Held out `certainty` as before; trained the SAME
+  direction-conditional corrector (5.25M params, identical recipe/seed/data/8 epochs) on NESTED
+  training banks of size 1 [sentiment], 3 [sentiment,formality,concreteness = Exp 6's bank], and 5
+  [+ politeness |v|=15.6, + complexity |v|=58.4 — two new DiffMean dirs, 16 pairs each]. Cosines to
+  certainty: complexity −0.80 (strong), politeness −0.35 (weak), formality +0.77, concreteness −0.82,
+  sentiment +0.03.
+- **Result (new, corrective):** enlarging the bank does NOT close the held-out gap — at fixed model
+  capacity it makes transfer WORSE. Held-out `certainty` recovery is non-monotone in bank size and
+  PEAKS at size 3, not size 5: α=1 14%/51%/−1% (bank 1/3/5), α=8 0%/7%/3%. Even though the size-5
+  bank adds a strongly-correlated direction (complexity, |cos|=0.80), transfer dropped at every α.
+  Corroborating in-bank signal: under the size-5 model, per-direction recovery @α=8 is LOWER than the
+  size-3 model gave (formality 70%→45%, concreteness 17%→13%; new dirs politeness 72%, complexity
+  41%, sentiment 57%). ⇒ capacity interference between directions competing for the shared 5.25M MLP,
+  not coverage, is the binding constraint. Native oracle retrained on certainty still recovers 78–142%,
+  so the direction is fully correctable — the gap is a cost of amortization.
+- Size-3 bank reproduces Exp 6 exactly (held-out recovery [51,42,21,12,7]; raw ΔLM
+  [0.22,0.99,2.62,3.35,3.71]), confirming reproducibility.
+- **Superseded framing:** Exp 6's "path to a reusable corrector is a LARGER bank" → corrected to
+  "more MODEL CAPACITY and/or a bank CURATED toward the target subspace, not simply more directions."
+  Updated RESULTS Headline + Exp-6 closing sentence; REPORT Summary + Conclusion (Exp 6 paragraph) +
+  Limitation (3).
+- New code: `experiments/07_bank_scaling.py` (reuses Exp 6 CondCorrector/train_cond/make_hat_cond +
+  Exp 3 LM-loss/Gaussian/Mahalanobis via import; builds politeness/complexity vectors, persisted to
+  `data/{politeness,complexity}_vec_layer6.npy`). New figure `plots/07_bank_scaling.png` (held-out
+  recovery vs α per bank size + oracle; held-out recovery @α=1,8 vs bank size). Results in
+  `results/07_bank_scaling.json`.
+- REPORT math re-verified via GitHub API: 10/10 js-display-math (added the recovery-fraction eq),
+  0 broken, 0 inline hazards.

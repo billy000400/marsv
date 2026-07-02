@@ -250,3 +250,51 @@ Pareto (heavier: needs a generation+scoring harness); (iii) multi-layer or a sec
 On track? yes — success criterion met since Iter 3; S4 (a)+(b)+(c) all delivered, Exp 5's open
 question closed (~98% of direction); no blocker. Remaining is optional (larger bank / text Pareto /
 multi-layer).
+
+## 2026-07-02 — Iter (S4c follow-up): Experiment 7 — scaling the vector bank
+**Did.** Built Experiment 7 (`experiments/07_bank_scaling.py`) to directly test Exp 6's parting
+prescription that "scaling the bank is the indicated path" to correct a held-out direction at strong
+steering. Held `certainty` out; trained the SAME direction-conditional corrector (5.25M params,
+identical recipe/seed/data/8ep) on nested banks of size 1/3/5. Added two NEW DiffMean directions for
+size 5 — politeness (|v|=15.6, cos to certainty −0.35) and complexity (|v|=58.4, cos −0.80) — 16
+contrastive pairs each, persisted to data/. Reused saved sentiment/formality/concreteness/certainty.
+~13 min GPU (3 bank models + 1 native oracle, 0.18 frac).
+
+**Learned (headline — a corrective, honest result).** Enlarging the bank does NOT close the held-out
+gap; at fixed model capacity it makes transfer WORSE. Held-out `certainty` recovery is non-monotone in
+bank size and PEAKS at size 3, not 5: α=1 14%/51%/−1%, α=8 0%/7%/3% (bank 1/3/5). This held even though
+the size-5 bank adds complexity (|cos|=0.80, strongly correlated with certainty) — coverage that should
+help. Corroborating in-bank: under size-5, per-direction recovery @α=8 dropped vs size-3 (formality
+70%→45%, concreteness 17%→13%; new: politeness 72%, complexity 41%, sentiment 57%). ⇒ capacity
+interference between directions sharing the fixed 5.25M MLP, NOT coverage, is the binding constraint.
+Native oracle still 78–142%, so the direction is fully correctable — the gap is a cost of amortization.
+Size-3 reproduces Exp 6 to the digit (recovery [51,42,21,12,7]).
+
+**Assumption/decision logged.** (a) Chose PLAN Next-step (i) "scale the bank" over (ii) text-Pareto /
+(iii) multi-layer because it directly interrogates Exp 6's own conclusion — the highest-value next
+question — and reuses all machinery (no new harness). (b) Nested banks {1,3,5} with 2 new directions
+(vs a bigger {1,3,5,7} needing 4 new concepts) to keep it one clean iteration; the non-monotone drop at
+5 already answers the question, so a 7-point sweep was unnecessary this iter. (c) Kept model capacity
+FIXED across bank sizes on purpose — that isolates the interference effect and is exactly what makes the
+negative result interpretable (a bigger model at size 5 would confound). (d) Reported the negative
+result honestly and CORRECTED Exp 6's optimistic "larger bank" framing rather than hiding the reversal —
+this is the actual scientific finding. Rejected: capacity-scaling ablation, curated-bank ablation this
+iter (clear follow-ups, out of scope for one step).
+
+**Deliverables.** RESULTS.md + REPORT.md curated: added Experiment 7 (two tables + interpretation),
+updated Headline / Exp-6 closing sentence (RESULTS) and Summary / Conclusion / Limitation(3) (REPORT);
+new figure `plots/07_bank_scaling.png`; `results/07_bank_scaling.json`;
+`data/{politeness,complexity}_vec_layer6.npy`. REPORT math re-verified via GitHub API (10/10
+js-display-math after adding the recovery-fraction equation, 0 broken, 0 inline hazards). CHANGELOG
+appended.
+
+**Next step.** Direction complete on all planned axes; Exp 6's open question now closed with a
+corrected answer. Remaining optional polish, any one a clean iter: (i) CAPACITY-scaling ablation — retrain
+the size-5 bank at 2×/4× width and check whether held-out transfer recovers (the direct test of Exp 7's
+"capacity interference" claim); (ii) CURATED bank — pick the 3 bank directions most correlated with the
+held-out target and see if transfer beats the 5-direction bank; (iii) text-level concept-strength Pareto;
+(iv) multi-layer / second model.
+
+On track? yes — success criterion met since Iter 3; S4 (a)+(b)+(c) delivered and Exp 6's follow-up now
+resolved (Exp 7); ~99% of direction. No blocker. Remaining is optional (capacity/curation ablation,
+text Pareto, multi-layer).
