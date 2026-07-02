@@ -4,6 +4,15 @@ Append-only.
 
 ---
 
+## 2026-07-02 — Finalization re-verify + STOP recovery (no deliverable change)
+- No result numbers changed. On reset the project was already FINALIZED (Stages A/B/B-dir/C/D/E
+  complete; project-level null named), but the STOP file had again been dropped by the loop wrapper.
+- Re-verified both deliverables current-best: REPORT.md passes the GitHub markdown API check
+  (4/4 display-math fences render as `js-display-math`, 0 degraded to `<pre lang="math">`), and both
+  REPORT.md and RESULTS.md have 0 inline-escape (8b) hazards. All 6 plots
+  (stageA/stageB/stageB_dir/stageC/stageD/stageE_L9) and all result artifacts present on disk.
+- Re-created the empty STOP file.
+
 ## 2026-07-02 — Stage C: improved synthetic codes (H3) — null holds, with positive control
 
 - Built `experiments/stageC_synthetic.py` (reuses the Stage B distance-matched framework: same
