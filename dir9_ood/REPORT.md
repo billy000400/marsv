@@ -83,7 +83,9 @@ fixed magnitude $\epsilon=6$ applied at $h$:
 s_{\text{pert}}(x) \;=\; \frac{1}{M}\sum_{j=1}^{M} D_{\mathrm{KL}}\!\big(p(\cdot\mid h)\,\big\|\,p(\cdot\mid h+\epsilon u_j)\big),\qquad \|u_j\|_2=1.
 ```
 
-Sharper response (higher KL) = more OOD.
+Sharper response (higher KL) = more OOD. The magnitude $\epsilon=6$ is fixed for the main table; its
+sensitivity is scanned separately (see *Epsilon sensitivity* under Results) over
+$\epsilon\in\lbrace0.25,\dots,24\rbrace$.
 
 **selfNLL-grad** (transparency control = iter-1's mislabeled "jacobian") — gradient norm of the
 model's own argmax negative log-likelihood; kept to show it is confidence-adjacent:
@@ -163,6 +165,25 @@ in **RESULTS.md**. Verdict per OOD set:
 - **Internal vs input-space:** for the genuine `plateau-jacFrob`, **input-space is best** and the
   residual stream is worse/reversed → **no value in measuring plateau-ness internally**. (The strong
   baselines are the opposite: Mahalanobis/cup-RMD need a deep residual layer to catch the code shift.)
+
+### Epsilon sensitivity (robustness of plateau-perturbation)
+The main table fixes the perturbation magnitude at $\epsilon=6$; an operator asked whether a *different*
+$\epsilon$ makes plateau-perturbation competitive. `experiments/eps_scan.py` sweeps
+$\epsilon\in\lbrace0.25,0.5,1,2,4,6,8,12,16,24\rbrace$ at all four measurement points on the same canonical split
+(same 16 random directions reused across magnitudes, so the $\epsilon=6$ column reproduces the main table
+exactly). Full numbers in `results/auroc_perturbation_eps.csv` (120 rows).
+
+![plateau-perturbation AUROC vs epsilon](results/plots/perturbation_eps_scan.png)
+
+- **Residual-stream points are nearly $\epsilon$-insensitive** (resid3/6/9 vary <0.05 across two decades).
+- **Input space is $\epsilon$-sensitive and $\epsilon=6$ was a poor choice there:** random@input is
+  ~0.87 for $\epsilon\le2$, 0.44 at $\epsilon=6$, and *reverses* to 0.12 at $\epsilon\ge8$ — the fixed
+  value sat on the cliff, understating the metric.
+- **Even an oracle $\epsilon$ (best $\epsilon$ and point per set, an upper bound that peeks at labels)
+  loses on every set:** random 0.873 (input, $\epsilon=0.25$) < MSP 0.932; shuffled 0.554 (input,
+  $\epsilon=4$) < MSP 0.872; code 0.614 (input, $\epsilon=24$) < cup-RMD@resid6 0.918. No single $\epsilon$
+  is jointly best (random wants small, code wants large). The negative verdict is unchanged and
+  strengthened — "wrong $\epsilon$" does not rescue plateau-perturbation.
 
 ## Conclusion
 Plateau-ness, measured honestly as the flatness of the output distribution, is a **weak OOD detector

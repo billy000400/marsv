@@ -227,3 +227,38 @@ WARN is unavoidable given the layout and was present at iter-6 STOP; gate is cle
 **Next step:** Rename `human_feedback_07011019.md` → `*.addressed.md`, write STOP. Project remains a
 complete negative result; this iteration only clarified the writeup.
 On track? yes — S1+S2+S3 100% done; new operator doc-clarity feedback fully addressed (plot bars labeled, canonical split + MSP explained), numbers unchanged, STOP re-created.
+
+---
+
+## Iteration 8 (2026-07-02) — epsilon scan for plateau-perturbation (human_feedback_07010438.md) + STOP
+**Did:** Reset into a nominally-finished project but found (a) NO STOP on disk and (b) a NEW unaddressed
+operator feedback file `human_feedback_07010438.md` (Jul 1 04:38): *"For the plateau perturbation, have you
+tried using different epsilon? We want to ... scan through a series of epsilons."* A prior partial iteration
+had already written `experiments/eps_scan.py` and RUN it to completion (the CSV+PNG existed, untracked in
+git), but never updated the deliverables, appended history, renamed the feedback, or wrote STOP. I finished
+addressing it. Verified the completed run: `results/auroc_perturbation_eps.csv` (120 rows = 3 OOD × 4 points
+× 10 eps) and `results/plots/perturbation_eps_scan.png`. The script sweeps
+$\epsilon\in\{0.25,0.5,1,2,4,6,8,12,16,24\}$ at {input,resid3,resid6,resid9} on the canonical split, reusing
+the same 16 random unit directions across magnitudes (only the scalar eps varies), so it is apples-to-apples
+and its eps=6 column REPRODUCES `auroc_table.csv` exactly (random@input 0.437, random@resid3 0.647,
+shuffled@resid3 0.534 — all match to 3dp). No new compute needed this iteration; work was verification +
+curating the deliverables.
+**Learned:** (1) The residual-stream measurement points are almost eps-insensitive (resid3/6/9 change <0.05
+across two orders of magnitude) — the magnitude choice barely matters internally. (2) Input space is where
+eps matters, and the previously-fixed eps=6 was a POOR choice there: random@input is ~0.87 for eps<=2, drops
+to 0.44 at eps=6 (right on a cliff), then REVERSES to 0.12 for eps>=8 (a large input perturbation moves the
+OOD next-token dist *less* than the ID one). So the main table understated input-space plateau-perturbation.
+(3) Best-achievable oracle-eps (best eps AND point per set, an upper bound that peeks at labels) still LOSES
+on every OOD set: random 0.873 (input, eps=0.25) < MSP 0.932; shuffled 0.554 (input, eps=4) < MSP 0.872;
+code 0.614 (input, eps=24) < cup-RMD@resid6 0.918. No single eps is jointly best (random wants small eps,
+code wants large). So the negative verdict is UNCHANGED and strengthened — "we just used the wrong eps" is
+ruled out as an escape. The random-set best plateau does improve (0.700 -> 0.873, now above jacFrob@input
+0.734), but not enough to beat MSP.
+**Gotchas:** my new inline math introduced `\{ \}` inside `$…$` (CLAUDE.md rule 8b hazard — GitHub strips
+the backslash before `{`/`}`); rewrote as `\lbrace`/`\rbrace`. REPORT.md display-math API check clean (8/8
+js-display-math, 0 `<pre lang=math>`). Kept the main fixed-eps table/pivot/summary unchanged (pre-registered
+eps=6 is a legitimate design point) and added the eps scan as its own clearly-caveated section rather than
+rewriting the headline — honest oracle-eps is transductive, an upper bound not a deployable detector.
+**Next step:** Rename `human_feedback_07010438.md` -> `*.addressed.md`, write STOP. Project remains a complete
+negative result; this iteration answered the operator's eps question without changing the verdict.
+On track? yes — S1+S2+S3 100% done; new operator eps-scan feedback fully addressed (residual eps-insensitive, input eps=6 was on a cliff, oracle-eps still loses everywhere), deliverables curated with the new plot, STOP created.

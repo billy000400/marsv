@@ -30,6 +30,19 @@ Minimum acceptable: one plateau variant (perturbation-sensitivity) computed at a
 End each JOURNAL.md entry with one line: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**DONE (iter 8, 2026-07-02) — EPSILON SCAN + STOP.** A new operator feedback file
+`human_feedback_07010438.md` asked whether scanning the plateau-perturbation magnitude $\epsilon$ (fixed at
+6) changes the picture. A partial prior iteration had already run `experiments/eps_scan.py` (outputs on
+disk) but never finalized; iter 8 completed it. Sweep $\epsilon\in\{0.25..24\}$ × {input,resid3,6,9} on the
+canonical split → `results/auroc_perturbation_eps.csv` (120 rows) + `results/plots/perturbation_eps_scan.png`
+(eps=6 column reproduces `auroc_table.csv` exactly). **Findings:** residual points are eps-insensitive
+(<0.05 across two decades); input-space eps=6 was a poor choice (random@input ~0.87 for eps≤2, 0.44 at
+eps=6, reverses to 0.12 at eps≥8); best oracle-eps plateau-perturbation still loses everywhere (random 0.873
+< MSP 0.932; shuffled 0.554 < MSP 0.872; code 0.614 < cup-RMD 0.918). **Verdict unchanged/strengthened.**
+Added an "Epsilon sensitivity" section to RESULTS.md + a Results subsection/Methods note to REPORT.md (both
+embed the new plot; display-math check 8/8 clean); main fixed-eps table unmodified. Feedback renamed
+`*.addressed.md`; `STOP` written. _History below:_
+
 **DONE (iter 7, 2026-07-01) — DOCUMENTATION CLARITY PASS + STOP.** A new operator feedback file
 `human_feedback_07011019.md` arrived asking three *documentation* questions (no recomputation): name the
 best baseline/plateau variant in the headline plot, define "canonical split", and explain why MSP detects
@@ -106,8 +119,9 @@ value measuring internally. Clean NEGATIVE result (acceptable per plan). Feedbac
 ## Next step
 None — project complete and finalized; deliverables are CLAUDE.md-compliant (clean current-best,
 LaTeX Methods, full CHANGELOG history) and `STOP` is written. **all** operator feedback addressed (incl.
-the iter-5 Codex `CODEX_REVIEW_20260622T230658Z.md` canonical-split hygiene review and the iter-7
-`human_feedback_07011019.md` documentation-clarity requests), `STOP` written. If reopened, the
+the iter-5 Codex `CODEX_REVIEW_20260622T230658Z.md` canonical-split hygiene review, the iter-7
+`human_feedback_07011019.md` documentation-clarity requests, and the iter-8
+`human_feedback_07010438.md` epsilon-scan request), `STOP` written. If reopened, the
 remaining ideas are all enhancements, not corrections: run cupbearer's **full task/data harness**
 end-to-end in `cupenv` (not just its detectors on precomputed acts) and refresh `auroc_cupbearer.csv`
 with a clean log; a multi-model sweep (Pythia/larger GPT-2); and a non-code domain shift to test whether

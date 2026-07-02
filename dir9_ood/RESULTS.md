@@ -86,6 +86,47 @@ approximation and is superseded by the real-package `cup-QUE` below; read it as 
 | shuffled | plateau-perturbation@resid3 0.534 | **MSP 0.872** | **NO** |
 | code | plateau-jacFrob@input 0.649 | **cup-RMD@resid6 0.918**, maha@resid6 0.913 | **NO** (MSP collapses to 0.359) |
 
+_"Best plateau" above uses the pre-registered fixed $\epsilon=6$. An oracle $\epsilon$-scan (next section)
+raises `plateau-perturbation` on `random` to 0.873 — still below MSP — and leaves the other sets' verdicts
+unchanged._
+
+## Epsilon sensitivity of plateau-perturbation (operator request 2026-07-01)
+
+The main table fixes the perturbation magnitude at $\epsilon=6$. An operator asked whether *scanning*
+$\epsilon$ changes the picture — does plateau-perturbation become competitive at some magnitude?
+`experiments/eps_scan.py` sweeps $\epsilon \in \lbrace0.25,0.5,1,2,4,6,8,12,16,24\rbrace$ at every measurement point
+on the **same canonical split**, reusing the same 16 random unit directions across magnitudes (only the
+scalar $\epsilon$ varies), so the curves are apples-to-apples and the $\epsilon=6$ column **reproduces the
+main table exactly** (e.g. random@input 0.437, random@resid3 0.647, shuffled@resid3 0.534).
+
+![plateau-perturbation AUROC vs epsilon, per OOD set](results/plots/perturbation_eps_scan.png)
+
+**What the scan shows (figure above).**
+- **The residual-stream points are almost flat in $\epsilon$** — resid3/6/9 move by <0.05 across two orders
+  of magnitude, so the metric there is essentially insensitive to the magnitude choice.
+- **Input space is where $\epsilon$ matters, and the fixed $\epsilon=6$ was a poor choice there.** At input
+  space the AUROC is high for small perturbations, then falls off a cliff and *reverses* (crosses below
+  0.5) as $\epsilon$ grows: random@input is **0.87 for $\epsilon\le2$**, 0.44 at $\epsilon=6$, and 0.12 at
+  $\epsilon\ge8$ (a large input perturbation moves the OOD distribution *less* than the ID one). The single
+  fixed $\epsilon=6$ landed right on that cliff, understating input-space plateau-perturbation.
+- **Best-achievable (oracle-$\epsilon$) plateau-perturbation still loses on every OOD set.** Picking the
+  best $\epsilon$ *and* point per set is an oracle that peeks at labels — an upper bound, not a deployable
+  detector:
+
+| OOD set | best plateau-perturbation (oracle $\epsilon$, point) | fixed $\epsilon=6$ best | best baseline | beats baseline? |
+|---|---|---|---|---|
+| random | **0.873** (input, $\epsilon=0.25$) | 0.700 (resid9) | MSP 0.932 | **NO** |
+| shuffled | **0.554** (input, $\epsilon=4$) | 0.534 (resid3) | MSP 0.872 | **NO** |
+| code | **0.614** (input, $\epsilon=24$) | 0.506 (resid3) | cup-RMD@resid6 0.918 | **NO** |
+
+**Takeaway.** Scanning $\epsilon$ lifts the `random` AUROC substantially (0.70 → 0.873, now the best
+plateau variant for `random`, above `plateau-jacFrob@input` 0.734) and shows the residual points are
+magnitude-insensitive — but even an oracle $\epsilon$ leaves plateau-perturbation below the best baseline
+on every set. No single $\epsilon$ is jointly best (random wants $\epsilon\le2$, code wants
+$\epsilon\ge16$), and at input space large $\epsilon$ actively *reverses* the detector. The negative
+verdict is unchanged; the scan strengthens it by ruling out "we just used the wrong $\epsilon$" as an
+escape. Full numbers: `results/auroc_perturbation_eps.csv` (120 rows).
+
 ## Headline
 With the methodology errors flagged by the operator review fixed, the iter-1 "competitive with MSP"
 story does not survive:

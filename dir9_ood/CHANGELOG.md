@@ -5,6 +5,24 @@ live in those files; this file records what moved and why.
 
 ---
 
+## 2026-07-02 — Epsilon scan for plateau-perturbation (iter 8; `human_feedback_07010438.md`)
+- **New experiment added — verdict unchanged, strengthened.** Operator asked whether scanning the
+  perturbation magnitude $\epsilon$ (fixed at 6 in the main table) makes plateau-perturbation competitive.
+  `experiments/eps_scan.py` sweeps $\epsilon\in\{0.25,\dots,24\}$ at all four measurement points on the
+  canonical split (same 16 directions reused across magnitudes; the $\epsilon=6$ column reproduces
+  `auroc_table.csv` exactly — random@input 0.437, random@resid3 0.647, shuffled@resid3 0.534). Outputs:
+  `results/auroc_perturbation_eps.csv` (120 rows), `results/plots/perturbation_eps_scan.png`.
+- **Findings:** residual-stream points are nearly $\epsilon$-insensitive (<0.05 across two decades); at
+  input space $\epsilon=6$ was a *poor* choice — random@input is ~0.87 for $\epsilon\le2$, 0.44 at
+  $\epsilon=6$, and reverses to 0.12 at $\epsilon\ge8$. Best oracle-$\epsilon$ plateau-perturbation:
+  random **0.873** (input, $\epsilon=0.25$; up from the fixed-$\epsilon$ best 0.700), shuffled 0.554
+  (input, $\epsilon=4$), code 0.614 (input, $\epsilon=24$) — each still **below** the best baseline
+  (MSP 0.932 / MSP 0.872 / cup-RMD 0.918). No single $\epsilon$ jointly best.
+- **Deliverables:** added an "Epsilon sensitivity" section to RESULTS.md and a Results subsection +
+  Methods note to REPORT.md, both embedding the new plot; no existing numbers moved (the main
+  fixed-$\epsilon$ table is unchanged). REPORT display-math check clean (8/8 js-display-math, 0 code
+  fallbacks).
+
 ## 2026-07-01 — Fix inline-math escape stripping (no science changed)
 - **Rendering fix only — no numbers moved.** The **L2 norm** baseline used inline `$\; s_{\text{L2}}(x)
   = \|h\|_2.$`; GitHub strips the backslash before punctuation inside inline `$…$`, so `\|`→`|` (single
