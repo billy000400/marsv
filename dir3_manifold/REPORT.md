@@ -58,12 +58,26 @@ The reported AE signal is the **bend location** $k^\star$ (where added latents s
 by Kneedle on $\mathrm{FVU}$ vs $\log_2 k$, plus the per-doubling marginal gain
 $\Delta\mathrm{FVU}(k) = \mathrm{FVU}(k/2) - \mathrm{FVU}(k)$ used to test for a plateau.
 
-**TwoNN (Facco et al.) local ID.** For each point let $r_1, r_2$ be the distances to its 1st and 2nd
-nearest neighbours and $\mu = r_2/r_1$. Under a locally uniform density of dimension $d$, $\mu$ is
-Pareto, so $d$ is the slope of the empirical log–log CDF (upper 10% tail discarded):
+**TwoNN (Facco et al.) local ID.** Every point and its neighbours live in the **ambient
+768-dimensional residual-stream space** $\mathbb{R}^{768}$ (the raw captured activation vectors),
+under the standard Euclidean metric — TwoNN uses **no** projection or embedding; it reads the
+*local* intrinsic dimension straight off the geometry of the ambient point cloud. For each point
+$x_i$, let $r_1(i)$ and $r_2(i)$ be the Euclidean distances to its **1st and 2nd nearest neighbours**
+among the other activation vectors, and let $\mu_i = r_2(i)/r_1(i) \ge 1$. Under a density that is
+locally uniform on a $d$-dimensional manifold, this ratio is Pareto-distributed with parameter $d$,
+so its cumulative distribution function is
 
 ```math
-\log\!\big(1 - F(\mu)\big) = -\,d\,\log \mu .
+F(\mu) \;=\; \Pr[\,\mu_i \le \mu\,] \;=\; 1 - \mu^{-d}, \qquad \mu \ge 1 .
+```
+
+$F$ is thus the CDF **of the neighbour-distance ratios** $\mu_i$ (estimated empirically by the sorted
+rank $F(\mu_{(j)}) = j/(N+1)$). Taking $-\log(1-F)$ of both sides rearranges this into a line through
+the origin whose slope is the intrinsic dimension $d$; the fit discards the upper 10% of $\mu$ for
+heavy-tail robustness:
+
+```math
+-\log\!\big(1 - F(\mu)\big) = d\,\log \mu .
 ```
 
 **MLE (Levina–Bickel) local ID.** Using the $k$ nearest-neighbour distances $T_j(x)$ ($k = 20$),

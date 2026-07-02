@@ -23,7 +23,12 @@ PR = participation ratio (Σλ)²/Σλ²; dXX = #dims for XX% cumulative varianc
 ### Nonlinear estimators (TwoNN + MLE, pure-numpy/torch, CPU) — done (S2b)
 Hand-rolled (no skdim): TwoNN = Facco distance-ratio fit (10% tail discarded);
 MLE = Levina-Bickel k=20, MacKay-Ghahramani inverse-average. Chunked brute-force
-kNN via torch.cdist. Two preprocessings: **centered** (mean only) and
+kNN via torch.cdist. **What TwoNN operates on (operator Q, 2026-07-01):** the two
+points are each reference vector's 1st and 2nd nearest neighbours, living in the
+*ambient 768-d residual-stream space* under Euclidean distance (no projection); `F`
+is the empirical CDF of the ratios μ=r₂/r₁, which is Pareto `F(μ)=1−μ^{−d}` for a
+locally-uniform d-manifold, so d is the slope of −log(1−F) vs log μ. Full defs +
+equations in REPORT.md Methods. Two preprocessings: **centered** (mean only) and
 **standardized** (z-scored per dim, to neutralise the massive-activation dim).
 Estimators validated on synthetic d∈{5,10,20,50} Gaussians (exact at low d,
 mild downward bias at high d — the known TwoNN/MLE finite-sample edge effect).

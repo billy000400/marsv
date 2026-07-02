@@ -183,3 +183,32 @@ result, history consolidated to CHANGELOG, STOP written. If reopened: raw block-
 a forward hook (current L11 is post-ln_f); AE on outlier-dim-removed activations; second model/corpus.
 
 On track? yes — 100% done; S1–S5c complete + plots + consolidation; STOP written; no blocker.
+
+## Iter 9 (2026-07-01) — address operator feedback: TwoNN space & F()
+**Did:** Re-entered a COMPLETE directory but found STOP absent and a new **unaddressed** feedback
+file `human_feedback_07010347.md` asking: *"In TwoNN, where do the two points live in? What is the
+F()?"* — a Methods-clarity question, not a science change. Confirmed the answer against the actual
+code (`experiments/id_estimate.py` `twonn()`): kNN is a brute-force `torch.cdist` on the raw
+activation vectors, so the two neighbours are in the **ambient 768-d residual-stream space** under
+Euclidean distance (no projection); `F` in the code is the empirical CDF of `mu=r2/r1`
+(`F=arange(1,keep+1)/(N+1)`), and the fit `d=(x·y)/(x·x)` with `x=log mu`, `y=-log(1-F)` is the
+Pareto-slope least-squares through the origin (top 10% of mu discarded). Rewrote the REPORT.md
+TwoNN Methods paragraph to say all of this explicitly; added a display `math` fence for
+`F(μ)=1−μ^{−d}` (display-eq count 3→4); removed an inline copy of the log-log slope equation that
+contained `\!`/`\,` (rule-8b hazard) since the display fence already shows it. Added a one-line
+answer + pointer in RESULTS.md's nonlinear-estimators paragraph. Verified via GitHub markdown API:
+**4 `js-display-math`, 0 `<pre lang="math">`, 0 inline-escape hazards**. Appended CHANGELOG,
+updated PLAN, renamed feedback `→ .addressed.md`, re-wrote STOP.
+
+**Learned:** The prior "STOP written" state did not persist a STOP file on disk (re-entry found
+none), so the finalize gate is only real once STOP exists on disk — always re-check. The feedback
+was purely expository; the right response is a surgical Methods edit (answer both sub-questions
+explicitly, in the canonical REPORT.md Methods) plus a RESULTS pointer, not any recompute.
+
+**Next step:** None — success criterion met (3-estimator per-layer ID; AE bottleneck sweep with
+identified bend; REPORT.md comparison); all THREE reviews + this feedback addressed; figures exist
+for every result; history consolidated to CHANGELOG; STOP written. If reopened: raw block-11
+resid_post via a forward hook (current L11 is post-ln_f); AE on outlier-dim-removed activations;
+second model/corpus; TDA persistent homology on a layer-6 subsample.
+
+On track? yes — 100% done; S1–S6 + all operator feedback addressed; deliverables verified-rendering; STOP written; no blocker.

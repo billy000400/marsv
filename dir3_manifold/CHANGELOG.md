@@ -5,6 +5,21 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-01 — Address operator feedback: clarify TwoNN space & F() (no numbers changed)
+- **Operator question** (`human_feedback_07010347.md`): *"In TwoNN, where do the two points live?
+  What is the F()?"* — answered in REPORT.md Methods and RESULTS.md; no result changed.
+- REPORT.md **TwoNN paragraph rewritten** to state explicitly: (1) each reference point and its two
+  neighbours live in the **ambient 768-d residual-stream space** $\mathbb{R}^{768}$ (raw activation
+  vectors), Euclidean metric, **no projection/embedding** — TwoNN reads local ID off the ambient
+  cloud; (2) the two points are each vector's **1st and 2nd nearest neighbours**, with
+  $\mu_i = r_2/r_1$; (3) **$F$ is the CDF of the ratios $\mu_i$**, empirically the sorted rank
+  $j/(N{+}1)$, theoretically Pareto $F(\mu)=1-\mu^{-d}$. Added a dedicated `math` fence for
+  $F(\mu)=1-\mu^{-d}$ (display-eq count 3→4; all 4 verified as `js-display-math`, 0 as `<pre>`).
+- Removed an inline `$…$` copy of the log-log slope equation that contained `\!`/`\,` (would have
+  been mangled by the rule-8b backslash-strip) — the display fence below it already shows it.
+- RESULTS.md nonlinear-estimators paragraph got a one-line answer pointing to REPORT Methods.
+- Renamed `human_feedback_07010347.md` → `human_feedback_07010347.addressed.md`.
+
 ## 2026-07-01 — Fix inline-math escape stripping (no science changed)
 - **Rendering fix only — no numbers moved.** GitHub strips the backslash before punctuation inside
   inline `$…$`, so the Baselines set-notation `\{…\}` (PCA `d_q` bounds and the `{5,10,20,50}` /
