@@ -1,0 +1,38 @@
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 5809.77it/s]
+[data] N=49218 tokens, d=768
+{
+  "model": "gpt2-small",
+  "layer": 6,
+  "n_tokens": 49218,
+  "ambient_dim": 768,
+  "gaussianity": {
+    "dm2_mean": 764.7438078483517,
+    "dm2_std": 262.77024817788697,
+    "dm2_skew": 0.4518348963733849,
+    "dm2_exkurt": 0.744750053407544,
+    "chi2_expected": {
+      "mean": 768,
+      "std": 39.191835884530846,
+      "skew": 0.10206207261596575,
+      "exkurt": 0.015625
+    },
+    "mardia_kurtosis": 653881.25,
+    "mardia_gaussian": 591360.0,
+    "mardia_ratio": 1.1057245163690477,
+    "n_dims_heavy_tailed": 14,
+    "max_perdim_exkurt": 118.1495590209961
+  },
+  "intrinsic_dim": {
+    "twonn_raw": 11.39921123240671,
+    "twonn_zscored": 8.14948990785547,
+    "mle10_raw": 25.08016038091531,
+    "mle20_raw": 26.568232913287538,
+    "mle10_zscored": 31.34394313619858,
+    "mle20_zscored": 33.76358595121238,
+    "pca_participation_ratio": 1.114728481133427,
+    "pca_n_comp_90pct": 1,
+    "pca_n_comp_95pct": 3
+  }
+}
+[done] wrote plot + json
+EXIT=0

@@ -87,6 +87,11 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         the clean-activation shift under the FineWeb Gaussian (D_M 27.5→30.1→37.4) — graceful degradation, not a
         FineWeb-prompt artifact. fineweb row reproduces Exp 3 to the digit. Flagship result now robust on 5 axes
         (strength/direction/layer/model/prompt).
+- [x] S5 — MANIFOLD GEOMETRY (Exp 16, human feedback #2) DONE: intrinsic dim (TwoNN/Levina–Bickel MLE/PCA
+        participation ratio) + Gaussianity (held-out D_M² vs χ²₇₆₈) on clean layer-6 activations. Cloud is
+        LOW-DIM (~8–34 ≪ 768), ANISOTROPIC (PR 1.1), HEAVY-TAILED (D_M² spread 6.7× Gaussian) — NOT a single
+        Gaussian. Sharpens the thesis (mechanism for Exp 2). Human asks #1 (diffusion corrector) + #3 (other
+        steering family) remain — see Next step.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -98,6 +103,19 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S5 Experiment 16 (new, acts on human feedback 2026-07-06):** the human doubted the Gaussian-manifold
+assumption behind `D_M` and asked to characterize the real manifold via manifold-recovery literature.
+Tested directly on clean layer-6 activations (49,218 tokens, no steering): intrinsic dimension (TwoNN —
+Facco 2017; Levina–Bickel MLE — 2004; PCA participation ratio) + Gaussianity (held-out D_M² vs χ²₇₆₈).
+RESULT: the cloud is NOT a single 768-d Gaussian — LOW-DIM (intrinsic dim ~8–34 ≪ 768), EXTREMELY
+ANISOTROPIC (participation ratio 1.1, ~90% var in 1 PC), HEAVY-TAILED (held-out D_M² spread 6.7× the
+Gaussian, 14 dims excess-kurt>1 max 118). SHARPENS the thesis: concrete mechanism for Exp 2's negative
+(D_M piles volume into rogue dims → D_M-minimizing correction goes there → LM breaks); reframes "off the
+Gaussian manifold" as "off a crude fit." No prior (LM-loss) number changes. Artifacts:
+`experiments/16_manifold_geometry.py`, `results/16_manifold_geometry.json`, `plots/16_manifold_geometry.png`.
+RESULTS/REPORT/CHANGELOG curated; REPORT math verified (18/18 js-display-math, 0 broken, 0 inline hazards).
+Two human asks remain queued (see Next step): #1 a real diffusion-model corrector, #3 a different steering family.
+<!-- prior: S4(i) prompt-family Exp 15 -->
 S1+S2+S3 + S4(a) strength-extrap + S4(b) held-out-vector + S4(c) direction-conditional-bank +
 S4(c-follow-ups) bank/capacity/curated SCALING (Exp 7/8/9) + S4(d) BEHAVIORAL text Pareto (Exp 10) +
 S4(e) BEHAVIORAL-PRESERVATION term (Exp 11) + S4(f) LAYER ROBUSTNESS (Exp 12) + S4(g) CROSS-MODEL
@@ -281,7 +299,19 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-Core arc + all generalization axes + behavioral axis + behavioral-preservation follow-up + LAYER-ROBUSTNESS
+**Two open HUMAN-FEEDBACK asks (2026-07-06), each a clean iteration, highest priority:**
+(#1) **A real diffusion-model corrector.** The current corrector is a one-shot MLP, not the diffusion model
+of the GLP arxiv paper. Build a (conditional) flow-matching / DDPM-style denoiser over layer-6 activations
+trained on the STEERING corruption z=h+αv (Cold-Diffusion framing, NOT Gaussian-noise denoising), with
+iterative sampling; name it explicitly "diffusion." Compare its ΔLM + behavioral Pareto to the one-shot MLP
+and to a generic Gaussian-noise GLP-style teacher. This is the central critique — worth 2 iters if needed.
+(#3) **A genuinely different steering family.** All steering so far is hand-built DiffMean concepts (6 of
+them). Try a persona/behavioral trait or a downloaded sentiment/toxicity dataset (downloads OK per feedback)
+to test the recipe beyond DiffMean probes.
+(Exp 16 just answered #2 — the Gaussian-manifold doubt — confirming the cloud is low-dim/anisotropic/heavy-tailed.)
+
+Prior (all delivered, success criterion long met): Core arc + all generalization axes + behavioral axis +
+behavioral-preservation follow-up + LAYER-ROBUSTNESS
 (Exp 12: 90/84/76% @α=8 at blocks 3/6/9) + CROSS-MODEL generality (Exp 13: GPT-2 medium, 89% @α=8 / 101% @α=4)
 + BANK-DIVERSITY causal confirmation (Exp 14) + PROMPT-FAMILY robustness (Exp 15: FineWeb-trained corrector
 recovers 84/77/60% @α=8 on fineweb/markdown/code) delivered — the flagship fluency result is now robust on

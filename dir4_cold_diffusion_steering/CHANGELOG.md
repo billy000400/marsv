@@ -370,3 +370,32 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   shift bar). Results `results/15_prompt_family.json`.
 - REPORT math re-verified via GitHub API: 14/14 js-display-math (Exp 15 reuses the recovery fence, no new
   equation), 0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-06 — Experiment 16: is the "manifold" Gaussian? Intrinsic dimension + Gaussianity — NEW (acts on human feedback)
+- Acts on human feedback (2026-07-06): "I'm not sure if Gaussian manifold is valid here. Look up recent
+  literature about recovering smooth manifold from discrete points and evaluate what kind of manifold we
+  are dealing with. I doubt it is not Gaussian." Tested directly, no steering, on the clean layer-6 FineWeb
+  activations used throughout (49,218 tokens).
+- **Method (new):** two standard manifold-from-discrete-points intrinsic-dimension estimators — TwoNN
+  (Facco et al. 2017) and the Levina–Bickel MLE (2004) — plus PCA participation ratio; and a Gaussianity
+  test comparing held-out D_M^2 to its chi^2_768 law (moments + Wilson–Hilferty QQ) with per-dimension
+  excess kurtosis. All implemented in numpy/torch (no scipy/sklearn available). Deterministic (seed 0).
+- **Result (new):** the activation cloud is NOT a single 768-d Gaussian. (1) LOW-DIMENSIONAL: intrinsic
+  dim ~8–34 (TwoNN 11.4 raw / 8.1 z-scored; MLE 25–34) vs 768 ambient. (2) EXTREMELY ANISOTROPIC: PCA
+  participation ratio 1.1, ~90% of variance in ONE PC and 95% in three (GPT-2 outlier/rogue dims).
+  (3) HEAVY-TAILED: held-out D_M^2 spread 6.7× the Gaussian chi^2_768 (variance ~45× too big), skew 0.45
+  vs 0.10, 14 dims with excess kurtosis >1 (max 118). Mean of D_M^2 matches 768 but is non-diagnostic.
+- **Framing (no prior result superseded):** this SHARPENS the thesis. It is the concrete mechanism behind
+  Exp 2's negative result (the Gaussian piles its "volume" into high-variance rogue dims, so the
+  D_M-minimizing correction Σv̂ moves there — cheap in D_M, destructive to the LM), and it reframes "off
+  the Gaussian manifold" (Exp 3/5/12/13) as "off a crude fit," confirming D_M is a diagnostic, never a
+  training target. All existing LM-loss-based numbers unchanged.
+- **Deliverable deltas:** RESULTS.md +Exp 16 (two tables + reading) + figure entry + Headline
+  "On the 'manifold' itself" paragraph. REPORT.md +Methods "Manifold geometry" subsection (TwoNN /
+  Levina–Bickel / participation-ratio / chi^2 equations, 4 new display-math blocks) + Results Exp 16
+  (two tables + interpretation + figure) + Summary Step-2 clause + Conclusion clause + Limitation (1)
+  upgraded (now quantified; future work notes a mixture/flow/diffusion prior).
+- New code `experiments/16_manifold_geometry.py`. New figure `plots/16_manifold_geometry.png` (QQ vs
+  chi^2 / PCA cumulative variance / intrinsic-dim bars). Results `results/16_manifold_geometry.json`.
+- REPORT math re-verified via GitHub API: 18/18 js-display-math (14 prior + 4 new), 0 broken
+  (<pre lang=math>), 0 inline hazards.

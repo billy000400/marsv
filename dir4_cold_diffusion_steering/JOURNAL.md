@@ -623,3 +623,47 @@ readout THROUGH sampled/differentiable generation rather than teacher-forced (th
 On track? yes — Exp 15 adds prompt-family robustness (FineWeb-trained corrector recovers 84/77/60% @α=8 on
 fineweb/markdown/code, graceful degradation tracking activation shift); direction ~99% complete, all planned
 generalization axes now covered, deliverables curated + math-verified. No blocker.
+
+## 2026-07-06 — Iter 16: is the "Gaussian manifold" valid? (acts on human feedback)
+
+**Scope decision.** New human feedback (`human_feedback_07060332.md`) raised three asks: (#1) build an
+actual diffusion-model corrector like the GLP arxiv paper, not the one-shot MLP; (#2) doubt the Gaussian
+manifold — look at manifold-recovery literature and characterize the real manifold; (#3) try steering types
+beyond sentiment (downloads OK). One focused iteration → picked #2: self-contained (no downloads), directly
+tests the assumption under the D_M metric used in EVERY experiment, highest value-to-risk. Logged #1 and #3
+as prioritized next steps (see PLAN). Rejected doing #1 this iter (a proper diffusion/flow model over
+activations + iterative sampling is a multi-iteration build, higher risk of not landing cleanly); rejected
+#3 this iter (I already cover 6 DiffMean concepts — sentiment/formality/concreteness/certainty/politeness/
+complexity — so the marginal value is a genuinely different steering *family*, better done alongside #1).
+
+**Env note (important for future iters).** The working interpreter is
+`/mars-vol/marsv/dir9_ood/cupenv/bin/python` (py3.11, torch 2.9, transformers present). Under 5-agent
+contention the `from transformers import ...` line takes ~206s (finite, not hung — faulthandler showed it
+crawling through the import chain). Set `HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1` and run in background with
+a large timeout. `/opt/conda/bin/python` has torch but NOT transformers; no scipy/sklearn anywhere.
+
+**Did.** Wrote `experiments/16_manifold_geometry.py`: on the clean layer-6 FineWeb activations (49,218
+tokens, no steering) it estimates intrinsic dimension (TwoNN — Facco 2017; Levina–Bickel MLE — 2004; PCA
+participation ratio) and tests Gaussianity (held-out D_M^2 vs chi^2_768 moments + Wilson–Hilferty QQ;
+per-dim excess kurtosis). All numpy/torch (no scipy). Deterministic seed 0.
+
+**Learned.** The activation cloud is decisively NOT a single 768-d Gaussian: intrinsic dim ~8–34 (TwoNN
+11.4/8.1, MLE 25–34) ≪ 768; participation ratio 1.1 (near rank-1 — GPT-2 rogue dims, ~90% var in 1 PC);
+held-out D_M^2 spread 6.7× the chi^2_768 Gaussian (var ~45× too big), skew 0.45 vs 0.10, 14 heavy-tailed
+dims (max excess kurt 118). KEY INSIGHT: this SHARPENS the paper rather than breaking it — it's the concrete
+mechanism for Exp 2's negative result (D_M concentrates in high-variance rogue dims, so the D_M-minimizing
+correction moves exactly there) and reframes "off the Gaussian manifold" as "off a crude fit." No existing
+(LM-loss-based) number changes; the human's doubt is validated and folded into the thesis. Runtime ~5 min
+(mostly the slow import + GPU forward), well under budget.
+
+**Next step.** Two open human asks remain, each a clean iteration: (i) **#1 — a real diffusion/flow
+corrector**: train a (conditional) flow-matching or DDPM-style denoiser over layer-6 activations using the
+STEERING corruption z=h+αv (Cold-Diffusion framing), do iterative sampling, and compare its ΔLM/behavioral
+Pareto to the one-shot MLP and to a generic Gaussian-noise GLP-style teacher — name it explicitly a
+"diffusion" model per the feedback. (ii) **#3 — a genuinely different steering family** (e.g. a
+persona/behavioral trait or a downloaded sentiment/toxicity dataset rather than the 20/20 DiffMean probes),
+to test the recipe beyond hand-built DiffMean concepts. Both optional; success criterion long met.
+
+On track? yes — Exp 16 (manifold geometry) delivered, acting on human feedback #2: activations are
+low-dim/anisotropic/heavy-tailed, NOT Gaussian — sharpens the thesis; deliverables curated + math-verified
+(18/18 display-math). ~99% complete; feedback asks #1 (diffusion model) and #3 (other steering) queued. No blocker.

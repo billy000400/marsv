@@ -29,7 +29,10 @@ projection to the digit. **Yet it makes the language model dramatically worse**,
 `ΔLM` rises to +4.2 nats, and even at weak steering where raw steering is nearly harmless
 (+0.08 nats) the "corrected" activation is catastrophic (+3.31 nats). The lesson is sharp:
 **statistical "on-manifold" and "safe for the LM" are decoupled** — you can reduce the
-off-manifold distance while multiplying LM loss ~40×.
+off-manifold distance while multiplying LM loss ~40×. (Experiment 16 shows *why* the Gaussian is the
+wrong yardstick to begin with: the real activation cloud is low-dimensional — intrinsic dimension ~8–34,
+not 768 — near rank-1 anisotropic, and heavy-tailed, so `D_M` concentrates its "volume" in a few outlier
+dimensions, exactly the directions this correction moves into.)
 
 **Step 3 — the corrector that works.** We keep the exact same projection-preserving form but
 replace the Gaussian-optimal shift with a small **MLP trained end-to-end against the downstream
@@ -443,6 +446,53 @@ Mahalanobis distance `D_M` under the FineWeb Gaussian (the same fit used through
 `resid_post` activations sit further from the FineWeb activation cloud is more out-of-distribution *for the
 corrector*, since the corrector is a function of those activations. The `fineweb` family re-runs Experiment 3
 and is the built-in reproducibility check.
+
+### Manifold geometry: intrinsic dimension and Gaussianity (Experiment 16)
+
+Every off-manifold measure in this report uses `D_M`, which models the cloud of real activations as a
+**single 768-dimensional Gaussian** with mean `μ` and covariance `Σ`. Experiment 16 tests that modeling
+choice directly, on the clean layer-6 FineWeb activations used throughout (49,218 tokens, **no
+steering**), along two axes.
+
+**Intrinsic dimension** — how many degrees of freedom the activations occupy — is estimated with two
+standard estimators that recover a manifold's dimension from sampled points. **TwoNN** (Facco et al.
+2017) uses, for each point, the ratio of its distances to the 2nd and 1st nearest neighbours; the
+maximum-likelihood dimension over `N` points is:
+
+```math
+\hat{d}_{\text{TwoNN}} = \frac{N}{\sum_{i=1}^{N} \ln \mu_i}, \qquad \mu_i = \frac{r_2(x_i)}{r_1(x_i)}
+```
+
+The **Levina–Bickel MLE** (2004) uses each point's `k` nearest-neighbour distances, ordered
+`T_1 < \dots < T_k`, and averages the per-point estimate:
+
+```math
+\hat{d}_k = \Big\langle\, m_k(x_i) \,\Big\rangle_i, \qquad m_k(x_i) = \Big[\, \tfrac{1}{k-1}\textstyle\sum_{j=1}^{k-1} \ln \tfrac{T_k(x_i)}{T_j(x_i)} \,\Big]^{-1}
+```
+
+We report both on raw activations and on per-dimension z-scored activations (which removes GPT-2's
+extreme per-dimension scale differences), and complement them with the linear **PCA participation
+ratio**, an effective linear dimension from the sorted covariance eigenvalues:
+
+```math
+\mathrm{PR} = \frac{\big(\sum_i \lambda_i\big)^2}{\sum_i \lambda_i^2}
+```
+
+`PR = d` for an isotropic Gaussian; `PR = 1` when a single direction carries all the variance.
+
+**Gaussianity** is tested through the held-out squared Mahalanobis distance. If the activations were
+Gaussian, then fitting `(μ, Σ)` on one half of the tokens and evaluating on the other half, the held-out
+`D_M²` would follow a chi-square law with `d = 768` degrees of freedom exactly:
+
+```math
+D_M^2(x) = (x-\mu)^{\top} \Sigma^{-1} (x-\mu) \;\sim\; \chi^2_{d} \quad (\text{mean } d,\; \text{variance } 2d,\; \text{skewness } \sqrt{8/d})
+```
+
+We compare the empirical `D_M²` distribution to `χ²₇₆₈` by its moments and a Wilson–Hilferty QQ plot.
+The *mean* of `D_M²` is ≈ `d` for **any** distribution once `(μ,Σ)` are fit on matched data (it is
+essentially `trace(Σ⁻¹Σ) = d`), so only the *spread* and *shape* are diagnostic. We additionally report
+the per-dimension excess kurtosis of the standardized activations, counting "heavy-tailed" dimensions as
+those with excess kurtosis above 1 (a Gaussian has 0).
 
 ### Baselines
 
@@ -926,6 +976,54 @@ generalizes across the prompt distribution as well as across strength, layer, an
 FineWeb-prompt artifact**, and a single trained corrector stays useful on out-of-domain text — most so when
 that text's activations remain near the distribution the corrector was fit on.
 
+### Experiment 16 — the activation manifold is low-dimensional, anisotropic, and non-Gaussian
+
+![manifold geometry](plots/16_manifold_geometry.png)
+
+The clean activation cloud is far from the single 768-d Gaussian that `D_M` assumes. Intrinsic dimension:
+
+| estimator | value | as % of ambient 768 |
+|---|---|---|
+| TwoNN (raw) | 11.4 | 1.5% |
+| TwoNN (per-dim z-scored) | 8.1 | 1.1% |
+| Levina–Bickel MLE, k = 10 / 20 (raw) | 25.1 / 26.6 | ~3% |
+| Levina–Bickel MLE, k = 10 / 20 (z-scored) | 31.3 / 33.8 | ~4% |
+| PCA participation ratio | 1.1 | 0.1% |
+| # PCs for 90% / 95% of variance | 1 / 3 | — |
+
+Gaussianity of the fit — held-out `D_M²` against the `χ²₇₆₈` a Gaussian predicts:
+
+| quantity of held-out `D_M²` | observed | Gaussian (`χ²₇₆₈`) | ratio |
+|---|---|---|---|
+| mean | 765 | 768 | 1.00 (not diagnostic) |
+| standard deviation | 263 | 39.2 | **6.7×** |
+| skewness | 0.45 | 0.10 | 4.4× |
+| excess kurtosis | 0.74 | 0.016 | — |
+| # dims with excess kurtosis > 1 | 14 / 768 | ≈ 0 | — |
+| max per-dimension excess kurtosis | 118 | ≈ 0 | — |
+
+**Interpretation.** The activation cloud is **not** a single 768-d Gaussian, and confirming this
+*sharpens* the report's thesis rather than weakening it. Three facts. **(1) It is low-dimensional.** Every
+intrinsic-dimension estimator puts the manifold at **~8–34 dimensions** — one to two orders of magnitude
+below the 768-d ambient space — so the activations lie near a thin, curved manifold, not spread through
+the space a full-rank Gaussian describes. **(2) It is extremely anisotropic.** The PCA participation ratio
+is **1.1**: a single direction carries ~90% of the variance and three carry 95%, the well-documented
+signature of GPT-2's "outlier"/"rogue" activation dimensions. **(3) It is heavy-tailed.** Were the Gaussian
+correct, held-out `D_M²` would be `χ²₇₆₈` (standard deviation 39); instead its spread is **6.7× larger**
+(variance ≈ 45× too big), it is right-skewed (0.45 vs 0.10), and **14** individual dimensions have excess
+kurtosis above 1, up to **118**. (The mean of `D_M²` matches 768, but that is guaranteed for any
+distribution once the Gaussian is fit on matched data, so it is not evidence of Gaussianity.)
+
+**Why this matters.** This is the mechanism behind Experiment 2's central negative result, made concrete.
+Because the Gaussian mis-models the manifold — piling almost all of its probability "volume" into a handful
+of high-variance rogue directions — the Mahalanobis-minimizing correction `Σv̂` moves *into* exactly those
+directions: cheap in `D_M`, but maximally destructive to a language model that reads them sharply. It also
+clarifies what "off the Gaussian manifold" means in Experiments 3 / 5 / 12 / 13: the learned corrector moves
+off a **crude Gaussian fit**, which is not the same as moving off the true (low-dimensional, non-Gaussian)
+data manifold. `D_M` is a useful *diagnostic* of departure-from-typical, but — as the whole direction
+argues — was never, and should never be, a training target. Supervising the corrector with the downstream
+LM loss is precisely the right response to a manifold this far from Gaussian.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -939,7 +1037,11 @@ correction against the **downstream LM loss** works decisively: the learned corr
 **84%** of the fluency lost at strong steering (`ΔLM` +2.78→+0.44 at `α=8`) with the steering
 edit intact at layer 6. It does so by moving *further* from the Gaussian manifold — confirming that
 statistical "on-manifold" and "safe for the LM" are not just decoupled but that the LM-safe
-correction is genuinely off-manifold. This is **not a block-6 artifact**: replicating the exact pipeline
+correction is genuinely off-manifold. And the "Gaussian manifold" is itself only a crude proxy:
+Experiment 16 finds the real activation cloud is low-dimensional (intrinsic dimension ~8–34 ≪ 768),
+near rank-1 anisotropic, and heavy-tailed (held-out `D_M²` spread 6.7× the Gaussian `χ²₇₆₈`), so `D_M`
+is a diagnostic of departure-from-typical, never a training target — which is precisely why a
+downstream-LM objective, not a manifold-distance surrogate, supervises the corrector. This is **not a block-6 artifact**: replicating the exact pipeline
 at the early, middle, and late residual stream (blocks 3 / 6 / 9) recovers 90% / 84% / 76% of the fluency
 damage at α=8, off the Gaussian manifold at every layer (Experiment 12); and **not a GPT-2-small artifact**:
 the same pipeline on GPT-2 medium (355M, block 12 / 24) recovers 89% at α=8 (101% at α=4), likewise off the
@@ -999,7 +1101,14 @@ follow-up work.
 
 **Limitations.** (1) The manifold is modeled as a single Gaussian, so `D_M` captures
 scale/correlation but not multimodal or nonlinear structure — Experiments 2 and 3 show this is a
-defining flaw of the *metric as a training target*, not merely a modeling nicety. (2) `ΔLM` is a
+defining flaw of the *metric as a training target*, not merely a modeling nicety. **Experiment 16
+quantifies the gap directly:** the clean activation cloud has intrinsic dimension ~8–34 (vs 768 ambient,
+by TwoNN and the Levina–Bickel MLE), a PCA participation ratio of 1.1 (near rank-1), and held-out `D_M²`
+with 6.7× the spread of the `χ²₇₆₈` a Gaussian predicts (plus 14 heavy-tailed dimensions) — it is
+low-dimensional, anisotropic, and heavy-tailed, not Gaussian. So `D_M` is a coarse diagnostic of
+departure-from-typical, not a faithful manifold distance; this is exactly why the corrector is supervised
+by the downstream LM loss and `D_M` is reported only as a diagnostic. A better manifold model (e.g. a
+mixture, a flow, or a diffusion prior over activations) is left to future work. (2) `ΔLM` is a
 teacher-forced fluency proxy measured at matched projection at *one layer*. Experiment 10 shows this is
 **not** the same as matched behavioral steering in generation: the projection along `v` is preserved
 exactly at layer 6, but the correction is not orthogonal to the downstream concept readout, so the
