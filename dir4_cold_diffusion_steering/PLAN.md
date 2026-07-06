@@ -99,6 +99,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         carries the result (not iteration: iter ~ties one-shot); the generic Gaussian-noise prior is WORSE
         than raw and ERASES the steer. Validates ColdSteer's design. Only human ask #3 (other steering
         family) remains — see Next step.
+- [x] S4(j) — STEERING-FAMILY robustness (Exp 18, human feedback #3) DONE: rebuilt the sentiment steering
+        vector from a REAL downloaded dataset (SST-2) via the three canonical linear-steering families —
+        DiffMean, logistic-regression probe, PCA-contrast (cos to DiffMean 1.00/0.40/0.30) — rescaled to a
+        common norm and ran the identical flagship recipe per family. POSITIVE + family-robust: recovery@8 =
+        86%/84%/101% (all three genuinely different directions), DiffMean reproduces flagship Exp 3 from real
+        data; PCA-contrast raw steering is ON the Gaussian manifold (D_M flat 27.3) yet breaks the LM.
+        Core result now robust on SIX axes; all three human asks done.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -110,7 +117,26 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**S6 Experiment 17 (new, acts on human feedback #1, 2026-07-06):** built the REAL diffusion machinery the
+**S4(j) Experiment 18 (new, acts on human feedback #3, 2026-07-06):** tested the LAST open human-feedback ask
+— a genuinely different steering FAMILY, beyond the 6 hand-built DiffMean concepts. Changed BOTH data source
+and extraction method on the same concept (sentiment): built the vector from a REAL downloaded dataset (SST-2,
+500 pos + 500 neg movie-review sentences) via the three canonical linear-steering families — DiffMean (μ⁺−μ⁻),
+logistic-regression probe (discriminative), PCA-contrast (top PC of centered pos−neg pair diffs, RepE,
+unsupervised). Sign-aligned + rescaled all to a common norm |v|=11.0 so ONLY the direction varies; ran the
+identical flagship Exp-3 recipe per family at matched projection. POSITIVE + family-ROBUST: the three
+directions are genuinely different (cos to DiffMean 1.00/0.40/0.30), all break the LM under raw steering
+(ΔLM@8 +3.41/+2.63/+2.27), and the identical LM-supervised corrector recovers each — recovery@8
+**86%/84%/101%** (98/95/118% @α=4). DiffMean reproduces flagship Exp 3 (86%≈84%) from real data (concept vector
+only cos-0.49 reproducible across data sources, yet recipe works on both). BONUS: PCA-contrast aligns with
+GPT-2's dominant high-variance axis (Exp 16), so its raw steering leaves D_M FLAT at the clean 27.3 (ON the
+Gaussian manifold) yet still breaks the LM — off-Gaussian is neither necessary nor sufficient for LM damage.
+Core result now robust on SIX axes (strength/direction/layer/model/prompt-family/steering-family). ALL THREE
+human asks now done. No prior result superseded. Artifacts: `experiments/18_steering_family.py`,
+`results/18_steering_family.json`, `plots/18_steering_family.png`, `data/sst2_train.tsv`. RESULTS/REPORT/
+CHANGELOG curated; REPORT math verified (24/24 js-display-math, 0 broken, 0 inline hazards). ENV note: shared
+conda `transformers` vanished this iter; ran with dir9's `cupenv` python (superset env, no state modified).
+<!-- prior: S6 real diffusion corrector Exp 17 -->
+**S6 Experiment 17 (acts on human feedback #1, 2026-07-06):** built the REAL diffusion machinery the
 direction is named after and settled whether "diffusion" adds anything over the one-shot MLP. Three
 correctors at matched projection α|v| on the same held-out FineWeb eval (GPT-2 small, block 6, sentiment):
 (1) one-shot MLP (Exp 3, 4.46M), (2) COLD-DIFFUSION iterative K=8 (step-conditioned velocity field,
@@ -321,14 +347,14 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**One open HUMAN-FEEDBACK ask (2026-07-06), a clean iteration, highest priority:**
-(#3) **A genuinely different steering family.** All steering so far is hand-built DiffMean concepts (6 of
-them). Try a persona/behavioral trait or a downloaded sentiment/toxicity dataset (downloads OK per feedback)
-to test the recipe beyond DiffMean probes.
-(Exp 16 answered #2 — the Gaussian-manifold doubt — confirming the cloud is low-dim/anisotropic/heavy-tailed.
-Exp 17 answered #1 — the real diffusion corrector — showing the Cold-Diffusion corruption model + LM
-supervision, not iteration, carries the result, and a generic Gaussian-noise diffusion prior is worse than
-raw. Both human asks #1 and #2 now DONE.)
+**All three human-feedback asks are now DONE** (Exp 16 = #2 Gaussian-manifold doubt; Exp 17 = #1 real diffusion
+corrector; Exp 18 = #3 different steering family). Success criterion long met; direction ~complete. Remaining
+work is OPTIONAL polish, any one a clean iteration:
+(i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH sampled/differentiable generation
+rather than teacher-forced (the one substantive open lever left);
+(ii) a still-larger model (GPT-2 large) — the only untested model-scale point.
+If picked up, note the ENV: run experiment scripts with `/mars-vol/marsv/dir9_ood/cupenv/bin/python` until the
+shared conda `transformers` is restored (it had disappeared as of iter 18).
 
 Prior (all delivered, success criterion long met): Core arc + all generalization axes + behavioral axis +
 behavioral-preservation follow-up + LAYER-ROBUSTNESS

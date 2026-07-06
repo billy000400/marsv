@@ -70,7 +70,12 @@ manifold — so the core result is **model-robust** too (Experiment 13). It is a
 artifact**: a corrector trained only on FineWeb still recovers **77%** of the damage at α=8 on held-out
 technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at α=4), with
 recovery declining smoothly as the family's clean activations drift off the FineWeb manifold — so it is
-**prompt-family-robust** as well (Experiment 15).
+**prompt-family-robust** as well (Experiment 15). Finally, it is **not tied to the DiffMean steering family
+or to hand-built prompts**: rebuilding the sentiment vector from a real downloaded dataset (SST-2) via three
+genuinely different extraction families — DiffMean, a logistic-regression probe, and PCA-contrast (cosines to
+DiffMean 1.00 / 0.40 / 0.30) — the identical recipe recovers **84% / 84% / 101%** of the damage at α=8, so the
+result is robust to the **steering-vector family** too (Experiment 18). The core result therefore holds on six
+independent axes: steering strength, direction, layer, model, prompt family, and steering-vector family.
 
 Because the direction is named after Cold Diffusion, a final experiment builds the actual iterative
 machinery and settles what "diffusion" contributes (Experiment 17). Three correctors are compared at matched
@@ -553,6 +558,40 @@ mean `ΔLM` at α∈{4,8}; the best was 0.15). Because this prior is **unconditi
 steer; we measure that erasure (projection retention before re-imposing) and, for the matched-`ΔLM`
 comparison, re-impose the target projection `α|v|` along `\hat v` afterward. **Recovery** is the same metric
 as Experiment 4 (percent of raw steering's `ΔLM` removed).
+
+### Steering-vector families (Experiment 18)
+
+Every steering vector in Experiments 1–17 is a **DiffMean** direction built from ~20 hand-written contrastive
+sentences. Experiment 18 tests whether the flagship result depends on that choice, changing two things at
+once. **Data source:** the vectors are built from a **real downloaded dataset** — 500 positive + 500 negative
+movie-review sentences from **SST-2** (Socher et al. 2013) — using the **mean-pooled** block-6 activation of
+each sentence, `h^{+}_i` and `h^{-}_i`. **Extraction family:** from those activations we build the three
+canonical linear-steering directions. **DiffMean** — the difference of class means:
+
+```math
+v_{\text{DM}} = \frac{1}{n}\sum_i h^{+}_i - \frac{1}{n}\sum_i h^{-}_i
+```
+
+**Logistic-regression probe** — the weight vector of an L2-regularized classifier trained (on per-dimension
+standardized activations, standard deviation `s`) to separate positive from negative, mapped back to raw
+activation coordinates:
+
+```math
+w^{\star} = \arg\min_{w,b}\ \frac{1}{2n}\sum_i \operatorname{BCE}\!\big(\sigma(w^{\top}\tilde h_i + b),\, y_i\big) + \lambda\lVert w\rVert_2^2, \qquad v_{\text{LR}} = w^{\star} / s
+```
+
+where `\tilde h_i = (h_i-\mu)/s` and `y_i\in\{0,1\}`. **PCA-contrast** — the top principal component of the
+mean-centered positive−negative activation-pair differences (the RepE recipe; `\pi` a random pairing):
+
+```math
+d_i = h^{+}_i - h^{-}_{\pi(i)}, \qquad v_{\text{PCA}} = \text{top right singular vector of } \{\,d_i - \bar d\,\}_i
+```
+
+Each direction is sign-aligned so that steering `+v` increases positive sentiment (flip if `v^{\top}v_{\text{DM}}<0`)
+and **rescaled to a common norm `|v| = 11.0`** (the flagship scale), so the *only* variable across families is
+the direction. We report each family's cosine to `v_{\text{DM}}` (how different the directions are), then run
+the **identical flagship recipe** (train an LM-supervised, projection-preserving corrector per direction,
+Experiment 3) on each and report **recovery** at matched projection.
 
 ### Baselines
 
@@ -1122,6 +1161,39 @@ re-imposing — exactly the information-loss the GLP authors flag for unconditio
 projection re-imposed it cannot repair the LM. Conditioning on the clean activation and supervising with the
 LM, what ColdSteer does, is the fix.
 
+### Experiment 18 — the recipe is not tied to DiffMean or to hand-built prompts
+
+![steering-vector families](plots/18_steering_family.png)
+
+Three steering-vector families, all built from **real SST-2 data** and rescaled to a common norm `|v| = 11.0`,
+each run through the identical flagship recipe at matched projection. The families are genuinely different
+directions (cosine to DiffMean 1.00 / 0.40 / 0.30), and the SST-2 DiffMean direction agrees with the original
+hand-built one only at `cos = 0.49`:
+
+| family (cos to DiffMean) | ΔLM raw @α=8 | ΔLM learned @α=8 | recovery @α=8 | recovery @α=4 | `D_M` raw / learned @α=8 |
+|---|---|---|---|---|---|
+| DiffMean (1.00) | +3.41 | **+0.47** | **86%** | 98% | 41.4 / 65.2 |
+| LogReg probe (0.40) | +2.63 | **+0.42** | **84%** | 95% | 61.6 / 80.1 |
+| PCA-contrast (0.30) | +2.27 | **−0.02** | **101%** | 118% | 27.3 / 47.5 |
+
+Steering-projection retention is matched `α|v|` = 11.0→88.0 for all three families at every α.
+
+**Interpretation.** **(1) Family-robust.** All three genuinely different directions show the same two facts —
+raw steering breaks the LM (`ΔLM` +2.3 to +3.4 nats at α = 8) and the identical LM-supervised corrector
+recovers it at matched projection (**84–101% at α = 8, 95–118% at α = 4**). The DiffMean family reproduces the
+flagship Experiment 3 (raw +3.41 → learned +0.47, 86% ≈ 84%) even though it was built from real movie reviews
+rather than the original 20 hand-written sentences — and since the two DiffMean directions agree only at
+`cos = 0.49`, the *concept* vector is only partly reproducible across data sources while the *recipe* works on
+both. **(2) The PCA-contrast case sharpens the central decoupling from the opposite side.** The unsupervised
+PCA direction happens to align with GPT-2's dominant high-variance axis (Experiment 16), so steering along it
+leaves the Mahalanobis distance essentially **flat at the clean value** (`D_M` 27.3, *on* the Gaussian
+manifold) yet still breaks the LM by **+2.27 nats**. So off-Gaussian distance is neither necessary nor
+sufficient for LM damage: raw PCA steering is on-manifold but harmful, and the corrector fixes it by moving
+*off* the manifold as always (`D_M` 27.3 → 47.5). **(3)** The reliable route — a per-direction native
+corrector — is unchanged, now shown to work regardless of how the steering direction was extracted. This
+closes the last external-validity axis: the ColdSteer result is robust to the **steering-vector family** as
+well as to strength, direction, layer, model, and prompt family.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -1152,7 +1224,15 @@ And building the *actual* diffusion machinery the direction is named after (Expe
 steering corruption under LM supervision recovers 84–85% at α=8 whether it is a one-shot MLP or an 8-step
 iterative velocity field, while a generic Gaussian-noise diffusion prior (a real DDPM with SDEdit, no LM in
 the loop) has *negative* recovery — worse than raw — and partially erases the steer, confirming that the LM
-supervision and the steering-specific corruption, not "diffusion" as a genre, are what matter.
+supervision and the steering-specific corruption, not "diffusion" as a genre, are what matter. It is likewise
+**not tied to the DiffMean steering family or to hand-built prompts** (Experiment 18): rebuilding the sentiment
+vector from a real downloaded dataset (SST-2) via three genuinely different extraction families — DiffMean, a
+logistic-regression probe, and PCA-contrast (cosines to DiffMean 1.00 / 0.40 / 0.30) — the identical recipe
+recovers 84% / 84% / 101% of the fluency damage at α=8, so the result holds on six independent axes (strength,
+direction, layer, model, prompt family, steering-vector family). The PCA family also makes the central
+decoupling vivid from the other side: steering along that direction leaves `D_M` flat at the clean value (on
+the Gaussian manifold) yet still breaks the LM, so off-Gaussian distance is neither necessary nor sufficient
+for LM damage.
 A behavioral reality-check (Experiment 10) qualifies this: when
 the corrector *generates*, it prevents raw steering's collapse into repetition (distinct-2 stays near
 baseline while raw's crashes 0.78→0.32) but its output is only weakly steered — the projection-preserving

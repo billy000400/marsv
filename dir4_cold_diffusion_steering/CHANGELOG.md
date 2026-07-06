@@ -432,3 +432,34 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   (ΔLM vs α / recovery vs α / projection retention). Results `results/17_diffusion_corrector.json`.
 - REPORT math re-verified via GitHub API: 21/21 js-display-math (18 prior + 3 new), 0 broken
   (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-06 — Experiment 18: beyond hand-built DiffMean — steering-vector-family robustness (acts on human feedback #3)
+- **Why:** the last open human-feedback ask (#3). Every steering vector in Exp 1–17 (6 of them) is a
+  DiffMean direction built from ~20 HAND-WRITTEN contrastive sentences, so the flagship result could be an
+  artifact of that one extraction method and/or the hand-built prompts. Tests whether the recipe generalizes
+  to a genuinely different steering FAMILY and DATA SOURCE.
+- **Method (new):** built the sentiment steering vector from a REAL downloaded dataset (SST-2, 500 pos + 500
+  neg movie-review sentences, mean-pooled block-6 activations) via the three canonical linear-steering
+  families — (1) DiffMean μ⁺−μ⁻; (2) logistic-regression probe (L2, weight mapped from standardized to raw
+  activation coords, discriminative); (3) PCA-contrast (top PC of centered pos−neg pair differences, RepE,
+  unsupervised). Sign-aligned to +sentiment and RESCALED to a common norm |v|=11.0 (flagship scale) so the
+  ONLY variable across families is the direction. Ran the identical flagship recipe (Exp 3 corrector, per
+  direction) on each at matched projection α|v|.
+- **Result (new):** the three directions are genuinely different (cos to DiffMean 1.00 / 0.40 / 0.30), and the
+  SST-2 DiffMean agrees with the original hand-built DiffMean only at cos 0.49. All three break the LM under
+  raw steering (ΔLM @α=8 = +3.41 / +2.63 / +2.27) and the identical LM-supervised corrector recovers each:
+  **recovery @α=8 = 86% / 84% / 101%** (98/95/118% @α=4), matched projection. The DiffMean family reproduces
+  the flagship Exp 3 (raw +3.41→+0.47, 86% ≈ 84%) from real data. PCA-contrast is especially telling: its raw
+  steering leaves D_M FLAT at the clean value 27.3 (ON the Gaussian manifold) yet still breaks the LM (+2.27),
+  and the corrector fixes it by moving OFF the manifold (27.3→47.5) — off-Gaussian distance is neither
+  necessary nor sufficient for LM damage. No prior result superseded; this is an added external-validity axis.
+  The core result now holds on SIX axes (strength/direction/layer/model/prompt-family/steering-family).
+- **Deliverable deltas:** RESULTS.md +Exp 18 (family table + reading) + figure entry + Headline
+  steering-family clause (now "six axes"). REPORT.md +Methods "Steering-vector families (Experiment 18)"
+  subsection (3 new display-math: DiffMean, logistic-probe objective, PCA-contrast) + Results Exp 18 (table +
+  interpretation + figure) + Summary six-axes clause + Conclusion clause.
+- New code `experiments/18_steering_family.py` (run with dir9's cupenv python — the shared conda `transformers`
+  had disappeared this iteration, cupenv has torch+CUDA+transformers). New figure `plots/18_steering_family.png`
+  (ΔLM / recovery / D_M vs α per family). Results `results/18_steering_family.json`, `data/sst2_train.tsv`.
+- REPORT math re-verified via GitHub API: 24/24 js-display-math (21 prior + 3 new), 0 broken
+  (<pre lang=math>), 0 inline hazards.
