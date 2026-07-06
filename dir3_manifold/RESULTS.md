@@ -220,6 +220,62 @@ k, which would bias the elbow toward larger k, yet the steep regime is at *low* 
 the low-k knee is not produced by parameter-count drift. (A param-matched architecture
 would still be the cleaner design and is listed as future work.)
 
+### AE elbow-k under reconstruction error and cosine similarity (operator request 2026-07-06) — done
+`results/ae_results_metrics.json`, `results/ae_metrics_elbow.json`,
+`experiments/ae_sweep_metrics.py`. FVU is only one way to score how well the AE
+reconstructs; the operator asked whether the AE-based "ID" (the elbow-k) is an artifact
+of that choice. We re-scored the **same** trained GPU models (identical architecture /
+optimizer / raw-centered layer-6 data / 90-10 split / STEPS=10000 / seed 0 — the FVU
+column below reproduces `ae_results_gpu.json` to ≤0.0001) with two additional held-out
+metrics on the centered vectors $x' = x - \mu_\text{train}$ that the AE actually
+reconstructs.
+
+**Reconstruction error (per-dimension RMSE)** — the raw average reconstruction error in
+activation units, *lower is better*; unlike FVU it is **not** normalised by the data
+variance, so it exposes the absolute error scale ($d = 768$):
+
+```math
+\mathrm{RMSE} = \sqrt{\frac{1}{N\,d}\sum_{i=1}^{N}\lVert x'_i - \hat{x}_i\rVert^2}
+```
+
+**Cosine similarity** — the mean angle-only agreement between each centered activation and
+its reconstruction (ignores magnitude), *higher is better*, in $[-1,1]$:
+
+```math
+\mathrm{cos} = \frac{1}{N}\sum_{i=1}^{N} \frac{\langle x'_i,\ \hat{x}_i\rangle}{\lVert x'_i\rVert\,\lVert \hat{x}_i\rVert}
+```
+
+| k   | val FVU | val RMSE | val cosine |
+|-----|---------|----------|------------|
+| 2   | 0.0956  | 2.193    | 0.441 |
+| 4   | 0.0754  | 1.948    | 0.611 |
+| 8   | 0.0666  | 1.830    | 0.669 |
+| 16  | 0.0606  | 1.745    | 0.706 |
+| 24  | 0.0578  | 1.706    | 0.724 |
+| 32  | 0.0530  | 1.633    | 0.751 |
+| 48  | 0.0488  | 1.567    | 0.774 |
+| 64  | 0.0470  | 1.538    | 0.783 |
+| 128 | 0.0404  | 1.425    | 0.817 |
+| 256 | 0.0324  | 1.278    | 0.855 |
+
+![AE layer-6 elbow-k under FVU vs per-dim RMSE vs mean cosine similarity (same models)](plots/ae_metrics_id.png)
+
+**The elbow-k is the same, k≈4, under all three metrics.** Applying the identical Kneedle
+rule (max normalized distance from the first→last chord on the $\log_2 k$ axis) to each
+curve returns **k=4 for FVU, k=4 for RMSE, and k=4 for cosine similarity**. So the AE
+"ID" is **not** an artifact of using FVU: whether you score reconstruction by
+variance-normalised error, raw error, or angle-only cosine, the bend sits at the first
+doubling. The cosine panel makes the earlier "barely-a-bend" reading vivid — cosine jumps
+0.44→0.61 over k=2→4 (the one steep step) and then climbs slowly and near-linearly to
+0.86 at k=256 with no saturation, exactly mirroring the FVU/RMSE tails. This **confirms
+the elbow's location is metric-robust but does not upgrade the AE's strength**: all three
+curves are near-straight after k=4 with no plateau, so the AE remains *consistent with*
+(not proof of) the ~11–15 local ID. Note the absolute reconstruction quality at the elbow
+is modest — at k=4 mean cosine is only 0.61 and RMSE is still ~89% of the k=256 error
+floor — reinforcing that a genuinely 4-dimensional bottleneck does **not** reconstruct the
+layer-6 stream well; the low-k "elbow" reflects the single massive-activation dimension
+being captured first, not a tight 4-D manifold.
+
 ### Parameter-matched AE sweep (S5b) — done (Codex concern #4 / suggested step #1)
 `results/ae_results_matched.json`, `results/ae_matched_param_counts.json`. The earlier
 sweeps let total params drift with k (1.052M→1.182M). Here the **total parameter count is

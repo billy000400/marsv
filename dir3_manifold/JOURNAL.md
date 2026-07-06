@@ -324,3 +324,39 @@ Next step: none; reopen only for a new *REVIEW*/*feedback* file or the stretch i
 
 On track? yes — 100% done; S1–S6 + all SEVEN operator feedback items addressed; new linear-x
 pca_cumvar figure rendered + embedded; STOP written; no blocker.
+
+---
+
+## Iter 14 — 2026-07-06 — Operator request: AE ID via reconstruction error + cosine similarity
+
+**Request** (`human_feedback_07060326.md`): *"I saw you used FVU to calculate ID from AE. Can you use
+reconstruction error and cosine similarity and find the ID again? Don't forget to include the
+definition of your cosine similarity."*
+
+**Did.** Wrote `experiments/ae_sweep_metrics.py` — retrains the identical layer-6 GPU AE (768→512→256→k→
+256→512→768 GELU, Adam 1e-3, STEPS=10000, BATCH=4096, seed 0, raw-centered acts, 90/10 split) at every
+k∈{2..256} and records, on held-out val, three metrics on the centered vectors x'=x−μ_train that the AE
+reconstructs: FVU, per-dimension RMSE = sqrt(mean_(i,dim)(x'−x̂)²), and mean cosine similarity =
+mean_i ⟨x',x̂⟩/(‖x'‖‖x̂‖). Ran on the RTX 3090 at mem-fraction 0.180 (~4.5 min total). `analyze_metrics.py`
+applies the same Kneedle rule (max |curve−chord| on log₂k, handles both increasing and decreasing) to
+each metric and renders `plots/ae_metrics_id.png`. Artifacts: `results/ae_results_metrics.json`,
+`results/ae_metrics_elbow.json`.
+
+**Learned.** The FVU column reproduces `ae_results_gpu.json` to ≤0.0001 (models reproduced). **Kneedle
+elbow-k = 4 under ALL THREE metrics** (FVU, RMSE, cosine) — so the AE "ID" (elbow location) is *not* an
+artifact of scoring by FVU; RMSE and cosine give the same answer. This pins the location but not the
+strength: cosine jumps 0.44→0.61 over the one steep step k=2→4 then climbs near-linearly to 0.86 at
+k=256 with no saturation (same no-plateau tail as FVU/RMSE), and absolute quality at the elbow is modest
+(k=4 cosine 0.61, RMSE ~89% of the k=256 floor), so a 4-D bottleneck reconstructs the stream poorly —
+the low-k elbow reflects the massive-activation dim being captured first, consistent with the existing
+"suggestive, not proof" headline. No prior numbers changed.
+
+**Deliverables.** REPORT.md Methods gained RMSE + cosine definitions (2 new `math` fences; render check
+6 js-display-math / 0 degraded / 0 inline hazards) and AE-section point #4 + the new figure. RESULTS.md
+gained a subsection (three-metric table + elbow finding + figure). CHANGELOG appended. Feedback file
+renamed `→ .addressed.md`. STOP written.
+
+**Next step:** none; reopen only for a new *REVIEW*/*feedback* file or the stretch items.
+
+On track? yes — 100% done; S1–S6 + all EIGHT operator feedback items addressed; AE ID re-derived under
+reconstruction-error & cosine metrics (elbow k=4 all three); STOP written; no blocker.

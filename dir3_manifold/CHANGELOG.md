@@ -5,6 +5,24 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-06 — AE elbow-k under reconstruction error & cosine similarity (operator request; no prior numbers changed)
+- **Operator request** (`human_feedback_07060326.md`): *"I saw you used FVU to calculate ID from AE.
+  Can you use reconstruction error and cosine similarity and find the ID again? Don't forget to
+  include the definition of your cosine similarity."*
+- Re-scored the **same** layer-6 GPU AE models (identical arch/optimizer/data/split/STEPS=10000/seed 0;
+  `experiments/ae_sweep_metrics.py`) with two additional held-out metrics on the centered vectors:
+  **per-dimension RMSE** and **mean cosine similarity** (definitions added to REPORT.md Methods and
+  RESULTS.md). New artifacts `results/ae_results_metrics.json`, `results/ae_metrics_elbow.json`,
+  `plots/ae_metrics_id.png`. FVU column reproduces `ae_results_gpu.json` to ≤0.0001 (models reproduced).
+- **Result:** Kneedle elbow-k is **k=4 under all three metrics** (FVU, RMSE, cosine) — the AE "ID" is
+  metric-robust, not an FVU artifact. But this pins the *location*, not the *strength*: cosine rises
+  0.44→0.61 over the one steep step k=2→4 then climbs near-linearly to 0.86 at k=256 with no saturation
+  (same no-plateau tail); absolute quality at the elbow is modest (k=4 cosine 0.61, RMSE ~89% of the
+  k=256 floor), reinforcing the existing "consistent with, not proof of, low ID" conclusion.
+- REPORT.md Methods: added RMSE + cosine-similarity definitions (render check 6 js-display-math /
+  0 degraded / 0 inline hazards). Added AE-section point #4 + the new figure. RESULTS.md: new
+  subsection with the three-metric table, elbow finding, and figure. No headline or prior numbers changed.
+
 ## 2026-07-02 — Add linear-x-axis version of the cumulative-PCA-variance plot (operator request; no numbers changed)
 - **Operator request** (`human_feedback_07021113.md`): *"for the PCA variance plot, also add a non
   log scale version."*

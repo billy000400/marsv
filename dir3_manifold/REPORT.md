@@ -70,6 +70,26 @@ the straight chord joining the curve's first and last points, after normalizing 
 $[0,1]$; here that curve is $\mathrm{FVU}$ vs $\log_2 k$. It only reports *where* a curve turns; it
 does not certify that a sharp turn exists — see the honest reading of the bend in Results.)
 
+To check that the AE elbow is not an artifact of scoring reconstruction by FVU, we re-score the
+same trained models with two further held-out metrics on the centered vectors $x' = x - \mu_{\text{train}}$
+that the AE reconstructs. **Per-dimension reconstruction error (RMSE)** — the raw error scale, not
+normalized by variance, lower is better:
+
+```math
+\mathrm{RMSE} = \sqrt{\frac{1}{N\,d}\sum_{i=1}^{N}\lVert x'_i - \hat{x}_i\rVert^2}, \qquad d = 768 .
+```
+
+**Mean cosine similarity** — angle-only agreement between each centered activation and its
+reconstruction (magnitude-invariant, higher is better, in $[-1,1]$):
+
+```math
+\mathrm{cos} = \frac{1}{N}\sum_{i=1}^{N} \frac{\langle x'_i,\ \hat{x}_i\rangle}{\lVert x'_i\rVert\;\lVert \hat{x}_i\rVert} .
+```
+
+The same Kneedle rule is applied to each of the three curves ($\mathrm{FVU}\downarrow$,
+$\mathrm{RMSE}\downarrow$, $\mathrm{cos}\uparrow$; for the increasing cosine curve the knee is the
+point of maximum distance *above* the chord).
+
 **TwoNN (Facco et al.) local ID.** Every point and its neighbours live in the **ambient
 768-dimensional residual-stream space** $\mathbb{R}^{768}$ (the raw captured activation vectors),
 under the standard Euclidean metric — TwoNN uses **no** projection or embedding; it reads the
@@ -192,6 +212,17 @@ nonlinear ID band (12–13). But three checks show the AE signal is **fragile**,
    curve at every k and shows the **same low-k bend** — so the bend is *not* a param-count artifact.
    Honest caveat: because $h_1$ also changes, k is not the "only varying channel"; this controls the
    param-count confound but not outer-width capacity.
+4. **Metric-robust elbow (not an FVU artifact).** Re-scoring the same GPU models by per-dimension
+   **RMSE** and by **mean cosine similarity** (definitions in Methods) returns the **same Kneedle
+   elbow, k = 4, under all three metrics** (FVU, RMSE, cosine). So the AE "ID" does not depend on
+   using FVU. But this pins down the *location*, not the *strength*: the cosine curve rises 0.44→0.61
+   over the one steep step k = 2→4 and then climbs slowly and near-linearly to 0.86 at k = 256 with no
+   saturation — the same near-straight, no-plateau tail. And absolute quality at the elbow is modest
+   (k = 4: mean cosine only 0.61, RMSE still ~89% of the k = 256 floor), so a 4-D bottleneck does *not*
+   reconstruct the stream well — the low-k elbow reflects the single massive-activation dimension being
+   captured first, not a tight 4-D manifold.
+
+![AE elbow-k is the same (k≈4) under FVU, per-dim RMSE, and cosine similarity](plots/ae_metrics_id.png)
 
 ![AE bottleneck sweep: raw bend vanishes under standardization](plots/ae_fvu_sweep.png)
 
