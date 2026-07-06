@@ -1,4 +1,4 @@
-Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 6155.19it/s]
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 6374.71it/s]
 device: cuda
 |v| = 11.08
 clean D_M=27.32 mean|h|=112.24
@@ -13,3 +13,33 @@ clean D_M=27.32 mean|h|=112.24
   ep5 step 200 a= 5.5 LM=4.214 near=0.413
   ep5 step 225 a= 1.3 LM=3.855 near=0.309
 == train cold-diffusion iterative corrector (K=8) ==
+  [iter K=8] ep0 step  25 a= 1.9 LM=3.872 near=0.133
+  [iter K=8] ep1 step  50 a= 4.4 LM=4.081 near=0.282
+  [iter K=8] ep1 step  75 a= 7.2 LM=4.496 near=0.781
+  [iter K=8] ep2 step 100 a= 1.4 LM=3.989 near=0.141
+  [iter K=8] ep3 step 125 a= 6.4 LM=4.266 near=0.713
+  [iter K=8] ep3 step 150 a= 7.2 LM=4.294 near=0.466
+  [iter K=8] ep4 step 175 a= 2.8 LM=4.163 near=0.298
+  [iter K=8] ep5 step 200 a= 5.5 LM=4.209 near=0.437
+  [iter K=8] ep5 step 225 a= 1.3 LM=3.846 near=0.316
+== train GLP Gaussian diffusion prior ==
+  [glp] ep0 mse=0.9804
+  [glp] ep5 mse=0.6929
+  [glp] ep10 mse=0.6083
+  [glp] ep15 mse=0.6011
+  [glp] ep20 mse=0.5326
+  [glp] ep25 mse=0.5743
+  [glp] ep30 mse=0.4975
+  [glp] ep35 mse=0.4278
+params: one-shot 4.46M  iter 4.46M  glp 2.69M
+clean eval loss = 3.731
+  GLP t0=0.15 mean ΔLM(α=4,8) = +2.279
+  GLP t0=0.25 mean ΔLM(α=4,8) = +2.585
+  GLP t0=0.4 mean ΔLM(α=4,8) = +3.018
+GLP best t_start = 0.15
+alpha= 1.0 ΔLM raw=+0.076 one=-0.069 iter=-0.074 glp=+0.631 | glp as-is ret=10.6 (target 11.1)
+alpha= 2.0 ΔLM raw=+0.325 one=-0.051 iter=-0.058 glp=+0.862 | glp as-is ret=21.1 (target 22.2)
+alpha= 4.0 ΔLM raw=+1.222 one=+0.058 iter=+0.039 glp=+1.634 | glp as-is ret=42.0 (target 44.3)
+alpha= 6.0 ΔLM raw=+2.111 one=+0.224 iter=+0.195 glp=+2.360 | glp as-is ret=62.6 (target 66.5)
+alpha= 8.0 ΔLM raw=+2.778 one=+0.435 iter=+0.419 glp=+2.925 | glp as-is ret=83.1 (target 88.6)
+saved figure + results

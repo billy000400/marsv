@@ -72,6 +72,19 @@ technical-prose (Markdown) and **60%** on strongly out-of-distribution Python co
 recovery declining smoothly as the family's clean activations drift off the FineWeb manifold — so it is
 **prompt-family-robust** as well (Experiment 15).
 
+Because the direction is named after Cold Diffusion, a final experiment builds the actual iterative
+machinery and settles what "diffusion" contributes (Experiment 17). Three correctors are compared at matched
+projection: the one-shot MLP, a **cold-diffusion iterative** corrector (a step-conditioned velocity field
+integrated over K=8 projection-preserving steps, LM-supervised through the unroll), and a **generic
+Gaussian-noise GLP prior** (a real DDPM trained on clean activations, corrected by SDEdit, no LM in the
+loop). The verdict is that the **Cold-Diffusion *corruption model*, not the iteration, is what matters**:
+training on the actual steering corruption under LM supervision recovers **84–85%** of the fluency damage at
+α = 8, but the generic "denoise back to the manifold" GLP prior has **negative recovery** (−5% at α = 8 —
+worse than raw). The iterative corrector essentially ties the one-shot MLP (85% vs 84%), so the value of
+"diffusion" is the corruption and the supervision, not the step count; and the unconditional prior partially
+**erases the steer** (~5–6% of the projection lost), the exact information-loss conditioning on the clean
+activation is designed to avoid.
+
 One caveat frames all of the above. The `ΔLM` recoveries are measured at matched projection at a single
 layer. A behavioral test on *generated* text (Experiment 10) shows the corrector prevents raw steering's
 collapse into repetition — keeping generation fluent — but its output is only weakly steered (roughly
@@ -493,6 +506,53 @@ The *mean* of `D_M²` is ≈ `d` for **any** distribution once `(μ,Σ)` are fit
 essentially `trace(Σ⁻¹Σ) = d`), so only the *spread* and *shape* are diagnostic. We additionally report
 the per-dimension excess kurtosis of the standardized activations, counting "heavy-tailed" dimensions as
 those with excess kurtosis above 1 (a Gaussian has 0).
+
+### A real diffusion corrector (Experiment 17)
+
+The direction is named after **Cold Diffusion** (Bansal et al. 2022 — diffusion models built around
+non-Gaussian, even deterministic degradations), and the reference **GLP** work trains an *iterative*
+diffusion prior over activations. The flagship corrector (Experiment 3), however, is a **one-shot MLP**.
+Experiment 17 builds the actual diffusion machinery and compares three correctors at matched steering
+projection `α|v|` on the same held-out FineWeb eval set (GPT-2 small, block 6, sentiment vector), all
+reusing the Experiment-3 training/eval pipeline. All three are held to equal steering projection, so `ΔLM`
+is the only free axis.
+
+**(1) One-shot MLP** — the incumbent from Experiment 3, restated for reference (4.46M params, one forward):
+
+```math
+\hat h = z + P_{v\perp}\, r_\theta(h, z, \alpha), \qquad z = h + \alpha v
+```
+
+**(2) Cold-diffusion iterative corrector (K=8)** — a same-capacity, weight-shared network `g_\theta` that
+additionally takes a step index `t_k = k/K`, integrated over `K=8` steps from `x_K = z` down to `\hat h =
+x_0`. Each increment is projected orthogonal to `v`, so the steering projection is preserved at **every**
+step by construction:
+
+```math
+x_{k-1} = x_k + \tfrac{1}{K}\, P_{v\perp}\, g_\theta(h, x_k, \alpha, t_k), \qquad \hat h = x_0
+```
+
+It is trained the same way as Experiment 3 — patch `\hat h` into block 6, run the frozen upper LM, backprop
+the next-token cross-entropy — but through the **unrolled** `K`-step trajectory, making it a genuine
+flow-matching-style corrector: a time-conditioned velocity field integrated to transport `z` to an LM-safe
+activation (4.46M params; last layer zero-initialised so each step starts as the identity).
+
+**(3) GLP Gaussian-noise prior (SDEdit)** — the "generic Gaussian-noise GLP teacher" the proposal names, as
+a baseline. A real **DDPM** with a cosine schedule `\bar\alpha(t)` (Nichol & Dhariwal 2021) and
+ε-prediction network `\epsilon_\theta`, trained on **clean, standardized** activations with **Gaussian**
+corruption and pure MSE — **no LM in the loop** (2.69M params):
+
+```math
+x_t = \sqrt{\bar\alpha(t)}\; x_0 + \sqrt{1-\bar\alpha(t)}\; \epsilon, \qquad \mathcal{L} = \big\lVert \epsilon_\theta(x_t, t) - \epsilon \big\rVert_2^2
+```
+
+To correct a steered activation `z` it uses **SDEdit** (Meng et al. 2021): standardize, forward-noise to a
+start time `t_{\text{start}}`, then DDIM-denoise back to 0, projecting `z` toward the learned clean-activation
+manifold. `t_{\text{start}}` is chosen by steelmanning (the value in `{0.15, 0.25, 0.40}` giving the lowest
+mean `ΔLM` at α∈{4,8}; the best was 0.15). Because this prior is **unconditional** it partially erases the
+steer; we measure that erasure (projection retention before re-imposing) and, for the matched-`ΔLM`
+comparison, re-impose the target projection `α|v|` along `\hat v` afterward. **Recovery** is the same metric
+as Experiment 4 (percent of raw steering's `ΔLM` removed).
 
 ### Baselines
 
@@ -1024,6 +1084,44 @@ data manifold. `D_M` is a useful *diagnostic* of departure-from-typical, but —
 argues — was never, and should never be, a training target. Supervising the corrector with the downstream
 LM loss is precisely the right response to a manifold this far from Gaussian.
 
+### Experiment 17 — a real diffusion corrector: the corruption model matters, not the iteration count
+
+![diffusion corrector comparison](plots/17_diffusion_corrector.png)
+
+Three correctors at matched steering projection `α|v|` on the same held-out eval set. ΔLM (nats, lower is
+better) and recovery (percent of raw's damage removed, higher is better):
+
+| α | ΔLM raw | ΔLM one-shot MLP | ΔLM cold-diff iter (K=8) | ΔLM GLP prior | recovery one-shot | recovery iter | recovery GLP |
+|---|---|---|---|---|---|---|---|
+| 1 | +0.076 | −0.069 | **−0.074** | +0.631 | 191% | **197%** | −731% |
+| 2 | +0.325 | −0.051 | **−0.058** | +0.862 | 116% | **118%** | −165% |
+| 4 | +1.222 | +0.058 | **+0.039** | +1.634 | 95% | **97%** | −34% |
+| 6 | +2.111 | +0.224 | **+0.195** | +2.360 | 89% | **91%** | −12% |
+| 8 | +2.778 | +0.435 | **+0.419** | +2.925 | 84% | **85%** | −5% |
+
+All three correctors and raw hold the **same** steering projection (11.1→88.6 across α), except the GLP
+prior *before* re-imposing, which erases part of the steer: as-is retention 10.6 / 83.1 vs target 11.1 /
+88.6 at α = 1 / 8 (~5–6% lost). Off-Gaussian distance `D_M` at α = 8: raw 49.0, GLP 52.8, one-shot 79.5,
+cold-diffusion iterative 75.2.
+
+**Interpretation — three clean answers to the direction's central critique.** **(1) The Cold-Diffusion
+*corruption model* is what carries the result, not "diffusion" as a genre.** Both correctors trained on the
+*actual steering corruption* `z = h + αv` under LM supervision — the one-shot MLP and the iterative
+model — recover **84–85%** of the fluency damage at α = 8. The generic Gaussian-noise GLP prior — the
+canonical "denoise back to the activation manifold" recipe, trained with no LM in the loop — has **negative
+recovery at every strength** (−5% at α = 8: it leaves the LM *worse than raw steering*, +2.93 vs +2.78
+nats). This is Experiment 2's lesson in diffusion clothing: a prior that only models "typical activation"
+cannot know which off-typical directions the LM tolerates; only the downstream objective can. **(2) The
+iterative diffusion structure essentially ties the one-shot MLP** — a small, consistent edge at every α
+(85% vs 84% at α = 8; ΔLM +0.419 vs +0.435), at equal capacity, while sitting slightly *closer* to the
+Gaussian (`D_M` 75.2 vs 79.5). The expensive 8-step unroll buys a marginal improvement, not a qualitative
+one — so Experiment 3's one-shot MLP was not leaving fluency on the table. The value of "diffusion" here is
+the **corruption** (steering, not Gaussian noise) and the **supervision** (LM, not reconstruction), not the
+step count. **(3) The unconditional prior erases the steer** — ~5–6% of the target projection lost before
+re-imposing — exactly the information-loss the GLP authors flag for unconditional priors, and even with the
+projection re-imposed it cannot repair the LM. Conditioning on the clean activation and supervising with the
+LM, what ColdSteer does, is the fix.
+
 ## Conclusion
 
 Raw linear activation steering in GPT-2 trades off strength against fluency in a sharp,
@@ -1049,6 +1147,12 @@ Gaussian manifold (Experiment 13) — the result is layer- and model-robust. Nor
 artifact**: the same FineWeb-trained corrector recovers 77% of the fluency damage at α=8 on held-out
 technical-prose and 60% on out-of-distribution Python code (Experiment 15), degrading smoothly as the prompt
 family's clean activations drift off the training manifold — so the correction is prompt-family-robust too.
+And building the *actual* diffusion machinery the direction is named after (Experiment 17) shows that the
+**Cold-Diffusion corruption model, not the iteration, is what carries the result**: training on the real
+steering corruption under LM supervision recovers 84–85% at α=8 whether it is a one-shot MLP or an 8-step
+iterative velocity field, while a generic Gaussian-noise diffusion prior (a real DDPM with SDEdit, no LM in
+the loop) has *negative* recovery — worse than raw — and partially erases the steer, confirming that the LM
+supervision and the steering-specific corruption, not "diffusion" as a genre, are what matter.
 A behavioral reality-check (Experiment 10) qualifies this: when
 the corrector *generates*, it prevents raw steering's collapse into repetition (distinct-2 stays near
 baseline while raw's crashes 0.78→0.32) but its output is only weakly steered — the projection-preserving
@@ -1107,8 +1211,12 @@ by TwoNN and the Levina–Bickel MLE), a PCA participation ratio of 1.1 (near ra
 with 6.7× the spread of the `χ²₇₆₈` a Gaussian predicts (plus 14 heavy-tailed dimensions) — it is
 low-dimensional, anisotropic, and heavy-tailed, not Gaussian. So `D_M` is a coarse diagnostic of
 departure-from-typical, not a faithful manifold distance; this is exactly why the corrector is supervised
-by the downstream LM loss and `D_M` is reported only as a diagnostic. A better manifold model (e.g. a
-mixture, a flow, or a diffusion prior over activations) is left to future work. (2) `ΔLM` is a
+by the downstream LM loss and `D_M` is reported only as a diagnostic. **Experiment 17 tests the obvious
+"better manifold model" — a real Gaussian-noise diffusion prior over activations (a DDPM with SDEdit) — and
+finds it does *not* help** (negative recovery, worse than raw), because an unconditional manifold prior
+cannot know which off-typical directions the LM tolerates; a mixture or flow prior may model the manifold
+more faithfully but would inherit the same defect as a *correction* target, so the downstream-LM objective
+remains the right supervision. (2) `ΔLM` is a
 teacher-forced fluency proxy measured at matched projection at *one layer*. Experiment 10 shows this is
 **not** the same as matched behavioral steering in generation: the projection along `v` is preserved
 exactly at layer 6, but the correction is not orthogonal to the downstream concept readout, so the

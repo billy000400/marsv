@@ -399,3 +399,36 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   chi^2 / PCA cumulative variance / intrinsic-dim bars). Results `results/16_manifold_geometry.json`.
 - REPORT math re-verified via GitHub API: 18/18 js-display-math (14 prior + 4 new), 0 broken
   (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-06 — Experiment 17: a REAL diffusion corrector (Cold-Diffusion) vs one-shot MLP vs GLP Gaussian prior — NEW (acts on human feedback #1)
+- Acts on human feedback (2026-07-06): "build an actual diffusion-model corrector like the GLP arxiv paper,
+  not the one-shot MLP; name it explicitly diffusion; compare Pareto to the one-shot MLP and to a generic
+  Gaussian-noise GLP-style teacher." This was the central critique of the direction (named after Cold
+  Diffusion but the flagship corrector is a one-shot MLP).
+- **Method (new):** three correctors compared at MATCHED steering projection α|v| on the SAME held-out
+  FineWeb eval (GPT-2 small, block 6, sentiment vector), all reusing the Exp-3 pipeline. (1) one-shot MLP
+  (Exp 3 incumbent, 4.46M). (2) COLD-DIFFUSION iterative (NEW): same-capacity weight-shared step-conditioned
+  velocity field g_θ(h,x,α,t), integrated over K=8 projection-preserving steps (each increment ⟂v so the
+  steer is preserved at every step), trained by UNROLLING the K steps and backpropping the frozen upper-LM
+  next-token CE (iterative analogue of Exp 3; 4.46M). (3) GLP Gaussian prior (NEW baseline): a real DDPM
+  (cosine schedule, ε-prediction, 2.69M) trained on CLEAN standardized activations with GAUSSIAN-noise
+  corruption, pure MSE, NO LM in the loop; corrects a steered z by SDEdit (noise to t_start=0.15 chosen by
+  steelmanning, DDIM-denoise back), projection re-imposed for the matched-ΔLM comparison.
+- **Result (new):** recovery of raw steering's fluency damage @α=8 — one-shot MLP **84%** (ΔLM +0.435),
+  cold-diffusion iterative **85%** (ΔLM +0.419), GLP Gaussian prior **−5%** (ΔLM +2.925, WORSE than raw
+  +2.778). Three answers: (RQ1) the Cold-Diffusion CORRUPTION MODEL is what matters — LM-supervised training
+  on the actual steering corruption recovers 84–85% while the generic Gaussian-noise "denoise back to the
+  manifold" prior has NEGATIVE recovery at every α; (RQ2) the iterative diffusion structure ~TIES the
+  one-shot MLP (85 vs 84% @α=8, a small consistent edge; iter D_M 75.2 vs one-shot 79.5 — slightly closer to
+  Gaussian) so iteration is not the source of the benefit; (RQ3) the unconditional GLP prior ERASES the
+  steer (as-is projection retention 10.6/83.1 vs target 11.1/88.6 @α=1/8, ~5–6% lost). No prior result
+  superseded — this is an added comparison; the one-shot MLP's 84% @α=8 is unchanged.
+- **Deliverable deltas:** RESULTS.md +Exp 17 (7-column comparison table + reading) + figure entry +
+  Headline "A real diffusion corrector" paragraph. REPORT.md +Methods "A real diffusion corrector (Exp 17)"
+  subsection (3 new display-math: one-shot form, iterative update, DDPM forward+MSE) + Results Exp 17 (table
+  + interpretation + figure) + Summary diffusion paragraph + Conclusion clause + Limitation (1) updated (the
+  "better manifold model = diffusion prior" future-work item is now TESTED and does not help).
+- New code `experiments/17_diffusion_corrector.py`. New figure `plots/17_diffusion_corrector.png`
+  (ΔLM vs α / recovery vs α / projection retention). Results `results/17_diffusion_corrector.json`.
+- REPORT math re-verified via GitHub API: 21/21 js-display-math (18 prior + 3 new), 0 broken
+  (<pre lang=math>), 0 inline hazards.

@@ -92,6 +92,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         LOW-DIM (~8–34 ≪ 768), ANISOTROPIC (PR 1.1), HEAVY-TAILED (D_M² spread 6.7× Gaussian) — NOT a single
         Gaussian. Sharpens the thesis (mechanism for Exp 2). Human asks #1 (diffusion corrector) + #3 (other
         steering family) remain — see Next step.
+- [x] S6 — REAL DIFFUSION CORRECTOR (Exp 17, human feedback #1) DONE: built the actual iterative machinery
+        and compared three correctors at matched projection — one-shot MLP (Exp 3), cold-diffusion iterative
+        K=8 (step-conditioned velocity field, LM-supervised through the unroll), GLP Gaussian-noise DDPM prior
+        (SDEdit, no LM). Recovery @α=8: 84% / 85% / −5%. The Cold-Diffusion CORRUPTION MODEL + LM supervision
+        carries the result (not iteration: iter ~ties one-shot); the generic Gaussian-noise prior is WORSE
+        than raw and ERASES the steer. Validates ColdSteer's design. Only human ask #3 (other steering
+        family) remains — see Next step.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -103,7 +110,22 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**S5 Experiment 16 (new, acts on human feedback 2026-07-06):** the human doubted the Gaussian-manifold
+**S6 Experiment 17 (new, acts on human feedback #1, 2026-07-06):** built the REAL diffusion machinery the
+direction is named after and settled whether "diffusion" adds anything over the one-shot MLP. Three
+correctors at matched projection α|v| on the same held-out FineWeb eval (GPT-2 small, block 6, sentiment):
+(1) one-shot MLP (Exp 3, 4.46M), (2) COLD-DIFFUSION iterative K=8 (step-conditioned velocity field,
+projection-preserving every step, LM-supervised through the K-step unroll, 4.46M), (3) GLP Gaussian-noise
+DDPM prior (SDEdit, no LM, 2.69M). RESULT: recovery @α=8 = **84% / 85% / −5%**. Three answers — (RQ1) the
+Cold-Diffusion CORRUPTION MODEL is what matters: LM-supervised training on the real steering corruption
+recovers 84–85%, but the generic Gaussian-noise "denoise back to the manifold" prior has NEGATIVE recovery
+(worse than raw); (RQ2) the iterative structure ~TIES the one-shot MLP (85 vs 84%) so iteration isn't the
+source; (RQ3) the unconditional prior ERASES the steer (as-is retention 10.6/83.1 vs target 11.1/88.6
+@α=1/8). Validates ColdSteer's design (condition on clean activation + LM supervision). No prior result
+superseded. Artifacts: `experiments/17_diffusion_corrector.py`, `results/17_diffusion_corrector.json`,
+`plots/17_diffusion_corrector.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified (21/21
+js-display-math, 0 broken, 0 inline hazards). Only human ask #3 (a different steering family) remains queued.
+<!-- prior: S5 manifold geometry Exp 16 -->
+**S5 Experiment 16 (acts on human feedback 2026-07-06):** the human doubted the Gaussian-manifold
 assumption behind `D_M` and asked to characterize the real manifold via manifold-recovery literature.
 Tested directly on clean layer-6 activations (49,218 tokens, no steering): intrinsic dimension (TwoNN —
 Facco 2017; Levina–Bickel MLE — 2004; PCA participation ratio) + Gaussianity (held-out D_M² vs χ²₇₆₈).
@@ -299,16 +321,14 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**Two open HUMAN-FEEDBACK asks (2026-07-06), each a clean iteration, highest priority:**
-(#1) **A real diffusion-model corrector.** The current corrector is a one-shot MLP, not the diffusion model
-of the GLP arxiv paper. Build a (conditional) flow-matching / DDPM-style denoiser over layer-6 activations
-trained on the STEERING corruption z=h+αv (Cold-Diffusion framing, NOT Gaussian-noise denoising), with
-iterative sampling; name it explicitly "diffusion." Compare its ΔLM + behavioral Pareto to the one-shot MLP
-and to a generic Gaussian-noise GLP-style teacher. This is the central critique — worth 2 iters if needed.
+**One open HUMAN-FEEDBACK ask (2026-07-06), a clean iteration, highest priority:**
 (#3) **A genuinely different steering family.** All steering so far is hand-built DiffMean concepts (6 of
 them). Try a persona/behavioral trait or a downloaded sentiment/toxicity dataset (downloads OK per feedback)
 to test the recipe beyond DiffMean probes.
-(Exp 16 just answered #2 — the Gaussian-manifold doubt — confirming the cloud is low-dim/anisotropic/heavy-tailed.)
+(Exp 16 answered #2 — the Gaussian-manifold doubt — confirming the cloud is low-dim/anisotropic/heavy-tailed.
+Exp 17 answered #1 — the real diffusion corrector — showing the Cold-Diffusion corruption model + LM
+supervision, not iteration, carries the result, and a generic Gaussian-noise diffusion prior is worse than
+raw. Both human asks #1 and #2 now DONE.)
 
 Prior (all delivered, success criterion long met): Core arc + all generalization axes + behavioral axis +
 behavioral-preservation follow-up + LAYER-ROBUSTNESS

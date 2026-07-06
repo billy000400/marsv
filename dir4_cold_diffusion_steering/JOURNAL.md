@@ -667,3 +667,57 @@ to test the recipe beyond hand-built DiffMean concepts. Both optional; success c
 On track? yes — Exp 16 (manifold geometry) delivered, acting on human feedback #2: activations are
 low-dim/anisotropic/heavy-tailed, NOT Gaussian — sharpens the thesis; deliverables curated + math-verified
 (18/18 display-math). ~99% complete; feedback asks #1 (diffusion model) and #3 (other steering) queued. No blocker.
+
+## 2026-07-06 — Iter 17: a REAL diffusion corrector (acts on human feedback #1)
+
+**Scope.** Completed the highest-priority open human-feedback ask (#1): build the ACTUAL diffusion machinery
+the direction is named after and settle whether "diffusion" adds anything over the one-shot MLP. The script
+`experiments/17_diffusion_corrector.py` was already authored in a prior iter but its run had been killed
+mid-training (log stopped at "== train cold-diffusion iterative corrector ==", no JSON). This iter I ran it
+to completion (0.18 VRAM frac, ~5 min under contention: slow transformers import + model forward + 3 model
+trainings + eval) and curated all deliverables.
+
+**Did.** Ran the three-corrector comparison at matched projection α|v| on the same held-out FineWeb eval
+(GPT-2 small, block 6, sentiment): (1) one-shot MLP (Exp 3), (2) cold-diffusion iterative K=8 (step-conditioned
+velocity field, projection-preserving at every step, LM-supervised through the unroll), (3) GLP Gaussian-noise
+DDPM prior (SDEdit, no LM). All 4.46M/4.46M/2.69M params.
+
+**Learned (clean, three-part answer to the central critique).** Recovery @α=8: one-shot **84%**, iterative
+**85%**, GLP prior **−5%** (ΔLM +2.925, actually WORSE than raw +2.778). (1) The Cold-Diffusion CORRUPTION
+MODEL is what carries the result — LM-supervised training on the real steering corruption recovers 84–85%
+regardless of one-shot-vs-iterative, but the generic "denoise clean activations back to the manifold" GLP
+prior has NEGATIVE recovery at every α: Exp 2's lesson in diffusion clothing (a prior that only knows
+"typical activation" can't know which off-typical directions the LM tolerates). (2) The iterative diffusion
+structure ~TIES the one-shot MLP (85 vs 84%; a tiny consistent edge at every α; iter sits slightly closer to
+the Gaussian, D_M 75.2 vs 79.5) — the value of "diffusion" is the corruption + LM supervision, NOT the step
+count, so Exp 3's one-shot MLP was not leaving fluency on the table. (3) The unconditional GLP prior ERASES
+the steer (as-is projection retention 10.6/83.1 vs target 11.1/88.6 @α=1/8) — exactly the info-loss the GLP
+authors flag for unconditional priors, and re-imposing the projection still can't repair the LM. This
+directly validates the ColdSteer design choices (condition on clean activation + LM supervision) and turns
+the "you didn't build a real diffusion model" critique into a positive result.
+
+**Assumptions/decisions logged.** (a) Picked #1 (real diffusion corrector) over #3 (a different steering
+family) because #1 is the direction's CENTRAL critique and the script was already written (lowest-risk path
+to landing it cleanly). (b) Steelmanned the GLP baseline: chose its SDEdit t_start by grid-search over
+{0.15,0.25,0.40} for the LOWEST ΔLM, and re-imposed the target projection so the fluency comparison is matched
+and fair — the GLP prior still loses, so the negative result is robust, not a strawman. (c) Held the iterative
+net to EXACTLY the one-shot capacity (4.46M) so RQ2 isolates structure from parameters. (d) Reported the GLP
+prior's negative recovery honestly rather than clipping to 0 — it genuinely makes the LM worse than raw. (e)
+No prior result superseded; this is an added comparison (one-shot's 84% @α=8 reproduced to the digit).
+
+**Deliverables.** RESULTS.md +Exp 17 (7-col table + reading) + figure entry + Headline paragraph; REPORT.md
++Exp 17 Methods (3 new display-math) + Results (table + interpretation + figure) + Summary/Conclusion clauses
++ Limitation (1) updated (diffusion-prior future-work item now TESTED, doesn't help); CHANGELOG appended;
+`plots/17_diffusion_corrector.png`, `results/17_diffusion_corrector.json`. REPORT math re-verified via GitHub
+API: 21/21 js-display-math, 0 broken, 0 inline hazards.
+
+**Next step (optional; success criterion long met).** One human ask remains: #3 — a genuinely different
+steering family (persona/behavioral trait, or a downloaded sentiment/toxicity dataset rather than hand-built
+DiffMean probes) to test the recipe beyond DiffMean concepts. Also optional: (i) push Exp 11 by supervising
+the behavioral readout through sampled/differentiable generation; (ii) GPT-2 large. All optional.
+
+On track? yes — Exp 17 delivers the central human-feedback ask (#1: a real diffusion corrector): the
+Cold-Diffusion corruption model + LM supervision recovers 84–85% whether one-shot or iterative, while a
+generic Gaussian-noise diffusion prior is worse than raw and erases the steer — validating ColdSteer's design.
+Deliverables curated + math-verified (21/21 display-math). ~99% complete; only feedback #3 (other steering
+family) queued. No blocker.
