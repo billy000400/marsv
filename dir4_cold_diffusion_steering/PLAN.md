@@ -120,6 +120,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         λ_g=160 @α=2 effect +1.61 at near-baseline d2 0.71 — but over-weighting collapses at strong steering
         (λ_g=160: eff −0.22, d2 0.32 @α=8, degenerates like raw). Frontier pushed out a SECOND time, not
         erased; strong-effect-and-fluent corner still eludes. λ_g=0 reproduces Exp 10/11 to the digit.
+- [x] S4(l) — CROSS-ARCHITECTURE generality (Exp 21) DONE: Exp 13/19 scaled the model but stayed in the
+        GPT-2 family. Replicated the EXACT flagship Exp-3 pipeline UNCHANGED on Qwen3-1.7B (28 blocks, d=2048,
+        block 14/28) — a non-GPT-2 architecture (RMSNorm/rotary/SwiGLU/grouped-query attention). POSITIVE:
+        raw breaks the LM (ΔLM@8 +3.43, D_M 44.7→77.8); identical corrector recovers 94% @α=8 / 108% @α=4 at
+        matched projection, corrected activation further off the Gaussian manifold at every α (122.2 vs 77.8
+        @α=8). 94% edges GPT-2 small's 84%. Architecture-robust; result now spans 7 axes (strength/direction/
+        layer/model-scale/architecture/prompt-family/steering-family).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -131,7 +138,30 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**S4(k) Experiment 20 (new, differentiable-generation behavioral supervision, 2026-07-07):** closed the last
+**S4(l) Experiment 21 (new, cross-ARCHITECTURE generality, 2026-07-07):** picked the single highest-value
+remaining external-validity point — every model tested so far (Exp 13/19: GPT-2 small/medium/large) is the
+SAME GPT-2 architecture, so the flagship result could be a GPT-2-architecture artifact. Replicated the EXACT
+flagship Exp-3 pipeline UNCHANGED on Qwen3-1.7B (28 blocks, d=2048) at mid layer block 14/28 — a modern
+architecture differing from GPT-2 on EVERY structural axis: RMSNorm (not LayerNorm), rotary position
+embeddings (not learned), SwiGLU MLP (not GELU), grouped-query attention (16 query / 8 KV heads, not dense
+MHA). Only the model changes (|v|=38.1, mean|h|=301.9, clean D_M=44.7; corrector 8.39M @ d=2048; Qwen3 bf16
+for the ~4.3 GB share, corrector fp32 with a bf16 hook boundary, train batch 2 / EVAL batch 1). POSITIVE —
+both headline facts replicate: raw steering breaks the LM (ΔLM@8 **+3.43**, D_M 44.7→77.8) and the identical
+LM-supervised corrector recovers it at matched projection — **recovery @α=8 = 94%** (ΔLM +3.43→+0.19), **108%
+@α=4** (ΔLM even below clean baseline = free-or-better weak-α, as on every GPT-2 scale), retention matched
+α|v| (38.1→304.8), with the corrected activation FURTHER off the Gaussian manifold than raw at every α (122.2
+vs 77.8 @α=8; Exp-2/3 decoupling holds a 4th time). 94% @α=8 edges GPT-2 small's 84%. ⇒ ARCHITECTURE-robust
+across LayerNorm↔RMSNorm, learned↔rotary positions, GELU↔SwiGLU, dense↔grouped-query attention; the flagship
+result now spans SEVEN axes (strength/direction/layer/model-scale/architecture/prompt-family/steering-family).
+Debugging: shared /mars-vol disk contention made the cold Qwen3 load slow (~8 min tensor-by-tensor; ~21 MB/s;
+re-run instant via OS page cache); first run OOM'd in eval at the float cast of Qwen3's 151,936-token vocab
+logits — fixed with EVAL batch 1 + expandable_segments + empty_cache + a corrector checkpoint (results/21_corr.pt).
+No prior result superseded. Artifacts: `experiments/21_cross_arch.py`, `results/21_cross_arch.json`,
+`results/21_corr.pt`, `results/21_run.log`, `plots/21_cross_arch.png`. RESULTS/REPORT/CHANGELOG curated;
+REPORT math verified (26/26 js-display-math, 0 broken, 0 inline hazards). ENV: dir9's cupenv python (shared
+conda `transformers` still absent).
+<!-- prior: S4(k) differentiable-generation Exp 20 -->
+**S4(k) Experiment 20 (differentiable-generation behavioral supervision, 2026-07-07):** closed the last
 substantive open lever (PLAN Next-step (i)). Exp 11's behavioral term matched the corrector's downstream
 sentiment readout on a TEACHER-FORCED pass and hit a ≈+1.3 generated-effect ceiling — a proxy gap
 (teacher-forced ≠ autoregressive). Exp 20 supervises the readout on the corrector's OWN generated
@@ -393,15 +423,21 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**All three human-feedback asks DONE, the optional model-scale point (GPT-2 large, Exp 19) DONE, and the
-last substantive open lever — differentiable-generation supervision (Exp 20) — now DONE.** Success criterion
-long met; direction complete on all planned axes and the full behavioral arc (Exp 10→11→20). No substantive
-open lever remains. Only very-low-value untested points are left, all optional:
-(i) GPT-2 XL / a non-GPT-2 architecture (another model-scale point);
-(ii) a harder differentiable-generation objective (Gumbel-softmax hard samples, longer rollouts) to push the
-strong-effect-and-fluent corner Exp 20 left open.
+**All three human-feedback asks DONE; optional model-scale (GPT-2 large, Exp 19), differentiable-generation
+(Exp 20), and cross-ARCHITECTURE (Qwen3-1.7B, Exp 21) all DONE.** Success criterion long met; direction
+complete on all planned axes plus the full behavioral arc (Exp 10→11→20), now robust on SEVEN axes
+(strength/direction/layer/model-scale/architecture/prompt-family/steering-family). No substantive open lever
+remains. Only very-low-value untested points are left, all optional:
+(i) a SECOND non-GPT-2 architecture (Llama/Mistral) to make the architecture axis a *sweep* rather than a
+single boundary crossing;
+(ii) re-run the behavioral generation protocol (Exp 10: sentiment effect + distinct-2) on Qwen3 to confirm the
+94% fluency recovery is not bought by under-steering on this architecture (the Exp-10 caveat is untested off
+GPT-2);
+(iii) a harder differentiable-generation objective (Gumbel-softmax hard samples, longer rollouts) for the
+strong-effect-and-fluent corner Exp 20 left open; (iv) GPT-2 XL.
 ENV: run experiment scripts with `/mars-vol/marsv/dir9_ood/cupenv/bin/python` until the shared conda
-`transformers` is restored (still absent as of iter 19).
+`transformers` is restored (still absent as of iter 21). Note: shared /mars-vol disk is contended — a cold
+large-model load can take several minutes; a warm re-run is instant via OS page cache.
 
 Prior (all delivered, success criterion long met): Core arc + all generalization axes + behavioral axis +
 behavioral-preservation follow-up + LAYER-ROBUSTNESS

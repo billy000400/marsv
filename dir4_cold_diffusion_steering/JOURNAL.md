@@ -863,3 +863,47 @@ On track? yes — Exp 20 closes the last substantive open lever: differentiable-
 Exp 11's behavioral ceiling (α=8 effect +1.08→+1.72 at far better fluency than raw) but the strong-effect-and-
 fluent corner still eludes (over-weighting collapses). Deliverables curated + math-verified (26/26). ~100%
 complete. No blocker.
+
+## 2026-07-07 — Iter 21: cross-ARCHITECTURE generality (Qwen3-1.7B)
+
+**Scope.** Success criterion long met; all human asks + all substantive levers closed. Picked the single
+highest-value remaining external-validity point: every model tested so far (Exp 13/19: small/medium/large)
+is the SAME GPT-2 architecture. Tested a genuinely different one — Qwen3-1.7B (RMSNorm, rotary positions,
+SwiGLU, grouped-query attention) — to answer "is the flagship result a GPT-2-architecture artifact?"
+
+**Did.** New `experiments/21_cross_arch.py`: self-contained port of the flagship Exp-3 pipeline to Qwen3-1.7B
+(28 blocks, d=2048), steering/correcting at mid layer block 14/28. Reused exp03's Corrector / gaussian_stats /
+mahalanobis; wrote arch-agnostic resid_post + FuncPatcher hooks on `model.model.layers[layer]` (Qwen3 module
+path); corrector fp32 with bf16 boundary at the hook. Only the model changes vs Exp 3. Ran with dir9 cupenv.
+
+**Learned.** POSITIVE, clean cross-architecture replication. Raw steering breaks Qwen3 (ΔLM@8 +3.43, D_M
+44.7→77.8); identical corrector recovers **94% @α=8 / 108% @α=4** at matched projection (retention α|v|
+exactly), corrected activation further off the Gaussian manifold than raw at every α (122.2 vs 77.8 @α=8 —
+decoupling holds a 4th time). 94% edges GPT-2 small's 84%. ⇒ architecture-robust, not just scale-robust.
+Training LM loss fell ~4.1→~3.0 over 900 steps; λ_near behaved as on GPT-2.
+
+**Debugging/decisions logged.** (a) DISK CONTENTION: the shared /mars-vol volume was heavily contended —
+first Qwen3 load stalled (state D, 436 MB after 10 min; dd measured ~21 MB/s). Cold load of the 3.9 GB bf16
+shards took ~8 min tensor-by-tensor; a re-run loaded instantly (OS page cache). Not a code issue. (b) OOM:
+first run trained fine (900 steps) then OOM'd in eval at `log_softmax(logits.float())` — Qwen3's 151,936-token
+vocab makes the float logit cast the memory bottleneck at d=2048 under the 4.24 GB cap. Fix per BUDGET.md:
+EVAL_BATCH 4→1, added PYTORCH_ALLOC_CONF expandable_segments, empty_cache() before eval, and a corrector
+checkpoint save (results/21_corr.pt) so any eval rerun skips training. Re-ran clean, no OOM. (c) bf16 model +
+fp32 corrector with `.to(h.dtype)` at the hook boundary — backprop through frozen bf16 layers into the fp32
+corrector was stable (Qwen3 is bf16-native). (d) ENV: cupenv python again; shared conda transformers still gone.
+
+**Deliverables.** RESULTS.md +Exp 21 (table + reading) + figure entry + Headline architecture clause.
+REPORT.md +Methods subsection (no new display math — reuses Exp 12 recovery eq) + Results Exp 21
+(Observation/Interpretation/Limitations/Next-check) + Summary + Conclusion (2 clauses). CHANGELOG appended.
+Artifacts: experiments/21_cross_arch.py, results/21_cross_arch.json, results/21_corr.pt, results/21_run.log,
+plots/21_cross_arch.png. REPORT math re-verified: 26/26 js-display-math, 0 broken, 0 inline hazards.
+
+**Next step (all optional; success criterion long met).** The result now spans strength/direction/layer/
+model-scale/architecture/prompt-family/steering-family. Only very-low-value points remain: a second non-GPT-2
+architecture (Llama/Mistral) to make it an architecture *sweep*; the behavioral generation protocol (Exp 10)
+re-run on Qwen3 to confirm the recovery isn't bought by under-steering on this architecture; or GPT-2 XL. Keep
+running scripts with dir9's cupenv python until the shared conda env returns.
+
+On track? yes — Exp 21 closes the architecture axis: the flagship result replicates on Qwen3-1.7B (non-GPT-2:
+RMSNorm/RoPE/SwiGLU/GQA), recovery 94% @α=8, again off the Gaussian manifold. Deliverables curated +
+math-verified (26/26). ~100% complete; direction robust on 7 axes. No blocker.

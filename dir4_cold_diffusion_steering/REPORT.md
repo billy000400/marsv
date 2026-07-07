@@ -68,7 +68,10 @@ manifold at every layer (Experiment 12); nor a GPT-2-*small* artifact: replicati
 (355M, block 12 / 24)** and **GPT-2 large (774M, block 18 / 36)** recovers **89%** and **84%** of the damage
 at α=8 (101% / 95% at α=4), again off the Gaussian manifold — so across a 6× parameter range
 (124M → 355M → 774M) the α=8 recovery stays flat (84% / 89% / 84%) and the core result is **model-robust**
-too (Experiments 13, 19). It is also **not a FineWeb-prompt
+too (Experiments 13, 19); and not a GPT-2-*architecture* artifact either — replicating it on
+**Qwen3-1.7B (block 14 / 28)**, which swaps LayerNorm→RMSNorm, learned→rotary positions, GELU→SwiGLU, and
+dense→grouped-query attention, recovers **94%** at α=8 (108% at α=4), so the result is **architecture-robust**
+across all four structural axes that separate Qwen3 from GPT-2 (Experiment 21). It is also **not a FineWeb-prompt
 artifact**: a corrector trained only on FineWeb still recovers **77%** of the damage at α=8 on held-out
 technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at α=4), with
 recovery declining smoothly as the family's clean activations drift off the FineWeb manifold — so it is
@@ -496,6 +499,27 @@ the model through a shared cache, so large is loaded once and installed there; t
 batch 2 to fit the 774M model in the per-agent VRAM budget of ~4.3 GB.) We report `ΔLM`, `D_M`, and the
 fluency recovery of Experiment 12's equation across `α ∈ {1, 2, 4, 8}`, at matched projection `α|v|`, versus
 raw steering.
+
+### Cross-architecture generality (Experiment 21)
+
+Experiments 13 and 19 scale the model but stay inside the **GPT-2 family** — every one shares the same
+architecture (learned absolute position embeddings, LayerNorm, dense multi-head attention, GELU MLP).
+Experiment 21 asks whether the result depends on that architecture at all by replicating the **exact
+Experiment-3 pipeline** on **Qwen3-1.7B** (1.7B parameters, 28 transformer blocks, `d = 2048`), a modern
+architecture that differs from GPT-2 on **every** structural axis: **RMSNorm** instead of LayerNorm,
+**rotary position embeddings** instead of learned ones, a **SwiGLU** feed-forward block instead of GELU, and
+**grouped-query attention** (16 query heads sharing 8 key-value heads) instead of dense multi-head attention.
+We hook `resid_post` at its **mid layer, block 14 of 28** (`hidden_states[15]`), the depth analogue of block
+6 of 12 in GPT-2 small. Everything else is held fixed: the same 20/20 DiffMean sentiment sentences (the
+vector is rebuilt at block 14 of Qwen3, `|v| = 38.1`; mean `|h| = 301.9`, clean `D_M = 44.7`), the same
+400-document Gaussian fit, the same 300-document training set and held-out 100-document eval, the same
+4-layer projection-preserving corrector against the downstream LM loss (now at `d = 2048`, 8.39M
+parameters), the same seed, `α ∼ U(0.5, 8)`, and hyper-parameters. Only the model changes. (Implementation
+note: Qwen3 weights are loaded in bf16 to fit the 1.7B model in the per-agent VRAM budget of ~4.3 GB, with
+the corrector run in fp32 and cast to bf16 at the patch hook; the corrector is trained at batch 2 and the
+held-out evaluation at batch 1 because the full 151,936-token vocabulary logits dominate memory at
+`d = 2048`.) We report `ΔLM`, `D_M`, and the fluency recovery of Experiment 12's equation across
+`α ∈ {1, 2, 4, 8}`, at matched projection `α|v|`, versus raw steering.
 
 ### Held-out prompt family (Experiment 15)
 
@@ -1128,6 +1152,46 @@ raw throughout, 96.8 vs 66.0 at α=8). The projection-preserving, downstream-sup
 carries over intact from 124M to 774M — the core ColdSteer result is **model-robust across the full GPT-2
 size range**, not an artifact of any single model.
 
+### Experiment 21 — the fluency result holds on a non-GPT-2 architecture (Qwen3-1.7B)
+
+![cross-architecture generality on Qwen3-1.7B](plots/21_cross_arch.png)
+
+| α | ΔLM raw (nats) | ΔLM learned | recovery | `D_M` raw | `D_M` learned |
+|---|----------------|-------------|----------|-----------|----------------|
+| 1 | +0.06 | **−0.18** | >100% | 45.4 | 60.5 |
+| 2 | +0.24 | **−0.16** | >100% | 47.5 | 65.6 |
+| 4 | +1.08 | **−0.09** | **108%** | 55.0 | 81.9 |
+| 8 | +3.43 | **+0.19** | **94%** | 77.8 | 122.2 |
+
+**Observation.** Experiments 13 and 19 scaled the model but never left the GPT-2 family. On **Qwen3-1.7B** —
+which shares *no* structural component with GPT-2 (RMSNorm, rotary positions, SwiGLU, grouped-query
+attention) — both headline facts replicate. Raw steering breaks the model (`ΔLM` → **+3.43 nats at α=8**,
+`D_M` 44.7 → 77.8), and the identical LM-supervised, projection-preserving corrector removes essentially all
+of it at matched projection: **94% of the fluency damage recovered at α=8** (`ΔLM` +3.43 → +0.19) and **108%
+at α=4**, with `ΔLM` slightly *below* the unsteered baseline at weak/medium steering (the free-or-better
+weak-α behavior seen on every GPT-2 scale; the ">100%" reads reflect raw's near-zero damage there). The α=8
+recovery on Qwen3 (94%) is even a touch higher than GPT-2 small's 84%. And the Experiment-2/3 decoupling
+holds a **fourth** time: the corrected activation sits **further** off the Gaussian manifold than raw at
+**every** α (`D_M` learned > raw throughout, 122.2 vs 77.8 at α=8).
+
+**Interpretation.** The projection-preserving, downstream-supervised recipe is not tied to any GPT-2-specific
+design choice. It works identically whether the model normalizes with LayerNorm or RMSNorm, encodes position
+with learned embeddings or rotary phases, uses a GELU or a SwiGLU MLP, and attends densely or with shared
+key-value heads — so the mechanism it exploits (a downstream objective can find a fluent, projection-matched
+correction that a statistical-manifold prior cannot) is a property of transformer language models in general,
+not of the GPT-2 architecture.
+
+**Limitations.** This is still a *single* concept (sentiment), *single* seed, and *single* mid layer, on one
+non-GPT-2 model; it establishes that the result crosses the GPT-2/Qwen3 architecture boundary but does not
+sweep architectures (e.g. Llama, Mistral, MoE models) or re-run the behavioral generation analysis (Exp
+10/11/20) on Qwen3. The teacher-forced `ΔLM` proxy carries the same caveat here as everywhere: it measures
+disruption to processing real text, and part of the recovery may reflect a weaker propagated edit (Exp 10).
+
+**Next check.** Repeat the behavioral generation protocol (sentiment effect + distinct-2, Exp 10) on Qwen3 to
+confirm the fluency recovery is not bought by under-steering on this architecture, and add one more distinct
+architecture family (e.g. a Llama-style model) to turn "crosses one architecture boundary" into "architecture
+family sweep."
+
 ### Experiment 14 — bank diversity is a causal lever (controlled test, confound removed)
 
 ![controlled third-member swap isolating bank diversity](plots/14_diversity_lever.png)
@@ -1336,7 +1400,10 @@ at the early, middle, and late residual stream (blocks 3 / 6 / 9) recovers 90% /
 damage at α=8, off the Gaussian manifold at every layer (Experiment 12); and **not a GPT-2-small artifact**:
 the same pipeline on GPT-2 medium (355M, block 12 / 24) and GPT-2 large (774M, block 18 / 36) recovers 89%
 and 84% at α=8 (101% / 95% at α=4), likewise off the Gaussian manifold (Experiments 13, 19) — across a 6×
-parameter range the α=8 recovery stays flat (84% / 89% / 84%), so the result is layer- and model-robust. Nor is it a **FineWeb-prompt
+parameter range the α=8 recovery stays flat (84% / 89% / 84%), so the result is layer- and model-robust; and
+**not a GPT-2-architecture artifact** — the same pipeline on **Qwen3-1.7B** (block 14 / 28; RMSNorm, rotary
+positions, SwiGLU, grouped-query attention) recovers **94%** at α=8 (108% at α=4), off the Gaussian manifold
+as always, so the result is architecture-robust as well (Experiment 21). Nor is it a **FineWeb-prompt
 artifact**: the same FineWeb-trained corrector recovers 77% of the fluency damage at α=8 on held-out
 technical-prose and 60% on out-of-distribution Python code (Experiment 15), degrading smoothly as the prompt
 family's clean activations drift off the training manifold — so the correction is prompt-family-robust too.
@@ -1449,7 +1516,9 @@ curation alone (the native per-direction oracle is still needed); stronger direc
 richer training objective, and diverse-bank composition remain open. The flagship fluency result is now
 shown **layer-robust** (Experiment 12: blocks 3 / 6 / 9 of GPT-2 small), **model-robust** across a 6×
 parameter range (Experiments 13, 19: GPT-2 medium 355M and large 774M recover 89% and 84% at α=8, with the
-124M → 355M → 774M α=8 recovery flat at 84% / 89% / 84%), and **prompt-family-robust** (Experiment 15: a
+124M → 355M → 774M α=8 recovery flat at 84% / 89% / 84%), **architecture-robust** (Experiment 21: Qwen3-1.7B,
+a non-GPT-2 architecture with RMSNorm / rotary positions / SwiGLU / grouped-query attention, recovers 94% at
+α=8), and **prompt-family-robust** (Experiment 15: a
 FineWeb-trained corrector recovers 77% on held-out technical prose and 60% on out-of-distribution Python code
 at α=8, degrading smoothly with distribution shift); GPT-2 XL and non-GPT-2 architectures remain open. (4) The small
 non-positive `ΔLM` at low `α`

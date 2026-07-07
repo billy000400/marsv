@@ -1,0 +1,32 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 34751.40it/s]
+model=Qwen/Qwen3-1.7B layers=28 d=2048 device=cuda
+|v|=38.10 mean|h|=301.90 clean D_M=44.66
+corrector params: 8.39M
+  ep0 step  50 a= 4.2 LM=4.134 near=0.516
+  ep0 step 100 a= 7.7 LM=3.418 near=1.766
+  ep0 step 150 a= 7.7 LM=3.882 near=1.735
+  ep1 step 200 a= 3.3 LM=4.755 near=0.687
+  ep1 step 250 a= 7.8 LM=3.728 near=1.462
+  ep1 step 300 a= 6.9 LM=3.545 near=2.303
+  ep2 step 350 a= 5.9 LM=3.027 near=1.363
+  ep2 step 400 a= 7.6 LM=3.995 near=2.459
+  ep2 step 450 a= 1.6 LM=3.185 near=1.090
+  ep3 step 500 a= 0.7 LM=3.745 near=0.790
+  ep3 step 550 a= 6.6 LM=3.852 near=2.636
+  ep3 step 600 a= 6.3 LM=4.370 near=2.120
+  ep4 step 650 a= 2.4 LM=2.972 near=1.065
+  ep4 step 700 a= 0.6 LM=4.115 near=0.840
+  ep4 step 750 a= 4.9 LM=3.346 near=1.336
+  ep5 step 800 a= 7.0 LM=3.956 near=2.293
+  ep5 step 850 a= 4.3 LM=4.098 near=1.550
+  ep5 step 900 a= 2.8 LM=4.282 near=1.193
+saved corrector checkpoint
+clean eval loss = 3.415
+a= 1.0 raw ΔLM=+0.064 learned=-0.182 rec=383% D_M raw=45.4 learn=60.5
+a= 2.0 raw ΔLM=+0.243 learned=-0.159 rec=166% D_M raw=47.5 learn=65.6
+a= 4.0 raw ΔLM=+1.081 learned=-0.091 rec=108% D_M raw=55.0 learn=81.9
+a= 8.0 raw ΔLM=+3.429 learned=+0.192 rec=94% D_M raw=77.8 learn=122.2
+saved figure + results
+[W707 23:29:24.949969107 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

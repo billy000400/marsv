@@ -756,6 +756,41 @@ core ColdSteer claim — *a downstream-supervised, projection-preserving correct
 steering's fluency damage while moving off the statistical manifold* — is confirmed **model-robust** across
 GPT-2 small, medium, and large.
 
+**Experiment 21 — Cross-architecture generality: is the result a GPT-2-*architecture* artifact?**
+Experiments 13 and 19 scaled the *model* (124M → 355M → 774M) but every one stayed inside the **GPT-2
+family** — the same architecture (learned positional embeddings, LayerNorm, dense multi-head attention,
+GELU MLP). The sharpest remaining external-validity question is whether the result depends on that
+architecture at all. We replicate the exact Experiment-3 pipeline **unchanged** on **Qwen3-1.7B (28 blocks,
+`d = 2048`)**, a modern architecture that differs from GPT-2 on every structural axis: **RMSNorm** (not
+LayerNorm), **rotary position embeddings** (not learned positions), a **SwiGLU** MLP (not GELU), and
+**grouped-query attention** (16 query / 8 key-value heads, not dense MHA). We steer and correct at the
+**mid layer, block 14 of 28** (the depth analogue of block 6 of 12 in GPT-2 small). Only the model changes;
+the DiffMean sentiment prompts, 400-doc Gaussian fit, 300-doc training set, held-out 100-doc eval, 4-layer
+corrector, seed, `α ∼ U(0.5, 8)`, and objective are identical to Exp 3 (weights loaded in bf16 for the VRAM
+share; `|v| = 38.1`, mean `|h| = 301.9`, clean `D_M = 44.7`; corrector 8.39M params at `d = 2048`).
+
+| α | ΔLM raw (nats) | **ΔLM learned** | recovery | `D_M` raw | `D_M` learned |
+|---|----------------|------------------|----------|-----------|----------------|
+| 1 | +0.06 | **−0.18** | >100% | 45.4 | 60.5 |
+| 2 | +0.24 | **−0.16** | >100% | 47.5 | 65.6 |
+| 4 | +1.08 | **−0.09** | **108%** | 55.0 | 81.9 |
+| 8 | +3.43 | **+0.19** | **94%** | 77.8 | 122.2 |
+
+(Steering-projection retention is matched `α|v|` = 38.1 → 304.8 for raw and learned at every α.)
+
+**Reading it: both headline facts replicate on a non-GPT-2 architecture — the result is not a
+GPT-2-*architecture* artifact.** (P) Raw steering breaks Qwen3 exactly as it breaks GPT-2: `ΔLM` climbs
+monotonically to **+3.43 nats at α=8** while the Mahalanobis distance inflates 44.7 → 77.8. (C) The
+identical LM-supervised, projection-preserving corrector removes essentially all of it at matched
+projection — recovering **94% of the fluency damage at α=8** and **108% at α=4**, with `ΔLM` slightly
+*below* the clean baseline at weak/medium steering (the same free-or-better behavior seen on every GPT-2
+scale; the ">100%" reads only reflect raw's near-zero damage there). The α=8 recovery on Qwen3 (94%) is
+even a touch higher than GPT-2 small's 84%. And the signature decoupling holds a **fourth** time: the
+corrected activation sits **further** off the Gaussian manifold than raw at **every** α (`D_M` learned > raw
+throughout, 122.2 vs 77.8 at α=8). So the core ColdSteer claim is **architecture-robust**, not merely
+scale-robust: it holds across LayerNorm ↔ RMSNorm, learned ↔ rotary positions, GELU ↔ SwiGLU MLPs, and
+dense ↔ grouped-query attention — every structural axis that separates Qwen3 from the GPT-2 family.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -847,6 +882,11 @@ GPT-2 small, medium, and large.
   `λ_g ∈ {0,40,160}`; (b) distinct-2 vs α; (c) the effect-vs-fluency Pareto. The `λ_g=40` corrector reaches
   higher effect than Exp 11's teacher-forced term at comparable fluency (breaking the ≈+1.3 ceiling to +1.72
   at α=8), while `λ_g=160` gains effect at moderate α but collapses to raw-like repetition at α≥6.
+- `plots/21_cross_arch.png` — cross-architecture replication of the flagship result on **Qwen3-1.7B**
+  (28 blocks, block 14/28; RMSNorm / RoPE / SwiGLU / grouped-query attention). (a) ΔLM vs α, raw (dashed) vs
+  corrected (solid) — corrected sits at or below zero while raw climbs to +3.43; (b) fluency recovery vs α —
+  94% at α=8, ≥108% at α≤4; (c) `D_M` vs α, raw vs corrected — corrected exceeds raw at every α
+  (off-Gaussian-but-LM-safe holds on a non-GPT-2 architecture too).
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -887,7 +927,12 @@ replicating the exact flagship pipeline on **GPT-2 medium (355M, block 12/24)** 
 steering's fluency damage at α=8 (**101%** at α=4), and on **GPT-2 large (774M, block 18/36)** recovers
 **84%** at α=8 (**95%** at α=4) — both again by moving *further* off the Gaussian manifold than raw. Across
 the **124M → 355M → 774M** scale range (6× parameters) the α=8 recovery stays essentially flat (84% / 89% /
-84%), so the core result is **model-robust** as well (Exp 13, Exp 19). It is likewise **not a FineWeb-prompt
+84%), so the core result is **model-robust** as well (Exp 13, Exp 19). And it is **not a GPT-2-*architecture*
+artifact** either: replicating the exact flagship pipeline on **Qwen3-1.7B (block 14/28)** — a modern
+architecture that swaps LayerNorm→RMSNorm, learned→rotary positions, GELU→SwiGLU, and dense→grouped-query
+attention — recovers **94%** of the fluency damage at α=8 (**108%** at α=4), again by moving *further* off the
+Gaussian manifold than raw (`D_M` 122.2 vs 77.8), so the result is **architecture-robust** across all four
+structural axes that separate Qwen3 from the GPT-2 family (Exp 21). It is likewise **not a FineWeb-prompt
 artifact**: a corrector trained only on FineWeb still recovers **77%** of the fluency damage at α=8 on
 held-out technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at
 α=4), with recovery declining smoothly as the family's clean activations drift further off the FineWeb

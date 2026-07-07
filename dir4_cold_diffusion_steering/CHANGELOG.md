@@ -524,3 +524,33 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - New code experiments/20_diff_generation.py, figure plots/20_diff_generation.png, results
   results/20_diff_generation.json, log results/20_run.log.
 - REPORT math re-verified via GitHub API: 26/26 js-display-math (2 new), 0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-07 — Experiment 21: cross-ARCHITECTURE generality (Qwen3-1.7B, non-GPT-2)
+- **Why:** Exps 13/19 scaled the model (124M→355M→774M) but every point stayed inside the GPT-2 family
+  (learned positions, LayerNorm, dense MHA, GELU). The remaining external-validity gap was whether the
+  flagship result is a GPT-2-*architecture* artifact. Exp 21 tests a genuinely different architecture.
+- **Method (new):** replicated the EXACT flagship Exp-3 pipeline UNCHANGED on Qwen3-1.7B (28 blocks,
+  d=2048) at mid layer block 14/28 — a modern architecture differing from GPT-2 on every structural axis:
+  RMSNorm (not LayerNorm), rotary position embeddings (not learned), SwiGLU MLP (not GELU), grouped-query
+  attention (16 query / 8 KV heads, not dense MHA). Same DiffMean sentiment prompts, 400-doc Gaussian fit,
+  300-doc train, held-out 100-doc eval, 4-layer projection-preserving corrector vs downstream LM loss,
+  seed, α~U(0.5,8). Only the model changes (|v|=38.1, mean|h|=301.9, clean D_M=44.7; corrector 8.39M @
+  d=2048). Qwen3 loaded bf16 for the ~4.3 GB VRAM share; corrector fp32 with a bf16 boundary at the patch
+  hook; train batch 2, EVAL batch 1 (full 151,936-token vocab logits dominate memory at d=2048);
+  expandable_segments alloc. Ran with dir9's cupenv python (shared conda transformers still absent).
+- **Result (new):** POSITIVE — both headline facts replicate on a non-GPT-2 architecture. Raw steering
+  breaks the LM (ΔLM@8 +3.43, D_M 44.7→77.8); the identical corrector recovers it at matched projection —
+  recovery @α=8 = **94%** (ΔLM +3.43→+0.19), **108%** @α=4 (ΔLM even below clean baseline, free-or-better
+  weak-α as on every GPT-2 scale), retention matched α|v| (38.1→304.8). Corrected activation FURTHER off the
+  Gaussian manifold than raw at every α (122.2 vs 77.8 @α=8; Exp-2/3 decoupling holds a 4th time). 94% @α=8
+  edges GPT-2 small's 84%. ⇒ architecture-robust across LayerNorm↔RMSNorm, learned↔rotary, GELU↔SwiGLU,
+  dense↔grouped-query attention. No prior result superseded (Exp 21 is a new follow-up).
+- **Deliverable deltas:** RESULTS.md +Exp 21 block (table + reading) + figure entry + Headline
+  model-robustness clause extended to architecture. REPORT.md +Methods "Cross-architecture generality
+  (Experiment 21)" subsection (no new display math — reuses Exp 12's recovery equation) + Results
+  "Experiment 21" (table + Observation/Interpretation/Limitations/Next-check) + Summary clause + Conclusion
+  clauses (2).
+- New code experiments/21_cross_arch.py, figure plots/21_cross_arch.png, results
+  results/21_cross_arch.json, checkpoint results/21_corr.pt, log results/21_run.log.
+- REPORT math re-verified via GitHub API: 26/26 js-display-math (unchanged), 0 broken (<pre lang=math>),
+  0 inline hazards.
