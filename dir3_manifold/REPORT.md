@@ -141,6 +141,18 @@ claim.
 
 ![Per-layer ID vs linear d95 vs ambient](plots/id_per_layer.png)
 
+**Estimator agreement (TwoNN vs MLE only).** The figure above overlays the linear PCA d95 and the
+ambient d_model = 768 on a log axis, which compresses the two nonlinear curves. The version below
+plots **only** TwoNN and MLE (centered and standardized) on a **linear** y-axis, so the reader can
+judge directly how closely the two nonlinear estimators agree: they track each other within ≈ 1.5
+units at layers 0/3/6 (near-identical at layer 6, 11.8 vs 13.3), and diverge only at the deeper
+layers 9/11 — most sharply at the **post-final-layernorm** layer 11, where standardization also flips
+their order. So the two independent nonlinear estimators corroborate each other where it matters (the
+layer-6 headline), and their disagreement is confined to the layers with known preprocessing
+artifacts.
+
+![TwoNN vs MLE only, linear y-axis — how closely the two nonlinear estimators agree](plots/id_twonn_vs_mle.png)
+
 PCA participation ratio is **not** usable as an ID here: from layer 3 on, a single massive-activation
 dimension carries 78–94% of total variance, collapsing $\mathrm{PR}$ to ≈ 1.
 
