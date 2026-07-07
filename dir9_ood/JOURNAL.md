@@ -262,3 +262,29 @@ rewriting the headline — honest oracle-eps is transductive, an upper bound not
 **Next step:** Rename `human_feedback_07010438.md` -> `*.addressed.md`, write STOP. Project remains a complete
 negative result; this iteration answered the operator's eps question without changing the verdict.
 On track? yes — S1+S2+S3 100% done; new operator eps-scan feedback fully addressed (residual eps-insensitive, input eps=6 was on a cliff, oracle-eps still loses everywhere), deliverables curated with the new plot, STOP created.
+
+---
+
+## Iteration 9 (2026-07-07) — verify finished state, re-create missing STOP
+**Did:** Reset into a nominally-finished project and found the `STOP` file was **absent** (a recurring
+finalization miss — same as iters 1/2/3/5/8). Before re-creating it, verified the project is genuinely
+complete rather than trusting the journal: (1) **no open feedback** — all six review/human files on
+disk are `*.addressed.md` (latest `human_feedback_07010438.addressed.md`, the eps-scan request, read &
+confirmed answered); (2) **all referenced figures exist** — `results/plots/` has all 9 PNGs cited by
+RESULTS.md/REPORT.md (`summary_best_per_set`, `perturbation_eps_scan`, `roc_{random,shuffled,code}`,
+`dist_*`); (3) **all result artifacts present** — `auroc_table.csv`, `auroc_cupbearer.csv`,
+`auroc_perturbation_eps.csv`, `cup_real_vs_vendored.csv`, `scores_full.npz`, `split/canonical_split.npz`,
+`acts/`; (4) **REPORT.md display-math renders** — GitHub markdown-API check clean (8/8 `js-display-math`,
+0 `<pre lang="math">`). RESULTS.md read in full — current-best only, matches CHANGELOG, no version
+history. Created `STOP`.
+**Learned:** No science was outstanding — the negative result (plateau-ness loses to standard and
+cupbearer baselines on every OOD set; random plateau-jacFrob@input 0.734 < MSP 0.932; shuffled
+plateau-perturbation@resid3 0.534 < MSP 0.872; code plateau-jacFrob@input 0.649 < cup-RMD@resid6 0.918)
+is complete and acceptable per PLAN.md, and the eps-scan (iter 8) already ruled out "wrong epsilon" as an
+escape. The only defect was procedural (missing STOP). No recomputation; no GPU/RAM used (verification +
+touch STOP only). Deliverables unchanged this iteration, so no CHANGELOG entry (rule 7 = deliverable-change
+history only).
+**Next step:** None — project complete and finalized; STOP written. If reopened by NEW feedback, the
+remaining ideas are all enhancements not corrections (cupbearer full task harness end-to-end; multi-model
+sweep; a non-code domain shift).
+On track? yes — S1+S2+S3 100% done, all feedback addressed, deliverables verified current-best on disk, STOP (re-)created.

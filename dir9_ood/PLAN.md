@@ -30,6 +30,16 @@ Minimum acceptable: one plateau variant (perturbation-sensitivity) computed at a
 End each JOURNAL.md entry with one line: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**DONE (iter 9, 2026-07-07) — VERIFIED FINISHED STATE + RE-CREATED MISSING STOP.** Reset into a
+nominally-finished project with **no `STOP` on disk** (recurring finalization miss) but **no open
+feedback** (all six review/human files are `*.addressed.md`). Verified completeness before finalizing:
+all 9 figures cited by RESULTS.md/REPORT.md exist under `results/plots/`; all CSV/npz artifacts present;
+REPORT.md display-math renders clean via the GitHub markdown API (8/8 `js-display-math`, 0 code
+fallbacks); RESULTS.md is current-best (no version history). No science outstanding — the negative result
+stands (random plateau 0.734<MSP 0.932; shuffled 0.534<MSP 0.872; code 0.649<cup-RMD@resid6 0.918) and
+iter-8's eps-scan already ruled out "wrong epsilon". Created `STOP`. Deliverables unchanged → no CHANGELOG
+entry. _History below:_
+
 **DONE (iter 8, 2026-07-02) — EPSILON SCAN + STOP.** A new operator feedback file
 `human_feedback_07010438.md` asked whether scanning the plateau-perturbation magnitude $\epsilon$ (fixed at
 6) changes the picture. A partial prior iteration had already run `experiments/eps_scan.py` (outputs on
@@ -118,7 +128,8 @@ value measuring internally. Clean NEGATIVE result (acceptable per plan). Feedbac
 
 ## Next step
 None — project complete and finalized; deliverables are CLAUDE.md-compliant (clean current-best,
-LaTeX Methods, full CHANGELOG history) and `STOP` is written. **all** operator feedback addressed (incl.
+LaTeX Methods, full CHANGELOG history) and `STOP` is written (re-created iter 9 after a finalization
+miss; all artifacts and figures verified present on disk). **all** operator feedback addressed (incl.
 the iter-5 Codex `CODEX_REVIEW_20260622T230658Z.md` canonical-split hygiene review, the iter-7
 `human_feedback_07011019.md` documentation-clarity requests, and the iter-8
 `human_feedback_07010438.md` epsilon-scan request), `STOP` written. If reopened, the
