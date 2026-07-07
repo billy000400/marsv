@@ -302,3 +302,21 @@ it every finalization pass rather than trust the log.
 On track? yes — FINALIZED (Stages A(M1)+B(M2)+B-dir+C(M3)+D(M4)+E(M5) done & decisive); project-level
 null complete, direction-robust, improved-code-robust, cross-layer generalized; deliverables verified
 current-best; STOP re-created on disk.
+
+## 2026-07-07 — Finalization re-verify + STOP recovery
+**Did.** Read CLAUDE.md/BUDGET.md/PLAN/JOURNAL/RESULTS/CHANGELOG/REPORT. Project already FINALIZED as
+a project-level null (Stages A/B/B-dir/C/D/E all done & decisive; success criterion met, failing notion
+named = "mere local robustness" + distance-to-real). The STOP file was again absent on disk (loop
+wrapper removes it each iteration). Ran the finalization pass, not a science iteration — nothing in
+PLAN remains (S1–S9 all ticked).
+**Verified (not assumed).** REPORT.md passes the GitHub markdown API check (4/4 display-math render as
+`js-display-math`, 0 degraded to `<pre lang="math">`); REPORT.md and RESULTS.md both have 0 inline-8b
+hazards; all 6 plots and all `results/` artifacts present. No result numbers changed. Re-created STOP;
+appended CHANGELOG.
+**Learned.** As before, STOP does not survive across iterations — must `ls STOP` and re-`touch` it each
+finalization pass rather than trust the log.
+**Next step.** None — project complete. If a future loop wakes, confirm `ls STOP` before assuming done.
+
+On track? yes — FINALIZED (Stages A(M1)+B(M2)+B-dir+C(M3)+D(M4)+E(M5) done & decisive); project-level
+null complete, direction-robust, improved-code-robust, cross-layer generalized; deliverables verified
+current-best; STOP re-created on disk.
