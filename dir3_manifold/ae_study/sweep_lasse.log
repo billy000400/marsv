@@ -3,3 +3,5 @@
 layer 2: train torch.Size([144000, 2048]) val torch.Size([16000, 2048]) d=2048 top1_var_frac=0.0117 steps=3000
   k=   5 val: rel_L2=0.5762 cos=0.7799 FVU=0.5811 | train: rel_L2=0.5566 cos=0.7984 (179s)
   k=  10 val: rel_L2=0.5266 cos=0.8178 FVU=0.4943 | train: rel_L2=0.5001 cos=0.8404 (372s)
+  k=  20 val: rel_L2=0.5006 cos=0.8395 FVU=0.4438 | train: rel_L2=0.4738 cos=0.8609 (567s)
+  k=  30 val: rel_L2=0.4886 cos=0.8495 FVU=0.4198 | train: rel_L2=0.4640 cos=0.8682 (751s)
