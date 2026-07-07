@@ -127,14 +127,16 @@ set to
 Only this one number changes between the "isotropic" and "anisotropic" runs, so any change in the curve
 is attributable to the injected dominant dimension alone.
 
-**Anisotropy diagnostics (why).** For each cloud we report, from a PCA of the mean-centered covariance
-(eigenvalues `λ_1 ≥ λ_2 ≥ …`): the **participation ratio** (a soft count of effective directions,
-1 = one dominant direction, `d_model` = isotropic), and the **top-1 coordinate variance fraction** (the
-axis-aligned massive-activation measure):
+**Anisotropy diagnostics (why).** For each cloud we report two numbers from a PCA of the mean-centered
+covariance (eigenvalues `λ_1 ≥ λ_2 ≥ …`). The first is the **participation ratio** — a soft count of
+effective directions (1 = one dominant direction, `d_model` = fully isotropic):
 
 ```math
 \mathrm{PR} = \frac{\left(\sum_j \lambda_j\right)^{2}}{\sum_j \lambda_j^{2}}
 ```
+
+The second is the **top-1 coordinate variance fraction** — the axis-aligned massive-activation measure,
+i.e. the share of total variance carried by the single highest-variance raw coordinate:
 
 ```math
 \mathrm{top1} = \frac{\max_c \mathrm{Var}(x^{(c)})}{\sum_c \mathrm{Var}(x^{(c)})}
