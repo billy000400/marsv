@@ -65,8 +65,10 @@ but by the **training signal** — and the reliable route to a genuinely unseen 
 exact flagship pipeline at the early, middle, and late residual stream (blocks 3 / 6 / 9) recovers
 **90% / 84% / 76%** of raw steering's fluency damage at α=8, with the corrected activation off the Gaussian
 manifold at every layer (Experiment 12); nor a GPT-2-*small* artifact: replicating it on **GPT-2 medium
-(355M, block 12 / 24)** recovers **89%** of the damage at α=8 (101% at α=4), again off the Gaussian
-manifold — so the core result is **model-robust** too (Experiment 13). It is also **not a FineWeb-prompt
+(355M, block 12 / 24)** and **GPT-2 large (774M, block 18 / 36)** recovers **89%** and **84%** of the damage
+at α=8 (101% / 95% at α=4), again off the Gaussian manifold — so across a 6× parameter range
+(124M → 355M → 774M) the α=8 recovery stays flat (84% / 89% / 84%) and the core result is **model-robust**
+too (Experiments 13, 19). It is also **not a FineWeb-prompt
 artifact**: a corrector trained only on FineWeb still recovers **77%** of the damage at α=8 on held-out
 technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at α=4), with
 recovery declining smoothly as the family's clean activations drift off the FineWeb manifold — so it is
@@ -442,6 +444,23 @@ Experiment-3 helpers fetch the model through a shared cache, so medium is loaded
 the corrector is trained at batch 4 to fit the larger model in the per-agent VRAM budget.) We report `ΔLM`,
 `D_M`, and the fluency recovery of Experiment 12's equation across `α ∈ {1, 2, 4, 8}`, at matched
 projection `α|v|`, versus raw steering.
+
+### Model scaling to GPT-2 large (Experiment 19)
+
+Experiment 13 adds one larger model; Experiment 19 adds a **third** scale point so the model axis spans a
+6.2× parameter range. We replicate the **exact Experiment-3 pipeline** on **GPT-2 large** (774M parameters,
+36 transformer blocks, `d = 1280` — about 6× the size of GPT-2 small and 2× medium), hooking `resid_post`
+at its **mid layer, block 18 of 36** (`hidden_states[19]`), the depth analogue of block 6 of 12 in small and
+block 12 of 24 in medium. Everything else is held fixed: the same 20/20 DiffMean sentiment sentences (the
+vector is rebuilt at block 18 of large, `|v| = 16.8`; mean `|h| = 129.1`, clean `D_M = 35.2`), the same
+400-document Gaussian fit, the same 300-document training set and held-out 100-document eval, the same
+4-layer projection-preserving corrector against the downstream LM loss (now at `d = 1280`, 6.03M
+parameters), the same seed, `α ∼ U(0.5, 8)`, and hyper-parameters. Only the model — and hence `d`, the layer
+count, `|v|`, and `|h|` — changes. (Implementation note: as in Experiment 13 the Experiment-3 helpers fetch
+the model through a shared cache, so large is loaded once and installed there; the corrector is trained at
+batch 2 to fit the 774M model in the per-agent VRAM budget of ~4.3 GB.) We report `ΔLM`, `D_M`, and the
+fluency recovery of Experiment 12's equation across `α ∈ {1, 2, 4, 8}`, at matched projection `α|v|`, versus
+raw steering.
 
 ### Held-out prompt family (Experiment 15)
 
@@ -1008,6 +1027,32 @@ off-Gaussian," the extrapolation and recovery magnitudes, and the whole projecti
 over intact to a 3× larger model with a different width (`d = 1024`) and depth (24 blocks). The core
 ColdSteer result is **model-robust** as well as layer-robust.
 
+### Experiment 19 — the fluency result holds at 774M (model-scaling to GPT-2 large)
+
+![model-scaling generality on GPT-2 large](plots/19_gpt2_large.png)
+
+| α | ΔLM raw (nats) | ΔLM learned | recovery | `D_M` raw | `D_M` learned |
+|---|----------------|-------------|----------|-----------|----------------|
+| 1 | +0.04 | **−0.07** | >100% | 35.9 | 42.7 |
+| 2 | +0.15 | **−0.05** | >100% | 37.9 | 46.8 |
+| 4 | +0.73 | **+0.03** | **95%** | 45.0 | 62.2 |
+| 8 | +2.47 | **+0.39** | **84%** | 66.0 | 96.8 |
+
+**Interpretation.** Experiment 13 showed the result survives one step up in model size; Experiment 19 adds a
+second step, to **GPT-2 large (774M)**, so the same recipe has now been checked across a **6× parameter
+range (124M → 355M → 774M)**. Both headline facts replicate again: raw steering breaks the large model
+(`ΔLM` → **+2.47 nats at α=8**, `D_M` 35.2 → 66.0), and the identical LM-supervised, projection-preserving
+corrector removes essentially all of it at matched projection — **84% of the fluency damage recovered at
+α=8** (`ΔLM` +2.47 → +0.39) and **95% at α=4** (`ΔLM` +0.73 → +0.03), with `ΔLM` slightly below the unsteered
+baseline at weak steering (the same free-or-better weak-α behavior as on small and medium; ">100%" reflects
+near-zero raw damage, not a large effect). The striking observation across the three scales is that the
+α=8 recovery is essentially **flat** — small **84%**, medium **89%**, large **84%** — so amortized correction
+quality does *not* erode as the model grows six-fold. And the Experiment-2/3 decoupling holds a third time:
+the corrected activation sits **further** off the Gaussian manifold than raw at **every** α (`D_M` learned >
+raw throughout, 96.8 vs 66.0 at α=8). The projection-preserving, downstream-supervised recipe therefore
+carries over intact from 124M to 774M — the core ColdSteer result is **model-robust across the full GPT-2
+size range**, not an artifact of any single model.
+
 ### Experiment 14 — bank diversity is a causal lever (controlled test, confound removed)
 
 ![controlled third-member swap isolating bank diversity](plots/14_diversity_lever.png)
@@ -1214,8 +1259,9 @@ is a diagnostic of departure-from-typical, never a training target — which is 
 downstream-LM objective, not a manifold-distance surrogate, supervises the corrector. This is **not a block-6 artifact**: replicating the exact pipeline
 at the early, middle, and late residual stream (blocks 3 / 6 / 9) recovers 90% / 84% / 76% of the fluency
 damage at α=8, off the Gaussian manifold at every layer (Experiment 12); and **not a GPT-2-small artifact**:
-the same pipeline on GPT-2 medium (355M, block 12 / 24) recovers 89% at α=8 (101% at α=4), likewise off the
-Gaussian manifold (Experiment 13) — the result is layer- and model-robust. Nor is it a **FineWeb-prompt
+the same pipeline on GPT-2 medium (355M, block 12 / 24) and GPT-2 large (774M, block 18 / 36) recovers 89%
+and 84% at α=8 (101% / 95% at α=4), likewise off the Gaussian manifold (Experiments 13, 19) — across a 6×
+parameter range the α=8 recovery stays flat (84% / 89% / 84%), so the result is layer- and model-robust. Nor is it a **FineWeb-prompt
 artifact**: the same FineWeb-trained corrector recovers 77% of the fluency damage at α=8 on held-out
 technical-prose and 60% on out-of-distribution Python code (Experiment 15), degrading smoothly as the prompt
 family's clean activations drift off the training manifold — so the correction is prompt-family-robust too.
@@ -1321,9 +1367,10 @@ target-alignment confound). Held-out
 transfer at strong steering thus remains unsolved by bank-size, model-size, **or** target-aligned bank
 curation alone (the native per-direction oracle is still needed); stronger direction-conditioning, a
 richer training objective, and diverse-bank composition remain open. The flagship fluency result is now
-shown **layer-robust** (Experiment 12: blocks 3 / 6 / 9 of GPT-2 small), **model-robust** (Experiment
-13: GPT-2 medium, 355M, recovers 89% at α=8), and **prompt-family-robust** (Experiment 15: a FineWeb-trained
-corrector recovers 77% on held-out technical prose and 60% on out-of-distribution Python code at α=8,
-degrading smoothly with distribution shift); still-larger models remain open. (4) The small
+shown **layer-robust** (Experiment 12: blocks 3 / 6 / 9 of GPT-2 small), **model-robust** across a 6×
+parameter range (Experiments 13, 19: GPT-2 medium 355M and large 774M recover 89% and 84% at α=8, with the
+124M → 355M → 774M α=8 recovery flat at 84% / 89% / 84%), and **prompt-family-robust** (Experiment 15: a
+FineWeb-trained corrector recovers 77% on held-out technical prose and 60% on out-of-distribution Python code
+at α=8, degrading smoothly with distribution shift); GPT-2 XL and non-GPT-2 architectures remain open. (4) The small
 non-positive `ΔLM` at low `α`
 is within noise of zero and should not be over-read as the corrector "improving" the base model.

@@ -682,6 +682,39 @@ regardless of how the steering direction was extracted. This closes the last ext
 ColdSteer result is robust to the **steering-vector family** as well as to strength, direction, layer,
 model, and prompt family.
 
+**Experiment 19 — Model scaling to GPT-2 large: does the result hold at 774M?**
+Experiment 13 replicated the flagship result on GPT-2 **medium** (355M). This adds the third
+model-scale point — **GPT-2 large (774M, 36 blocks, `d = 1280`)** — so the model axis now spans a
+6.2× parameter range: **124M → 355M → 774M**. We replicate the exact Experiment-3 pipeline
+**unchanged** (same DiffMean sentiment prompts, 400-doc Gaussian fit, 300-doc training set, held-out
+100-doc eval, 4-layer corrector, seed, `α ∼ U(0.5, 8)`, hyper-parameters), steering and correcting at
+the **mid layer, block 18 of 36** — the depth analogue of block 6 of 12 in small and block 12 of 24 in
+medium. Only the model changes, so `|v|`, `|h|`, and `d` change with it (`|v| = 16.8`, mean `|h| = 129.1`,
+clean `D_M = 35.2`; corrector 6.03M params at `d = 1280`).
+
+| α | ΔLM raw (nats) | **ΔLM learned** | recovery | `D_M` raw | `D_M` learned |
+|---|----------------|------------------|----------|-----------|----------------|
+| 1 | +0.04 | **−0.07** | >100% | 35.9 | 42.7 |
+| 2 | +0.15 | **−0.05** | >100% | 37.9 | 46.8 |
+| 4 | +0.73 | **+0.03** | **95%** | 45.0 | 62.2 |
+| 8 | +2.47 | **+0.39** | **84%** | 66.0 | 96.8 |
+
+(Steering-projection retention is matched `α|v|` = 16.8 → 134.0 for raw and learned at every α.)
+
+**Reading it: both headline facts replicate on GPT-2 large — the result is robust across a 6× model-scale
+range.** (P) Raw steering breaks the 774M model exactly as it breaks the 124M and 355M ones: `ΔLM` climbs
+monotonically to **+2.47 nats at α=8** while the Mahalanobis distance inflates 35.2 → 66.0. (C) The
+identical LM-supervised, projection-preserving corrector removes essentially all of it at matched
+projection — recovering **84% of the fluency damage at α=8** and **95% at α=4** (`ΔLM` +0.73 → +0.03), with
+`ΔLM` slightly negative at weak steering (the same free-or-better weak-α behavior as on small/medium; the
+">100%" reads only reflect near-zero raw damage). Across the three scales the α=8 recovery is essentially
+flat — **small 84% / medium 89% / large 84%** — so amortized correction quality does **not** degrade as the
+model grows. And the signature decoupling holds a third time: the corrected activation sits **further** off
+the Gaussian manifold than raw at **every** α (`D_M` learned > raw throughout, 96.8 vs 66.0 at α=8). The
+core ColdSteer claim — *a downstream-supervised, projection-preserving corrector buys back nearly all of raw
+steering's fluency damage while moving off the statistical manifold* — is confirmed **model-robust** across
+GPT-2 small, medium, and large.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -764,6 +797,10 @@ model, and prompt family.
   zero; (b) fluency recovery vs α per family — all three ≥84% at α=8; (c) `D_M` vs α, raw vs corrected — the
   PCA family's raw curve is flat at the clean value (on-manifold yet LM-breaking) while all corrected curves
   rise above raw (off-Gaussian-but-LM-safe holds for every family).
+- `plots/19_gpt2_large.png` — model-scaling replication of the flagship result on GPT-2 large (774M,
+  block 18/36). (a) ΔLM vs α, raw (dashed) vs corrected (solid) — corrected sits near zero while raw climbs
+  to +2.47; (b) fluency recovery vs α — 84% at α=8, 95% at α=4; (c) `D_M` vs α, raw vs corrected — corrected
+  exceeds raw at every α (off-Gaussian-but-LM-safe holds on the largest model too).
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -801,8 +838,10 @@ block-6 artifact**: replicating the exact flagship pipeline at the early, middle
 the corrected activation sitting *further* off the Gaussian manifold than raw at every layer (Exp 12) — the
 "LM-safe but off-Gaussian" correction is a layer-robust property. It is also **not a GPT-2-*small* artifact**:
 replicating the exact flagship pipeline on **GPT-2 medium (355M, block 12/24)** recovers **89%** of raw
-steering's fluency damage at α=8 (**101%** at α=4), again by moving *further* off the Gaussian manifold than
-raw — so the core result is **model-robust** as well (Exp 13). It is likewise **not a FineWeb-prompt
+steering's fluency damage at α=8 (**101%** at α=4), and on **GPT-2 large (774M, block 18/36)** recovers
+**84%** at α=8 (**95%** at α=4) — both again by moving *further* off the Gaussian manifold than raw. Across
+the **124M → 355M → 774M** scale range (6× parameters) the α=8 recovery stays essentially flat (84% / 89% /
+84%), so the core result is **model-robust** as well (Exp 13, Exp 19). It is likewise **not a FineWeb-prompt
 artifact**: a corrector trained only on FineWeb still recovers **77%** of the fluency damage at α=8 on
 held-out technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at
 α=4), with recovery declining smoothly as the family's clean activations drift further off the FineWeb

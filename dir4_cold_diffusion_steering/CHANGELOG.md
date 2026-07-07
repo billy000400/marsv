@@ -463,3 +463,32 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   (ΔLM / recovery / D_M vs α per family). Results `results/18_steering_family.json`, `data/sst2_train.tsv`.
 - REPORT math re-verified via GitHub API: 24/24 js-display-math (21 prior + 3 new), 0 broken
   (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-07 — Experiment 19: model-scaling to GPT-2 large (774M) — the third model-scale point
+- **Why:** Exp 13 showed the flagship result survives one step up in model size (GPT-2 medium, 355M). The
+  natural next external-validity point is a still-larger model, to check whether amortized correction
+  quality erodes with scale. Adds a third scale so the model axis spans a 6× parameter range
+  (124M → 355M → 774M) — the one untested model-scale point flagged as optional in PLAN.md.
+- **Method (new):** replicated the EXACT flagship Exp-3 pipeline UNCHANGED on GPT-2 large (774M, 36 blocks,
+  d=1280) at the mid layer block 18/36 (depth analogue of block 6/12 small, block 12/24 medium). Only the
+  model changes; same DiffMean sentiment prompts, 400-doc Gaussian fit, 300-doc training set, held-out
+  100-doc eval, 4-layer projection-preserving corrector (now 6.03M params at d=1280), seed, α∼U(0.5,8),
+  hyper-parameters. Reused Exp-3 helpers via the shared model cache (as Exp 13). Batch 2 for training to fit
+  the 774M model in the ~4.3 GB per-agent VRAM share (no OOM). Ran with dir9's cupenv python (shared conda
+  transformers still absent).
+- **Result (new):** both headline facts replicate. Raw steering breaks the LM (ΔLM@α=8 = +2.47 nats, D_M
+  35.2→66.0) and the identical LM-supervised corrector recovers it at matched projection: **recovery @α=8 =
+  84%** (ΔLM +2.47→+0.39), **95% @α=4** (ΔLM +0.73→+0.03), free-or-better at weak α (ΔLM −0.05 to −0.07).
+  Corrected activation sits FURTHER off the Gaussian manifold than raw at every α (D_M learned 96.8 > raw
+  66.0 @α=8) — the Exp-2/3 decoupling holds a third time. Retention matched α|v|=16.8→134.0 exactly.
+  Model-scaling trend @α=8 recovery is FLAT across the 6× range: small 84% / medium 89% / large 84% — quality
+  does not erode as the model grows. No prior result superseded; this is an added external-validity axis.
+  Core result now model-robust across GPT-2 small/medium/large.
+- **Deliverable deltas:** RESULTS.md +Exp 19 (table + reading) + figure entry + Headline model-robust clause
+  extended to three scales (124M→355M→774M, 84/89/84%). REPORT.md +Methods "Model scaling to GPT-2 large
+  (Experiment 19)" subsection + Results Exp 19 (table + interpretation + figure) + Summary model-robust
+  clause + Conclusion clause (two spots) extended to three scales.
+- New code experiments/19_gpt2_large.py, figure plots/19_gpt2_large.png, results results/19_gpt2_large.json,
+  log results/19_run.log. Downloaded gpt2-large weights into the shared HF cache (3.1 GB).
+- REPORT math re-verified via GitHub API: 24/24 js-display-math (no new display-math added), 0 broken
+  (<pre lang=math>), 0 inline hazards.

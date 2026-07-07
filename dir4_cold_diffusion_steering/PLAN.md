@@ -74,6 +74,11 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         MEDIUM (355M, 24 blocks, d=1024) at mid layer block 12/24 (only the model changes). POSITIVE — both
         headline facts replicate: recovery 89% @α=8 / 101% @α=4, corrected off the Gaussian manifold at every
         α (79.9 vs 55.1 @α=8); ≈ small's 84%. NOT a GPT-2-small artifact. Result is layer- AND model-robust.
+        (g-follow-up) MODEL-SCALING to GPT-2 LARGE DONE (Exp 19): replicated the EXACT flagship Exp-3 pipeline
+        on GPT-2 LARGE (774M, 36 blocks, d=1280) at mid layer block 18/36 (only the model changes). POSITIVE —
+        both headline facts replicate: recovery 84% @α=8 / 95% @α=4, corrected off the Gaussian manifold at
+        every α (96.8 vs 66.0 @α=8). Model axis now spans 6× params (124M→355M→774M) with FLAT α=8 recovery
+        (84/89/84%) — amortized correction quality does not erode with scale. Model-robust at three scales.
         (h) BANK-DIVERSITY LEVER — CAUSAL confirmation DONE (Exp 14): controlled third-member swap removes
         Exp 9's confound (all size-3 banks share {sentiment,formality} anchor; only 3rd member's collinearity
         varies). POSITIVE: the swapped member's OWN recovery collapses as it collinearizes (politeness 69%→
@@ -117,7 +122,22 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**S4(j) Experiment 18 (new, acts on human feedback #3, 2026-07-06):** tested the LAST open human-feedback ask
+**S4(g-follow-up) Experiment 19 (new, model-scaling to GPT-2 large, 2026-07-07):** picked the untested
+optional external-validity point (a still-larger model) to strengthen the model-robustness axis from two
+scales to three. Replicated the EXACT flagship Exp-3 pipeline UNCHANGED on GPT-2 LARGE (774M, 36 blocks,
+d=1280) at mid layer block 18/36 — only the model changes. Downloaded gpt2-large (3.1 GB, previously
+uncached); corrector 6.03M params at d=1280; trained batch 2 for VRAM (~4.3 GB share, no OOM). POSITIVE —
+both headline facts replicate: raw steering breaks the LM (ΔLM@8 +2.47, D_M 35.2→66.0) and the identical
+LM-supervised corrector recovers it at matched projection — **recovery @α=8 = 84%** (ΔLM +2.47→+0.39),
+**95% @α=4**, free-or-better at weak α, with the corrected activation FURTHER off the Gaussian manifold than
+raw at every α (96.8 vs 66.0 @α=8; Exp-2/3 decoupling holds a third time). The model axis now spans a 6×
+parameter range (124M→355M→774M) with **FLAT α=8 recovery (84% / 89% / 84%)** — amortized correction quality
+does not erode with model size. Retention matched α|v| exactly. No prior result superseded. Artifacts:
+`experiments/19_gpt2_large.py`, `results/19_gpt2_large.json`, `plots/19_gpt2_large.png`, `results/19_run.log`.
+RESULTS/REPORT/CHANGELOG curated; REPORT math verified (24/24 js-display-math, 0 broken, 0 inline hazards).
+ENV: ran with dir9's cupenv python (shared conda `transformers` still absent).
+<!-- prior: S4(j) steering-family Exp 18 -->
+**S4(j) Experiment 18 (acts on human feedback #3, 2026-07-06):** tested the LAST open human-feedback ask
 — a genuinely different steering FAMILY, beyond the 6 hand-built DiffMean concepts. Changed BOTH data source
 and extraction method on the same concept (sentiment): built the vector from a REAL downloaded dataset (SST-2,
 500 pos + 500 neg movie-review sentences) via the three canonical linear-steering families — DiffMean (μ⁺−μ⁻),
@@ -347,14 +367,14 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**All three human-feedback asks are now DONE** (Exp 16 = #2 Gaussian-manifold doubt; Exp 17 = #1 real diffusion
-corrector; Exp 18 = #3 different steering family). Success criterion long met; direction ~complete. Remaining
-work is OPTIONAL polish, any one a clean iteration:
-(i) push the Exp 11 ceiling by supervising the behavioral readout THROUGH sampled/differentiable generation
-rather than teacher-forced (the one substantive open lever left);
-(ii) a still-larger model (GPT-2 large) — the only untested model-scale point.
-If picked up, note the ENV: run experiment scripts with `/mars-vol/marsv/dir9_ood/cupenv/bin/python` until the
-shared conda `transformers` is restored (it had disappeared as of iter 18).
+**All three human-feedback asks DONE and the optional model-scale point (GPT-2 large, Exp 19) now DONE.**
+Success criterion long met; direction ~complete on all planned axes. The single substantive open lever
+remaining:
+(i) push the Exp 11 behavioral ceiling by supervising the readout THROUGH sampled/differentiable generation
+rather than teacher-forced.
+Lower-value untested points: GPT-2 XL (2× large again) or a non-GPT-2 architecture. All optional.
+ENV: run experiment scripts with `/mars-vol/marsv/dir9_ood/cupenv/bin/python` until the shared conda
+`transformers` is restored (still absent as of iter 19).
 
 Prior (all delivered, success criterion long met): Core arc + all generalization axes + behavioral axis +
 behavioral-preservation follow-up + LAYER-ROBUSTNESS

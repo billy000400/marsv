@@ -770,3 +770,47 @@ On track? yes — Exp 18 delivers the last open human-feedback ask (#3): the Col
 steering-vector FAMILY (DiffMean/logistic-probe/PCA-contrast, real SST-2 data), recovering 84–101% @α=8, and
 the PCA case sharpens the central decoupling (on-Gaussian yet LM-breaking). All 3 human asks now done; core
 result holds on 6 axes. Deliverables curated + math-verified (24/24). ~100% complete. No blocker.
+
+## 2026-07-07 — Iter 19: model-scaling to GPT-2 large (774M) — third model-scale point
+
+**Scope.** Picked the untested optional external-validity point flagged in PLAN.md Next-step (ii): a
+still-larger model. Success criterion long met; all 3 human asks done. This extends the model-robustness
+axis from two points (small 124M / medium 355M) to three (adding large 774M), a 6× parameter range.
+
+**Did.** New `experiments/19_gpt2_large.py`, a near-copy of Exp 13's cross-model script retargeted to
+gpt2-large at mid layer block 18/36 (d=1280). Downloaded gpt2-large (3.1 GB) into the shared HF cache
+(only small+medium were cached). Reused the exact Exp-3 pipeline via the shared model-cache trick;
+corrector 6.03M params; trained batch 2 (VRAM: one of 5 agents at ~4.3 GB share; no OOM, peaked ~4.2 GB).
+Ran with dir9's cupenv python — shared conda `transformers` still absent this iter.
+
+**Learned.** Both headline facts replicate at 774M: raw steering breaks the LM (ΔLM@8 +2.47, D_M
+35.2→66.0) and the identical LM-supervised, projection-preserving corrector recovers it at matched
+projection — **recovery @α=8 = 84%** (ΔLM +2.47→+0.39), **95% @α=4**, free-or-better at weak α. Corrected
+D_M > raw at every α (96.8 vs 66.0 @α=8) — Exp-2/3 decoupling holds a third time. The clean model-scaling
+finding: α=8 recovery is essentially FLAT across the 6× range — small 84% / medium 89% / large 84% — so
+amortized correction quality does not erode with model size. Retention matched α|v| exactly (16.8→134.0).
+Note: large's |v|=16.8 < medium's 19.6, so large's raw damage (+2.47) is a touch below medium's (+2.72);
+recovery is what's comparable across scales, and it is.
+
+**Assumptions/decisions logged.** (a) Chose the model-scale point over the differentiable-generation
+behavioral lever (Next-step (i)) — cleaner, lower-risk, and directly strengthens the "model-robust"
+headline to a genuine trend; the differentiable-generation lever remains the single substantive open item.
+(b) Mid-layer = block 18 of 36 to match the depth ratio (6/12, 12/24, 18/36). (c) Batch 2 train / 4 eval
+to fit VRAM; halving rule unused (no OOM). (d) ENV: cupenv python again (`/mars-vol/marsv/dir9_ood/cupenv/
+bin/python`) — shared conda transformers still gone.
+
+**Deliverables.** RESULTS.md +Exp 19 (table + reading) + figure entry + Headline (three scales); REPORT.md
++Methods subsection + Results Exp 19 (table + interpretation + figure) + Summary + Conclusion (2 spots);
+CHANGELOG appended. Artifacts: `plots/19_gpt2_large.png`, `results/19_gpt2_large.json`,
+`results/19_run.log`. REPORT math re-verified via GitHub API: 24/24 js-display-math, 0 broken, 0 inline
+hazards.
+
+**Next step (all optional; success criterion long met, all human asks done).** The one substantive open
+lever: (i) push the Exp 11 behavioral ceiling by supervising the readout THROUGH sampled/differentiable
+generation rather than teacher-forced. Otherwise only GPT-2 XL / non-GPT-2 architectures remain untested,
+both low marginal value. Keep running scripts with dir9's cupenv python until the shared conda env returns.
+
+On track? yes — Exp 19 adds the third model-scale point: the flagship result is model-robust across GPT-2
+small/medium/large (124M→355M→774M, α=8 recovery flat 84/89/84%), by moving off the Gaussian manifold as
+always. Core result now robust on the model axis at three scales; deliverables curated + math-verified
+(24/24). ~100% complete. No blocker.

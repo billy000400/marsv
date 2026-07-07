@@ -1,0 +1,47 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 6209.71it/s]
+model=gpt2-large n_layer=36 d=1280 device=cuda
+|v|=16.75 mean|h|=129.05 clean D_M=35.22
+corrector params: 6.03M
+  ep0 step  25 a= 1.9 LM=3.709 near=0.198
+  ep0 step  50 a= 4.2 LM=3.979 near=0.168
+  ep0 step  75 a= 2.2 LM=3.420 near=0.098
+  ep0 step 100 a= 7.7 LM=3.574 near=0.408
+  ep0 step 125 a= 2.5 LM=2.964 near=0.253
+  ep0 step 150 a= 7.7 LM=3.958 near=0.613
+  ep1 step 175 a= 5.7 LM=3.792 near=0.373
+  ep1 step 200 a= 3.3 LM=4.074 near=0.265
+  ep1 step 225 a= 6.3 LM=4.630 near=0.524
+  ep1 step 250 a= 7.8 LM=3.926 near=0.605
+  ep1 step 275 a= 1.3 LM=3.237 near=0.198
+  ep1 step 300 a= 6.9 LM=3.950 near=1.134
+  ep2 step 325 a= 4.4 LM=3.285 near=0.532
+  ep2 step 350 a= 5.9 LM=3.464 near=0.706
+  ep2 step 375 a= 0.7 LM=3.489 near=0.175
+  ep2 step 400 a= 7.6 LM=4.361 near=1.955
+  ep2 step 425 a= 6.4 LM=3.782 near=0.410
+  ep2 step 450 a= 1.6 LM=3.740 near=0.312
+  ep3 step 475 a= 6.2 LM=3.079 near=0.506
+  ep3 step 500 a= 0.7 LM=3.477 near=0.126
+  ep3 step 525 a= 6.3 LM=3.707 near=1.088
+  ep3 step 550 a= 6.6 LM=3.715 near=0.663
+  ep3 step 575 a= 8.0 LM=3.869 near=1.113
+  ep3 step 600 a= 6.3 LM=4.028 near=0.799
+  ep4 step 625 a= 0.9 LM=2.123 near=0.261
+  ep4 step 650 a= 2.4 LM=3.273 near=0.291
+  ep4 step 675 a= 6.9 LM=3.678 near=0.974
+  ep4 step 700 a= 0.6 LM=3.897 near=0.155
+  ep4 step 725 a= 3.4 LM=3.083 near=0.304
+  ep4 step 750 a= 4.9 LM=3.007 near=0.610
+  ep5 step 775 a= 1.5 LM=3.686 near=0.224
+  ep5 step 800 a= 7.0 LM=3.831 near=0.659
+  ep5 step 825 a= 3.9 LM=3.598 near=0.493
+  ep5 step 850 a= 4.3 LM=3.290 near=0.716
+  ep5 step 875 a= 7.8 LM=3.475 near=1.329
+  ep5 step 900 a= 2.8 LM=4.014 near=0.331
+clean eval loss = 3.299
+a= 1.0 raw ΔLM=+0.036 learned=-0.068 rec=288% D_M raw=35.9 learn=42.7
+a= 2.0 raw ΔLM=+0.146 learned=-0.047 rec=133% D_M raw=37.9 learn=46.8
+a= 4.0 raw ΔLM=+0.728 learned=+0.033 rec=95% D_M raw=45.0 learn=62.2
+a= 8.0 raw ΔLM=+2.470 learned=+0.386 rec=84% D_M raw=66.0 learn=96.8
+saved figure + results
