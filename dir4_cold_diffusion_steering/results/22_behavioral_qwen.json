@@ -1,0 +1,54 @@
+{
+  "model": "Qwen/Qwen3-1.7B",
+  "layer": 14,
+  "d_model": 2048,
+  "v_norm": 38.10200119018555,
+  "prompt_len": 12,
+  "gen_len": 30,
+  "n_prompts": 48,
+  "alphas": [
+    2.0,
+    4.0,
+    6.0,
+    8.0
+  ],
+  "B0": 28.63344955444336,
+  "distinct2_0": 0.875,
+  "seed": 0,
+  "results": {
+    "raw": {
+      "effect": [
+        5.216548919677734,
+        7.311943054199219,
+        7.636299133300781,
+        8.009990692138672
+      ],
+      "distinct2": [
+        0.8864942528735632,
+        0.8764367816091955,
+        0.8189655172413793,
+        0.7614942528735632
+      ]
+    },
+    "corrected": {
+      "effect": [
+        0.5286769866943359,
+        0.7701358795166016,
+        0.9820175170898438,
+        2.3054771423339844
+      ],
+      "distinct2": [
+        0.8397988505747126,
+        0.8326149425287355,
+        0.8433908045977011,
+        0.8247126436781609
+      ]
+    }
+  },
+  "samples": {
+    "raw_a4": "Brecon Park is a six acre neighborhood park, situated in the heart of the town of Brimfield. The community is a welcoming place with a variety of activities and events throughout the year. The park is",
+    "corrected_a4": "Brecon Park is a six acre neighborhood park, situated in the heart of the city of Bracken, in the county of Montgomery, just 10 minutes from the city of Montgomery. The park is",
+    "raw_a8": "Brecon Park is a six acre neighborhood park, situated in the heart of the community. The community is a welcoming family and a welcoming community. The community is a home and a family. The community is a",
+    "corrected_a8": "Brecon Park is a six acre neighborhood park, situated in the heart of the city of Bridgend, just 15 minutes north of the city of Bridgend. The park is located in the Bridgend"
+  }
+}

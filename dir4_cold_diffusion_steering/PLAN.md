@@ -127,6 +127,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         matched projection, corrected activation further off the Gaussian manifold at every α (122.2 vs 77.8
         @α=8). 94% edges GPT-2 small's 84%. Architecture-robust; result now spans 7 axes (strength/direction/
         layer/model-scale/architecture/prompt-family/steering-family).
+- [x] S4(m) — BEHAVIORAL check on Qwen3 (Exp 22) DONE: Exp 21's 94% recovery is a TEACHER-FORCED ΔLM; ran the
+        identical Exp-10 behavioral generation protocol on Qwen3-1.7B reusing the exact Exp-21 corrector. The Exp-10
+        under-steering caveat REPLICATES: corrector generated sentiment effect only 10–29% of raw's (raw +5.2–8.0,
+        corr +0.53–2.31). So 94% is honest as a fluency metric but partly bought by a weaker propagated edit — as on
+        GPT-2. KEY DIFFERENCE: raw degenerates far less on Qwen3 (distinct-2 0.76 vs GPT-2's 0.32 @α=8), so raw is a
+        stronger baseline and the Pareto is shallower. "matched projection ≠ matched behavioral steering" is
+        architecture-robust.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -138,7 +145,27 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**S4(l) Experiment 21 (new, cross-ARCHITECTURE generality, 2026-07-07):** picked the single highest-value
+**S4(m) Experiment 22 (new, BEHAVIORAL check on Qwen3, 2026-07-07):** picked the highest-value remaining point —
+the honesty check Exp 21 itself flagged as its "Next check". Exp 21's headline 94% recovery on Qwen3-1.7B is a
+TEACHER-FORCED ΔLM at matched layer-14 projection; Exp 10 taught (on GPT-2) that this proxy can hide a weaker
+propagated behavioral edit in generation. Ran the IDENTICAL Exp-10 behavioral generation protocol on Qwen3-1.7B,
+reusing the EXACT Exp-21 corrector checkpoint (results/21_corr.pt, no retraining): greedy-generate 30 tokens from
+48 held-out 12-token prompts, steer at block 14 every position, raw vs corrected; on a clean re-encode measure
+sentiment effect B(α)−B(0) (baseline B0=+28.6) and distinct-2 (baseline 0.875). CORRECTIVE / honest result — the
+Exp-10 under-steering caveat REPLICATES: corrector effect only 10–29% of raw's (raw +5.22/+7.31/+7.64/+8.01 vs
+corr +0.53/+0.77/+0.98/+2.31 @α=2/4/6/8), so 94% is honest as a fluency metric but partly bought by a weaker
+propagated edit — exactly as on GPT-2 (~1/6 there). KEY DIFFERENCE: raw steering degenerates FAR LESS on Qwen3
+(distinct-2 0.886→0.761 @α=8 vs GPT-2's collapse to 0.32), so raw is a STRONGER baseline here and the corrector's
+fluency edge is small (0.06 @α=8) — the effect-vs-fluency Pareto is shallower than on GPT-2. ⇒ "matched projection
+≠ matched behavioral steering" is architecture-robust; the Exp 11/20 behavioral-preservation terms (GPT-2-tested)
+are the indicated fix if strong behavioral steering is required. No prior result superseded (Exp 22 measures a
+behavioral quantity; Exp 21's ΔLM unchanged). No OOM (GEN_BATCH 8, empty_cache between chunks). Artifacts:
+`experiments/22_behavioral_qwen.py`, `results/22_behavioral_qwen.json`, `results/22_run.log`,
+`plots/22_behavioral_qwen.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified (26/26 js-display-math, 0
+broken, 0 inline hazards — Exp 22 reuses Exp 10's behavioral-metric definitions, no new equation). ENV: dir9's
+cupenv python (shared conda `transformers` still absent).
+<!-- prior: S4(l) cross-architecture Exp 21 -->
+**S4(l) Experiment 21 (cross-ARCHITECTURE generality, 2026-07-07):** picked the single highest-value
 remaining external-validity point — every model tested so far (Exp 13/19: GPT-2 small/medium/large) is the
 SAME GPT-2 architecture, so the flagship result could be a GPT-2-architecture artifact. Replicated the EXACT
 flagship Exp-3 pipeline UNCHANGED on Qwen3-1.7B (28 blocks, d=2048) at mid layer block 14/28 — a modern
@@ -423,16 +450,16 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**All three human-feedback asks DONE; optional model-scale (GPT-2 large, Exp 19), differentiable-generation
-(Exp 20), and cross-ARCHITECTURE (Qwen3-1.7B, Exp 21) all DONE.** Success criterion long met; direction
-complete on all planned axes plus the full behavioral arc (Exp 10→11→20), now robust on SEVEN axes
-(strength/direction/layer/model-scale/architecture/prompt-family/steering-family). No substantive open lever
-remains. Only very-low-value untested points are left, all optional:
+**All three human-feedback asks DONE; optional model-scale (Exp 19), differentiable-generation (Exp 20),
+cross-ARCHITECTURE (Exp 21), and the Qwen3 behavioral honesty-check (Exp 22) all DONE.** Success criterion long
+met; direction complete on all planned axes plus the full behavioral arc (Exp 10→11→20→22), robust on SEVEN axes
+(strength/direction/layer/model-scale/architecture/prompt-family/steering-family), and the behavioral caveat now
+shown architecture-robust. No substantive open lever remains. Only very-low-value untested points are left, all
+optional:
 (i) a SECOND non-GPT-2 architecture (Llama/Mistral) to make the architecture axis a *sweep* rather than a
 single boundary crossing;
-(ii) re-run the behavioral generation protocol (Exp 10: sentiment effect + distinct-2) on Qwen3 to confirm the
-94% fluency recovery is not bought by under-steering on this architecture (the Exp-10 caveat is untested off
-GPT-2);
+(ii) re-fit the Exp 11/20 behavioral-preservation terms ON Qwen3 to test whether the GPT-2 fix (pushing the
+effect-fluency Pareto out) transfers across the architecture boundary — the natural follow-up to Exp 22;
 (iii) a harder differentiable-generation objective (Gumbel-softmax hard samples, longer rollouts) for the
 strong-effect-and-fluent corner Exp 20 left open; (iv) GPT-2 XL.
 ENV: run experiment scripts with `/mars-vol/marsv/dir9_ood/cupenv/bin/python` until the shared conda

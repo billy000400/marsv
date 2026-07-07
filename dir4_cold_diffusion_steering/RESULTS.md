@@ -791,6 +791,45 @@ throughout, 122.2 vs 77.8 at α=8). So the core ColdSteer claim is **architectur
 scale-robust: it holds across LayerNorm ↔ RMSNorm, learned ↔ rotary positions, GELU ↔ SwiGLU MLPs, and
 dense ↔ grouped-query attention — every structural axis that separates Qwen3 from the GPT-2 family.
 
+**Experiment 22 — Behavioral reality-check on Qwen3: is Exp 21's 94% recovery bought by under-steering?**
+Experiment 21 recovered **94%** of raw steering's fluency damage on Qwen3-1.7B — but that number is a
+*teacher-forced* `ΔLM` at matched layer-14 projection. Experiment 10 showed on GPT-2 that this proxy can be
+misleading: the corrector's fluency win came partly at the cost of a *weaker propagated behavioral edit* in
+generation (its correction is ⟂ `v` in activation space but not ⟂ the downstream sentiment readout). That
+caveat had never been checked off GPT-2. We run the **identical Exp 10 protocol** on Qwen3, reusing the
+**exact Exp 21 corrector** (checkpoint, no retraining): greedily generate 30-token continuations from 48
+held-out 12-token prompts with the steer applied at block 14 at every position, raw vs corrected, and on a
+**clean re-encode** measure the sentiment **effect** `B(α)−B(0)` (mean projection of the continuation's
+block-14 activations onto `v̂`; higher = more strongly steered; unsteered baseline `B(0)=+28.6`) and
+**degeneration** via **distinct-2** (unique-bigram ratio; unsteered baseline `0.875`; lower = more repetitive).
+
+| α | effect raw `B−B₀` | effect corr `B−B₀` | corr/raw effect | distinct-2 raw | distinct-2 corr |
+|---|-------------------|--------------------|-----------------|----------------|-----------------|
+| 2 | **+5.22** | +0.53 | 10% | 0.886 | 0.840 |
+| 4 | **+7.31** | +0.77 | 11% | 0.876 | 0.833 |
+| 6 | **+7.64** | +0.98 | 13% | 0.819 | 0.843 |
+| 8 | +8.01 | +2.31 | 29% | **0.761** | 0.825 |
+
+**Reading it: the Exp 10 under-steering caveat *replicates on Qwen3* — the 94% fluency recovery is honest as
+a teacher-forced metric but is again partly bought by a weaker behavioral edit in generation.** Two findings,
+and a difference from GPT-2. **(1) The corrector under-steers, exactly as on GPT-2.** Raw steering swings the
+generated sentiment hard (`+5.2` at α=2 rising to `+8.0` at α=8), while the corrector's effect is only
+`+0.53–2.31` — **10–29% of raw's** (cf. ~1/6 on GPT-2 in Exp 10). So the projection-preserving correction is
+again not orthogonal to the downstream readout: minimizing LM loss at matched layer-14 projection yields
+near-normal, lightly-steered text (α=8 corrected sample: *"…situated in the heart of the city of Bridgend,
+just 15 minutes north of the city of Bridgend"* — fluent, factual, barely steered; raw α=8: *"…a welcoming
+family and a welcoming community. The community is a home and a family. The community is a…"* — positive but
+repetitive). **(2) The fluency win is smaller here because raw steering degenerates *less* on Qwen3.** Raw
+distinct-2 falls only `0.886→0.761` at α=8 — nowhere near GPT-2's collapse to `0.32`. The corrector stays flat
+and fluent (`0.825–0.843`), so it is still more fluent than raw at strong steering, but the gap (0.06 at α=8)
+is far narrower than on GPT-2 (0.32). **The practical read:** on Qwen3 the two methods sit on a *shallower*
+effect-vs-fluency Pareto — raw is a stronger baseline here (it steers hard *and* stays fairly fluent), so the
+corrector's advantage is almost entirely on the (small) fluency axis while paying a large behavioral-effect
+cost. This confirms that the flagship `ΔLM` recoveries (Exp 3–21) measure reduced *teacher-forced disruption*,
+genuinely, but on Qwen3 as on GPT-2 a substantial part of that reduction reflects a weaker propagated edit —
+**matched projection ≠ matched behavioral steering is architecture-robust**, and the Exp 11/20 behavioral-
+preservation terms (tested on GPT-2) are the indicated fix if strong *behavioral* steering is required.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -887,6 +926,11 @@ dense ↔ grouped-query attention — every structural axis that separates Qwen3
   corrected (solid) — corrected sits at or below zero while raw climbs to +3.43; (b) fluency recovery vs α —
   94% at α=8, ≥108% at α≤4; (c) `D_M` vs α, raw vs corrected — corrected exceeds raw at every α
   (off-Gaussian-but-LM-safe holds on a non-GPT-2 architecture too).
+- `plots/22_behavioral_qwen.png` — behavioral test on generated text on **Qwen3-1.7B** (block 14, sentiment),
+  the Exp-10 protocol run on the Exp-21 corrector. (a) sentiment effect `B(α)−B(0)` vs α for raw vs corrected —
+  raw rises to +8.0 while the corrector stays at +0.5–2.3 (under-steered); (b) distinct-2 vs α — raw dips to
+  0.76 at α=8 while the corrector holds ~0.83; (c) the effect-vs-fluency Pareto (points labelled by α), showing
+  a shallower tradeoff than GPT-2 (raw degenerates far less on Qwen3). The under-steering caveat replicates.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -978,7 +1022,12 @@ projection-preserving correction is orthogonal to `v` in *activation* space yet 
 downstream sentiment *readout*, so minimizing LM loss produces near-normal, lightly-steered text. There
 is a genuine **effect–fluency tradeoff** the matched-projection metric hid: the corrector's fluency win
 is not costless — part of it is a weaker propagated edit. Matched layer-6 projection ≠ matched behavioral
-steering; any use of ColdSteer must verify the behavioral effect on generated text, not only `ΔLM`.
+steering; any use of ColdSteer must verify the behavioral effect on generated text, not only `ΔLM`. **This
+caveat is architecture-robust (Exp 22):** running the identical protocol on Qwen3-1.7B (whose teacher-forced
+recovery was 94%, Exp 21) reproduces it — the corrector's generated sentiment effect is only 10–29% of raw's,
+so its fluency win is again partly a weaker propagated edit. (One difference: raw steering degenerates far less
+on Qwen3, distinct-2 0.76 vs GPT-2's 0.32 at α=8, so raw is a stronger baseline there and the Pareto is
+shallower.)
 **Partial fix (Exp 11):** adding one training term that preserves the *downstream* sentiment readout
 (measured at the final layer, pushed toward raw steering's) recovers **2–6× more behavioral effect** while
 keeping generation fluent, and turns Exp 10's non-dominating tradeoff into **outright dominance over raw at

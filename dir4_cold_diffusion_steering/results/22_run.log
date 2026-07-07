@@ -1,0 +1,14 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 8861.31it/s]
+model=Qwen/Qwen3-1.7B layer=14 d=2048 device=cuda
+|v| = 38.10
+loaded Exp 21 corrector (8.39M params)
+48 prompts x 12 tokens, generating 30
+clean: B0=+28.633 distinct2=0.875
+alpha= 2.0  raw: eff=+5.22 d2=0.886  | corr: eff=+0.53 d2=0.840
+alpha= 4.0  raw: eff=+7.31 d2=0.876  | corr: eff=+0.77 d2=0.833
+alpha= 6.0  raw: eff=+7.64 d2=0.819  | corr: eff=+0.98 d2=0.843
+alpha= 8.0  raw: eff=+8.01 d2=0.761  | corr: eff=+2.31 d2=0.825
+saved figure + results
+[W707 23:39:41.961409812 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

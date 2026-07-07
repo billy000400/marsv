@@ -101,7 +101,10 @@ collapse into repetition — keeping generation fluent — but its output is onl
 one-sixth of raw's behavioral effect), because the projection-preserving correction, though orthogonal
 to `v` in activation space, is not orthogonal to the downstream concept readout. Matched layer-6
 projection does not guarantee matched behavioral steering: the fluency win is partly a weaker propagated
-edit, and behavioral effect on generation must be measured directly. Acting on that, a follow-up
+edit, and behavioral effect on generation must be measured directly. This behavioral caveat is itself
+**architecture-robust** (Experiment 22): the identical protocol on Qwen3-1.7B reproduces it — the corrector's
+generated sentiment effect is only 10–29% of raw's — though raw degenerates far less on Qwen3, making it a
+stronger baseline there. Acting on the caveat, a follow-up
 (Experiment 11) adds a term that preserves the downstream concept readout during training; it recovers
 2–6× more behavioral effect while staying fluent and turns the tradeoff into outright dominance over raw
 at moderate steering — though the projection-preserving corrector still cannot match raw's strong
@@ -1183,14 +1186,55 @@ not of the GPT-2 architecture.
 
 **Limitations.** This is still a *single* concept (sentiment), *single* seed, and *single* mid layer, on one
 non-GPT-2 model; it establishes that the result crosses the GPT-2/Qwen3 architecture boundary but does not
-sweep architectures (e.g. Llama, Mistral, MoE models) or re-run the behavioral generation analysis (Exp
-10/11/20) on Qwen3. The teacher-forced `ΔLM` proxy carries the same caveat here as everywhere: it measures
-disruption to processing real text, and part of the recovery may reflect a weaker propagated edit (Exp 10).
+sweep architectures (e.g. Llama, Mistral, MoE models). The teacher-forced `ΔLM` proxy carries the same caveat
+here as everywhere: it measures disruption to processing real text, and part of the recovery may reflect a
+weaker propagated edit — **Experiment 22 measures exactly this on Qwen3** and confirms the caveat holds.
 
-**Next check.** Repeat the behavioral generation protocol (sentiment effect + distinct-2, Exp 10) on Qwen3 to
-confirm the fluency recovery is not bought by under-steering on this architecture, and add one more distinct
-architecture family (e.g. a Llama-style model) to turn "crosses one architecture boundary" into "architecture
-family sweep."
+**Next check.** *Done in Experiment 22* — the behavioral generation protocol (sentiment effect + distinct-2,
+Exp 10) is re-run on Qwen3 below and shows the fluency recovery is again partly bought by under-steering.
+Remaining: add one more distinct architecture family (e.g. a Llama-style model) to turn "crosses one
+architecture boundary" into "architecture family sweep."
+
+### Experiment 22 — the under-steering caveat replicates on Qwen3 (behavioral generation)
+
+![behavioral test on generated text, Qwen3-1.7B](plots/22_behavioral_qwen.png)
+
+| α | effect raw `B−B₀` | effect corr `B−B₀` | corr/raw effect | distinct-2 raw | distinct-2 corr |
+|---|-------------------|--------------------|-----------------|----------------|-----------------|
+| 2 | **+5.22** | +0.53 | 10% | 0.886 | 0.840 |
+| 4 | **+7.31** | +0.77 | 11% | 0.876 | 0.833 |
+| 6 | **+7.64** | +0.98 | 13% | 0.819 | 0.843 |
+| 8 | +8.01 | +2.31 | 29% | **0.761** | 0.825 |
+
+(Behavioral metrics as defined for Experiment 10; unsteered baselines `B(0)=+28.6`, distinct-2 `0.875`. Same
+48 held-out prompts, 30 greedy tokens, steer at block 14 every position; the corrector is the exact Experiment
+21 checkpoint, not retrained.)
+
+**Observation.** Experiment 21's headline 94% recovery is a *teacher-forced* `ΔLM` at matched layer-14
+projection. Run through actual generation, the corrector under-steers: its sentiment effect is only
+`+0.53–2.31`, **10–29% of raw's** `+5.2–8.0`. On fluency the corrector holds distinct-2 flat at `0.825–0.843`
+while raw dips to `0.761` at α=8 — so the corrector is still more fluent than raw at strong steering, but the
+gap (0.06) is far narrower than on GPT-2, where raw *collapsed* to distinct-2 0.32 (Experiment 10). Sample at
+α=8: raw *"…a welcoming family and a welcoming community. The community is a home and a family…"* (positive,
+repetitive) vs corrected *"…situated in the heart of the city of Bridgend, just 15 minutes north of the city
+of Bridgend"* (fluent, factual, barely steered).
+
+**Interpretation.** The Experiment 10 mechanism is architecture-robust: the projection-preserving correction
+is orthogonal to `v` in *activation* space but not to the downstream sentiment *readout*, so minimizing LM
+loss on Qwen3 also yields near-normal, lightly-steered text. The large teacher-forced `ΔLM` recovery is
+genuine as a measure of reduced disruption to processing real text, but a substantial part of it reflects a
+weaker propagated behavioral edit here too. Matched projection ≠ matched behavioral steering is not a
+GPT-2 quirk.
+
+**Limitations.** Single concept/seed/layer, one architecture, and — unlike GPT-2 — the Experiment 11/20
+behavioral-preservation terms were not re-fit on Qwen3, so we show the caveat holds but not (yet) that the fix
+transfers. A second difference from GPT-2 complicates the Pareto read: raw steering degenerates far less on
+Qwen3 (distinct-2 0.76 vs 0.32 at α=8), so raw is a stronger baseline here and the corrector's fluency edge is
+smaller. The sentiment-effect scale is model-specific (Qwen3's `|h|` and `B(0)` are ~8× GPT-2's), so absolute
+effects are not comparable across models — only the corr/raw *ratio* is.
+
+**Next check.** Re-fit the Experiment 11/20 behavioral-preservation terms on Qwen3 to test whether the fix that
+pushed the GPT-2 Pareto out also transfers across the architecture boundary.
 
 ### Experiment 14 — bank diversity is a causal lever (controlled test, confound removed)
 
@@ -1426,7 +1470,9 @@ the corrector *generates*, it prevents raw steering's collapse into repetition (
 baseline while raw's crashes 0.78→0.32) but its output is only weakly steered — the projection-preserving
 correction is orthogonal to `v` in activation space yet not to the downstream readout, so the fluency
 win comes partly at the cost of the behavioral edit. Matched layer-6 projection is **not** matched
-behavioral steering. Adding an explicit behavioral-preservation term (Experiment 11) — pushing the
+behavioral steering — and this caveat is **architecture-robust**: rerunning the protocol on Qwen3-1.7B
+(Experiment 22) reproduces it, with the corrector's generated effect only 10–29% of raw's (raw degenerates
+less on Qwen3, so it is a stronger baseline there). Adding an explicit behavioral-preservation term (Experiment 11) — pushing the
 corrector's *downstream* concept readout toward raw steering's during training — recovers 2–6× more of
 the behavioral effect while keeping generation fluent, and converts the tradeoff into outright dominance
 over raw at moderate steering; but no weighting reaches raw's strong pre-collapse effect, because matching
@@ -1495,7 +1541,10 @@ teacher-forced fluency proxy measured at matched projection at *one layer*. Expe
 exactly at layer 6, but the correction is not orthogonal to the downstream concept readout, so the
 corrector's generated text is only weakly steered (sentiment effect ~one-sixth of raw's) even as it stays
 fluent. The fluency win therefore reflects, in part, a weaker propagated edit — behavioral effect on
-generated text must be measured directly, not inferred from `ΔLM`. Experiment 11 acts on this: a corrector
+generated text must be measured directly, not inferred from `ΔLM`. **Experiment 22 confirms this caveat is
+architecture-robust:** the same protocol on Qwen3-1.7B reproduces the under-steering (generated effect 10–29%
+of raw's), so the gap between teacher-forced `ΔLM` recovery and behavioral steering is not a GPT-2 quirk.
+Experiment 11 acts on this: a corrector
 objective that explicitly preserves the downstream concept readout recovers 2–6× more behavioral effect
 and dominates raw at moderate steering, but still cannot reach raw's strong pre-collapse effect (matching
 a teacher-forced readout transfers only partially to generation), so the effect–fluency frontier is pushed

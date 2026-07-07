@@ -907,3 +907,58 @@ running scripts with dir9's cupenv python until the shared conda env returns.
 On track? yes — Exp 21 closes the architecture axis: the flagship result replicates on Qwen3-1.7B (non-GPT-2:
 RMSNorm/RoPE/SwiGLU/GQA), recovery 94% @α=8, again off the Gaussian manifold. Deliverables curated +
 math-verified (26/26). ~100% complete; direction robust on 7 axes. No blocker.
+
+## 2026-07-07 — Iter 22: behavioral honesty-check on Qwen3 (Exp 22)
+
+**Scope.** Success criterion long met; direction robust on 7 axes. Picked the single highest-value remaining
+point — the honesty check Exp 21 itself named as its "Next check". Exp 21's headline 94% recovery on Qwen3-1.7B
+is a TEACHER-FORCED ΔLM at matched layer-14 projection. Exp 10 taught (on GPT-2) that this proxy can hide a
+weaker propagated behavioral edit in generation. Was the 94% bought by under-steering on Qwen3? Untested.
+
+**Did.** New `experiments/22_behavioral_qwen.py`: ran the IDENTICAL Exp-10 behavioral generation protocol on
+Qwen3-1.7B, reusing the EXACT Exp-21 corrector checkpoint (results/21_corr.pt, no retraining — rebuilt the same
+deterministic block-14 sentiment vector so it matches the checkpoint). Greedy-generate 30 tokens from 48 held-out
+12-token prompts, steer at block 14 every position, raw vs corrected; on a clean re-encode measure sentiment
+effect B(α)−B(0) (baseline B0=+28.6) and distinct-2 (baseline 0.875). Reused exp21's Qwen3 load / FuncPatcher /
+make_hat / resid_post; batched generation + re-encode at GEN_BATCH 8 with empty_cache between chunks.
+
+**Learned.** CORRECTIVE / honest — the Exp-10 under-steering caveat REPLICATES on Qwen3. Corrector generated
+sentiment effect is only 10–29% of raw's (raw +5.22/+7.31/+7.64/+8.01 vs corr +0.53/+0.77/+0.98/+2.31 @α=2/4/6/8;
+cf. ~1/6 on GPT-2). So 94% is honest as a teacher-forced fluency metric but partly reflects a weaker propagated
+behavioral edit — as on GPT-2. KEY DIFFERENCE: raw steering degenerates FAR LESS on Qwen3 (distinct-2 0.886→0.761
+@α=8 vs GPT-2's collapse to 0.32), so raw is a STRONGER baseline here (steers hard AND stays fairly fluent), the
+corrector's fluency edge is small (0.06 @α=8), and the effect-vs-fluency Pareto is shallower than on GPT-2.
+Qualitative: raw α=8 "…a welcoming family and a welcoming community. The community is a home and a family…"
+(positive, repetitive); corr α=8 "…in the heart of the city of Bridgend, just 15 minutes north of the city of
+Bridgend" (fluent, factual, barely steered). ⇒ "matched projection ≠ matched behavioral steering" is
+architecture-robust; the Exp 11/20 behavioral-preservation terms are the indicated fix if strong behavioral
+steering is needed on Qwen3.
+
+**Assumptions/decisions logged.** (a) Reused the Exp-21 corrector checkpoint UNCHANGED (the whole point is to
+probe that exact corrector, not a fresh one) — rebuilt v deterministically so state_dict matches. (b) Kept the
+Exp-10 protocol EXACTLY (48 prompts, PROMPT_LEN 12, GEN_LEN 30, α∈{2,4,6,8}, same metrics) so the two are
+directly comparable; only model/corrector differ. (c) Reported the corr/raw effect RATIO, not absolute effects,
+across models — Qwen3's |h| and B0 are ~8× GPT-2's, so absolute sentiment projections are not comparable across
+architectures; the ratio is the architecture-invariant quantity. (d) GEN_BATCH 8 + empty_cache between chunks for
+the ~4.3 GB VRAM share (generation is lighter than Exp 21's full-vocab eval; no OOM). (e) ENV: dir9's cupenv
+python again (`/mars-vol/marsv/dir9_ood/cupenv/bin/python`) — shared conda transformers still gone.
+
+**Deliverables.** RESULTS.md +Exp 22 (table + reading) + figure entry + Headline behavioral-caveat paragraph now
+notes architecture-robustness. REPORT.md +Results "Experiment 22" (Observation/Interpretation/Limitations/Next-
+check; reuses Exp 10's metric definitions, no new display math) + Exp 21 Limitations/Next-check updated (behavioral
+check now DONE) + Summary + Conclusion + Limitation (2) all note the caveat is architecture-robust. CHANGELOG
+appended. Artifacts: experiments/22_behavioral_qwen.py, results/22_behavioral_qwen.json, results/22_run.log,
+plots/22_behavioral_qwen.png. REPORT math re-verified via GitHub API: 26/26 js-display-math, 0 broken, 0 inline
+hazards.
+
+**Next step (all optional; success criterion long met).** Only very-low-value points remain: re-fit the Exp 11/20
+behavioral-preservation terms ON Qwen3 to test whether the GPT-2 fix transfers across the architecture boundary
+(the natural Exp-22 follow-up); a second non-GPT-2 architecture (Llama/Mistral) for an architecture *sweep*; a
+harder differentiable-generation objective; or GPT-2 XL. Keep running scripts with dir9's cupenv python until the
+shared conda env returns.
+
+On track? yes — Exp 22 closes Exp 21's own "Next check": the flagship behavioral caveat (matched projection ≠
+matched behavioral steering, corrector under-steers in generation) is architecture-robust, replicating on Qwen3
+(effect 10–29% of raw's), while raw's lesser degeneration makes it a stronger baseline there. Deliverables curated
++ math-verified (26/26). ~100% complete; direction robust on 7 axes plus a now-architecture-robust behavioral
+caveat. No blocker.
