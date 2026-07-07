@@ -1,20 +1,0 @@
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
-Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 35257.68it/s]
-model=Qwen/Qwen3-1.7B steer L14 readout L27 d=2048 device=cuda
-|v|(L14)=38.10  |w|(L27)=12.87
-48 prompts x 12 tokens, gen 30
-clean: B0=+28.633 distinct2=0.875
-raw   effect=['+5.22', '+7.31', '+7.64', '+8.01'] d2=['0.89', '0.88', '0.82', '0.76']
-lam_b=0: loaded Exp 21 checkpoint (= Exp 22 corrector, reproducibility anchor)
-lam_b= 0.0 effect=['+0.53', '+0.77', '+0.98', '+2.31'] d2=['0.84', '0.83', '0.84', '0.82']
-  lam_b=10.0 ep0 step  50 a= 4.2 LM=4.759 behav=0.0044 p_raw=+645.8 p_corr=+647.2
-  lam_b=10.0 ep0 step 100 a= 7.7 LM=4.919 behav=0.0241 p_raw=+793.2 p_corr=+786.3
-  lam_b=10.0 ep0 step 150 a= 7.7 LM=5.443 behav=0.0121 p_raw=+841.5 p_corr=+848.0
-  lam_b=10.0 ep1 step 200 a= 3.3 LM=5.154 behav=0.0091 p_raw=+596.2 p_corr=+596.9
-  lam_b=10.0 ep1 step 250 a= 7.8 LM=5.077 behav=0.0136 p_raw=+750.8 p_corr=+749.7
-  lam_b=10.0 ep1 step 300 a= 6.9 LM=4.995 behav=0.0160 p_raw=+744.8 p_corr=+737.1
-  lam_b=10.0 ep2 step 350 a= 5.9 LM=3.888 behav=0.0642 p_raw=+685.6 p_corr=+663.6
-  lam_b=10.0 ep2 step 400 a= 7.6 LM=5.405 behav=0.0584 p_raw=+821.6 p_corr=+839.6
-  lam_b=10.0 ep2 step 450 a= 1.6 LM=3.355 behav=0.0094 p_raw=+329.9 p_corr=+331.2
-  lam_b=10.0 ep3 step 500 a= 0.7 LM=3.870 behav=0.0135 p_raw=+413.5 p_corr=+421.5
