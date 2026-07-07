@@ -28,7 +28,7 @@ def main():
     chunks = []
     n_seq = TARGET // SEQ_LEN + BATCH
     for t in texts:
-        ids = tok(t, add_special_tokens=False, truncation=False)["input_ids"]
+        ids = tok(t, add_special_tokens=True, truncation=False)["input_ids"]
         for s in range(0, len(ids) - SEQ_LEN + 1, SEQ_LEN):
             chunks.append(ids[s:s + SEQ_LEN])
             if len(chunks) >= n_seq:

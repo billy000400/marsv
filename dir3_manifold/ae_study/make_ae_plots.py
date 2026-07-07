@@ -22,7 +22,17 @@ def save(fig, name):
     plt.close(fig); print("wrote", name)
 
 
-# ---- Fig A: Qwen layer-2 & layer-10 reconstruction vs k (the elbow figure) ----
+def kneedle_log2(ks, ys):
+    x = np.log2(np.asarray(ks, float)); y = np.asarray(ys, float)
+    xn = (x - x.min()) / (x.max() - x.min())
+    yn = (y - y.min()) / (y.max() - y.min())
+    if yn[-1] < yn[0]:
+        yn = 1 - yn
+    d = np.abs(yn - xn)
+    return int(ks[int(np.argmax(d))]), float(d.max())
+
+
+# ---- Fig A: faithful reproduction — Qwen L2 & L10 last-token, colleague k range ----
 L2 = load("qwen_sweep_L2.json")
 L10 = load("qwen_sweep_L10.json")
 fig, axes = plt.subplots(1, 3, figsize=(15, 4.3))
@@ -38,28 +48,62 @@ axes[1].set_ylabel("held-out rel-L2 error (lower better)"); axes[1].set_title("R
 axes[2].set_ylabel("held-out cosine (higher better)"); axes[2].set_title("Cosine similarity vs k")
 for ax in axes:
     ax.set_xlabel("bottleneck k"); ax.grid(alpha=0.3); ax.legend(fontsize=8)
-fig.suptitle("Qwen3-1.7B last-token AE bottleneck sweep (deep AE 2048-4096-4096-2048-k, 4000 steps)")
+fig.suptitle("Faithful reproduction of colleague's setup: Qwen3-1.7B last-token AE sweep "
+             "(deep AE 2048-4096-4096-2048-k, 4000 steps) — smooth decline, no plateau")
 fig.tight_layout()
 save(fig, "qwen_ae_sweep.png")
 
-# ---- Fig B: controlled experiment — last-token vs pooled (Qwen L2) ----
-pooled = load("qwen_sweep_L2_pooled.json")
-inj = load("qwen_sweep_L2_inject.json")
-if pooled or inj:
-    fig, ax = plt.subplots(figsize=(7, 4.5))
-    if L2:
-        ax.plot([r["k"] for r in L2["rows"]], [r["val_fvu"] for r in L2["rows"]],
-                "o-", color="C0", label=f"last-token (top1_var={L2['top1_var_frac']:.3f})")
-    if pooled:
-        ax.plot([r["k"] for r in pooled["rows"]], [r["val_fvu"] for r in pooled["rows"]],
-                "s-", color="C3", label=f"all-token pooled (top1_var={pooled['top1_var_frac']:.3f})")
-    if inj:
-        ax.plot([r["k"] for r in inj["rows"]], [r["val_fvu"] for r in inj["rows"]],
-                "^--", color="C1", label=f"last-token + injected massive dim (top1_var={inj['top1_var_frac']:.3f})")
-    ax.set_xlabel("bottleneck k"); ax.set_ylabel("held-out FVU")
-    ax.set_title("Controlled experiment (Qwen L2): what a massive-activation dim does to the AE curve")
-    ax.grid(alpha=0.3); ax.legend(fontsize=8)
-    save(fig, "qwen_ae_controlled.png")
+
+# ---- Fig B: DECISIVE controlled experiment — wide k, isotropic vs injected-massive ----
+base = load("qwen_sweep_L2_wide.json")
+inj = load("qwen_sweep_L2_wide_inject.json")
+pool = load("qwen_sweep_L2_pooled_wide.json")
+if base and inj:
+    fig, ax = plt.subplots(figsize=(7.5, 5))
+    for d, lab, col, mk in [
+        (base, "Qwen L2 baseline (isotropic, top1={:.3f})", "C0", "o-"),
+        (pool, "Qwen L2 all-token pooled (top1={:.3f})", "C2", "s-"),
+        (inj, "Qwen L2 + injected massive dim (top1={:.2f})", "C3", "^--"),
+    ]:
+        if d is None:
+            continue
+        ks = [r["k"] for r in d["rows"]]
+        fv = [r["val_fvu"] for r in d["rows"]]
+        kk, contrast = kneedle_log2(ks, fv)
+        ax.plot(ks, fv, mk, color=col, label=lab.format(d["top1_var_frac"]) +
+                f"  [Kneedle k*={kk}, contrast={contrast:.2f}]")
+        j = ks.index(kk)
+        ax.scatter([kk], [fv[j]], s=170, facecolors="none", edgecolors=col, linewidths=2, zorder=5)
+    ax.set_xscale("log", base=2)
+    ax.set_xlabel("bottleneck k (log2 scale)")
+    ax.set_ylabel("held-out FVU (lower = better reconstruction)")
+    ax.set_title("When does an AE reconstruction elbow appear?\n"
+                 "Only concentrated variance yields a sharp low-k knee (○ = Kneedle knee)")
+    ax.grid(alpha=0.3, which="both"); ax.legend(fontsize=8, loc="upper right")
+    save(fig, "qwen_ae_wide_controlled.png")
+
+
+# ---- Fig C: anisotropy diagnostic — why (GPT-2 vs Qwen) ----
+labels = ["GPT-2 L6\n(all-token)", "Qwen L2\n(last-tok)", "Qwen L10\n(last-tok)"]
+top1 = [0.904, 0.034, 0.145]      # top PCA eigenvalue fraction
+pr = [1.22, 245.4, 41.9]          # participation ratio
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.3))
+bars = a1.bar(labels, top1, color=["C3", "C0", "C2"])
+a1.set_ylabel("top-1 PCA eigenvalue fraction")
+a1.set_title("Variance concentration (higher = more anisotropic)")
+a1.axhline(0.5, color="k", ls=":", lw=1)
+for b, v in zip(bars, top1):
+    a1.text(b.get_x() + b.get_width() / 2, v + 0.01, f"{v:.3f}", ha="center", fontsize=9)
+bars = a2.bar(labels, pr, color=["C3", "C0", "C2"])
+a2.set_ylabel("participation ratio (effective # directions)")
+a2.set_title("Effective dimensionality (log scale)")
+a2.set_yscale("log")
+for b, v in zip(bars, pr):
+    a2.text(b.get_x() + b.get_width() / 2, v * 1.1, f"{v:.0f}", ha="center", fontsize=9)
+fig.suptitle("Why GPT-2 shows a low-k bend but Qwen last-token does not: "
+             "GPT-2 L6 puts 90% of variance in one direction; Qwen spreads it over 42-245")
+fig.tight_layout()
+save(fig, "qwen_anisotropy.png")
 
 
 if __name__ == "__main__":
