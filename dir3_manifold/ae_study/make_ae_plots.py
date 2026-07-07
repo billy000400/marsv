@@ -124,11 +124,14 @@ if lasse:
                linewidths=2, zorder=5, label=f"peak at k={k_cos}")
     a1.set_ylabel("Cosine similarity"); a1.set_xlabel("Bottleneck dimension")
     a1.set_title("Reconstruction quality vs bottleneck")
-    a2.plot(ks, rel, "o-", color="C0", label="Autoencoder (67M)")
+    a2.plot(ks, rel, "o-", color="C0", label="held-out (val)")
+    if all("train_rel_l2" in r for r in rows):
+        a2.plot(ks, [r["train_rel_l2"] for r in rows], "s--", color="C7",
+                label="train", alpha=0.8)
     a2.scatter([k_rel], [min(rel)], s=170, facecolors="none", edgecolors="C3",
-               linewidths=2, zorder=5, label=f"min at k={k_rel}")
+               linewidths=2, zorder=5, label=f"val min at k={k_rel}")
     a2.set_ylabel("Relative L2 error"); a2.set_xlabel("Bottleneck dimension")
-    a2.set_title("Reconstruction error vs bottleneck")
+    a2.set_title("Reconstruction error vs bottleneck (val vs train)")
     for ax in (a1, a2):
         ax.grid(alpha=0.3); ax.legend(fontsize=9)
     fig.suptitle("Reproduction of the colleague's Qwen3-1.7B AE sweep (last-token L2, k up to 500, "

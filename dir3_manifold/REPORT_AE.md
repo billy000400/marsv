@@ -121,7 +121,7 @@ matching GPT-2's massive-activation structure; everything else is unchanged. Coo
 set to
 
 ```math
-\mathrm{Var}(x^{(0)}) \leftarrow \frac{f}{1-f} \sum_{c \neq 0} \mathrm{Var}(x^{(c)})
+\mathrm{Var}(x^{(0)}) = \frac{f}{1-f} \sum_{c \neq 0} \mathrm{Var}(x^{(c)})
 ```
 
 Only this one number changes between the "isotropic" and "anisotropic" runs, so any change in the curve
@@ -133,7 +133,11 @@ is attributable to the injected dominant dimension alone.
 axis-aligned massive-activation measure):
 
 ```math
-\mathrm{PR} = \frac{(\sum_j \lambda_j)^{2}}{\sum_j \lambda_j^{2}}, \qquad \mathrm{top1} = \frac{\max_c \mathrm{Var}(x^{(c)})}{\sum_c \mathrm{Var}(x^{(c)})}
+\mathrm{PR} = \frac{\left(\sum_j \lambda_j\right)^{2}}{\sum_j \lambda_j^{2}}
+```
+
+```math
+\mathrm{top1} = \frac{\max_c \mathrm{Var}(x^{(c)})}{\sum_c \mathrm{Var}(x^{(c)})}
 ```
 
 ## Results
