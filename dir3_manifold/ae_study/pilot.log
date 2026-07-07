@@ -1,0 +1,2 @@
+layer 2: train torch.Size([144000, 2048]) val torch.Size([16000, 2048]) d=2048 top1_var_frac=0.0117
+  k=  5 FVU=0.6316 rel_L2=0.6080 cos=0.7570 (210s)

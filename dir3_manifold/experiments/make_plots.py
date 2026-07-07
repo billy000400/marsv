@@ -61,6 +61,24 @@ ax.legend(fontsize=8, ncol=2)
 ax.grid(alpha=0.3)
 save(fig, "id_per_layer.png")
 
+# ---- Fig 1b: TwoNN vs MLE ONLY (operator request 2026-07-07) ----
+# Same nonlinear-ID data as Fig 1 but WITHOUT linear PCA d95 and the d_model=768
+# reference line, and on a linear y-axis, so the reader can judge directly how
+# closely the two nonlinear estimators (TwoNN and MLE) agree with each other.
+fig, ax = plt.subplots(figsize=(7, 4.5))
+ax.plot(layers, twonn_c, "o-", color="C0", label="TwoNN (centered)")
+ax.plot(layers, mle_c, "s-", color="C1", label="MLE (centered)")
+ax.plot(layers, twonn_s, "o--", color="C0", alpha=0.5, label="TwoNN (standardized)")
+ax.plot(layers, mle_s, "s--", color="C1", alpha=0.5, label="MLE (standardized)")
+ax.set_xlabel("layer (block output / resid_post)")
+ax.set_ylabel("intrinsic dimension (linear scale)")
+ax.set_title("Do TwoNN and MLE agree? Nonlinear local ID only, GPT-2 small (n=50k)\n"
+             "L11 is post-final-layernorm (caveat)")
+ax.set_xticks(layers)
+ax.legend(fontsize=8, ncol=2)
+ax.grid(alpha=0.3)
+save(fig, "id_twonn_vs_mle.png")
+
 # ---- Fig 2: AE FVU bottleneck sweep (the headline AE figure) ----
 ks = [2, 4, 8, 16, 24, 32, 48, 64, 128, 256]
 cpu = {r["k"]: r["val_fvu"] for r in load("ae_results.json")}
