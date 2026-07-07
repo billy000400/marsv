@@ -1,11 +1,5 @@
 /opt/conda/lib/python3.11/site-packages/torch/backends/__init__.py:46: UserWarning: Please use the new API settings to control TF32 behavior, such as torch.backends.cudnn.conv.fp32_precision = 'tf32' or torch.backends.cuda.matmul.fp32_precision = 'ieee'. Old settings, e.g, torch.backends.cuda.matmul.allow_tf32 = True, torch.backends.cudnn.allow_tf32 = True, allowTF32CuDNN() and allowTF32CuBLAS() will be deprecated after Pytorch 2.9. Please see https://pytorch.org/docs/main/notes/cuda.html#tensorfloat-32-tf32-on-ampere-and-later-devices (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:80.)
   self.setter(val)
-layer 2: train torch.Size([144000, 2048]) val torch.Size([16000, 2048]) d=2048 top1_var_frac=0.0117
-  k=  1 FVU=0.8508 rel_L2=0.7317 cos=0.6465 (129s)
-  k=  2 FVU=0.7506 rel_L2=0.6732 cos=0.6996 (260s)
-  k=  4 FVU=0.6410 rel_L2=0.6118 cos=0.7525 (390s)
-  k=  8 FVU=0.5416 rel_L2=0.5552 cos=0.7972 (522s)
-  k= 16 FVU=0.4880 rel_L2=0.5267 cos=0.8208 (653s)
-  k= 32 FVU=0.4511 rel_L2=0.5097 cos=0.8366 (786s)
-  k= 64 FVU=0.4476 rel_L2=0.5099 cos=0.8382 (918s)
-elbow: {'val_fvu': 8, 'val_rel_l2': 8, 'val_cos': 8}
+layer 2: train torch.Size([144000, 2048]) val torch.Size([16000, 2048]) d=2048 top1_var_frac=0.8999
+  k=  1 FVU=0.0992 rel_L2=0.4546 cos=0.8532 (267s)
+  k=  2 FVU=0.0880 rel_L2=0.4179 cos=0.8746 (367s)

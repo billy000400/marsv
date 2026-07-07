@@ -1,37 +1,10 @@
-fetched 500 texts (offset 500)
-fetched 1000 texts (offset 1000)
-fetched 1500 texts (offset 1500)
-fetched 2000 texts (offset 2000)
-fetched 2500 texts (offset 2500)
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 31740.24it/s]
-[34s] model loaded
-[38s] 160000 seq_len=10 chunks
-  [40s] 0/160000
-  [46s] 6400/160000
-  [52s] 12800/160000
-  [57s] 19200/160000
-  [63s] 25600/160000
-  [68s] 32000/160000
-  [74s] 38400/160000
-  [80s] 44800/160000
-  [86s] 51200/160000
-  [92s] 57600/160000
-  [97s] 64000/160000
-  [103s] 70400/160000
-  [109s] 76800/160000
-  [117s] 83200/160000
-  [122s] 89600/160000
-  [129s] 96000/160000
-  [134s] 102400/160000
-  [140s] 108800/160000
-  [146s] 115200/160000
-  [151s] 121600/160000
-  [157s] 128000/160000
-  [163s] 134400/160000
-  [169s] 140800/160000
-  [174s] 147200/160000
-  [180s] 153600/160000
-saved acts_qwen_L2.npy (160000, 2048)
-saved acts_qwen_L10.npy (160000, 2048)
-[194s] done. VRAM peak MB 4140
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 31711.69it/s]
+1500 source docs
+120176 windows of len 10
+  128/120176 (254/s)
+  6528/120176 (1065/s)
+  12928/120176 (1087/s)
+  19328/120176 (1103/s)
+  25728/120176 (1102/s)
