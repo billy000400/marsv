@@ -361,3 +361,45 @@ search); in-context-PROCESS negatives (steered/SAE acts produced during a forwar
 On track? yes — closed the last rigor gap (Phase-6b CIs); claim-4 upgrade now CI-backed and
 trust-region nuance corrected; deliverable curated + figure-complete (13 figs), self-consistent; S10
 re-finalized (iter14); blocker: none.
+
+## Iter 15 (2026-07-07) — Phase 7: STEERING preservation (claim 5, the last unchecked stage S9)
+**Did:** On resume STOP was gone again; the science was complete after iter14 but S9 (claim 5, steering
+preservation) was the ONLY unchecked stage in the whole plan — every prior iter listed it as the top
+remaining lever ("apply the Phase-6b manifold step to a REAL Direction-1 steering vector at matched
+achieved effect"). With ~300 min I ran it. Env reset AGAIN: torch 2.9.0 / numpy 2.3.3 / PIL present,
+transformers + matplotlib absent. Reinstalled transformers via the known `--no-deps` recipe
+(transformers 5.12.1, tokenizers 0.22.1, huggingface_hub 1.21.0 + httpx chain, safetensors/regex/…);
+verified numpy/torch UNCHANGED. Used PIL for the figure (make_plots.py precedent; no matplotlib).
+Wrote `experiments/steering_repair.py` (in-context forward hook identical to manifold_repair.py; N=200
+FineWeb prompts; 30k real-train kNN manifold): built a real difference-of-means (contrastive activation
+addition) steering vector v from 20 positive- vs 20 negative-sentiment sentences (‖v‖=15), steered
+strongly (‖αv‖≈70 vs clean-act norm≈88), decomposed the vocab-mean-centred logit change into an achieved
+effect E=⟨ΔL,d̂⟩ (along the linear steering readout) and off-target collateral C=‖ΔL−E·d̂‖, then compared
+at MATCHED E the "shrink-alpha" control (x0+f·αv) vs the Phase-6b manifold step (x_s+t·(kNN_mean−x_s)) vs
+a matched-size random move. + `plot_fig14.py` (fig14, two Pareto panels E-vs-C and E-vs-KL). Ran in 53s.
+**Learned:** Claim 5 = **NO (well-controlled null)**. At EVERY matched achieved effect, the trivial
+shrink-alpha control Pareto-DOMINATES the manifold repair on all output-validity metrics: at E=145,
+off-target C 148 (shrink) vs 212 (manifold), KL-from-clean 0.31 vs 0.69, entropy 3.73 vs 4.15. The
+manifold step ONLY wins on distance-to-manifold (knn_dist 60 vs 75) — its own objective — and that does
+not translate into output validity. It DOES still beat a matched-size random move (fig14 gray>red), so
+the Phase-6b "manifold supplies a valid direction vs random" result is intact. The reason for the flip
+vs Phase 6b: Phase-6b's win was on *unstructured* (random-noise) corruption, which has no direction to
+walk back along, so the manifold direction was the best available. A steering edit is *structured* along
+v; the cheapest faithful validity/effect tradeoff is to shrink α (walk back along −v, staying in the
+near-linear regime), and the direction-agnostic kNN step can't beat it — it partially destroys E AND
+injects new off-target output change. Practical Direction-1 takeaway is the OPPOSITE of a naive
+"project steered acts onto the manifold" recipe: for a linear steering vector coefficient scaling is
+already the better control; a manifold correction would need to be *readout-constrained* (fix E, denoise
+the orthogonal complement) to have a chance. Curated RESULTS.md (Phase 7 section + table + fig14 +
+Headline claim-5 verdict), REPORT.md (E/C Methods equation fence, fig14, Verdict bullet, Direction-1
+Implications paragraph, Reproduce/Figures), appended CHANGELOG. REPORT display equations 8→9, all render
+as js-display-math (0 degraded, GitHub API check), no inline-math escape hazard.
+**Next:** ALL FIVE claims of the ladder are now verdicted — the project is complete. Genuine remaining
+future work (all optional strengthening): a READOUT-CONSTRAINED manifold projection (project onto the
+real manifold within the affine subspace that fixes E) — the one correction that could still beat
+alpha-shrink; repeat Phase 7 across steering concepts / layers / coefficients and with nonlinear steering
+vectors; in-context-PROCESS negatives (steered/SAE acts produced during a forward); cross-model transfer
+(only gpt2 cached). Re-creating STOP.
+On track? yes — closed the last unchecked stage (S9/claim 5) with a well-controlled null; 5-claim ladder
+fully verdicted; deliverable curated + figure-complete (14 figs), self-consistent, rule-8 compliant;
+blocker: none.

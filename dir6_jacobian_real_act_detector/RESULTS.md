@@ -382,6 +382,60 @@ KL(reference) − KL(kNN step), so **delta > 0 means the kNN step has lower — 
   the same size), while every fractional step keeps a significant edge. This sharpens the trust-region
   conclusion without over-claiming the overshoot.
 
+## Phase 7 — STEERING preservation (claim 5): does the manifold repair beat simply shrinking alpha?
+`experiments/steering_repair.py` (GPU; same in-context forward-hook harness as Phase 6b, N=200 FineWeb
+prompts, 30k real-train kNN manifold). Phase 6b's manifold step repaired *random* corruption. Claim 5
+asks the Direction-1 question: when the "corruption" is an intentional **steering edit**, can the same
+kNN step improve validity while PRESERVING the intended effect — and beat the trivial control of just
+shrinking the steering coefficient? Steering vector `v` = difference-of-means of last-token resid@L6
+between 20 positive- and 20 negative-sentiment sentences (contrastive activation addition, ‖v‖=15). We
+steer at a strong coefficient (‖αv‖≈70 vs clean-act norm≈88), then decompose the output change in
+vocab-mean-centred logit space into the **achieved effect** `E = ⟨ΔL, d̂⟩` along the linear steering
+readout `d̂` and the **off-target collateral** `C = ‖ΔL − E·d̂‖` (output change the steering did not
+intend). We compare, at MATCHED achieved effect `E`, the "shrink-alpha" control (`x0 + f·αv`) against
+the Phase-6b manifold step (`x_s + t·(kNN_mean(x_s) − x_s)`) and a matched-size random move.
+
+| method (matched at effect E) | E | off-target C | KL(clean‖x) | entropy | knn_dist |
+|---|---|---|---|---|---|
+| clean (E=0)                       | 0     | 0    | 0.000 | 3.54 | 63.2 |
+| full steer (start)                | 182   | 282  | 0.936 | 4.17 | 94.2 |
+| manifold(t=0.20)                  | 170   | 255  | 0.820 | 4.17 | 79.9 |
+| alpha_shrink @ E=170              | 170   | **232** | **0.650** | **4.00** | 85.7 |
+| manifold(t=0.35)                  | 161   | 237  | 0.760 | 4.17 | 69.7 |
+| alpha_shrink @ E=161              | 161   | **197** | **0.487** | **3.88** | 80.7 |
+| manifold(t=0.50)                  | 145   | 212  | 0.690 | 4.15 | 60.2 |
+| alpha_shrink @ E=145              | 145   | **148** | **0.312** | **3.73** | 75.3 |
+
+![Phase 7 steering repair: manifold vs shrinking alpha](plots/fig14_steering_repair.png)
+
+**Observation.** At every matched achieved effect, the shrink-alpha control has LOWER off-target
+collateral, LOWER KL-from-clean, and LOWER entropy than the manifold step (bold). The manifold step only
+wins on `knn_dist`/`dist_to_mean` — i.e. it moves closer to the real manifold, but that does not buy any
+output-space validity. The manifold step DOES still beat a matched-size **random** move (fig14, gray
+above red) — the Phase-6b "manifold supplies a valid direction vs random" result survives — but the
+relevant Direction-1 baseline is alpha-shrink, and alpha-shrink Pareto-dominates it.
+
+**Interpretation.** Phase-6b's manifold repair helped because *random* corruption has no structured
+direction to undo, so moving toward real neighbours was the best available move. A steering edit is
+*structured* (all along `v`), and the cheapest faithful way to trade effect for validity is to walk back
+along `−v` (shrink alpha), which keeps the activation in the near-linear regime. The kNN step does not
+know the steering direction: it partially destroys the intended effect (E drops) AND injects new
+off-target output change, because the mean of nearby reals is not aligned with `−v`.
+
+**Limitations.** One linear difference-of-means steering vector, one layer (L6), last token, GPT-2 small,
+sentiment concept; a fixed corruption strength. A learned/nonlinear repair, or a manifold step
+constrained to preserve the readout `E`, is untested and could change the verdict.
+
+**Next check.** A *readout-constrained* manifold projection (project onto the manifold within the affine
+subspace that fixes `E`), and repeating across steering concepts / layers / coefficients, would test
+whether ANY manifold-aware correction can beat alpha-shrink — the honest current answer is no.
+
+**Verdict — claim 5 = NO (well-controlled null).** For a real (difference-of-means) steering vector, the
+Phase-6b manifold-projection repair does NOT preserve the intended steering effect better than simply
+shrinking the steering coefficient; shrink-alpha dominates it on every output-validity metric at matched
+achieved effect. Manifold repair is useful for *unstructured* corruption (Phase 6b) but is
+contraindicated as a steering-preservation method — coefficient scaling is the better control.
+
 ## Headline
 **What makes real activations real?** For GPT-2 small residual activations, no single statistic equals
 "realness"; it is a COMBINATION of complementary structures, and different corruptions are anomalous
@@ -431,9 +485,14 @@ start (0.78→0.57, paired-bootstrap ΔKL +0.22 [+0.18,+0.26]) and a matched-siz
 supplies a valid repair *direction* that scalar scores lack (Phase 6b). The step must stay in a small
 trust region: the FULL kNN projection overshoots into the over-central interior and loses the manifold
 advantage (t=1.00 vs matched-random ΔKL not significant, CI straddles 0). Oracle
-movement toward the true clean activation is the ceiling (KL→0.003). (5) Steering — NOT tested, but the
-Phase-6b sweet-spot (small manifold-projection step) is the concrete objective a Direction-1 repair
-should use, whereas a scalar-score penalty is contraindicated.
+movement toward the true clean activation is the ceiling (KL→0.003). (5) Steering — NO (well-controlled
+null, Phase 7): applied to a real difference-of-means steering vector at matched achieved effect, the
+Phase-6b manifold-projection step does NOT preserve the intended effect better than simply shrinking the
+steering coefficient — shrink-alpha Pareto-dominates it on off-target collateral, KL-from-clean, and
+entropy, while manifold repair only reduces distance-to-manifold (its own objective). The manifold step
+still beats a matched-size *random* move, so the "valid direction vs random" result holds, but the
+repair helps *unstructured* corruption (Phase 6b), NOT *structured* steering edits, where coefficient
+scaling is the better validity/effect tradeoff.
 [Phases 5 & 6 re-verified genuinely in-context (forward hook, full context) per external review
 20260623T024606Z; conclusions for claims 3 and 4 are unchanged. The single-position pre-correction
 numbers remain in git history.]

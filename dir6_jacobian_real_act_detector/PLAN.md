@@ -513,20 +513,49 @@ Correction/steering metrics:
       iter14: PAIRED-BOOTSTRAP CIs (`manifold_repair_ci.py`, B=5000, fig13) — t=0.25 beats matched
       random ΔKL +0.297 [+0.246,+0.350] and corrupted start +0.219 [+0.177,+0.262], both 95%-CI sig;
       full-step vs random n.s. [−0.49,+0.07] → "loses manifold advantage", not sig-worse.)
-- [ ] S9 — Validate on steering while preserving achieved steering effect. (NOT done — but the objective
-      it needs is now identified: iter13's fractional kNN manifold-projection step (Phase 6b), NOT a
-      scalar-score penalty. Applying it to a real Direction-1 steering vector at matched achieved effect
-      remains future work.)
+- [x] S9 — Validate on steering while preserving achieved steering effect. (iter15: Phase 7,
+      `experiments/steering_repair.py` + fig14. Applied the Phase-6b kNN manifold step to a REAL
+      difference-of-means steering vector at MATCHED achieved effect E. RESULT = well-controlled NULL:
+      shrink-alpha Pareto-DOMINATES the manifold step on every output-validity metric (at E=145: C 148 vs
+      212, KL 0.31 vs 0.69, entropy 3.73 vs 4.15); manifold only wins on distance-to-manifold (its own
+      objective). Manifold still beats a matched-size RANDOM move (Phase-6b direction result intact). The
+      repair helps *unstructured* corruption, NOT *structured* steering edits — coefficient scaling is
+      the better control. Claim 5 = NO.)
 - [x] S10 — Finalize RESULTS.md, REPORT.md, JOURNAL.md, and STOP. (iter7; iter8 re-finalized after
       review; iter9 added the 8 result figures under plots/ + backfilled CHANGELOG.md; iter10 added
       Phase 2c sink control; iter11 added bootstrap 95% CIs (fig10) + reconciled the un-persisted
-      Phase 2c into both deliverables + added the rule-8 Methods LaTeX section to REPORT.md)
+      Phase 2c into both deliverables + added the rule-8 Methods LaTeX section to REPORT.md;
+      iter12 in-context discrimination (fig11); iter13 manifold repair (fig12); iter14 Phase-6b CIs
+      (fig13); iter15 Phase 7 steering preservation (fig14) — 5-claim ladder fully verdicted, re-finalized)
 
 ## On-track check (required every iteration)
 End each JOURNAL.md entry with one line:
 `On track? <yes/no> — <stage, % done, blocker if any>`.
 
-## Current status (after iter14 — PAIRED-BOOTSTRAP CIs on the Phase-6b manifold-repair KL deltas)
+## Current status (after iter15 — Phase 7 STEERING preservation; claim 5 = NO, last stage S9 closed)
+Iter15 closed S9, the ONLY previously-unchecked stage, completing the 5-claim ladder. `experiments/
+steering_repair.py` (in-context forward hook, N=200 FineWeb prompts, 30k real-train kNN manifold) built a
+REAL difference-of-means (contrastive activation addition) sentiment steering vector (‖v‖=15, strong
+steer ‖αv‖≈70 vs clean-norm 88), decomposed the vocab-mean-centred logit change into achieved effect
+E=⟨ΔL,d̂⟩ and off-target collateral C=‖ΔL−E·d̂‖, then compared at MATCHED E the Phase-6b kNN
+manifold-projection step vs the "merely shrink alpha" control vs a matched-size random move. **Result =
+well-controlled NULL for claim 5:** shrink-alpha Pareto-DOMINATES the manifold step on every
+output-validity metric (E=145: C 148 vs 212, KL-from-clean 0.31 vs 0.69, entropy 3.73 vs 4.15); the
+manifold step only reduces distance-to-manifold (knn_dist 60 vs 75 — its own objective), which does NOT
+buy output validity. It still beats a matched-size random move (Phase-6b "valid direction vs random"
+intact), but Direction-1's control is alpha-shrink. Reason for the flip vs Phase-6b: that win was on
+*unstructured* corruption; a steering edit is *structured* along v and the cheapest faithful tradeoff is
+to shrink α (walk back along −v), which the direction-agnostic kNN step can't beat. New fig14. Curated
+RESULTS.md (Phase 7 section+table+fig14, Headline claim-5 verdict NOT-TESTED→NO), REPORT.md (E/C Methods
+equation, fig14, Verdict bullet, Direction-1 Implications paragraph, Reproduce/Figures), appended
+CHANGELOG. REPORT display equations 8→9 (all render js-display-math, 0 degraded). No prior numbers
+changed. **All 5 claims now verdicted; project complete.** Env note: transformers reinstalled --no-deps
+(5.12.1 + tokenizers 0.22.1 + hf_hub 1.21.0 + httpx chain); torch/numpy unchanged; PIL used for fig14
+(no matplotlib). Remaining future work: a READOUT-CONSTRAINED manifold projection (fix E, denoise the
+orthogonal complement) is the one correction that could still beat alpha-shrink; Phase-7 across
+concepts/layers/coefficients; in-context-PROCESS negatives; cross-model transfer.
+
+## (prior) Current status (after iter14 — PAIRED-BOOTSTRAP CIs on the Phase-6b manifold-repair KL deltas)
 Iter14 closed the last listed statistical-rigor gap: the iter13 claim-4 upgrade rested on point
 estimates over N=300 prompts. Added per-prompt KL persistence to `manifold_repair.py` (re-ran, table
 reproduces iter13 exactly) and `experiments/manifold_repair_ci.py` — a PAIRED bootstrap (B=5000 over
@@ -664,15 +693,18 @@ layer (AUROC ≈ 0.44–0.54 ≈ chance) — decisive evidence (H1) that realnes
 and local density. Phase 4 LOFO: learned discriminative detectors do NOT generalize (< kNN). So the
 generalizing statistical signal is one-class density, and it has a HARD CEILING at `interp`/`tangent_pert`.
 
-## Next step (UPDATED iter14 — all five claims verdicted + claim 4 now CI-backed; project complete)
-The 5-claim ladder is fully answered: (1) discrimination YES via multi-axis score, (2) generalization
-PARTIAL, (3) prediction PARTIAL/YES (functional axis), (4) causality SCORE-DEPENDENT — scalar-score
-descent fails but a fractional kNN manifold-projection step partially succeeds, now with 95%-CI
-significance (iter13 Phase 6b + iter14 paired-bootstrap CIs), (5) steering NOT tested but its objective
-is identified (the Phase-6b manifold step). Deliverable is curated + figure-complete (13 figs) +
-rule-8/8a/8b compliant. Re-creating STOP. Highest-value future work if resumed: apply the Phase-6b
-manifold-projection step to a REAL Direction-1 steering vector at matched achieved effect (closes S9,
-the only unchecked stage), then trust-region / step-size auto-selection (line search).
+## Next step (UPDATED iter15 — all five claims verdicted incl. steering; project complete)
+The 5-claim ladder is now FULLY answered and every stage S1–S10 is checked: (1) discrimination YES via
+multi-axis score, (2) generalization PARTIAL, (3) prediction PARTIAL/YES (functional axis), (4) causality
+SCORE-DEPENDENT — scalar-score descent fails but a fractional kNN manifold-projection step partially
+succeeds, 95%-CI backed (iter13/14), (5) steering **NO** — the Phase-6b manifold step does NOT preserve
+the intended steering effect better than simply shrinking alpha; shrink-alpha Pareto-dominates it on all
+output-validity metrics at matched effect (iter15 Phase 7). Deliverable is curated + figure-complete
+(14 figs) + rule-8/8a/8b compliant. Re-creating STOP. Highest-value future work if resumed: a
+READOUT-CONSTRAINED manifold projection (project onto the real manifold within the affine subspace that
+fixes E) — the only correction that could still beat alpha-shrink for steering; then Phase-7 across
+concepts/layers/coefficients and nonlinear steering vectors; in-context-PROCESS negatives; cross-model
+transfer.
 
 ### (history, iter4) Next step — core verdict reached; remaining work optional strengthening + REPORT
 Iter4 ran the functional probe: on `interp` (≈chance for all stats) entropy/plateau_kl reach ~0.61,

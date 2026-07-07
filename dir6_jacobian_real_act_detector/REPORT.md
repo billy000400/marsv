@@ -95,12 +95,30 @@ indices, shared across methods since each method's KL is measured on the same pr
 delta $\Delta = \mathrm{KL}(\text{reference}) - \mathrm{KL}(\text{kNN step})$; a step is significantly
 better when the CI of $\Delta$ excludes $0$.
 
+**Steering preservation** (Phase 7). The steering vector is a difference-of-means (contrastive
+activation addition) of the last-token resid@L6 over 20 positive- vs 20 negative-sentiment sentences,
+$v=\bar{x}^{+}-\bar{x}^{-}$; steering adds $x_s=x_0+\alpha v$ at a fixed strong $\alpha$ (with
+$\lVert\alpha v\rVert\approx 0.8\lVert x_0\rVert$). The output change is decomposed in vocab-mean-centred
+logit space $\Delta L=f(x)-f(x_0)$ along the linear readout direction $\hat d$ (the normalized per-prompt
+response of steering in the small-$\alpha$ regime) into the **achieved effect** and **off-target
+collateral**:
+
+```math
+E(x)=\langle \Delta L,\hat d\rangle,\qquad C(x)=\lVert \Delta L - E(x)\,\hat d\rVert,\qquad \hat d=\frac{f(x_0+\alpha_s v)-f(x_0)}{\lVert f(x_0+\alpha_s v)-f(x_0)\rVert}.
+```
+
+Higher $E$ = more of the intended steering; lower $C$ (and lower KL-from-clean, lower next-token entropy)
+= better validity. At *matched* $E$, the manifold step $x_t$ is compared against the shrink-alpha control
+$x_0+f\alpha v$ (walk back along $-v$) and a matched-size random move. Claim 5 succeeds only if the
+manifold step reaches an $E$ with strictly lower off-target $C$ than shrink-alpha at the same $E$.
+
 ## Figures
 Figures 1–8 are rendered from cached result CSVs by `experiments/make_plots.py` (pure PIL); figure 9
 (Phase 2c) by `experiments/plot_fig9.py`, figure 10 (bootstrap CIs) by `experiments/bootstrap_ci.py`,
 figure 11 (Phase 3c in-context discrimination) by `experiments/plot_fig11.py`, figure 12 (Phase 6b
 manifold-projection repair) by `experiments/plot_fig12.py`, and figure 13 (Phase 6b paired-bootstrap
-CIs) by `experiments/plot_fig13.py` (matplotlib) — all from the cached `results/*.csv`.
+CIs) by `experiments/plot_fig13.py` (matplotlib), and figure 14 (Phase 7 steering repair) by
+`experiments/plot_fig14.py` (pure PIL) — all from the cached `results/*.csv`.
 
 ![Phase 2 baseline AUROC by family @ L6](plots/fig1_baselines_L6.png)
 ![Phase 2b baseline AUROC heatmap @ L6 (interp defeats every statistic)](plots/fig3_baselines_L6_heatmap.png)
@@ -115,6 +133,7 @@ CIs) by `experiments/plot_fig13.py` (matplotlib) — all from the cached `result
 ![Phase 3c in-context vs out-of-context plateau-KL discrimination](plots/fig11_incontext_discrimination.png)
 ![Phase 6b manifold-projection repair: KL vs move, kNN direction vs matched random](plots/fig12_manifold_repair.png)
 ![Phase 6b paired-bootstrap 95% CIs on the manifold-repair KL deltas](plots/fig13_manifold_repair_ci.png)
+![Phase 7 steering repair: manifold projection vs shrinking alpha at matched achieved effect](plots/fig14_steering_repair.png)
 
 ## Key results
 1. **No single statistic is "realness."** Norm is a shortcut (AUROC 0.50 on the two norm-matched
@@ -236,8 +255,15 @@ survive the correction:**
   scalar-score failure is the score, not the optimizer. Net: these realness *scalars* are valid
   detectors/predictors but invalid causal objectives, whereas a small manifold-projection step is a
   valid (if incomplete) one.
-- **Steering preservation — NOT TESTED**, but (4)'s failure implies a steering-repair regularizer built
-  on these scalar scores would degrade behavior; a usable objective must respect the data shell.
+- **Steering preservation — NO (well-controlled null, Phase 7).** Applied to a real difference-of-means
+  steering vector at matched achieved effect $E$, the Phase-6b manifold-projection step does NOT preserve
+  the intended effect better than simply shrinking the steering coefficient: shrink-alpha has lower
+  off-target collateral $C$ (e.g. at $E{=}145$: 148 vs 212), lower KL-from-clean (0.31 vs 0.69) and lower
+  entropy (3.73 vs 4.15). The manifold step only reduces distance-to-manifold (its own objective), which
+  does not buy output validity. It still beats a matched-size *random* move (so the Phase-6b "valid
+  direction vs random" result holds), but Direction-1's control is alpha-shrink, and alpha-shrink
+  Pareto-dominates. The manifold repair is useful for *unstructured* corruption, not for *structured*
+  steering edits.
 - **H1 — SUPPORTED.** Real activations carry geometric (shell-distance) and functional (model-sensitivity)
   structure beyond first/second moments. The effect is real but smaller and more orientation-dependent
   than a naive "interpolations fool everything" reading; the honest framing is that statistics need a
@@ -275,6 +301,18 @@ manifold-projection step, NOT a scalar-score penalty and NOT a full projection. 
 must still be evaluated against in-context downstream KL at *matched achieved steering effect*, with
 reward-hacking checked via metrics outside the objective.
 
+**Phase 7 tests exactly that, and delivers a cautionary null.** Applied to a real difference-of-means
+steering vector at matched achieved effect, the Phase-6b manifold step does *not* beat the trivial
+control of shrinking the steering coefficient — shrink-alpha has strictly lower off-target collateral,
+KL-from-clean, and entropy at every matched effect. The reason is structural: Phase-6b's manifold repair
+excels when the corruption is *unstructured* (random noise has no direction to walk back along), but a
+steering edit is *structured* along $v$, and the cheapest faithful validity/effect tradeoff is to shrink
+$\alpha$ (walk back along $-v$), which the direction-agnostic kNN step cannot beat. The practical
+Direction-1 takeaway is therefore the opposite of a naive "project steered activations onto the
+manifold" recipe: for a *linear* steering vector, coefficient scaling is already the better control, and
+a manifold-aware correction would need to be *readout-constrained* (preserve $E$ while denoising the
+orthogonal complement) to have any chance of beating it — an open direction.
+
 ## Reproduce
 `experiments/mvp_benchmark.py` (Phase 2 L6) · `position_stratified.py` (Phase 2c sink-confound control,
 doc-level split) · `train_detectors.py` (LOFO detectors) ·
@@ -284,7 +322,8 @@ doc-level split) · `train_detectors.py` (LOFO detectors) ·
 `context_validation_v2.py` (Phase-5 CORRECTED
 in-context prediction) · `causal_repair_v2.py` (Phase-6 CORRECTED in-context scalar-score causal repair,
 negative result) · `manifold_repair.py` (Phase-6b kNN manifold-projection repair, partial positive) ·
-`manifold_repair_ci.py` (Phase-6b paired-bootstrap CIs on the KL deltas) · `plot_fig12.py`/`plot_fig13.py`
-(figs 12–13). The pre-correction single-position versions (`context_validation.py`, `causal_repair.py`) are
+`manifold_repair_ci.py` (Phase-6b paired-bootstrap CIs on the KL deltas) ·
+`steering_repair.py` (Phase-7 steering-preservation: manifold vs shrink-alpha) · `plot_fig12.py`/`plot_fig13.py`/`plot_fig14.py`
+(figs 12–14). The pre-correction single-position versions (`context_validation.py`, `causal_repair.py`) are
 retained for provenance. Results in `results/*.csv`, `results/*.json` (the `_v2` files are canonical
 for Phases 5/6).

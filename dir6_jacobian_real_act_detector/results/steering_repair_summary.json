@@ -1,0 +1,233 @@
+{
+  "layer": 6,
+  "n": 200,
+  "n_train": 30000,
+  "k": 16,
+  "alpha_full": 4.696957111358643,
+  "a_small_frac": 0.12,
+  "steer_vec_norm": 15.003890037536621,
+  "clean_norm": 88.09078216552734,
+  "cols": [
+    "E_effect",
+    "C_offtarget",
+    "entropy",
+    "KL_from_clean",
+    "knn_dist",
+    "dist_to_mean",
+    "move"
+  ],
+  "rows": [
+    {
+      "method": "steered(full)",
+      "E_effect": 182.4175,
+      "C_offtarget": 282.3147,
+      "entropy": 4.1744,
+      "KL_from_clean": 0.9362,
+      "knn_dist": 94.1749,
+      "dist_to_mean": 97.1001,
+      "move": 70.4726
+    },
+    {
+      "method": "alpha_shrink(f=0.00)",
+      "E_effect": 0.0,
+      "C_offtarget": 0.0,
+      "entropy": 3.5356,
+      "KL_from_clean": 0.0,
+      "knn_dist": 63.1734,
+      "dist_to_mean": 66.9383,
+      "move": 0.0
+    },
+    {
+      "method": "alpha_shrink(f=0.15)",
+      "E_effect": 41.4219,
+      "C_offtarget": 2.0426,
+      "entropy": 3.5303,
+      "KL_from_clean": 0.0107,
+      "knn_dist": 64.04,
+      "dist_to_mean": 67.7225,
+      "move": 10.5709
+    },
+    {
+      "method": "alpha_shrink(f=0.30)",
+      "E_effect": 81.7589,
+      "C_offtarget": 27.6831,
+      "entropy": 3.5423,
+      "KL_from_clean": 0.0484,
+      "knn_dist": 66.6147,
+      "dist_to_mean": 70.1306,
+      "move": 21.1418
+    },
+    {
+      "method": "alpha_shrink(f=0.45)",
+      "E_effect": 121.2032,
+      "C_offtarget": 89.0354,
+      "entropy": 3.6152,
+      "KL_from_clean": 0.1568,
+      "knn_dist": 70.6759,
+      "dist_to_mean": 73.9958,
+      "move": 31.7127
+    },
+    {
+      "method": "alpha_shrink(f=0.60)",
+      "E_effect": 149.2266,
+      "C_offtarget": 157.8116,
+      "entropy": 3.7506,
+      "KL_from_clean": 0.3377,
+      "knn_dist": 75.9561,
+      "dist_to_mean": 79.0969,
+      "move": 42.2836
+    },
+    {
+      "method": "alpha_shrink(f=0.75)",
+      "E_effect": 164.6007,
+      "C_offtarget": 209.3396,
+      "entropy": 3.9191,
+      "KL_from_clean": 0.5349,
+      "knn_dist": 82.202,
+      "dist_to_mean": 85.2075,
+      "move": 52.8545
+    },
+    {
+      "method": "alpha_shrink(f=0.90)",
+      "E_effect": 175.4731,
+      "C_offtarget": 253.4658,
+      "entropy": 4.0739,
+      "KL_from_clean": 0.7601,
+      "knn_dist": 89.1913,
+      "dist_to_mean": 92.1249,
+      "move": 63.4254
+    },
+    {
+      "method": "alpha_shrink(f=1.00)",
+      "E_effect": 182.4175,
+      "C_offtarget": 282.3147,
+      "entropy": 4.1744,
+      "KL_from_clean": 0.9362,
+      "knn_dist": 94.1749,
+      "dist_to_mean": 97.1001,
+      "move": 70.4726
+    },
+    {
+      "method": "manifold(t=0.10)",
+      "E_effect": 176.1457,
+      "C_offtarget": 267.7701,
+      "entropy": 4.1691,
+      "KL_from_clean": 0.8725,
+      "knn_dist": 86.9476,
+      "dist_to_mean": 89.626,
+      "move": 63.9146
+    },
+    {
+      "method": "random(t=0.10-matched)",
+      "E_effect": 181.5561,
+      "C_offtarget": 283.3938,
+      "entropy": 4.1641,
+      "KL_from_clean": 0.9444,
+      "knn_dist": 94.5028,
+      "dist_to_mean": 97.4277,
+      "move": 70.9317
+    },
+    {
+      "method": "manifold(t=0.20)",
+      "E_effect": 170.1411,
+      "C_offtarget": 254.8647,
+      "entropy": 4.1667,
+      "KL_from_clean": 0.8196,
+      "knn_dist": 79.881,
+      "dist_to_mean": 82.3029,
+      "move": 57.8047
+    },
+    {
+      "method": "random(t=0.20-matched)",
+      "E_effect": 180.0647,
+      "C_offtarget": 287.3774,
+      "entropy": 4.167,
+      "KL_from_clean": 0.967,
+      "knn_dist": 95.539,
+      "dist_to_mean": 98.4542,
+      "move": 72.3465
+    },
+    {
+      "method": "manifold(t=0.35)",
+      "E_effect": 160.8341,
+      "C_offtarget": 237.1922,
+      "entropy": 4.172,
+      "KL_from_clean": 0.7605,
+      "knn_dist": 69.6875,
+      "dist_to_mean": 71.6997,
+      "move": 49.8212
+    },
+    {
+      "method": "random(t=0.35-matched)",
+      "E_effect": 176.7306,
+      "C_offtarget": 298.3837,
+      "entropy": 4.197,
+      "KL_from_clean": 1.0252,
+      "knn_dist": 98.3689,
+      "dist_to_mean": 101.2541,
+      "move": 76.1321
+    },
+    {
+      "method": "manifold(t=0.50)",
+      "E_effect": 145.2836,
+      "C_offtarget": 211.798,
+      "entropy": 4.1534,
+      "KL_from_clean": 0.6902,
+      "knn_dist": 60.206,
+      "dist_to_mean": 61.7557,
+      "move": 43.8827
+    },
+    {
+      "method": "random(t=0.50-matched)",
+      "E_effect": 172.3968,
+      "C_offtarget": 314.4188,
+      "entropy": 4.2497,
+      "KL_from_clean": 1.1106,
+      "knn_dist": 102.614,
+      "dist_to_mean": 105.4539,
+      "move": 81.6536
+    },
+    {
+      "method": "manifold(t=0.75)",
+      "E_effect": 89.473,
+      "C_offtarget": 208.4108,
+      "entropy": 4.3974,
+      "KL_from_clean": 0.908,
+      "knn_dist": 47.134,
+      "dist_to_mean": 47.7383,
+      "move": 40.6815
+    },
+    {
+      "method": "random(t=0.75-matched)",
+      "E_effect": 163.8936,
+      "C_offtarget": 348.0504,
+      "entropy": 4.3715,
+      "KL_from_clean": 1.3093,
+      "knn_dist": 112.3763,
+      "dist_to_mean": 115.1254,
+      "move": 93.836
+    },
+    {
+      "method": "manifold(t=1.00)",
+      "E_effect": 37.0506,
+      "C_offtarget": 282.2732,
+      "entropy": 4.7671,
+      "KL_from_clean": 1.6425,
+      "knn_dist": 40.4573,
+      "dist_to_mean": 39.9691,
+      "move": 47.1561
+    },
+    {
+      "method": "random(t=1.00-matched)",
+      "E_effect": 154.5657,
+      "C_offtarget": 385.8471,
+      "entropy": 4.5167,
+      "KL_from_clean": 1.5596,
+      "knn_dist": 124.783,
+      "dist_to_mean": 127.4562,
+      "move": 108.6276
+    }
+  ],
+  "method": "in-context forward hook; diff-of-means steering; kNN manifold repair vs alpha-shrink",
+  "elapsed_s": 52.7
+}

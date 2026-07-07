@@ -4,6 +4,24 @@ Append-only. Records changes to the deliverables (RESULTS.md / REPORT.md) with o
 
 ---
 
+## 2026-07-07 — Phase 7 STEERING preservation: manifold repair vs shrink-alpha (claim 5) (iter15)
+Closed the last unchecked stage (S9). Applied the Phase-6b kNN manifold-projection repair to a REAL
+difference-of-means (contrastive activation addition) steering vector at MATCHED achieved effect and
+compared it to the "merely shrink alpha" control the PLAN demanded. New `experiments/steering_repair.py`
+(in-context forward hook, N=200 FineWeb prompts, 30k real-train kNN manifold, sentiment steering vector
+‖v‖=15, strong steer ‖αv‖≈70 vs clean-norm 88) + `plot_fig14.py` (fig14).
+- **Deliverable change:** claim 5 verdict **"NOT TESTED" → "NO (well-controlled null)"** in both
+  RESULTS.md (new Phase 7 section + table + fig14 + updated Headline verdict) and REPORT.md (new
+  steering-preservation Methods equation for E/C decomposition, fig14, Verdict bullet rewritten,
+  Implications-for-Direction-1 paragraph added, Reproduce + Figures updated).
+- **Numbers:** at matched achieved effect E, shrink-alpha Pareto-dominates the manifold step on every
+  output-validity metric — e.g. at E=145: off-target collateral C 148 (shrink) vs 212 (manifold),
+  KL-from-clean 0.31 vs 0.69, entropy 3.73 vs 4.15. Manifold only wins on distance-to-manifold (its own
+  objective, knn_dist 60 vs 75). Manifold still beats a matched-size RANDOM move (fig14, gray>red), so
+  the Phase-6b "valid direction vs random" result is unchanged; the new finding is that alpha-shrink is a
+  strictly better control for *structured* steering edits.
+- No prior numbers changed. REPORT display equations: 8 → 9 (all render as js-display-math; 0 degraded).
+
 ## 2026-07-02 — Paired-bootstrap 95% CIs on the Phase-6b manifold-repair KL deltas (iter14)
 Put statistical rigor under iter13's claim-4 upgrade, which rested on point estimates over N=300 prompts.
 Added per-prompt KL persistence to `manifold_repair.py` (new `manifold_repair_perprompt_kl.npz`) and a
