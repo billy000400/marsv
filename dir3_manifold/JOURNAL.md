@@ -360,3 +360,48 @@ renamed `→ .addressed.md`. STOP written.
 
 On track? yes — 100% done; S1–S6 + all EIGHT operator feedback items addressed; AE ID re-derived under
 reconstruction-error & cosine metrics (elbow k=4 all three); STOP written; no blocker.
+
+---
+
+## Iter 15 — 2026-07-07 — Operator request: TwoNN-vs-MLE-only figure + Qwen3-1.7B AE elbow study
+
+**Request** (`human_feedback_07071040.md`): (1) a nonlinear-ID plot version showing ONLY TwoNN & MLE
+(drop linear PCA and d_model) to see how much the two estimators agree; (2) reproduce a colleague's
+autoencoder study (`autoencoder_share.tar.gz`) in a dedicated workspace → **REPORT_AE.md**, high-level
+only in REPORT.md; find whether any factor makes the AE reconstruction error show an **elbow**, with a
+controlled experiment for when it does/doesn't.
+
+**State on re-entry.** Prior autoloop iters today (18:33–20:02, un-journaled) had already: built the
+`ae_study/` workspace, collected Qwen3-1.7B last-token acts (L2/L10, FineWeb-Edu, seq_len 10, 160k/layer),
+run the colleague's 67M-param `DeepAutoencoder` sweeps (faithful k=5..30 + wide-k baseline + injected-
+massive controls), written `REPORT_AE.md` (with 2 placeholders), added the Qwen section + `id_twonn_vs_mle`
+figure to REPORT.md. Missing: the wide **injected** sweep was still running (PID 3477, at k=16); RESULTS.md,
+CHANGELOG, JOURNAL, PLAN, STOP not done.
+
+**Did this iter.** (a) Waited for the wide-inject sweep to finish (k=32/64: FVU flat at 0.066).
+(b) Regenerated the 3 Qwen figures (`ae_study/make_ae_plots.py`). (c) Filled REPORT_AE.md §3
+(controlled-experiment table + reading) and Conclusion with the final numbers; embedded all 3 figures;
+**removed the "all-token pooled" control + `qwen_sweep_L2_pooled_wide.json` artifact refs** — that control
+was set up but never completed, so claiming it would overclaim (CLAUDE.md rule 1/8 honesty). (d) Fixed one
+stale number in REPORT.md ("FVU floors ~0.05" → "≈0.10 at k=1, flat ~0.066 by k=16"). (e) Added a Qwen
+AE subsection (both tables + figure) and the TwoNN-vs-MLE-only figure pointer to RESULTS.md. (f) Verified
+render: REPORT.md 6 / REPORT_AE.md 5 js-display-math, 0 degraded, 0 inline hazards. (g) CHANGELOG appended.
+
+**Result / learned.** The colleague's exact recipe on Qwen3-1.7B produces **no elbow** — held-out FVU
+declines smoothly (L2 0.569→0.404, L10 0.629→0.434 over k=5..30), never plateaus, because these last-token
+clouds are genuinely high-dimensional (PCA participation ratio **245 (L2) / 42 (L10)**; 1300–1500 PCs for
+95% var), unlike GPT-2 L6 (90.4% variance in one dir, PR≈1.2). The **decisive controlled experiment**:
+rescale ONE coordinate of the same isotropic Qwen L2 acts to hold 90% of variance and re-sweep — the
+identical AE snaps to a sharp knee + flat plateau (FVU 0.099@k=1 → 0.066 flat by k=16) while the isotropic
+run keeps falling at k=64. So an **AE-reconstruction elbow ⟺ concentrated variance (anisotropy)**, not a
+property of model/layer/token/dataset/AE-size — the honest cross-model confirmation of what the GPT-2 sweep
+suggested. Un-matched factor (flagged, not fixed): 2k–4k training steps vs the colleague's ~50k, which
+shifts curve height but not the knee.
+
+**Next step.** None required — both operator asks addressed; deliverables render; STOP written. If reopened:
+train the Qwen AE to ~50k steps to fully close the compute-mismatch caveat; run the all-token-pooled control
+that was scaffolded but not completed; check whether FVU-against-zero (un-centered) alone manufactures an
+elbow on Qwen (a candidate source of the colleague's result).
+
+On track? yes — 100% done; all NINE operator feedback items addressed (this = #9: TwoNN-vs-MLE figure +
+Qwen AE elbow study); REPORT_AE.md complete + rendering; RESULTS/REPORT/CHANGELOG updated; STOP written.

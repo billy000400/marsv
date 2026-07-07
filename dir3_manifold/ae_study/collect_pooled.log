@@ -1,0 +1,4 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 33832.93it/s]
+[7s] 16064 seqs -> up to 160640 pooled
+[84s] saved acts_qwen_L2_pooled.npy (160000, 2048)

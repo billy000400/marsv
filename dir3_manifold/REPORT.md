@@ -258,7 +258,7 @@ GPT-2. **Full study in `REPORT_AE.md`; the high-level result:**
   bottleneck cannot plateau on data this spread out.
 - **A single factor switches the elbow on.** Taking the *same* isotropic Qwen activations and rescaling
   one coordinate to carry 90% of the variance (matching GPT-2's structure) makes the identical AE snap
-  to a **sharp low-k knee with a flat plateau** (FVU floors at ~0.05). So the elbow is a readout of
+  to a **sharp low-k knee with a flat plateau** (FVU ≈ 0.10 at k = 1, flat at ~0.066 by k = 16). So the elbow is a readout of
   **variance concentration (anisotropy)**, not of model, layer, token position, dataset, or AE size.
 
 This confirms cross-model what the GPT-2 sweep already suggested: the AE "elbow" tracks the dominant

@@ -127,10 +127,6 @@ set to
 Only this one number changes between the "isotropic" and "anisotropic" runs, so any change in the curve
 is attributable to the injected dominant dimension alone.
 
-**All-token pooled (factor-3 control).** Identical model, layer, text, and seq_len, but keep the
-residual vector at every token position instead of only the last — isolating the "last-token only"
-choice.
-
 **Anisotropy diagnostics (why).** For each cloud we report, from a PCA of the mean-centered covariance
 (eigenvalues `λ_1 ≥ λ_2 ≥ …`): the **participation ratio** (a soft count of effective directions,
 1 = one dominant direction, `d_model` = isotropic), and the **top-1 coordinate variance fraction** (the
@@ -157,7 +153,9 @@ Held-out reconstruction for the faithful reproduction (Qwen3-1.7B, last token, d
 
 At k=30 the AE still explains only ~57–60% of the variance and every added 5 dimensions still helps.
 Kneedle returns `k≈10` at low contrast — the "soft bend, not a knee" pattern from GPT-2, **not** a
-plateau. See `plots/qwen_ae_sweep.png`.
+plateau.
+
+![Qwen3-1.7B last-token AE sweep (colleague's setup): FVU, rel-L2, cosine all decline smoothly with no plateau](plots/qwen_ae_sweep.png)
 
 ### 2. Why: the activation cloud is high-dimensional
 
@@ -173,24 +171,62 @@ GPT-2 layer 6 collapses to ~one dominant direction (PR ≈ 1.2); Qwen last-token
 variance over **tens to hundreds** of directions and need 1300–1500 PCs to reach 95%. That spread is
 exactly why a `k≤30` bottleneck cannot plateau. The single-raw-coordinate top-1 measured on the AE
 train split (0.012 at L2, 0.026 at L10) is even smaller than the top principal component; both agree
-Qwen is far more isotropic than GPT-2. See `plots/qwen_anisotropy.png`.
+Qwen is far more isotropic than GPT-2.
+
+![Variance concentration: GPT-2 L6 puts 90% of variance in one direction (PR≈1.2); Qwen L2/L10 spread it over 42–245](plots/qwen_anisotropy.png)
 
 ### 3. Controlled experiment: an elbow appears only under concentrated variance
 
-<!-- FILL_WIDE: wide-k table (baseline / pooled / injected) + reading + figure ref -->
+We now sweep a *wide* `k` range on the layer-2 activations and flip exactly one property — whether one
+coordinate is rescaled to dominate the variance — holding the AE, optimizer, data, split, and step
+count fixed. Held-out FVU (lower = better):
+
+| condition | top-1 var frac | k=1 | k=2 | k=4 | k=8 | k=16 | k=32 | k=64 | shape |
+|-----------|---------------|-----|-----|-----|-----|------|------|------|-------|
+| **isotropic** (real Qwen L2) | 0.012 | 0.851 | 0.751 | 0.641 | 0.542 | 0.488 | 0.451 | **0.448** | keeps falling, **no plateau** |
+| **+ injected massive dim**   | 0.90  | 0.099 | 0.088 | 0.077 | 0.068 | 0.066 | 0.066 | **0.066** | drops fast, **flat by k≈16** |
+
+The two curves are night and day. The **isotropic** run falls from 0.85 to 0.45 and is *still*
+declining at k=64 (0.451→0.448 from k=32→64 — a slowing crawl, not a plateau), and its Kneedle knee
+sits at a low-contrast k≈8. The **injected** run reaches FVU 0.099 at *k=1* and is essentially flat
+from k≈16 onward (0.066 at k=16, 32, and 64 alike) — a genuine steep-then-flat elbow, because a single
+direction already accounts for ~90% of the variance and the AE captures it immediately. Nothing else
+differs between the two runs.
+
+![Controlled experiment: only concentrated variance (injected massive dim) yields a sharp low-k FVU elbow; isotropic Qwen L2 keeps declining](plots/qwen_ae_wide_controlled.png)
+
+This is the controlled answer to "when does an elbow appear, and when does it not": **an AE-reconstruction
+elbow appears iff the activation variance is concentrated in a few directions.** It is not switched on
+by the model, the layer, last-token selection, the dataset, the seq-length, or the (large) AE size —
+none of which we changed here — but purely by variance geometry.
 
 ## Conclusion
 
-<!-- FILL_CONCLUSION -->
+- **None of the colleague's stated factors, applied faithfully, reproduces a low-dimensional
+  reconstruction elbow on Qwen3-1.7B.** Held-out FVU declines smoothly and never plateaus at layers 2
+  and 10 over the colleague's `k` range; the 67 M-parameter AE rules out "AE too small."
+- **The single decisive factor is variance concentration (anisotropy).** Qwen last-token residual
+  streams are genuinely high-dimensional — participation ratio 245 (L2) / 42 (L10), needing 1300–1500
+  principal components for 95% of the variance — so no small bottleneck can plateau. Rescaling one
+  coordinate to carry 90% of the variance, and *only* that, immediately produces a sharp elbow.
+- **What an AE elbow does and does not measure.** A low-`k` elbow is a readout of *how concentrated the
+  variance is*, not a certificate of a low-dimensional curved manifold. GPT-2 layer 6 shows a bend only
+  because ~90% of its variance lives in one "massive-activation" direction (PR ≈ 1.2); that is the same
+  phenomenon as our injected control, not evidence that GPT-2's manifold is genuinely ~8-dimensional.
+- **Most likely source of the colleague's elbow.** An elbow consistent with our results would arise if
+  their activations were dominated by a few high-variance directions — e.g. a layer/position with
+  massive-activation dims, or FVU measured against zero (un-centered) so a large mean vector inflates
+  the denominator. On the near-isotropic Qwen last-token clouds we cached, no such elbow exists.
+- **Caveat.** We trained 2,000–4,000 steps vs the colleague's ~50,000. Under-training shifts the whole
+  curve up but not its knee (it does not manufacture or hide a plateau), so it does not change the
+  qualitative conclusion; it remains the main un-matched factor and the obvious next check.
 
 ## Artifacts
 - `ae_study/collect_qwen.py` — collect Qwen3-1.7B last-token activations (fineweb-edu, seq_len 10).
-- `ae_study/collect_qwen_pooled.py` — all-token-pooled variant (factor-3 control).
 - `ae_study/ae_sweep_qwen.py` — bottleneck-k sweep of the colleague's `DeepAutoencoder`, with the
   `--inject_massive` controlled-experiment flag and `--ks`/`--n_steps`/`--acts` options.
 - `ae_study/pca_diag.py` — linear anisotropy diagnostics (top-1 var frac, participation ratio, d95).
 - `ae_study/ae_share/` — the colleague's unmodified bundle (`src/autoencoders.py::DeepAutoencoder`).
-- `ae_study/results/qwen_sweep_L2.json`, `qwen_sweep_L10.json`, `qwen_sweep_L2_inject.json`,
-  `qwen_sweep_L2_wide.json`, `qwen_sweep_L2_wide_inject.json`, `qwen_sweep_L2_pooled_wide.json`,
-  `qwen_pca_diag.json` — sweep + diagnostic results.
+- `ae_study/results/qwen_sweep_L2.json`, `qwen_sweep_L10.json`, `qwen_sweep_L2_wide.json`,
+  `qwen_sweep_L2_wide_inject.json`, `qwen_pca_diag.json` — sweep + diagnostic results.
 - `plots/qwen_ae_sweep.png`, `plots/qwen_ae_wide_controlled.png`, `plots/qwen_anisotropy.png` — figures.

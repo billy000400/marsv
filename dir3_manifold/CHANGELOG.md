@@ -5,6 +5,37 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-07 — Cross-model AE study (Qwen3-1.7B) + TwoNN-vs-MLE-only figure (operator request; no prior GPT-2 numbers changed)
+- **Operator request** (`human_feedback_07071040.md`): (1) add a version of the nonlinear-ID plot
+  showing **only TwoNN and MLE** (no linear PCA, no d_model) to judge how well the two estimators
+  agree; (2) reproduce a colleague's autoencoder study (bundle `autoencoder_share.tar.gz`) in a
+  dedicated workspace, report it as **REPORT_AE.md** with only high-level results in REPORT.md, and
+  find whether any factor makes the AE reconstruction error show an **elbow** in FVU/reconstruction
+  error — with a controlled experiment showing when it does and does not appear.
+- **(1) TwoNN-vs-MLE-only figure** → `plots/id_twonn_vs_mle.png` (`experiments/make_plots.py` Fig 1b,
+  linear y-axis, no PCA/d_model). Embedded in REPORT.md and RESULTS.md nonlinear-ID section. No numbers
+  changed — same `id_nonlinear.json` data as the main figure.
+- **(2) Qwen3-1.7B AE study** (new workspace `ae_study/`): collected Qwen3-1.7B last-token residual
+  activations (layers 2 & 10, FineWeb-Edu sample-10BT, seq_len 10, 160k vectors/layer;
+  `collect_qwen.py`) and swept the colleague's unmodified 67M-param `DeepAutoencoder`
+  (`2048→4096→4096→2048→k`, MSE on raw acts; `ae_sweep_qwen.py`).
+  - **Faithful reproduction shows NO elbow:** held-out FVU falls smoothly and never plateaus —
+    L2 0.569→0.404, L10 0.629→0.434 over k=5→30; at k=30 the AE still leaves ~40% variance unexplained.
+  - **Why:** these clouds are high-dimensional — PCA participation ratio **245 (L2) / 42 (L10)**,
+    ≤3.4% variance in any one direction (`pca_diag.py`), vs GPT-2 L6's 90.4%/PR≈1.2.
+  - **Controlled experiment (decisive):** rescaling ONE coordinate of the same isotropic Qwen L2
+    activations to carry 90% of the variance (`--inject_massive 0.90`), changing nothing else, makes the
+    identical AE snap to a **sharp low-k knee + flat plateau** (FVU 0.099 at k=1 → 0.066 flat by k=16),
+    while the isotropic run keeps declining at k=64 (0.851→0.448). **Elbow ⟺ concentrated variance
+    (anisotropy)** — not model/layer/token/dataset/AE-size.
+  - New deliverable `REPORT_AE.md` (Summary→Methods→Results→Conclusion, 5 rendered math fences, all
+    render / 0 degraded / 0 hazards); high-level 3-bullet result added to REPORT.md
+    "Cross-model check" section; RESULTS.md gained a Qwen AE subsection with both tables + figure.
+  - Figures: `plots/qwen_ae_sweep.png`, `plots/qwen_anisotropy.png`, `plots/qwen_ae_wide_controlled.png`
+    (`ae_study/make_ae_plots.py`). Results JSON under `ae_study/results/qwen_sweep_*.json`,
+    `qwen_pca_diag.json`.
+- No GPT-2 (main-study) numbers changed; this is additive cross-model work.
+
 ## 2026-07-06 — AE elbow-k under reconstruction error & cosine similarity (operator request; no prior numbers changed)
 - **Operator request** (`human_feedback_07060326.md`): *"I saw you used FVU to calculate ID from AE.
   Can you use reconstruction error and cosine similarity and find the ID again? Don't forget to

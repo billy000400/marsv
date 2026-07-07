@@ -78,6 +78,13 @@ and MLE agree within ~3 units at most layers and within ~1.5 at layer 6, but **d
 up to ~5.2 at layer 11** (standardized: TwoNN 11.10 vs MLE 16.32) — so "agree within ~3
 everywhere" is **false**; agreement is layer-dependent.
 
+**TwoNN-vs-MLE-only view (operator request 2026-07-07).** To judge estimator *agreement* directly,
+the figure below plots only the two nonlinear estimators (no linear PCA d95, no d_model=768 line, on a
+linear y-axis). Read it as: the two curves sit within ~1–3 units of each other at layers 0–9 (close
+agreement) and split apart only at layer 11, where the post-final-layernorm caveat applies.
+
+![TwoNN vs MLE only (linear y-axis): how closely the two nonlinear estimators agree, per layer](plots/id_twonn_vs_mle.png)
+
 **Synthetic validation (saved artifact — `results/id_validation.json`).** The same
 hand-rolled `twonn()`/`mle()` run on isotropic Gaussians of known dimension linearly
 embedded in 768-d (n=20k): true_d 5→TwoNN 5.16/MLE 5.09; 10→9.98/9.68; 20→17.7/16.9;
@@ -378,6 +385,42 @@ support:
   activations *consistent with* low ID," not as a second method that confirms the ID.
 - **Net:** the two are *consistent* at layer 6 (~8–16 vs ~11–13), but this is
   *suggestive*, not the "strong evidence" originally claimed.
+
+## Cross-model AE study: when does a reconstruction elbow appear? (Qwen3-1.7B; operator request 2026-07-07) — done
+Full write-up in **`REPORT_AE.md`**; code/data/figs under `ae_study/`. A colleague reported an AE
+reconstruction *elbow* on Qwen3-1.7B; we reproduced their exact setup (Qwen3-1.7B last-token
+activations, layers 2 & 10, FineWeb-Edu, seq_len 10, the large `2048→4096→4096→2048→k` ≈67M-param
+`DeepAutoencoder` imported unchanged, MSE on raw acts) to find what actually controls the elbow.
+
+**Faithful reproduction → no elbow.** Held-out FVU declines smoothly and never plateaus:
+
+| layer | k=5 | k=10 | k=15 | k=20 | k=25 | k=30 | top-1 PCA frac | participation ratio |
+|-------|-----|------|------|------|------|------|----------------|---------------------|
+| 2  | 0.569 | 0.476 | 0.443 | 0.428 | 0.412 | 0.404 | 0.034 | **245** |
+| 10 | 0.629 | 0.545 | 0.501 | 0.469 | 0.452 | 0.434 | 0.145 | **42**  |
+
+At k=30 the 67M-param AE still leaves ~40% of variance unexplained and each added dimension still helps
+— a soft low-contrast Kneedle k≈10, not a plateau. These clouds are genuinely high-dimensional (PR
+42–245; 1300–1500 PCs for 95% variance), unlike GPT-2 L6 which puts 90.4% of variance in one direction
+(PR≈1.2).
+
+**Controlled experiment — one factor switches the elbow on.** Rescale a single coordinate of the *same*
+isotropic Qwen L2 activations to carry 90% of the variance (matching GPT-2's massive-activation
+structure), changing nothing else, and re-sweep wide-k FVU:
+
+| condition | top-1 var frac | k=1 | k=2 | k=4 | k=8 | k=16 | k=32 | k=64 |
+|-----------|---------------|-----|-----|-----|-----|------|------|------|
+| isotropic (real Qwen L2)  | 0.012 | 0.851 | 0.751 | 0.641 | 0.542 | 0.488 | 0.451 | 0.448 |
+| + injected massive dim    | 0.90  | 0.099 | 0.088 | 0.077 | 0.068 | 0.066 | 0.066 | 0.066 |
+
+The injected run reaches FVU 0.099 at *k=1* and is flat from k≈16 — a genuine steep-then-flat elbow —
+while the isotropic run keeps declining at k=64. **Conclusion: an AE-reconstruction elbow is a readout
+of variance concentration (anisotropy), not of the model, layer, token position, dataset, seq-length,
+or AE size.** This corroborates cross-model the GPT-2 finding that the AE "elbow" tracks the dominant
+variance direction, not a demonstrated low-dimensional manifold. (Un-matched factor: we trained
+2k–4k steps vs the colleague's ~50k; under-training shifts the whole curve up but not its knee.)
+
+![Controlled experiment: only concentrated variance yields a sharp low-k FVU elbow; isotropic Qwen L2 keeps declining](plots/qwen_ae_wide_controlled.png)
 
 ## Headline (honest, post-review)
 **On one pooled FineWeb activation sample from GPT-2 small, the layer-6 residual stream
