@@ -2,4 +2,6 @@
   self.setter(val)
 layer 2: train torch.Size([144000, 2048]) val torch.Size([16000, 2048]) d=2048 top1_var_frac=0.8999
   k=  1 FVU=0.0992 rel_L2=0.4546 cos=0.8532 (267s)
-  k=  2 FVU=0.0880 rel_L2=0.4179 cos=0.8746 (367s)
+  k=  2 FVU=0.0880 rel_L2=0.4179 cos=0.8746 (537s)
+  k=  4 FVU=0.0770 rel_L2=0.3841 cos=0.8936 (639s)
+  k=  8 FVU=0.0680 rel_L2=0.3543 cos=0.9091 (819s)
