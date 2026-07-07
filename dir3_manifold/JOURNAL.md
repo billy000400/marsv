@@ -405,3 +405,40 @@ elbow on Qwen (a candidate source of the colleague's result).
 
 On track? yes — 100% done; all NINE operator feedback items addressed (this = #9: TwoNN-vs-MLE figure +
 Qwen AE elbow study); REPORT_AE.md complete + rendering; RESULTS/REPORT/CHANGELOG updated; STOP written.
+
+---
+
+## Iter 16 (2026-07-07) — Fixed the broken remote sync (operator `human_feedback_07070207.md`)
+
+**Ask.** "Add the AE study's code, results and reports to GitHub and keep tracking them" + "my REPORT.md
+did not update on the remote and REPORT_AE.md did not show up on the remote."
+
+**Diagnosis.** The files were *already* tracked (REPORT_AE.md + 55 ae_study/ files in HEAD) and committed
+— the problem was purely that the wrapper's auto-`git push` was silently failing, leaving local `main`
+**8 commits ahead of origin/main** for ~20 h (remote tip was another direction's 00:26 commit). Ran the
+push manually: GitHub returned **push-protection rule violation `GH013` — a HuggingFace user access token**
+hardcoded at `ae_study/ae_share/scripts/autoencoder/run_final_eval.sh:16` (the colleague's shared code).
+That is why the wrapper's self-heal (which only handles SSH/auth) never recovered — this is a content
+policy rejection, not an auth failure. Because the push always failed, the token never reached GitHub.
+
+**Fix (git surgery — justified: the wrapper cannot self-heal a secret-scanning rejection, and the operator
+explicitly asked to get these onto the remote).** (1) Redacted the line to `login(token=os.environ.get('HF_TOKEN'))`
+so no secret lives in source. (2) Purged the token from all 8 unpushed commits with
+`git filter-branch --force --index-filter` swapping the offending blob for the redacted one over
+`4e40252..HEAD` (tree-filter timed out on this large repo; index-filter finished in ~52 s). History
+rewrite is safe — none of the 8 commits were ever pushed. (3) Verified the token is gone from every
+rewritten commit and confirmed REPORT_AE.md + 55 ae_study/ files survived. (4) Restored the wrapper's
+stashed WIP and pushed `4e40252..98958a1`.
+
+**Result / learned.** `origin/main == HEAD` (0 ahead / 0 behind); REPORT.md on remote now == local HEAD;
+REPORT_AE.md present on remote; token absent from `origin/main`. Lesson for future iters: when
+"nothing is pushing," check `git rev-list --count origin/main..HEAD` and try a real push — a
+push-protection/secret rejection looks like a stuck loop but is NOT self-healed by the wrapper. No
+research numbers or figures changed; only the secret redaction + history rewrite.
+
+**Next step.** None required. Recommend the operator rotate the leaked HF token (defensive; it never
+reached the remote). If the wrapper commits new ae_study logs each iter, pushes will now succeed since
+the history is clean.
+
+On track? yes — 100% done; operator feedback #10 (remote-sync fix) addressed; remote now carries the
+current-best REPORT.md/REPORT_AE.md/RESULTS.md + full ae_study/ tree; STOP written.

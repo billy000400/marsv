@@ -2,3 +2,10 @@
   self.setter(val)
 layer 2: train torch.Size([144000, 2048]) val torch.Size([16000, 2048]) d=2048 top1_var_frac=0.7169
   k=  1 FVU=0.0001 rel_L2=0.6878 cos=0.6565 (130s)
+  k=  2 FVU=0.0001 rel_L2=0.6464 cos=0.6983 (261s)
+  k=  4 FVU=0.0000 rel_L2=0.6159 cos=0.7262 (392s)
+  k=  8 FVU=0.0000 rel_L2=0.5757 cos=0.7626 (524s)
+  k= 16 FVU=0.0000 rel_L2=0.5588 cos=0.7792 (655s)
+  k= 32 FVU=0.0000 rel_L2=0.5495 cos=0.7887 (787s)
+  k= 64 FVU=0.0000 rel_L2=0.5761 cos=0.7638 (918s)
+elbow: {'val_fvu': 8, 'val_rel_l2': 8, 'val_cos': 8}

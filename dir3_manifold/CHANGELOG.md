@@ -5,6 +5,26 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-07 (Iter 16) — Fixed remote-sync failure: purged a hardcoded secret blocking every push (operator request `human_feedback_07070207.md`; no result numbers changed)
+- **Symptom (operator report):** REPORT.md was not updating on GitHub and REPORT_AE.md never appeared
+  on the remote, even though both were committed locally and the ae_study/ tree was fully tracked.
+- **Root cause:** the wrapper's automatic `git push` was being **rejected by GitHub Push Protection**
+  (rule violation `GH013`), not by SSH/auth (which the wrapper self-heals). The colleague's shared
+  script `ae_study/ae_share/scripts/autoencoder/run_final_eval.sh:16` hardcoded a **HuggingFace user
+  access token**. Push protection refused the whole branch, so all 8 dir3 commits (2026-07-07 18:33 →
+  20:11, including the REPORT.md updates and the new REPORT_AE.md) were stranded local-only for ~20 h
+  while `origin/main` stayed at another direction's 00:26 commit. Because every push failed, the token
+  **never reached the remote** — no public exposure.
+- **Fix:** redacted the line to read the token from the `HF_TOKEN` env var (no secret in source), then
+  purged the token from all 8 unpushed commits via `git filter-branch --index-filter` (blob swap;
+  history rewrite is safe since none were pushed). Verified the token is absent from every rewritten
+  commit and from `origin/main`, then pushed `4e40252..98958a1`. Remote now matches local HEAD:
+  REPORT.md updated, REPORT_AE.md present, all 55 ae_study/ files tracked.
+- **Deliverable impact:** none on numbers/figures — this restored the *availability* of the current-best
+  REPORT.md/REPORT_AE.md/RESULTS.md on the remote. The only source change is the secret redaction.
+- **Follow-up for the operator:** the leaked HF token was a real-looking credential in a colleague's
+  shared file; even though it never hit GitHub, rotating it is the safe default.
+
 ## 2026-07-07 — Cross-model AE study (Qwen3-1.7B) + TwoNN-vs-MLE-only figure (operator request; no prior GPT-2 numbers changed)
 - **Operator request** (`human_feedback_07071040.md`): (1) add a version of the nonlinear-ID plot
   showing **only TwoNN and MLE** (no linear PCA, no d_model) to judge how well the two estimators
