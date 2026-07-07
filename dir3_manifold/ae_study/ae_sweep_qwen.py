@@ -60,8 +60,8 @@ def train_one(acts_train, mu, d_model, k, n_steps, batch, lr, seed):
     sch = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=n_steps)
     n = acts_train.shape[0]
     for step in range(n_steps):
-        idx = torch.randint(0, n, (batch,))
-        b = acts_train[idx].cuda()
+        idx = torch.randint(0, n, (batch,), device=acts_train.device)
+        b = acts_train[idx].float()
         r, _ = ae(b)
         loss = F.mse_loss(r, b)
         opt.zero_grad(); loss.backward(); opt.step(); sch.step()
@@ -99,6 +99,7 @@ def main():
     val = acts[perm[:n_val]].contiguous()
     train = acts[perm[n_val:]].contiguous()
     mu = train.mean(0, keepdim=True).cuda()
+    train_gpu = train.half().cuda()   # resident on GPU (fp16) to keep the gather on-device
     # top-1 variance fraction of the RAW activations (massive-activation diagnostic)
     var = train.var(0); top1 = (var.max() / var.sum()).item()
     print(f"layer {args.layer}: train {train.shape} val {val.shape} d={d_model} "
@@ -107,7 +108,7 @@ def main():
     rows = []
     t0 = time.time()
     for k in args.ks:
-        ae, npar = train_one(train, mu, d_model, k, args.n_steps, args.batch, args.lr, args.seed)
+        ae, npar = train_one(train_gpu, mu, d_model, k, args.n_steps, args.batch, args.lr, args.seed)
         m = evaluate(ae, val, mu)
         m.update(k=k, n_params=npar)
         rows.append(m)

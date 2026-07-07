@@ -106,5 +106,36 @@ fig.tight_layout()
 save(fig, "qwen_anisotropy.png")
 
 
+# ---- Fig D: reproduce the colleague's plot (lasse.png) — wide k to 500, linear x ----
+# Two panels: cosine similarity (higher=better) and relative L2 error (lower=better)
+# vs bottleneck dimension, matching the colleague's axes/range, so the reconstruction
+# minimum / cosine peak at intermediate k is directly comparable.
+lasse = load("qwen_sweep_L2_lasse.json")
+if lasse:
+    rows = lasse["rows"]
+    ks = [r["k"] for r in rows]
+    cos = [r["val_cos"] for r in rows]
+    rel = [r["val_rel_l2"] for r in rows]
+    k_cos = ks[int(np.argmax(cos))]           # best (peak) cosine
+    k_rel = ks[int(np.argmin(rel))]           # best (min) rel-L2 error
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 4.6))
+    a1.plot(ks, cos, "o-", color="C0", label="Autoencoder (67M)")
+    a1.scatter([k_cos], [max(cos)], s=170, facecolors="none", edgecolors="C3",
+               linewidths=2, zorder=5, label=f"peak at k={k_cos}")
+    a1.set_ylabel("Cosine similarity"); a1.set_xlabel("Bottleneck dimension")
+    a1.set_title("Reconstruction quality vs bottleneck")
+    a2.plot(ks, rel, "o-", color="C0", label="Autoencoder (67M)")
+    a2.scatter([k_rel], [min(rel)], s=170, facecolors="none", edgecolors="C3",
+               linewidths=2, zorder=5, label=f"min at k={k_rel}")
+    a2.set_ylabel("Relative L2 error"); a2.set_xlabel("Bottleneck dimension")
+    a2.set_title("Reconstruction error vs bottleneck")
+    for ax in (a1, a2):
+        ax.grid(alpha=0.3); ax.legend(fontsize=9)
+    fig.suptitle("Reproduction of the colleague's Qwen3-1.7B AE sweep (last-token L2, k up to 500, "
+                 f"{lasse['n_steps']} steps): quality peaks / error bottoms at intermediate k, then degrades")
+    fig.tight_layout()
+    save(fig, "qwen_ae_lasse_repro.png")
+
+
 if __name__ == "__main__":
     pass
