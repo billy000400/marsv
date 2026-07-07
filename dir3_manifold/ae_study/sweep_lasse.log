@@ -1,5 +1,5 @@
 /opt/conda/lib/python3.11/site-packages/torch/backends/__init__.py:46: UserWarning: Please use the new API settings to control TF32 behavior, such as torch.backends.cudnn.conv.fp32_precision = 'tf32' or torch.backends.cuda.matmul.fp32_precision = 'ieee'. Old settings, e.g, torch.backends.cuda.matmul.allow_tf32 = True, torch.backends.cudnn.allow_tf32 = True, allowTF32CuDNN() and allowTF32CuBLAS() will be deprecated after Pytorch 2.9. Please see https://pytorch.org/docs/main/notes/cuda.html#tensorfloat-32-tf32-on-ampere-and-later-devices (Triggered internally at /pytorch/aten/src/ATen/Context.cpp:80.)
   self.setter(val)
-layer 2: train torch.Size([144000, 2048]) val torch.Size([16000, 2048]) d=2048 top1_var_frac=0.0117
-  k=  5 FVU=0.5436 rel_L2=0.5511 cos=0.7969 (485s)
-  k= 10 FVU=0.4603 rel_L2=0.5038 cos=0.8328 (1520s)
+layer 2: train torch.Size([144000, 2048]) val torch.Size([16000, 2048]) d=2048 top1_var_frac=0.0117 steps=3000
+  k=   5 val: rel_L2=0.5762 cos=0.7799 FVU=0.5811 | train: rel_L2=0.5566 cos=0.7984 (208s)
+  k=  10 val: rel_L2=0.5266 cos=0.8178 FVU=0.4943 | train: rel_L2=0.5001 cos=0.8404 (427s)
