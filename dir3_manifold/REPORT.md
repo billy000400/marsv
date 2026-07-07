@@ -242,6 +242,29 @@ nonlinear ID band (12–13). But three checks show the AE signal is **fragile**,
 
 The **TwoNN/MLE local ID is the robust signal**; the AE merely fails to contradict it.
 
+### Cross-model check: what makes an AE elbow appear? (Qwen3-1.7B)
+A colleague reported a reconstruction *elbow* on **Qwen3-1.7B** using a much larger deep autoencoder
+(`2048→4096→4096→2048→k`, ≈ 67 M params) on last-token activations. We reproduced that setup to test
+whether an AE elbow is a real intrinsic-dimension signature or the same raw-variance artifact we see in
+GPT-2. **Full study in `REPORT_AE.md`; the high-level result:**
+
+- **Faithful reproduction shows no elbow.** On Qwen3-1.7B last-token activations (layers 2 and 10,
+  FineWeb-Edu, seq_len 10), held-out FVU falls **smoothly and never plateaus** (layer 2: 0.57 at k = 5
+  → 0.40 at k = 30, still improving; layer 10 similar). At k = 30 the AE still leaves ~40% of variance
+  unexplained.
+- **Why: these activations are near-isotropic.** Qwen last-token clouds have a PCA participation ratio
+  of **245 (layer 2)** and **42 (layer 10)** and put ≤ 3.4% of variance in any one direction — versus
+  GPT-2 layer 6, which puts **90.4%** in a single "massive-activation" direction (PR ≈ 1.2). A narrow
+  bottleneck cannot plateau on data this spread out.
+- **A single factor switches the elbow on.** Taking the *same* isotropic Qwen activations and rescaling
+  one coordinate to carry 90% of the variance (matching GPT-2's structure) makes the identical AE snap
+  to a **sharp low-k knee with a flat plateau** (FVU floors at ~0.05). So the elbow is a readout of
+  **variance concentration (anisotropy)**, not of model, layer, token position, dataset, or AE size.
+
+This confirms cross-model what the GPT-2 sweep already suggested: the AE "elbow" tracks the dominant
+variance direction, so it is **consistent with, not proof of, a low-dimensional manifold**. The
+trustworthy dimensionality signal remains the local ID estimators.
+
 ### Depth trend
 Nonlinear ID grows gently with depth — mean(TwoNN, MLE) ≈ 6 (L0) → 9 (L3) → 12 (L6) → 14 (L9) → ~14
 (L11). Standardization leaves the estimate close (Δ < 2) at layers 0/3/6/9 but **shifts layer 11
@@ -287,3 +310,5 @@ occupy a low-dimensional set at layer 6, but "~12–16-dimensional curved manifo
   `collect_by_position.py`, `id_diagnostics.py`, `ae_sweep.py`, `ae_sweep_gpu.py`,
   `ae_sweep_gpu_v2.py`, `ae_sweep_matched.py`, `make_plots.py`.
 - `RESULTS.md` — full tables, headline, and caveats. `CHANGELOG.md` — dated change history.
+- `REPORT_AE.md` — companion Qwen3-1.7B autoencoder-elbow study (when does an AE reconstruction elbow
+  appear?); `ae_study/` — its code, caches, results, and figures (`plots/qwen_*.png`).
