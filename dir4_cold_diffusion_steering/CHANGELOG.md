@@ -492,3 +492,35 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   log results/19_run.log. Downloaded gpt2-large weights into the shared HF cache (3.1 GB).
 - REPORT math re-verified via GitHub API: 24/24 js-display-math (no new display-math added), 0 broken
   (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-07 — Experiment 20: differentiable-generation behavioral supervision (breaks Exp 11's ceiling)
+- **Why:** the single substantive open lever flagged since Exp 11 (PLAN Next-step (i)). Exp 11's
+  behavioral-preservation term matched the corrector's downstream sentiment readout on a TEACHER-FORCED
+  pass and hit a ceiling (generated effect never past ≈+1.3), diagnosed as a proxy gap — a teacher-forced
+  readout only partially transfers to autoregressive generation. Exp 20 supervises the readout on the
+  corrector's OWN generated continuation to close that gap.
+- **Method (new):** a DIFFERENTIABLE soft-token rollout. From P=8 real prompt tokens, roll out K=8 steps
+  with the steer applied at LAYER at every position; read the downstream sentiment projection at L2 for the
+  produced position; feed the softmax-weighted expected embedding softmax(ℓ/τ)·Wₑ (τ=1) back as the next
+  input (fully differentiable in r_θ). Push the corrected rollout's readout toward RAW steering's own no-grad
+  rollout, weight λ_g, backpropped through the K-step unroll. Total loss = teacher-forced LM CE (Exp 3) +
+  λ_near·‖P_{v⊥}r‖²/100² + λ_g·mean_K((p_corr−p_raw)/100)². Trained λ_g∈{0,40,160} (λ_g=0 = Exp 10/11 base),
+  scored on the identical Exp 10 protocol (48 prompts, 30 greedy tokens, effect B(α)−B(0) + distinct-2).
+  GEN_B=4 rollout batch (VRAM), no OOM. Ran with dir9's cupenv python (shared conda transformers still absent).
+- **Result (new):** PARTIAL POSITIVE — the generation-aware signal breaks Exp 11's ≈+1.3 effect ceiling.
+  λ_g=0 reproduces Exp 10/11 to the digit (eff +0.17/+0.19/+0.15/+0.48). λ_g=40: eff +1.01/+1.40/+1.30/+1.72,
+  d2 0.67/0.67/0.54/0.47 — at α=8 effect +1.72 (vs Exp 11's best +1.23/+1.08) at d2 0.47 (vs raw's collapsed
+  0.32), nearly matching raw's already-collapsed +1.77. λ_g=160 at α=2 reaches eff +1.61 at near-baseline
+  d2 0.71 (dominates Exp 11's +0.99@0.73), but OVER-weighting collapses at strong steering: destabilizes
+  training (one LM step spiked to ~20) and degenerates like raw at α≥6 (eff +0.61 then −0.22 @α=8, d2→0.32,
+  sample repeats "the Southern-the-Beal and the Southern-the-Beal…"). So supervising on the autoregressive
+  distribution is a strictly better lever than teacher-forced at moderate steering and raises the achievable
+  strong-α effect (+1.08→+1.72 @α=8), but the strong-effect-AND-fluent corner still eludes. Frontier pushed
+  out a SECOND time, not erased. No prior result superseded (Exp 10/11 unchanged; Exp 20 is a new follow-up).
+- **Deliverable deltas:** RESULTS.md +Exp 20 (table + reading) + figure entry + Headline "Second fix (Exp 20)"
+  clause on the behavioral paragraph. REPORT.md +Methods "Differentiable-generation behavioral supervision
+  (Experiment 20)" subsection (2 new display-math: soft-token feedback + total loss) + Results Exp 20 (table +
+  interpretation + figure) + Summary clause + Conclusion clause.
+- New code experiments/20_diff_generation.py, figure plots/20_diff_generation.png, results
+  results/20_diff_generation.json, log results/20_run.log.
+- REPORT math re-verified via GitHub API: 26/26 js-display-math (2 new), 0 broken (<pre lang=math>), 0 inline hazards.

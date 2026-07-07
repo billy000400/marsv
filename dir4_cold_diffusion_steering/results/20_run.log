@@ -1,0 +1,26 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 6396.98it/s]
+device: cuda
+|v|(L6)=11.08  |w|(L11)=3.87
+48 prompts x 12 tokens, gen 30
+clean: B0=+0.343 distinct2=0.703
+raw   effect=['+2.97', '+2.31', '+2.47', '+1.77'] d2=['0.78', '0.72', '0.54', '0.32']
+  lam_g=  0.0 ep1 step  40 a= 5.6 LM=4.330 L_gen=0.0000
+  lam_g=  0.0 ep2 step  80 a= 3.1 LM=4.150 L_gen=0.0000
+  lam_g=  0.0 ep3 step 120 a= 7.3 LM=4.766 L_gen=0.0000
+  lam_g=  0.0 ep4 step 160 a= 6.3 LM=4.089 L_gen=0.0000
+  lam_g=  0.0 ep5 step 200 a= 5.5 LM=4.214 L_gen=0.0000
+lam_g=  0.0 effect=['+0.17', '+0.19', '+0.15', '+0.48'] d2=['0.65', '0.72', '0.71', '0.64']
+  lam_g= 40.0 ep1 step  40 a= 5.6 LM=5.625 L_gen=0.0004
+  lam_g= 40.0 ep2 step  80 a= 3.1 LM=4.550 L_gen=0.0015
+  lam_g= 40.0 ep3 step 120 a= 7.3 LM=6.325 L_gen=0.0034
+  lam_g= 40.0 ep4 step 160 a= 6.3 LM=5.173 L_gen=0.0409
+  lam_g= 40.0 ep5 step 200 a= 5.5 LM=5.174 L_gen=0.0015
+lam_g= 40.0 effect=['+1.01', '+1.40', '+1.30', '+1.72'] d2=['0.67', '0.67', '0.54', '0.47']
+  lam_g=160.0 ep1 step  40 a= 5.6 LM=5.753 L_gen=0.0005
+  lam_g=160.0 ep2 step  80 a= 3.1 LM=4.716 L_gen=0.0006
+  lam_g=160.0 ep3 step 120 a= 7.3 LM=19.995 L_gen=0.0040
+  lam_g=160.0 ep4 step 160 a= 6.3 LM=5.967 L_gen=0.0093
+  lam_g=160.0 ep5 step 200 a= 5.5 LM=5.806 L_gen=0.0011
+lam_g=160.0 effect=['+1.61', '+1.48', '+0.61', '-0.22'] d2=['0.71', '0.60', '0.46', '0.32']
+saved figure + results

@@ -814,3 +814,52 @@ On track? yes — Exp 19 adds the third model-scale point: the flagship result i
 small/medium/large (124M→355M→774M, α=8 recovery flat 84/89/84%), by moving off the Gaussian manifold as
 always. Core result now robust on the model axis at three scales; deliverables curated + math-verified
 (24/24). ~100% complete. No blocker.
+
+## 2026-07-07 — Iter 20: differentiable-generation behavioral supervision (the last open lever)
+
+**Scope.** Acted on the one substantive open lever flagged since Exp 11 (PLAN Next-step (i)): push the
+Exp 11 behavioral ceiling by supervising the downstream readout THROUGH sampled/differentiable generation
+rather than teacher-forced. Success criterion long met; this is the last non-trivial open item.
+
+**Did.** New `experiments/20_diff_generation.py`, reusing the Exp 3/10/11 pipeline. Added a DIFFERENTIABLE
+soft-token rollout: from P=8 prompt tokens, roll out K=8 steps with the steer at LAYER, read the L2 sentiment
+projection at the produced position, feed softmax(ℓ/τ)·Wₑ back as the next input (differentiable in r_θ).
+Behavioral term pushes the corrected rollout's readout toward RAW steering's own rollout (weight λ_g),
+backpropped through the unroll; combined with the teacher-forced LM CE + λ_near of Exp 3. Trained λ_g∈{0,40,
+160}, scored on the identical Exp 10 protocol. GEN_B=4 (VRAM), separate backward for TF vs gen graph to bound
+peak memory; no OOM (GPU nearly idle this iter). Ran with dir9's cupenv python.
+
+**Learned.** PARTIAL POSITIVE — the generation-aware signal breaks Exp 11's ≈+1.3 teacher-forced ceiling.
+λ_g=0 reproduces Exp 10/11 to the digit (built-in check). λ_g=40 @α=8 reaches effect +1.72 (Exp 11's best was
++1.23/+1.08) at distinct-2 0.47 vs raw's collapsed 0.32 — nearly matching raw's already-collapsed +1.77 but
+far more fluent. At moderate steering λ_g=160 @α=2 hits effect +1.61 at near-baseline fluency 0.71 (dominates
+Exp 11's +0.99@0.73). BUT over-weighting collapses at strong steering: λ_g=160 destabilizes (one LM step spiked
+to ~20) and degenerates like raw at α≥6 (effect +0.61→−0.22 @α=8, d2→0.32, repeats "the Southern-the-Beal…").
+So supervising on the AUTOREGRESSIVE distribution is a strictly better lever than teacher-forced at moderate
+steering and raises the achievable strong-α effect, but the strong-effect-AND-fluent corner still eludes.
+Frontier pushed out a second time, not erased — the honest completion of the Exp 10→11→20 behavioral arc.
+
+**Assumptions/decisions logged.** (a) Full BPTT through the K=8 soft rollout (not truncated) — memory was fine
+(~1GB, GPU idle) and it's the faithful "differentiable generation." (b) Target = raw steering's OWN rollout
+readout (the autoregressive analogue of Exp 11's teacher-forced p_raw). (c) Soft feedback = expected embedding
+(probs·Wₑ), τ=1 — standard differentiable-generation proxy vs non-differentiable argmax. (d) λ_g grid {0,40,160}
+to span Exp-11-comparable→4×; λ_g=160's collapse at strong α is itself informative (over-supervision hazard).
+(e) Kept TF recipe EXACTLY Exp 3 (epochs 6, batch 8, seq 64) so λ_g=0 reproduces the base to the digit.
+(f) ENV: cupenv python again (`/mars-vol/marsv/dir9_ood/cupenv/bin/python`) — shared conda transformers still gone.
+
+**Deliverables.** RESULTS.md +Exp 20 (table + reading) + figure entry + Headline "Second fix (Exp 20)" clause;
+REPORT.md +Methods subsection (2 new display-math) + Results Exp 20 (table + interpretation + figure) + Summary
++ Conclusion clauses; CHANGELOG appended. Artifacts: `plots/20_diff_generation.png`,
+`results/20_diff_generation.json`, `results/20_run.log`. REPORT math re-verified via GitHub API: 26/26
+js-display-math, 0 broken, 0 inline hazards.
+
+**Next step (all optional; success criterion long met, all human asks done, all substantive levers now closed).**
+The Exp 10→11→20 behavioral arc is complete: teacher-forced→differentiable-generation supervision both push the
+frontier out without erasing it. Only very-low-value points remain: GPT-2 XL / non-GPT-2 architecture, or a
+harder differentiable-generation objective (Gumbel-softmax hard samples, longer rollouts). Keep running scripts
+with dir9's cupenv python until the shared conda env returns.
+
+On track? yes — Exp 20 closes the last substantive open lever: differentiable-generation supervision breaks
+Exp 11's behavioral ceiling (α=8 effect +1.08→+1.72 at far better fluency than raw) but the strong-effect-and-
+fluent corner still eludes (over-weighting collapses). Deliverables curated + math-verified (26/26). ~100%
+complete. No blocker.

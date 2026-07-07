@@ -102,7 +102,12 @@ edit, and behavioral effect on generation must be measured directly. Acting on t
 (Experiment 11) adds a term that preserves the downstream concept readout during training; it recovers
 2–6× more behavioral effect while staying fluent and turns the tradeoff into outright dominance over raw
 at moderate steering — though the projection-preserving corrector still cannot match raw's strong
-pre-collapse effect, so the frontier is pushed out, not erased.
+pre-collapse effect, so the frontier is pushed out, not erased. A further follow-up (Experiment 20)
+supervises the same readout on the corrector's *own generated continuation* through a differentiable
+soft-token rollout rather than a teacher-forced pass; this breaks Experiment 11's effect ceiling
+(raising the achievable α=8 effect from +1.08 to +1.72 at far better fluency than raw's collapse), but
+over-weighting the generation term destabilizes and collapses at strong steering — so the frontier is
+pushed out a second time, still not erased.
 
 ## Methods
 
@@ -407,6 +412,36 @@ score every one on the **identical Experiment-10 generation protocol** — 30 gr
 held-out prompts, sentiment effect `B(α)−B(0)` and distinct-2 on a clean re-encode — with raw steering
 as the shared reference. This asks whether an explicit behavioral term moves the effect-vs-fluency Pareto
 frontier of Experiment 10 outward.
+
+### Differentiable-generation behavioral supervision (Experiment 20)
+
+Experiment 11's behavioral term matches the downstream readout on a **teacher-forced** pass (the corrected
+activation patched over *ground-truth* FineWeb tokens); its ceiling was traced to a proxy gap — a
+teacher-forced readout only partially transfers to *autoregressive* generation. Experiment 20 supervises
+the readout on the corrector's **own generated continuation** through a **differentiable soft-token
+rollout**. Starting from the first `P = 8` real tokens of a training document (as input embeddings), we
+roll out `K = 8` steps: at each step we forward the frozen model with the steer applied at `LAYER` at every
+position, read the downstream sentiment projection `p^{\text{gen}} = \langle \text{resid}^{(L2)}_{\text{last}}, \hat{w}\rangle`
+at the just-produced position, then feed the **softmax-weighted expected embedding** back as the next
+input, so the whole rollout is differentiable in `r_\theta`:
+
+```math
+e_{t+1} = \mathrm{softmax}(\ell_t / \tau)\, W_e , \qquad \tau = 1 ,
+```
+
+where `\ell_t` are the step-`t` next-token logits and `W_e` is the (frozen) token-embedding matrix. The
+target `p^{\text{gen}}_{\text{raw}}` is raw steering's readout on **its own** no-grad rollout. The
+generation term, added with weight `\lambda_g`, backpropagates through the `K`-step unroll into `r_\theta`:
+
+```math
+\mathcal{L} = \mathrm{CE}_{\text{next-token}}(\hat{h}) \;+\; \lambda_{\text{near}}\,\big\langle \lVert P_{v^{\perp}} r_\theta \rVert^2 \big\rangle \;+\; \lambda_{g}\, \Big\langle \big( (p^{\text{gen}}_{\text{corr}} - p^{\text{gen}}_{\text{raw}})/100 \big)^2 \Big\rangle
+```
+
+Everything else is the Experiment-11 recipe (teacher-forced `CE` and `λ_near` terms unchanged, same seed
+and data). We train the family `λ_g ∈ {0, 40, 160}` (`λ_g = 0` recovers the Experiment-10/11 base corrector
+exactly) and score each on the **identical Experiment-10 generation protocol**. This asks whether
+supervising on the *autoregressive* distribution — rather than a teacher-forced proxy — pushes the
+effect-fluency Pareto further out than Experiment 11's teacher-forced term.
 
 ### Layer robustness (Experiment 12)
 
@@ -980,6 +1015,46 @@ Experiment 10's non-dominating tradeoff into outright dominance over raw at mode
 projection-preserving corrector still cannot reproduce raw's *strong* pre-collapse behavioral steering;
 the Pareto is pushed out, not erased.
 
+### Experiment 20 — supervising through differentiable generation breaks Experiment 11's ceiling
+
+![differentiable-generation behavioral supervision](plots/20_diff_generation.png)
+
+Experiment 11's ceiling came from supervising a *teacher-forced* readout. Experiment 20 instead supervises
+the readout on the corrector's **own generated continuation** through a differentiable `K=8`-step soft-token
+rollout (weight `λ_g`), scored on the identical generation protocol. `λ_g=0` is the Experiment-10/11 base
+corrector:
+
+| α | eff raw | eff λ_g=0 | eff λ_g=40 | eff λ_g=160 | d2 raw | d2 λ_g=0 | d2 λ_g=40 | d2 λ_g=160 |
+|---|---------|-----------|------------|-------------|--------|----------|-----------|------------|
+| 2 | **+2.97** | +0.17 | +1.01 | +1.61 | 0.78 | 0.65 | 0.67 | **0.71** |
+| 4 | **+2.31** | +0.19 | +1.40 | +1.48 | 0.72 | 0.67 | 0.67 | 0.60 |
+| 6 | **+2.47** | +0.15 | +1.30 | +0.61 | 0.54 | 0.71 | 0.54 | 0.46 |
+| 8 | +1.77 | +0.48 | **+1.72** | −0.22 | **0.32** | 0.64 | 0.47 | 0.32 |
+
+(`eff` = sentiment shift `B(α)−B(0)`, higher = more steered; `d2` = distinct-2, higher = more fluent;
+unsteered baselines `B(0)=+0.34`, distinct-2 `0.70`. `λ_g=0` reproduces Experiments 10/11 to the digit.)
+
+**Interpretation.** Supervising on the *autoregressive* distribution rather than a teacher-forced proxy
+**pushes the effect-fluency frontier further out than Experiment 11's teacher-forced term — it breaks the
+`≈+1.3` effect ceiling** — but the frontier stays sensitive at strong steering. Three findings. **(1) The
+ceiling moves.** At α=8 the moderate corrector `λ_g=40` reaches a sentiment effect of **+1.72** — above
+Experiment 11's best (`λ_b=10` gave +1.23, `λ_b=40` +1.08) and nearly matching *raw*'s already-collapsed
++1.77 — while keeping distinct-2 at **0.47** versus raw's collapsed **0.32**. At α=4 it reaches +1.40 (vs
+Experiment 11's +1.31) at the same fluency. So the generation-aware signal recovers behavioral effect the
+teacher-forced signal could not. **(2) At moderate steering the win is clean.** The stronger corrector
+`λ_g=160` at α=2 reaches effect **+1.61 at near-baseline fluency 0.71** — dominating Experiment 11's best
+moderate point (+0.99 at 0.73) — because at low α the differentiable rollout stays coherent and the readout
+target is easy to match without degenerating. **(3) But over-weighting collapses at strong steering.**
+`λ_g=160` overshoots: pushing the generation readout too hard destabilizes training (one step spiked the LM
+loss to ~20) and at α≥6 the corrector *degenerates like raw* — effect falls to +0.61 (α=6) then **−0.22**
+(α=8) with distinct-2 collapsing to **0.32**, its α=8 sample repeating *"the Southern-the-Beal and the
+Southern-the-Beal…"* just as raw does. So the generation-aware term is a strictly better lever than the
+teacher-forced one in the *moderate*-steering regime and pushes the achievable strong-α effect up
+(+1.08→+1.72 at α=8), but the strong-effect-**and**-fluent corner still eludes: too little generation
+weight under-steers, too much collapses. Differentiable-generation supervision **narrows** the proxy gap
+Experiment 11 left open — it does not close it. The projection-preserving corrector's frontier is pushed
+out a second time, still not erased.
+
 ### Experiment 12 — the fluency result replicates across layers (not a block-6 artifact)
 
 ![layer robustness](plots/12_layer_robustness.png)
@@ -1288,8 +1363,13 @@ behavioral steering. Adding an explicit behavioral-preservation term (Experiment
 corrector's *downstream* concept readout toward raw steering's during training — recovers 2–6× more of
 the behavioral effect while keeping generation fluent, and converts the tradeoff into outright dominance
 over raw at moderate steering; but no weighting reaches raw's strong pre-collapse effect, because matching
-a teacher-forced readout only partially transfers to autoregressive generation. The frontier moves out,
-not away.
+a teacher-forced readout only partially transfers to autoregressive generation. Experiment 20 attacks that
+last gap by supervising the readout on the corrector's own generated continuation through a differentiable
+soft-token rollout: it breaks Experiment 11's effect ceiling (raising the achievable α=8 effect from +1.08
+to +1.72, still far more fluent than raw's collapse) and cleanly dominates at moderate steering, but
+over-weighting the generation term destabilizes and collapses at strong steering — the frontier moves out
+a second time, still not away. The strong-effect-and-fluent corner remains genuinely hard for a
+projection-preserving corrector.
 
 The takeaway for on-manifold steering methods: keep the projection-preserving parameterization
 

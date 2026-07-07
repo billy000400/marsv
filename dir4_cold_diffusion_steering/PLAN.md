@@ -111,6 +111,15 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         86%/84%/101% (all three genuinely different directions), DiffMean reproduces flagship Exp 3 from real
         data; PCA-contrast raw steering is ON the Gaussian manifold (D_M flat 27.3) yet breaks the LM.
         Core result now robust on SIX axes; all three human asks done.
+- [x] S4(k) — DIFFERENTIABLE-GENERATION behavioral supervision (Exp 20, PLAN Next-step (i)) DONE: the last
+        substantive open lever. Exp 11 matched the downstream sentiment readout TEACHER-FORCED and hit a
+        ≈+1.3 effect ceiling (teacher-forced readout only partially transfers to generation). Exp 20
+        supervises the readout on the corrector's OWN generated continuation via a differentiable K=8
+        soft-token rollout (softmax(ℓ/τ)·Wₑ feedback), pushing toward raw's own rollout, weight λ_g.
+        PARTIAL POSITIVE: breaks the ceiling — λ_g=40 @α=8 effect +1.08(Exp11)→+1.72 at d2 0.47 (raw 0.32),
+        λ_g=160 @α=2 effect +1.61 at near-baseline d2 0.71 — but over-weighting collapses at strong steering
+        (λ_g=160: eff −0.22, d2 0.32 @α=8, degenerates like raw). Frontier pushed out a SECOND time, not
+        erased; strong-effect-and-fluent corner still eludes. λ_g=0 reproduces Exp 10/11 to the digit.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -122,7 +131,24 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**S4(g-follow-up) Experiment 19 (new, model-scaling to GPT-2 large, 2026-07-07):** picked the untested
+**S4(k) Experiment 20 (new, differentiable-generation behavioral supervision, 2026-07-07):** closed the last
+substantive open lever (PLAN Next-step (i)). Exp 11's behavioral term matched the corrector's downstream
+sentiment readout on a TEACHER-FORCED pass and hit a ≈+1.3 generated-effect ceiling — a proxy gap
+(teacher-forced ≠ autoregressive). Exp 20 supervises the readout on the corrector's OWN generated
+continuation via a DIFFERENTIABLE K=8 soft-token rollout (softmax(ℓ/τ)·Wₑ feedback, differentiable in r_θ),
+pushing the corrected rollout's readout toward RAW steering's own rollout, weight λ_g∈{0,40,160}; everything
+else is the Exp 11 recipe; scored on the identical Exp 10 protocol. GEN_B=4 (VRAM), no OOM. PARTIAL POSITIVE:
+supervising on the autoregressive distribution BREAKS Exp 11's ceiling — λ_g=40 @α=8 raises the achievable
+effect +1.08→**+1.72** at distinct-2 0.47 (raw's collapsed 0.32), and λ_g=160 @α=2 reaches effect **+1.61 at
+near-baseline fluency 0.71** (dominates Exp 11's +0.99@0.73) — but OVER-weighting (λ_g=160) destabilizes and
+collapses to raw-like repetition at strong steering (effect −0.22, d2 0.32 @α=8). Frontier pushed out a second
+time, still not erased; the strong-effect-and-fluent corner remains genuinely hard. λ_g=0 reproduces Exp 10/11
+to the digit. No prior result superseded. Artifacts: `experiments/20_diff_generation.py`,
+`results/20_diff_generation.json`, `results/20_run.log`, `plots/20_diff_generation.png`. RESULTS/REPORT/
+CHANGELOG curated; REPORT math verified (26/26 js-display-math, 0 broken, 0 inline hazards). ENV: dir9's
+cupenv python (shared conda `transformers` still absent).
+<!-- prior: S4(g-follow-up) model-scaling Exp 19 -->
+**S4(g-follow-up) Experiment 19 (model-scaling to GPT-2 large, 2026-07-07):** picked the untested
 optional external-validity point (a still-larger model) to strengthen the model-robustness axis from two
 scales to three. Replicated the EXACT flagship Exp-3 pipeline UNCHANGED on GPT-2 LARGE (774M, 36 blocks,
 d=1280) at mid layer block 18/36 — only the model changes. Downloaded gpt2-large (3.1 GB, previously
@@ -367,12 +393,13 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**All three human-feedback asks DONE and the optional model-scale point (GPT-2 large, Exp 19) now DONE.**
-Success criterion long met; direction ~complete on all planned axes. The single substantive open lever
-remaining:
-(i) push the Exp 11 behavioral ceiling by supervising the readout THROUGH sampled/differentiable generation
-rather than teacher-forced.
-Lower-value untested points: GPT-2 XL (2× large again) or a non-GPT-2 architecture. All optional.
+**All three human-feedback asks DONE, the optional model-scale point (GPT-2 large, Exp 19) DONE, and the
+last substantive open lever — differentiable-generation supervision (Exp 20) — now DONE.** Success criterion
+long met; direction complete on all planned axes and the full behavioral arc (Exp 10→11→20). No substantive
+open lever remains. Only very-low-value untested points are left, all optional:
+(i) GPT-2 XL / a non-GPT-2 architecture (another model-scale point);
+(ii) a harder differentiable-generation objective (Gumbel-softmax hard samples, longer rollouts) to push the
+strong-effect-and-fluent corner Exp 20 left open.
 ENV: run experiment scripts with `/mars-vol/marsv/dir9_ood/cupenv/bin/python` until the shared conda
 `transformers` is restored (still absent as of iter 19).
 

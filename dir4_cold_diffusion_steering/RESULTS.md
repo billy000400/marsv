@@ -398,6 +398,47 @@ converts Exp 10's non-dominating tradeoff into outright dominance over raw at mo
 projection-preserving corrector still cannot match raw's *strong* behavioral steering, so the effect–
 fluency frontier is pushed out, not erased.
 
+**Experiment 20 — Supervising through *differentiable generation* breaks the Exp 11 ceiling.**
+Experiment 11's behavioral term matched the corrector's downstream sentiment readout on a **teacher-forced**
+pass (corrected activation patched over *ground-truth* FineWeb tokens). Its ceiling (effect never past
+≈+1.3) was traced to a proxy gap: matching a teacher-forced readout only partially transfers to
+autoregressive generation. This experiment supervises the readout on the corrector's **own generated
+continuation** through a **differentiable soft-token rollout** — starting from `P=8` real tokens, roll out
+`K=8` steps with the steer applied at every position, read the downstream sentiment projection at each
+generated position, and feed the softmax-weighted expected embedding `softmax(ℓ/τ)·Wₑ` back as the next
+input (fully differentiable in `r_θ`) — pushing the corrected rollout's readout toward raw steering's own
+rollout, weight `λ_g`. Everything else is the Exp 11 recipe; `λ_g=0` is the Exp 10/11 base corrector.
+Scored on the identical Exp 10 protocol (48 prompts, 30 greedy tokens; `eff` = `B(α)−B(0)`, higher = more
+steered; `d2` = distinct-2, higher = more fluent; unsteered baselines `B(0)=+0.34`, `d2=0.70`).
+
+| α | eff raw | eff λ_g=0 | eff λ_g=40 | eff λ_g=160 | d2 raw | d2 λ_g=0 | d2 λ_g=40 | d2 λ_g=160 |
+|---|---------|-----------|------------|-------------|--------|----------|-----------|------------|
+| 2 | **+2.97** | +0.17 | +1.01 | +1.61 | 0.78 | 0.65 | 0.67 | **0.71** |
+| 4 | **+2.31** | +0.19 | +1.40 | +1.48 | 0.72 | 0.67 | 0.67 | 0.60 |
+| 6 | **+2.47** | +0.15 | +1.30 | +0.61 | 0.54 | 0.71 | 0.54 | 0.46 |
+| 8 | +1.77 | +0.48 | **+1.72** | −0.22 | **0.32** | 0.64 | 0.47 | 0.32 |
+
+(For reference, Exp 11's teacher-forced term at its best gave α=8 effect +1.23 (`λ_b=10`) / +1.08 (`λ_b=40`).
+`λ_g=0` reproduces Exp 10/11 to the digit — a built-in reproducibility check.)
+
+**Reading it: supervising on the *autoregressive* distribution rather than a teacher-forced proxy pushes the
+effect-fluency frontier further out than Exp 11 — it breaks the ≈+1.3 effect ceiling — but the frontier
+stays sensitive at strong steering.** Three findings. **(1) The ceiling moves.** At α=8 the moderate
+corrector `λ_g=40` reaches sentiment effect **+1.72** — above Exp 11's best (+1.23/+1.08) and nearly matching
+raw's already-collapsed +1.77 — while keeping distinct-2 at **0.47** vs raw's collapsed **0.32**. The
+generation-aware signal recovers behavioral effect the teacher-forced signal could not. **(2) At moderate
+steering the win is clean.** The stronger corrector `λ_g=160` at α=2 reaches effect **+1.61 at near-baseline
+fluency 0.71**, dominating Exp 11's best moderate point (+0.99 at 0.73): at low α the differentiable rollout
+stays coherent so the readout target is met without degenerating. **(3) But over-weighting collapses at
+strong steering.** `λ_g=160` overshoots — pushing the generation readout too hard destabilizes training (one
+step spiked LM loss to ~20) and at α≥6 the corrector *degenerates like raw*: effect falls to +0.61 (α=6) then
+**−0.22** (α=8) with distinct-2 collapsing to 0.32 (its α=8 sample repeats *"the Southern-the-Beal and the
+Southern-the-Beal…"*, exactly raw's failure). So the generation-aware term is a strictly better lever than
+the teacher-forced one in the *moderate*-steering regime and raises the achievable strong-α effect
+(+1.08→+1.72 at α=8), but the strong-effect-**and**-fluent corner still eludes: too little generation weight
+under-steers, too much collapses. Differentiable-generation supervision **narrows** the Exp 11 proxy gap
+without closing it — the projection-preserving corrector's frontier is pushed out a second time, not erased.
+
 **Experiment 12 — Layer robustness: is the result a block-6 artifact?**
 Every experiment above steers and corrects at resid_post block 6. The obvious question is whether the
 two headline facts — **(P)** raw steering breaks the LM, and **(C)** the LM-supervised
@@ -801,6 +842,11 @@ GPT-2 small, medium, and large.
   block 18/36). (a) ΔLM vs α, raw (dashed) vs corrected (solid) — corrected sits near zero while raw climbs
   to +2.47; (b) fluency recovery vs α — 84% at α=8, 95% at α=4; (c) `D_M` vs α, raw vs corrected — corrected
   exceeds raw at every α (off-Gaussian-but-LM-safe holds on the largest model too).
+- `plots/20_diff_generation.png` — differentiable-generation behavioral supervision (sentiment). (a)
+  sentiment effect `B(α)−B(0)` vs α for raw and generation-supervised correctors of increasing weight
+  `λ_g ∈ {0,40,160}`; (b) distinct-2 vs α; (c) the effect-vs-fluency Pareto. The `λ_g=40` corrector reaches
+  higher effect than Exp 11's teacher-forced term at comparable fluency (breaking the ≈+1.3 ceiling to +1.72
+  at α=8), while `λ_g=160` gains effect at moderate α but collapses to raw-like repetition at α≥6.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -894,4 +940,12 @@ keeping generation fluent, and turns Exp 10's non-dominating tradeoff into **out
 moderate steering** (effect ≈+1 at near-baseline distinct-2 0.73, where raw only reaches that effect after
 collapsing to 0.32). But a ceiling remains — no weighting reaches raw's *strong* pre-collapse effect
 (≈+2.5), because matching a teacher-forced readout only partially transfers to autoregressive generation.
-The projection-preserving corrector's frontier is pushed **out**, not erased.
+The projection-preserving corrector's frontier is pushed **out**, not erased. **Second fix (Exp 20):**
+supervising the same readout on the corrector's *own generated continuation* through a **differentiable
+soft-token rollout** (instead of a teacher-forced pass) **breaks Exp 11's effect ceiling** — the α=8
+achievable effect rises from +1.08 to **+1.72** at distinct-2 0.47 (vs raw's collapsed 0.32), and at
+moderate steering (α=2) reaches effect +1.61 at near-baseline fluency 0.71 — because we now supervise on the
+autoregressive distribution rather than a teacher-forced proxy. Yet over-weighting the generation term
+destabilizes training and collapses to raw-like repetition at strong steering (λ_g=160: effect −0.22,
+distinct-2 0.32 at α=8), so the strong-effect-and-fluent corner still eludes. The frontier is pushed out a
+second time, still not erased.
