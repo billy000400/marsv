@@ -33,9 +33,10 @@ optimization/training-budget artifact, not a certificate of a low-dimensional ma
 genuinely sharp elbow does exist — but only when the activation variance is concentrated in a few
 directions, which the Qwen last-token activations are not.
 
-- **Reproduction succeeds (correcting an earlier claim).** An earlier version of this study swept only
-  `k ∈ {5…30}`, saw a smooth monotone decline, and wrongly concluded "no elbow." Sweeping the
-  colleague's **full range out to `k=500`** with the same 67M-parameter deep AE reproduces `lasse.png`:
+- **Reproduction succeeds — but only if the sweep reaches past the minimum.** The held-out minimum sits
+  near `k≈50–100`, so a sweep that stops at `k≤30` sees only a monotone decline and misses the elbow
+  entirely; the range must extend well past `k≈50`. Sweeping the colleague's **full range out to
+  `k=500`** with the same 67M-parameter deep AE reproduces `lasse.png`:
   held-out relative-L2 error falls to a **broad minimum at `k≈50–100` (≈0.486)** and then **rises to
   0.529 at `k=500`**; held-out cosine similarity peaks (≈0.853) at the same place and then declines.
   Same U-shape as the colleague; our absolute error is higher only because we train 3,000 steps vs the
@@ -184,10 +185,10 @@ intact.
 
 ![Reproduction of lasse.png: held-out cosine peaks and rel-L2 minimises near k≈50–100, then reverse; the train overlay turns over too](plots/qwen_ae_lasse_repro.png)
 
-**Correction of the earlier claim.** A previous version of this study swept only `k ∈ {5,10,15,20,25,30}`
-— i.e. it stopped *before* the minimum — saw a smooth decline, and reported "no elbow." That conclusion
-was an artifact of the truncated range. The elbow is real and reproducible; the earlier statement is
-retracted.
+**Why the range matters.** A sweep restricted to `k ∈ {5,10,15,20,25,30}` stops *before* the minimum and
+shows only a smooth monotone decline — no visible elbow. The elbow is real and reproducible, but it lives
+at `k≈50–100`, so the bottleneck range must extend well past it (here, to `k=500`) for the U-shape to
+appear.
 
 ### 2. The elbow is an optimization artifact, not a manifold dimension
 
@@ -254,9 +255,10 @@ low-dimensional manifold** — one is variance concentration, the other is a tra
 
 ## Conclusion
 
-- **The colleague's elbow reproduces** (correcting an earlier "no elbow" claim that stopped the sweep at
-  `k=30`). Over the full range to `k=500`, held-out reconstruction on Qwen3-1.7B last-token activations
-  bottoms out near `k≈50–100` and rises afterward — the `lasse.png` U-shape.
+- **The colleague's elbow reproduces** when the sweep extends past the minimum. Over the full range to
+  `k=500`, held-out reconstruction on Qwen3-1.7B last-token activations bottoms out near `k≈50–100` and
+  rises afterward — the `lasse.png` U-shape. (A sweep truncated at `k≈30` stops before the minimum and
+  misleadingly looks monotone.)
 - **That elbow measures a training/optimization limit, not a manifold dimension.** The turnaround also
   appears on the training set (ruling out overfitting), and at convergence a wider bottleneck cannot do
   worse (the rise is an optimization gap at the fixed step budget). The optimum is also a poor

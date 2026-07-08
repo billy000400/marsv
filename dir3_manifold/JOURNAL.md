@@ -442,3 +442,52 @@ the history is clean.
 
 On track? yes — 100% done; operator feedback #10 (remote-sync fix) addressed; remote now carries the
 current-best REPORT.md/REPORT_AE.md/RESULTS.md + full ae_study/ tree; STOP written.
+
+---
+
+## Iter 17 (2026-07-08) — Operator `human_feedback_07070249.md`: reproduce lasse.png + fix REPORT_AE.md equation rendering
+
+**Two asks.** (1) "what do you mean you cannot reproduce the AE study? His plot is at
+`ae_study/lasse.png` — try to reproduce it." (2) "in REPORT_AE.md the equations under Baselines /
+controls are not rendered correctly on GitHub."
+
+**State on re-entry.** Prior un-journaled autoloop iters (2026-07-07 22:49 → 00:25) had already done the
+substantive science but left no JOURNAL/CHANGELOG entry, no STOP, and the feedback file unaddressed:
+they ran the wide-`k` (to 500) sweep of the colleague's 67M `DeepAutoencoder` on Qwen L2
+(`ae_study/ae_sweep_lasse.py` → `results/qwen_sweep_L2_lasse.json`), made the reproduction figure
+(`plots/qwen_ae_lasse_repro.png`), and rewrote REPORT_AE.md / REPORT.md / RESULTS.md with the corrected
+"elbow reproduces" narrative. They also (implicitly) fixed the render bug by splitting the combined
+Baselines equation.
+
+**Did this iter.** (a) **Verified the reproduction** against `lasse.png`: the held-out rel-L2 minimises
+and cosine peaks at `k≈50–100` then reverse — the same U-shape as the colleague (our absolute floor is
+higher, 0.486 vs ~0.407, purely from 3000 vs ~50k training steps). Confirmed the plot and JSON are on
+disk and embedded in all three deliverables. (b) **Diagnosed ask #2 with git+API archaeology:** the
+version on the remote when the operator looked (commit `98958a1`, the first push after Iter 16's ~20 h
+push-protection block) put the participation-ratio and top-1 definitions in **one** `math` fence using
+`\operatorname{Var}\!\big(x^{(c)}\big)` (neg-thin-space + `\big` + `\operatorname`) — which KaTeX renders
+wrong in the GitHub blob view even though the `js-display-math` placement check passes. Current HEAD had
+already **split it into three clean column-0 fences with plain `\mathrm{Var}(x^{(c)})`**; confirmed
+REPORT_AE.md now renders 6/6 display eqs, 0 degraded, 0 inline hazards, and grep for
+`\operatorname`/`\big`/`\!` returns none. (c) **Rule-6 cleanup:** removed the "an earlier version wrongly
+reported no elbow / correcting an earlier claim" self-correction wording from REPORT.md, RESULTS.md,
+REPORT_AE.md (version history → CHANGELOG) and replaced it with the current-best **methodological**
+statement (the elbow is at `k≈50–100`, so a sweep truncated at `k≤30` looks misleadingly monotone; sweep
+past the minimum). (d) CHANGELOG appended (flipped verdict + render fix + rewording, old→new). (e)
+Renamed feedback `→ .addressed.md`; wrote STOP.
+
+**Learned.** The "cannot reproduce" claim was never a real irreproducibility — it was a **truncated sweep
+range**: stopping at `k=30` sits *before* the held-out minimum, so the curve looks like a smooth decline
+with no elbow. Extending to `k=500` reproduces the colleague's U-shape exactly. The scientific
+interpretation is unchanged (the U-turn is a fixed-training-budget optimization artifact, shown by the
+train-set turnaround + the monotonicity-at-convergence argument; a genuinely *sharp* plateauing elbow
+needs concentrated variance). The render bug is a KaTeX-compile failure (`\operatorname\!\big` combined
+eq) that the placement-only `js-display-math` check does not catch — the fix is to keep each definition in
+its own column-0 fence using the simplest macros (`\mathrm`, no neg-space, no `\big`).
+
+**Next step.** None — both operator asks addressed; reproduction verified; all three deliverables render
+6/2/6 clean; CHANGELOG/JOURNAL/PLAN updated; feedback renamed; STOP written. If reopened: train each `k`
+to convergence (~50k steps) to show the rising branch flattens (the direct prediction of the
+monotonicity argument), closing the last compute-mismatch caveat.
+
+On track? yes — 100% done; operator feedback #11 (reproduce lasse.png + fix REPORT_AE.md render) addressed; Qwen elbow reproduces (U-shape to k=500); deliverables render clean; STOP written; no blocker.

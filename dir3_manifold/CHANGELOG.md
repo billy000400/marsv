@@ -5,6 +5,48 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-08 (Iter 17) — Qwen AE elbow REPRODUCED (supersedes the earlier "no elbow"); REPORT_AE.md equation-render fix (operator `human_feedback_07070249.md`)
+- **Operator report:** (1) "what do you mean you cannot reproduce the AE study? His plot is at
+  `ae_study/lasse.png` — try to reproduce it." (2) "in REPORT_AE.md the equations under Baselines /
+  controls are not rendered correctly on GitHub."
+- **(1) The colleague's elbow now REPRODUCES — verdict flipped.** The 2026-07-07 entry below concluded the
+  colleague's recipe shows **NO elbow** (held-out FVU declining smoothly over `k∈{5..30}`). That was an
+  artifact of a **truncated `k` range**: the held-out minimum sits at `k≈50–100`, *past* the old sweep's
+  upper end. Re-sweeping the identical 67M-param `DeepAutoencoder` over the **full range to `k=500`**
+  (3000 steps/k, seed 0, Qwen3-1.7B layer-2 last-token) reproduces `lasse.png`'s **U-shape**: held-out
+  rel-L2 **0.576 → broad min ≈0.486 @ k≈40–100 → 0.529 @ k=500**; cosine **0.780 → peak 0.853 → 0.821**;
+  FVU **0.581 → 0.410 → 0.488**. Our error floor is higher than the colleague's (0.486 vs ~0.407) only
+  because we train 3000 steps vs ~50k (shifts curve height, not shape). **Superseded claim:** "colleague's
+  recipe shows no elbow" → "elbow reproduces as a U-shape when the sweep extends past `k≈50`."
+- **Interpretation unchanged and reinforced:** the reproduced elbow is a **turnaround (U-shape)**, and it
+  is an **optimization/training-budget artifact, not a manifold dimension** — the *same* turnaround
+  appears on the training set (rules out overfitting), and at convergence a wider bottleneck cannot do
+  worse (dead-wire the extra latents), so the rise is under-optimization at the fixed step budget. The
+  separate *sharp, plateauing* elbow (injected-massive-dim control, FVU 0.10@k=1 → flat 0.066 by k=16)
+  still requires concentrated variance. So no interpretation changed; only the reproduction verdict
+  flipped from "absent" to "present (U-shape, needs full range)."
+- **New artifacts:** `ae_study/ae_sweep_lasse.py` (wide-`k` reproduction, logs train+val FVU/rel-L2/cos),
+  `ae_study/results/qwen_sweep_L2_lasse.json`, `ae_study/make_lasse_plot.py`,
+  `plots/qwen_ae_lasse_repro.png` (reproduction figure, held-out + train overlay). Embedded in REPORT.md,
+  RESULTS.md, and REPORT_AE.md.
+- **(2) Equation-render fix.** On the remote at commit `98958a1` (the first push after the ~20 h
+  push-protection block, see Iter 16), the Baselines/controls block combined the participation-ratio and
+  top-1 definitions into **one** `math` fence using `\operatorname{Var}\!\big(x^{(c)}\big)` — a
+  negative-thin-space + `\big` delimiters + `\operatorname` combination that KaTeX rendered incorrectly in
+  the GitHub blob view even though the `js-display-math` placement check passed. The current REPORT_AE.md
+  **splits this into three separate column-0 fences using plain `\mathrm{Var}(x^{(c)})`** (no `\!`, no
+  `\big`, no `\operatorname`), which render correctly. Verified now: REPORT_AE.md **6/6 display equations
+  render, 0 degraded, 0 inline hazards** via the GitHub markdown API; grep for `\operatorname`/`\big`/`\!`
+  in REPORT_AE.md returns none.
+- **Rule-6 cleanup:** removed "an earlier version wrongly reported no elbow / correcting an earlier claim"
+  self-correction wording from REPORT.md, RESULTS.md, and REPORT_AE.md (that is version history — it
+  belongs here, not in the deliverables). Replaced with the current-best **methodological** statement:
+  the elbow lives at `k≈50–100`, so a sweep truncated at `k≤30` misleadingly looks monotone; the range
+  must extend past the minimum.
+- **Deliverable impact:** no GPT-2 numbers changed; the Qwen reproduction table/figure were already on
+  disk from prior (un-journaled) autoloop work — this entry documents the flipped verdict, the render fix,
+  and the rule-6 rewording.
+
 ## 2026-07-07 (Iter 16) — Fixed remote-sync failure: purged a hardcoded secret blocking every push (operator request `human_feedback_07070207.md`; no result numbers changed)
 - **Symptom (operator report):** REPORT.md was not updating on GitHub and REPORT_AE.md never appeared
   on the remote, even though both were committed locally and the ae_study/ tree was fully tracked.

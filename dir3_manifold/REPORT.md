@@ -248,8 +248,8 @@ A colleague reported a reconstruction *elbow* on **Qwen3-1.7B** using a much lar
 error drops, bottoms out near k ≈ 50, then *rises* toward k = 500. We reproduced that setup to ask what
 the elbow measures. **Full study in `REPORT_AE.md`; the high-level result:**
 
-- **Reproduction succeeds (correcting an earlier claim).** An earlier version of this study swept only
-  k ∈ {5…30} — i.e. it stopped *before* the minimum — and wrongly reported "no elbow." Sweeping the
+- **Reproduction succeeds — the range must reach past the minimum.** A sweep restricted to k ∈ {5…30}
+  stops *before* the minimum and shows only a monotone decline (no visible elbow). Sweeping the
   **full range to k = 500** reproduces the colleague's U-shape: held-out relative-L2 error falls to a
   broad minimum at k ≈ 40–100 (≈ 0.486) and rises to 0.529 at k = 500; cosine peaks (≈ 0.853) then
   declines. Our error floor is higher than the colleague's (0.486 vs ~0.407) only because we train 3,000

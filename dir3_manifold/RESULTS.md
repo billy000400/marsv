@@ -393,10 +393,9 @@ reconstruction *elbow* on Qwen3-1.7B (`ae_study/lasse.png`): held-out error drop
 layers 2 & 10, FineWeb-Edu, seq_len 10, the large `2048→4096→4096→2048→k` ≈67M-param `DeepAutoencoder`
 imported unchanged, MSE on raw acts) and asked what that elbow actually measures.
 
-**Reproduction succeeds (correcting an earlier claim).** An earlier version of this study swept only
-`k∈{5..30}` — i.e. it stopped *before* the minimum — saw a smooth decline, and wrongly reported "no
-elbow." Sweeping the **full range to `k=500`** (3000 steps/k, seed 0, layer 2) reproduces the
-`lasse.png` U-shape:
+**Reproduction succeeds — the range must reach past the minimum.** A sweep restricted to `k∈{5..30}`
+stops *before* the held-out minimum and shows only a smooth monotone decline (no visible elbow). Sweeping
+the **full range to `k=500`** (3000 steps/k, seed 0, layer 2) reproduces the `lasse.png` U-shape:
 
 | k | 5 | 10 | 20 | 30 | 40 | 50 | 75 | 100 | 200 | 500 |
 |---|---|----|----|----|----|----|----|-----|-----|-----|
