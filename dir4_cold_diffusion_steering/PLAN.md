@@ -134,6 +134,15 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         GPT-2. KEY DIFFERENCE: raw degenerates far less on Qwen3 (distinct-2 0.76 vs GPT-2's 0.32 @α=8), so raw is a
         stronger baseline and the Pareto is shallower. "matched projection ≠ matched behavioral steering" is
         architecture-robust.
+- [x] S4(n) — BEHAVIORAL-FIX transfer to Qwen3 (Exp 23, PLAN Next-step ii, closes Exp 22's Next check) DONE:
+        re-fit the Exp 11 behavioral-preservation term (downstream readout at Qwen3 L2=27, family λ_b∈{0,10,40})
+        on the Exp 21/22 Qwen3 pipeline; λ_b=0 loads the Exp 21 checkpoint (reproduces Exp 22 to the digit).
+        NUANCED/CORRECTIVE: the fix's MECHANISM is architecture-robust — λ_b=40 recovers 53–83% of raw's generated
+        effect (vs base 10–29%), a 2–8× jump — but its PARETO ADVANTAGE is NOT: on Qwen3 raw does not collapse
+        (distinct-2 0.76 not 0.32), so raw weakly dominates at matched α; the λ_b sweep approaches raw's frontier
+        without passing it. Exp 20's over-steer wobble replicates (λ_b=40 @α=8). ⇒ behavioral fix is a robust lever
+        on effect; its payoff is GATED by whether the raw baseline degenerates. Closes the behavioral arc
+        (Exp 10→11→20→22→23).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -145,6 +154,32 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S4(n) Experiment 23 (new, BEHAVIORAL-FIX transfer to Qwen3, 2026-07-08):** completed an experiment a prior
+iteration had left half-done (script + λ_b=10 checkpoint present, but empty run log, no JSON/plot — interrupted).
+Acted on PLAN Next-step (ii) / Exp 22's own "Next check": re-fit the Exp 11 behavioral-preservation term on Qwen3
+to test whether the GPT-2 fix transfers across the architecture boundary. Reused the exact Exp 21/22 Qwen3
+pipeline + Exp 22 generation protocol; added the Exp 11 term at a DOWNSTREAM Qwen3 layer L2=27 (last decoder
+block, DiffMean ŵ |w|=12.9) pushing the corrected downstream readout toward raw's, family λ_b∈{0,10,40}. λ_b=0
+LOADS the Exp 21 checkpoint (= Exp 22 corrector; reproduced B0=+28.633, distinct2=0.875 and λ_b=0 effect/d2 to the
+digit — anchor); only λ_b=40 trained fresh (~900 steps, batch 2, no OOM); λ_b=10 reused the existing checkpoint.
+NUANCED / CORRECTIVE result — the fix's MECHANISM transfers, its PARETO ADVANTAGE does not. Adding λ_b lifts the
+corrected generation's sentiment effect from the base corrector's +0.53/+0.77/+0.98/+2.31 (10–29% of raw's, = Exp
+22) to λ_b=40 +4.06/+5.87/+6.35/+4.21 (53–83% of raw's at α≤6, a 2–8× jump) — exactly the Exp 11 lever, so the
+correction's non-orthogonality to the downstream readout AND the readout-preservation fix are architecture-robust.
+BUT on Qwen3 the corrector does NOT beat raw: at λ_b=40 its distinct-2 (0.875→0.673) sits slightly below raw's
+(0.886→0.761) at every α while its effect is also below raw's, so raw weakly dominates at matched α. Reason (= Exp
+22): GPT-2's term won by dominating a COLLAPSED raw (distinct-2 0.32); Qwen3's raw does not collapse, so there is
+no degenerate baseline to beat — the λ_b sweep approaches raw's frontier without passing it. Exp 20's λ_g=160
+over-steer wobble replicates (λ_b=40 @α=8 effect drops to +4.21 < its α=6 peak +6.35, d2 0.673). ⇒ the behavioral
+fix is a robust lever on generated effect; its payoff is GATED by whether the raw baseline degenerates. Closes the
+full behavioral arc (Exp 10→11→20→22→23): matched projection ≠ matched steering everywhere; the readout-
+preservation fix transfers everywhere; the size of its payoff depends on the baseline's failure mode. No prior
+result superseded (Exp 23 is new; λ_b=0 reproduces Exp 22). Artifacts: `experiments/23_behavioral_qwen_fix.py`,
+`results/23_behavioral_qwen_fix.json`, `results/23_corr_lamb{10,40}.pt`, `results/23_run.log`,
+`plots/23_behavioral_qwen_fix.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified (26/26 js-display-math,
+0 broken, 0 inline hazards — Exp 23 reuses Exp 11's behavioral-loss equation, no new equation). ENV: dir9's cupenv
+python (shared conda `transformers` still absent).
+<!-- prior: S4(m) behavioral check on Qwen3 Exp 22 -->
 **S4(m) Experiment 22 (new, BEHAVIORAL check on Qwen3, 2026-07-07):** picked the highest-value remaining point —
 the honesty check Exp 21 itself flagged as its "Next check". Exp 21's headline 94% recovery on Qwen3-1.7B is a
 TEACHER-FORCED ΔLM at matched layer-14 projection; Exp 10 taught (on GPT-2) that this proxy can hide a weaker
@@ -451,15 +486,17 @@ RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math v
 
 ## Next step
 **All three human-feedback asks DONE; optional model-scale (Exp 19), differentiable-generation (Exp 20),
-cross-ARCHITECTURE (Exp 21), and the Qwen3 behavioral honesty-check (Exp 22) all DONE.** Success criterion long
-met; direction complete on all planned axes plus the full behavioral arc (Exp 10→11→20→22), robust on SEVEN axes
-(strength/direction/layer/model-scale/architecture/prompt-family/steering-family), and the behavioral caveat now
-shown architecture-robust. No substantive open lever remains. Only very-low-value untested points are left, all
-optional:
+cross-ARCHITECTURE (Exp 21), the Qwen3 behavioral honesty-check (Exp 22), AND the Qwen3 behavioral-fix transfer
+(Exp 23) all DONE.** Success criterion long met; direction complete on all planned axes plus the FULL behavioral
+arc (Exp 10→11→20→22→23), robust on SEVEN axes (strength/direction/layer/model-scale/architecture/prompt-family/
+steering-family), the behavioral caveat shown architecture-robust (Exp 22), and the behavioral-fix mechanism now
+shown to transfer across the architecture boundary while its Pareto payoff is gated by baseline degeneration
+(Exp 23). No substantive open lever remains. Only very-low-value untested points are left, all optional:
 (i) a SECOND non-GPT-2 architecture (Llama/Mistral) to make the architecture axis a *sweep* rather than a
 single boundary crossing;
-(ii) re-fit the Exp 11/20 behavioral-preservation terms ON Qwen3 to test whether the GPT-2 fix (pushing the
-effect-fluency Pareto out) transfers across the architecture boundary — the natural follow-up to Exp 22;
+(ii) a FINER λ_b sweep + the Exp-20 differentiable-generation term ON Qwen3 to map how close the corrected
+frontier can get to raw's strong-and-fluent corner (Exp 23's own Next check) and check whether the α=8 wobble
+is a schedule artifact;
 (iii) a harder differentiable-generation objective (Gumbel-softmax hard samples, longer rollouts) for the
 strong-effect-and-fluent corner Exp 20 left open; (iv) GPT-2 XL.
 ENV: run experiment scripts with `/mars-vol/marsv/dir9_ood/cupenv/bin/python` until the shared conda

@@ -962,3 +962,52 @@ matched behavioral steering, corrector under-steers in generation) is architectu
 (effect 10–29% of raw's), while raw's lesser degeneration makes it a stronger baseline there. Deliverables curated
 + math-verified (26/26). ~100% complete; direction robust on 7 axes plus a now-architecture-robust behavioral
 caveat. No blocker.
+
+## 2026-07-08 — Experiment 23: does the GPT-2 behavioral fix (Exp 11) transfer to Qwen3? (S4(m) follow-up)
+**Did.** Completed an experiment a prior iteration had left half-done: `experiments/23_behavioral_qwen_fix.py`
+existed with the λ_b=10 checkpoint trained (`results/23_corr_lamb10.pt`, Jul 7 23:51) but an EMPTY run log and
+no JSON/plot — the run was interrupted before training λ_b=40 / writing deliverables. The script has resume
+logic (loads existing checkpoints, trains only the missing one), so I just ran it with dir9's cupenv python. It
+re-used the Exp 21/22 Qwen3 pipeline + Exp 22 generation protocol and added the Exp 11 behavioral-preservation
+term at downstream Qwen3 layer L2=27, family λ_b∈{0,10,40}. λ_b=0 loads the Exp 21 checkpoint (= Exp 22
+corrector, reproducibility anchor: reproduced B0=+28.633, distinct2=0.875, and λ_b=0 effect/d2 to the digit).
+Only λ_b=40 trained fresh (~900 steps, batch 2, no OOM). This directly answers PLAN Next-step (ii) and Exp 22's
+own "Next check."
+**Learned (headline — nuanced/corrective, closes the behavioral arc).** The fix's MECHANISM is
+architecture-robust but its PARETO ADVANTAGE is not. Adding λ_b lifts the corrected generation's sentiment
+effect from the base corrector's +0.53–2.31 (10–29% of raw's) to λ_b=40's +4.06–6.35 (53–83% of raw's at α≤6, a
+2–8× jump) — exactly the Exp 11 lever, so the correction's non-orthogonality to the downstream readout AND the
+readout-preservation fix carry to Qwen3. BUT on Qwen3 the corrector does NOT beat raw: at λ_b=40 its distinct-2
+(0.875→0.673) sits slightly below raw's (0.886→0.761) at every α while its effect is also below raw's — raw
+weakly dominates at matched α. The reason is exactly Exp 22's finding: on GPT-2 the term won by dominating a
+COLLAPSED raw (distinct-2 0.32); Qwen3's raw does not collapse, so there is no degenerate baseline to beat. The
+λ_b sweep traces a frontier from the base corrector (fluent, weakly steered) toward raw (strong, fluent) without
+passing it. Also: the Exp 20 λ_g=160 over-steer instability replicates (λ_b=40 @α=8 effect drops to +4.21 < its
+α=6 peak +6.35, d2 0.673). ⇒ the behavioral fix is a robust lever on generated effect; its payoff is GATED by
+whether the raw baseline degenerates. This closes the full behavioral arc (Exp 10→11→20→22→23): matched
+projection ≠ matched steering everywhere; the readout-preservation fix transfers everywhere; the size of its
+payoff depends on the baseline's failure mode.
+**Assumption/decision logged.** (a) Chose to COMPLETE the started Exp 23 (PLAN Next-step ii — re-fit the fix on
+Qwen3) over the other optional points (a 2nd non-GPT-2 arch, harder differentiable-generation, GPT-2 XL) because
+it was the highest-value AND lowest-risk next step: it directly answers Exp 22's "Next check," reuses all
+existing machinery, and its λ_b=10 checkpoint was already trained (only λ_b=40 needed). Rejected: retraining λ_b=10
+(wasteful — the resume logic reused the existing checkpoint; verified λ_b=0/anchor reproduced Exp 22 to the digit
+so the pipeline is faithful). (b) Downstream readout at L2=27 (last Qwen3 decoder block) — the architecture
+analogue of GPT-2's final resid_post used in Exp 11 (feeds the norm+head). (c) Reported the "mechanism transfers
+but Pareto win doesn't" result honestly rather than overselling the effect recovery — the gating-by-baseline-
+degeneration is the actual scientific finding and it ties Exp 23 cleanly to Exp 22.
+**Deliverables.** RESULTS.md +Exp 23 (table + reading) + figure entry + Headline clause; REPORT.md +Methods
+subsection (reuses Exp 11 equation, no new display math) + Results (Observation/Interpretation/Limitations/
+Next-check) + Exp 22 Next-check done + Summary/Conclusion/Limitation(2) clauses. plots/23_behavioral_qwen_fix.png;
+results/23_behavioral_qwen_fix.json; results/23_corr_lamb{10,40}.pt. CHANGELOG appended. REPORT math re-verified
+via GitHub API (26/26 js-display-math, 0 broken, 0 inline hazards). ENV: dir9's cupenv python (shared conda
+`transformers` still absent as of this iter). Killed the lingering post-run process to free VRAM for co-agents.
+**Next step (optional; success criterion long met — the behavioral arc is now closed on both architectures).**
+Any one a clean iter, all low-value: (i) a finer λ_b sweep + the Exp 20 differentiable-generation term ON Qwen3
+to map how close the corrected frontier can get to raw's strong-and-fluent corner (Exp 23's own Next check);
+(ii) a SECOND non-GPT-2 architecture (Llama/Mistral) to make the architecture axis a sweep rather than one
+boundary crossing; (iii) GPT-2 XL. All optional.
+On track? yes — Exp 23 completes the started fix-transfer test, closing the behavioral arc (Exp 10→11→20→22→23):
+the GPT-2 behavioral fix's mechanism is architecture-robust but its Pareto payoff is gated by baseline
+degeneration; direction complete on 7 axes + full behavioral arc (~100%). Deliverables curated + math-verified.
+No blocker.

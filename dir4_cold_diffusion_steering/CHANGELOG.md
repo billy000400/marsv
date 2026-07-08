@@ -586,3 +586,35 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   results/22_behavioral_qwen.json, log results/22_run.log.
 - REPORT math re-verified via GitHub API: 26/26 js-display-math (unchanged — Exp 22 adds no equation),
   0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-08 — Experiment 23: does the GPT-2 behavioral-preservation fix (Exp 11) transfer to Qwen3?
+- **Why:** Exp 22 showed the Exp 10 under-steering caveat replicates on Qwen3-1.7B and named the Exp 11/20
+  behavioral-preservation term as the indicated fix, but never tested whether the fix transfers across the
+  architecture boundary (Exp 22's own "Next check"; PLAN Next-step ii). This completes an experiment a prior
+  iteration had started (script + λ_b=10 checkpoint present, but no JSON/plot — the run was interrupted).
+- **Method (new):** reused the exact Exp 21/22 Qwen3 pipeline + the identical Exp 22 generation protocol, and
+  added the Exp 11 behavioral term at a DOWNSTREAM Qwen3 layer L2=27 (last decoder block, DiffMean ŵ |w|=12.9):
+  push the corrected activation's downstream sentiment readout p_corr toward RAW steering's p_raw, weight
+  λ_b∈{0,10,40}. λ_b=0 LOADS the exact Exp 21 checkpoint (= Exp 22 corrector, reproducibility anchor); λ_b∈{10,40}
+  trained fresh with the Exp 21 recipe/seed/data. Scored each on the Exp 22 protocol (48 prompts × 30 greedy
+  tokens; effect B(α)−B(0), distinct-2 on clean re-encode; baselines B0=+28.6, distinct2=0.875). GEN_BATCH 8, no OOM.
+- **Result (new, nuanced/corrective):** the fix's MECHANISM transfers, its PARETO ADVANTAGE does not. Adding λ_b
+  lifts the generated effect from the base corrector's +0.53/+0.77/+0.98/+2.31 (10–29% of raw's, = Exp 22) to
+  λ_b=40 +4.06/+5.87/+6.35/+4.21 — 53–83% of raw's effect at α≤6, a 2–8× increase, exactly the Exp 11 lever. BUT on
+  Qwen3 the corrector does NOT beat raw: at λ_b=40 its distinct-2 (0.875→0.673) sits slightly BELOW raw's
+  (0.886→0.761) at every α while its effect is also below raw's, so raw weakly dominates at matched α. Reason: on
+  GPT-2 the term won by dominating a COLLAPSED raw (distinct-2 0.32); Qwen3's raw does not collapse (0.761 @α=8), so
+  there is no degenerate baseline to beat. Strong-steering wobble replicates (λ_b=40 @α=8 effect drops to +4.21 <
+  its α=6 peak +6.35, distinct-2 0.673) — the Exp 20 λ_g=160 over-steer instability. ⇒ the behavioral fix is
+  architecture-robust as a lever on generated effect; its payoff is GATED by whether the raw baseline degenerates.
+  Closes the behavioral arc (Exp 10→11→20→22→23). λ_b=0 reproduces Exp 22 to the digit (reproducibility check).
+  No prior result superseded (Exp 23 is new; Exp 22's λ_b=0 numbers reproduced).
+- **Deliverable deltas:** RESULTS.md +Exp 23 (table + reading) + figure entry + Headline behavioral-fix-transfer
+  clause. REPORT.md +Methods "Behavioral-fix transfer across the architecture boundary (Experiment 23)" subsection
+  (no new display math — reuses Exp 11's behavioral-loss equation) + Results "Experiment 23" (table +
+  Observation/Interpretation/Limitations/Next-check) + Exp 22 Next-check marked done + Summary clause + Conclusion
+  behavioral clause + Limitation (2) clause.
+- New code experiments/23_behavioral_qwen_fix.py, figure plots/23_behavioral_qwen_fix.png, results
+  results/23_behavioral_qwen_fix.json, checkpoints results/23_corr_lamb{10,40}.pt, log results/23_run.log.
+- REPORT math re-verified via GitHub API: 26/26 js-display-math (unchanged — Exp 23 adds no equation),
+  0 broken (<pre lang=math>), 0 inline hazards.

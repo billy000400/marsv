@@ -830,6 +830,50 @@ genuinely, but on Qwen3 as on GPT-2 a substantial part of that reduction reflect
 **matched projection ≠ matched behavioral steering is architecture-robust**, and the Exp 11/20 behavioral-
 preservation terms (tested on GPT-2) are the indicated fix if strong *behavioral* steering is required.
 
+**Experiment 23 — Does the GPT-2 behavioral-preservation fix (Exp 11) transfer to Qwen3?**
+Experiment 22 found the under-steering caveat replicates on Qwen3-1.7B and named the Experiment-11
+behavioral-preservation term as the indicated fix — but never tested it. We do that here, reusing the exact
+Exp 21/22 Qwen3 pipeline and the identical Exp 22 generation protocol, and adding the Exp 11 term: during
+teacher-forced training we also read out the sentiment projection at a **downstream Qwen3 layer** (`L2 = 27`,
+the last decoder block, downstream DiffMean direction `ŵ`, `|w| = 12.9`) and push the corrected activation's
+downstream projection `p_corr` toward what **raw** steering produces, `p_raw`, weighted by `λ_b`. We train a
+family `λ_b ∈ {0, 10, 40}` (`λ_b = 0` loads the exact Exp 21 checkpoint — the Exp 22 corrector — as a
+reproducibility anchor) and score each on the identical Exp 22 protocol (48 prompts, 30 greedy tokens;
+sentiment effect `B(α)−B(0)` and distinct-2 on a clean re-encode; unsteered baselines `B(0) = +28.6`,
+distinct-2 `0.875`). Raw steering is the shared reference.
+
+| α | eff raw | eff λ_b=0 | eff λ_b=10 | eff λ_b=40 | d2 raw | d2 λ_b=0 | d2 λ_b=10 | d2 λ_b=40 |
+|---|---------|-----------|------------|------------|--------|----------|-----------|-----------|
+| 2 | **+5.22** | +0.53 | +2.56 | +4.06 | 0.886 | 0.840 | 0.833 | 0.875 |
+| 4 | **+7.31** | +0.77 | +4.35 | +5.87 | 0.876 | 0.833 | 0.802 | 0.859 |
+| 6 | **+7.64** | +0.98 | +4.47 | +6.35 | 0.819 | 0.843 | 0.730 | 0.789 |
+| 8 | +8.01 | +2.31 | +2.91 | +4.21 | 0.761 | 0.825 | 0.613 | 0.673 |
+
+(`eff` = sentiment shift `B(α)−B(0)`, higher = more steered; `d2` = distinct-2, higher = more fluent.
+`λ_b=0` reproduces Experiment 22 to the digit — a built-in reproducibility check.)
+
+**Reading it: the behavioral term's *mechanism* transfers to Qwen3 — it recovers most of the generated
+sentiment effect the base corrector threw away — but its *Pareto advantage* does not, because on Qwen3 raw
+steering does not collapse for the corrector to dominate.** Three findings. **(1) The term works
+mechanically.** Adding `λ_b` lifts the generated effect from the base corrector's `+0.53–2.31` (10–29% of
+raw's, = Exp 22) up to `+4.06–6.35` at `λ_b=40` — **53–83% of raw's effect** at α≤6, a 2–8× increase — exactly
+the lever Experiment 11 found on GPT-2. So the correction's non-orthogonality to the downstream readout, and
+the readout-preservation fix for it, are **architecture-robust**. **(2) But it does not beat raw on Qwen3.**
+On GPT-2 the same term flipped a non-dominating tradeoff into outright dominance *because raw steering there
+collapsed into repetition* (distinct-2 0.32) and a fluent-and-steered corrector dominated it. On Qwen3 raw
+does **not** collapse (distinct-2 only 0.761 at α=8, Exp 22), so raw is a strong-and-fluent baseline: at
+`λ_b=40` the corrector's distinct-2 (0.875→0.673) sits slightly *below* raw's (0.886→0.761) at every α while
+its effect is also below raw's, so raw weakly dominates at matched α. The `λ_b` sweep traces a frontier from
+the base corrector (fluent, weak) *toward* raw (strong, fluent) without passing it. **(3) Strong steering is
+unstable, as in Exp 20.** At `λ_b=40`, α=8 the effect falls to `+4.21` (below its own α=6 peak of +6.35) with
+distinct-2 dropping to 0.673 — the same over-steer degeneration Experiment 20's `λ_g=160` showed on GPT-2.
+**Net:** the GPT-2 behavioral fix is architecture-robust *as a lever on generated effect*, but its practical
+value is **gated by whether raw steering degenerates** — where raw collapses (GPT-2) the corrector wins the
+Pareto; where raw stays fluent (Qwen3) the fix recovers most of the effect but cannot dominate. This closes
+the behavioral arc (Exp 10 → 11 → 20 → 22 → 23): matched projection ≠ matched steering everywhere, the
+readout-preservation fix transfers everywhere, and the size of its payoff depends on the baseline's failure
+mode.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -931,6 +975,12 @@ preservation terms (tested on GPT-2) are the indicated fix if strong *behavioral
   raw rises to +8.0 while the corrector stays at +0.5–2.3 (under-steered); (b) distinct-2 vs α — raw dips to
   0.76 at α=8 while the corrector holds ~0.83; (c) the effect-vs-fluency Pareto (points labelled by α), showing
   a shallower tradeoff than GPT-2 (raw degenerates far less on Qwen3). The under-steering caveat replicates.
+- `plots/23_behavioral_qwen_fix.png` — does the GPT-2 behavioral-preservation fix (Exp 11) transfer to
+  **Qwen3-1.7B** (steer block 14, downstream readout block 27)? (a) sentiment effect vs α for raw and
+  correctors of increasing behavioral weight `λ_b ∈ {0,10,40}`; (b) distinct-2 vs α; (c) the effect-vs-fluency
+  Pareto (points labelled by α). As `λ_b` grows the corrector points move right (2–8× more effect) toward raw,
+  but because Qwen3's raw does not collapse the corrector approaches raw's frontier without passing it — the
+  fix's mechanism transfers, its Pareto win (seen on GPT-2) does not.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -1042,4 +1092,9 @@ moderate steering (α=2) reaches effect +1.61 at near-baseline fluency 0.71 — 
 autoregressive distribution rather than a teacher-forced proxy. Yet over-weighting the generation term
 destabilizes training and collapses to raw-like repetition at strong steering (λ_g=160: effect −0.22,
 distinct-2 0.32 at α=8), so the strong-effect-and-fluent corner still eludes. The frontier is pushed out a
-second time, still not erased.
+second time, still not erased. **Does the fix transfer across architectures? (Exp 23):** re-fitting the
+Exp-11 readout-preservation term on Qwen3-1.7B recovers **53–83% of raw's generated sentiment effect** (vs
+10–29% for the base corrector), so the fix's *mechanism* is architecture-robust. But because Qwen3's raw
+steering does not collapse (Exp 22), the corrector only approaches raw's effect-fluency frontier without
+dominating it — unlike on GPT-2, where the same term beat a *collapsed* raw. The behavioral fix is a robust
+lever on generated effect; its Pareto *payoff* is gated by whether the raw baseline degenerates.
