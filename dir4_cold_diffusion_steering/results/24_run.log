@@ -1,0 +1,19 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  36%|███▌      | 104/292 [00:00<00:00, 985.25it/s]Loading weights:  70%|██████▉   | 203/292 [00:00<00:00, 959.59it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 987.80it/s]
+model=EleutherAI/pythia-410m layers=24 d=1024 device=cuda
+|v|=3.29 mean|h|=35.34 clean D_M=31.33
+corrector params: 5.25M
+loaded corrector checkpoint (skipped training)
+clean eval loss = 3.277
+a= 1.0 raw ΔLM=+0.059 learned=+0.035 rec=41% D_M raw=31.8 learn=36.1
+a= 2.0 raw ΔLM=+0.231 learned=+0.066 rec=71% D_M raw=33.1 learn=39.7
+a= 4.0 raw ΔLM=+0.948 learned=+0.177 rec=81% D_M raw=37.7 learn=53.4
+a= 8.0 raw ΔLM=+3.103 learned=+0.590 rec=81% D_M raw=52.3 learn=89.4
+saved figure + results
+[W708 00:17:55.300037047 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+066 rec=71% D_M raw=33.1 learn=39.7
+a= 4.0 raw ΔLM=+0.948 learned=+0.177 rec=81% D_M raw=37.7 learn=53.4
+a= 8.0 raw ΔLM=+3.103 learned=+0.590 rec=81% D_M raw=52.3 learn=89.4
+saved figure + results
+[W708 00:17:40.293143175 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())
+n operator())

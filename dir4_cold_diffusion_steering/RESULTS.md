@@ -874,6 +874,45 @@ the behavioral arc (Exp 10 → 11 → 20 → 22 → 23): matched projection ≠ 
 readout-preservation fix transfers everywhere, and the size of its payoff depends on the baseline's failure
 mode.
 
+**Experiment 24 — A second non-GPT-2 architecture: turning "architecture-robust" into a sweep (Pythia-410m / GPT-NeoX).**
+Experiment 21 crossed the GPT-2 boundary **once** (to Qwen3-1.7B). A single point off the GPT-2 family is a
+weak basis for calling the result "architecture-robust." Here we add a **third, structurally distinct**
+architecture so the axis becomes a genuine sweep of three families. **Pythia-410m** is a **GPT-NeoX** model:
+it shares **rotary** positions with Qwen3 and **LayerNorm / GELU / dense multi-head attention** with GPT-2, but
+its transformer block uses a **parallel residual** — attention and MLP are computed from the *same* layer input
+and summed, rather than applied in series — and its input/output embeddings are untied. That parallel block is
+different from **both** GPT-2 (serial residual) and Qwen3 (serial residual + RMSNorm + SwiGLU + grouped-query
+attention). We replicate the flagship Experiment-3 pipeline **unchanged** (same DiffMean sentiment prompts,
+400-doc Gaussian fit, 300-doc training set, held-out 100-doc eval, 4-layer corrector, seed, `α ∼ U(0.5, 8)`,
+objective) — only the model changes — steering and correcting at the **mid layer, block 12 of 24** (the depth
+analogue of block 6 of 12 in GPT-2 small). Pythia-410m is small (`d = 1024`, ~800 MB), so it runs in fp32 within
+the VRAM share (`|v| = 3.29`, mean `|h| = 35.3`, clean `D_M = 31.3`; corrector 5.25M params at `d = 1024`).
+
+| α | ΔLM raw (nats) | **ΔLM learned** | recovery | `D_M` raw | `D_M` learned |
+|---|----------------|------------------|----------|-----------|----------------|
+| 1 | +0.06 | **+0.04** | 41% | 31.8 | 36.1 |
+| 2 | +0.23 | **+0.07** | **71%** | 33.1 | 39.7 |
+| 4 | +0.95 | **+0.18** | **81%** | 37.7 | 53.4 |
+| 8 | +3.10 | **+0.59** | **81%** | 52.3 | 89.4 |
+
+(Steering-projection retention is matched `α|v|` = 3.29 → 26.29 for raw and learned at every α.)
+
+**Reading it: both headline facts replicate on a third, parallel-residual architecture — the result is a
+genuine architecture sweep, not a one-off boundary crossing.** (P) Raw steering breaks Pythia exactly as it
+breaks GPT-2 and Qwen3: `ΔLM` climbs monotonically to **+3.10 nats at α=8** while the Mahalanobis distance
+inflates 31.3 → 52.3. (C) The identical LM-supervised, projection-preserving corrector removes most of it at
+matched projection — recovering **81% of the fluency damage at α=8** and **81% at α=4** (71% at α=2). At the
+weakest steering (α=1) raw's damage is nearly zero (+0.06 nats), so the recovery *ratio* there (41%) is
+dominated by noise rather than a real shortfall — the same instability of the ratio at α=1 noted throughout.
+And the signature decoupling holds a **fifth** time: the corrected activation sits **further** off the Gaussian
+manifold than raw at **every** α (`D_M` learned > raw throughout, 89.4 vs 52.3 at α=8). Placed beside the other
+architectures, the α=8 recovery now spans **three distinct families** — GPT-2 (124M/355M/774M: 84% / 89% /
+84%), Qwen3-1.7B (RMSNorm / RoPE / SwiGLU / GQA: 94%), and Pythia-410m / GPT-NeoX (parallel residual: 81%) —
+all between **81% and 94%**. So the core ColdSteer claim is **architecture-robust as a sweep**: a
+downstream-supervised, projection-preserving corrector buys back the bulk of raw steering's fluency damage,
+while moving off the statistical manifold, across serial and parallel residual blocks, LayerNorm and RMSNorm,
+learned and rotary positions, GELU and SwiGLU MLPs, and dense and grouped-query attention.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -981,6 +1020,11 @@ mode.
   Pareto (points labelled by α). As `λ_b` grows the corrector points move right (2–8× more effect) toward raw,
   but because Qwen3's raw does not collapse the corrector approaches raw's frontier without passing it — the
   fix's mechanism transfers, its Pareto win (seen on GPT-2) does not.
+- `plots/24_cross_arch_pythia.png` — SECOND non-GPT-2 architecture, making the architecture axis a sweep:
+  the flagship result replicated on **Pythia-410m / GPT-NeoX** (24 blocks, block 12/24; parallel residual /
+  rotary / LayerNorm / dense MHA). (a) ΔLM vs α, raw (dashed) vs corrected (solid) — corrected sits near zero
+  while raw climbs to +3.10; (b) fluency recovery vs α — 81% at α=8 and α=4; (c) `D_M` vs α, raw vs corrected —
+  corrected exceeds raw at every α (off-Gaussian-but-LM-safe holds on a parallel-residual architecture too).
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -1026,7 +1070,12 @@ artifact** either: replicating the exact flagship pipeline on **Qwen3-1.7B (bloc
 architecture that swaps LayerNorm→RMSNorm, learned→rotary positions, GELU→SwiGLU, and dense→grouped-query
 attention — recovers **94%** of the fluency damage at α=8 (**108%** at α=4), again by moving *further* off the
 Gaussian manifold than raw (`D_M` 122.2 vs 77.8), so the result is **architecture-robust** across all four
-structural axes that separate Qwen3 from the GPT-2 family (Exp 21). It is likewise **not a FineWeb-prompt
+structural axes that separate Qwen3 from the GPT-2 family (Exp 21). And this is now a genuine **architecture
+*sweep*, not a single boundary crossing**: adding a **third, structurally distinct family — Pythia-410m /
+GPT-NeoX (block 12/24)**, whose block uses a **parallel residual** (attention and MLP from the same input,
+summed) unlike both GPT-2's and Qwen3's serial residual — recovers **81%** of the fluency damage at α=8 (81% at
+α=4), again by moving *further* off the Gaussian manifold than raw (`D_M` 89.4 vs 52.3) (Exp 24). Across the
+three families the α=8 recovery stays in a tight **81–94%** band (GPT-2 84/89/84%, Qwen3 94%, GPT-NeoX 81%). It is likewise **not a FineWeb-prompt
 artifact**: a corrector trained only on FineWeb still recovers **77%** of the fluency damage at α=8 on
 held-out technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at
 α=4), with recovery declining smoothly as the family's clean activations drift further off the FineWeb

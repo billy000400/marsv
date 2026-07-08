@@ -618,3 +618,31 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   results/23_behavioral_qwen_fix.json, checkpoints results/23_corr_lamb{10,40}.pt, log results/23_run.log.
 - REPORT math re-verified via GitHub API: 26/26 js-display-math (unchanged — Exp 23 adds no equation),
   0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-08 — Experiment 24: second non-GPT-2 architecture (Pythia-410m / GPT-NeoX) — architecture SWEEP
+- **Why:** Exp 21 crossed the GPT-2 architecture boundary ONCE (to Qwen3-1.7B). A single point off the
+  GPT-2 family is a weak basis for "architecture-robust." Added a THIRD, structurally distinct family so
+  the axis is a genuine sweep. Pythia-410m = GPT-NeoX: shares rotary with Qwen3 and LayerNorm/GELU/dense-MHA
+  with GPT-2, but its block uses a PARALLEL residual (attention + MLP from the same input, summed) unlike
+  BOTH GPT-2's and Qwen3's serial residual — the untested structural axis.
+- **Setup:** replicated the EXACT flagship Exp-3 pipeline UNCHANGED on Pythia-410m (24 blocks, d=1024),
+  steer & correct at mid layer block 12/24; same DiffMean sentiment prompts / 400-doc Gaussian fit /
+  300-doc train / held-out 100-doc eval / 4-layer corrector (5.25M) / seed / α∼U(0.5,8) / objective.
+  Only the model changes (|v|=3.29, mean|h|=35.3, clean D_M=31.3). Ran fp32 in the ~4.3 GB VRAM share,
+  batch 4 train+eval (small 50304 vocab, no eval bottleneck).
+- **Result (new):** both headline facts replicate. (P) raw steering breaks the LM — ΔLM +3.10 @α=8,
+  D_M 31.3→52.3. (C) identical corrector recovers **81% @α=8, 81% @α=4** (71% @α=2), matched projection
+  (retention α|v| exactly 3.29→26.29), corrected activation FURTHER off the Gaussian manifold at every α
+  (89.4 vs 52.3 @α=8 — decoupling holds a 5th time). α=1 recovery 41% is noise-dominated (raw damage only
+  +0.06 nats there). Architecture axis is now a 3-family SWEEP: GPT-2 small/med/large 84/89/84%, Qwen3 94%,
+  GPT-NeoX 81% — all 81–94% @α=8.
+- **RESULTS.md:** +Experiment 24 (table + reading) + figure entry (plots/24_cross_arch_pythia.png) +
+  Headline architecture clause upgraded from "single boundary crossing" to a 3-family sweep (81–94% band).
+- **REPORT.md:** +Methods "A second non-GPT-2 architecture (Experiment 24)"; +Results "Experiment 24"
+  (Observation/Interpretation/Limitations/Next-check); Exp 21 Limitations/Next-check updated (sweep concern
+  now addressed); Summary + Conclusion (two clauses) architecture claims upgraded to a 3-family sweep.
+  No result superseded (Exp 24 is new; Exp 21's Qwen3 numbers unchanged).
+- New code experiments/24_cross_arch_pythia.py, figure plots/24_cross_arch_pythia.png, results
+  results/24_cross_arch_pythia.json, checkpoint results/24_corr.pt, log results/24_run.log.
+- REPORT math re-verified via GitHub API: 26/26 js-display-math (unchanged — Exp 24 reuses Exp 3/12
+  ΔLM/recovery/D_M definitions, adds no equation), 0 broken (<pre lang=math>), 0 inline hazards.

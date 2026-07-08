@@ -1011,3 +1011,43 @@ On track? yes — Exp 23 completes the started fix-transfer test, closing the be
 the GPT-2 behavioral fix's mechanism is architecture-robust but its Pareto payoff is gated by baseline
 degeneration; direction complete on 7 axes + full behavioral arc (~100%). Deliverables curated + math-verified.
 No blocker.
+
+## 2026-07-08 — Experiment 24: second non-GPT-2 architecture (Pythia-410m / GPT-NeoX) — architecture sweep (S4(l) follow-up)
+**Did.** Picked the single highest-value remaining external-validity point: Exp 21 crossed the GPT-2
+architecture boundary only ONCE (Qwen3), which is a weak "architecture-robust" claim. Added a THIRD,
+structurally distinct family — Pythia-410m (GPT-NeoX) — so the axis is a genuine sweep. GPT-NeoX shares rotary
+with Qwen3 and LayerNorm/GELU/dense-MHA with GPT-2, but its block uses a PARALLEL residual (attention+MLP from
+the same input, summed) unlike BOTH GPT-2 and Qwen3 (serial). Adapted the Exp-21 template (`experiments/
+24_cross_arch_pythia.py`): only model + hook path (`model.gpt_neox.layers[12]`) + dtype (fp32, small model)
+changed; everything else is the flagship Exp-3 recipe. Downloaded pythia-410m (~800MB, ungated). Ran with
+dir9's cupenv python.
+**Learned (headline — clean POSITIVE, makes the axis a sweep).** Both facts replicate: (P) raw steering breaks
+the LM (ΔLM +3.10 @α=8, D_M 31.3→52.3); (C) identical corrector recovers **81% @α=8, 81% @α=4** (71% @α=2) at
+matched projection (retention α|v| exactly), corrected activation FURTHER off the Gaussian manifold at every α
+(89.4 vs 52.3 @α=8 — decoupling holds a 5th time). α=1 recovery 41% is noise-dominated (raw damage only +0.06).
+The architecture axis is now a 3-family SWEEP with a tight 81–94% @α=8 band: GPT-2 84/89/84%, Qwen3 94%,
+GPT-NeoX 81%. The parallel-residual block is the untested structural axis and the recipe is indifferent to it.
+**Assumptions/decisions logged.** (a) Chose Pythia/GPT-NeoX over the other optional points (finer λ_b sweep on
+Qwen3, GPT-2 XL, Llama/Mistral) because it is the ONLY one that adds a NEW structural axis (parallel residual)
+at low risk — cached-adjacent, ungated, small (~800MB, fits fp32 in the 4.3GB share), and reuses the entire
+Exp-21 machinery. Rejected Llama/Mistral (gated and/or 7B = too big for the VRAM share); rejected GPT-2 XL
+(same architecture, adds no axis); rejected the finer-λ_b Qwen3 sweep (confirmatory, no new axis). (b) Mid
+layer block 12/24 = depth analogue of block 6/12 in GPT-2 small, matching Exp 13/19/21. (c) Downstream readout
+untouched — this is the fluency (ΔLM) replication, not the behavioral arc; the behavioral generation check on
+Pythia is logged as Exp 24's Next check but deferred (low value; the caveat is already architecture-robust via
+Exp 22). (d) Ops: the process was silently killed twice when launched via `nohup &` from the Bash tool (child
+died in the shell's process group when the tool call returned); fixed by launching with `setsid` to fully
+detach. Eval was slow (~1 α per few min) under GPU contention with co-agents but completed cleanly.
+**Deliverables.** RESULTS.md +Exp 24 (table + reading) + figure entry + Headline sweep clause; REPORT.md
++Methods subsection (reuses Exp 3/12 equations, no new display math) + Results (Observation/Interpretation/
+Limitations/Next-check) + Exp 21 Limitations/Next-check updated + Summary + Conclusion (2 clauses) upgraded to a
+3-family sweep. plots/24_cross_arch_pythia.png; results/24_cross_arch_pythia.json; results/24_corr.pt;
+results/24_run.log. CHANGELOG appended. REPORT math re-verified via GitHub API (26/26 js-display-math, 0 broken,
+0 inline hazards — Exp 24 adds no equation). ENV: dir9's cupenv python (shared conda `transformers` still absent).
+**Next step (all optional; success criterion long met — architecture is now a 3-family sweep).** Any one a clean
+iter, all low-value: (i) the Exp-10 behavioral generation protocol on Pythia (Exp 24's own Next check); (ii) a
+further architecture family for a fuller sweep (state-space / MoE); (iii) a finer λ_b + Exp-20 differentiable-
+generation term on Qwen3 (Exp 23's Next check). All optional.
+On track? yes — Exp 24 turns the architecture axis from a single GPT-2→Qwen3 boundary crossing into a genuine
+3-family sweep (GPT-2 / Qwen3 / GPT-NeoX, 81–94% recovery @α=8), corrected off-Gaussian at every α; direction
+complete on 7 axes + full behavioral arc (~100%). Deliverables curated + math-verified. No blocker.

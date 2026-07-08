@@ -143,6 +143,14 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         without passing it. Exp 20's over-steer wobble replicates (λ_b=40 @α=8). ⇒ behavioral fix is a robust lever
         on effect; its payoff is GATED by whether the raw baseline degenerates. Closes the behavioral arc
         (Exp 10→11→20→22→23).
+- [x] S4(l-follow-up) — SECOND non-GPT-2 architecture → architecture SWEEP (Exp 24, 2026-07-08) DONE:
+        Exp 21 crossed the GPT-2 boundary once (Qwen3). Added a THIRD, structurally distinct family — Pythia-410m
+        (GPT-NeoX): shares rotary w/ Qwen3 and LayerNorm/GELU/dense-MHA w/ GPT-2 but uses a PARALLEL residual
+        (attn+MLP from same input, summed) unlike BOTH. Replicated the EXACT flagship Exp-3 pipeline unchanged at
+        mid layer block 12/24. POSITIVE — both facts replicate: raw breaks LM (ΔLM +3.10@8, D_M 31.3→52.3);
+        identical corrector recovers 81%@8 / 81%@4 (71%@2), matched projection, corrected FURTHER off Gaussian at
+        every α (89.4 vs 52.3@8, decoupling holds a 5th time). Architecture axis now a 3-family SWEEP with a tight
+        81–94% @α=8 band (GPT-2 84/89/84%, Qwen3 94%, GPT-NeoX 81%). Not a single-boundary-crossing claim anymore.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -154,6 +162,26 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S4(l-follow-up) Experiment 24 (new, SECOND non-GPT-2 architecture → architecture SWEEP, 2026-07-08):** picked
+the single highest-value remaining external-validity point. Exp 21 crossed the GPT-2 architecture boundary only
+ONCE (Qwen3), a weak "architecture-robust" claim. Added a THIRD, structurally distinct family — **Pythia-410m
+(GPT-NeoX)** — whose block uses a **parallel residual** (attention+MLP from the same input, summed) unlike BOTH
+GPT-2 and Qwen3 (serial), while sharing rotary with Qwen3 and LayerNorm/GELU/dense-MHA with GPT-2. Replicated the
+EXACT flagship Exp-3 pipeline UNCHANGED (same prompts/fit/train/eval/corrector/seed/α∼U(0.5,8)/objective) at mid
+layer block 12/24; only the model changes (|v|=3.29, mean|h|=35.3, clean D_M=31.3; corrector 5.25M @ d=1024;
+fp32 in the 4.3GB share, batch 4). POSITIVE — both headline facts replicate: raw steering breaks the LM (ΔLM
++3.10@α=8, D_M 31.3→52.3) and the identical corrector recovers **81% @α=8 / 81% @α=4** (71%@2) at matched
+projection (retention α|v| exactly 3.29→26.29), with the corrected activation FURTHER off the Gaussian manifold
+at every α (89.4 vs 52.3 @α=8 — the Exp 2/3 decoupling holds a 5th time). α=1 recovery 41% is noise-dominated
+(raw damage only +0.06 nats). The architecture axis is now a genuine **3-family SWEEP** with a tight **81–94%
+@α=8** band: GPT-2 small/medium/large 84/89/84%, Qwen3 94%, GPT-NeoX 81%. No prior result superseded (Exp 24 is
+new; Exp 21's Qwen3 numbers unchanged). Ops note: the run was silently killed twice when launched via `nohup &`
+(child died with the shell process group when the Bash tool returned); fixed with `setsid` full detach. Eval slow
+under GPU contention but completed clean. Artifacts: `experiments/24_cross_arch_pythia.py`,
+`results/24_cross_arch_pythia.json`, `results/24_corr.pt`, `results/24_run.log`, `plots/24_cross_arch_pythia.png`.
+RESULTS/REPORT/CHANGELOG curated; REPORT math verified (26/26 js-display-math, 0 broken, 0 inline hazards — Exp 24
+reuses Exp 3/12 definitions, no new equation). ENV: dir9's cupenv python (shared conda `transformers` still absent).
+<!-- prior: S4(n) behavioral-fix transfer to Qwen3 Exp 23 -->
 **S4(n) Experiment 23 (new, BEHAVIORAL-FIX transfer to Qwen3, 2026-07-08):** completed an experiment a prior
 iteration had left half-done (script + λ_b=10 checkpoint present, but empty run log, no JSON/plot — interrupted).
 Acted on PLAN Next-step (ii) / Exp 22's own "Next check": re-fit the Exp 11 behavioral-preservation term on Qwen3
@@ -486,19 +514,22 @@ RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math v
 
 ## Next step
 **All three human-feedback asks DONE; optional model-scale (Exp 19), differentiable-generation (Exp 20),
-cross-ARCHITECTURE (Exp 21), the Qwen3 behavioral honesty-check (Exp 22), AND the Qwen3 behavioral-fix transfer
-(Exp 23) all DONE.** Success criterion long met; direction complete on all planned axes plus the FULL behavioral
-arc (Exp 10→11→20→22→23), robust on SEVEN axes (strength/direction/layer/model-scale/architecture/prompt-family/
-steering-family), the behavioral caveat shown architecture-robust (Exp 22), and the behavioral-fix mechanism now
-shown to transfer across the architecture boundary while its Pareto payoff is gated by baseline degeneration
-(Exp 23). No substantive open lever remains. Only very-low-value untested points are left, all optional:
-(i) a SECOND non-GPT-2 architecture (Llama/Mistral) to make the architecture axis a *sweep* rather than a
-single boundary crossing;
-(ii) a FINER λ_b sweep + the Exp-20 differentiable-generation term ON Qwen3 to map how close the corrected
+cross-ARCHITECTURE (Exp 21), the Qwen3 behavioral honesty-check (Exp 22), the Qwen3 behavioral-fix transfer
+(Exp 23), AND the SECOND non-GPT-2 architecture / architecture SWEEP (Exp 24) all DONE.** Success criterion long
+met; direction complete on all planned axes plus the FULL behavioral arc (Exp 10→11→20→22→23), robust on SEVEN
+axes (strength/direction/layer/model-scale/architecture/prompt-family/steering-family) — the architecture axis
+now a genuine 3-family SWEEP (GPT-2 / Qwen3 / GPT-NeoX, 81–94% recovery @α=8; Exp 21+24), the behavioral caveat
+shown architecture-robust (Exp 22), and the behavioral-fix mechanism shown to transfer across the architecture
+boundary while its Pareto payoff is gated by baseline degeneration (Exp 23). No substantive open lever remains.
+Only very-low-value untested points are left, all optional:
+(i) the Exp-10 BEHAVIORAL generation protocol on Pythia (Exp 24's own Next check) — confirm its 81% ΔLM recovery
+is not entirely bought by under-steering, as checked on GPT-2 (Exp 10) and Qwen3 (Exp 22);
+(ii) a FURTHER architecture family (state-space / MoE, e.g. Mamba/Mixtral) for a fuller sweep beyond three;
+(iii) a FINER λ_b sweep + the Exp-20 differentiable-generation term ON Qwen3 to map how close the corrected
 frontier can get to raw's strong-and-fluent corner (Exp 23's own Next check) and check whether the α=8 wobble
 is a schedule artifact;
-(iii) a harder differentiable-generation objective (Gumbel-softmax hard samples, longer rollouts) for the
-strong-effect-and-fluent corner Exp 20 left open; (iv) GPT-2 XL.
+(iv) a harder differentiable-generation objective (Gumbel-softmax hard samples, longer rollouts) for the
+strong-effect-and-fluent corner Exp 20 left open; (v) GPT-2 XL (same architecture, adds no axis).
 ENV: run experiment scripts with `/mars-vol/marsv/dir9_ood/cupenv/bin/python` until the shared conda
 `transformers` is restored (still absent as of iter 21). Note: shared /mars-vol disk is contended — a cold
 large-model load can take several minutes; a warm re-run is instant via OS page cache.

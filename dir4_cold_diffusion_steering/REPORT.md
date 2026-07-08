@@ -70,8 +70,11 @@ at α=8 (101% / 95% at α=4), again off the Gaussian manifold — so across a 6�
 (124M → 355M → 774M) the α=8 recovery stays flat (84% / 89% / 84%) and the core result is **model-robust**
 too (Experiments 13, 19); and not a GPT-2-*architecture* artifact either — replicating it on
 **Qwen3-1.7B (block 14 / 28)**, which swaps LayerNorm→RMSNorm, learned→rotary positions, GELU→SwiGLU, and
-dense→grouped-query attention, recovers **94%** at α=8 (108% at α=4), so the result is **architecture-robust**
-across all four structural axes that separate Qwen3 from GPT-2 (Experiment 21). It is also **not a FineWeb-prompt
+dense→grouped-query attention, recovers **94%** at α=8 (108% at α=4) — and adding a **third, structurally
+distinct family, Pythia-410m / GPT-NeoX (block 12 / 24)**, whose block uses a **parallel residual** (attention
+and MLP from the same input, summed) unlike both GPT-2's and Qwen3's serial residual, recovers **81%** at α=8
+(81% at α=4), so the result is **architecture-robust as a *sweep*** of three families rather than a single
+boundary crossing, with α=8 recovery in a tight 81–94% band (Experiments 21, 24). It is also **not a FineWeb-prompt
 artifact**: a corrector trained only on FineWeb still recovers **77%** of the damage at α=8 on held-out
 technical-prose (Markdown) and **60%** on strongly out-of-distribution Python code (87% / 78% at α=4), with
 recovery declining smoothly as the family's clean activations drift off the FineWeb manifold — so it is
@@ -528,6 +531,25 @@ the corrector run in fp32 and cast to bf16 at the patch hook; the corrector is t
 held-out evaluation at batch 1 because the full 151,936-token vocabulary logits dominate memory at
 `d = 2048`.) We report `ΔLM`, `D_M`, and the fluency recovery of Experiment 12's equation across
 `α ∈ {1, 2, 4, 8}`, at matched projection `α|v|`, versus raw steering.
+
+### A second non-GPT-2 architecture — an architecture sweep (Experiment 24)
+
+Experiment 21 crosses the GPT-2 boundary once. Experiment 24 adds a third, structurally distinct family so
+the architecture axis becomes a sweep rather than a single crossing. We replicate the **exact Experiment-3
+pipeline** on **Pythia-410m** (410M parameters, 24 blocks, `d = 1024`), a **GPT-NeoX** model. Its block shares
+**rotary** positions with Qwen3 and **LayerNorm / GELU / dense multi-head attention** with GPT-2, but differs
+from **both** by using a **parallel residual**: within a block the attention and MLP sub-layers read the *same*
+layer input and their outputs are summed into the residual stream (GPT-2 and Qwen3 apply them in series), and
+the input and output embeddings are untied. We hook `resid_post` at its **mid layer, block 12 of 24**
+(`hidden_states[13]`), the depth analogue of block 6 of 12 in GPT-2 small. Everything else is held fixed: the
+same 20/20 DiffMean sentiment sentences (the vector is rebuilt at block 12 of Pythia, `|v| = 3.29`; mean
+`|h| = 35.3`, clean `D_M = 31.3`), the same 400-document Gaussian fit, the same 300-document training set and
+held-out 100-document eval, the same 4-layer projection-preserving corrector against the downstream LM loss
+(now at `d = 1024`, 5.25M parameters), the same seed, `α ∼ U(0.5, 8)`, and hyper-parameters. Only the model
+changes. (Pythia-410m is small enough to load in fp32 within the ~4.3 GB per-agent VRAM budget, and its
+50,304-token vocabulary is no evaluation bottleneck, so training and eval both run at batch 4.) We report
+`ΔLM`, `D_M`, and the fluency recovery of Experiment 12's equation across `α ∈ {1, 2, 4, 8}`, at matched
+projection `α|v|`, versus raw steering.
 
 ### Behavioral-fix transfer across the architecture boundary (Experiment 23)
 
@@ -1207,15 +1229,53 @@ correction that a statistical-manifold prior cannot) is a property of transforme
 not of the GPT-2 architecture.
 
 **Limitations.** This is still a *single* concept (sentiment), *single* seed, and *single* mid layer, on one
-non-GPT-2 model; it establishes that the result crosses the GPT-2/Qwen3 architecture boundary but does not
-sweep architectures (e.g. Llama, Mistral, MoE models). The teacher-forced `ΔLM` proxy carries the same caveat
-here as everywhere: it measures disruption to processing real text, and part of the recovery may reflect a
-weaker propagated edit — **Experiment 22 measures exactly this on Qwen3** and confirms the caveat holds.
+non-GPT-2 model; on its own it establishes only that the result crosses the GPT-2/Qwen3 architecture boundary.
+**Experiment 24 addresses the sweep concern** by adding a third family (Pythia-410m / GPT-NeoX). The
+teacher-forced `ΔLM` proxy carries the same caveat here as everywhere: it measures disruption to processing
+real text, and part of the recovery may reflect a weaker propagated edit — **Experiment 22 measures exactly
+this on Qwen3** and confirms the caveat holds.
 
 **Next check.** *Done in Experiment 22* — the behavioral generation protocol (sentiment effect + distinct-2,
-Exp 10) is re-run on Qwen3 below and shows the fluency recovery is again partly bought by under-steering.
-Remaining: add one more distinct architecture family (e.g. a Llama-style model) to turn "crosses one
-architecture boundary" into "architecture family sweep."
+Exp 10) is re-run on Qwen3 below and shows the fluency recovery is again partly bought by under-steering. *And
+done in Experiment 24* — a third architecture (Pythia-410m / GPT-NeoX, parallel residual) turns "crosses one
+architecture boundary" into a three-family sweep.
+
+### Experiment 24 — the fluency result holds on a third architecture (Pythia-410m / GPT-NeoX)
+
+![second non-GPT-2 architecture: Pythia-410m / GPT-NeoX](plots/24_cross_arch_pythia.png)
+
+| α | ΔLM raw (nats) | ΔLM learned | recovery | `D_M` raw | `D_M` learned |
+|---|----------------|-------------|----------|-----------|----------------|
+| 1 | +0.06 | **+0.04** | 41% | 31.8 | 36.1 |
+| 2 | +0.23 | **+0.07** | **71%** | 33.1 | 39.7 |
+| 4 | +0.95 | **+0.18** | **81%** | 37.7 | 53.4 |
+| 8 | +3.10 | **+0.59** | **81%** | 52.3 | 89.4 |
+
+**Observation.** Experiment 21 crossed the GPT-2 boundary once; on **Pythia-410m** — a **GPT-NeoX** model whose
+block uses a **parallel residual** (attention and MLP read the same input and are summed) unlike both GPT-2's
+and Qwen3's serial residual — both headline facts replicate again. Raw steering breaks the model (`ΔLM` →
+**+3.10 nats at α=8**, `D_M` 31.3 → 52.3), and the identical corrector recovers **81% of the fluency damage at
+α=8** and **81% at α=4** (71% at α=2) at matched projection (retention `α|v|` exactly, 3.29 → 26.29). At α=1
+raw's damage is nearly zero (+0.06 nats), so the recovery *ratio* (41%) is noise-dominated, as the α=1 ratio is
+throughout. The Experiment-2/3 decoupling holds a **fifth** time: the corrected activation sits **further** off
+the Gaussian manifold than raw at **every** α (89.4 vs 52.3 at α=8).
+
+**Interpretation.** Placed beside Experiments 3/13/19 (GPT-2, 84/89/84% at α=8) and Experiment 21 (Qwen3,
+94%), Experiment 24's 81% makes the architecture axis a genuine **sweep of three families**, all recovering
+between **81% and 94%** at α=8. The parallel-residual block is the structural axis neither GPT-2 nor Qwen3
+varied, and the recipe is indifferent to it. So the mechanism the corrector exploits — a downstream objective
+finding a fluent, projection-matched correction a statistical-manifold prior cannot — is a general property of
+transformer language models, robust across serial *and* parallel residual blocks, LayerNorm *and* RMSNorm,
+learned *and* rotary positions, GELU *and* SwiGLU, and dense *and* grouped-query attention.
+
+**Limitations.** Still a *single* concept (sentiment), *single* seed, and *single* mid layer per model; three
+families is a sweep but not an exhaustive one (no Mistral / MoE / state-space model). The teacher-forced `ΔLM`
+proxy carries the usual behavioral caveat (Experiments 10/22); the behavioral generation protocol was not
+re-run on Pythia, so part of the 81% may again reflect a weaker propagated edit rather than costless cleanup.
+
+**Next check.** Run the Experiment-10 behavioral generation protocol on Pythia to confirm the fluency recovery
+is not entirely bought by under-steering, as on GPT-2 and Qwen3; and, for a fuller sweep, add a further
+architecture family (e.g. a state-space or MoE model).
 
 ### Experiment 22 — the under-steering caveat replicates on Qwen3 (behavioral generation)
 
@@ -1514,8 +1574,11 @@ the same pipeline on GPT-2 medium (355M, block 12 / 24) and GPT-2 large (774M, b
 and 84% at α=8 (101% / 95% at α=4), likewise off the Gaussian manifold (Experiments 13, 19) — across a 6×
 parameter range the α=8 recovery stays flat (84% / 89% / 84%), so the result is layer- and model-robust; and
 **not a GPT-2-architecture artifact** — the same pipeline on **Qwen3-1.7B** (block 14 / 28; RMSNorm, rotary
-positions, SwiGLU, grouped-query attention) recovers **94%** at α=8 (108% at α=4), off the Gaussian manifold
-as always, so the result is architecture-robust as well (Experiment 21). Nor is it a **FineWeb-prompt
+positions, SwiGLU, grouped-query attention) recovers **94%** at α=8 (108% at α=4) and on **Pythia-410m /
+GPT-NeoX** (block 12 / 24; a **parallel-residual** block unlike both GPT-2's and Qwen3's serial residual)
+recovers **81%** at α=8 (81% at α=4), both off the Gaussian manifold as always, so the result is
+architecture-robust as a **sweep of three families** (α=8 recovery in a tight 81–94% band; Experiments 21, 24).
+Nor is it a **FineWeb-prompt
 artifact**: the same FineWeb-trained corrector recovers 77% of the fluency damage at α=8 on held-out
 technical-prose and 60% on out-of-distribution Python code (Experiment 15), degrading smoothly as the prompt
 family's clean activations drift off the training manifold — so the correction is prompt-family-robust too.
@@ -1641,9 +1704,10 @@ curation alone (the native per-direction oracle is still needed); stronger direc
 richer training objective, and diverse-bank composition remain open. The flagship fluency result is now
 shown **layer-robust** (Experiment 12: blocks 3 / 6 / 9 of GPT-2 small), **model-robust** across a 6×
 parameter range (Experiments 13, 19: GPT-2 medium 355M and large 774M recover 89% and 84% at α=8, with the
-124M → 355M → 774M α=8 recovery flat at 84% / 89% / 84%), **architecture-robust** (Experiment 21: Qwen3-1.7B,
-a non-GPT-2 architecture with RMSNorm / rotary positions / SwiGLU / grouped-query attention, recovers 94% at
-α=8), and **prompt-family-robust** (Experiment 15: a
+124M → 355M → 774M α=8 recovery flat at 84% / 89% / 84%), **architecture-robust as a sweep of three families**
+(Experiment 21: Qwen3-1.7B with RMSNorm / rotary / SwiGLU / grouped-query attention recovers 94% at α=8;
+Experiment 24: Pythia-410m / GPT-NeoX with a parallel-residual block recovers 81% — 81–94% across all three),
+and **prompt-family-robust** (Experiment 15: a
 FineWeb-trained corrector recovers 77% on held-out technical prose and 60% on out-of-distribution Python code
 at α=8, degrading smoothly with distribution shift); GPT-2 XL and non-GPT-2 architectures remain open. (4) The small
 non-positive `ΔLM` at low `α`
