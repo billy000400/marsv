@@ -386,41 +386,61 @@ support:
 - **Net:** the two are *consistent* at layer 6 (~8–16 vs ~11–13), but this is
   *suggestive*, not the "strong evidence" originally claimed.
 
-## Cross-model AE study: when does a reconstruction elbow appear? (Qwen3-1.7B; operator request 2026-07-07) — done
+## Cross-model AE study: what does a reconstruction elbow measure? (Qwen3-1.7B; operator request 2026-07-07) — done
 Full write-up in **`REPORT_AE.md`**; code/data/figs under `ae_study/`. A colleague reported an AE
-reconstruction *elbow* on Qwen3-1.7B; we reproduced their exact setup (Qwen3-1.7B last-token
-activations, layers 2 & 10, FineWeb-Edu, seq_len 10, the large `2048→4096→4096→2048→k` ≈67M-param
-`DeepAutoencoder` imported unchanged, MSE on raw acts) to find what actually controls the elbow.
+reconstruction *elbow* on Qwen3-1.7B (`ae_study/lasse.png`): held-out error drops, bottoms out near
+`k≈50`, then *rises* toward `k=500`. We reproduced their exact setup (Qwen3-1.7B last-token activations,
+layers 2 & 10, FineWeb-Edu, seq_len 10, the large `2048→4096→4096→2048→k` ≈67M-param `DeepAutoencoder`
+imported unchanged, MSE on raw acts) and asked what that elbow actually measures.
 
-**Faithful reproduction → no elbow.** Held-out FVU declines smoothly and never plateaus:
+**Reproduction succeeds (correcting an earlier claim).** An earlier version of this study swept only
+`k∈{5..30}` — i.e. it stopped *before* the minimum — saw a smooth decline, and wrongly reported "no
+elbow." Sweeping the **full range to `k=500`** (3000 steps/k, seed 0, layer 2) reproduces the
+`lasse.png` U-shape:
 
-| layer | k=5 | k=10 | k=15 | k=20 | k=25 | k=30 | top-1 PCA frac | participation ratio |
-|-------|-----|------|------|------|------|------|----------------|---------------------|
-| 2  | 0.569 | 0.476 | 0.443 | 0.428 | 0.412 | 0.404 | 0.034 | **245** |
-| 10 | 0.629 | 0.545 | 0.501 | 0.469 | 0.452 | 0.434 | 0.145 | **42**  |
+| k | 5 | 10 | 20 | 30 | 40 | 50 | 75 | 100 | 200 | 500 |
+|---|---|----|----|----|----|----|----|-----|-----|-----|
+| val rel-L2 ↓ | 0.576 | 0.527 | 0.501 | 0.489 | 0.486 | 0.486 | 0.490 | **0.486** | 0.504 | 0.529 |
+| val cosine ↑ | 0.780 | 0.818 | 0.840 | 0.850 | 0.852 | 0.853 | 0.851 | **0.853** | 0.841 | 0.821 |
+| val FVU ↓    | 0.581 | 0.494 | 0.444 | 0.420 | 0.413 | 0.411 | 0.416 | **0.410** | 0.441 | 0.488 |
+| **train** rel-L2 ↓ | 0.557 | 0.500 | 0.474 | 0.464 | 0.465 | 0.466 | 0.473 | 0.467 | 0.488 | 0.513 |
 
-At k=30 the 67M-param AE still leaves ~40% of variance unexplained and each added dimension still helps
-— a soft low-contrast Kneedle k≈10, not a plateau. These clouds are genuinely high-dimensional (PR
-42–245; 1300–1500 PCs for 95% variance), unlike GPT-2 L6 which puts 90.4% of variance in one direction
-(PR≈1.2).
+Held-out rel-L2 bottoms out at a **broad `k≈40–100` (≈0.486)** and rises to 0.529 at `k=500`; cosine
+peaks (≈0.853) and declines to 0.821. Same shape as the colleague; our error floor is higher (0.486 vs
+their ~0.407) only because we train 3000 steps vs ~50k.
 
-**Controlled experiment — one factor switches the elbow on.** Rescale a single coordinate of the *same*
-isotropic Qwen L2 activations to carry 90% of the variance (matching GPT-2's massive-activation
-structure), changing nothing else, and re-sweep wide-k FVU:
+![Reproduction of lasse.png (Qwen L2, 67M AE): held-out cosine peaks / rel-L2 minimises near k≈50–100, then reverses; train overlay turns over too](plots/qwen_ae_lasse_repro.png)
+
+**The turnaround is an optimization artifact, not a manifold dimension.** Two facts pin this down. (1)
+The **same turnaround appears on the training set** (train rel-L2 bottoms at `k≈30` = 0.464 and rises to
+0.513 at `k=500`; last row above) — so the held-out rise is **not** overfitting, which would keep train
+error falling. (2) A wider bottleneck AE *contains* a narrower one (dead-wire the extra latent
+coordinates), so at convergence reconstruction error is monotonically non-increasing in `k`; a *rising*
+error can only mean the wider AEs are **under-optimized at the fixed step budget**. So the `k≈50`
+optimum marks where fixed-budget trainability turns over, not the data's degrees of freedom. Even at the
+optimum the reconstruction is mediocre (FVU ≈0.41, cosine ≈0.85), consistent with a genuinely
+high-dimensional cloud (Qwen L2/L10 participation ratio **245 / 42**; 1300–1500 PCs for 95% variance),
+unlike GPT-2 L6 (90.4% of variance in one direction, PR≈1.2).
+
+**A *different*, genuinely sharp elbow exists — only under concentrated variance (controlled
+experiment).** Rescale a single coordinate of the *same* isotropic Qwen L2 activations to carry 90% of
+the variance (matching GPT-2's massive-activation structure), changing nothing else, and re-sweep
+wide-k FVU:
 
 | condition | top-1 var frac | k=1 | k=2 | k=4 | k=8 | k=16 | k=32 | k=64 |
 |-----------|---------------|-----|-----|-----|-----|------|------|------|
 | isotropic (real Qwen L2)  | 0.012 | 0.851 | 0.751 | 0.641 | 0.542 | 0.488 | 0.451 | 0.448 |
 | + injected massive dim    | 0.90  | 0.099 | 0.088 | 0.077 | 0.068 | 0.066 | 0.066 | 0.066 |
 
-The injected run reaches FVU 0.099 at *k=1* and is flat from k≈16 — a genuine steep-then-flat elbow —
-while the isotropic run keeps declining at k=64. **Conclusion: an AE-reconstruction elbow is a readout
-of variance concentration (anisotropy), not of the model, layer, token position, dataset, seq-length,
-or AE size.** This corroborates cross-model the GPT-2 finding that the AE "elbow" tracks the dominant
-variance direction, not a demonstrated low-dimensional manifold. (Un-matched factor: we trained
-2k–4k steps vs the colleague's ~50k; under-training shifts the whole curve up but not its knee.)
+The injected run reaches FVU 0.099 at *k=1* and is flat from k≈16 — a genuine steep-then-flat plateau —
+while the isotropic run keeps declining at k=64. **So there are two distinct "elbows": the colleague's
+broad turnaround at `k≈50` (a training-budget artifact) and a sharp low-k plateau (a variance-
+concentration signature). A knee-detector flags both, but neither certifies a low-dimensional
+manifold.** The sharp elbow tracks the dominant variance direction, corroborating cross-model the GPT-2
+finding. (Un-matched factor: we trained 2k–3k steps vs the colleague's ~50k; under-training raises the
+whole curve but leaves the U-shape and the train-set turnaround intact.)
 
-![Controlled experiment: only concentrated variance yields a sharp low-k FVU elbow; isotropic Qwen L2 keeps declining](plots/qwen_ae_wide_controlled.png)
+![Controlled experiment: only concentrated variance yields a sharp low-k FVU plateau; isotropic Qwen L2 keeps declining](plots/qwen_ae_wide_controlled.png)
 
 ## Headline (honest, post-review)
 **On one pooled FineWeb activation sample from GPT-2 small, the layer-6 residual stream

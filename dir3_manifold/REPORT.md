@@ -244,26 +244,32 @@ The **TwoNN/MLE local ID is the robust signal**; the AE merely fails to contradi
 
 ### Cross-model check: what makes an AE elbow appear? (Qwen3-1.7B)
 A colleague reported a reconstruction *elbow* on **Qwen3-1.7B** using a much larger deep autoencoder
-(`2048→4096→4096→2048→k`, ≈ 67 M params) on last-token activations. We reproduced that setup to test
-whether an AE elbow is a real intrinsic-dimension signature or the same raw-variance artifact we see in
-GPT-2. **Full study in `REPORT_AE.md`; the high-level result:**
+(`2048→4096→4096→2048→k`, ≈ 67 M params) on last-token activations (`ae_study/lasse.png`): held-out
+error drops, bottoms out near k ≈ 50, then *rises* toward k = 500. We reproduced that setup to ask what
+the elbow measures. **Full study in `REPORT_AE.md`; the high-level result:**
 
-- **Faithful reproduction shows no elbow.** On Qwen3-1.7B last-token activations (layers 2 and 10,
-  FineWeb-Edu, seq_len 10), held-out FVU falls **smoothly and never plateaus** (layer 2: 0.57 at k = 5
-  → 0.40 at k = 30, still improving; layer 10 similar). At k = 30 the AE still leaves ~40% of variance
-  unexplained.
-- **Why: these activations are near-isotropic.** Qwen last-token clouds have a PCA participation ratio
-  of **245 (layer 2)** and **42 (layer 10)** and put ≤ 3.4% of variance in any one direction — versus
-  GPT-2 layer 6, which puts **90.4%** in a single "massive-activation" direction (PR ≈ 1.2). A narrow
-  bottleneck cannot plateau on data this spread out.
-- **A single factor switches the elbow on.** Taking the *same* isotropic Qwen activations and rescaling
-  one coordinate to carry 90% of the variance (matching GPT-2's structure) makes the identical AE snap
-  to a **sharp low-k knee with a flat plateau** (FVU ≈ 0.10 at k = 1, flat at ~0.066 by k = 16). So the elbow is a readout of
-  **variance concentration (anisotropy)**, not of model, layer, token position, dataset, or AE size.
+- **Reproduction succeeds (correcting an earlier claim).** An earlier version of this study swept only
+  k ∈ {5…30} — i.e. it stopped *before* the minimum — and wrongly reported "no elbow." Sweeping the
+  **full range to k = 500** reproduces the colleague's U-shape: held-out relative-L2 error falls to a
+  broad minimum at k ≈ 40–100 (≈ 0.486) and rises to 0.529 at k = 500; cosine peaks (≈ 0.853) then
+  declines. Our error floor is higher than the colleague's (0.486 vs ~0.407) only because we train 3,000
+  steps vs their ~50,000.
+- **The turnaround is an optimization artifact, not a manifold dimension.** The *same* turnaround
+  appears on the training set (train rel-L2 bottoms at k ≈ 30 = 0.464, rises to 0.513 at k = 500), so it
+  is not overfitting. And a wider bottleneck AE contains a narrower one as a special case, so at
+  convergence error cannot rise with k — the observed rise is under-optimization at the fixed step
+  budget. So k ≈ 50 marks where fixed-budget trainability turns over, not the data's dimension; the
+  optimum is also a poor reconstruction (FVU ≈ 0.41).
+- **A *different*, genuinely sharp elbow appears only under concentrated variance.** Qwen last-token
+  clouds are near-isotropic — PCA participation ratio **245 (layer 2)** / **42 (layer 10)**, ≤ 3.4% of
+  variance in any one direction — versus GPT-2 layer 6's **90.4%** in a single "massive-activation"
+  direction (PR ≈ 1.2). Rescaling one Qwen coordinate to carry 90% of the variance (matching GPT-2)
+  makes the identical AE snap to a **sharp low-k knee with a flat plateau** (FVU ≈ 0.10 at k = 1, flat
+  at ~0.066 by k = 16) — a variance-concentration signature, switched on by anisotropy alone.
 
-This confirms cross-model what the GPT-2 sweep already suggested: the AE "elbow" tracks the dominant
-variance direction, so it is **consistent with, not proof of, a low-dimensional manifold**. The
-trustworthy dimensionality signal remains the local ID estimators.
+So a *plateauing* low-k elbow tracks the dominant variance direction (as in GPT-2), while a *turnaround*
+elbow like the colleague's tracks the training budget. Neither, on its own, is proof of a
+low-dimensional manifold; the local ID estimators remain the primary dimensionality signal.
 
 ### Depth trend
 Nonlinear ID grows gently with depth — mean(TwoNN, MLE) ≈ 6 (L0) → 9 (L3) → 12 (L6) → 14 (L9) → ~14
