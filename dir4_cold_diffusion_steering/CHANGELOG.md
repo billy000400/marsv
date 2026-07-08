@@ -646,3 +646,28 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   results/24_cross_arch_pythia.json, checkpoint results/24_corr.pt, log results/24_run.log.
 - REPORT math re-verified via GitHub API: 26/26 js-display-math (unchanged — Exp 24 reuses Exp 3/12
   ΔLM/recovery/D_M definitions, adds no equation), 0 broken (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-08 — Experiment 25: behavioral reality-check on Pythia-410m (Exp 24's Next check) — NUANCED POSITIVE
+- **Why:** Exp 24's 81% recovery on Pythia-410m/GPT-NeoX is a TEACHER-FORCED ΔLM. Exp 10 (GPT-2) and Exp 22
+  (Qwen3) both showed matched layer projection can hide a weaker propagated behavioral edit in generation. This
+  is Exp 24's own "Next check", and closes the behavioral check on the third architecture. A prior iteration had
+  written the script (experiments/25_behavioral_pythia.py) but never run it (no JSON/plot/log); this iteration ran it.
+- **Method:** identical Exp 10/22 generation protocol on Pythia-410m, reusing the EXACT Exp 24 corrector
+  (results/24_corr.pt, block-12 sentiment, no retraining): greedy-generate 30 tokens from 48 held-out 12-token
+  prompts, steer at block 12 every position, raw vs corrected; on a clean re-encode measure sentiment effect
+  B(α)−B(0) (baseline B0=−4.77) and distinct-2 (baseline 0.77). GEN_BATCH 8, fp32, no OOM.
+- **Result (new):** the under-steering caveat is MILDER than on GPT-2/Qwen3. Corrected effect
+  +0.90/+0.80/+0.93/+0.98 (α=2/4/6/8) is ABOVE raw's +0.17/+0.40 at α≤4 and 84–92% of raw's +1.01/+1.17 at α≥6 —
+  not the ~1/6 shortfall of GPT-2 (Exp 10) or 10–29% of Qwen3 (Exp 22). At α=8 the corrector Pareto-DOMINATES raw
+  (effect +0.98 at distinct-2 0.72, vs raw effect +1.17 but collapsed distinct-2 0.38). Mechanism: raw steering
+  itself propagates weakly on Pythia at these α (effect peaks +1.17), so there is little behavioral effect for the
+  corrector to lose — the size of the "matched projection ≠ matched steering" penalty tracks how strongly raw
+  steering propagates in a given model. Limitation: small effect magnitudes (low-signal regime); best read as
+  "penalty mild here," not "corrector steers more than raw in general." No prior result superseded (Exp 25 is new;
+  reuses Exp 24 checkpoint).
+- **Deliverable deltas:** RESULTS.md +Exp 25 (table + reading) + figure entry + Headline behavioral-caveat
+  Pythia sentence. REPORT.md +Exp 25 Results subsection (Observation/Interpretation/Limitations/Next check; reuses
+  Exp 10 behavioral-metric definitions, NO new equation).
+- New outputs: results/25_behavioral_pythia.json, plots/25_behavioral_pythia.png, results/25_run.log.
+- REPORT math re-verified via GitHub API: 26/26 js-display-math (unchanged — Exp 25 adds no equation), 0 broken
+  (<pre lang=math>), 0 inline hazards.

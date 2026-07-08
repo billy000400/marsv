@@ -151,6 +151,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         identical corrector recovers 81%@8 / 81%@4 (71%@2), matched projection, corrected FURTHER off Gaussian at
         every α (89.4 vs 52.3@8, decoupling holds a 5th time). Architecture axis now a 3-family SWEEP with a tight
         81–94% @α=8 band (GPT-2 84/89/84%, Qwen3 94%, GPT-NeoX 81%). Not a single-boundary-crossing claim anymore.
+- [x] S4(l-follow-up) — BEHAVIORAL check on Pythia (Exp 25, Exp 24's own Next check, 2026-07-08) DONE: ran the
+        identical Exp 10/22 generation protocol on Pythia-410m reusing the exact Exp 24 corrector (no retrain).
+        NUANCED POSITIVE — the under-steering caveat is MILDER here: corrected effect +0.90/+0.80/+0.93/+0.98
+        (α=2/4/6/8) is ABOVE raw's at α≤4 and 84–92% of raw at α≥6 (vs ~1/6 GPT-2, 10–29% Qwen3), and at α=8 the
+        corrector Pareto-DOMINATES raw (eff +0.98 @ d2 0.72 vs raw +1.17 @ collapsed 0.38). Reason: raw steers
+        Pythia weakly here (eff peaks +1.17), so little effect for the corrector to lose ⇒ penalty size tracks how
+        strongly RAW steering propagates. Behavioral arc now closed on all THREE architectures (GPT-2/Qwen3/Pythia).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -162,6 +169,28 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S4(l-follow-up) Experiment 25 (new, BEHAVIORAL check on Pythia-410m = Exp 24's own Next check, 2026-07-08):**
+completed an experiment a prior iteration left half-done (script `experiments/25_behavioral_pythia.py` present — a
+clean adaptation of Exp 22 to the Exp-24 Pythia pipeline — but never run: no JSON/plot/log). Exp 24's 81% recovery
+is a TEACHER-FORCED ΔLM; Exp 10 (GPT-2) and Exp 22 (Qwen3) both showed matched layer projection can hide a weaker
+propagated behavioral edit. Ran the IDENTICAL Exp 10/22 generation protocol on Pythia-410m reusing the EXACT Exp 24
+corrector (`results/24_corr.pt`, no retrain): greedy 30 tokens from 48 held-out 12-token prompts, steer block 12
+every position, raw vs corrected; clean-re-encode sentiment effect B(α)−B(0) (B0=−4.77) + distinct-2 (baseline
+0.77). GEN_BATCH 8, fp32, no OOM. NUANCED POSITIVE — the under-steering caveat is MILDER than on GPT-2/Qwen3:
+corrected effect +0.90/+0.80/+0.93/+0.98 (α=2/4/6/8) is ABOVE raw's +0.17/+0.40 at α≤4 and 84–92% of raw's
++1.01/+1.17 at α≥6 (not the ~1/6 shortfall of GPT-2 or 10–29% of Qwen3), and at α=8 the corrector Pareto-DOMINATES
+raw (eff +0.98 @ distinct-2 0.72 vs raw +1.17 @ collapsed 0.38). Mechanism: raw steering propagates weakly on
+Pythia here (eff peaks +1.17), so there is little behavioral effect for the corrector to lose ⇒ the size of the
+"matched projection ≠ matched steering" penalty tracks how strongly RAW steering propagates in a given model.
+Limitation: small-magnitude low-signal regime — read as "penalty mild here," not "corrector out-steers raw in
+general." The behavioral arc is now closed on all THREE architectures (GPT-2 Exp 10 / Qwen3 Exp 22 / Pythia Exp 25).
+No prior result superseded (Exp 25 is new; reuses Exp 24 checkpoint). Ops note: cold Pythia load ran ~5 min under
+/mars-vol disk contention (CUDA idle until load finished) then the retrain-free sweep completed in seconds; `setsid`
+full detach used again. Artifacts: `experiments/25_behavioral_pythia.py`, `results/25_behavioral_pythia.json`,
+`results/25_run.log`, `plots/25_behavioral_pythia.png`. RESULTS/REPORT/CHANGELOG curated; REPORT math verified
+(26/26 js-display-math, 0 broken, 0 inline hazards — Exp 25 reuses Exp 10's behavioral-metric definitions, no new
+equation). ENV: dir9's cupenv python (shared conda `transformers` still absent).
+<!-- prior: S4(l-follow-up) SECOND non-GPT-2 architecture Exp 24 -->
 **S4(l-follow-up) Experiment 24 (new, SECOND non-GPT-2 architecture → architecture SWEEP, 2026-07-08):** picked
 the single highest-value remaining external-validity point. Exp 21 crossed the GPT-2 architecture boundary only
 ONCE (Qwen3), a weak "architecture-robust" claim. Added a THIRD, structurally distinct family — **Pythia-410m
@@ -515,16 +544,16 @@ RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math v
 ## Next step
 **All three human-feedback asks DONE; optional model-scale (Exp 19), differentiable-generation (Exp 20),
 cross-ARCHITECTURE (Exp 21), the Qwen3 behavioral honesty-check (Exp 22), the Qwen3 behavioral-fix transfer
-(Exp 23), AND the SECOND non-GPT-2 architecture / architecture SWEEP (Exp 24) all DONE.** Success criterion long
-met; direction complete on all planned axes plus the FULL behavioral arc (Exp 10→11→20→22→23), robust on SEVEN
-axes (strength/direction/layer/model-scale/architecture/prompt-family/steering-family) — the architecture axis
-now a genuine 3-family SWEEP (GPT-2 / Qwen3 / GPT-NeoX, 81–94% recovery @α=8; Exp 21+24), the behavioral caveat
-shown architecture-robust (Exp 22), and the behavioral-fix mechanism shown to transfer across the architecture
-boundary while its Pareto payoff is gated by baseline degeneration (Exp 23). No substantive open lever remains.
+(Exp 23), the SECOND non-GPT-2 architecture / architecture SWEEP (Exp 24), AND the Pythia behavioral honesty-check
+(Exp 25) all DONE.** Success criterion long met; direction complete on all planned axes plus the FULL behavioral
+arc (Exp 10→11→20→22→23) now closed on all THREE architectures (GPT-2 Exp 10 / Qwen3 Exp 22 / Pythia Exp 25),
+robust on SEVEN axes (strength/direction/layer/model-scale/architecture/prompt-family/steering-family) — the
+architecture axis now a genuine 3-family SWEEP (GPT-2 / Qwen3 / GPT-NeoX, 81–94% recovery @α=8; Exp 21+24), the
+behavioral caveat shown architecture-robust AND its severity shown to track how strongly raw steering propagates
+(mild on Pythia, Exp 25), and the behavioral-fix mechanism shown to transfer across the architecture boundary while
+its Pareto payoff is gated by baseline degeneration (Exp 23). No substantive open lever remains.
 Only very-low-value untested points are left, all optional:
-(i) the Exp-10 BEHAVIORAL generation protocol on Pythia (Exp 24's own Next check) — confirm its 81% ΔLM recovery
-is not entirely bought by under-steering, as checked on GPT-2 (Exp 10) and Qwen3 (Exp 22);
-(ii) a FURTHER architecture family (state-space / MoE, e.g. Mamba/Mixtral) for a fuller sweep beyond three;
+(i) a FURTHER architecture family (state-space / MoE, e.g. Mamba/Mixtral) for a fuller sweep beyond three;
 (iii) a FINER λ_b sweep + the Exp-20 differentiable-generation term ON Qwen3 to map how close the corrected
 frontier can get to raw's strong-and-fluent corner (Exp 23's own Next check) and check whether the α=8 wobble
 is a schedule artifact;

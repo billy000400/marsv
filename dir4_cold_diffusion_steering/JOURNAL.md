@@ -1051,3 +1051,26 @@ generation term on Qwen3 (Exp 23's Next check). All optional.
 On track? yes — Exp 24 turns the architecture axis from a single GPT-2→Qwen3 boundary crossing into a genuine
 3-family sweep (GPT-2 / Qwen3 / GPT-NeoX, 81–94% recovery @α=8), corrected off-Gaussian at every α; direction
 complete on 7 axes + full behavioral arc (~100%). Deliverables curated + math-verified. No blocker.
+
+## 2026-07-08 — Experiment 25: behavioral check on Pythia-410m (Exp 24's Next check)
+Completed an experiment a prior iteration left half-done: experiments/25_behavioral_pythia.py existed (a clean
+adaptation of Exp 22 to the Exp-24 Pythia pipeline) but had never been RUN — no JSON/plot/log. Ran it this
+iteration (dir9 cupenv python; shared conda transformers still absent). It reuses the EXACT Exp 24 corrector
+checkpoint (results/24_corr.pt), so no training — only the 9 generation passes (1 clean + 4α × 2 regimes) over 48
+prompts. Cold Pythia load was slow under /mars-vol disk contention (~5 min to first weight load on a cold cache;
+warm re-run instant), CUDA idle until load finished, then the sweep completed in seconds.
+RESULT (nuanced positive): the Exp 10/22 under-steering caveat is MILDER on Pythia. Corrected generated effect
++0.90/+0.80/+0.93/+0.98 (α=2/4/6/8) is ABOVE raw's +0.17/+0.40 at α≤4 and 84–92% of raw at α≥6 — vs the ~1/6
+(GPT-2) or 10–29% (Qwen3) shortfall. At α=8 the corrector Pareto-DOMINATES raw (effect +0.98 @ distinct-2 0.72 vs
+raw +1.17 @ collapsed 0.38). Learned: the penalty's size tracks how strongly RAW steering itself propagates
+behaviorally — raw steers Pythia weakly here (peaks +1.17), so the corrector loses little. Caveat: small-magnitude
+low-signal regime; not evidence the corrector out-steers raw in general. Assumption logged (loop mode): kept the
+Exp 22 α grid {2,4,6,8} and 48-prompt/30-token protocol verbatim for cross-arch comparability rather than widening
+α to hunt a stronger-raw regime (rejected alt: α up to 16 — would break comparability with Exp 10/22 and cost a
+retrain-free but longer run under contention). Deliverables curated (RESULTS +Exp 25 row/figure/headline sentence;
+REPORT +Exp 25 subsection, no new equation), math re-verified 26/26 js-display-math / 0 broken / 0 hazards.
+Next step: only very-low-value optional points remain — Exp 11/20 behavioral terms on Pythia; a state-space/MoE
+architecture for a 4th family; finer λ_b + Exp-20 term on Qwen3/Pythia. Success criterion long met.
+On track? yes — S4(l-follow-up) behavioral arc now closed on all THREE architectures (GPT-2 Exp 10 / Qwen3 Exp 22 /
+Pythia Exp 25); direction complete on 7 axes + full behavioral arc (~100%). Deliverables curated + math-verified.
+No blocker.

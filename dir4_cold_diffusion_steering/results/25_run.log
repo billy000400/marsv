@@ -1,0 +1,13 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  45%|████▌     | 132/292 [00:00<00:00, 1303.58it/s]Loading weights:  90%|█████████ | 263/292 [00:00<00:00, 1176.73it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 950.23it/s] 
+model=EleutherAI/pythia-410m layer=12 d=1024 device=cuda
+|v| = 3.29
+loaded Exp 24 corrector (5.25M params)
+48 prompts x 12 tokens, generating 30
+clean: B0=-4.765 distinct2=0.765
+alpha= 2.0  raw: eff=+0.17 d2=0.810  | corr: eff=+0.90 d2=0.823
+alpha= 4.0  raw: eff=+0.40 d2=0.856  | corr: eff=+0.80 d2=0.759
+alpha= 6.0  raw: eff=+1.01 d2=0.744  | corr: eff=+0.93 d2=0.733
+alpha= 8.0  raw: eff=+1.17 d2=0.382  | corr: eff=+0.98 d2=0.716
+saved figure + results
+[W708 03:07:25.601163245 AllocatorConfig.cpp:28] Warning: PYTORCH_CUDA_ALLOC_CONF is deprecated, use PYTORCH_ALLOC_CONF instead (function operator())

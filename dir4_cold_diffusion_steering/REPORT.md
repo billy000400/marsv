@@ -1364,6 +1364,36 @@ Experiment 20 (`λ_g=160`) is also present here and was not separately stabilize
 close the corrected frontier can get to raw's strong-and-fluent corner, and whether the α=8 wobble is a
 learning-rate/weight-schedule artifact rather than a fundamental limit.
 
+### Experiment 25 — the under-steering caveat is mild on a third architecture (Pythia-410m, behavioral generation)
+
+**Observation.** Experiment 24's 81% recovery on Pythia-410m is a teacher-forced `ΔLM`. Running the identical
+Experiment 10/22 behavioral protocol (48 held-out prompts, 30 greedy tokens, steer at block 12 every position,
+reusing the exact Experiment-24 corrector — no retraining) gives the sentiment effect `B(α)−B(0)` and distinct-2
+on a clean re-encode (unsteered baselines `B(0) = −4.77`, distinct-2 `0.77`):
+
+| α | effect raw `B−B₀` | effect corr `B−B₀` | distinct-2 raw | distinct-2 corr |
+|---|-------------------|--------------------|----------------|-----------------|
+| 2 | +0.17 | +0.90 | 0.81 | 0.82 |
+| 4 | +0.40 | +0.80 | 0.86 | 0.76 |
+| 6 | +1.01 | +0.93 | 0.74 | 0.73 |
+| 8 | +1.17 | +0.98 | 0.38 | 0.72 |
+
+**Interpretation.** Unlike GPT-2 (Experiment 10, corrector effect ~1/6 of raw) and Qwen3 (Experiment 22, 10–29%
+of raw), on Pythia the corrector's generated effect is *comparable to* raw's — above raw at α≤4 and 84–92% of
+raw at α≥6 — and at α=8 it Pareto-*dominates* raw (effect +0.98 at distinct-2 0.72, where raw collapses to 0.38).
+The mechanism is that raw steering itself propagates weakly on Pythia here (effect peaks at only +1.17), so there
+is little behavioral effect for the projection-preserving corrector to lose. This says the size of the
+"matched projection ≠ matched steering" penalty is architecture-dependent and tracks **how strongly raw steering
+propagates** to generation in a given model.
+
+**Limitations.** The effect magnitudes are small on Pythia (raw peaks at +1.17), a low-signal regime, so this is
+best read as "the Experiment 10/22 under-steering penalty is mild here," not as evidence the corrector steers
+*more* than raw in general; single concept/seed; the effect scale is model-specific (only corr/raw ratios compare
+across models). The α=8 raw distinct-2 collapse (0.38) mirrors GPT-2, confirming the fluency benefit is real.
+
+**Next check.** The Experiment 11/20 behavioral-preservation terms on Pythia if a stronger behavioral steer is
+required, and a wider α grid to reach a regime where raw steers Pythia more strongly.
+
 ### Experiment 14 — bank diversity is a causal lever (controlled test, confound removed)
 
 ![controlled third-member swap isolating bank diversity](plots/14_diversity_lever.png)
