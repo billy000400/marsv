@@ -671,3 +671,12 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - New outputs: results/25_behavioral_pythia.json, plots/25_behavioral_pythia.png, results/25_run.log.
 - REPORT math re-verified via GitHub API: 26/26 js-display-math (unchanged — Exp 25 adds no equation), 0 broken
   (<pre lang=math>), 0 inline hazards.
+
+## 2026-07-08 — Finalization pass (no deliverable numbers changed)
+- Verification-only iteration: with the direction complete on all seven external-validity axes
+  (strength/direction/layer/model-scale/architecture/prompt-family/steering-family) and the full
+  behavioral arc closed on all three architectures (GPT-2 Exp 10 / Qwen3 Exp 22 / Pythia Exp 25),
+  confirmed RESULTS.md and REPORT.md are current-best: both carry every experiment through Exp 25,
+  all plots/2[1-5]_*.png present.
+- REPORT math re-verified via GitHub API: 26/26 js-display-math, 0 broken (<pre lang=math>),
+  0 inline-math hazards. No result superseded; no equation added. STOP file created.

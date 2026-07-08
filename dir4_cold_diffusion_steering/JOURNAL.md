@@ -1074,3 +1074,15 @@ architecture for a 4th family; finer λ_b + Exp-20 term on Qwen3/Pythia. Success
 On track? yes — S4(l-follow-up) behavioral arc now closed on all THREE architectures (GPT-2 Exp 10 / Qwen3 Exp 22 /
 Pythia Exp 25); direction complete on 7 axes + full behavioral arc (~100%). Deliverables curated + math-verified.
 No blocker.
+
+## 2026-07-08 — Finalization / STOP
+Did: re-read CLAUDE.md, BUDGET.md, PLAN/JOURNAL/RESULTS/CHANGELOG. Direction is complete on all planned
+axes (Exp 1–25) and all three human-feedback asks; deliverables were already curated to current-best in
+the Exp 25 iteration. This iteration is a verification-only finalization (time budget in the finalize
+window): confirmed REPORT.md + RESULTS.md both include every experiment through Exp 25, all 21–25 plots
+present, and re-ran the GitHub markdown math check on REPORT.md = 26/26 js-display-math, 0 broken, 0
+inline hazards. Appended a CHANGELOG finalization note (no numbers changed) and created STOP.
+Learned: nothing new numerically; the deliverables pass the CLAUDE.md §8 rendering checks as-is.
+Next step: none required — success criterion long met. Optional low-value future points (Exp 11/20
+behavioral terms on Pythia; a state-space/MoE 4th architecture) remain but are not needed.
+On track? yes — direction complete (~100%), deliverables current-best + math-verified, STOP written. No blocker.
