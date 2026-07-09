@@ -1364,6 +1364,36 @@ extra ~7 points come from easy sub-word and punctuation targets the corrector fi
 without overturning, the token-control story: recovery is uniform *within* whole words (Exp 35/36) and the corrector
 is strongest on the easiest (non-word) token kinds.
 
+**Experiment 38 — Metric control: does the corrector recover next-token ACCURACY, not just nats?**
+Every recovery number above is measured in cross-entropy nats (`ΔLM`). A cross-entropy improvement could in
+principle come entirely from re-shaping the probability *tail* while the model's actual argmax prediction stays
+broken — which would make the headline a soft-metric artifact. We close that gap by scoring the exact flagship
+pipeline (GPT-2 small, block 6, sentiment `v`, seed 0 corrector) on a harder-to-game metric: **next-token top-1
+(greedy) accuracy** and **top-5 accuracy** on the same held-out 100 docs, for clean / raw-steered /
+learned-corrected activations at matched projection `α|v|`. We report an **accuracy recovery**, the direct
+analogue of the `ΔLM` recovery — the fraction of raw steering's accuracy *drop* the corrector buys back:
+`acc_recovery(α) = (acc_learned − acc_raw) / (acc_clean − acc_raw)`.
+
+| α | top-1 clean | top-1 raw | top-1 learned | **top-1 recovery** | **top-5 recovery** |
+|---|---|---|---|---|---|
+| 1 | 0.356 | 0.344 | 0.357 | 110% | 109% |
+| 2 | 0.356 | 0.324 | 0.355 | 97% | 94% |
+| 4 | 0.356 | 0.239 | 0.342 | **88%** | 88% |
+| 6 | 0.356 | 0.166 | 0.323 | **83%** | 84% |
+| 8 | 0.356 | 0.118 | 0.297 | **75%** | 78% |
+
+**Reading it: the nats recovery is not a tail-mass artifact — the corrector restores the model's actual
+predictions.** Raw steering does not merely inflate cross-entropy; it *crushes* the model's argmax accuracy, from
+a clean 0.356 down to **0.118 at α=8** (a 67% relative drop) — the model gets two-thirds fewer next tokens right.
+The learned corrector restores top-1 accuracy to **0.297 at α=8**, recovering **75% of that drop** (88% at α=4,
+≈100% at α≤2), and top-5 accuracy recovers similarly (78% at α=8). Because top-1 accuracy depends only on which
+token is *most likely* — not on the tail probability mass that cross-entropy also rewards — this rules out the
+worry that the flagship `ΔLM` recovery is a soft-metric artifact: the corrector genuinely puts the right token
+back on top. The accuracy recovery runs slightly *below* the nats recovery (75% vs 84.3% at α=8), which is honest
+and expected — recovering the single argmax is a stricter bar than recovering average log-probability — but the
+two metrics broadly agree, so the headline holds under a metric it was never trained on. (`α=1` reads >100% for
+the usual ratio reason: raw's accuracy drop is tiny there, so the denominator is near zero.)
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -1398,6 +1428,10 @@ is strongest on the easiest (non-word) token kinds.
   class split into SUBWORD / PUNCT (FUNCTION / CONTENT / SUBWORD / PUNCT) for α=4 and α=8, pooled
   headline dotted — subword word-pieces recover 91.7% at α=8, near punctuation, both above the whole-word
   linguistic classes; (b) per-class excess NLL for raw vs the learned corrector at α=8.
+- `plots/38_accuracy_metric.png` — (a) next-token top-1 accuracy vs α (clean dashed, raw, learned
+  corrector) — raw crushes accuracy 0.356→0.118 at α=8, the corrector restores it to 0.297; (b) top-1 and
+  top-5 accuracy recovery vs α, with the ΔLM recovery (84%) marked — accuracy recovery (75% top-1 @α=8)
+  broadly tracks the nats recovery, so the headline is not a soft-metric artifact.
 - `plots/03_learned_corrector.png` — (a) ΔLM, (b) `D_M`, (c) projection retention vs α for raw,
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the
@@ -1537,7 +1571,7 @@ nats at α=8). Correcting toward the **Gaussian manifold backfires** — an anal
 preserving corrector cuts off-manifold distance 22% but *worsens* LM loss to +4.2 nats. But a
 **learned corrector supervised by the LM loss** — same projection-preserving form, so the layer-6
 steering projection is untouched — **recovers 84% of the teacher-forced fluency damage** (ΔLM
-+2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33; and **flat across token position** — recovery holds an 80.7–83.5% band from token 16 to 126, so the pooled headline is not a pooling artifact, Exp 34, and content words are recovered as well as function words — 77.5% vs 73.9% at α=8, Exp 35, uniformly across content-word frequency, Exp 36; the whole-word linguistic-only recovery is a still-strong ~77% at α=8, with the pooled 84% lifted by near-complete recovery of easy sub-word and punctuation tokens, Exp 37) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
++2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33; and **flat across token position** — recovery holds an 80.7–83.5% band from token 16 to 126, so the pooled headline is not a pooling artifact, Exp 34, and content words are recovered as well as function words — 77.5% vs 73.9% at α=8, Exp 35, uniformly across content-word frequency, Exp 36; the whole-word linguistic-only recovery is a still-strong ~77% at α=8, with the pooled 84% lifted by near-complete recovery of easy sub-word and punctuation tokens, Exp 37; and the recovery is **not a soft-metric artifact** — on next-token top-1 accuracy, a metric the corrector never trained on, raw steering crushes accuracy 0.356→0.118 at α=8 and the corrector recovers 75% of that drop, tracking the nats recovery, Exp 38) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
 "LM-safe" are decoupled; only the downstream objective finds the fluent correction. The correction is
 **direction-specific**
 — a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe

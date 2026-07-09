@@ -1002,8 +1002,56 @@ strongest on the easiest (non-word) targets. This sharpens, without overturning,
 simple has-a-letter rule on the decoded token, so a few mixed tokens (e.g. alphanumerics) are classed by that rule;
 the linguistic-vs-non-word contrast is robust to those edge cases given the class sizes.
 
-**Next check.** None material — the token-control axis (position / type / frequency / OTHER-decomposition) is now
-exhausted; any further split (POS, named entities) is expected to land in the same band and is marginal.
+**Next check.** *Done in Experiment 38* — all recovery numbers (this axis included) are in cross-entropy nats;
+Experiment 38 checks whether the recovery survives a metric the corrector never trained on: next-token accuracy.
+
+### Experiment 38 — the recovery holds on next-token accuracy, so it is not a soft-metric (tail-mass) artifact
+
+![Accuracy-metric control of the flagship recovery](plots/38_accuracy_metric.png)
+
+Every recovery number in this report is measured in cross-entropy nats (`ΔLM`). A cross-entropy improvement could, in
+principle, come entirely from re-shaping the probability *tail* while the model's actual argmax prediction stays
+broken — which would make the headline a soft-metric artifact. This experiment scores the exact flagship pipeline
+(GPT-2 small, block 6, sentiment `v`, seed 0 corrector) on a harder-to-game metric: **next-token top-1 (greedy)
+accuracy** and **top-5 accuracy** on the same held-out 100 docs, for clean / raw-steered / learned-corrected
+activations at matched projection `α|v|`. Top-k accuracy is the fraction of non-pad targets `y_t` in the model's
+top-k prediction under patch `f`:
+
+```math
+\mathrm{acc}_k(f) = \frac{1}{N}\sum_{t} \mathbf{1}\!\left[\, y_t \in \mathrm{top}\text{-}k\, \mathrm{softmax}\big(\mathrm{LM}_{f}(x_{<t})\big) \,\right]
+```
+
+We report an **accuracy recovery**, the direct analogue of the `ΔLM` recovery — the fraction of raw steering's
+accuracy *drop* the corrector buys back:
+
+```math
+\mathrm{acc\text{-}recovery}(\alpha) = \frac{\mathrm{acc}_{\text{learned}} - \mathrm{acc}_{\text{raw}}}{\mathrm{acc}_{\text{clean}} - \mathrm{acc}_{\text{raw}}}
+```
+
+| α | top-1 clean | top-1 raw | top-1 learned | **top-1 recovery** | **top-5 recovery** |
+|---|---|---|---|---|---|
+| 1 | 0.356 | 0.344 | 0.357 | 110% | 109% |
+| 2 | 0.356 | 0.324 | 0.355 | 97% | 94% |
+| 4 | 0.356 | 0.239 | 0.342 | **88%** | 88% |
+| 6 | 0.356 | 0.166 | 0.323 | **83%** | 84% |
+| 8 | 0.356 | 0.118 | 0.297 | **75%** | 78% |
+
+**Observation.** Raw steering does not merely inflate cross-entropy; it crushes the model's argmax accuracy, from a
+clean 0.356 down to 0.118 at α=8 (a 67% relative drop). The learned corrector restores top-1 accuracy to 0.297,
+recovering 75% of that drop (88% at α=4, ≈100% at α≤2); top-5 recovery is similar (78% at α=8). The α=1 row reads
+>100% for the usual ratio reason (raw's accuracy drop is near zero there).
+
+**Interpretation.** Because top-1 accuracy depends only on which token is *most likely* — not on the tail
+probability mass cross-entropy also rewards — the recovery is not a soft-metric artifact: the corrector genuinely
+puts the right token back on top. The accuracy recovery runs slightly below the nats recovery (75% vs 84.3% at α=8),
+which is expected — recovering the single argmax is a stricter bar than recovering average log-probability — but the
+two broadly agree, so the headline holds under a metric the corrector was never trained on.
+
+**Limitations.** One steering direction (sentiment), one model, one layer, seed 0; top-1/top-5 are one family of
+hard metrics (a calibration or generation-quality metric could behave differently).
+
+**Next check.** None material — the flagship recovery now holds in both nats and accuracy; the metric-control axis is
+exhausted.
 
 ## Conclusion
 
@@ -1013,4 +1061,4 @@ The result is also **prompt-family-robust** (a FineWeb-trained corrector recover
 
 Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The *top* of the band is seed-controlled too: five seeds on Qwen3 give 94.8 ± 1.6% at α=8 (Experiment 29), a band entirely above every other model's, so Qwen3's edge is real. Finally, GPT-2 large — the last single-seed headline model — is confirmed at 85.1 ± 1.1% at α=8 (Experiment 30), a band between GPT-2 small and medium, so the flat model-scale trend is itself seed-controlled: medium is the GPT-2 peak, large ≈ small, and recovery does not grow with scale. The seed axis now spans all five headline models across three scales and two architectures.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, steering-vector, and **joint vector×seed** resampling: a joint resample of both sampling axes (Experiment 33) leaves recovery at 80.9 ± 2.9% at α=8, a spread dominated by the vector axis and *below* the independent-quadrature prediction (3.4 pp), so the flagship is best read as 84% ± 3 pp. The last metric-control axis CLAUDE.md names is closed as well: a per-token-position breakdown (Experiment 34) shows the recovery is *flat across token position* — an 80.7–83.5% band from token 16 to 126 at α=8 — so the pooled headline is not a pooling artifact, and a per-token-*type* breakdown (Experiment 35) shows content words recover at least as well as cheap function words (77.5% vs 73.9% at α=8), and a per-content-word-*frequency* breakdown (Experiment 36) shows rare, information-rich content tokens recover identically to common ones (77.8% vs 77.3% at α=8, across a 6× clean-NLL gap), so the pooled number is neither a function-word nor an easy-common-word artifact. Decomposing the residual OTHER class (Experiment 37) shows the pooled 84% is lifted above the whole-word linguistic recovery (~77% at α=8) by near-complete recovery of easy sub-word (91.7%) and punctuation (~100%) tokens — the honest whole-word figure is a still-strong ~77%. A wider architecture family (state-space / MoE / GPT-2 XL) and rebuilding the vector from an external labelled corpus (e.g. SST-2) are the natural remaining extensions for the external-validity story.
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, steering-vector, and **joint vector×seed** resampling: a joint resample of both sampling axes (Experiment 33) leaves recovery at 80.9 ± 2.9% at α=8, a spread dominated by the vector axis and *below* the independent-quadrature prediction (3.4 pp), so the flagship is best read as 84% ± 3 pp. The last metric-control axis CLAUDE.md names is closed as well: a per-token-position breakdown (Experiment 34) shows the recovery is *flat across token position* — an 80.7–83.5% band from token 16 to 126 at α=8 — so the pooled headline is not a pooling artifact, and a per-token-*type* breakdown (Experiment 35) shows content words recover at least as well as cheap function words (77.5% vs 73.9% at α=8), and a per-content-word-*frequency* breakdown (Experiment 36) shows rare, information-rich content tokens recover identically to common ones (77.8% vs 77.3% at α=8, across a 6× clean-NLL gap), so the pooled number is neither a function-word nor an easy-common-word artifact. Decomposing the residual OTHER class (Experiment 37) shows the pooled 84% is lifted above the whole-word linguistic recovery (~77% at α=8) by near-complete recovery of easy sub-word (91.7%) and punctuation (~100%) tokens — the honest whole-word figure is a still-strong ~77%. And the recovery is not a soft-metric artifact: on next-token top-1 accuracy — a metric the corrector never trained on — raw steering crushes accuracy from 0.356 to 0.118 at α=8 and the corrector recovers 75% of that drop (78% top-5), broadly tracking the nats recovery (Experiment 38). A wider architecture family (state-space / MoE / GPT-2 XL) and rebuilding the vector from an external labelled corpus (e.g. SST-2) are the natural remaining extensions for the external-validity story.

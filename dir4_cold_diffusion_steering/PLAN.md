@@ -254,6 +254,12 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         76.8% @α=8 / 81.3% @α=4; pooled 84.3%/95.3% reproduces Exp 3/34/35 to the digit. ⇒ the pooled 84% is lifted ~7pp
         above the honest whole-word figure (~77%) by near-complete correction of easy sub-word+punctuation tokens.
         Sharpens (does not overturn) the token-control story; token-control axis (position/type/frequency/OTHER) exhausted.
+- [x] S7(m) — METRIC control (Exp 38, 2026-07-09) DONE: all 37 prior recovery numbers are cross-entropy nats;
+        a CE drop could in principle be pure tail-mass reshaping while the argmax stays broken. Scored the EXACT
+        flagship corrector (GPT-2 small, block 6, sentiment v, seed 0) on next-token TOP-1/TOP-5 accuracy — a
+        metric it never trained on. POSITIVE: raw crushes top-1 accuracy 0.356→0.118 @α=8 (67% rel. drop); the
+        corrector recovers 75% of the drop @α=8 (88%@4, 97%@2), top-5 78%@8 — slightly BELOW the nats recovery
+        (84.3%) as expected (argmax is stricter) but broadly agreeing ⇒ the headline is NOT a soft-metric artifact.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -265,6 +271,28 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S7(m) METRIC control — Experiment 38 (new, 2026-07-09):** closed the last standing reviewer gap in the
+metric story. Every one of the 37 prior recovery numbers is measured in cross-entropy nats (ΔLM); a CE
+improvement could in principle come entirely from re-shaping the probability TAIL while the model's argmax
+prediction stays broken (soft-metric artifact). Wrote `experiments/38_accuracy_metric.py` (imports exp03
+Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim — corrector byte-identical to Exp 3;
+only new code = a top-1/top-5 accuracy eval pass). Trained the EXACT flagship corrector (GPT-2 small, block
+6, sentiment v, seed 0), scored next-token TOP-1 (greedy) and TOP-5 accuracy on the same held-out 100 docs
+for clean/raw/learned at matched projection α|v|, reporting acc-recovery=(learned−raw)/(clean−raw).
+POSITIVE: raw steering CRUSHES top-1 accuracy 0.356→0.118 @α=8 (67% relative drop, 2/3 fewer tokens right);
+corrector restores it to 0.297, recovering **75% of the drop @α=8** (88%@4, 97%@2, 110%@1), top-5 **78%@8**.
+Since top-1 depends only on which token is MOST likely (not tail mass), the flagship recovery is NOT a
+soft-metric artifact — the corrector puts the right token back on top. Accuracy recovery sits slightly BELOW
+the nats recovery (75% vs 84.3% @α=8), honest and expected (argmax is a stricter bar), but the two broadly
+agree. No prior result superseded (Exp 38 additive; corrector = Exp 3). Artifacts:
+`experiments/38_accuracy_metric.py`, `results/38_accuracy_metric.json`, `results/38_run.log`,
+`plots/38_accuracy_metric.png`. Curated RESULTS.md (Exp-38 section + table + figure + Headline metric clause),
+REPORT_3 (Exp-38 O/I/L/N + 2 math fences + Exp-37 Next-check done + Conclusion clause), REPORT.md index
+(headline row + Part-3 clause). CHANGELOG appended. Math re-verified via GitHub API (REPORT_3 14/14
+js-display-math [12+2], REPORT.md 1/1; 0 broken / 0 inline hazards). ENV: `/opt/conda/bin/python`, `setsid`
+full detach; ~1.5 min on GPU.
+
+<!-- prior: S7(l) OTHER-class decomposition Exp 37 -->
 **S7(l) OTHER-class DECOMPOSITION — Experiment 37 (new, 2026-07-09):** closed Experiment 35's residual question.
 Exp 35 found the pooled 84.3% recovery sits ABOVE both whole-word linguistic classes (FUNCTION 73.9%, CONTENT
 77.5% @α=8) because a catch-all OTHER class (subword pieces + punctuation + digits) recovers ~100% and, carrying
@@ -929,6 +957,20 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
+**S7(m) METRIC control DONE (Exp 38): the flagship recovery now holds in BOTH nats and accuracy.** All 37
+prior recovery numbers were cross-entropy nats; Exp 38 scored the exact flagship corrector on next-token
+top-1/top-5 accuracy — a metric it never trained on — and found raw steering crushes top-1 accuracy
+0.356→0.118 @α=8 while the corrector recovers 75% of the drop (78% top-5), broadly tracking the 84% nats
+recovery. So the headline is not a soft-metric/tail-mass artifact. Combined with the exhausted metric-control
+axis (position/type/frequency/OTHER, Exp 34–37), SEVEN external-validity axes, and all sampling axes, the
+direction has NO material open item; success criterion long met. Only very-low-value optional points remain,
+none required for the deliverable and each expected to land in an already-established band: (i) a FURTHER
+architecture family (state-space/MoE, e.g. Mamba/Mixtral) or GPT-2 XL for a fuller model sweep beyond three,
+or rebuilding `v` from a labelled corpus (SST-2); (ii) finer λ_b + Exp-20 differentiable-generation ON Qwen3
+(Exp 23's Next check). ENV: use `/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk, imports in seconds).
+Verify any REPORT edit with the GitHub-API math check on the touched report files.
+
+<!-- prior next step: S7(l) OTHER-class decomposition Exp 37 -->
 **S7(l) OTHER-class DECOMPOSITION DONE (Exp 37): the token-control axis is now fully EXHAUSTED.** Exp 34 fixed token
 position, Exp 35 token type, Exp 36 content-word frequency, and Exp 37 decomposed the residual OTHER catch-all class
 (subword pieces + punctuation) that Exp 35 had left lumped. The pooled 84.3% sits ~7pp above the whole-word

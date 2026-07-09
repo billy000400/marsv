@@ -72,7 +72,9 @@ words recover 77.5% vs function words 73.9% at `α=8`), and across content-word 
 tokens recover 77.8% vs 77.3% for common ones, Exp 36), so the pooled headline is neither a pooling, a cheap-token,
 nor an easy-common-word artifact. Decomposing the residual OTHER class (Exp 37) shows the pooled 84% is lifted above
 the whole-word linguistic recovery (~77% at `α=8`) by near-complete recovery of easy sub-word and punctuation
-tokens. Off the Gaussian manifold at every setting.
+tokens. And the recovery is not a soft-metric artifact — on next-token top-1 accuracy (never trained on) the
+corrector recovers 75% of raw's accuracy drop at `α=8` (Exp 38), tracking the nats recovery. Off the Gaussian
+manifold at every setting.
 
 ### [Part 4 — Behavioral reality-check: from fluency to real steering in generation](REPORT_4_behavioral.md)
 *Experiments 10, 11, 20, 22, 23, 25.* The `ΔLM` recoveries are teacher-forced at one layer. When
@@ -111,6 +113,7 @@ corrector.
 | Token-type control: content vs function words @`α=8` | 77.5% vs 73.9% (pooled 84.3%) | Part 3 (Exp 35) |
 | Content-word-frequency control: rare vs common @`α=8` | 77.8% vs 77.3% (pooled 84.3%) | Part 3 (Exp 36) |
 | OTHER-class decomposition: whole-word linguistic vs pooled @`α=8` | 76.8% vs 84.3% (subword 91.7%) | Part 3 (Exp 37) |
+| Metric control: next-token top-1 accuracy recovery @`α=8` | 75% (top-5 78%; raw crushes 0.356→0.118) | Part 3 (Exp 38) |
 | Behavioral caveat: generated effect vs raw (GPT-2) | ~1/6 of raw's | Part 4 (Exp 10) |
 | Readout-preservation term recovers more effect | 2–6×, dominates raw at moderate `α` | Part 4 (Exp 11) |
 

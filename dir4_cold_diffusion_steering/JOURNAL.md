@@ -1619,3 +1619,39 @@ external labelled corpus. All marginal; success criterion long met.
 On track? yes — Exp 37 closes Exp 35's residual (pooled 84% lifted above the ~77% whole-word linguistic recovery by
 easy sub-word+punctuation tokens); direction complete on all planned + control axes, deliverables curated +
 math-verified. No blocker.
+
+## 2026-07-09 — Experiment 38: metric control (next-token accuracy, not just nats)
+**Did.** Every recovery number in the study is measured in cross-entropy nats (ΔLM). The obvious reviewer
+worry that no experiment had closed: a CE drop can come entirely from re-shaping the probability TAIL while
+the model's actual argmax prediction stays broken, which would make the flagship 84% a soft-metric artifact.
+Wrote `experiments/38_accuracy_metric.py` (imports exp03 Corrector/train_corrector/make_hat/FuncPatcher/
+batched_ids verbatim — the corrector is byte-identical to Exp 3; only new code = an accuracy eval pass over
+top-1/top-5). Trained the EXACT flagship corrector (GPT-2 small, block 6, sentiment v, seed 0) and scored
+next-token TOP-1 (greedy) and TOP-5 accuracy on the same held-out 100 docs for clean/raw/learned at matched
+projection α|v|, plus an accuracy-recovery = (acc_learned−acc_raw)/(acc_clean−acc_raw). ~1.5 min on GPU.
+**Learned (POSITIVE).** Raw steering does not merely inflate CE — it CRUSHES top-1 accuracy from clean 0.356
+→ 0.118 @α=8 (67% relative drop). The corrector restores it to 0.297, recovering **75% of the drop @α=8**
+(88% @α=4, 97% @α=2, 110% @α=1); top-5 recovery **78% @α=8**. Since top-1 depends only on which token is MOST
+likely (not tail mass), this rules out the soft-metric worry: the corrector puts the right token back on top.
+Accuracy recovery sits slightly BELOW the nats recovery (75% vs 84.3% @α=8) — honest and expected, the argmax
+is a stricter bar — but the two broadly agree, so the headline holds on a metric the corrector never trained on.
+**Assumption/decision logged.** (a) Chose the accuracy-metric control over the remaining marginal optional
+items (GPT-2 XL / Mamba / Qwen3-differentiable-gen) because it is the cheapest genuinely-new axis (reuses the
+flagship corrector, one eval pass, ~1.5 min, zero OOM risk under GPU contention with ~29 min left) and closes
+a real reviewer gap — all 37 prior recovery numbers are nats-only. Rejected the heavier model/architecture
+runs: each is a multi-GB download + slow generation, high risk of not finishing in the window, and each is
+expected to land in an already-established band. (b) top-1 AND top-5 so the reader sees the result is not a
+single-threshold quirk. (c) Reported the accuracy-recovery-below-nats-recovery gap honestly rather than
+implying they match exactly.
+**Deliverables.** RESULTS.md +Exp 38 (table + reading) + figure + Headline metric-robust clause; REPORT_3
++Exp 38 O/I/L/N subsection (2 new `math` fences: top-k accuracy, acc-recovery) + Exp-37 Next-check done +
+Conclusion clause; REPORT.md index +headline row + Part-3 clause. CHANGELOG appended. Math re-verified via
+GitHub API: REPORT_3 14/14 js-display-math (0 broken), REPORT.md 1/1, 0 inline hazards in either file.
+Artifacts: experiments/38_accuracy_metric.py, results/38_accuracy_metric.json, results/38_run.log,
+plots/38_accuracy_metric.png. ENV: `/opt/conda/bin/python`, `setsid` full detach.
+**Next step.** Direction has no material open item; success criterion long met. The flagship recovery now
+holds in BOTH nats (Exp 3–37) and accuracy (Exp 38). Only very-low-value optional points remain, each
+expected to land in an established band: (i) a further architecture family (state-space/MoE, GPT-2 XL);
+(ii) finer λ_b + Exp-20 differentiable-generation ON Qwen3 (Exp 23's Next check). Both marginal.
+On track? yes — Exp 38 adds the metric-control axis (accuracy recovery 75% @α=8 tracks nats 84%); direction
+complete, deliverables curated + math-verified. No blocker.

@@ -1,0 +1,20 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 38960.46it/s]
+device: cuda
+|v|=11.08
+  ep0 step  25 a= 1.9 LM=3.864 near=0.137
+  ep1 step  50 a= 4.4 LM=4.066 near=0.282
+  ep1 step  75 a= 7.2 LM=4.436 near=0.616
+  ep2 step 100 a= 1.4 LM=3.991 near=0.150
+  ep3 step 125 a= 6.4 LM=4.257 near=0.769
+  ep3 step 150 a= 7.2 LM=4.305 near=0.454
+  ep4 step 175 a= 2.8 LM=4.162 near=0.297
+  ep5 step 200 a= 5.5 LM=4.214 near=0.413
+  ep5 step 225 a= 1.3 LM=3.855 near=0.309
+clean top1=0.3561 top5=0.5768
+alpha= 1.0  top1 clean=0.356 raw=0.344 learned=0.357 rec1=+110.46% | top5 raw=0.568 learned=0.578 rec5=+108.77%
+alpha= 2.0  top1 clean=0.356 raw=0.324 learned=0.355 rec1=+96.73% | top5 raw=0.538 learned=0.574 rec5=+93.53%
+alpha= 4.0  top1 clean=0.356 raw=0.239 learned=0.342 rec1=+88.26% | top5 raw=0.433 learned=0.559 rec5=+87.90%
+alpha= 6.0  top1 clean=0.356 raw=0.166 learned=0.323 rec1=+82.76% | top5 raw=0.338 learned=0.537 rec5=+83.50%
+alpha= 8.0  top1 clean=0.356 raw=0.118 learned=0.297 rec1=+75.10% | top5 raw=0.283 learned=0.511 rec5=+77.67%
+saved figure + results

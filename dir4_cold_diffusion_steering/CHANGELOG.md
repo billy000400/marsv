@@ -1037,3 +1037,27 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   `plots/37_other_decomposition.png`. Results `results/37_other_decomposition.json`, log `results/37_run.log`.
 - REPORT math re-verified via GitHub API on the two touched files: REPORT.md 1 js-display-math / 0 broken,
   REPORT_3 12 / 0 (no new display math), 0 inline hazards in both + RESULTS.md.
+
+## 2026-07-09 — Experiment 38: metric control (next-token accuracy, not just nats) — POSITIVE
+- Added Experiment 38 to RESULTS.md and REPORT_3: every recovery number in the study is in cross-entropy
+  nats (ΔLM). A CE improvement could in principle come entirely from re-shaping the probability tail while
+  the model's argmax prediction stays broken (soft-metric artifact). Tested directly on a harder-to-game
+  metric: next-token TOP-1 (greedy) and TOP-5 accuracy, scoring the EXACT flagship pipeline (GPT-2 small,
+  block 6, sentiment v, seed 0 corrector — byte-identical to Exp 3 via import).
+- **Result (new, POSITIVE):** raw steering crushes top-1 accuracy from clean 0.356 → 0.118 @α=8 (67%
+  relative drop, i.e. 2/3 fewer next tokens right); the corrector restores it to 0.297, recovering 75% of
+  the drop (88% @α=4, 97% @α=2, 110% @α=1); top-5 recovery 78% @α=8. Accuracy recovery runs slightly BELOW
+  the nats recovery (75% vs 84.3% @α=8 — recovering the single argmax is a stricter bar) but broadly agrees,
+  so the flagship recovery is NOT a soft-metric/tail-mass artifact: the corrector puts the right token back
+  on top. α=1 reads >100% (usual ratio artifact, raw's accuracy drop near zero). No prior result superseded
+  (Exp 38 additive; corrector = Exp 3).
+- **Deliverable deltas:** RESULTS.md +Exp 38 (table + reading) + figure entry + Headline metric-robust
+  clause. REPORT_3 +Exp 38 subsection (O/I/L/N + top-k accuracy `math` fence + acc-recovery `math` fence +
+  table; Exp-37 Next-check marked done + Conclusion open-items clause). REPORT.md index +headline row +
+  Part-3 summary clause.
+- New code experiments/38_accuracy_metric.py (imports exp03 Corrector/train_corrector/make_hat/FuncPatcher/
+  batched_ids verbatim; only new code = an accuracy eval pass). New figure plots/38_accuracy_metric.png
+  ((a) top-1 accuracy vs α clean/raw/learned; (b) top-1/top-5 accuracy recovery vs α with ΔLM recovery
+  marked). Results results/38_accuracy_metric.json, log results/38_run.log.
+- REPORT math re-verified via GitHub API: REPORT_3 14/14 js-display-math (12 prior + 2 new: top-k accuracy
+  + acc-recovery), REPORT.md 1/1; 0 broken (<pre lang=math>), 0 inline hazards in either touched file.
