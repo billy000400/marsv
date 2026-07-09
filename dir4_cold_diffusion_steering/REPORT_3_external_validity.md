@@ -288,6 +288,18 @@ recipe and `α ∼ U(0.5, 8)` — at **five seeds (`0–4`)**. As in Experiments
 seed-independent (computed once); only the learned corrector varies; we report mean ± sample standard deviation
 of the fluency recovery. Seed 0 re-runs Experiment 21 exactly and is the built-in reproducibility check.
 
+### Seed robustness on GPT-2 large (Experiment 30)
+
+Experiments 26/27/28/29 give error bars on GPT-2 small, GPT-2 medium, Pythia, and Qwen3. The one remaining
+headline model reported from a single seed-0 run is **GPT-2 large (Experiment 19, 774M, block 18/36)** — the
+last point in the study without an error bar. Experiment 30 puts the same five-seed control on the **exact
+Experiment-19 GPT-2-large pipeline** — same DiffMean sentiment vector at block 18/36 (`|v| = 16.75`), same
+400-document Gaussian fit, same 300-document training set, same held-out 100-document eval, same 6.03M
+projection-preserving corrector at `d = 1280`, same recipe and `α ∼ U(0.5, 8)`, same VRAM-safe batch sizes — at
+**five seeds (`0–4`)**. As in Experiments 26/27/28/29, `ΔLM_raw(α)` is seed-independent (computed once); only the
+learned corrector varies; we report mean ± sample standard deviation of the fluency recovery. Seed 0 re-runs
+Experiment 19 exactly and is the built-in reproducibility check.
+
 ## Results
 
 ### Experiment 12 — the fluency result replicates across layers (not a block-6 artifact)
@@ -574,7 +586,7 @@ raw's damage is only +0.037 nats there, while the absolute `ΔLM_learned` is a t
 **Limitations.** As in Experiment 26, this varies only the *training* seed; the eval documents, Gaussian fit,
 and steering vector are held fixed, so it bounds optimization variance on GPT-2 medium, not sampling variance
 over eval text or vector construction. The cross-architecture checks are seed-controlled in Experiments 28
-(Pythia) and 29 (Qwen3); GPT-2 large (Experiment 19) remains single-seed.
+(Pythia) and 29 (Qwen3), and GPT-2 large in Experiment 30.
 
 **Next check.** A five-seed control on a cross-*architecture* model (Qwen3 or Pythia) would put error bars past
 the GPT-2 family and test whether the 81–94% architecture band is within seed noise. *Done in Experiment 28.*
@@ -608,7 +620,7 @@ therefore real at its low end but should be read as three seed-controlled points
 **Limitations.** As in Experiments 26/27, this varies only the *training* seed; the eval documents, Gaussian
 fit, and steering vector are held fixed, so it bounds optimization variance on Pythia, not sampling variance
 over eval text or vector construction. The other non-GPT-2 architecture (Qwen3) is seed-controlled in
-Experiment 29; GPT-2 large (Experiment 19) remains single-seed.
+Experiment 29, and GPT-2 large in Experiment 30 — so all five headline models now carry a five-seed bar.
 
 **Next check.** A five-seed control on Qwen3 (the *top* of the 81–94% band) would test whether its higher
 recovery is likewise real or seed noise, completing the seed control across the full architecture sweep.
@@ -642,10 +654,45 @@ scales and two architectures with no band-crossing ambiguity except the small/Py
 
 **Limitations.** As in Experiments 26/27/28, this varies only the *training* seed; the eval documents, Gaussian
 fit, and steering vector are held fixed, so it bounds optimization variance on Qwen3, not sampling variance over
-eval text or vector construction. GPT-2 large (Experiment 19) remains the only headline model still single-seed.
+eval text or vector construction. Among the headline models, GPT-2 large (Experiment 19) was the last still
+single-seed. *Closed in Experiment 30.*
 
-**Next check.** The seed control now covers four models across two scales and two architectures; extending it to
-a further-scaled or non-Transformer family (e.g. a state-space model) would broaden it, at low marginal value.
+**Next check.** *Done in Experiment 30.*
+
+### Experiment 30 — the largest GPT-2 recovery is stable across seeds, and the flat scale trend is confirmed
+
+![seed robustness on GPT-2 large](plots/30_seed_robustness_large.png)
+
+Five independently-trained correctors (seeds 0–4), the exact GPT-2-large pipeline, mean ± sample standard deviation:
+
+| α | ΔLM raw (nats) | ΔLM learned (mean ± sd) | recovery (mean ± sd) | `D_M` raw | `D_M` learned (mean ± sd) |
+|---|----------------|--------------------------|----------------------|-----------|----------------------------|
+| 1 | +0.036 | −0.058 ± 0.011 | 260.3 ± 30.3% | 35.9 | 45.0 ± 1.9 |
+| 2 | +0.146 | −0.040 ± 0.008 | 127.2 ± 5.6% | 37.9 | 49.2 ± 2.1 |
+| 4 | +0.728 | **+0.037 ± 0.005** | **94.9 ± 0.6%** | 45.0 | 63.8 ± 1.6 |
+| 8 | +2.470 | **+0.369 ± 0.028** | **85.1 ± 1.1%** | 66.0 | 97.0 ± 4.1 |
+
+Per-seed recovery at α=8: 84 / 87 / 85 / 84 / 85% (Experiment 19's 84% is seed 0's 84%).
+
+**Observation.** At α=8 the five GPT-2-large correctors recover **85.1 ± 1.1%** of raw steering's fluency damage
+(range 84–87%), tightening to **94.9 ± 0.6%** at α=4. The corrected activation sits *further* off the Gaussian
+manifold than raw at every seed (`D_M` 97.0 ± 4.1 vs raw 66.0 at α=8). Seed 0 reproduces Experiment 19 to the
+digit.
+
+**Interpretation.** Every headline model is now seed-controlled, and the α=8 ordering is Qwen3 `[93.2, 96.4]%` >
+GPT-2 medium `[86.1, 90.5]%` ≳ GPT-2 large `[84.0, 86.2]%` ≈ GPT-2 small `[81.3, 85.3]%` > Pythia
+`[79.2, 82.4]%`. Within the GPT-2 family this makes the single-seed 84 / 89 / 84% "flat across a 6× scale range"
+finding a genuine, seed-controlled effect: **medium — not large — is the peak, and large ≈ small**, so amortized
+correction quality does not grow (nor erode monotonically) with scale. Large's band overlaps small's and sits just
+below medium's, consistent with a mild non-monotonicity rather than any scaling law in recovery.
+
+**Limitations.** As in Experiments 26–29, this varies only the *training* seed; the eval documents, Gaussian fit,
+and steering vector are held fixed, so it bounds optimization variance on GPT-2 large, not sampling variance over
+eval text or vector construction.
+
+**Next check.** All five headline models now carry a five-seed bar; broadening the controls to eval-document or
+vector-construction resampling, or to a non-Transformer family (e.g. a state-space model), would extend the
+external-validity story at low marginal value.
 
 ## Conclusion
 
@@ -653,6 +700,6 @@ The core fluency result survives every external-validity axis we tested. It is *
 
 The result is also **prompt-family-robust** (a FineWeb-trained corrector recovers 77% on held-out technical prose and 60% on out-of-distribution code at α=8, degrading smoothly with the family's clean-activation drift off the FineWeb manifold) and **steering-vector-family-robust** (DiffMean, a logistic-regression probe, and PCA-contrast built from real SST-2 data all recover 84–101% at α=8, even though the directions differ at cosines of 1.00 / 0.40 / 0.30). Across every axis the Experiment-2/3 decoupling reappears: the corrected activation sits *further* off the Gaussian manifold than raw steering, so "LM-safe but off-Gaussian" is a general property of the learned correction rather than a quirk of one setup — and the PCA family shows the two can be fully decoupled, since steering on-manifold still breaks the LM.
 
-Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The *top* of the band is seed-controlled too: five seeds on Qwen3 give 94.8 ± 1.6% at α=8 (Experiment 29), a band entirely above every other model's, so Qwen3's edge is real. The seed axis now spans four models across two scales and two architectures.
+Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The *top* of the band is seed-controlled too: five seeds on Qwen3 give 94.8 ± 1.6% at α=8 (Experiment 29), a band entirely above every other model's, so Qwen3's edge is real. Finally, GPT-2 large — the last single-seed headline model — is confirmed at 85.1 ± 1.1% at α=8 (Experiment 30), a band between GPT-2 small and medium, so the flat model-scale trend is itself seed-controlled: medium is the GPT-2 peak, large ≈ small, and recovery does not grow with scale. The seed axis now spans all five headline models across three scales and two architectures.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; the seed control has been run on four models (GPT-2 small, GPT-2 medium, Pythia, and Qwen3) across two scales and two architectures, leaving only GPT-2 large single-seed. These are the natural next extensions for the external-validity story.
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), still varies only the *training* seed — extending the error bars to eval-document or vector-construction resampling is the remaining sampling axis. These are the natural next extensions for the external-validity story.

@@ -828,3 +828,42 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   died with the shell process group when the Bash tool returned). Artifacts:
   `experiments/29_seed_robustness_qwen.py`, `results/29_seed_robustness_qwen.json`, `results/29_run.log`,
   `plots/29_seed_robustness_qwen.png`.
+
+## 2026-07-09 — Experiment 30: seed robustness on GPT-2 large (error bar on the last single-seed headline model)
+- **What / why:** Experiments 26/27/28/29 gave five-seed intervals on GPT-2 small (83.3 ± 2.0%), GPT-2 medium
+  (88.3 ± 2.2%), Pythia-410m/GPT-NeoX (80.8 ± 1.6%), and Qwen3-1.7B (94.8 ± 1.6%) at α=8. The one remaining
+  headline model reported from a single seed-0 run was **GPT-2 large (Exp 19, 774M, block 18/36)** — 84% @α=8 /
+  95% @α=4 — the last point in the study without an error bar (PLAN Next-step (i)'s final item).
+- **Setup:** the EXACT Experiment-19 GPT-2-large pipeline — DiffMean sentiment vector at block 18/36
+  (`|v|=16.75`, mean `|h|=129.1`), 400-doc Gaussian fit (clean `D_M=35.2`), 300-doc train / held-out 100-doc
+  eval, 6.03M projection-preserving corrector at `d=1280`, recipe / `α ∼ U(0.5,8)`, matched projection, same
+  VRAM-safe batch sizes — at five seeds (0–4). Raw ΔLM seed-independent (computed once); only the learned
+  corrector varies. `experiments/30_seed_robustness_large.py` reuses the Exp-19 module (retarget/diffmean/batch
+  sizes) and the Exp-3 module helpers verbatim, overriding `exp03.SEED` per run.
+- **Numbers:** recovery **85.1 ± 1.1% @α=8** (per-seed 84/87/85/84/85%), **94.9 ± 0.6% @α=4**, 127.2 ± 5.6%
+  @α=2, 260.3 ± 30.3% @α=1; ΔLM learned @α=8 +0.369 ± 0.028 vs raw +2.470; `D_M` learned 97.0 ± 4.1 vs raw 66.0
+  @α=8 (decoupling holds every seed). Seed 0 reproduces Exp 19 to the digit (84% @α=8, 95% @α=4).
+- **Key result:** every headline model is now seed-controlled. The α=8 ordering is Qwen3 `[93.2, 96.4]%` >
+  GPT-2 medium `[86.1, 90.5]%` ≳ GPT-2 large `[84.0, 86.2]%` ≈ GPT-2 small `[81.3, 85.3]%` > Pythia
+  `[79.2, 82.4]%`. Within the GPT-2 family this makes the single-seed 84/89/84% "flat across a 6× scale range"
+  finding a genuine, seed-controlled effect: **medium — not large — is the GPT-2 peak, and large ≈ small**, so
+  amortized correction quality does not grow (nor erode monotonically) with scale. The seed axis now spans all
+  five headline models across three scales and two architectures.
+- **Deliverables:** RESULTS.md gained the Exp-30 section + table + figure entry; the Headline now carries GPT-2
+  large's seed CI and states the flat scale trend is seed-controlled; Exp-29's "last single-seed" line marked
+  closed. REPORT_3 gained an Exp-30 Methods block + Results subsection (Observation/Interpretation/Limitations/
+  Next check); Exp-27/28/29 limitation lines updated (GPT-2 large now seed-controlled); Conclusion seed
+  paragraph + open-items updated so no headline model is single-seed (only the eval-document/vector-construction
+  resampling axis remains). REPORT.md index: seed-robust headline-table row + Summary now show all five models
+  (83.3 / 88.3 / 85.1 / 80.8 / 94.8%).
+- **Verification:** GitHub-API math check on the 2 touched report files — REPORT.md index 1, REPORT_3 9
+  js-display-math (Exp 30 adds a table + O/I/L/N prose, reuses the inline recovery expression, no new display
+  equation); 0 broken (`<pre lang=math>`), 0 inline hazards.
+- **Limitation:** varies only the training seed on GPT-2 large (init + α-sampling / data-shuffle RNG); eval set,
+  Gaussian fit, and steering vector fixed. All five headline models are now seed-controlled; the remaining
+  sampling axis is eval-document / vector-construction resampling.
+- **No prior result superseded** (Exp 30 additive; Exp 19's 84% confirmed representative as seed 0).
+- **Ops:** ran with `/opt/conda/bin/python` (LOCAL disk); GPT-2 large loaded from page cache; 5-seed run
+  ~35 min under GPU contention (~7 min/seed). `setsid` full detach. Artifacts:
+  `experiments/30_seed_robustness_large.py`, `results/30_seed_robustness_large.json`, `results/30_run.log`,
+  `plots/30_seed_robustness_large.png`.

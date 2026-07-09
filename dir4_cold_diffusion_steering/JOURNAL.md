@@ -1277,3 +1277,48 @@ single-seed headline model; (ii) a further architecture family (state-space/MoE)
 Qwen3 (Exp 23's Next check). All marginal. ENV: `/opt/conda/bin/python` (LOCAL disk, fast); `setsid` full detach.
 On track? yes — S7 seed axis extended to a fourth model (Qwen3 94.8±1.6% @α=8, top of the band, real edge);
 recipe seed-stable across two scales AND two architectures; only GPT-2 large single-seed. ~100% complete. No blocker.
+
+## 2026-07-09 — Experiment 30: seed robustness on GPT-2 large (the last single-seed headline model)
+**Did.** Picked PLAN Next-step (i)'s final item — the single highest-value remaining rigor point. Exp 26/27/28/29
+put five-seed CIs on GPT-2 small, GPT-2 medium, Pythia, and Qwen3, but GPT-2 large (Exp 19, 774M, block 18/36)
+was still a single seed-0 run — the ONLY headline model without an error bar. Wrote
+`experiments/30_seed_robustness_large.py` (imports the Exp-19 module and reuses its retarget/diffmean + VRAM-safe
+batch sizes verbatim, plus the Exp-3 module helpers; overrides `exp03.SEED` per run — DRY, no pipeline
+duplication, same pattern as Exp 27/28/29) and ran the EXACT Exp-19 GPT-2-large pipeline at 5 seeds (0–4). Raw
+ΔLM seed-independent (computed once); only the learned corrector varies. Result POSITIVE + tight: recovery
+85.1±1.1% @α=8 (per-seed 84/87/85/84/85%), 94.9±0.6% @α=4, 127.2±5.6% @α=2, 260.3±30.3% @α=1; ΔLM learned @α=8
++0.369±0.028 vs raw +2.470; D_M learned 97.0±4.1 vs raw 66.0 (decoupling every seed). Seed 0 reproduces Exp 19
+to the digit (84%/95%). KEY: with every headline model now seed-controlled, the α=8 ordering is Qwen3
+[93.2,96.4]% > GPT-2 medium [86.1,90.5]% ≳ GPT-2 large [84.0,86.2]% ≈ GPT-2 small [81.3,85.3]% > Pythia
+[79.2,82.4]% — so within the GPT-2 family the single-seed 84/89/84% "flat across 6× scale" finding is a genuine
+seed-controlled effect: MEDIUM (not large) is the GPT-2 peak, large ≈ small, recovery does not grow with scale.
+**Learned.** (1) The recipe is seed-stable on the 774M scale too — the corrector's advantage over raw dwarfs its
+seed spread (±0.6–1.1% at α≥4). (2) The mild NON-monotonicity in the GPT-2 scale trend (medium > large ≈ small)
+survives seed noise: large's band [84.0,86.2]% overlaps small's and sits just below medium's, so "flat/slightly
+non-monotone with scale", NOT a scaling law — I stated this explicitly rather than implying recovery rises with
+size. (3) Sanity: |v|=16.75, mean|h|=129.1, clean D_M=35.22, clean eval loss=3.299, raw ΔLM +0.036/+0.146/
++0.728/+2.470 all reproduce Exp 19 to the digit — the module reuse is faithful. (4) Timing: ~7 min/seed for the
+774M model under GPU contention (train ~4 + eval ~3), ~35 min for 5 seeds — well within budget.
+**Assumptions/decisions logged (loop mode).** (a) Chose GPT-2 large (the last single-seed headline model) over
+the other marginal options (non-Transformer family; eval-document/vector resampling; finer λ_b) — closing the
+final single-seed point is the highest rigor-per-minute step and completes the seed axis; logged the alternatives
+(state-space family; sampling-axis resampling) as Exp 30's own Next check. (b) 5 seeds (matches Exp 26/27/28/29
+for an apples-to-apples CI comparison). (c) Placed Exp 30 in RESULTS + REPORT_3 next to Exp 26–29 (seed cluster),
+not a new part.
+**Deliverables.** RESULTS.md (Exp-30 section + table + figure entry + Headline GPT-2-large seed CI + flat-scale
+statement, Exp-29 "last single-seed" line marked closed); REPORT_3 (Exp-30 Methods block + Results O/I/L/N
+subsection + Exp-27/28/29 limitation lines updated + Conclusion seed paragraph + open-items so NO headline model
+is single-seed); REPORT.md index (seed-robust headline row + Summary now all five models 83.3/88.3/85.1/80.8/
+94.8%). CHANGELOG appended; PLAN Current status/Next step rewritten + S7(e) checkbox added; this JOURNAL entry.
+REPORT math re-verified on the 2 touched files (REPORT.md index 1 / REPORT_3 9 js-display-math, 0 broken, 0
+inline hazards — Exp 30 adds a table + O/I/L/N prose, reuses the inline recovery expression, no new equation).
+Artifacts: `experiments/30_seed_robustness_large.py`, `results/30_seed_robustness_large.json`,
+`results/30_run.log`, `plots/30_seed_robustness_large.png`. ENV: `/opt/conda/bin/python` (LOCAL disk); GPT-2
+large from page cache; `setsid` full detach.
+**Next step.** Optional only (success criterion long met; all five headline models now seed-controlled):
+(i) extend the error bars to the remaining sampling axis — eval-document or vector-construction resampling (bounds
+sampling variance, not just optimization variance); (ii) a non-Transformer family (state-space/MoE); (iii) finer
+λ_b / Exp-20 on Qwen3 (Exp 23's Next check). All marginal.
+On track? yes — S7 seed axis now spans ALL FIVE headline models (GPT-2 large 85.1±1.1% @α=8 closes the last
+single-seed point); the flat GPT-2 scale trend shown seed-controlled (medium peak, large ≈ small). ~100% complete.
+No blocker.

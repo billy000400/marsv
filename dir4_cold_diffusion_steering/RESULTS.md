@@ -1093,9 +1093,46 @@ ratio artifact — raw's damage there is only +0.06–0.24 nats, inflating the r
 `ΔLM_learned` stays tight (±0.01–0.02). **Limitation.** As in Experiments 26/27/28, this varies only the training
 seed (corrector init + α-sampling / data-shuffle RNG); the eval set, Gaussian fit, and steering vector are held
 fixed, so it bounds *optimization* variance on Qwen3, not eval-document or vector-construction sampling variance.
-GPT-2 large (Exp 19) remains the only headline model still single-seed. **Next check.** The seed axis now covers
-four models spanning two scales and two architectures; a further-scaled or non-Transformer family (e.g. a
-state-space model) would extend it, at low marginal value.
+Among the headline models, GPT-2 large (Exp 19) was the last still single-seed. *Closed in Experiment 30.*
+
+**Experiment 30 — Seed robustness on GPT-2 large: an error bar on the last single-seed headline model.**
+Experiments 26/27/28/29 put five-seed intervals on GPT-2 small (83.3 ± 2.0%), GPT-2 medium (88.3 ± 2.2%),
+Pythia-410m/GPT-NeoX (80.8 ± 1.6%), and Qwen3-1.7B (94.8 ± 1.6%) at α=8. The one remaining headline model
+reported from a single seed-0 run was **GPT-2 large (Experiment 19, 774M, block 18/36)** — 84% @α=8 / 95% @α=4 —
+the last point in the study without an error bar. We close it by re-running the **exact Experiment-19 GPT-2-large
+pipeline** — same DiffMean sentiment vector (`|v| = 16.75`, mean `|h| = 129.1`), same 400-doc Gaussian fit (clean
+`D_M = 35.2`), same 300-doc training set, same held-out 100-doc eval, same 6.03M corrector at `d = 1280`, same
+recipe / `α ∼ U(0.5, 8)`, same VRAM-safe batch sizes — at **five seeds** (`0–4`), reporting mean ± sample standard
+deviation of the fluency recovery `recovery(α) = (ΔLM_raw(α) − ΔLM_learned(α)) / ΔLM_raw(α)`. `ΔLM_raw` is
+seed-independent (computed once); only the learned corrector varies. Seed 0 reproduces Experiment 19 to the digit
+— a built-in check.
+
+| α | ΔLM raw (nats) | **ΔLM learned (mean ± sd)** | **recovery (mean ± sd)** | `D_M` raw | `D_M` learned (mean ± sd) |
+|---|----------------|------------------------------|--------------------------|-----------|----------------------------|
+| 1 | +0.036 | **−0.058 ± 0.011** | 260.3 ± 30.3% | 35.9 | 45.0 ± 1.9 |
+| 2 | +0.146 | **−0.040 ± 0.008** | 127.2 ± 5.6% | 37.9 | 49.2 ± 2.1 |
+| 4 | +0.728 | **+0.037 ± 0.005** | **94.9 ± 0.6%** | 45.0 | 63.8 ± 1.6 |
+| 8 | +2.470 | **+0.369 ± 0.028** | **85.1 ± 1.1%** | 66.0 | 97.0 ± 4.1 |
+
+(Per-seed recovery at α=8: 84 / 87 / 85 / 84 / 85% — Experiment 19's 84% is seed 0's 84%.)
+
+**Reading it: the largest GPT-2 recovery is seed-stable too, and the flat model-scale trend is confirmed — recovery
+does not grow with scale.** At α=8 the five independently-trained GPT-2-large correctors recover **85.1 ± 1.1%** of
+raw steering's fluency damage (range 84–87%), tightening to **94.9 ± 0.6%** at α=4 — the corrector's advantage over
+raw again dwarfs its seed-to-seed variability. With every headline model now seed-controlled, the α=8 ordering is
+Qwen3 (`[93.2, 96.4]%`) > GPT-2 medium (`[86.1, 90.5]%`) ≳ GPT-2 large (`[84.0, 86.2]%`) ≈ GPT-2 small
+(`[81.3, 85.3]%`) > Pythia (`[79.2, 82.4]%`). Within the GPT-2 family this means **medium, not large, is the peak:
+recovery is flat-to-slightly-lower from 355M → 774M**, so the single-seed 84/89/84% "flat across a 6× scale range"
+finding is a real, seed-controlled effect, not noise — amortized correction quality does not erode (nor improve
+monotonically) with scale. The signature decoupling holds every seed: the corrected activation sits *further* off
+the Gaussian manifold than raw at α=8 (`D_M` learned 97.0 ± 4.1 vs raw 66.0). The wide bar at α=1 (260 ± 30%) is
+the usual ratio artifact — raw's damage there is only +0.036 nats, inflating the relative spread while the absolute
+`ΔLM_learned` stays tight (−0.058 ± 0.011). **Limitation.** As in Experiments 26–29, this varies only the training
+seed (corrector init + α-sampling / data-shuffle RNG); the eval set, Gaussian fit, and steering vector are held
+fixed, so it bounds *optimization* variance on GPT-2 large, not eval-document or vector-construction sampling
+variance. **Next check.** Every headline model now carries a five-seed bar; extending the error bars to
+eval-document or vector-construction resampling, or to a non-Transformer family (e.g. a state-space model), would
+broaden the controls at low marginal value.
 
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
@@ -1231,6 +1268,10 @@ state-space model) would extend it, at low marginal value.
   as Exp 26/27/28. (b) recovery is 94.8 ± 1.6% at α=8 (five per-seed points 92–96%): its band sits **entirely
   above** every other model's, so Qwen3's top-of-band 94% is a genuine effect and the recipe is seed-stable on a
   fourth model.
+- `plots/30_seed_robustness_large.png` — seed robustness on **GPT-2 large** (774M, block 18/36, 5 seeds). Same two
+  panels as Exp 26/27/28/29. (b) recovery is 85.1 ± 1.1% at α=8 (five per-seed points 84–87%): its band sits
+  between GPT-2 small and medium, confirming the flat model-scale trend (medium is the GPT-2 peak; large ≈ small)
+  and closing the last single-seed headline model.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -1273,7 +1314,10 @@ steering's fluency damage at α=8 (**101%** at α=4), and on **GPT-2 large (774M
 the **124M → 355M → 774M** scale range (6× parameters) the α=8 recovery stays essentially flat (84% / 89% /
 84%), so the core result is **model-robust** as well (Exp 13, Exp 19). A five-seed control on GPT-2 medium
 (Exp 27) confirms its α=8 recovery is **88.3 ± 2.2%** — a band entirely above GPT-2 small's 83.3 ± 2.0%
-(Exp 26), so medium's edge is a genuine model-scale effect, not seed noise. And it is **not a GPT-2-*architecture*
+(Exp 26), so medium's edge is a genuine model-scale effect, not seed noise; and a five-seed control on **GPT-2
+large (Exp 30)** confirms **85.1 ± 1.1%** at α=8 — a band (`[84.0, 86.2]%`) between small and medium, so the flat
+model-scale trend is itself seed-controlled (medium is the GPT-2 peak; large ≈ small, recovery does not grow with
+scale). And it is **not a GPT-2-*architecture*
 artifact** either: replicating the exact flagship pipeline on **Qwen3-1.7B (block 14/28)** — a modern
 architecture that swaps LayerNorm→RMSNorm, learned→rotary positions, GELU→SwiGLU, and dense→grouped-query
 attention — recovers **94%** of the fluency damage at α=8 (**108%** at α=4), again by moving *further* off the
