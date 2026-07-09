@@ -12,9 +12,9 @@ apples-to-apples. **$N=200 \Rightarrow$ AUROC noise $\approx \pm0.035$**, so gap
 significant. Scores are oriented a priori (higher = more OOD); an AUROC < 0.5 means a *reversed* signal.
 
 **Methods (summary; equations in REPORT.md):** `plateau-jacFrob` = Hutchinson estimate of
-$\|\partial \log p/\partial h\|_F$ (4 dirs; flatter=ID); `plateau-perturbation` = mean next-token KL
-after 16 unit perturbations (eps=6); `selfNLL-grad` = $\|\partial(-\log p[\arg\max])/\partial h\|$
-(confidence-adjacent control); `baseline-MSP` = $1-\max$ softmax; `baseline-L2norm` = $\|h\|_2$;
+$\Vert\partial \log p/\partial h\Vert_F$ (4 dirs; flatter=ID); `plateau-perturbation` = mean next-token KL
+after 16 unit perturbations (eps=6); `selfNLL-grad` = $\Vert\partial(-\log p[\arg\max])/\partial h\Vert$
+(confidence-adjacent control); `baseline-MSP` = $1-\max$ softmax; `baseline-L2norm` = $\Vert h\Vert_2$;
 `baseline-mahalanobis` = naive Mahalanobis (1000-seq fit); `cup-RMD` = cupbearer relative Mahalanobis;
 `cup-QUE` = cupbearer Quantum-Entropy/SPECTRE.
 
@@ -126,6 +126,73 @@ on every set. No single $\epsilon$ is jointly best (random wants $\epsilon\le2$,
 $\epsilon\ge16$), and at input space large $\epsilon$ actively *reverses* the detector. The negative
 verdict is unchanged; the scan strengthens it by ruling out "we just used the wrong $\epsilon$" as an
 escape. Full numbers: `results/auroc_perturbation_eps.csv` (120 rows).
+
+## Randomly-sampled residual points + GPT-2 scaling (operator request 2026-07-09)
+
+An operator asked to *"try GPT-2 XL, and OOD detection with randomly sampled points in the residual
+stream."* GPT-2 XL is not in the offline model cache, so the largest cached model — **gpt2-large
+(774M, ~6× GPT-2 small)** — is used for the scale test. The "randomly sampled points" idea is
+implemented as a new **forward-only** detector, `rand-points`, evaluated against the two cheapest
+reference baselines (MSP, naive Mahalanobis) on the same three OOD sets. Full numbers:
+`results/auroc_randpoints.csv` (78 rows); code `experiments/rand_points.py`.
+
+**What the detector does.** For each input, take the last-token activation $h$ at a measurement point,
+then sample $K$ random points around it, $h_k = h + \sigma z_k$ with $z_k \sim \mathcal{N}(0,I)$ and
+$\sigma = 0.1\Vert h\Vert$ (the cloud scales with the local activation magnitude). Continue the
+forward pass from each random point to get $K$ next-token distributions $p_1,\dots,p_K$, and score by
+their **dispersion** (`rand-points-disp`, the epistemic / plateau-width term) and by the **entropy** of
+their mean (`rand-points-ent`):
+
+```math
+s_{\text{disp}}(x) = \frac{1}{K}\sum_{k=1}^{K} D_{\mathrm{KL}}\!\big(p_k \,\Vert\, \bar p\big),
+\qquad
+s_{\text{ent}}(x) = H(\bar p) = -\sum_y \bar p(y)\log \bar p(y),
+\qquad \bar p = \frac{1}{K}\sum_k p_k .
+```
+
+Both are oriented *a priori* higher = more OOD. `rand-points-disp` differs from `plateau-perturbation`
+(distance of each perturbed output from the *clean* output): it measures the **spread among the random
+outputs themselves** — a Monte-Carlo estimate of epistemic uncertainty (BALD mutual information). The
+plateau hypothesis predicts low dispersion on a flat in-distribution plateau and high dispersion off it.
+gpt2 uses $K=16$, $N=200$, points {input, resid3/6/9}; gpt2-large uses $K=8$, $N=150$, points {input,
+resid9/18/27} (¼/½/¾ depth) under the shared VRAM/time budget.
+
+![rand-points detector vs baselines — GPT-2 small](results/plots/randpoints_gpt2.png)
+![rand-points detector vs baselines — GPT-2 large](results/plots/randpoints_gpt2-large.png)
+
+**Best AUROC per method (max over measurement point; `disp`/`ent` point in parentheses):**
+| model | OOD set | rand-points-disp | rand-points-ent | MSP | Mahalanobis (best pt) | best method |
+|---|---|---|---|---|---|---|
+| gpt2 | random | 0.518 (resid9) | 1.000 (input) | 0.932 | 0.834 (input) | rand-points-ent* |
+| gpt2 | shuffled | 0.267 (input) | 0.886 (resid3) | **0.872** | 0.535 (resid6) | MSP |
+| gpt2 | code | 0.707 (resid3) | 0.566 (resid3) | 0.359 | **0.913** (resid6) | Mahalanobis |
+| gpt2-large | random | 0.436 (resid27) | 1.000 (input) | 0.957 | 0.888 (input) | rand-points-ent* |
+| gpt2-large | shuffled | 0.256 (resid27) | 0.980 (input) | **0.914** | 0.578 (resid18) | rand-points-ent* |
+| gpt2-large | code | 0.596 (resid18) | 0.326→ | 0.326 | **0.842** (resid18) | Mahalanobis |
+
+\* `rand-points-ent` is **predictive entropy** — a confidence signal, not plateau geometry. It is
+near-perfect on `random`/`shuffled` (where the model is simply uncertain) but **collapses on `code`
+exactly like MSP** (gpt2 0.566, gpt2-large **reverses** to 0.43/0.30) — the same confident-wrong failure.
+It wins the synthetic sets only because it *is* the entropy baseline; it is not evidence for plateau-ness.
+
+**What the scan shows.**
+- **The genuine "plateau-width" signal (`rand-points-disp`) is weak and loses on every set, for both
+  models.** It is *reversed* on `random` and `shuffled` (best-point AUROC ≤ 0.52 for gpt2, ≤ 0.44 for
+  gpt2-large — ID text disperses *more* under residual noise than the synthetic OOD does), and only
+  moderate on `code` (0.71 / 0.60), where it still loses to Mahalanobis (0.913 / 0.842). Same verdict as
+  the existing `plateau-jacFrob` / `plateau-perturbation` variants.
+- **The negative result holds at ~6× scale.** Going GPT-2 small → large does not rescue any plateau-style
+  signal: `rand-points-disp` stays weak/reversed, MSP stays best on the synthetic sets (and rises to
+  0.957 / 0.914), and on the `code` domain shift every confidence signal collapses (MSP 0.326) while
+  Mahalanobis in a deep residual layer (resid18, ½-depth, 0.842) remains the strongest detector.
+- **No consistent internal-vs-input advantage** for `rand-points-disp`: it is best in a *shallow-to-mid*
+  residual layer on `code` (slightly above input) but reversed in the residual stream on the synthetic
+  sets — no clean case for measuring internally, matching the main study.
+
+**Takeaway.** Adding the operator's randomly-sampled-residual-points detector and a ~6× larger model
+does **not** change the conclusion. The honest epistemic-dispersion signal is a weak detector that loses
+to Mahalanobis (code) and MSP (synthetic) at both scales; the only strong `rand-points` variant is the
+entropy summary, which is a confidence baseline in disguise and collapses on the real domain shift.
 
 ## Headline
 With the methodology errors flagged by the operator review fixed, the iter-1 "competitive with MSP"

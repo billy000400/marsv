@@ -30,6 +30,21 @@ Minimum acceptable: one plateau variant (perturbation-sensitivity) computed at a
 End each JOURNAL.md entry with one line: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**DONE (iter 10, 2026-07-09) — NEW operator feedback addressed: randomly-sampled residual points +
+GPT-2 scaling.** Reset into a nominally-finished project but found NO `STOP` and a NEW unaddressed
+feedback file `human_feedback_07082204.md`: *"try GPT-2 XL, and OOD detection with randomly sampled
+points in the residual stream."* A prior partial iteration had written `experiments/rand_points.py` +
+`make_randpoints_plot.py` and launched the sweep (gpt2 done, gpt2-large mid-run); this iteration let the
+run finish, verified `results/auroc_randpoints.csv` (78 rows), generated both plots, and curated the
+deliverables. **GPT-2 XL is not in the offline cache → used gpt2-large (774M, ~6×)** for the scale test
+(assumption logged; rejected alternative = block on the missing XL weights). **Verdict UNCHANGED and
+strengthened at scale:** the genuine dispersion signal `rand-points-disp` is weak/reversed (random 0.52 /
+shuffled 0.27 / code 0.71 for gpt2; 0.44 / 0.26 / 0.60 for gpt2-large), losing to Mahalanobis on code
+(0.913 / 0.842) and MSP on synthetic; `rand-points-ent` is a confidence baseline (near-perfect on
+random/shuffled but collapses on code like MSP, 0.359 / 0.326). Added a section to RESULTS.md + REPORT.md
+(Methods equation, gpt2-large Data note, Obs/Interp/Limitations/Next-check, both plots); REPORT
+display-math clean (9/9). Renamed feedback `*.addressed.md`; `STOP` written. _History below:_
+
 **DONE (iter 9, 2026-07-07) — VERIFIED FINISHED STATE + RE-CREATED MISSING STOP.** Reset into a
 nominally-finished project with **no `STOP` on disk** (recurring finalization miss) but **no open
 feedback** (all six review/human files are `*.addressed.md`). Verified completeness before finalizing:
@@ -128,8 +143,11 @@ value measuring internally. Clean NEGATIVE result (acceptable per plan). Feedbac
 
 ## Next step
 None — project complete and finalized; deliverables are CLAUDE.md-compliant (clean current-best,
-LaTeX Methods, full CHANGELOG history) and `STOP` is written (re-created iter 9 after a finalization
-miss; all artifacts and figures verified present on disk). **all** operator feedback addressed (incl.
+LaTeX Methods, full CHANGELOG history) and `STOP` is written. The iter-10 operator request
+(`human_feedback_07082204.md`: GPT-2 XL / randomly-sampled residual points) is addressed and renamed
+`*.addressed.md`; the negative result now also holds at ~6× scale (gpt2-large). If reopened by NEW
+feedback: run the actual GPT-2 XL if its weights reach the offline cache, and test the collapse-on-code
+pattern on a non-code real domain shift. Prior finalized state: **all** operator feedback addressed (incl.
 the iter-5 Codex `CODEX_REVIEW_20260622T230658Z.md` canonical-split hygiene review, the iter-7
 `human_feedback_07011019.md` documentation-clarity requests, and the iter-8
 `human_feedback_07010438.md` epsilon-scan request), `STOP` written. If reopened, the

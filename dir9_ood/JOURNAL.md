@@ -288,3 +288,42 @@ history only).
 remaining ideas are all enhancements not corrections (cupbearer full task harness end-to-end; multi-model
 sweep; a non-code domain shift).
 On track? yes — S1+S2+S3 100% done, all feedback addressed, deliverables verified current-best on disk, STOP (re-)created.
+
+---
+
+## Iteration 10 (2026-07-09) — NEW feedback: randomly-sampled residual points + GPT-2 scaling
+**Did:** Reset into a nominally-finished project but found (a) NO `STOP` on disk and (b) a NEW unaddressed
+operator feedback file `human_feedback_07082204.md` (05:05): *"try: GPT-2 excel [XL], and OOD detection
+with randomly sampled points in residual streams."* A prior partial iteration had already written
+`experiments/rand_points.py` + `experiments/make_randpoints_plot.py` and LAUNCHED the sweep — the running
+process (PID 1535) was mid-`gpt2-large` (gpt2 fully scored, gpt2-large weights loaded, id_test/OOD encoded)
+when I reset. I monitored it to completion rather than restarting (saves GPU/time; it was already 58% CPU,
+5 GB VRAM). It finished writing `results/auroc_randpoints.csv` (78 rows). Ran `make_randpoints_plot.py` →
+`results/plots/randpoints_{gpt2,gpt2-large}.png`. Then curated deliverables: new section in RESULTS.md
+(best-per-method table across both models + both plots) and REPORT.md (Methods `rand-points` equation,
+gpt2-large Data note, a rule-10 Observation/Interpretation/Limitations/Next-check Results subsection,
+Conclusion clause). Fixed my one new inline-`\,`→stray-comma 8b hazard and the 3 pre-existing RESULTS
+`\|`→single-bar norms (`\Vert`); REPORT display-math API check clean (9/9 js-display-math, 0 code
+fallbacks); both files 8b-hazard-grep clean. Appended CHANGELOG; updated PLAN status/next-step.
+**Assumption logged (CLAUDE.md loop rule):** "GPT-2 excel" read as **GPT-2 XL**; XL (1.5B) is NOT in the
+offline HF cache, so used the largest cached model **gpt2-large (774M, ~6× small)** for the scale test.
+Rejected alternatives: (i) block/skip the scaling ask waiting for XL weights (violates loop rule); (ii)
+download XL (would need network + violates the no-heavy-install / offline constraint). gpt2-large is the
+standard fallback and still answers "does the negative result survive a ~6× model?".
+**Learned:** (1) The genuine epistemic "plateau-width" signal `rand-points-disp` is **weak and mostly
+reversed** — random/shuffled best-point AUROC ≤0.52 (gpt2) / ≤0.44 (gpt2-large), i.e. ID text disperses
+MORE under residual noise than synthetic OOD does (opposite of the flat-ID hypothesis; likely because
+random/shuffled inputs put the model in an already-saturated near-uniform output state). Only moderate on
+code (0.71 / 0.60), still < Mahalanobis (0.913 / 0.842). Loses on every set, both models — same story as
+the existing plateau variants. (2) `rand-points-ent` is near-perfect on random (1.000) and strong on
+shuffled but **collapses/reverses on code** (0.566 gpt2; 0.30–0.43 gpt2-large) exactly like MSP (0.359 /
+0.326) — it is predictive entropy, a confidence baseline in disguise (same category as `selfNLL-grad`),
+not plateau geometry. (3) **Scaling:** at ~6× params MSP rises to 0.957/0.914 on synthetic and
+Mahalanobis@resid18 (½-depth, 0.842) still leads on code — the negative result is not a small-model
+artifact. No consistent internal-vs-input advantage for `rand-points-disp`. Verdict UNCHANGED, strengthened.
+**Gotchas:** other agents' scripts (`ae_learning_curves.py`, `collect_lasttoken.py`) were running
+concurrently on the box — only monitored/read, didn't touch them. The rand_points run used ~5 GB VRAM at
+peak (within the shared budget; my process had `set_per_process_memory_fraction(0.180)`).
+**Next step:** Rename `human_feedback_07082204.md` → `*.addressed.md`, write STOP. Negative result complete,
+now corroborated by a new detector and a ~6× scale check.
+On track? yes — S1+S2+S3 100% done; new operator feedback (GPT-2 scaling + randomly-sampled residual points) fully addressed, negative result reproduced/strengthened at gpt2-large, deliverables curated + display-math clean, feedback renamed + STOP created.

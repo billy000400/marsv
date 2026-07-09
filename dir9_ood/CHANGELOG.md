@@ -5,6 +5,30 @@ live in those files; this file records what moved and why.
 
 ---
 
+## 2026-07-09 — Randomly-sampled residual points + GPT-2 scaling (iter 10; `human_feedback_07082204.md`)
+- **New experiment added — verdict unchanged, strengthened at scale.** Operator asked to *"try GPT-2 XL,
+  and OOD detection with randomly sampled points in the residual stream."* GPT-2 XL is not in the offline
+  cache → used **gpt2-large (774M, ~6×)** for the scale test. Added a forward-only `rand-points` detector
+  (`experiments/rand_points.py`): sample $K$ points $h_k=h+0.1\Vert h\Vert z_k$ around the last-token
+  activation, continue the forward pass from each, score by output **dispersion** (`rand-points-disp`,
+  epistemic/plateau-width) and mean-distribution **entropy** (`rand-points-ent`). Ran on gpt2 (K=16,
+  N=200) and gpt2-large (K=8, N=150), same canonical split, vs MSP + naive Mahalanobis on {random,
+  shuffled, code}. Outputs: `results/auroc_randpoints.csv` (78 rows),
+  `results/plots/randpoints_{gpt2,gpt2-large}.png`.
+- **Findings:** `rand-points-disp` (the genuine signal) is weak and *reversed* on random/shuffled
+  (best-point ≤0.52 gpt2, ≤0.44 gpt2-large) and only moderate on code (0.707 gpt2 / 0.596 large) — loses
+  to Mahalanobis (0.913 / 0.842) and MSP everywhere. `rand-points-ent` is near-perfect on random/shuffled
+  (up to 1.000) but **collapses/reverses on code** (0.566 gpt2; 0.30–0.43 gpt2-large) exactly like MSP
+  (0.359 / 0.326) — it is predictive entropy, a confidence baseline, not plateau geometry. At ~6× scale
+  MSP rises (0.957 / 0.914 synthetic) and Mahalanobis@resid18 (0.842) still leads on code. Negative result
+  holds and is strengthened (not a small-model artifact).
+- **Deliverables:** added a "Randomly-sampled residual points + GPT-2 scaling" section to RESULTS.md
+  (best-per-method table + both plots) and to REPORT.md (Methods equation for `rand-points`, Data note on
+  gpt2-large, Results Observation/Interpretation/Limitations/Next-check subsection, Conclusion clause). No
+  existing numbers moved (main GPT-2-small tables unchanged). Also fixed pre-existing inline-`\|`→single-bar
+  norms in the RESULTS.md Methods-summary paragraph (`\|`→`\Vert`, rule 8b; no numbers changed). REPORT
+  display-math check clean (9/9 js-display-math, 0 code fallbacks).
+
 ## 2026-07-02 — Epsilon scan for plateau-perturbation (iter 8; `human_feedback_07010438.md`)
 - **New experiment added — verdict unchanged, strengthened.** Operator asked whether scanning the
   perturbation magnitude $\epsilon$ (fixed at 6 in the main table) makes plateau-perturbation competitive.

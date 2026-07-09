@@ -27,7 +27,9 @@ best-per-set directly from `results/auroc_table.csv`.)
 ## Methods
 
 ### Data & Model
-- **Model:** GPT-2 small (124M), run on GPU (NVIDIA A10, sm_86, CUDA 13.2). VRAM capped per BUDGET.md.
+- **Model:** GPT-2 small (124M) for the main study; a scaling check additionally runs the `rand-points`
+  detector and MSP/Mahalanobis baselines on **gpt2-large (774M, ~6×)** (GPT-2 XL is not in the offline
+  cache). Run on GPU (RTX 3090 / A10), VRAM capped per BUDGET.md.
 - **In-distribution (ID):** held-out FineWeb text (`data/fineweb_sample.txt`).
 - **OOD sets (3):** `random` tokens (uniform over the vocab), `shuffled` tokens (ID tokens with order
   permuted — same unigram statistics, wrong order), and `code` (Python source read offline from
@@ -94,6 +96,23 @@ model's own argmax negative log-likelihood; kept to show it is confidence-adjace
 s_{\text{selfNLL}}(x) \;=\; \Big\| \tfrac{\partial\,[-\log p(\hat y\mid x)]}{\partial h} \Big\|_2,
    \qquad \hat y = \arg\max_y p(y\mid x).
 ```
+
+**rand-points** (operator request 2026-07-09, forward-only) — "OOD detection with randomly sampled
+points in the residual stream". Sample $K$ points around $h$, $h_k = h + \sigma z_k$ with
+$z_k\sim\mathcal{N}(0,I)$ and $\sigma = 0.1\Vert h\Vert$, continue the forward pass from each to get
+$p_k = p(\cdot\mid h_k)$, and summarise their spread two ways — **dispersion** (the epistemic /
+"plateau-width" term, a.k.a. BALD mutual information) and **entropy** of the mean:
+
+```math
+s_{\text{disp}}(x) = \frac{1}{K}\sum_{k=1}^{K} D_{\mathrm{KL}}\!\big(p_k \,\Vert\, \bar p\big),
+\qquad
+s_{\text{ent}}(x) = -\sum_y \bar p(y)\log \bar p(y),
+\qquad \bar p = \frac{1}{K}\sum_{k=1}^{K} p_k .
+```
+
+Both are oriented higher = more OOD. The plateau hypothesis predicts **low** dispersion on a flat
+in-distribution plateau. This differs from `plateau-perturbation` (distance from the *clean* output):
+`rand-points-disp` measures the spread *among the sampled outputs*, a Monte-Carlo epistemic estimate.
 
 ### Baselines
 **MSP** — one minus the maximum softmax probability:
@@ -185,12 +204,44 @@ exactly). Full numbers in `results/auroc_perturbation_eps.csv` (120 rows).
   is jointly best (random wants small, code wants large). The negative verdict is unchanged and
   strengthened — "wrong $\epsilon$" does not rescue plateau-perturbation.
 
+### Randomly-sampled residual points + GPT-2 scaling (operator request 2026-07-09)
+An operator asked to *"try GPT-2 XL, and OOD detection with randomly sampled points in the residual
+stream."* We added the `rand-points` detector (Methods) and re-ran it plus MSP/Mahalanobis on gpt2-large
+(GPT-2 XL is not cached). Full numbers: `results/auroc_randpoints.csv` (78 rows).
+
+![rand-points vs baselines — GPT-2 small](results/plots/randpoints_gpt2.png)
+![rand-points vs baselines — GPT-2 large](results/plots/randpoints_gpt2-large.png)
+
+**Observation.** Best AUROC over measurement points: the genuine dispersion signal `rand-points-disp` is
+weak and mostly *reversed* — random 0.518 / shuffled 0.267 / code 0.707 (gpt2), and 0.436 / 0.256 / 0.596
+(gpt2-large) — losing to Mahalanobis on `code` (0.913 / 0.842) and to MSP on the synthetic sets. The
+`rand-points-ent` variant is near-perfect on `random`/`shuffled` (up to 1.000) but **collapses/reverses
+on `code`** (gpt2 0.566; gpt2-large 0.30–0.43), the same failure mode as MSP (0.359 / 0.326). At ~6× scale
+MSP rises to 0.957 / 0.914 on synthetic OOD and Mahalanobis@resid18 (0.842) still leads on `code`.
+
+**Interpretation.** `rand-points-disp` measures epistemic dispersion, the honest "plateau-width" idea;
+its reversal on synthetic OOD suggests random/shuffled inputs put the model in an *already-saturated*
+(near-uniform, low-dispersion) output state, the opposite of the flat-ID / scattered-OOD hypothesis.
+`rand-points-ent` is simply predictive entropy — a confidence baseline — which is why it tracks MSP and
+shares its confident-wrong collapse on `code`. The scaling check indicates the negative result is not an
+artifact of GPT-2 small's capacity.
+
+**Limitations.** gpt2-large used slightly smaller $K$/$N$ (8/150 vs 16/200) under the shared budget;
+GPT-2 XL itself was not run (not in the offline cache). Two model sizes, three OOD sets.
+
+**Next check.** Fitting `rand-points-ent`/`disp` as calibrated detectors on a non-code real domain shift,
+and running the actual GPT-2 XL if its weights become available, would test whether the collapse-on-code
+pattern is domain-specific.
+
 ## Conclusion
 Plateau-ness, measured honestly as the flatness of the output distribution, is a **weak OOD detector
 that is beaten by standard *and* cupbearer baselines on every OOD set**, and measuring it inside the
 residual stream provides no advantage over the simpler input-space signal. The best detectors are MSP
-(synthetic OOD) and relative/naive Mahalanobis in a deep residual layer (real domain shift). This is a
-clean negative result, which PLAN.md declares complete and acceptable.
+(synthetic OOD) and relative/naive Mahalanobis in a deep residual layer (real domain shift). The
+operator's randomly-sampled-residual-points detector fits the same pattern — its epistemic-dispersion
+term is weak/reversed, and its entropy term is a confidence baseline that collapses on the real domain
+shift — and the negative result **holds at ~6× scale (gpt2-large)**. This is a clean negative result,
+which PLAN.md declares complete and acceptable.
 
 ## Limitations / honest caveats
 - $N=200 \Rightarrow \pm0.035$ AUROC noise; the qualitative ranking (baselines > plateau on every set)
