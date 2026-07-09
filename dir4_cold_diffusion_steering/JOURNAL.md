@@ -1322,3 +1322,44 @@ sampling variance, not just optimization variance); (ii) a non-Transformer famil
 On track? yes — S7 seed axis now spans ALL FIVE headline models (GPT-2 large 85.1±1.1% @α=8 closes the last
 single-seed point); the flat GPT-2 scale trend shown seed-controlled (medium peak, large ≈ small). ~100% complete.
 No blocker.
+
+## 2026-07-09 — Experiment 31: eval-set sampling control (document bootstrap)
+**Did.** Every prior confidence interval (Exp 26–30) varies the OPTIMIZATION seed and holds the 100 held-out
+eval documents fixed — so the sampling variance of that finite document draw was the one unbounded noise
+source (PLAN Next-step (i)'s remaining sampling axis; CLAUDE.md rule 10 control). Wrote
+`experiments/31_eval_bootstrap.py`: imports the Exp-3 module (Corrector / train_corrector / make_hat /
+FuncPatcher / batched_ids reused verbatim — DRY), trains the EXACT flagship seed-0 corrector (GPT-2 small,
+block 6), then evaluates ΔLM PER DOCUMENT (summed excess next-token NLL over clean) for raw and learned at
+α∈{1,2,4,6,8}, and bootstrap-resamples the 100 docs with replacement B=2000×, recomputing the token-weighted
+aggregate recovery `R = 1 − Σ e_learned / Σ e_raw` each resample. Reports point estimate + 95% percentile CI.
+Result POSITIVE + tight: α=8 recovery 84.3%, doc-bootstrap CI [83.1, 85.6]% (±0.7 pp); α=4 95.3% [92.9, 97.6]%;
+α=6 89.4% [87.9, 90.9]%. Point estimates reproduce Exp 3 to the digit.
+**Learned.** (1) KEY: the eval-document CI (±0.7 pp @α=8) is NARROWER than the five-seed CI (±2.0 pp, Exp 26) —
+which 100 docs we hold out moves the headline < 1 point, while re-training with a new seed moves it ~2 points.
+So the seed CI we already report is the BINDING uncertainty, and the flagship 84% is not an artifact of the
+particular held-out split. (2) The bootstrap interval tightens monotonically with α (±1.2→±0.7 pp for α=4→8)
+because raw's denominator damage grows, shrinking the ratio's relative spread; α=1's ±17 pp is the same
+ratio artifact as everywhere (raw damage only +0.076 nats). (3) Token-weighting (summed, not per-doc-averaged
+NLL) makes the point estimate identical to Exp 3's doc-pooled ΔLM ratio — a faithful reproduction check.
+**Assumptions/decisions logged (loop mode).** (a) Chose eval-document resampling (the named remaining sampling
+axis) over the other marginals — vector-construction resampling (deferred as Exp 31's own Next check) and a
+non-Transformer family (heavier, no pip). Eval-bootstrap is the cheapest rigor-per-minute step and directly
+answers "is the seed CI or the eval split the binding bound?". (b) B=2000, percentile CI (standard). (c) Kept
+it on the flagship (small/block6/seed0) only — the point is to compare sampling vs optimization variance on
+the headline number, not to re-bootstrap every model. (d) Placed Exp 31 in the seed cluster (RESULTS + REPORT_3
+next to Exp 26–30), not a new part.
+**Deliverables.** RESULTS.md (Exp-31 section + table + `$$` equation + figure entry; Exp-30 Next-check
+"eval-document resampling done"); REPORT_3 (Exp-31 Methods ```math block + Results O/I/L/N + Exp-30 Next-check +
+Conclusion open-items); REPORT.md index (Summary sentence + headline-table row). CHANGELOG appended; PLAN
+Current status/Next step rewritten + S7(f) checkbox; this JOURNAL entry. Math re-verified via GitHub API:
+REPORT_3 10 js-display-math / 0 `<pre lang=math>` / 0 inline hazards (fixed one `\{...\}`→`\lbrace...\rbrace`
+inline set), REPORT.md 1/0, RESULTS.md `$$` renders. Artifacts: `experiments/31_eval_bootstrap.py`,
+`results/31_eval_bootstrap.json`, `results/31_run.log`, `plots/31_eval_bootstrap.png`. ENV:
+`/opt/conda/bin/python` (LOCAL disk), `setsid` full detach; ~2 min total.
+**Next step.** Optional only (success criterion long met, seed axis + eval-sampling axis both controlled):
+(i) vector-construction resampling — bootstrap the SST-2/DiffMean examples the steering vector is built from
+(the one untouched sampling axis); (ii) a non-Transformer family (state-space/MoE); (iii) finer λ_b / Exp-20
+on Qwen3. All marginal.
+On track? yes — S7 sampling control extended: eval-document bootstrap of the flagship [83.1, 85.6]% @α=8 (±0.7
+pp) shown TIGHTER than the seed CI, so the seed CI is the binding bound; headline not an eval-split artifact.
+~100% complete. No blocker.

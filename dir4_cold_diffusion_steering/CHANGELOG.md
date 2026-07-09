@@ -867,3 +867,23 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   ~35 min under GPU contention (~7 min/seed). `setsid` full detach. Artifacts:
   `experiments/30_seed_robustness_large.py`, `results/30_seed_robustness_large.json`, `results/30_run.log`,
   `plots/30_seed_robustness_large.png`.
+
+## 2026-07-09 — Experiment 31: eval-set sampling control (document bootstrap of the flagship recovery)
+- **New (Exp 31), additive.** Every prior CI (Exp 26–30) varies the *optimization* seed and holds the 100
+  held-out eval documents fixed. Exp 31 bounds the *other* noise source — the finite eval-document sample —
+  by bootstrapping the flagship recovery (GPT-2 small, block 6, seed 0, the exact Exp-3 corrector) over the
+  100 held-out docs (`B = 2000`). Per-doc summed excess NLL over clean; token-weighted aggregate recovery
+  `R = 1 − Σ e_learned / Σ e_raw` per resample.
+- **Result.** α=8 recovery 84.3%, 95% doc-bootstrap CI `[83.1, 85.6]%` (± 0.7 pp) — TIGHTER than the
+  five-seed CI `[81.3, 85.3]%` (± 2.0 pp, Exp 26). α=4: 95.3% `[92.9, 97.6]%`. Point estimates reproduce
+  Exp 3 to the digit (built-in check). ⇒ eval-set sampling noise < optimization noise, so the seed CI is the
+  binding uncertainty and the headline is not an eval-split artifact. α=1 row (191% ± 17 pp) is the usual
+  ratio artifact (raw damage only +0.076 nats).
+- **Deliverables.** RESULTS.md: Exp-31 section + table + `$$` recovery equation + figure entry, Exp-30
+  Next-check "eval-document resampling" marked done. REPORT_3: Exp-31 Methods block (```math fence) + Results
+  O/I/L/N subsection + Exp-30 Next-check + Conclusion open-items updated. REPORT.md index: Summary sentence +
+  a headline-table row. Math re-verified via GitHub API (REPORT_3 10 js-display-math / 0 broken / 0 inline
+  hazards; REPORT.md 1 / 0; RESULTS.md `$$` renders). **No prior result superseded** (Exp 31 confirms Exp 3).
+- **Ops:** `/opt/conda/bin/python`, `setsid` full detach; GPT-2 small; ~2 min total. Artifacts:
+  `experiments/31_eval_bootstrap.py`, `results/31_eval_bootstrap.json`, `results/31_run.log`,
+  `plots/31_eval_bootstrap.png`.

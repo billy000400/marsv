@@ -198,6 +198,14 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         [79.2,82.4] — so within the GPT-2 family the flat 84/89/84% scale trend is seed-controlled: MEDIUM is the
         peak, large ≈ small, recovery does not grow with scale. Seed axis now spans ALL FIVE headline models /
         three scales / two architectures.
+- [x] S7(f) — EVAL-SET SAMPLING control (Exp 31, 2026-07-09) DONE: all seed CIs (Exp 26–30) bound OPTIMIZATION
+        variance only; Exp 31 bounds the remaining SAMPLING axis by bootstrapping the flagship recovery (GPT-2
+        small, block 6, seed-0 Exp-3 corrector) over the 100 held-out eval docs (B=2000, per-doc summed excess
+        NLL, token-weighted `R = 1 − Σe_learned/Σe_raw`). POSITIVE + tight: α=8 recovery 84.3%, 95% doc-bootstrap
+        CI [83.1,85.6]% (±0.7 pp) — NARROWER than the five-seed CI [81.3,85.3]% (±2.0 pp, Exp 26); α=4 95.3%
+        [92.9,97.6]%. Point estimates reproduce Exp 3 to the digit. ⇒ eval-set sampling noise < optimization
+        noise, so the seed CI is the BINDING uncertainty; headline is not an eval-split artifact. Only untouched
+        sampling axis left = vector-construction resampling.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -209,7 +217,27 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**S7 SEED robustness on GPT-2 LARGE — Experiment 30 (new, 2026-07-09):** closed the LAST single-seed headline
+**S7(f) EVAL-SET SAMPLING control — Experiment 31 (new, 2026-07-09):** every prior CI (Exp 26–30) varies the
+OPTIMIZATION seed and holds the 100 held-out eval documents fixed, leaving eval-document sampling variance — the
+remaining sampling axis (PLAN Next-step (i)) — unbounded. Wrote `experiments/31_eval_bootstrap.py` (imports the
+Exp-3 module, reuses Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim — DRY), trained the EXACT
+flagship seed-0 corrector (GPT-2 small, block 6), evaluated ΔLM PER DOCUMENT (summed excess NLL over clean) for
+raw + learned at α∈{1,2,4,6,8}, bootstrap-resampled the 100 docs (B=2000), token-weighted aggregate recovery
+`R = 1 − Σ e_learned / Σ e_raw` per resample. POSITIVE + tight: α=8 recovery 84.3%, 95% doc-bootstrap CI
+**[83.1, 85.6]% (±0.7 pp)** — NARROWER than the five-seed CI [81.3, 85.3]% (±2.0 pp, Exp 26); α=4 95.3%
+[92.9, 97.6]%; α=6 89.4% [87.9, 90.9]%. Point estimates reproduce Exp 3 to the digit (built-in check). KEY:
+eval-set sampling noise < optimization noise, so the seed CI is the BINDING uncertainty and the flagship 84% is
+not an eval-split artifact; α=1 (191% ±17 pp) is the usual ratio artifact (raw damage only +0.076 nats). No prior
+result superseded (Exp 31 confirms Exp 3). Artifacts: `experiments/31_eval_bootstrap.py`,
+`results/31_eval_bootstrap.json`, `results/31_run.log`, `plots/31_eval_bootstrap.png`. Curated RESULTS.md (Exp-31
+section + table + `$$` equation + figure; Exp-30 "eval-document resampling" Next-check closed), REPORT_3 (Exp-31
+Methods ```math block + Results O/I/L/N + Exp-30 Next-check + Conclusion open-items), REPORT.md index (Summary
+sentence + headline row). CHANGELOG appended. Math re-verified via GitHub API (REPORT_3 10 js-display-math / 0
+broken / 0 inline hazards — fixed one inline `\{\}`→`\lbrace\rbrace`; REPORT.md 1/0; RESULTS.md `$$` renders).
+ENV: `/opt/conda/bin/python` (LOCAL disk), `setsid` full detach; ~2 min total.
+
+<!-- prior: S7 seed robustness Exp 30 -->
+**S7 SEED robustness on GPT-2 LARGE — Experiment 30 (2026-07-09):** closed the LAST single-seed headline
 model (PLAN Next-step (i)'s final item). Exp 26/27/28/29 gave five-seed CIs on GPT-2 small, GPT-2 medium, Pythia,
 and Qwen3, but GPT-2 large (Exp 19, 774M, block 18/36) was still a single seed-0 run — the only headline model
 without an error bar. Wrote `experiments/30_seed_robustness_large.py` (imports the Exp-19 module, reuses its
@@ -727,8 +755,11 @@ controlled α=8 ordering Qwen3 > medium ≳ large ≈ small > Pythia: Qwen3 enti
 medium above the rest (real edge), large ≈ small (overlap, and both below medium → GPT-2 scale trend is
 flat/mildly non-monotone, medium the peak), Pythia at the bottom. Success criterion long met; result robust on
 SEVEN axes (strength/direction/layer/model-scale/architecture/prompt-family/steering-family) PLUS seed on all five
-models. Only very-low-value optional points remain: (i) extend the error bars to the remaining SAMPLING axis —
-eval-document or vector-construction resampling (all seed CIs bound optimization variance only); (ii) a FURTHER
+models. **S7(f) eval-set sampling control DONE (Exp 31):** doc-bootstrap of the flagship @α=8 = [83.1, 85.6]%
+(±0.7 pp), NARROWER than the seed CI, so the seed CI is the binding bound and the headline is not an eval-split
+artifact. Only very-low-value optional points remain: (i) the one untouched SAMPLING axis — VECTOR-CONSTRUCTION
+resampling (bootstrap the SST-2/DiffMean examples the steering vector is built from; eval-document already done
+in Exp 31); (ii) a FURTHER
 architecture family (state-space/MoE, e.g. Mamba/Mixtral) for a fuller sweep beyond three; (iii) finer λ_b +
 Exp-20 differentiable-generation ON Qwen3 (Exp 23's Next check). All are marginal — the seed axis and the
 external-validity story are already comprehensive. ENV: use `/opt/conda/bin/python` (transformers 5.13.0, LOCAL

@@ -1132,7 +1132,44 @@ seed (corrector init + α-sampling / data-shuffle RNG); the eval set, Gaussian f
 fixed, so it bounds *optimization* variance on GPT-2 large, not eval-document or vector-construction sampling
 variance. **Next check.** Every headline model now carries a five-seed bar; extending the error bars to
 eval-document or vector-construction resampling, or to a non-Transformer family (e.g. a state-space model), would
-broaden the controls at low marginal value.
+broaden the controls at low marginal value. *Eval-document resampling done in Experiment 31.*
+
+**Experiment 31 — Eval-set sampling control: bootstrap the flagship recovery over held-out documents.**
+Experiments 26–30 all vary the *optimization* seed (corrector init + α-sampling / data-shuffle RNG) and hold the
+100 held-out eval documents fixed. That leaves one source of noise unbounded: those 100 documents are themselves a
+finite sample, so the reported recovery could shift under a different draw. We isolate this *sampling* variance
+(distinct from optimization variance) on the flagship pipeline (GPT-2 small, block 6, seed 0, the exact Experiment-3
+corrector). We evaluate ΔLM **per document** — summed excess next-token NLL over the clean baseline, `e_m(d) =
+Σ_tokens[NLL_m(d) − NLL_clean(d)]`, for `m ∈ {raw, learned}` — then bootstrap-resample the 100 documents with
+replacement `B = 2000` times. For each resample we recompute the token-weighted aggregate recovery
+
+$$R = 1 - \frac{\sum_{d} e_{\text{learned}}(d)}{\sum_{d} e_{\text{raw}}(d)}$$
+
+and report its point estimate (full sample) and 95% bootstrap percentile interval. The point estimates reproduce
+Experiment 3 to the digit — a built-in check.
+
+| α | ΔLM raw (nats) | ΔLM learned (nats) | recovery (point) | **95% doc-bootstrap CI** | sd |
+|---|----------------|--------------------|------------------|--------------------------|-----|
+| 1 | +0.076 | −0.069 | 190.8% | `[159.6, 224.9]%` | 17.0 pp |
+| 2 | +0.325 | −0.051 | 115.8% | `[108.1, 123.7]%` | 4.0 pp |
+| 4 | +1.222 | +0.058 | 95.3% | `[92.9, 97.6]%` | 1.2 pp |
+| 6 | +2.111 | +0.224 | 89.4% | `[87.9, 90.9]%` | 0.8 pp |
+| 8 | +2.778 | +0.435 | **84.3%** | **`[83.1, 85.6]%`** | 0.7 pp |
+
+**Reading it: eval-set sampling noise is *smaller* than optimization noise, so the seed interval already dominates
+the flagship's total uncertainty.** At α=8 the recovery's 95% document-bootstrap interval is `[83.1, 85.6]%` (± 0.7
+pp) — *tighter* than the five-seed interval `[81.3, 85.3]%` (± 2.0 pp, Experiment 26) that varies the corrector's
+training. In other words, which 100 documents we happened to hold out moves the headline by well under a point,
+whereas re-training with a new seed moves it by ~2 points; the seed CI we already report is the wider, dominant
+bound. The bootstrap interval narrows monotonically as α rises (α=4: ± 1.2 pp, α=8: ± 0.7 pp) because raw's
+denominator damage grows, shrinking the ratio's relative spread. The α=1 row is the familiar ratio artifact — raw's
+damage is only +0.076 nats, so the recovery balloons to 191% with a ± 17 pp bootstrap spread even though the
+absolute learned ΔLM is a tight −0.069 nats. **Limitation.** This bootstraps the *evaluation* documents only, on the
+single flagship model/layer/seed; it does not resample the training set, the Gaussian-fit set, or the steering
+vector, so it bounds eval-document sampling variance specifically. It confirms the flagship point estimate is not an
+artifact of the particular held-out split, and that the previously-reported seed CI is the binding uncertainty.
+**Next check.** The last untouched sampling axis is vector construction — resampling the SST-2/DiffMean examples the
+steering vector is built from — which would bound how much the headline moves with the steering direction itself.
 
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
@@ -1140,6 +1177,9 @@ broaden the controls at low marginal value.
 - `plots/02_corrector.png` — (a) `D_M`, (b) ΔLM, (c) projection retention vs α for raw steering,
   the analytic cov-aligned corrector, norm-clip, and the naive-inversion control. The corrector
   lowers `D_M` but raises ΔLM; retention curves for raw and cov_corr coincide (matched projection).
+- `plots/31_eval_bootstrap.png` — flagship recovery vs α with 95% document-bootstrap error bars
+  (GPT-2 small, block 6, seed 0, `B = 2000`). Bars are tight (± 0.7 pp at α=8), narrower than the
+  seed CI, showing eval-set sampling is not the binding uncertainty.
 - `plots/03_learned_corrector.png` — (a) ΔLM, (b) `D_M`, (c) projection retention vs α for raw,
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the

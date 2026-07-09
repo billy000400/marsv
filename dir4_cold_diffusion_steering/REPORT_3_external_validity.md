@@ -300,6 +300,24 @@ projection-preserving corrector at `d = 1280`, same recipe and `α ∼ U(0.5, 8)
 learned corrector varies; we report mean ± sample standard deviation of the fluency recovery. Seed 0 re-runs
 Experiment 19 exactly and is the built-in reproducibility check.
 
+### Eval-set sampling control (Experiment 31)
+
+Experiments 26–30 all vary the *optimization* seed and hold the 100 held-out evaluation documents fixed. That
+leaves the sampling variance of those documents unbounded: a different draw of 100 documents could shift the
+headline. Experiment 31 isolates this *sampling* variance on the flagship pipeline (GPT-2 small, block 6, the exact
+Experiment-3 seed-0 corrector). We score ΔLM **per document** as the summed excess next-token negative
+log-likelihood over the clean baseline, $e_m(d) = \sum_{\text{tokens}}[\mathrm{NLL}_m(d) - \mathrm{NLL}_{\text{clean}}(d)]$
+for method $m \in \lbrace\text{raw}, \text{learned}\rbrace$, then bootstrap-resample the 100 documents with replacement
+$B = 2000$ times. Each resample recomputes the token-weighted aggregate recovery
+
+```math
+R \;=\; 1 \;-\; \frac{\sum_{d} e_{\text{learned}}(d)}{\sum_{d} e_{\text{raw}}(d)}
+```
+
+and we report the full-sample point estimate together with the 95% bootstrap percentile interval of $R$. Token
+weighting (summed rather than per-document-averaged NLL) makes the point estimate identical to Experiment 3's
+document-pooled ΔLM ratio — the built-in reproducibility check.
+
 ## Results
 
 ### Experiment 12 — the fluency result replicates across layers (not a block-6 artifact)
@@ -692,7 +710,40 @@ eval text or vector construction.
 
 **Next check.** All five headline models now carry a five-seed bar; broadening the controls to eval-document or
 vector-construction resampling, or to a non-Transformer family (e.g. a state-space model), would extend the
-external-validity story at low marginal value.
+external-validity story at low marginal value. *Eval-document resampling done in Experiment 31.*
+
+### Experiment 31 — eval-set sampling noise is smaller than optimization noise
+
+![flagship recovery bootstrapped over held-out documents](plots/31_eval_bootstrap.png)
+
+Flagship pipeline (GPT-2 small, block 6, seed 0), recovery bootstrapped over the 100 held-out evaluation documents
+(`B = 2000`):
+
+| α | ΔLM raw (nats) | ΔLM learned (nats) | recovery (point) | 95% doc-bootstrap CI | sd |
+|---|----------------|--------------------|------------------|----------------------|-----|
+| 1 | +0.076 | −0.069 | 190.8% | `[159.6, 224.9]%` | 17.0 pp |
+| 2 | +0.325 | −0.051 | 115.8% | `[108.1, 123.7]%` | 4.0 pp |
+| 4 | +1.222 | +0.058 | 95.3% | `[92.9, 97.6]%` | 1.2 pp |
+| 6 | +2.111 | +0.224 | 89.4% | `[87.9, 90.9]%` | 0.8 pp |
+| 8 | +2.778 | +0.435 | **84.3%** | **`[83.1, 85.6]%`** | 0.7 pp |
+
+**Observation.** At α=8 the recovery's 95% document-bootstrap interval is `[83.1, 85.6]%` (± 0.7 pp) — *narrower*
+than the five-seed interval `[81.3, 85.3]%` (± 2.0 pp, Experiment 26). The point estimates reproduce Experiment 3 to
+the digit (84.3% at α=8, 95.3% at α=4). The bootstrap interval tightens monotonically with α (± 1.2 pp at α=4 → ± 0.7
+pp at α=8).
+
+**Interpretation.** Which 100 documents we hold out moves the headline by well under a point, whereas re-training
+with a new seed moves it by ~2 points. So the seed CI already reported (Experiment 26) is the *binding* uncertainty,
+and the flagship point estimate is not an artifact of the particular eval split. The interval narrows with α because
+raw's denominator damage grows, shrinking the ratio's relative spread; the wide α=1 interval (± 17 pp) is the same
+ratio artifact seen throughout — raw's damage there is only +0.076 nats.
+
+**Limitations.** This bootstraps the *evaluation* documents only, on the single flagship model / layer / seed. It
+does not resample the training set, the Gaussian-fit set, or the steering vector, so it bounds eval-document
+sampling variance specifically — not vector-construction variance.
+
+**Next check.** The one untouched sampling axis is vector construction: resampling the SST-2 / DiffMean examples the
+steering vector is built from would bound how much the headline moves with the steering direction itself.
 
 ## Conclusion
 
@@ -702,4 +753,4 @@ The result is also **prompt-family-robust** (a FineWeb-trained corrector recover
 
 Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The *top* of the band is seed-controlled too: five seeds on Qwen3 give 94.8 ± 1.6% at α=8 (Experiment 29), a band entirely above every other model's, so Qwen3's edge is real. Finally, GPT-2 large — the last single-seed headline model — is confirmed at 85.1 ± 1.1% at α=8 (Experiment 30), a band between GPT-2 small and medium, so the flat model-scale trend is itself seed-controlled: medium is the GPT-2 peak, large ≈ small, and recovery does not grow with scale. The seed axis now spans all five headline models across three scales and two architectures.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), still varies only the *training* seed — extending the error bars to eval-document or vector-construction resampling is the remaining sampling axis. These are the natural next extensions for the external-validity story.
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound, leaving vector-construction resampling as the one untouched sampling axis. These are the natural next extensions for the external-validity story.
