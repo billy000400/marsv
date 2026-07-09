@@ -89,7 +89,7 @@ corrector.
 | Architecture-robust as a 3-family sweep @`α=8` | 81–94% (GPT-2 / Qwen3 / GPT-NeoX) | Part 3 (Exp 21, 24) |
 | Prompt-family-robust @`α=8` | 77% prose / 60% code | Part 3 (Exp 15) |
 | Steering-vector-family-robust @`α=8` | 84% / 84% / 101% | Part 3 (Exp 18) |
-| Seed-robust: flagship recovery across 5 seeds @`α=8` | 83.3 ± 2.0% (headline 84% reproducible) | Part 3 (Exp 26) |
+| Seed-robust across 5 seeds @`α=8` (small / medium) | 83.3 ± 2.0% / 88.3 ± 2.2% (non-overlapping) | Part 3 (Exp 26, 27) |
 | Behavioral caveat: generated effect vs raw (GPT-2) | ~1/6 of raw's | Part 4 (Exp 10) |
 | Readout-preservation term recovers more effect | 2–6×, dominates raw at moderate `α` | Part 4 (Exp 11) |
 

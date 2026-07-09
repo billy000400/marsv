@@ -1163,3 +1163,40 @@ reuses Exp 12's recovery equation, no new equation). Artifacts: `experiments/26_
 architecture family; or Exp 23's finer-λ_b Next check. Success criterion long met.
 On track? yes — S7 (seed robustness) done, ~100% complete; flagship 84% shown reproducible at 83.3±2.0% across
 5 seeds, closing the last review-named control. No blocker.
+
+## 2026-07-09 — Experiment 27: seed robustness on GPT-2 medium (error bar on the cross-model recovery)
+**Did.** Picked PLAN Next-step (i), the highest-value remaining rigor point: Exp 26 gave the flagship
+(GPT-2-small) recovery a 5-seed CI, but the cross-MODEL number (Exp 13, GPT-2 medium) was still a single
+seed-0 run, so we could not say whether medium's 89% @α=8 (vs small's 83.3%) is a real model-scale effect
+or optimization noise. Wrote `experiments/27_seed_robustness_medium.py` (reuses the Exp-3 module +
+Exp-13's medium-retarget trick verbatim; overrides `exp03.SEED` per run, `exp03.LAYER=12`) and ran the
+EXACT Exp-13 GPT-2-medium pipeline at 5 seeds (0–4). Raw ΔLM seed-independent (computed once); only the
+learned corrector varies. Result POSITIVE + informative: recovery **88.3 ± 2.2% @α=8** (per-seed
+89/90/88/85/89%), **101.7 ± 1.0% @α=4**; ΔLM learned @α=8 +0.317 ± 0.059 vs raw +2.718; `D_M` learned
+74.6 ± 4.5 vs raw 55.1 (decoupling holds every seed). Seed 0 reproduces Exp 13 to the digit (89%/101%).
+The medium band `[86.1, 90.5]%` sits ENTIRELY ABOVE small's `[81.3, 85.3]%` (Exp 26) — non-overlapping,
+so medium's ~5-point edge is a genuine model-scale effect, not a lucky seed.
+**Learned.** (1) The model-scale improvement small→medium (83.3%→88.3% @α=8) survives seed noise — the two
+5-seed CIs don't touch. So the flat-looking 84/89/84% scale curve (Exp 13/19) has a real small→medium bump
+(large then dips back). (2) The recovery is even MORE seed-stable on medium at α=4 (±1.0%) than small
+(±0.8%); optimization variance stays tiny across scale. (3) Sanity: |v|=19.57, |h|=226.20, D_M=31.45,
+ΔLM raw +0.037/+0.150/+0.738/+2.718 all reproduce Exp 13 to the digit — the retarget-to-medium reuse is
+faithful.
+**Assumptions/decisions logged (loop mode).** (a) Chose GPT-2 medium (cached, ~1.5GB, fast) as the
+cross-model seed check over Qwen3/Pythia (heavy loads, slow under /mars-vol contention) — highest rigor per
+minute, and it directly tests the one cross-model number the paper leans on next to the flagship. Logged the
+alternative (a cross-ARCHITECTURE seed CI) as Exp 27's own Next check. (b) 5 seeds (matches Exp 26 for an
+apples-to-apples CI comparison) over 3/10. (c) Placed Exp 27 in RESULTS + REPORT_3 next to Exp 26 (seed axis)
+rather than a new part.
+**Deliverables.** RESULTS.md (Exp-27 section + figure entry + Headline model-scale seed CI); REPORT_3
+(Methods block + Results subsection + Exp-13 seed pointer + Conclusion/open-items update); REPORT.md index
+(seed-robust headline row now both scales). CHANGELOG appended; PLAN Current status/Next step updated + S7
+checkbox extended; this JOURNAL entry. REPORT math re-verified on the 2 touched files (REPORT_3 9 / index 1
+js-display-math, 0 broken, 0 inline hazards — reuses Exp 12's recovery equation, no new equation). Artifacts:
+`experiments/27_seed_robustness_medium.py`, `results/27_seed_robustness_medium.json`, `results/27_run.log`,
+`plots/27_seed_robustness_medium.png`.
+**Next step.** Optional only (success criterion long met): a 5-seed control on a cross-ARCHITECTURE model
+(Qwen3/Pythia) to test whether the 81–94% architecture band is within seed noise; a further architecture
+family; or the Exp-23 finer-λ_b / Exp-20-on-Qwen3 lever. ENV: `/opt/conda/bin/python` (LOCAL disk, fast).
+On track? yes — S7 seed axis extended to a second model scale (GPT-2 medium 88.3 ± 2.2% @α=8, non-overlapping
+with small); model-scale edge shown real, not seed noise. ~100% complete. No blocker.

@@ -729,3 +729,33 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   faster than dir9's `cupenv` on the contended `/mars-vol` network volume (a cold import there stalled ~30 min
   in `folio_wait_bit_common` grinding scipy/sklearn). Switched to `/opt/conda/bin/python`; run completed in
   ~15 min. Recommend this env for future iterations.
+
+## 2026-07-09 — Experiment 27: seed robustness on GPT-2 medium (error bar on the cross-model recovery)
+- **Trigger:** Exp 26 put a 5-seed CI on the FLAGSHIP recovery (GPT-2 small), but the cross-model number
+  (Exp 13, GPT-2 medium) was a single seed-0 run, so it was unknown whether medium's higher recovery
+  (89% @α=8 vs small's 83.3%) is a real model-scale effect or seed noise. This is PLAN Next-step (i):
+  give the cross-model check its own error bar.
+- **Change (new, supersedes nothing):** added **Experiment 27** to RESULTS.md — re-ran the EXACT Exp-13
+  GPT-2-medium pipeline (same DiffMean sentiment vector `|v|=19.57` at block 12/24, 400-doc Gaussian fit
+  `D_M=31.45`, 300-doc train, held-out 100-doc eval, 5.25M corrector at d=1024, recipe, `α∼U(0.5,8)`) at
+  **5 seeds (0–4)** and reported mean ± sd of fluency recovery. Result: recovery **88.3 ± 2.2% @α=8**
+  (per-seed 89/90/88/85/89%), **101.7 ± 1.0% @α=4**, 162.1 ± 2.9% @α=2, 409.2 ± 16.8% @α=1 (ratio artifact,
+  raw +0.037 nats; absolute ΔLM_learned −0.114 ± 0.006); ΔLM learned @α=8 +0.317 ± 0.059 vs raw +2.718.
+  `D_M` learned 74.6 ± 4.5 vs raw 55.1 @α=8 (decoupling holds every seed). Seed 0 reproduces Exp 13 to the
+  digit (89% @α=8 / 101% @α=4).
+- **Key result:** the medium 5-seed band `[86.1, 90.5]%` sits ENTIRELY ABOVE GPT-2 small's `[81.3, 85.3]%`
+  (Exp 26) — non-overlapping, so medium's ~5-point higher recovery is a genuine model-scale effect, not a
+  lucky seed. The seed axis now spans two model scales.
+- **Deliverables:** RESULTS.md gained the Exp-27 section + figure entry; the Headline model-scale sentence
+  now carries medium's seed CI. REPORT_3 gained an Exp-27 Methods block + Results subsection (Observation/
+  Interpretation/Limitations/Next check) + a seed-CI pointer on the Exp-13 subsection; its Conclusion + open
+  items updated (seed axis now on small AND medium). REPORT.md index: seed-robust headline-table row now
+  shows both scales (83.3 ± 2.0% / 88.3 ± 2.2%). No prior result number changed (Exp 27 additive; Exp 13's
+  89% confirmed representative).
+- **Verification:** GitHub-API math check on the 2 touched report files — REPORT_3 9 js-display-math (Exp 27
+  reuses Exp 12's recovery equation, no new equation), index 1; 0 broken (`<pre lang=math>`), 0 inline hazards.
+- **Limitation:** varies only the training seed on GPT-2 medium (init + α-sampling/data-shuffle RNG); eval set,
+  Gaussian fit, and vector fixed. GPT-2 large (Exp 19) and cross-architecture (Exp 21/24) remain single-seed.
+- **Ops:** ran with `/opt/conda/bin/python` (transformers 5.13.0, torch 2.9 cu130, LOCAL disk); 5-seed medium
+  run completed in ~35 min. Artifacts: `experiments/27_seed_robustness_medium.py`,
+  `results/27_seed_robustness_medium.json`, `results/27_run.log`, `plots/27_seed_robustness_medium.png`.

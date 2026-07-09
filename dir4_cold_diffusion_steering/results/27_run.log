@@ -1,0 +1,118 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   4%|▍         | 13/292 [00:01<00:21, 12.91it/s]Loading weights:   5%|▌         | 15/292 [00:02<01:06,  4.14it/s]Loading weights:   5%|▌         | 16/292 [00:03<01:29,  3.07it/s]Loading weights:   6%|▌         | 17/292 [00:04<01:56,  2.36it/s]Loading weights:   6%|▌         | 18/292 [00:05<02:16,  2.01it/s]Loading weights:   7%|▋         | 19/292 [00:06<02:36,  1.74it/s]Loading weights:   7%|▋         | 20/292 [00:07<02:58,  1.52it/s]Loading weights:   7%|▋         | 21/292 [00:08<03:18,  1.37it/s]Loading weights:   8%|▊         | 22/292 [00:09<03:36,  1.25it/s]Loading weights:   8%|▊         | 23/292 [00:10<03:49,  1.17it/s]Loading weights:   8%|▊         | 24/292 [00:12<05:18,  1.19s/it]Loading weights:   9%|▊         | 25/292 [00:13<04:54,  1.10s/it]Loading weights:   9%|▉         | 26/292 [00:15<05:53,  1.33s/it]Loading weights:   9%|▉         | 27/292 [00:16<04:58,  1.13s/it]Loading weights:  10%|▉         | 28/292 [00:18<06:10,  1.40s/it]Loading weights:  10%|▉         | 29/292 [00:19<05:35,  1.27s/it]Loading weights:  10%|█         | 30/292 [00:20<05:08,  1.18s/it]Loading weights:  11%|█         | 31/292 [00:21<04:53,  1.12s/it]Loading weights:  11%|█         | 32/292 [00:21<04:04,  1.06it/s]Loading weights:  11%|█▏        | 33/292 [00:22<03:46,  1.14it/s]Loading weights:  12%|█▏        | 34/292 [00:24<05:02,  1.17s/it]Loading weights:  12%|█▏        | 35/292 [00:25<05:43,  1.34s/it]Loading weights:  12%|█▏        | 36/292 [00:26<05:13,  1.23s/it]Loading weights:  13%|█▎        | 37/292 [00:28<06:00,  1.41s/it]Loading weights:  13%|█▎        | 38/292 [00:29<04:52,  1.15s/it]Loading weights:  13%|█▎        | 39/292 [00:30<04:37,  1.10s/it]Loading weights:  14%|█▎        | 40/292 [00:31<04:28,  1.06s/it]Loading weights:  14%|█▍        | 41/292 [00:31<03:42,  1.13it/s]Loading weights:  14%|█▍        | 42/292 [00:32<03:19,  1.25it/s]Loading weights:  15%|█▍        | 43/292 [00:33<03:55,  1.06it/s]Loading weights:  15%|█▌        | 44/292 [00:34<03:53,  1.06it/s]Loading weights:  15%|█▌        | 45/292 [00:39<08:14,  2.00s/it]Loading weights:  16%|█▌        | 46/292 [00:39<06:25,  1.57s/it]Loading weights:  16%|█▌        | 47/292 [00:41<06:49,  1.67s/it]Loading weights:  16%|█▋        | 48/292 [00:43<07:15,  1.79s/it]Loading weights:  17%|█▋        | 49/292 [00:44<05:57,  1.47s/it]Loading weights:  17%|█▋        | 50/292 [00:44<04:51,  1.20s/it]Loading weights: 100%|██████████| 292/292 [00:44<00:00,  6.49it/s]
+model=gpt2-medium layer=12 d=1024 device=cuda
+|v|=19.57 mean|h|=226.20 clean D_M=31.45
+clean eval loss = 3.450
+ΔLM raw: ['+0.037', '+0.150', '+0.738', '+2.718']
+
+=== seed 0 — training (5.25M) ===
+  ep0 step  25 a= 1.9 LM=4.007 near=0.191
+  ep0 step  50 a= 4.2 LM=3.441 near=0.340
+  ep0 step  75 a= 2.2 LM=3.596 near=0.136
+  ep1 step 100 a= 4.6 LM=3.656 near=0.656
+  ep1 step 125 a= 0.6 LM=3.711 near=0.108
+  ep1 step 150 a= 7.4 LM=3.890 near=1.712
+  ep2 step 175 a= 0.7 LM=3.458 near=0.275
+  ep2 step 200 a= 3.1 LM=3.401 near=0.615
+  ep2 step 225 a= 3.2 LM=3.644 near=0.411
+  ep3 step 250 a= 7.8 LM=4.234 near=1.195
+  ep3 step 275 a= 2.5 LM=3.261 near=0.400
+  ep3 step 300 a= 5.0 LM=3.666 near=0.769
+  ep4 step 325 a= 7.7 LM=3.847 near=1.364
+  ep4 step 350 a= 4.6 LM=4.502 near=0.638
+  ep4 step 375 a= 2.8 LM=3.086 near=0.485
+  ep5 step 400 a= 6.5 LM=3.262 near=1.337
+  ep5 step 425 a= 1.7 LM=3.334 near=0.253
+  ep5 step 450 a= 1.7 LM=3.592 near=0.412
+seed 0 recovery: ['420%', '162%', '101%', '89%']
+
+=== seed 1 — training (5.25M) ===
+  ep0 step  25 a= 3.7 LM=3.702 near=0.406
+  ep0 step  50 a= 5.2 LM=3.917 near=0.374
+  ep0 step  75 a= 1.1 LM=3.119 near=0.180
+  ep1 step 100 a= 5.1 LM=4.175 near=1.008
+  ep1 step 125 a= 6.6 LM=3.509 near=0.765
+  ep1 step 150 a= 1.9 LM=3.712 near=0.235
+  ep2 step 175 a= 6.6 LM=3.920 near=0.931
+  ep2 step 200 a= 4.0 LM=3.735 near=0.373
+  ep2 step 225 a= 1.0 LM=3.490 near=0.234
+  ep3 step 250 a= 2.0 LM=3.569 near=0.394
+  ep3 step 275 a= 1.6 LM=3.481 near=0.429
+  ep3 step 300 a= 6.5 LM=3.581 near=0.842
+  ep4 step 325 a= 6.3 LM=4.239 near=1.164
+  ep4 step 350 a= 6.2 LM=3.816 near=0.858
+  ep4 step 375 a= 7.0 LM=3.365 near=1.030
+  ep5 step 400 a= 6.6 LM=3.588 near=1.295
+  ep5 step 425 a= 0.7 LM=3.351 near=0.319
+  ep5 step 450 a= 7.4 LM=3.404 near=1.429
+seed 1 recovery: ['399%', '163%', '103%', '90%']
+
+=== seed 2 — training (5.25M) ===
+  ep0 step  25 a= 0.8 LM=3.740 near=0.061
+  ep0 step  50 a= 3.0 LM=3.794 near=0.220
+  ep0 step  75 a= 3.7 LM=3.796 near=0.389
+  ep1 step 100 a= 6.7 LM=3.942 near=0.781
+  ep1 step 125 a= 4.7 LM=3.949 near=0.588
+  ep1 step 150 a= 5.5 LM=3.651 near=0.505
+  ep2 step 175 a= 1.4 LM=3.742 near=0.199
+  ep2 step 200 a= 0.9 LM=3.243 near=0.246
+  ep2 step 225 a= 4.1 LM=3.353 near=0.723
+  ep3 step 250 a= 3.2 LM=4.055 near=0.483
+  ep3 step 275 a= 7.0 LM=4.166 near=1.238
+  ep3 step 300 a= 4.9 LM=3.511 near=0.708
+  ep4 step 325 a= 0.8 LM=3.264 near=0.296
+  ep4 step 350 a= 3.7 LM=3.757 near=0.595
+  ep4 step 375 a= 4.2 LM=3.746 near=0.395
+  ep5 step 400 a= 3.6 LM=3.472 near=0.661
+  ep5 step 425 a= 0.7 LM=3.492 near=0.298
+  ep5 step 450 a= 3.5 LM=3.396 near=0.463
+seed 2 recovery: ['428%', '165%', '102%', '88%']
+
+=== seed 3 — training (5.25M) ===
+  ep0 step  25 a= 4.9 LM=4.054 near=0.127
+  ep0 step  50 a= 0.9 LM=3.902 near=0.092
+  ep0 step  75 a= 4.6 LM=3.995 near=0.383
+  ep1 step 100 a= 1.6 LM=3.509 near=0.169
+  ep1 step 125 a= 7.9 LM=4.209 near=1.310
+  ep1 step 150 a= 7.1 LM=3.358 near=0.994
+  ep2 step 175 a= 2.7 LM=4.109 near=0.353
+  ep2 step 200 a= 6.2 LM=3.983 near=0.956
+  ep2 step 225 a= 3.1 LM=3.526 near=0.320
+  ep3 step 250 a= 7.6 LM=3.597 near=1.283
+  ep3 step 275 a= 1.4 LM=5.078 near=0.358
+  ep3 step 300 a= 3.8 LM=3.724 near=0.598
+  ep4 step 325 a= 2.1 LM=3.561 near=0.408
+  ep4 step 350 a= 2.7 LM=3.172 near=0.301
+  ep4 step 375 a= 6.8 LM=4.235 near=0.993
+  ep5 step 400 a= 5.7 LM=4.030 near=0.891
+  ep5 step 425 a= 6.8 LM=3.391 near=1.423
+  ep5 step 450 a= 4.6 LM=3.431 near=0.604
+seed 3 recovery: ['386%', '157%', '101%', '85%']
+
+=== seed 4 — training (5.25M) ===
+  ep0 step  25 a= 1.5 LM=3.569 near=0.108
+  ep0 step  50 a= 3.8 LM=3.981 near=0.171
+  ep0 step  75 a= 4.1 LM=3.706 near=0.446
+  ep1 step 100 a= 3.6 LM=3.308 near=0.312
+  ep1 step 125 a= 1.6 LM=3.803 near=0.244
+  ep1 step 150 a= 7.8 LM=3.985 near=0.951
+  ep2 step 175 a= 5.9 LM=3.354 near=0.738
+  ep2 step 200 a= 5.8 LM=3.681 near=0.927
+  ep2 step 225 a= 4.1 LM=3.561 near=0.629
+  ep3 step 250 a= 4.1 LM=3.547 near=0.565
+  ep3 step 275 a= 7.0 LM=3.585 near=1.405
+  ep3 step 300 a= 7.2 LM=3.301 near=1.176
+  ep4 step 325 a= 4.4 LM=3.738 near=0.757
+  ep4 step 350 a= 3.0 LM=3.533 near=0.386
+  ep4 step 375 a= 2.7 LM=3.430 near=0.490
+  ep5 step 400 a= 4.9 LM=3.245 near=0.493
+  ep5 step 425 a= 4.0 LM=3.718 near=0.736
+  ep5 step 450 a= 6.0 LM=3.405 near=0.774
+seed 4 recovery: ['413%', '164%', '102%', '89%']
+
+=== aggregate ===
+alpha= 1.0  ΔLM raw=+0.037  ΔLM learned=-0.114±0.006  recovery=409.2±16.8%
+alpha= 2.0  ΔLM raw=+0.150  ΔLM learned=-0.093±0.004  recovery=162.1±2.9%
+alpha= 4.0  ΔLM raw=+0.738  ΔLM learned=-0.013±0.007  recovery=101.7±1.0%
+alpha= 8.0  ΔLM raw=+2.718  ΔLM learned=+0.317±0.059  recovery=88.3±2.2%
+saved figure + results
