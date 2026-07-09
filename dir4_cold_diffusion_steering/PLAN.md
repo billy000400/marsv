@@ -236,6 +236,15 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         the LARGEST absolute raw damage (+3.89 nats vs function +1.25) yet recover slightly BETTER than function words,
         so the pooled 84.3% (= Exp 3/34) is NOT a cheap-function-word artifact. Pooled sits above both linguistic
         classes because near-perfect OTHER (punct/subword) recovery pulls the token-weighted pool up.
+- [x] S7(k) — CONTENT-word FREQUENCY control (Exp 36, 2026-07-09) DONE: closed Exp 35's own Next check — the last
+        refinement of the token-control axis. Exp 35 showed CONTENT recovers ~77.5% as a class, but bundles common
+        easy nouns with rare surprising ones. A POS split needs an in-context tagger GPT-2 word-pieces don't support
+        reliably, so split CONTENT by target-token corpus frequency at the token-WEIGHTED median (equal predicted-token
+        mass: 2358 common vs 2362 rare; cut at count 2 ⇒ RARE = hapax). POSITIVE + uniform: rare content tokens are
+        much harder even on clean text (clean NLL 6.04 vs 4.27 nats) and take more absolute raw damage (+4.11 vs +3.67
+        @α=8) yet recover IDENTICALLY to common ones — 77.8% vs 77.3% @α=8 (81.4% vs 83.8% @α=4). So the pooled 84% is
+        NOT carried by easy common content words. Pooled 84.3%/95.3% reproduces Exp 3/34/35 to the digit. With Exp 34
+        (position) + Exp 35 (type), the token-control axis is now exhausted.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -247,6 +256,30 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S7(k) CONTENT-word FREQUENCY control — Experiment 36 (new, 2026-07-09):** closed Experiment 35's own Next check —
+the last refinement of the token-control axis. Exp 35 showed the CONTENT class recovers ~77.5% at α=8, but bundles
+common easy nouns with rare surprising ones; a corrector could still be buying back fluency mostly on frequent,
+easy content words. A part-of-speech split (noun/verb/adj) needs an in-context tagger GPT-2 word-piece tokens do
+not support reliably, so I took an OBJECTIVE cut instead. Wrote `experiments/36_content_frequency.py` (reuses
+`exp35.build_type_map` for the base FUNCTION/CONTENT/OTHER map + exp03 Corrector/train_corrector/make_hat/
+FuncPatcher/batched_ids verbatim; only new code = a target-count pass, a token-WEIGHTED-median CONTENT split, and a
+per-class NLL accumulator): trained the EXACT flagship corrector (GPT-2 small, block 6, sentiment `v`, seed 0),
+accumulated next-token NLL on the same held-out 100 FineWeb docs split into FUNCTION / CONTENT_COMMON / CONTENT_RARE
+/ OTHER, recovery at α∈{4,8}. The weighted median gave ~equal predicted-token mass (2358 common vs 2362 rare); the
+cut lands at count 2, so CONTENT_RARE = hapax content tokens. POSITIVE + uniform: rare content tokens are much
+harder even on clean text (clean NLL 6.04 vs 4.27 nats) and take more absolute raw damage (+4.11 vs +3.67 nats @α=8)
+yet recover ESSENTIALLY IDENTICALLY to common ones — **77.8% vs 77.3% @α=8** (81.4% vs 83.8% @α=4). So the pooled
+84% is NOT carried by easy, frequent content words. **Pooled 84.3%@α=8 / 95.3%@α=4 reproduces Exp 3/34/35 to the
+digit.** With Exp 34 (position) + Exp 35 (type), the token-control axis is now exhausted. No prior result superseded
+(Exp 36 additive; pooled = Exp 3 reproduced). Artifacts: `experiments/36_content_frequency.py`,
+`results/36_content_frequency.json`, `results/36_run.log`, `plots/36_content_frequency.png`. Curated RESULTS.md
+(Exp-36 section + table + figure; Exp-35 "closes its Next check" clause), REPORT_3 (Exp-36 O/I/L/N subsection +
+table + Exp-35 Next-check closed + Conclusion open-items), REPORT.md index (Part-3 blurb frequency clause +
+headline row). CHANGELOG appended. Math re-verified via GitHub API (REPORT.md 1 js-display-math / 0 broken; REPORT_3
+12/0 — no new display math; 0 inline hazards in either touched file). ENV: `/opt/conda/bin/python` (LOCAL disk),
+`setsid` full detach; ~2 min.
+
+<!-- prior: S7(j) token-type Exp 35 -->
 **S7(j) TOKEN-TYPE control — Experiment 35 (new, 2026-07-09):** closed Experiment 34's own explicit Next check and
 the last named metric-control axis. Exp 34 fixed *where* a token sits (position); Exp 35 fixes *what kind* it is
 (type). A corrector could inflate the pooled 84% by fixing only cheap high-frequency function words while leaving
@@ -864,6 +897,21 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
+**S7(k) CONTENT-word FREQUENCY control DONE (Exp 36): the token-control axis is now EXHAUSTED.** Exp 34 fixed token
+position, Exp 35 fixed token type, and Exp 36 split the CONTENT class by target-token frequency (an objective cut,
+since context-free GPT-2 word-pieces can't be POS-tagged reliably) — rare hapax content tokens recover identically
+to common ones (77.8% vs 77.3% @α=8) across a 6× clean-NLL gap, so the pooled 84% is not carried by easy, frequent
+words. The metric-control axes are FULLY COMPLETE (strength / layer / model / prompt-family / steering-family /
+seed / eval-doc / vector / joint / token-position / token-type / content-frequency all isolated), on top of SEVEN
+external-validity axes and all sampling axes. Success criterion long met; the direction has no material open item.
+Only very-low-value optional points remain, none required for the deliverable: (i) a FURTHER architecture family
+(state-space/MoE, e.g. Mamba/Mixtral) or GPT-2 XL for a fuller model sweep beyond three, or rebuilding `v` from a
+labelled corpus (SST-2); (ii) finer λ_b + Exp-20 differentiable-generation ON Qwen3 (Exp 23's Next check). Both are
+marginal (each expected to land in an already-established band). ENV: use `/opt/conda/bin/python` (transformers
+5.13.0, LOCAL disk, imports in seconds). Verify any REPORT edit with the GitHub-API math check on the touched report
+files.
+
+<!-- prior next step: S7(j) token-type Exp 35 -->
 **S7(j) TOKEN-TYPE control DONE (Exp 35): the LAST metric-control axis is closed.** Exp 34 fixed token position;
 Exp 35 fixed token type and found the recovery uniform across type — content words (77.5% @α=8) recover at least as
 well as cheap function words (73.9%), even though content words take the largest absolute raw damage — so the pooled

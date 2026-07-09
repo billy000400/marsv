@@ -1530,3 +1530,45 @@ the CONTENT class; (ii) wider architecture family (state-space/MoE/GPT-2 XL) or 
 On track? yes — S7(j) closes the last metric-control axis (token TYPE): the flagship recovery is uniform across
 token type (content 77.5% ≥ function 73.9% @α=8, pooled 84.3% = Exp 3/34), so the headline is neither a pooling nor
 a cheap-token artifact. ~100% complete. No blocker.
+
+## 2026-07-09 — Experiment 36: content-word FREQUENCY control (Exp 35's Next check)
+**Did.** The project is exhaustively complete on all substantive axes (7 external-validity + all sampling +
+position + type controls). The single named-but-open item was Exp 35's Next check: refine the CONTENT token class.
+A part-of-speech split (noun/verb/adj) needs an in-context tagger that GPT-2 word-piece tokens don't support
+reliably, so I chose an OBJECTIVE, fully-controlled cut instead — split CONTENT by target-token corpus frequency.
+Wrote `experiments/36_content_frequency.py` (reuses `exp35.build_type_map` for the base FUNCTION/CONTENT/OTHER map
++ exp03 Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim; only new code = a target-count pass,
+a token-weighted-median CONTENT split, and a per-class NLL accumulator). Trained the EXACT flagship corrector,
+accumulated next-token NLL on the same held-out 100 docs split into FUNCTION / CONTENT_COMMON / CONTENT_RARE /
+OTHER, recovery at α∈{4,8}. ~2 min on GPU (0.18 frac).
+
+**Learned (POSITIVE, clean).** Recovery is uniform across content-word frequency. The weighted-median split gave
+~equal token counts (2358 common vs 2362 rare); the cut lands at count 2, so CONTENT_RARE = hapax content tokens.
+Rare content tokens are genuinely harder even on clean text (clean NLL 6.04 vs 4.27 nats) and take slightly more
+absolute raw-steering damage (+4.11 vs +3.67 nats @α=8), yet the corrector recovers them essentially identically
+to common ones — **77.8% vs 77.3% @α=8** (81.4% vs 83.8% @α=4). So the pooled 84% is NOT carried by easy,
+frequent content words: the corrector buys back the same fraction of damage on the surprising, information-rich
+ones. Pooled 84.3% / 95.3% reproduces Exp 3/34/35 to the digit (built-in check). Together with Exp 34 (position)
+and Exp 35 (type), the token-control axis is exhausted.
+
+**Assumption/decision logged.** (a) Chose the frequency cut over a POS/NER split because token-level POS tagging
+of context-free GPT-2 word-pieces is unreliable and would need a tagger not installed; frequency is objective,
+reproducible, and directly targets the "does it only fix easy tokens?" worry. Rejected: a suffix-heuristic POS
+tagger (noisy, indefensible). (b) Weighted-median split (not simple median of the token list) so the two buckets
+carry equal PREDICTED-token mass — the honest way to compare recovery fractions. (c) Kept FUNCTION/OTHER in the
+run so the pooled number still reproduces Exp 3/34/35 as a reproducibility anchor.
+
+**Deliverables.** Curated RESULTS.md (Exp-36 Metrics section + table + figure entry; Exp-35 "closes its Next
+check" clause), REPORT_3 (Exp-36 O/I/L/N subsection + table + Exp-35 Next-check marked done + Conclusion
+open-items updated), REPORT.md index (Part-3 blurb frequency clause + headline row). CHANGELOG appended. Math
+re-verified via GitHub API on the two touched report files (REPORT.md 1 js-display-math / 0 broken; REPORT_3 12/0
+— no new display math; 0 inline hazards). Artifacts: `experiments/36_content_frequency.py`,
+`results/36_content_frequency.json`, `results/36_run.log`, `plots/36_content_frequency.png`.
+
+**Next step.** No material open item — the token-control axis (position / type / frequency) is exhausted, and the
+result is robust on seven external-validity axes plus all sampling axes. Only very-low-value optional points
+remain: GPT-2 XL or a state-space/MoE architecture for a fuller model sweep; finer λ_b + Exp-20
+differentiable-generation on Qwen3 (Exp 23's Next check). All marginal; success criterion long met.
+
+On track? yes — Exp 36 closes Exp 35's Next check (content recovery uniform across frequency, 77.8% vs 77.3%
+@α=8); direction complete on all planned + control axes, deliverables curated + math-verified. No blocker.

@@ -1305,6 +1305,32 @@ the token-weighted pool up; on the two meaningful classes recovery is a still-st
 equal 74–78%. Pooled recovery reproduces Exp 3 / Exp 34 to the digit (84.3% / 95.3%). This closes Experiment 34's
 Next check: the flagship recovery is uniform across token *type* as well as token *position*.
 
+**Experiment 36 — Content-word frequency control: does the corrector recover rare, information-rich words as well
+as common ones?** Experiment 35's own Next check asked to refine the CONTENT class. A part-of-speech split
+(noun/verb/adjective) needs an in-context tagger that GPT-2's word-piece tokens do not support reliably, so we take
+an objective, fully-controlled cut instead: split CONTENT by how **common** the target token is in the eval corpus.
+Rare content tokens are the surprising, meaning-bearing words where an off-manifold steer is most likely to break
+prediction; if the pooled 84% were carried by easy common content words while rare ones stayed broken, that would
+matter. We reuse the exact Experiment-35 setup (flagship Exp-3 corrector, GPT-2 small, block 6, sentiment `v`,
+seed 0; per-target-token NLL on the same held-out 100 docs) and split the CONTENT class at the token-**weighted
+median** frequency, so the two content buckets carry ~equal numbers of predicted tokens (2358 vs 2362). The cut
+lands at count 2: `CONTENT_COMMON` = content tokens seen ≥2× as a target, `CONTENT_RARE` = seen exactly once
+(hapax content tokens).
+
+| content class | share of tokens | clean NLL (nats) | raw excess @α=8 | learned excess @α=8 | **recovery @α=8** | recovery @α=4 |
+|---|---|---|---|---|---|---|
+| CONTENT_COMMON (seen ≥2×) | 15% | 4.27 | +3.67 | +0.83 | **77.3%** | 83.8% |
+| CONTENT_RARE (hapax) | 15% | 6.04 | +4.11 | +0.92 | **77.8%** | 81.4% |
+| **pooled (headline)** | 100% | — | +2.78 | +0.44 | **84.3%** | 95.3% |
+
+**Reading it: recovery is uniform across content-word frequency — the pooled 84% is not carried by easy common
+words.** Rare (hapax) content tokens are genuinely harder to predict even on clean text (clean NLL 6.04 vs 4.27
+nats) and take slightly more absolute raw-steering damage (+4.11 vs +3.67 nats at α=8), yet the corrector recovers
+them **essentially identically** to common content tokens — 77.8% vs 77.3% at α=8 (81.4% vs 83.8% at α=4). So the
+fluency win is not concentrated on the frequent, easy content words: the corrector buys back the same fraction of
+damage on the surprising, information-rich ones. Pooled recovery reproduces Exp 3 / 34 / 35 to the digit
+(84.3% / 95.3%). This closes Experiment 35's Next check — the last remaining refinement of the token-control axis.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -1331,6 +1357,10 @@ Next check: the flagship recovery is uniform across token *type* as well as toke
   α=4 and α=8, with the pooled headline as a dotted line — content-word recovery (77.5%) matches/exceeds
   function-word recovery (73.9%) at α=8; (b) per-type excess NLL for raw vs the learned corrector at α=8 —
   raw damage is largest on content words, and the corrector removes most of it on every type.
+- `plots/36_content_frequency.png` — (a) fluency recovery split by content-word frequency
+  (FUNCTION / CONTENT-common / CONTENT-rare / OTHER) for α=4 and α=8 — the two content buckets recover
+  near-identically (77.3% vs 77.8% at α=8); (b) per-class excess NLL for raw vs the learned corrector at
+  α=8 — rare content tokens take the most raw damage yet are recovered as well as common ones.
 - `plots/03_learned_corrector.png` — (a) ΔLM, (b) `D_M`, (c) projection retention vs α for raw,
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the

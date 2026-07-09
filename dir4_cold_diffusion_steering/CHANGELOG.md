@@ -986,3 +986,28 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   is the vocab token-type map + per-type NLL accumulator. `/opt/conda/bin/python`, `setsid` full detach; ~1 min.
   Artifacts: `experiments/35_token_type.py`, `results/35_token_type.json`, `results/35_run.log`,
   `plots/35_token_type.png`.
+
+## 2026-07-09 — Experiment 36: content-word FREQUENCY control (closes Exp 35's Next check)
+- Added Experiment 36 to RESULTS.md (Metrics + Figures) and REPORT_3_external_validity.md (Results subsection +
+  Conclusion open-items) and REPORT.md index (Part-3 blurb + headline row). Closes Exp 35's own Next check — the
+  last refinement of the token-control axis.
+- **Motivation:** Exp 35 showed the CONTENT class recovers ~77.5% at α=8, but "content words" bundles common,
+  easy nouns with rare, surprising ones. A part-of-speech split needs an in-context tagger GPT-2 word-pieces do
+  not support reliably, so we take an OBJECTIVE cut: split CONTENT by target-token corpus frequency.
+- **Setup:** reuse the exact Exp-35 setup (flagship Exp-3 corrector, GPT-2 small, block 6, sentiment v, seed 0;
+  per-target-token NLL on the same held-out 100 FineWeb docs). Split the CONTENT class at the token-WEIGHTED
+  median frequency so the two buckets carry ~equal predicted-token counts (2358 vs 2362). Cut lands at count 2:
+  CONTENT_COMMON = content tokens seen ≥2× as a target, CONTENT_RARE = hapax (seen once).
+- **Result (new, POSITIVE):** recovery is uniform across content-word frequency. CONTENT_RARE tokens are much
+  harder even on clean text (clean NLL 6.04 vs 4.27 nats) and take more absolute raw damage (+4.11 vs +3.67 nats
+  @α=8) yet recover essentially identically to CONTENT_COMMON — 77.8% vs 77.3% @α=8 (81.4% vs 83.8% @α=4). So the
+  pooled 84% is not carried by easy common content words. Pooled recovery reproduces Exp 3/34/35 to the digit
+  (84.3% / 95.3%) — built-in reproducibility check. No prior result superseded (Exp 36 additive; pooled = Exp 3
+  reproduced). Together with Exp 34 (position) and Exp 35 (type), the token-control axis is exhausted.
+- **Ops:** reuses exp35.build_type_map + exp03 Corrector/train_corrector/make_hat/FuncPatcher/batched_ids
+  verbatim (DRY); only new code is the target-count pass + weighted-median CONTENT split + per-class NLL
+  accumulator. `/opt/conda/bin/python`, `setsid` full detach; ~2 min. Artifacts:
+  `experiments/36_content_frequency.py`, `results/36_content_frequency.json`, `results/36_run.log`,
+  `plots/36_content_frequency.png`.
+- REPORT math re-verified via GitHub API on the two touched report files (REPORT.md 1 js-display-math / 0 broken;
+  REPORT_3 12 / 0 — no new display math; 0 inline hazards in either).

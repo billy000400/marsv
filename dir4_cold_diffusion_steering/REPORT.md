@@ -67,9 +67,10 @@ direction swings up to ~56° — because the corrector is re-trained per vector.
 vector and the seed (Exp 33) gives 80.9 ± 2.9% at `α=8`, a spread dominated by the vector axis and below the
 independent-quadrature bound, so the flagship is best read as **84% ± 3 pp**. A per-token-position breakdown
 (Exp 34) and per-token-*type* breakdown (Exp 35) close the metric-control axes CLAUDE.md names: recovery is
-*flat across token position* (an 80.7–83.5% band from token 16 to 126 at `α=8`) and across token *type* (content
-words recover 77.5% vs function words 73.9% at `α=8`), so the pooled headline is neither a pooling nor a
-cheap-token artifact. Off the Gaussian manifold at every setting.
+*flat across token position* (an 80.7–83.5% band from token 16 to 126 at `α=8`), across token *type* (content
+words recover 77.5% vs function words 73.9% at `α=8`), and across content-word *frequency* (rare hapax content
+tokens recover 77.8% vs 77.3% for common ones, Exp 36), so the pooled headline is neither a pooling, a cheap-token,
+nor an easy-common-word artifact. Off the Gaussian manifold at every setting.
 
 ### [Part 4 — Behavioral reality-check: from fluency to real steering in generation](REPORT_4_behavioral.md)
 *Experiments 10, 11, 20, 22, 23, 25.* The `ΔLM` recoveries are teacher-forced at one layer. When
@@ -106,6 +107,7 @@ corrector.
 | Joint vector×seed sampling: recovery over 5 joint resamples @`α=8` | 80.9 ± 2.9% (below quadrature 3.4 pp → vector-dominated; 84% ± 3 pp) | Part 3 (Exp 33) |
 | Token-position control: recovery flat across position @`α=8` | 80.7–83.5% (tokens 16–126; pooled 84.3%) | Part 3 (Exp 34) |
 | Token-type control: content vs function words @`α=8` | 77.5% vs 73.9% (pooled 84.3%) | Part 3 (Exp 35) |
+| Content-word-frequency control: rare vs common @`α=8` | 77.8% vs 77.3% (pooled 84.3%) | Part 3 (Exp 36) |
 | Behavioral caveat: generated effect vs raw (GPT-2) | ~1/6 of raw's | Part 4 (Exp 10) |
 | Readout-preservation term recovers more effect | 2–6×, dominates raw at moderate `α` | Part 4 (Exp 11) |
 
