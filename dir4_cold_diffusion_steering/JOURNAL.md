@@ -1572,3 +1572,50 @@ differentiable-generation on Qwen3 (Exp 23's Next check). All marginal; success 
 
 On track? yes — Exp 36 closes Exp 35's Next check (content recovery uniform across frequency, 77.8% vs 77.3%
 @α=8); direction complete on all planned + control axes, deliverables curated + math-verified. No blocker.
+
+## 2026-07-09 — Experiment 37: OTHER-class decomposition (Exp 35's residual question)
+**Did.** The project is exhaustively complete (7 external-validity axes + all sampling + token position/type/
+frequency controls). The one residual was Exp 35's own observation that the pooled 84.3% sits ABOVE both whole-word
+linguistic classes (FUNCTION 73.9%, CONTENT 77.5% @α=8) because a catch-all OTHER class (subword pieces +
+punctuation + digits) recovers ~100% and, carrying large excess NLL, pulls the token-weighted pool up. That left a
+fair reviewer question: is that lift trivial punctuation (a cheap-token effect) or genuine language? Wrote
+`experiments/37_other_decomposition.py` (reuses `exp35.build_type_map` for FUNCTION/CONTENT + exp03 Corrector/
+train_corrector/make_hat/FuncPatcher/batched_ids verbatim; only new code = split OTHER by has-a-letter into SUBWORD
+[15,157 vocab types] vs PUNCT [2,996] + a linguistic-only FUNCTION+CONTENT pool). Trained the EXACT flagship
+corrector (GPT-2 small, block 6, sentiment `v`, seed 0), accumulated per-target-token NLL on the same held-out 100
+FineWeb docs, recovery per class at α∈{4,8}. ~2 min on GPU (0.18 frac), no OOM.
+
+**Learned (POSITIVE, sharpening).** The ~100% OTHER recovery is NOT just punctuation. Recovery @α=8: FUNCTION 73.9%
+/ CONTENT 77.5% / **SUBWORD 91.7%** / **PUNCT 109.7%** (>100% = the usual ratio artifact — for punctuation the
+corrector's residual excess NLL is at or slightly below the clean baseline, elrn −0.21); @α=4: 75.8/82.5/118.0/149.0%.
+So SUBWORD word-continuation pieces (genuine language) recover far above the whole-word linguistic classes, close to
+punctuation. The whole-word **linguistic-only pool** (FUNCTION+CONTENT) recovers **76.8% @α=8 / 81.3% @α=4**; the
+pooled headline **84.3%/95.3%** reproduces Exp 3/34/35 to the digit. KEY: the pooled 84% is lifted ~7pp above the
+honest whole-word figure (~77%) by near-complete correction of easy sub-word AND punctuation tokens. This sharpens,
+without overturning, the token-control story — recovery is uniform WITHIN whole words (Exp 35/36), and the corrector
+is strongest on the easiest (non-word) token kinds.
+
+**Assumption/decision logged (loop mode).** (a) Chose to decompose OTHER (Exp 35's own residual) over the remaining
+marginal external-validity items (GPT-2 XL, state-space/MoE, SST-2 vector) because it is cheap (reuse the flagship
+corrector + exp35 map, ~2 min), fully controlled, and directly answers the honest "is the pooled 84% inflated by
+cheap punctuation?" question that Exp 35 raised but did not resolve. (b) Split OTHER by has-a-letter (SUBWORD vs
+PUNCT) — an objective, reproducible rule needing no tagger; logged the mixed-token edge cases as the Limitation.
+(c) Reported the linguistic-only pool explicitly and framed the pooled 84% as "genuine but partly inflated" honestly
+rather than burying the ~7pp gap — that gap is the finding. (d) α∈{4,8}, the two headline strengths.
+
+**Deliverables.** Curated RESULTS.md (Exp-37 four-class table + reading + figure entry; Headline linguistic-only
+clause), REPORT_3 (Exp-37 O/I/L/N subsection + table after Exp 36; Exp-36 Next-check marked "Done in Experiment 37";
+Conclusion sentence), REPORT.md index (Summary Part-3 clause + headline-table row). CHANGELOG appended; PLAN Current
+status / Next step rewritten + S7(l) checkbox added; this JOURNAL entry. Math re-verified via GitHub API: REPORT.md
+1 js-display-math / 0 broken, REPORT_3 12/0 (unchanged — no new display math), 0 inline hazards in both + RESULTS.md.
+Artifacts: `experiments/37_other_decomposition.py`, `results/37_other_decomposition.json`, `results/37_run.log`,
+`plots/37_other_decomposition.png`.
+
+**Next step.** No material open item — the token-control axis (position / type / frequency / OTHER-decomposition) is
+exhausted, and the result is robust on seven external-validity axes plus all sampling axes. Only very-low-value
+optional points remain: GPT-2 XL or a state-space/MoE architecture for a fuller model sweep; a vector rebuilt from an
+external labelled corpus. All marginal; success criterion long met.
+
+On track? yes — Exp 37 closes Exp 35's residual (pooled 84% lifted above the ~77% whole-word linguistic recovery by
+easy sub-word+punctuation tokens); direction complete on all planned + control axes, deliverables curated +
+math-verified. No blocker.

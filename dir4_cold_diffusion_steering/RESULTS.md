@@ -1331,6 +1331,39 @@ fluency win is not concentrated on the frequent, easy content words: the correct
 damage on the surprising, information-rich ones. Pooled recovery reproduces Exp 3 / 34 / 35 to the digit
 (84.3% / 95.3%). This closes Experiment 35's Next check — the last remaining refinement of the token-control axis.
 
+**Experiment 37 — What lifts the pool above the linguistic classes? Decomposing the OTHER token class.**
+Experiment 35 found the pooled 84% sits *above* both linguistic classes (FUNCTION 73.9%, CONTENT 77.5% at α=8)
+because a third catch-all class — OTHER (subword continuation pieces + punctuation + digits) — recovers ~100% and,
+carrying large excess NLL, pulls the token-weighted pool up. That leaves one honest question: is that near-100%
+OTHER recovery driven by trivial **punctuation** (a cheap-token effect that would make the pooled headline flatter
+than the real linguistic recovery), or does it also hold on genuine **subword** word-pieces? We reuse the exact
+Experiment-35 setup (flagship Exp-3 corrector, GPT-2 small, block 6, sentiment `v`, seed 0; per-target-token NLL on
+the same held-out 100 docs) and split OTHER in two by whether the decoded token contains a letter: `SUBWORD` (any
+alphabetic char — mid-word continuation pieces like "ing", "tion"; 15,157 vocab types) vs `PUNCT` (no alphabetic
+char — punctuation, digits, symbols; 2,996 vocab types). FUNCTION and CONTENT are exactly Experiment 35's classes,
+so the four-way pool reproduces the headline.
+
+| target-token class | raw excess @α=8 | learned excess @α=8 | **recovery @α=8** | recovery @α=4 |
+|---|---|---|---|---|
+| FUNCTION | +1.25 | +0.33 | **73.9%** | 75.8% |
+| CONTENT | +3.89 | +0.87 | **77.5%** | 82.5% |
+| SUBWORD (word-pieces) | +3.97 | +0.33 | **91.7%** | 118.0% |
+| PUNCT (punct/digits) | +2.19 | −0.21 | **109.7%** | 149.0% |
+| **linguistic-only pool** (FUNCTION+CONTENT) | — | — | **76.8%** | 81.3% |
+| **pooled (headline)** | +2.78 | +0.44 | **84.3%** | 95.3% |
+
+**Reading it: the pooled 84% is a genuine but partly-inflated summary — the honest whole-word figure is ~77%.** The
+near-complete OTHER recovery is **not** just punctuation: SUBWORD word-continuation pieces recover **91.7% at α=8**
+(118% at α=4), well above the two whole-word linguistic classes and close to PUNCT's 109.7% (>100% is the usual
+ratio artifact — for punctuation the corrector's residual excess NLL is at or slightly below the clean baseline).
+So both non-word token kinds — punctuation *and* subword pieces — are corrected essentially completely, and together
+they lift the token-weighted pool from the **linguistic-only 76.8% at α=8** (FUNCTION+CONTENT, whole words) up to the
+pooled **84.3%**. The practical read: the flagship 84% is real and reproduces Exp 3 / 34 / 35 to the digit, but the
+fraction of damage recovered *on meaning-bearing whole words specifically* is a still-strong but lower ~77% — the
+extra ~7 points come from easy sub-word and punctuation targets the corrector fixes almost perfectly. This sharpens,
+without overturning, the token-control story: recovery is uniform *within* whole words (Exp 35/36) and the corrector
+is strongest on the easiest (non-word) token kinds.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -1361,6 +1394,10 @@ damage on the surprising, information-rich ones. Pooled recovery reproduces Exp 
   (FUNCTION / CONTENT-common / CONTENT-rare / OTHER) for α=4 and α=8 — the two content buckets recover
   near-identically (77.3% vs 77.8% at α=8); (b) per-class excess NLL for raw vs the learned corrector at
   α=8 — rare content tokens take the most raw damage yet are recovered as well as common ones.
+- `plots/37_other_decomposition.png` — (a) fluency recovery by target-token class with Exp 35's OTHER
+  class split into SUBWORD / PUNCT (FUNCTION / CONTENT / SUBWORD / PUNCT) for α=4 and α=8, pooled
+  headline dotted — subword word-pieces recover 91.7% at α=8, near punctuation, both above the whole-word
+  linguistic classes; (b) per-class excess NLL for raw vs the learned corrector at α=8.
 - `plots/03_learned_corrector.png` — (a) ΔLM, (b) `D_M`, (c) projection retention vs α for raw,
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the
@@ -1500,7 +1537,7 @@ nats at α=8). Correcting toward the **Gaussian manifold backfires** — an anal
 preserving corrector cuts off-manifold distance 22% but *worsens* LM loss to +4.2 nats. But a
 **learned corrector supervised by the LM loss** — same projection-preserving form, so the layer-6
 steering projection is untouched — **recovers 84% of the teacher-forced fluency damage** (ΔLM
-+2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33; and **flat across token position** — recovery holds an 80.7–83.5% band from token 16 to 126, so the pooled headline is not a pooling artifact, Exp 34, and content words are recovered as well as function words — 77.5% vs 73.9% at α=8, Exp 35) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
++2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33; and **flat across token position** — recovery holds an 80.7–83.5% band from token 16 to 126, so the pooled headline is not a pooling artifact, Exp 34, and content words are recovered as well as function words — 77.5% vs 73.9% at α=8, Exp 35, uniformly across content-word frequency, Exp 36; the whole-word linguistic-only recovery is a still-strong ~77% at α=8, with the pooled 84% lifted by near-complete recovery of easy sub-word and punctuation tokens, Exp 37) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
 "LM-safe" are decoupled; only the downstream objective finds the fluent correction. The correction is
 **direction-specific**
 — a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe

@@ -1011,3 +1011,29 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   `plots/36_content_frequency.png`.
 - REPORT math re-verified via GitHub API on the two touched report files (REPORT.md 1 js-display-math / 0 broken;
   REPORT_3 12 / 0 — no new display math; 0 inline hazards in either).
+
+## 2026-07-09 — Experiment 37: decomposing Exp 35's OTHER token class — sharpens the pooled headline
+- Added Experiment 37 to RESULTS.md and REPORT_3 (external validity). Exp 35 found the pooled 84.3% sits ABOVE
+  both whole-word linguistic classes (FUNCTION 73.9%, CONTENT 77.5% @α=8) because a catch-all OTHER class
+  (subword pieces + punctuation) recovers ~100% and, carrying large excess NLL, pulls the token-weighted pool up.
+  Exp 37 splits OTHER to ask whether that lift is trivial punctuation or genuine language.
+- **Setup:** reuse the exact Exp-35 pipeline (flagship Exp-3 corrector, GPT-2 small, block 6, sentiment v, seed 0;
+  per-target-token NLL on the same held-out 100 FineWeb docs). Split OTHER by has-a-letter: SUBWORD (alphabetic
+  char, 15,157 vocab types) vs PUNCT (no letter, 2,996 types). FUNCTION/CONTENT = Exp 35's classes → four-way
+  pool reproduces the headline.
+- **Result (new, additive — no prior result superseded):** the ~100% OTHER recovery is NOT just punctuation.
+  Recovery @α=8: FUNCTION 73.9% / CONTENT 77.5% / **SUBWORD 91.7%** / **PUNCT 109.7%** (>100% = ratio artifact,
+  learned excess ≤ clean); @α=4: 75.8 / 82.5 / 118.0 / 149.0%. The whole-word **linguistic-only pool**
+  (FUNCTION+CONTENT) recovers **76.8% @α=8 / 81.3% @α=4**; the pooled headline **84.3% / 95.3%** reproduces
+  Exp 3/34/35 to the digit. So the pooled 84% is lifted ~7 points above the whole-word linguistic recovery by
+  near-complete correction of easy sub-word AND punctuation tokens — the honest meaning-bearing-whole-word figure
+  is a still-strong ~77% @α=8. Sharpens (does not overturn) the token-control story: recovery is uniform WITHIN
+  whole words (Exp 35/36), and the corrector is strongest on the easiest (non-word) token kinds.
+- **Deliverable deltas:** RESULTS.md +Exp 37 (four-class table + reading) + figure entry + Headline
+  linguistic-only clause. REPORT_3 +Exp 37 O/I/L/N subsection + table + Exp-36 Next-check marked done
+  ("Done in Experiment 37") + Conclusion sentence. REPORT.md index +Summary Part-3 clause + headline-table row.
+- New code `experiments/37_other_decomposition.py` (reuses exp35.build_type_map + exp03 Corrector/train_corrector/
+  make_hat/FuncPatcher/batched_ids; only new code = the OTHER split + linguistic-only pool). New figure
+  `plots/37_other_decomposition.png`. Results `results/37_other_decomposition.json`, log `results/37_run.log`.
+- REPORT math re-verified via GitHub API on the two touched files: REPORT.md 1 js-display-math / 0 broken,
+  REPORT_3 12 / 0 (no new display math), 0 inline hazards in both + RESULTS.md.
