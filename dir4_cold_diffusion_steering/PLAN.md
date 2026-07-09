@@ -206,6 +206,14 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         [92.9,97.6]%. Point estimates reproduce Exp 3 to the digit. ⇒ eval-set sampling noise < optimization
         noise, so the seed CI is the BINDING uncertainty; headline is not an eval-split artifact. Only untouched
         sampling axis left = vector-construction resampling.
+- [x] S7(g) — VECTOR-CONSTRUCTION control (Exp 32, 2026-07-09) DONE: closed Exp 31's Next check — the LAST
+        untouched sampling axis. Bootstrap-resampled the 20 POS + 20 NEG DiffMean sentences (5 resamples, corrector
+        RE-TRAINED per resample at fixed seed 0), rebuilt `v` each time, re-measured recovery at matched projection.
+        Resampling swings the direction a lot (`cos(v_boot,v_full)` mean 0.69, min 0.56 ≈56°; `|v|` 11.1→13–20) yet
+        recovery holds at **82.1±2.7% @α=8** (95.8±1.6% @α=4), within ~2 pp of the un-resampled 84.3% and on the
+        order of the seed CI (±2.0 pp, Exp 26). ⇒ the METHOD (retrain-per-vector) is robust to which examples build
+        `v`; a single frozen corrector would not be (correction is direction-specific, Exp 5). Headline now survives
+        seed (26–30), eval-doc (31), and vector (32) resampling.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -217,7 +225,28 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
-**S7(f) EVAL-SET SAMPLING control — Experiment 31 (new, 2026-07-09):** every prior CI (Exp 26–30) varies the
+**S7(g) VECTOR-CONSTRUCTION control — Experiment 32 (new, 2026-07-09):** every prior sampling control (seed →
+Exp 26–30, eval documents → Exp 31) held the steering vector fixed, leaving vector construction as the last
+untouched axis (Exp 31's Next check). Wrote `experiments/32_vector_bootstrap.py` (imports the Exp-3 + Exp-1 modules,
+reuses Corrector/train_corrector/make_hat/eval helpers + the POS/NEG sentence lists verbatim — DRY). Bootstrap-
+resampled the 20 POS + 20 NEG DiffMean sentences WITH replacement 5×, rebuilt `v = mean(POS tok) − mean(NEG tok)`
+each time, RE-TRAINED the exact Exp-3 corrector against each `v` at FIXED seed 0 (isolating vector-construction
+variance from the seed variance already bounded by Exp 26), recomputed `ΔLM_raw` per resample, re-measured recovery
+at matched projection. POSITIVE + stable: the direction moves a LOT (`cos(v_boot,v_full)` mean 0.69, min 0.56 ≈56°;
+`|v|` 11.1→13–20) yet recovery holds at **82.1±2.7% @α=8**, **95.8±1.6% @α=4** — within ~2 pp of the un-resampled
+84.3% (b=0 reproduces Exp 3 exactly) and on the order of the five-seed CI (±2.0 pp, Exp 26), NOT larger. ⇒ the
+METHOD (build vector → train corrector) is robust to which examples build `v` because the corrector is re-trained
+per vector; a single frozen corrector would not be (correction is direction-specific, Exp 5). `ΔLM_raw` itself
+varies (±0.16 nats @α=8, tracks `|v|`) but the recovery RATIO is stable → property of the corrector, not matched raw
+damage. No prior result superseded. Artifacts: `experiments/32_vector_bootstrap.py`,
+`results/32_vector_bootstrap.json`, `results/32_run.log`, `plots/32_vector_bootstrap.png`. Curated RESULTS.md (Exp-32
+section + table + figure; Exp-31 Next-check closed), REPORT_3 (Exp-32 Methods ```math block + Results O/I/L/N +
+Exp-31 Next-check + Conclusion open-items), REPORT.md index (Summary sentence + headline row). CHANGELOG appended.
+Math re-verified via GitHub API (REPORT_3 11 js-display-math / 0 broken / 0 inline hazards; REPORT.md 1/0; RESULTS.md
+no new `$$`). ENV: `/opt/conda/bin/python` (LOCAL disk), `setsid` full detach; ~9 min (6 correctors trained).
+
+<!-- prior: S7(f) eval-set sampling Exp 31 -->
+**S7(f) EVAL-SET SAMPLING control — Experiment 31 (2026-07-09):** every prior CI (Exp 26–30) varies the
 OPTIMIZATION seed and holds the 100 held-out eval documents fixed, leaving eval-document sampling variance — the
 remaining sampling axis (PLAN Next-step (i)) — unbounded. Wrote `experiments/31_eval_bootstrap.py` (imports the
 Exp-3 module, reuses Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim — DRY), trained the EXACT
@@ -748,6 +777,18 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
+**S7(g) VECTOR-CONSTRUCTION control DONE (Exp 32): the last single-axis sampling gap is closed.** The flagship
+headline now survives seed (Exp 26–30), eval-document (Exp 31), AND steering-vector (Exp 32) resampling — recovery
+82.1±2.7% @α=8 across 5 sentence-resamples, within ~2 pp of 84.3% even though the direction swings up to ~56°,
+because the corrector is re-trained per vector. Success criterion long met; result robust on SEVEN external-validity
+axes PLUS three sampling axes. Only very-low-value optional points remain: (i) a JOINT resample (vector × seed
+together) or rebuilding `v` from a labelled corpus (SST-2) rather than the hand-written sets; (ii) a FURTHER
+architecture family (state-space/MoE, e.g. Mamba/Mixtral) or GPT-2 XL for a fuller sweep beyond three; (iii) finer
+λ_b + Exp-20 differentiable-generation ON Qwen3 (Exp 23's Next check). All are marginal. ENV: use
+`/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk, imports in seconds). Verify any REPORT edit with the
+GitHub-API math check on the touched report files.
+
+<!-- prior next step: S7 seed robustness Exp 26–30 + eval-sampling Exp 31 -->
 **S7 seed robustness DONE on ALL FIVE headline models — three scales + two architectures (Exp 26 GPT-2 small
 83.3±2.0% + Exp 27 GPT-2 medium 88.3±2.2% + Exp 30 GPT-2 large 85.1±1.1% + Exp 28 Pythia/GPT-NeoX 80.8±1.6% +
 Exp 29 Qwen3-1.7B 94.8±1.6%, all @α=8).** No headline model remains single-seed. The five seed bands give a clean

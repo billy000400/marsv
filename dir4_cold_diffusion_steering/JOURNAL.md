@@ -1363,3 +1363,47 @@ on Qwen3. All marginal.
 On track? yes — S7 sampling control extended: eval-document bootstrap of the flagship [83.1, 85.6]% @α=8 (±0.7
 pp) shown TIGHTER than the seed CI, so the seed CI is the binding bound; headline not an eval-split artifact.
 ~100% complete. No blocker.
+
+## 2026-07-09 — Experiment 32: vector-construction bootstrap (the last untouched sampling axis)
+**Did.** Picked Exp 31's Next check / PLAN Next-step (i) — the single named remaining rigor point. Seed variance
+(Exp 26–30) and eval-document variance (Exp 31) were both bounded, but every result held the flagship steering
+vector FIXED, so the headline could still depend on which 20 POS + 20 NEG sentences build the DiffMean vector.
+Wrote `experiments/32_vector_bootstrap.py` — imports the Exp-3 module (Corrector/train_corrector/make_hat/eval
+helpers reused verbatim, DRY) and the Exp-1 module (POS/NEG sentence lists), bootstrap-resamples the two 20-sentence
+sets WITH replacement 5×, rebuilds `v` each time, RE-TRAINS the exact Exp-3 corrector against each `v` at a FIXED
+seed of 0 (so the ONLY varying factor is the vector's example composition — seed/optimizer variance already
+quantified by Exp 26), recomputes `ΔLM_raw` per resample (a different `v` steers differently), and re-measures
+recovery at matched projection. b=0 is the un-resampled original — a built-in Exp-3 reproduction.
+**Result.** POSITIVE + stable. Resampling swings the steering DIRECTION a lot — `cos(v_boot,v_full)` mean 0.69,
+min 0.56 (~56° off), `|v|` 11.1→13–20 — yet the flagship recovery holds at **82.1±2.7% @α=8** (95.8±1.6% @α=4),
+within ~2 pp of the un-resampled 84.3% and on the SAME ORDER as the five-seed CI (±2.0 pp, Exp 26), not larger.
+b=0 reproduces Exp 3 exactly (84.3/95.3% @α=8/4).
+**Learned.** (1) KEY: which examples build `v` barely moves the headline even though it moves the direction by up
+to ~56°, because the corrector is RE-TRAINED per vector — the correction rule is direction-specific and reproduces
+per direction (Exp 5), so a native corrector for each resampled `v` recovers about equally. The METHOD is robust
+to vector-construction sampling; a single FROZEN corrector would not be (that's exactly Exp 5's 0%-transfer
+result). (2) `ΔLM_raw` itself varies (±0.16 nats @α=8) because a bigger-norm `v` steers harder, but the recovery
+RATIO is stable → the finding is a property of the corrector, not an accident of matched raw damage. (3) The
+sentence-bootstrap moves `v` much more than I expected (I'd guessed cos≈0.99); 20 short sentences is a small set,
+so resampling reweights the direction substantially — which makes the recovery stability a stronger result.
+**Assumptions/decisions logged (loop mode).** (a) Fixed seed 0 for all 6 runs so the ONLY varying factor is the
+vector (seed variance is Exp 26's job) — the honest way to isolate this axis. (b) RE-trained per resample rather
+than freezing the flagship corrector, because Exp 5 shows a frozen corrector doesn't transfer across directions;
+the pipeline under test is "build vector → train corrector", so both stages must see the resampled vector. (c) 5
+bootstraps (+ b=0 reference) — matches the 5-seed budget of Exp 26–30, kept it cheap on the flagship only. (d)
+Placed Exp 32 in the seed/sampling cluster (RESULTS + REPORT_3 next to Exp 26–31), not a new part.
+**Deliverables.** RESULTS.md (Exp-32 section + table + `cos` characterization + figure entry; Exp-31 Next-check
+closed); REPORT_3 (Exp-32 Methods ```math DiffMean block + Results O/I/L/N + Exp-31 Next-check + Conclusion
+open-items); REPORT.md index (Summary Part-3 sentence + headline row). CHANGELOG appended; PLAN Current status /
+Next step rewritten + S7(g) checkbox added; this JOURNAL entry. Math re-verified via GitHub API: REPORT_3 11
+js-display-math / 0 `<pre lang=math>` / 0 inline hazards (was 10; +1 for the new DiffMean fence), REPORT.md 1/0,
+RESULTS.md no new `$$`. Artifacts: `experiments/32_vector_bootstrap.py`, `results/32_vector_bootstrap.json`,
+`results/32_run.log`, `plots/32_vector_bootstrap.png`. ENV: `/opt/conda/bin/python` (LOCAL disk), `setsid` full
+detach; ~9 min (6 correctors trained).
+**Next step.** Optional only (success criterion long met; three sampling axes + seven external-validity axes all
+controlled): (i) a JOINT resample (vector × seed) or rebuilding `v` from a labelled corpus (SST-2) vs the
+hand-written sets; (ii) a further architecture family (state-space/MoE) or GPT-2 XL; (iii) finer λ_b / Exp-20 on
+Qwen3. All marginal.
+On track? yes — S7 sampling control completed on the LAST axis: vector-construction bootstrap holds the flagship at
+82.1±2.7% @α=8 despite ~56° direction swings, because the corrector re-trains per vector; headline now survives
+seed + eval-doc + vector resampling. ~100% complete. No blocker.

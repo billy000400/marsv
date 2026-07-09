@@ -1168,8 +1168,42 @@ absolute learned ΔLM is a tight −0.069 nats. **Limitation.** This bootstraps 
 single flagship model/layer/seed; it does not resample the training set, the Gaussian-fit set, or the steering
 vector, so it bounds eval-document sampling variance specifically. It confirms the flagship point estimate is not an
 artifact of the particular held-out split, and that the previously-reported seed CI is the binding uncertainty.
-**Next check.** The last untouched sampling axis is vector construction — resampling the SST-2/DiffMean examples the
-steering vector is built from — which would bound how much the headline moves with the steering direction itself.
+**Next check.** *Done in Experiment 32* — the last untouched sampling axis, vector construction, is resampled below.
+
+**Experiment 32 — Vector-construction control: bootstrap the sentences that build the steering vector.**
+The flagship steering vector `v` is the DiffMean of a fixed set of **20 positive + 20 negative** sentences
+(Experiment 1). Every result above holds that vector fixed, so the headline could still depend on *which*
+examples were chosen. This is the last untouched sampling axis (seed → Exp 26–30, eval documents → Exp 31). We
+bootstrap-resample the two 20-sentence sets **with replacement** 5 times, rebuild `v = mean(POS tokens) −
+mean(NEG tokens)` for each resample, **re-train the exact Experiment-3 corrector against it** (seed fixed at 0,
+so the only thing that varies is the vector's example composition — the seed/optimizer variance is already
+quantified by Exp 26), and re-measure recovery at matched projection. Raw steering's damage `ΔLM_raw` is
+recomputed per resample because a different `v` steers differently. `b=0` is the original, un-resampled set — a
+built-in reproduction of Experiment 3.
+
+| α | ΔLM raw (mean±sd, nats) | recovery (mean±sd) | [min, max] | `b=0` original (Exp 3) |
+|---|-------------------------|--------------------|------------|------------------------|
+| 1 | +0.115 ± 0.026 | 170.8 ± 22.9% | [136, 191]% | 190.8% |
+| 2 | +0.498 ± 0.118 | 112.0 ± 4.0% | [106, 115]% | 115.8% |
+| 4 | +1.654 ± 0.253 | 95.8 ± 1.6% | [95, 99]% | 95.3% |
+| 6 | +2.582 ± 0.168 | 89.0 ± 3.0% | [87, 94]% | 89.4% |
+| 8 | +3.299 ± 0.164 | **82.1 ± 2.7%** | **[80, 87]%** | **84.3%** |
+
+Resampling moves the steering *direction* a lot: `cos(v_boot, v_full)` averages **0.69** (min **0.56**, i.e. up
+to ~56° off) and the vector norm swings from `|v|=11.1` to `13–20`.
+
+**Reading it: the headline barely moves even though the steering direction moves a lot.** Which sentences build
+`v` swings the direction by 30–56° and nearly doubles its norm, yet the flagship recovery stays at **82.1 ± 2.7%
+at α=8** (95.8 ± 1.6% at α=4) — within ~2 points of the original 84.3%, and its ± 2.7 pp spread is on the same
+order as the five-seed CI (± 2.0 pp, Exp 26), not larger. The reason is that the corrector is **re-trained for
+each vector**: because the correction rule is direction-specific (Exp 5) and the recipe reproduces per direction,
+a native corrector for each resampled `v` recovers about equally well. So the *method* is robust to
+vector-construction sampling even though any single vector is not. Note that `ΔLM_raw` itself does vary across
+resamples (± 0.16 nats at α=8) because a larger-norm `v` steers harder — but the recovery *ratio* is stable, so
+the finding is a property of the corrector, not an accident of matched raw damage. **Limitation.** This fixes the
+model / layer / seed / eval set and resamples only the vector's construction sentences; it does not cross with the
+seed or eval-document axes jointly. It closes the last single-axis sampling gap: the headline survives seed, eval
+document, and steering-vector resampling.
 
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
@@ -1180,6 +1214,10 @@ steering vector is built from — which would bound how much the headline moves 
 - `plots/31_eval_bootstrap.png` — flagship recovery vs α with 95% document-bootstrap error bars
   (GPT-2 small, block 6, seed 0, `B = 2000`). Bars are tight (± 0.7 pp at α=8), narrower than the
   seed CI, showing eval-set sampling is not the binding uncertainty.
+- `plots/32_vector_bootstrap.png` — (a) flagship recovery vs α under vector-construction bootstrap
+  (5 resamples of the 20+20 DiffMean sentences, corrector re-trained each; mean ± std, with the b=0
+  original overlaid); (b) histogram of `cos(v_boot, v_full)` — the direction moves a lot (mean 0.69)
+  while recovery stays at 82.1 ± 2.7% at α=8.
 - `plots/03_learned_corrector.png` — (a) ΔLM, (b) `D_M`, (c) projection retention vs α for raw,
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the

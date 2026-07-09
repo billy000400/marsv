@@ -887,3 +887,23 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - **Ops:** `/opt/conda/bin/python`, `setsid` full detach; GPT-2 small; ~2 min total. Artifacts:
   `experiments/31_eval_bootstrap.py`, `results/31_eval_bootstrap.json`, `results/31_run.log`,
   `plots/31_eval_bootstrap.png`.
+
+## 2026-07-09 — Experiment 32: vector-construction bootstrap (the last untouched sampling axis)
+- **RESULTS.md:** added the **Experiment 32** section (table + `cos(v_boot,v_full)` characterization + reading),
+  marked Exp-31's "Next check" *done*, and added the `plots/32_vector_bootstrap.png` figure entry. **No prior
+  result superseded** — Exp 32's b=0 reproduces Exp 3's headline (84.3% @α=8) exactly.
+- **Finding:** bootstrap-resampling the 20 POS + 20 NEG DiffMean sentences (5 resamples, corrector RE-TRAINED per
+  resample at fixed seed 0) swings the steering direction a lot — `cos(v_boot,v_full)` mean 0.69, min 0.56 (~56°),
+  `|v|` 11.1→13–20 — yet the flagship recovery holds at **82.1 ± 2.7% @α=8** (95.8 ± 1.6% @α=4), within ~2 pp of
+  the un-resampled 84.3% and on the order of the five-seed CI (±2.0 pp, Exp 26). The *method* (retrain-per-vector)
+  is robust to vector-construction sampling even though any single vector is not (correction is direction-specific,
+  Exp 5). Closes the last single-axis sampling gap: headline survives seed (26–30), eval-doc (31), vector (32).
+- **REPORT_3_external_validity.md:** Methods gained a "Vector-construction bootstrap (Exp 32)" block with the
+  DiffMean ```math equation; Results gained the Exp-32 O/I/L/N subsection + figure; Exp-31 Next-check closed;
+  Conclusion open-items updated (vector-construction now closed, joint resample + wider families remain).
+- **REPORT.md index:** Summary Part-3 sentence extended; headline-table row added (82.1 ± 2.7% @α=8).
+- **Math re-verified via GitHub API:** REPORT_3 11 js-display-math / 0 `<pre lang=math>` / 0 inline hazards (was
+  10; +1 for the new DiffMean fence); REPORT.md 1/0/0; RESULTS.md no new `$$`.
+- **Ops:** `/opt/conda/bin/python`, `setsid` full detach; GPT-2 small, block 6; ~9 min (6 correctors trained).
+  Artifacts: `experiments/32_vector_bootstrap.py`, `results/32_vector_bootstrap.json`, `results/32_run.log`,
+  `plots/32_vector_bootstrap.png`.

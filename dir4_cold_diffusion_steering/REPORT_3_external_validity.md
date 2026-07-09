@@ -318,6 +318,25 @@ and we report the full-sample point estimate together with the 95% bootstrap per
 weighting (summed rather than per-document-averaged NLL) makes the point estimate identical to Experiment 3's
 document-pooled ΔLM ratio — the built-in reproducibility check.
 
+### Vector-construction bootstrap (Experiment 32)
+
+Experiments 26–31 resample the optimization seed and the evaluation documents but hold the steering vector fixed.
+The flagship DiffMean sentiment vector is built from a fixed set of 20 positive and 20 negative sentences
+(Experiment 1), so the last unbounded sampling axis is *which sentences* build it. Experiment 32 bootstrap-resamples
+the two 20-sentence sets with replacement $B = 5$ times, rebuilds the DiffMean vector
+
+```math
+v_b \;=\; \frac{1}{|\mathcal{P}_b|}\sum_{t \in \mathcal{P}_b} h_t \;-\; \frac{1}{|\mathcal{N}_b|}\sum_{t \in \mathcal{N}_b} h_t
+```
+
+where $\mathcal{P}_b, \mathcal{N}_b$ are the token sets of the $b$-th resampled positive / negative sentence lists,
+and **re-trains the exact Experiment-3 corrector against $v_b$** at a *fixed* seed of 0 — so the only quantity that
+varies across resamples is the vector's example composition (the seed / optimizer variance is separately quantified
+by Experiment 26). Raw steering's damage $\Delta\mathrm{LM}_{\text{raw}}(\alpha)$ is recomputed per resample because
+a different $v_b$ steers differently. We report the mean ± standard deviation (and min / max) of the recovery across
+the 5 resamples, together with $\cos(v_b, v_{\text{full}})$ to measure how far example choice moves the direction.
+The un-resampled original set ($b=0$) reproduces Experiment 3.
+
 ## Results
 
 ### Experiment 12 — the fluency result replicates across layers (not a block-6 artifact)
@@ -742,8 +761,44 @@ ratio artifact seen throughout — raw's damage there is only +0.076 nats.
 does not resample the training set, the Gaussian-fit set, or the steering vector, so it bounds eval-document
 sampling variance specifically — not vector-construction variance.
 
-**Next check.** The one untouched sampling axis is vector construction: resampling the SST-2 / DiffMean examples the
-steering vector is built from would bound how much the headline moves with the steering direction itself.
+**Next check.** *Done in Experiment 32* — the vector-construction sampling axis is resampled below.
+
+### Experiment 32 — the headline survives resampling the sentences that build the steering vector
+
+![vector-construction bootstrap of the flagship recovery](plots/32_vector_bootstrap.png)
+
+Flagship pipeline (GPT-2 small, block 6, seed fixed 0), 5 bootstrap resamples of the 20+20 DiffMean sentences,
+corrector re-trained per resample:
+
+| α | ΔLM raw (mean±sd, nats) | recovery (mean±sd) | [min, max] | b=0 original (Exp 3) |
+|---|-------------------------|--------------------|------------|----------------------|
+| 1 | +0.115 ± 0.026 | 170.8 ± 22.9% | [136, 191]% | 190.8% |
+| 2 | +0.498 ± 0.118 | 112.0 ± 4.0% | [106, 115]% | 115.8% |
+| 4 | +1.654 ± 0.253 | 95.8 ± 1.6% | [95, 99]% | 95.3% |
+| 6 | +2.582 ± 0.168 | 89.0 ± 3.0% | [87, 94]% | 89.4% |
+| 8 | +3.299 ± 0.164 | **82.1 ± 2.7%** | **[80, 87]%** | **84.3%** |
+
+**Observation.** Resampling the sentences moves the steering *direction* substantially — $\cos(v_b, v_{\text{full}})$
+averages 0.69 (min 0.56, i.e. up to ~56° off) and the norm swings from `|v|=11.1` to 13–20 — yet the recovery holds
+at 82.1 ± 2.7% at α=8 (95.8 ± 1.6% at α=4), within ~2 points of the un-resampled 84.3%. The ± 2.7 pp spread is on the
+same order as the five-seed CI (± 2.0 pp, Experiment 26). Raw steering's own damage does move (± 0.16 nats at α=8),
+tracking the resampled vector's norm.
+
+**Interpretation.** Which examples build the steering vector barely moves the headline, even though it moves the
+direction a lot, because the corrector is **re-trained for each vector**: the correction rule is direction-specific
+and the recipe reproduces per direction (Experiment 5), so a native corrector for each resampled $v_b$ recovers about
+equally. The *method* — build a vector, then train a corrector against it — is robust to vector-construction sampling;
+a single frozen corrector would not be. The recovery *ratio* is stable even though both numerator and denominator
+move with `|v|`, so this is a property of the corrector rather than an artifact of matched raw damage.
+
+**Limitations.** This fixes the model / layer / seed / eval set and resamples only the construction sentences at a
+fixed seed; it does not cross the vector axis with the seed or eval-document axes jointly, and it uses the
+hand-written sentence sets, not an external labelled corpus. It closes the last single-axis sampling gap: the
+headline survives seed (Exp 26–30), eval-document (Exp 31), and steering-vector (Exp 32) resampling.
+
+**Next check.** A joint resample (vector × seed together) or rebuilding the vector from a labelled sentiment corpus
+(e.g. SST-2) rather than the hand-written sets would extend the control; both are marginal given the single-axis
+results.
 
 ## Conclusion
 
@@ -753,4 +808,4 @@ The result is also **prompt-family-robust** (a FineWeb-trained corrector recover
 
 Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The *top* of the band is seed-controlled too: five seeds on Qwen3 give 94.8 ± 1.6% at α=8 (Experiment 29), a band entirely above every other model's, so Qwen3's edge is real. Finally, GPT-2 large — the last single-seed headline model — is confirmed at 85.1 ± 1.1% at α=8 (Experiment 30), a band between GPT-2 small and medium, so the flat model-scale trend is itself seed-controlled: medium is the GPT-2 peak, large ≈ small, and recovery does not grow with scale. The seed axis now spans all five headline models across three scales and two architectures.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound, leaving vector-construction resampling as the one untouched sampling axis. These are the natural next extensions for the external-validity story.
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, and steering-vector resampling; a joint (vector × seed) resample and a wider architecture family (state-space / MoE / GPT-2 XL) are the natural next extensions for the external-validity story.

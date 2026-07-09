@@ -1,0 +1,92 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 32940.14it/s]
+device: cuda layer: 6
+|POS|=20  |NEG|=20
+clean eval loss = 3.731  clean D_M=27.23
+
+=== boot 0 — |v|=11.08 cos(v,v_full)=1.0000 — training ===
+  ep0 step  25 a= 1.9 LM=3.864 near=0.137
+  ep1 step  50 a= 4.4 LM=4.066 near=0.282
+  ep1 step  75 a= 7.2 LM=4.436 near=0.616
+  ep2 step 100 a= 1.4 LM=3.991 near=0.150
+  ep3 step 125 a= 6.4 LM=4.257 near=0.769
+  ep3 step 150 a= 7.2 LM=4.305 near=0.454
+  ep4 step 175 a= 2.8 LM=4.162 near=0.297
+  ep5 step 200 a= 5.5 LM=4.214 near=0.413
+  ep5 step 225 a= 1.3 LM=3.855 near=0.309
+boot 0 raw ΔLM: ['+0.076', '+0.325', '+1.222', '+2.111', '+2.778']
+boot 0 recovery: ['191%', '116%', '95%', '89%', '84%']
+
+=== boot 1 — |v|=14.43 cos(v,v_full)=0.7857 — training ===
+  ep0 step  25 a= 1.9 LM=3.935 near=0.158
+  ep1 step  50 a= 4.4 LM=4.193 near=0.371
+  ep1 step  75 a= 7.2 LM=4.749 near=0.848
+  ep2 step 100 a= 1.4 LM=4.084 near=0.194
+  ep3 step 125 a= 6.4 LM=4.385 near=1.069
+  ep3 step 150 a= 7.2 LM=4.485 near=0.853
+  ep4 step 175 a= 2.8 LM=4.179 near=0.387
+  ep5 step 200 a= 5.5 LM=4.327 near=0.660
+  ep5 step 225 a= 1.3 LM=3.905 near=0.454
+boot 1 raw ΔLM: ['+0.106', '+0.479', '+1.627', '+2.645', '+3.483']
+boot 1 recovery: ['159%', '109%', '95%', '89%', '81%']
+
+=== boot 2 — |v|=13.20 cos(v,v_full)=0.7857 — training ===
+  ep0 step  25 a= 1.9 LM=3.860 near=0.120
+  ep1 step  50 a= 4.4 LM=4.126 near=0.322
+  ep1 step  75 a= 7.2 LM=4.701 near=0.868
+  ep2 step 100 a= 1.4 LM=4.003 near=0.178
+  ep3 step 125 a= 6.4 LM=4.361 near=0.760
+  ep3 step 150 a= 7.2 LM=4.444 near=0.789
+  ep4 step 175 a= 2.8 LM=4.158 near=0.325
+  ep5 step 200 a= 5.5 LM=4.270 near=0.743
+  ep5 step 225 a= 1.3 LM=3.860 near=0.367
+boot 2 raw ΔLM: ['+0.100', '+0.414', '+1.438', '+2.418', '+3.123']
+boot 2 recovery: ['184%', '115%', '95%', '87%', '80%']
+
+=== boot 3 — |v|=18.23 cos(v,v_full)=0.5638 — training ===
+  ep0 step  25 a= 1.9 LM=3.863 near=0.128
+  ep1 step  50 a= 4.4 LM=4.219 near=0.299
+  ep1 step  75 a= 7.2 LM=4.677 near=1.459
+  ep2 step 100 a= 1.4 LM=3.962 near=0.109
+  ep3 step 125 a= 6.4 LM=4.327 near=0.935
+  ep3 step 150 a= 7.2 LM=4.345 near=0.978
+  ep4 step 175 a= 2.8 LM=4.146 near=0.281
+  ep5 step 200 a= 5.5 LM=4.191 near=0.742
+  ep5 step 225 a= 1.3 LM=3.961 near=0.096
+boot 3 raw ΔLM: ['+0.104', '+0.458', '+1.552', '+2.441', '+3.146']
+boot 3 recovery: ['184%', '115%', '95%', '87%', '81%']
+
+=== boot 4 — |v|=19.74 cos(v,v_full)=0.5944 — training ===
+  ep0 step  25 a= 1.9 LM=4.088 near=0.249
+  ep1 step  50 a= 4.4 LM=4.170 near=0.361
+  ep1 step  75 a= 7.2 LM=4.455 near=1.191
+  ep2 step 100 a= 1.4 LM=4.028 near=0.097
+  ep3 step 125 a= 6.4 LM=4.209 near=0.939
+  ep3 step 150 a= 7.2 LM=4.345 near=1.775
+  ep4 step 175 a= 2.8 LM=4.217 near=0.274
+  ep5 step 200 a= 5.5 LM=4.274 near=0.582
+  ep5 step 225 a= 1.3 LM=3.907 near=0.161
+boot 4 raw ΔLM: ['+0.161', '+0.703', '+2.090', '+2.832', '+3.301']
+boot 4 recovery: ['136%', '106%', '99%', '94%', '87%']
+
+=== boot 5 — |v|=14.57 cos(v,v_full)=0.7385 — training ===
+  ep0 step  25 a= 1.9 LM=3.826 near=0.119
+  ep1 step  50 a= 4.4 LM=4.150 near=0.390
+  ep1 step  75 a= 7.2 LM=4.681 near=0.695
+  ep2 step 100 a= 1.4 LM=3.999 near=0.145
+  ep3 step 125 a= 6.4 LM=4.411 near=1.256
+  ep3 step 150 a= 7.2 LM=4.495 near=0.968
+  ep4 step 175 a= 2.8 LM=4.146 near=0.372
+  ep5 step 200 a= 5.5 LM=4.224 near=0.834
+  ep5 step 225 a= 1.3 LM=3.832 near=0.275
+boot 5 raw ΔLM: ['+0.101', '+0.434', '+1.563', '+2.573', '+3.440']
+boot 5 recovery: ['191%', '115%', '95%', '88%', '82%']
+
+=== aggregate over 5 bootstraps (b=0 reference) ===
+cos(v_boot, v_full): mean=0.6936 min=0.5638
+alpha= 1.0  recovery=170.8±22.9%  [136,191]  (b=0 ref 190.8%)
+alpha= 2.0  recovery=112.0±4.0%  [106,115]  (b=0 ref 115.8%)
+alpha= 4.0  recovery=95.8±1.6%  [95,99]  (b=0 ref 95.3%)
+alpha= 6.0  recovery=89.0±3.0%  [87,94]  (b=0 ref 89.4%)
+alpha= 8.0  recovery=82.1±2.7%  [80,87]  (b=0 ref 84.3%)
+saved figure + results
