@@ -4,7 +4,7 @@
 
 ## Summary
 
-The core result this part stress-tests (established in Part 1) is a single sentence: at GPT-2 small block 6, raw activation steering breaks the language model, and a small MLP corrector in the projection-preserving form `ĥ = z + P_{v⊥}r`, trained on the downstream LM loss, recovers ~84% of the fluency damage at α=8 while moving *further* off the Gaussian manifold. The obvious worry is that this is an artifact — of the specific layer we hooked, the specific model, its architecture, the prompt family we trained on, or the way we built the steering vector. This part asks that question on six independent axes, and the result holds on all six.
+The core result this part stress-tests (established in Part 1) is a single sentence: at GPT-2 small block 6, raw activation steering breaks the language model, and a small MLP corrector in the projection-preserving form `ĥ = z + P_{v⊥}r`, trained on the downstream LM loss, recovers ~84% of the fluency damage at α=8 while moving *further* off the Gaussian manifold. The obvious worry is that this is an artifact — of the specific layer we hooked, the specific model, its architecture, the prompt family we trained on, the way we built the steering vector, or simply the one random seed we trained with. This part asks that question on seven independent axes, and the result holds on all seven.
 
 Across the model's depth (Exp 12), replicating the exact pipeline at the early, middle, and late residual stream (blocks 3/6/9 of GPT-2 small) recovers 90% / 84% / 76% of the fluency damage at α=8, off the Gaussian manifold at every layer — so it is not a block-6 artifact. Across model size (Exp 13, 19), on GPT-2 medium (355M, block 12/24) and GPT-2 large (774M, block 18/36) recovery is 89% and 84% at α=8 (101% / 95% at α=4); over the full 124M→355M→774M range the α=8 recovery stays essentially flat (84% / 89% / 84%) — model-robust.
 
@@ -239,6 +239,19 @@ the direction. We report each family's cosine to `v_{\text{DM}}` (how different 
 the **identical flagship recipe** (train an LM-supervised, projection-preserving corrector per direction,
 Experiment 3) on each and report **recovery** at matched projection.
 
+### Seed robustness (Experiment 26)
+
+Every experiment above — including the flagship Experiment 3 — is a **single training run at `SEED = 0`**, so
+the headline "84% recovery" carries no error bar and could in principle be a lucky initialization. Experiment
+26 closes the last robustness axis, the training seed. We re-run the **exact Experiment-3 pipeline** — same
+DiffMean sentiment vector (`|v| = 11.08`), same 400-document Gaussian fit, same 300-document training set, same
+held-out 100-document eval, same 4-layer 4.46M projection-preserving corrector, same recipe and
+`α ∼ U(0.5, 8)` — at **five seeds (`0–4`)**, where the seed controls the corrector's random initialization and
+the per-step α-sampling / data-shuffle RNG. Raw steering has no trained parameters, so `ΔLM_raw(α)` is
+identical across seeds and is computed once; only the learned corrector varies. We report the mean ± sample
+standard deviation of the fluency recovery (Experiment 12's equation) across `α ∈ {1, 2, 4, 6, 8}`. Seed 0
+re-runs Experiment 3 exactly and is the built-in reproducibility check.
+
 ## Results
 
 ### Experiment 12 — the fluency result replicates across layers (not a block-6 artifact)
@@ -461,10 +474,44 @@ corrector — is unchanged, now shown to work regardless of how the steering dir
 closes the last external-validity axis: the ColdSteer result is robust to the **steering-vector family** as
 well as to strength, direction, layer, model, and prompt family.
 
+### Experiment 26 — the flagship recovery is stable across seeds (not a single-seed artifact)
+
+![seed robustness of the flagship result](plots/26_seed_robustness.png)
+
+Five independently-trained correctors (seeds 0–4), same flagship pipeline, mean ± sample standard deviation:
+
+| α | ΔLM raw (nats) | ΔLM learned (mean ± sd) | recovery (mean ± sd) | `D_M` learned (mean ± sd) |
+|---|----------------|--------------------------|----------------------|----------------------------|
+| 1 | +0.076 | −0.073 ± 0.014 | 196.0 ± 18.8% | 31.8 ± 0.2 |
+| 2 | +0.325 | −0.056 ± 0.011 | 117.4 ± 3.4% | 35.6 ± 0.5 |
+| 4 | +1.222 | **+0.047 ± 0.010** | **96.2 ± 0.8%** | 47.9 ± 1.8 |
+| 6 | +2.111 | **+0.211 ± 0.012** | **90.0 ± 0.6%** | 61.7 ± 2.9 |
+| 8 | +2.778 | **+0.464 ± 0.054** | **83.3 ± 2.0%** | 74.6 ± 3.6 |
+
+Per-seed recovery at α=8: 84.3 / 84.5 / 84.6 / 83.0 / 80.0% (Experiment 3's 84% is seed 0's 84.3%).
+
+**Interpretation.** The flagship recovery is **highly reproducible** — at α=8 the five correctors recover
+**83.3 ± 2.0%** of raw steering's fluency damage (range 80–85%), tightening to **96.2 ± 0.8%** at α=4 and
+**90.0 ± 0.6%** at α=6. The corrector's advantage over raw is therefore many times its seed-to-seed
+variability at every strength that matters, and Experiment 3's single-seed 84% sits inside the band (it *is*
+seed 0), so that number was representative rather than lucky. The one wide error bar, α=1 (196 ± 19%), is a
+ratio artifact: raw's damage there is only +0.076 nats, so dividing by it inflates the *relative* spread even
+though the absolute `ΔLM_learned` is a tight −0.073 ± 0.014 nats — the same near-zero-denominator instability
+flagged throughout.
+
+**Limitations.** This varies only the *training* seed (corrector initialization + the α-sampling / data-shuffle
+RNG); the eval documents, Gaussian fit, and steering vector are held fixed, so it bounds *optimization*
+variance, not sampling variance over eval text or over the DiffMean vector's construction. It also covers only
+the flagship setup (GPT-2 small, block 6, sentiment) — the cross-model, cross-architecture, and cross-family
+checks above each remain single-seed. Still, the seed control the review standard names for the headline number
+is now satisfied: the 84% recovery is stable to ±2 points across five seeds.
+
 ## Conclusion
 
 The core fluency result survives every external-validity axis we tested. It is **layer-robust** (blocks 3/6/9 of GPT-2 small recover 90% / 84% / 76% at α=8, off the Gaussian manifold at each depth); **model-robust** across a 6× parameter range, with α=8 recovery essentially flat across small / medium / large (84% / 89% / 84%); and **architecture-robust** as a genuine sweep of three structurally distinct families — GPT-2, Qwen3, and Pythia / GPT-NeoX — all recovering in a tight **81–94% band at α=8**, spanning serial and parallel residual blocks, LayerNorm and RMSNorm, learned and rotary positions, GELU and SwiGLU, and dense and grouped-query attention.
 
 The result is also **prompt-family-robust** (a FineWeb-trained corrector recovers 77% on held-out technical prose and 60% on out-of-distribution code at α=8, degrading smoothly with the family's clean-activation drift off the FineWeb manifold) and **steering-vector-family-robust** (DiffMean, a logistic-regression probe, and PCA-contrast built from real SST-2 data all recover 84–101% at α=8, even though the directions differ at cosines of 1.00 / 0.40 / 0.30). Across every axis the Experiment-2/3 decoupling reappears: the corrected activation sits *further* off the Gaussian manifold than raw steering, so "LM-safe but off-Gaussian" is a general property of the learned correction rather than a quirk of one setup — and the PCA family shows the two can be fully decoupled, since steering on-manifold still breaks the LM.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models, and each cross-model / cross-architecture check is still a single concept, seed, and mid layer. These are the natural next extensions for the external-validity story.
+Finally, the result is **seed-robust** for the flagship setup: re-running the exact Experiment-3 pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26).
+
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; the seed control was run only on the flagship GPT-2-small setup, so each cross-model / cross-architecture check is still a single concept, seed, and mid layer. These are the natural next extensions for the external-validity story.

@@ -948,6 +948,42 @@ general. **Next check:** the Exp 11/20 behavioral-preservation terms (GPT-2/Qwen
 behavioral steer is required. `λ_b=0`/raw rows reuse the exact Exp 24 checkpoint, so this is directly comparable to
 Exp 10 and Exp 22.
 
+**Experiment 26 — Seed robustness: a confidence interval on the flagship 84% recovery.**
+Every result above is a **single training run at `SEED = 0`**, so the headline number ("84% fluency
+recovery at α=8", Experiment 3) has no error bar. CLAUDE.md's review standard names *seed* as a control a
+metric should survive, and it is the one axis Experiments 4/5/12/13/15/18/19/21/24 (strength / direction /
+layer / model / prompt / steering-family / architecture) never varied. We close it by re-running the **exact
+flagship Experiment-3 pipeline** — same DiffMean sentiment vector (`|v| = 11.08`), same 400-doc Gaussian fit
+(49,218 clean tokens, clean `D_M = 27.3`), same 300-doc training set, same held-out 100-doc eval, same
+4-layer 4.46M corrector, same recipe / `α ∼ U(0.5, 8)` — at **five seeds** (`0–4`), and report the mean ± sample
+standard deviation of the fluency recovery `recovery(α) = (ΔLM_raw(α) − ΔLM_learned(α)) / ΔLM_raw(α)` at each
+α. Raw steering has no trained parameters, so `ΔLM_raw` is identical across seeds (computed once); only the
+learned corrector varies. Seed 0 reproduces Experiment 3 to the digit — a built-in check.
+
+| α | ΔLM raw (nats) | **ΔLM learned (mean ± sd)** | **recovery (mean ± sd)** | `D_M` learned (mean ± sd) |
+|---|----------------|------------------------------|--------------------------|----------------------------|
+| 1 | +0.076 | **−0.073 ± 0.014** | 196.0 ± 18.8% | 31.8 ± 0.2 |
+| 2 | +0.325 | **−0.056 ± 0.011** | 117.4 ± 3.4% | 35.6 ± 0.5 |
+| 4 | +1.222 | **+0.047 ± 0.010** | **96.2 ± 0.8%** | 47.9 ± 1.8 |
+| 6 | +2.111 | **+0.211 ± 0.012** | **90.0 ± 0.6%** | 61.7 ± 2.9 |
+| 8 | +2.778 | **+0.464 ± 0.054** | **83.3 ± 2.0%** | 74.6 ± 3.6 |
+
+(Per-seed recovery at α=8: 84.3 / 84.5 / 84.6 / 83.0 / 80.0% — Experiment 3's 84% is seed 0's 84.3%.)
+
+**Reading it: the flagship recovery is highly reproducible across seeds — the headline 84% is not a
+single-seed artifact.** At α=8 the five independently-trained correctors recover **83.3 ± 2.0%** of raw
+steering's fluency damage (range 80–85%), and the spread is tighter still at moderate steering — **96.2 ± 0.8%**
+at α=4 and **90.0 ± 0.6%** at α=6 — so the corrector's advantage over raw is far larger than its seed-to-seed
+variability at every strength that matters. Experiment 3's single-seed 84% sits inside the band (it *is* seed
+0), confirming that number was representative, not lucky. The only wide error bar is at α=1 (196 ± 19%), and
+that is an artifact of the recovery *ratio*: raw's damage there is only +0.076 nats, so dividing by it inflates
+the relative spread even though the absolute `ΔLM_learned` is a tight −0.073 ± 0.014 nats — the same
+ratio-instability at near-zero raw damage noted throughout. **Limitation.** This varies only the training seed
+(corrector init + the α-sampling / data-shuffle RNG); the eval set, Gaussian fit, and steering vector are held
+fixed, so it bounds *optimization* variance, not sampling variance over eval documents or over the DiffMean
+vector's construction. Still, the one control the review standard names for the flagship number is now met: the
+84% recovery is stable to ±2 points across five seeds.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -1066,6 +1102,11 @@ Exp 10 and Exp 22.
   collapses to 0.38 at α=8 while the corrector holds 0.72; (c) the effect-vs-fluency Pareto (points labelled by
   α), showing the corrector up-and-right of raw at α=8. The Exp 10/22 under-steering caveat is mild here because
   raw itself steers Pythia weakly (effect peaks at +1.17).
+- `plots/26_seed_robustness.png` — seed robustness of the flagship result (GPT-2 small, layer 6, 5 seeds).
+  (a) ΔLM vs α, raw (red) vs the learned corrector (blue mean line + ±1 sd band over 5 seeds) — the band hugs
+  zero far below raw at every α; (b) fluency recovery vs α with mean ± sd error bars and the five per-seed points
+  overlaid — 83.3 ± 2.0% at α=8, tightening to ±0.6–0.8% at α=4–6. The headline 84% is reproducible, not a
+  single-seed artifact.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -1073,7 +1114,7 @@ nats at α=8). Correcting toward the **Gaussian manifold backfires** — an anal
 preserving corrector cuts off-manifold distance 22% but *worsens* LM loss to +4.2 nats. But a
 **learned corrector supervised by the LM loss** — same projection-preserving form, so the layer-6
 steering projection is untouched — **recovers 84% of the teacher-forced fluency damage** (ΔLM
-+2.78→+0.44 at α=8) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
++2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
 "LM-safe" are decoupled; only the downstream objective finds the fluent correction. The correction is
 **direction-specific**
 — a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe

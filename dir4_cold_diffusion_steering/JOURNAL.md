@@ -1127,3 +1127,39 @@ finds it long too; the prior low-value research follow-ups remain.
 On track? yes — directly resolved the operator's readability complaint by restructuring the report into an index +
 four topic-focused parts with zero change to any result; all five files math-verified (42 js-display-math, 0
 broken, 0 inline hazards). No blocker.
+
+## 2026-07-09 — Experiment 26: seed robustness / confidence interval on the flagship 84% recovery
+**Did.** Picked the single highest-value remaining rigor gap: every prior experiment (incl. flagship Exp 3) is
+a single run at SEED=0, so "84% @α=8" had no error bar — and *seed* is the one control CLAUDE.md rule 10 names
+that no axis had varied (strength/direction/layer/model/prompt/steering-family/architecture all were). Wrote
+`experiments/26_seed_robustness.py` (imports the flagship Exp-3 module via importlib and overrides its SEED per
+run — DRY, no pipeline duplication) and ran the EXACT Exp-3 recipe at 5 seeds (0–4). Raw ΔLM is seed-independent
+(computed once); only the learned corrector varies. Result POSITIVE + TIGHT: recovery 83.3±2.0% @α=8 (per-seed
+84.3/84.5/84.6/83.0/80.0%), 96.2±0.8% @α=4, 90.0±0.6% @α=6; ΔLM learned @α=8 +0.464±0.054 vs raw +2.778. Seed 0
+reproduces Exp 3 to the digit (84.3%). The only wide bar, α=1 (196±19%), is a ratio artifact of raw's near-zero
++0.076-nat damage (absolute ΔLM_learned tight −0.073±0.014). So the headline 84% is representative, not a lucky
+init — a 7th robustness axis for the flagship.
+**Learned.** (1) The recovery is far more seed-stable than I expected (±0.6–2.0% at α≥4) — the corrector's
+advantage over raw dwarfs its optimization variance, which strengthens the whole paper's headline. (2) OPS: the
+dir9 `cupenv` python lives on the shared `/mars-vol` network volume, and under 5-agent disk contention a cold
+import STALLED ~30 min in the kernel `folio_wait_bit_common` (page-cache misses), grinding one small scipy/sklearn
+`.pyc`/`.so` file at a time (diagnosed via /proc/<pid>/fd/3 + /proc/<pid>/io syscr). `/opt/conda/bin/python`
+(transformers 5.13.0, torch 2.9 cu130, matplotlib 3.11) is on LOCAL disk and imports in seconds — switched to it
+and the run completed in ~15 min. Recorded in PLAN Next step + CHANGELOG as the recommended env.
+**Assumptions/decisions logged (loop mode).** (a) Chose 5 seeds (standard minimal-but-defensible N for a
+sample-std CI on a cheap GPT-2-small run) over 3 (too few for a std) or 10 (diminishing value at 2–3 min/seed).
+(b) Ran the control on the FLAGSHIP setup only (GPT-2 small/block 6/sentiment), not on every cross-model check —
+the flagship number is THE headline, and per-model 5-seed sweeps would be ~5× the cost for little marginal rigor;
+logged as a Limitation (bounds optimization variance on the flagship, not eval-doc/vector-construction sampling
+variance, and cross-model checks stay single-seed). (c) Placed Exp 26 in REPORT_3 (external validity) as the
+seed axis rather than a new part — it directly answers that part's own repeatedly-flagged "single seed" open item.
+**Deliverables.** RESULTS.md (Exp-26 section + figure entry + Headline seed CI), REPORT_3 (Methods+Results+
+Conclusion + Summary bump six→seven axes), REPORT.md index (Summary 84% CI, Part-3 blurb, headline table row).
+CHANGELOG appended; PLAN Current status/Next step rewritten + S7 checkbox added; this JOURNAL entry. REPORT math
+re-verified on the 2 touched files (index 1 / Part 3 9 js-display-math, 0 broken, 0 inline hazards — Exp 26
+reuses Exp 12's recovery equation, no new equation). Artifacts: `experiments/26_seed_robustness.py`,
+`results/26_seed_robustness.json`, `results/26_run.log`, `plots/26_seed_robustness.png`.
+**Next step.** Optional only: 5-seed control on a cross-model check (Qwen3) for error bars there; a further
+architecture family; or Exp 23's finer-λ_b Next check. Success criterion long met.
+On track? yes — S7 (seed robustness) done, ~100% complete; flagship 84% shown reproducible at 83.3±2.0% across
+5 seeds, closing the last review-named control. No blocker.

@@ -704,3 +704,28 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   P3 9 / P4 10), 0 broken (`<pre lang=math>`), 0 inline-math hazards. Every part has all four top-level sections.
 - **RESULTS.md:** left unchanged (a distinct per-experiment results log; the feedback targeted the narrative
   report's length/back-and-forth). No experiment re-run; no result superseded.
+
+## 2026-07-09 — Experiment 26: seed robustness / confidence interval on the flagship recovery (new result)
+- **Trigger:** every prior experiment is a single run at `SEED=0`, so the headline "84% recovery @α=8"
+  (Exp 3) had no error bar. CLAUDE.md rule 10 names *seed* as a control a trustworthy metric must survive,
+  and it was the one axis never varied (strength/direction/layer/model/prompt/steering-family/architecture
+  all were).
+- **Change (new, supersedes nothing):** added **Experiment 26** to RESULTS.md — re-ran the EXACT flagship
+  Exp-3 pipeline (same vector `|v|=11.08`, 400-doc Gaussian fit, 300-doc train, held-out 100-doc eval,
+  4.46M corrector, recipe, `α∼U(0.5,8)`) at **5 seeds (0–4)** and reported mean ± sd of the fluency recovery.
+  Result: recovery **83.3 ± 2.0% @α=8** (per-seed 84.3/84.5/84.6/83.0/80.0%), **96.2 ± 0.8% @α=4**,
+  **90.0 ± 0.6% @α=6**; ΔLM learned @α=8 = +0.464 ± 0.054 nats vs raw +2.778. Seed 0 reproduces Exp 3 to the
+  digit (84.3% ≈ 84%), a built-in check. Wide bar only at α=1 (196 ± 19%) — a ratio artifact of raw's
+  near-zero +0.076-nat damage there, not real spread (absolute ΔLM_learned tight at −0.073 ± 0.014).
+- **Deliverables:** RESULTS.md gained the Exp-26 section + figure entry; the Headline now carries the seed CI
+  ("83.3 ± 2.0% across 5 training seeds"). No prior result number changed (Exp 26 is additive; Exp 3's 84%
+  is confirmed as representative). Figure `plots/26_seed_robustness.png`; artifacts
+  `experiments/26_seed_robustness.py`, `results/26_seed_robustness.json`, `results/26_run.log`.
+- **Limitation recorded:** varies only the training seed (corrector init + α-sampling/data-shuffle RNG);
+  eval set, Gaussian fit, and steering vector held fixed — bounds optimization variance, not eval-doc or
+  vector-construction sampling variance.
+- **Ops:** the shared conda `transformers` was still absent, but `/opt/conda/bin/python` (transformers
+  5.13.0, torch 2.9 cu130, matplotlib 3.11, on LOCAL disk) is available and imports in seconds — vastly
+  faster than dir9's `cupenv` on the contended `/mars-vol` network volume (a cold import there stalled ~30 min
+  in `folio_wait_bit_common` grinding scipy/sklearn). Switched to `/opt/conda/bin/python`; run completed in
+  ~15 min. Recommend this env for future iterations.

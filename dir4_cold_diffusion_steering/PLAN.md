@@ -158,6 +158,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         corrector Pareto-DOMINATES raw (eff +0.98 @ d2 0.72 vs raw +1.17 @ collapsed 0.38). Reason: raw steers
         Pythia weakly here (eff peaks +1.17), so little effect for the corrector to lose ⇒ penalty size tracks how
         strongly RAW steering propagates. Behavioral arc now closed on all THREE architectures (GPT-2/Qwen3/Pythia).
+- [x] S7 — SEED robustness (Exp 26, 2026-07-09) DONE: every prior experiment is a single run at SEED=0, so
+        the flagship "84% @α=8" had no error bar — the one control CLAUDE.md rule 10 names that no axis varied
+        (strength/direction/layer/model/prompt/steering-family/architecture all did). Re-ran the EXACT flagship
+        Exp-3 pipeline at 5 seeds (0–4). POSITIVE + tight: recovery 83.3±2.0% @α=8 (per-seed 84/84/85/83/80%),
+        96.2±0.8% @α=4, 90.0±0.6% @α=6; ΔLM learned @α=8 +0.464±0.054 vs raw +2.778. Seed 0 reproduces Exp 3 to
+        the digit (84.3%). Wide bar only @α=1 (196±19%) = ratio artifact of raw's near-zero +0.076-nat damage.
+        Flagship result now robust on a 7th axis; headline confirmed representative, not a lucky init.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -169,6 +176,29 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S7 SEED robustness — Experiment 26 (new, 2026-07-09):** picked the single highest-value remaining rigor
+gap. Every prior experiment (incl. the flagship Exp 3) is a SINGLE run at SEED=0, so "84% recovery @α=8" had no
+error bar — and *seed* is the one control CLAUDE.md rule 10 explicitly names that no axis varied (strength/
+direction/layer/model/prompt/steering-family/architecture all were). Re-ran the EXACT flagship Exp-3 pipeline
+(same DiffMean sentiment vector |v|=11.08, 400-doc Gaussian fit, 300-doc train, held-out 100-doc eval, 4.46M
+projection-preserving corrector, recipe, α∼U(0.5,8)) at 5 seeds (0–4); seed varies corrector init + α-sampling/
+data-shuffle RNG; raw ΔLM is seed-independent (computed once). POSITIVE + TIGHT: recovery 83.3±2.0% @α=8
+(per-seed 84.3/84.5/84.6/83.0/80.0%), 96.2±0.8% @α=4, 90.0±0.6% @α=6; ΔLM learned @α=8 +0.464±0.054 nats vs raw
++2.778. Seed 0 reproduces Exp 3 to the digit (84.3%) — built-in check. The only wide bar, α=1 (196±19%), is a
+ratio artifact of raw's near-zero +0.076-nat damage there (absolute ΔLM_learned tight −0.073±0.014). So the
+headline 84% is reproducible to ±2 points — representative, not a lucky init — closing a 7th robustness axis.
+Limitation: varies only the TRAINING seed on the flagship setup (eval set/fit/vector fixed; cross-model checks
+still single-seed) — bounds optimization variance, not eval-doc or vector-construction sampling variance. No
+prior result superseded (Exp 26 additive; Exp 3's 84% confirmed). Artifacts: `experiments/26_seed_robustness.py`,
+`results/26_seed_robustness.json`, `results/26_run.log`, `plots/26_seed_robustness.png`. Curated RESULTS.md
+(Exp-26 section + figure + Headline seed CI), REPORT_3 (Methods+Results+Conclusion for the seed axis) + index
+(Summary/Part-3 blurb/headline table). CHANGELOG appended. REPORT math re-verified on the 2 touched files
+(index 1 / Part 3 9 js-display-math, 0 broken, 0 inline hazards — Exp 26 reuses Exp 12's recovery equation, no
+new equation). OPS: dir9 `cupenv` on /mars-vol stalled ~30 min in `folio_wait_bit_common` on a cold scipy/sklearn
+import (disk contention); switched to `/opt/conda/bin/python` (transformers 5.13.0, torch 2.9 cu130, matplotlib
+3.11, LOCAL disk) which imports in seconds — RECOMMENDED for future iters.
+
+<!-- prior: REPORT restructure -->
 **REPORT RESTRUCTURE (human feedback, 2026-07-09):** the operator said REPORT.md was "too long and too much
 back and forth" to follow, and asked to disassemble it into 2–4 topic-focused mini reports. Done: the 1744-line
 monolith is now a 108-line **index** (`REPORT.md`: overall Summary + the takeaway equation + headline-numbers
@@ -562,6 +592,17 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
+**S7 seed robustness DONE (Exp 26).** The last-named review control (seed) is now covered for the flagship:
+83.3±2.0% @α=8 across 5 seeds. Success criterion long met; result robust on SEVEN axes (strength/direction/
+layer/model-scale/architecture/prompt-family/steering-family) PLUS seed for the flagship. Only very-low-value
+optional points remain: (i) run the 5-seed control on a cross-model/architecture check (e.g. Qwen3) to give
+those numbers error bars too — modest value, the flagship CI already establishes the recipe is stable; (ii) a
+FURTHER architecture family (state-space/MoE) for a fuller sweep; (iii) finer λ_b + Exp-20 differentiable-
+generation ON Qwen3 (Exp 23's Next check). ENV: use `/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk,
+imports in seconds) — the dir9 `cupenv` on /mars-vol stalls ~30 min on cold imports under disk contention.
+Verify any REPORT edit with the GitHub-API math check on the touched report files.
+
+<!-- prior next step -->
 **Report restructure DONE (2026-07-09 human feedback).** REPORT.md is now an index + four topic-focused parts
 (see Current status). Optional follow-ups if a future iter wants them: (a) apply the same split to RESULTS.md if
 the operator finds it too long too (currently left as a single per-experiment results log); (b) the research

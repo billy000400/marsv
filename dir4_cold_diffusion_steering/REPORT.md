@@ -16,7 +16,7 @@ effect while keeping the activation safe for the model. The central finding: the
 works keeps the steering projection exactly (`ĥ = z + P_{v⊥} r`, a correction orthogonal to `v`)
 but is trained against the **downstream language-model loss**, *not* against a manifold-distance
 surrogate. It recovers **84%** of the fluency lost at strong steering (`ΔLM` +2.78 → +0.44 nats at
-`α=8`) — and it does so by moving *further* off the statistical manifold, so "on-manifold" and
+`α=8`; 83.3 ± 2.0% across five training seeds) — and it does so by moving *further* off the statistical manifold, so "on-manifold" and
 "safe for the LM" are genuinely decoupled. The takeaway for on-manifold steering methods:
 
 ```math
@@ -52,12 +52,13 @@ Amortized correction is capped by the **training signal**; the reliable route to
 remains a per-direction corrector.
 
 ### [Part 3 — External validity: does the fluency result generalize?](REPORT_3_external_validity.md)
-*Experiments 12, 13, 19, 21, 24, 15, 18.* The core fluency result holds on six independent axes:
+*Experiments 12, 13, 19, 21, 24, 15, 18, 26.* The core fluency result holds on seven independent axes:
 **layer** (blocks 3/6/9: 90/84/76% at `α=8`), **model size** (GPT-2 medium & large, 89% & 84%;
 flat across a 6× parameter range), **architecture** as a *sweep of three families* (Qwen3-1.7B 94%,
 Pythia-410m/GPT-NeoX with a parallel-residual block 81% — 81–94% band), **prompt family** (77% on
-technical prose, 60% on out-of-distribution code), and **steering-vector family** (DiffMean /
-logistic probe / PCA-contrast, 84–101%). Off the Gaussian manifold at every setting.
+technical prose, 60% on out-of-distribution code), **steering-vector family** (DiffMean /
+logistic probe / PCA-contrast, 84–101%), and **training seed** (83.3 ± 2.0% at `α=8` across five
+seeds — the headline 84% is reproducible). Off the Gaussian manifold at every setting.
 
 ### [Part 4 — Behavioral reality-check: from fluency to real steering in generation](REPORT_4_behavioral.md)
 *Experiments 10, 11, 20, 22, 23, 25.* The `ΔLM` recoveries are teacher-forced at one layer. When
@@ -88,6 +89,7 @@ corrector.
 | Architecture-robust as a 3-family sweep @`α=8` | 81–94% (GPT-2 / Qwen3 / GPT-NeoX) | Part 3 (Exp 21, 24) |
 | Prompt-family-robust @`α=8` | 77% prose / 60% code | Part 3 (Exp 15) |
 | Steering-vector-family-robust @`α=8` | 84% / 84% / 101% | Part 3 (Exp 18) |
+| Seed-robust: flagship recovery across 5 seeds @`α=8` | 83.3 ± 2.0% (headline 84% reproducible) | Part 3 (Exp 26) |
 | Behavioral caveat: generated effect vs raw (GPT-2) | ~1/6 of raw's | Part 4 (Exp 10) |
 | Readout-preservation term recovers more effect | 2–6×, dominates raw at moderate `α` | Part 4 (Exp 11) |
 
