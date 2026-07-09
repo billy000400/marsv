@@ -1200,3 +1200,41 @@ js-display-math, 0 broken, 0 inline hazards — reuses Exp 12's recovery equatio
 family; or the Exp-23 finer-λ_b / Exp-20-on-Qwen3 lever. ENV: `/opt/conda/bin/python` (LOCAL disk, fast).
 On track? yes — S7 seed axis extended to a second model scale (GPT-2 medium 88.3 ± 2.2% @α=8, non-overlapping
 with small); model-scale edge shown real, not seed noise. ~100% complete. No blocker.
+
+## 2026-07-09 — Experiment 28: seed robustness on Pythia-410m / GPT-NeoX (error bar on the cross-architecture recovery)
+**Did.** Picked Exp 27's own Next check, the highest-value remaining rigor point: Exp 26/27 gave 5-seed CIs on
+two GPT-2 SCALES, but the cross-ARCHITECTURE recovery (Exp 24, Pythia) was still a single seed-0 run — and Pythia
+sits at the LOW end of the reported 81–94% architecture band (below both GPT-2 scales), exactly where a single
+seed is most in doubt. Wrote `experiments/28_seed_robustness_pythia.py` (imports the Exp-24 module and reuses its
+load/resid_post/make_hat/lm_loss_fn/train_corrector/corrector_acts verbatim; overrides `exp24.SEED` per run — DRY,
+no pipeline duplication) and ran the EXACT Exp-24 Pythia pipeline at 5 seeds (0–4). Raw ΔLM seed-independent
+(computed once); only the learned corrector varies. Result POSITIVE + tight: recovery 80.8±1.6% @α=8 (per-seed
+81/82/80/78/81%), 81.7±0.3% @α=4, 72.1±1.5% @α=2; ΔLM learned @α=8 +0.597±0.048 vs raw +3.103; D_M learned
+80.8±6.6 vs raw 52.3 (decoupling holds every seed). Seed 0 reproduces Exp 24 to the digit (81%/81%). KEY: Pythia's
+α=8 band [79.2,82.4]% sits ENTIRELY BELOW GPT-2 medium's [86.1,90.5]% (Exp 27, a genuine gap) but OVERLAPS GPT-2
+small's [81.3,85.3]% (Exp 26) — so Pythia≈small within seed noise at α=8, and the 81–94% band is real at its low
+end but is three seed-controlled points, not a hard pairwise ranking.
+**Learned.** (1) The recipe is seed-stable on a THIRD, non-GPT-2 architecture (parallel-residual block) — the
+corrector's advantage over raw dwarfs its seed spread (±0.3–1.6% at α≥2) just as on GPT-2. (2) The medium>Pythia
+architecture gap survives seed noise (bands don't touch) but the small≈Pythia comparison does NOT — so I qualified
+the earlier "architecture ordering" language: the 81–94% band is honest but pairwise rankings within a couple of
+points are inside seed noise. (3) Sanity: |v|=3.29, |h|=35.34, D_M=31.33, raw ΔLM +0.059/+0.231/+0.948/+3.103 all
+reproduce Exp 24 to the digit — the module reuse is faithful. (4) Spotted + fixed a stale RESULTS.md Headline typo
+while editing (GPT-2 medium α=8 std quoted 2.0%, but Exp-27 table/JSON give 2.2%).
+**Assumptions/decisions logged (loop mode).** (a) Chose Pythia-410m (cached, ~800MB, ~15 s/seed) as the
+cross-architecture seed check over Qwen3-1.7B (heavier, slower under /mars-vol contention) — highest rigor per
+minute AND it probes the LOW end of the band where a single seed is most in doubt; logged the alternative (Qwen3
+seed CI, the band's TOP) as Exp 28's own Next check. (b) 5 seeds (matches Exp 26/27 for an apples-to-apples CI
+comparison). (c) Placed Exp 28 in RESULTS + REPORT_3 next to Exp 26/27 (seed axis), not a new part.
+**Deliverables.** RESULTS.md (Exp-28 section + table + figure entry + Headline architecture seed CI, Exp-27
+Next-check marked done, medium-std typo fix); REPORT_3 (Exp-28 Methods block + Results O/I/L/N subsection + Exp-27
+Next-check marked done + Conclusion/open-items update); REPORT.md index (seed-robust headline row + Summary now all
+three models). CHANGELOG appended; PLAN Current status/Next step rewritten + S7(c) checkbox added; this JOURNAL
+entry. REPORT math re-verified on the 2 touched files (REPORT_3 9 / index 1 js-display-math, 0 broken, 0 inline
+hazards — reuses Exp 12's recovery equation, no new equation). Artifacts: `experiments/28_seed_robustness_pythia.py`,
+`results/28_seed_robustness_pythia.json`, `results/28_run.log`, `plots/28_seed_robustness_pythia.png`.
+**Next step.** Optional only (success criterion long met): a 5-seed control on Qwen3 (the TOP of the 81–94% band)
+to test whether its 94% edge is real or seed noise; a further architecture family (state-space/MoE); or the
+Exp-23 finer-λ_b / Exp-20-on-Qwen3 lever. ENV: `/opt/conda/bin/python` (LOCAL disk, fast).
+On track? yes — S7 seed axis extended to a second architecture (Pythia 80.8±1.6% @α=8); recipe shown seed-stable
+across two model scales AND two architectures. ~100% complete. No blocker.

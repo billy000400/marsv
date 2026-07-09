@@ -57,8 +57,9 @@ remains a per-direction corrector.
 flat across a 6× parameter range), **architecture** as a *sweep of three families* (Qwen3-1.7B 94%,
 Pythia-410m/GPT-NeoX with a parallel-residual block 81% — 81–94% band), **prompt family** (77% on
 technical prose, 60% on out-of-distribution code), **steering-vector family** (DiffMean /
-logistic probe / PCA-contrast, 84–101%), and **training seed** (83.3 ± 2.0% at `α=8` across five
-seeds — the headline 84% is reproducible). Off the Gaussian manifold at every setting.
+logistic probe / PCA-contrast, 84–101%), and **training seed** (five-seed recovery 83.3 ± 2.0% / 88.3 ± 2.2% /
+80.8 ± 1.6% at `α=8` on GPT-2 small / GPT-2 medium / Pythia — the headline 84% is reproducible, and the
+recipe is seed-stable across two model scales and two architectures). Off the Gaussian manifold at every setting.
 
 ### [Part 4 — Behavioral reality-check: from fluency to real steering in generation](REPORT_4_behavioral.md)
 *Experiments 10, 11, 20, 22, 23, 25.* The `ΔLM` recoveries are teacher-forced at one layer. When
@@ -89,7 +90,7 @@ corrector.
 | Architecture-robust as a 3-family sweep @`α=8` | 81–94% (GPT-2 / Qwen3 / GPT-NeoX) | Part 3 (Exp 21, 24) |
 | Prompt-family-robust @`α=8` | 77% prose / 60% code | Part 3 (Exp 15) |
 | Steering-vector-family-robust @`α=8` | 84% / 84% / 101% | Part 3 (Exp 18) |
-| Seed-robust across 5 seeds @`α=8` (small / medium) | 83.3 ± 2.0% / 88.3 ± 2.2% (non-overlapping) | Part 3 (Exp 26, 27) |
+| Seed-robust across 5 seeds @`α=8` (small / medium / Pythia) | 83.3 ± 2.0% / 88.3 ± 2.2% / 80.8 ± 1.6% | Part 3 (Exp 26, 27, 28) |
 | Behavioral caveat: generated effect vs raw (GPT-2) | ~1/6 of raw's | Part 4 (Exp 10) |
 | Readout-preservation term recovers more effect | 2–6×, dominates raw at moderate `α` | Part 4 (Exp 11) |
 

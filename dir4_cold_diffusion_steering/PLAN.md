@@ -171,6 +171,14 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         88.3±2.2% @α=8 (per-seed 89/90/88/85/89%), 101.7±1.0% @α=4; seed 0 reproduces Exp 13 to the digit. KEY:
         medium band [86.1,90.5]% sits ENTIRELY ABOVE small's [81.3,85.3]% (Exp 26) — non-overlapping, so medium's
         ~5-point edge is a genuine model-scale effect, not a lucky seed. Seed axis now spans two model scales.
+- [x] S7(c) — SEED robustness on PYTHIA-410m / GPT-NeoX (Exp 28, 2026-07-09) DONE: extended the 5-seed control
+        past the GPT-2 family. The cross-ARCHITECTURE number (Exp 24) was single seed-0, and Pythia sits at the
+        LOW end of the 81–94% band (below both GPT-2 scales) — exactly where a single seed is most in doubt.
+        Re-ran the EXACT Exp-24 Pythia pipeline at 5 seeds (0–4). POSITIVE: recovery 80.8±1.6% @α=8 (per-seed
+        81/82/80/78/81%), 81.7±0.3% @α=4; D_M learned 80.8±6.6 vs raw 52.3 (decoupling every seed); seed 0
+        reproduces Exp 24 to the digit. KEY: Pythia band [79.2,82.4]% sits ENTIRELY BELOW medium's [86.1,90.5]%
+        (genuine gap) but OVERLAPS small's [81.3,85.3]% (Pythia≈small within seed noise). Recipe seed-stable on
+        a non-GPT-2 family; seed axis now spans two model scales AND two architectures.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -182,6 +190,31 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S7 SEED robustness on PYTHIA-410m / GPT-NeoX — Experiment 28 (new, 2026-07-09):** picked Exp 27's own Next
+check, the highest-value remaining rigor point. Exp 26/27 gave 5-seed CIs on two GPT-2 SCALES, but the
+cross-ARCHITECTURE number (Exp 24, Pythia) was still single seed-0 — and Pythia sits at the LOW end of the
+81–94% architecture band (below both GPT-2 scales), exactly where a single seed is most in doubt. Re-ran the
+EXACT Exp-24 Pythia pipeline (DiffMean sentiment |v|=3.29 at block 12/24, 400-doc Gaussian fit D_M=31.3, 300-doc
+train, held-out 100-doc eval, 5.25M corrector @ d=1024, recipe, α∼U(0.5,8)) at 5 seeds (0–4); raw ΔLM
+seed-independent. `experiments/28_seed_robustness_pythia.py` reuses the Exp-24 module functions verbatim,
+overriding `exp24.SEED` per run. POSITIVE: recovery **80.8±1.6% @α=8** (per-seed 81/82/80/78/81%), **81.7±0.3%
+@α=4**, 72.1±1.5% @α=2; ΔLM learned @α=8 +0.597±0.048 vs raw +3.103; D_M learned 80.8±6.6 vs raw 52.3 (decoupling
+every seed). Seed 0 reproduces Exp 24 to the digit (81%/81%). KEY: Pythia band [79.2,82.4]% sits ENTIRELY BELOW
+GPT-2 medium's [86.1,90.5]% (Exp 27, genuine gap) but OVERLAPS GPT-2 small's [81.3,85.3]% (Exp 26) — so
+Pythia≈small within seed noise at α=8, and the 81–94% band is real at its low end but is three seed-controlled
+points, not a hard pairwise ranking. Recipe seed-stable on a non-GPT-2 family; seed axis now spans two model
+scales AND two architectures. Also fixed a stale RESULTS.md Headline typo (GPT-2 medium α=8 std 2.0→2.2%, matches
+Exp-27 table/JSON). Limitation: varies only the training seed on Pythia (eval set/fit/vector fixed); Qwen3
+(Exp 21) + GPT-2 large (Exp 19) remain single-seed. No prior result superseded (Exp 28 additive; Exp 24's 81%
+confirmed representative). Artifacts: `experiments/28_seed_robustness_pythia.py`,
+`results/28_seed_robustness_pythia.json`, `results/28_run.log`, `plots/28_seed_robustness_pythia.png`. Curated
+RESULTS.md (Exp-28 section + table + figure + Headline architecture seed CI, Exp-27 Next-check marked done),
+REPORT_3 (Exp-28 Methods block + Results O/I/L/N subsection + Conclusion/open-items) + index (seed-robust row +
+Summary now all three scales/archs). CHANGELOG appended. REPORT math re-verified on the 2 touched files (REPORT_3
+9 / index 1 js-display-math, 0 broken, 0 inline hazards — reuses Exp 12's recovery equation, no new equation).
+ENV: `/opt/conda/bin/python` (transformers 5.13.0, torch 2.9 cu130, LOCAL disk); 5-seed Pythia run ~5 min.
+
+<!-- prior: S7 seed robustness Exp 27 -->
 **S7 SEED robustness on GPT-2 medium — Experiment 27 (new, 2026-07-09):** picked PLAN Next-step (i), the
 highest-value remaining rigor point. Exp 26 gave the FLAGSHIP (GPT-2-small) recovery a 5-seed CI, but the
 cross-MODEL number (Exp 13, GPT-2 medium) was still a single seed-0 run — so we could not say whether medium's
@@ -619,13 +652,14 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**S7 seed robustness DONE on TWO model scales (Exp 26 small + Exp 27 medium).** Seed CI now covers GPT-2 small
-(83.3±2.0% @α=8) AND GPT-2 medium (88.3±2.2% @α=8), non-overlapping bands → medium's model-scale edge is real,
-not seed noise. Success criterion long met; result robust on SEVEN axes (strength/direction/layer/model-scale/
-architecture/prompt-family/steering-family) PLUS seed on two scales. Only very-low-value optional points remain:
-(i) a 5-seed control on a cross-ARCHITECTURE model (Qwen3/Pythia) to test whether the 81–94% architecture band
-is within seed noise (Exp 27's own Next check) — modest value, both GPT-2 scales already show the recipe is
-seed-stable; (ii) a FURTHER architecture family (state-space/MoE) for a fuller sweep; (iii) finer λ_b + Exp-20
+**S7 seed robustness DONE on TWO model scales + TWO architectures (Exp 26 GPT-2 small + Exp 27 GPT-2 medium +
+Exp 28 Pythia/GPT-NeoX).** Seed CI now covers GPT-2 small (83.3±2.0% @α=8), GPT-2 medium (88.3±2.2%), and Pythia
+(80.8±1.6%): medium sits entirely above the other two (real model-scale edge), Pythia overlaps small (≈ within
+seed noise). Success criterion long met; result robust on SEVEN axes (strength/direction/layer/model-scale/
+architecture/prompt-family/steering-family) PLUS seed on two scales and two architectures. Only very-low-value
+optional points remain: (i) a 5-seed control on Qwen3 (the TOP of the 81–94% band, Exp 28's own Next check) to
+test whether its 94% edge is real or seed noise — modest value, the recipe is already shown seed-stable on three
+models; (ii) a FURTHER architecture family (state-space/MoE) for a fuller sweep; (iii) finer λ_b + Exp-20
 differentiable-generation ON Qwen3 (Exp 23's Next check); (iv) a 5-seed control on GPT-2 large (Exp 19). ENV: use
 `/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk, imports in seconds) — the dir9 `cupenv` on /mars-vol
 stalls ~30 min on cold imports under disk contention. Verify any REPORT edit with the GitHub-API math check on

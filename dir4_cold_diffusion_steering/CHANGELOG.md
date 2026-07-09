@@ -759,3 +759,34 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - **Ops:** ran with `/opt/conda/bin/python` (transformers 5.13.0, torch 2.9 cu130, LOCAL disk); 5-seed medium
   run completed in ~35 min. Artifacts: `experiments/27_seed_robustness_medium.py`,
   `results/27_seed_robustness_medium.json`, `results/27_run.log`, `plots/27_seed_robustness_medium.png`.
+
+## 2026-07-09 — Experiment 28: seed robustness on Pythia-410m / GPT-NeoX (error bar on the cross-architecture recovery)
+- **New result (additive; no prior number changed).** Extended the 5-seed control past the GPT-2 family to a
+  non-GPT-2 architecture. Re-ran the EXACT Exp-24 Pythia-410m pipeline (DiffMean sentiment vector |v|=3.29 at
+  block 12/24, 400-doc Gaussian fit clean D_M=31.3, 300-doc train / held-out 100-doc eval, 5.25M corrector @
+  d=1024, recipe, α∼U(0.5,8)) at 5 seeds (0–4). Raw ΔLM seed-independent (computed once); only the learned
+  corrector varies. `experiments/28_seed_robustness_pythia.py` reuses the Exp-24 module functions verbatim,
+  overriding `exp24.SEED` per run.
+- **Numbers:** recovery **80.8 ± 1.6% @α=8** (per-seed 81/82/80/78/81%), **81.7 ± 0.3% @α=4**, 72.1 ± 1.5%
+  @α=2; ΔLM learned @α=8 +0.597 ± 0.048 vs raw +3.103; `D_M` learned 80.8 ± 6.6 vs raw 52.3 @α=8 (decoupling
+  holds every seed). Seed 0 reproduces Exp 24 to the digit (81% @α=8/α=4).
+- **Key result:** the recipe is seed-stable on a THIRD, non-GPT-2 architecture. Pythia's α=8 band `[79.2, 82.4]%`
+  sits ENTIRELY BELOW GPT-2 medium's `[86.1, 90.5]%` (Exp 27) — a genuine gap, not seed noise — but OVERLAPS
+  GPT-2 small's `[81.3, 85.3]%` (Exp 26), so Pythia≈small within seed noise at α=8. The 81–94% architecture band
+  is real at its low end but is three seed-controlled points, not a hard pairwise ranking. Seed axis now spans
+  two model scales AND two architectures.
+- **Deliverables:** RESULTS.md gained the Exp-28 section + table + figure entry; the Headline architecture
+  sentence now carries Pythia's seed CI; Exp-27's "Next check" marked done. REPORT_3 gained an Exp-28 Methods
+  block + Results subsection (Observation/Interpretation/Limitations/Next check) + Exp-27 Next-check marked done;
+  Conclusion + open items updated (seed axis now two scales + two architectures). REPORT.md index: seed-robust
+  headline-table row + Summary now show all three (83.3/88.3/80.8%).
+- **Fix (unrelated to Exp 28, spotted while editing):** the Headline in RESULTS.md quoted GPT-2 medium's α=8
+  seed std as ± 2.0%; the Exp-27 table and JSON give ± 2.2%. Corrected 2.0 → 2.2.
+- **Verification:** GitHub-API math check on the 2 touched report files — REPORT_3 9 js-display-math (Exp 28
+  adds a table + O/I/L/N prose, reuses Exp 12's recovery equation, no new equation), index 1; 0 broken
+  (`<pre lang=math>`), 0 inline hazards.
+- **Limitation:** varies only the training seed on Pythia (init + α-sampling/data-shuffle RNG); eval set,
+  Gaussian fit, and vector fixed. Qwen3 (Exp 21) and GPT-2 large (Exp 19) remain single-seed.
+- **Ops:** ran with `/opt/conda/bin/python` (transformers 5.13.0, torch 2.9 cu130, LOCAL disk); 5-seed Pythia
+  run completed in ~5 min (training ~15 s/seed). Artifacts: `experiments/28_seed_robustness_pythia.py`,
+  `results/28_seed_robustness_pythia.json`, `results/28_run.log`, `plots/28_seed_robustness_pythia.png`.

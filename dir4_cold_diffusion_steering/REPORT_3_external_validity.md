@@ -264,6 +264,18 @@ at **five seeds (`0–4`)**. As in Experiment 26, `ΔLM_raw(α)` is seed-indepen
 learned corrector varies; we report mean ± sample standard deviation of the fluency recovery. Seed 0 re-runs
 Experiment 13 exactly and is the built-in reproducibility check.
 
+### Seed robustness on Pythia-410m / GPT-NeoX (Experiment 28)
+
+Experiments 26/27 put error bars on two GPT-2 *scales*, but the *architecture* axis (Qwen3 Exp 21, Pythia
+Exp 24; the 81–94% band) was still single-seed. Pythia sits at the *low* end of that band (81% @α=8, below
+both GPT-2 scales), so its position is exactly where a single-seed run is most in doubt. Experiment 28 puts the
+same five-seed control on the **exact Experiment-24 Pythia-410m pipeline** — same DiffMean sentiment vector at
+block 12/24 (`|v| = 3.29`), same 400-document Gaussian fit, same 300-document training set, same held-out
+100-document eval, same 5.25M projection-preserving corrector at `d = 1024`, same recipe and `α ∼ U(0.5, 8)` —
+at **five seeds (`0–4`)**. As in Experiments 26/27, `ΔLM_raw(α)` is seed-independent (computed once); only the
+learned corrector varies; we report mean ± sample standard deviation of the fluency recovery. Seed 0 re-runs
+Experiment 24 exactly and is the built-in reproducibility check.
+
 ## Results
 
 ### Experiment 12 — the fluency result replicates across layers (not a block-6 artifact)
@@ -552,7 +564,41 @@ over eval text or vector construction. GPT-2 large (Experiment 19) and the cross
 (Experiments 21/24) remain single-seed.
 
 **Next check.** A five-seed control on a cross-*architecture* model (Qwen3 or Pythia) would put error bars past
-the GPT-2 family and test whether the 81–94% architecture band is within seed noise.
+the GPT-2 family and test whether the 81–94% architecture band is within seed noise. *Done in Experiment 28.*
+
+### Experiment 28 — the cross-architecture recovery is stable across seeds
+
+![seed robustness on Pythia-410m](plots/28_seed_robustness_pythia.png)
+
+Five independently-trained correctors (seeds 0–4), the exact Pythia-410m / GPT-NeoX pipeline, mean ± sample standard deviation:
+
+| α | ΔLM raw (nats) | ΔLM learned (mean ± sd) | recovery (mean ± sd) | `D_M` raw | `D_M` learned (mean ± sd) |
+|---|----------------|--------------------------|----------------------|-----------|----------------------------|
+| 1 | +0.059 | +0.033 ± 0.006 | 44.0 ± 10.7% | 31.8 | 36.1 ± 0.5 |
+| 2 | +0.231 | +0.064 ± 0.003 | 72.1 ± 1.5% | 33.1 | 39.2 ± 0.5 |
+| 4 | +0.948 | **+0.174 ± 0.003** | **81.7 ± 0.3%** | 37.7 | 50.4 ± 1.8 |
+| 8 | +3.103 | **+0.597 ± 0.048** | **80.8 ± 1.6%** | 52.3 | 80.8 ± 6.6 |
+
+Per-seed recovery at α=8: 81 / 82 / 80 / 78 / 81% (Experiment 24's 81% is seed 0's 81%).
+
+**Observation.** At α=8 the five Pythia correctors recover **80.8 ± 1.6%** of raw steering's fluency damage
+(range 78–82%), tightening to **81.7 ± 0.3%** at α=4. The corrected activation sits *further* off the Gaussian
+manifold than raw at every seed (`D_M` 80.8 ± 6.6 vs raw 52.3 at α=8). Seed 0 reproduces Experiment 24 to the digit.
+
+**Interpretation.** The recipe is **seed-stable on a third, non-GPT-2 architecture** — the corrector's advantage
+over raw is many times its seed-to-seed spread at every strength that matters. Placing all three α=8 bands side
+by side puts the architecture *ordering* on a controlled footing: Pythia's band `[79.2, 82.4]%` sits **entirely
+below** GPT-2 medium's `[86.1, 90.5]%` (a genuine gap, not seed noise) but **overlaps** GPT-2 small's
+`[81.3, 85.3]%`, so Pythia and small are within seed noise of each other at α=8. The 81–94% architecture band is
+therefore real at its low end but should be read as three seed-controlled points, not a hard ranking of every pair.
+
+**Limitations.** As in Experiments 26/27, this varies only the *training* seed; the eval documents, Gaussian
+fit, and steering vector are held fixed, so it bounds optimization variance on Pythia, not sampling variance
+over eval text or vector construction. The other non-GPT-2 architecture (Qwen3, Experiment 21) and GPT-2 large
+(Experiment 19) remain single-seed.
+
+**Next check.** A five-seed control on Qwen3 (the *top* of the 81–94% band) would test whether its higher
+recovery is likewise real or seed noise, completing the seed control across the full architecture sweep.
 
 ## Conclusion
 
@@ -560,6 +606,6 @@ The core fluency result survives every external-validity axis we tested. It is *
 
 The result is also **prompt-family-robust** (a FineWeb-trained corrector recovers 77% on held-out technical prose and 60% on out-of-distribution code at α=8, degrading smoothly with the family's clean-activation drift off the FineWeb manifold) and **steering-vector-family-robust** (DiffMean, a logistic-regression probe, and PCA-contrast built from real SST-2 data all recover 84–101% at α=8, even though the directions differ at cosines of 1.00 / 0.40 / 0.30). Across every axis the Experiment-2/3 decoupling reappears: the corrected activation sits *further* off the Gaussian manifold than raw steering, so "LM-safe but off-Gaussian" is a general property of the learned correction rather than a quirk of one setup — and the PCA family shows the two can be fully decoupled, since steering on-manifold still breaks the LM.
 
-Finally, the result is **seed-robust**: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27), and the seed axis now spans two model scales.
+Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The seed axis now spans two model scales and two architectures.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; the seed control has been run on two GPT-2 scales (small, medium) but not on GPT-2 large or on any cross-architecture model, so each remaining cross-architecture check is still a single concept, seed, and mid layer. These are the natural next extensions for the external-validity story.
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; the seed control has been run on GPT-2 small, GPT-2 medium, and Pythia, but not on GPT-2 large or on Qwen3 (the top of the 81–94% band), so those checks remain single-seed. These are the natural next extensions for the external-validity story.
