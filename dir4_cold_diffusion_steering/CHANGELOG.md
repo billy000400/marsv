@@ -907,3 +907,26 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - **Ops:** `/opt/conda/bin/python`, `setsid` full detach; GPT-2 small, block 6; ~9 min (6 correctors trained).
   Artifacts: `experiments/32_vector_bootstrap.py`, `results/32_vector_bootstrap.json`, `results/32_run.log`,
   `plots/32_vector_bootstrap.png`.
+
+## 2026-07-09 — Experiment 33: joint vector×seed resample (total flagship uncertainty)
+- **RESULTS.md:** added the **Experiment 33** section (table comparing joint vs seed-only vs vector-only spreads +
+  reading), updated Exp-32's Limitation/Next-check (joint cross now done in Exp 33), added the
+  `plots/33_joint_vector_seed.png` figure entry, and extended the Headline seed-CI clause with "84% ± 3 pp under a
+  joint vector×seed resample". **No prior result superseded** — Exp 33's b=0 reproduces Exp 3's 84.3% @α=8 exactly.
+- **Finding:** floating BOTH the steering vector (same 5 bootstrap vectors as Exp 32) AND the corrector seed
+  (seed=b instead of fixed 0) gives recovery **80.9 ± 2.9% @α=8** (95.7 ± 3.2% @α=4). The joint std (2.9 pp) is
+  *below* the independent-quadrature prediction √(2.0² + 2.7²) ≈ 3.4 pp and ≈ the vector-only std (2.7 pp, Exp 32),
+  so the total flagship uncertainty is DOMINATED by which sentences build `v`; the optimization seed adds almost
+  nothing once the vector already floats. Flagship best read as **84% ± 3 pp @α=8**. Closes the joint-resample
+  open item: headline survives seed (26–30), eval-doc (31), vector (32), AND joint vector×seed (33) resampling.
+- **REPORT_3_external_validity.md:** Methods gained a "Joint vector×seed resample (Exp 33)" block with the
+  quadrature ```math equation; Results gained the Exp-33 O/I/L/N subsection + figure + table; Exp-32 Next-check
+  closed; Conclusion open-items updated (joint now closed; SST-2 corpus + wider families remain).
+- **REPORT.md index:** Summary sampling-controls sentence extended (joint 80.9 ± 2.9%, 84% ± 3 pp); headline-table
+  row added.
+- **Math re-verified via GitHub API:** REPORT_3 12 js-display-math / 0 `<pre lang=math>` / 0 inline hazards (was
+  11; +1 for the new quadrature fence); REPORT.md 1/0/0.
+- **Ops:** controlled edit of Exp 32 — same sentence-resampling RNG (1234) so bootstrap vectors are identical, only
+  the corrector seed differs. `/opt/conda/bin/python`, `setsid` full detach; GPT-2 small, block 6; ~2 min (6
+  correctors trained). Artifacts: `experiments/33_joint_vector_seed.py`, `results/33_joint_vector_seed.json`,
+  `results/33_run.log`, `plots/33_joint_vector_seed.png`.

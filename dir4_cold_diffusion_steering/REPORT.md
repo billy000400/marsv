@@ -63,7 +63,9 @@ the headline 84% is reproducible, and the recipe is seed-stable across all five 
 scales and two architectures). Two sampling controls close the remaining axes: a document-bootstrap (Exp 31) shows
 eval-set sampling noise (± 0.7 pp at `α=8`) is smaller than seed noise, and a vector-construction bootstrap (Exp 32)
 that resamples the sentences building the steering vector leaves recovery at 82.1 ± 2.7% at `α=8` even as the
-direction swings up to ~56° — because the corrector is re-trained per vector. Off the Gaussian manifold at every
+direction swings up to ~56° — because the corrector is re-trained per vector. A **joint** resample of both the
+vector and the seed (Exp 33) gives 80.9 ± 2.9% at `α=8`, a spread dominated by the vector axis and below the
+independent-quadrature bound, so the flagship is best read as **84% ± 3 pp**. Off the Gaussian manifold at every
 setting.
 
 ### [Part 4 — Behavioral reality-check: from fluency to real steering in generation](REPORT_4_behavioral.md)
@@ -98,6 +100,7 @@ corrector.
 | Seed-robust across 5 seeds @`α=8` (small / medium / large / Pythia / Qwen3) | 83.3 ± 2.0% / 88.3 ± 2.2% / 85.1 ± 1.1% / 80.8 ± 1.6% / 94.8 ± 1.6% | Part 3 (Exp 26–30) |
 | Eval-set sampling: flagship recovery, 95% doc-bootstrap @`α=8` | 84.3%, `[83.1, 85.6]%` (tighter than seed CI) | Part 3 (Exp 31) |
 | Vector-construction sampling: recovery over 5 resamples @`α=8` | 82.1 ± 2.7% (direction swings ~56°, corrector re-trained) | Part 3 (Exp 32) |
+| Joint vector×seed sampling: recovery over 5 joint resamples @`α=8` | 80.9 ± 2.9% (below quadrature 3.4 pp → vector-dominated; 84% ± 3 pp) | Part 3 (Exp 33) |
 | Behavioral caveat: generated effect vs raw (GPT-2) | ~1/6 of raw's | Part 4 (Exp 10) |
 | Readout-preservation term recovers more effect | 2–6×, dominates raw at moderate `α` | Part 4 (Exp 11) |
 

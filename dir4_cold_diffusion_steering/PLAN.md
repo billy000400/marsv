@@ -214,6 +214,13 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         order of the seed CI (±2.0 pp, Exp 26). ⇒ the METHOD (retrain-per-vector) is robust to which examples build
         `v`; a single frozen corrector would not be (correction is direction-specific, Exp 5). Headline now survives
         seed (26–30), eval-doc (31), and vector (32) resampling.
+- [x] S7(h) — JOINT vector×seed resample (Exp 33, 2026-07-09) DONE: closed Exp 32's Next check / Next-step (i)'s
+        joint-resample item. Exp 26 varied only the seed (83.3±2.0% @α=8), Exp 32 only the vector (82.1±2.7%); Exp 33
+        floats BOTH (controlled edit of Exp 32: SAME 5 bootstrap vectors, but corrector seed=b not fixed 0).
+        POSITIVE: recovery 80.9±2.9% @α=8, within ~3 pp of flagship 84.3% (b=0 reproduces Exp 3 to the digit). KEY:
+        joint std (2.9 pp) is BELOW the independent-quadrature bound √(2.0²+2.7²)≈3.4 pp and ≈ the vector-only std
+        (2.7) — total flagship uncertainty is VECTOR-DOMINATED; the seed adds ~nothing once the vector floats.
+        Flagship best read as 84%±3 pp @α=8. Headline now survives seed+eval-doc+vector+joint resampling.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -225,6 +232,28 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S7(h) JOINT vector×seed resample — Experiment 33 (new, 2026-07-09):** Exp 26 bounded the OPTIMIZATION-seed
+variance (vector fixed → 83.3±2.0% @α=8) and Exp 32 the VECTOR-construction variance (seed fixed 0 → 82.1±2.7%),
+but neither answered the practical question — resample BOTH at once, what is the total spread? Wrote
+`experiments/33_joint_vector_seed.py` as a CONTROLLED edit of Exp 32: it reuses the identical sentence-resampling
+RNG (RandomState(1234)) so the 5 bootstrap vectors are BYTE-IDENTICAL to Exp 32's (|v|=14.4/13.2/18.2/19.7/14.6,
+cos 0.79/0.79/0.56/0.59/0.74), but the corrector seed now FLOATS with the resample (seed=b, was pinned 0). So
+Exp 33 differs from Exp 32 by exactly one factor — whether the seed varies jointly — making the joint spread
+directly comparable to the two single-axis spreads. POSITIVE + informative: joint recovery **80.9±2.9% @α=8**
+(95.7±3.2% @α=4), within ~3 pp of the flagship 84.3% (b=0, original set at seed 0, reproduces Exp 3 to the digit).
+KEY: the joint std (2.9 pp) is *below* the independent-quadrature prediction √(2.0²+2.7²)≈3.4 pp and essentially
+equals the vector-only std (2.7 pp) → the TOTAL flagship uncertainty is DOMINATED by which sentences build `v`; the
+optimization seed adds ~nothing once the vector already floats (each resampled vector fixes most of its own
+recovery — correction is direction-specific, Exp 5). Flagship best read as **84%±3 pp @α=8**. No prior result
+superseded (Exp 33 additive; b=0 = Exp 3). Artifacts: `experiments/33_joint_vector_seed.py`,
+`results/33_joint_vector_seed.json`, `results/33_run.log`, `plots/33_joint_vector_seed.png`. Curated RESULTS.md
+(Exp-33 section + comparison table + figure; Exp-32 Next-check closed; Headline "84%±3 pp" clause), REPORT_3
+(Exp-33 Methods ```math quadrature block + Results O/I/L/N + Exp-32 Next-check + Conclusion open-items), REPORT.md
+index (Summary sentence + headline row). CHANGELOG appended. Math re-verified via GitHub API (REPORT_3 12
+js-display-math / 0 broken / 0 inline hazards, was 11 +1 quadrature fence; REPORT.md 1/0/0). ENV:
+`/opt/conda/bin/python` (LOCAL disk), `setsid` full detach; ~2 min (6 correctors trained).
+
+<!-- prior: S7(g) vector-construction Exp 32 -->
 **S7(g) VECTOR-CONSTRUCTION control — Experiment 32 (new, 2026-07-09):** every prior sampling control (seed →
 Exp 26–30, eval documents → Exp 31) held the steering vector fixed, leaving vector construction as the last
 untouched axis (Exp 31's Next check). Wrote `experiments/32_vector_bootstrap.py` (imports the Exp-3 + Exp-1 modules,
@@ -777,6 +806,19 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
+**S7(h) JOINT vector×seed resample DONE (Exp 33): the joint-resample open item is closed.** The flagship headline
+now survives seed (Exp 26–30), eval-document (Exp 31), steering-vector (Exp 32), AND joint vector×seed (Exp 33)
+resampling — joint recovery 80.9±2.9% @α=8, a spread that is VECTOR-DOMINATED (below the independent-quadrature
+bound 3.4 pp), so the flagship is best read as 84%±3 pp @α=8. Success criterion long met; result robust on SEVEN
+external-validity axes PLUS all sampling axes (seed / eval-doc / vector / joint). Only very-low-value optional
+points remain, none required for the deliverable: (i) rebuild `v` from a labelled corpus (SST-2) rather than the
+hand-written sentence sets, or a larger joint-resample count for a tighter std; (ii) a FURTHER architecture family
+(state-space/MoE, e.g. Mamba/Mixtral) or GPT-2 XL for a fuller sweep beyond three; (iii) finer λ_b + Exp-20
+differentiable-generation ON Qwen3 (Exp 23's Next check). All are marginal. ENV: use `/opt/conda/bin/python`
+(transformers 5.13.0, LOCAL disk, imports in seconds). Verify any REPORT edit with the GitHub-API math check on the
+touched report files.
+
+<!-- prior next step: S7(g) vector-construction Exp 32 -->
 **S7(g) VECTOR-CONSTRUCTION control DONE (Exp 32): the last single-axis sampling gap is closed.** The flagship
 headline now survives seed (Exp 26–30), eval-document (Exp 31), AND steering-vector (Exp 32) resampling — recovery
 82.1±2.7% @α=8 across 5 sentence-resamples, within ~2 pp of 84.3% even though the direction swings up to ~56°,

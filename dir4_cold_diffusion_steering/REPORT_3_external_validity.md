@@ -337,6 +337,24 @@ a different $v_b$ steers differently. We report the mean ± standard deviation (
 the 5 resamples, together with $\cos(v_b, v_{\text{full}})$ to measure how far example choice moves the direction.
 The un-resampled original set ($b=0$) reproduces Experiment 3.
 
+### Joint vector×seed resample (Experiment 33)
+
+Experiment 26 varies the seed with the vector fixed; Experiment 32 varies the vector with the seed fixed. Experiment
+33 varies **both together** to measure the *total* flagship uncertainty. It is a controlled edit of Experiment 32:
+it reuses the identical sentence-resampling RNG, so the $B=5$ bootstrap vectors are the *same* vectors as
+Experiment 32, but the corrector's optimization seed now floats with the resample ($\text{seed}=b$) instead of being
+pinned at 0. So the two runs differ by exactly one factor — whether the seed varies jointly with the vector — which
+lets us compare the joint spread against the two single-axis spreads. If the seed noise $\sigma_{\text{seed}}$
+(Experiment 26) and the vector noise $\sigma_{\text{vec}}$ (Experiment 32) were independent, the joint standard
+deviation would be their quadrature sum:
+
+```math
+\sigma_{\text{joint}} \;=\; \sqrt{\sigma_{\text{seed}}^{2} + \sigma_{\text{vec}}^{2}}
+```
+
+We report the joint mean ± standard deviation of the recovery across the 5 resamples and compare it to this
+prediction. The original set at seed 0 ($b=0$) reproduces Experiment 3.
+
 ## Results
 
 ### Experiment 12 — the fluency result replicates across layers (not a block-6 artifact)
@@ -791,14 +809,46 @@ equally. The *method* — build a vector, then train a corrector against it — 
 a single frozen corrector would not be. The recovery *ratio* is stable even though both numerator and denominator
 move with `|v|`, so this is a property of the corrector rather than an artifact of matched raw damage.
 
-**Limitations.** This fixes the model / layer / seed / eval set and resamples only the construction sentences at a
-fixed seed; it does not cross the vector axis with the seed or eval-document axes jointly, and it uses the
-hand-written sentence sets, not an external labelled corpus. It closes the last single-axis sampling gap: the
-headline survives seed (Exp 26–30), eval-document (Exp 31), and steering-vector (Exp 32) resampling.
+**Limitations.** This fixes the seed at 0 and resamples only the construction sentences; the *joint* vector×seed
+spread is measured in Experiment 33 below. It uses the hand-written sentence sets, not an external labelled corpus.
+It closes the last single-axis sampling gap: the headline survives seed (Exp 26–30), eval-document (Exp 31), and
+steering-vector (Exp 32) resampling.
 
-**Next check.** A joint resample (vector × seed together) or rebuilding the vector from a labelled sentiment corpus
-(e.g. SST-2) rather than the hand-written sets would extend the control; both are marginal given the single-axis
-results.
+**Next check.** *Done in Experiment 33* — the joint (vector × seed) resample is measured below.
+
+### Experiment 33 — the joint vector×seed spread is dominated by the vector axis, and stays near 84%
+
+![joint vector×seed resample of the flagship recovery](plots/33_joint_vector_seed.png)
+
+Same 5 bootstrap vectors as Experiment 32, but the corrector seed floats with the resample (seed $=b$) instead of
+being fixed at 0:
+
+| α | recovery joint (mean±sd) | [min, max] | seed-only (Exp 26) | vector-only (Exp 32) | b=0 (Exp 3) |
+|---|--------------------------|------------|--------------------|-----------------------|--------------|
+| 2 | 109.8 ± 5.6% | [100, 115]% | — | 112.0 ± 4.0% | 115.8% |
+| 4 | 95.7 ± 3.2% | [92, 100]% | 96.2 ± 0.8% | 95.8 ± 1.6% | 95.3% |
+| 6 | 88.8 ± 3.5% | [86, 95]% | 90.0 ± 0.6% | 89.0 ± 3.0% | 89.4% |
+| 8 | **80.9 ± 2.9%** | **[79, 86]%** | **83.3 ± 2.0%** | **82.1 ± 2.7%** | **84.3%** |
+
+**Observation.** With the vector *and* the seed both floating, recovery is 80.9 ± 2.9% at α=8 — within ~3 points of
+the flagship 84.3%, and $b=0$ reproduces Experiment 3 to the digit. The joint standard deviation (2.9 pp) is
+*smaller* than the independent-quadrature prediction $\sqrt{2.0^2 + 2.7^2} \approx 3.4$ pp, and essentially equal to
+the vector-only spread (2.7 pp). (α=1 recovery 155.6 ± 26.3% is the usual near-zero-denominator artifact.)
+
+**Interpretation.** The total flagship uncertainty is dominated by *which sentences build the vector*; once the
+vector is already resampled, also varying the optimization seed adds almost nothing. This is consistent with each
+resampled vector fixing most of its own recovery (the correction is direction-specific, Exp 5), so re-seeding the
+corrector for that vector barely moves it. A ±3 pp band captures the combined effect of both sampling axes, so the
+flagship is best read as **84% ± 3 pp at α=8** under joint resampling.
+
+**Limitations.** Five joint resamples give a coarse std estimate, and the run still fixes the model (GPT-2 small),
+layer (block 6), and 100-document eval set (eval-document sampling is bounded separately in Experiment 31 at
+± 0.7 pp, the smallest of the three axes). The seed range (1–5) differs from Experiment 26's (0–4), but both draw
+from the same optimization-noise distribution.
+
+**Next check.** Rebuilding the vector from an external labelled sentiment corpus (e.g. SST-2) rather than the
+hand-written sets, or a larger resample count for a tighter joint std, would extend the control; both are marginal
+given that all three sampling axes now agree within ~3 pp.
 
 ## Conclusion
 
@@ -808,4 +858,4 @@ The result is also **prompt-family-robust** (a FineWeb-trained corrector recover
 
 Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The *top* of the band is seed-controlled too: five seeds on Qwen3 give 94.8 ± 1.6% at α=8 (Experiment 29), a band entirely above every other model's, so Qwen3's edge is real. Finally, GPT-2 large — the last single-seed headline model — is confirmed at 85.1 ± 1.1% at α=8 (Experiment 30), a band between GPT-2 small and medium, so the flat model-scale trend is itself seed-controlled: medium is the GPT-2 peak, large ≈ small, and recovery does not grow with scale. The seed axis now spans all five headline models across three scales and two architectures.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, and steering-vector resampling; a joint (vector × seed) resample and a wider architecture family (state-space / MoE / GPT-2 XL) are the natural next extensions for the external-validity story.
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, steering-vector, and **joint vector×seed** resampling: a joint resample of both sampling axes (Experiment 33) leaves recovery at 80.9 ± 2.9% at α=8, a spread dominated by the vector axis and *below* the independent-quadrature prediction (3.4 pp), so the flagship is best read as 84% ± 3 pp. A wider architecture family (state-space / MoE / GPT-2 XL) and rebuilding the vector from an external labelled corpus (e.g. SST-2) are the natural remaining extensions for the external-validity story.

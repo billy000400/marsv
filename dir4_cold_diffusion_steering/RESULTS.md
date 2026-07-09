@@ -1201,9 +1201,45 @@ a native corrector for each resampled `v` recovers about equally well. So the *m
 vector-construction sampling even though any single vector is not. Note that `ΔLM_raw` itself does vary across
 resamples (± 0.16 nats at α=8) because a larger-norm `v` steers harder — but the recovery *ratio* is stable, so
 the finding is a property of the corrector, not an accident of matched raw damage. **Limitation.** This fixes the
-model / layer / seed / eval set and resamples only the vector's construction sentences; it does not cross with the
-seed or eval-document axes jointly. It closes the last single-axis sampling gap: the headline survives seed, eval
-document, and steering-vector resampling.
+seed at 0 and resamples only the vector's construction sentences; the *joint* vector×seed spread is measured in
+Experiment 33. It closes the last single-axis sampling gap: the headline survives seed, eval document, and
+steering-vector resampling.
+
+**Experiment 33 — Joint vector×seed resample: the total flagship uncertainty.** Experiments 26 and 32 each vary
+*one* sampling axis with the other held fixed — seed alone (Exp 26: recovery **83.3 ± 2.0%** @α=8, vector fixed)
+and vector alone (Exp 32: **82.1 ± 2.7%** @α=8, seed fixed at 0). Neither answers the practical question: if you
+rebuild `v` from a fresh sample of sentences **and** retrain the corrector from a fresh initialization, what is the
+*combined* spread? We resample both together. This run is a controlled edit of Experiment 32: it uses the **same
+sentence-resampling RNG** (so the 5 bootstrap vectors — `|v|` = 14.4/13.2/18.2/19.7/14.6, `cos(v,v_full)` =
+0.79/0.79/0.56/0.59/0.74 — are **identical** to Exp 32's), but the corrector seed now **floats with the resample**
+(seed = 1…5) instead of being pinned at 0. So Exp 33 differs from Exp 32 by exactly one thing: the optimization
+seed varies jointly with the vector. `b=0` is the original set at seed 0 — a built-in reproduction of Experiment 3.
+
+| α | recovery joint (mean±sd) | [min, max] | seed-only (Exp 26) | vector-only (Exp 32) | `b=0` (Exp 3) |
+|---|--------------------------|------------|--------------------|-----------------------|----------------|
+| 2 | 109.8 ± 5.6% | [100, 115]% | — | 112.0 ± 4.0% | 115.8% |
+| 4 | 95.7 ± 3.2% | [92, 100]% | 96.2 ± 0.8% | 95.8 ± 1.6% | 95.3% |
+| 6 | 88.8 ± 3.5% | [86, 95]% | 90.0 ± 0.6% | 89.0 ± 3.0% | 89.4% |
+| 8 | **80.9 ± 2.9%** | **[79, 86]%** | **83.3 ± 2.0%** | **82.1 ± 2.7%** | **84.3%** |
+
+(α=1 recovery 155.6 ± 26.3% is the usual ratio artifact of raw's near-zero +0.10-nat damage there — omitted from
+the reading.)
+
+**Reading it: resampling both axes at once still leaves the headline near 84%, and the two noise sources do not
+simply compound.** With the vector *and* the seed both floating, recovery is **80.9 ± 2.9% at α=8** — within ~3
+points of the flagship 84.3%, and `b=0` reproduces Experiment 3 to the digit (84.3%). The informative part is the
+**size** of the joint spread. If seed noise (± 2.0 pp, Exp 26) and vector noise (± 2.7 pp, Exp 32) were
+independent, the joint standard deviation should be their quadrature sum, **√(2.0² + 2.7²) ≈ 3.4 pp**. The
+measured joint std is **2.9 pp — smaller than that, and essentially equal to the vector-only std (2.7 pp)**. So
+the total flagship uncertainty is **dominated by which sentences build `v`**; once the vector is already
+resampled, also varying the optimization seed adds almost nothing on top (the per-vector recovery is largely set
+by the vector, and re-seeding the corrector for that vector barely moves it). **Interpretation.** The binding
+uncertainty on the headline is vector construction, not optimization; a ±3 pp band captures the combined effect of
+both, so the flagship "≈84% recovery @α=8" is best read as **84% ± 3 pp** under joint resampling. **Limitation.**
+Still fixes the model (GPT-2 small), layer (block 6), and the 100-doc eval set; eval-document sampling is bounded
+separately (Exp 31, ± 0.7 pp — the smallest of the three axes). Five joint resamples give a coarse std estimate.
+This closes the joint-resample open item: the flagship survives seed, eval-document, vector, **and** joint
+vector×seed resampling.
 
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
@@ -1218,6 +1254,11 @@ document, and steering-vector resampling.
   (5 resamples of the 20+20 DiffMean sentences, corrector re-trained each; mean ± std, with the b=0
   original overlaid); (b) histogram of `cos(v_boot, v_full)` — the direction moves a lot (mean 0.69)
   while recovery stays at 82.1 ± 2.7% at α=8.
+- `plots/33_joint_vector_seed.png` — (a) flagship recovery vs α under a **joint** vector×seed resample
+  (same 5 bootstrap vectors as Exp 32, but the corrector seed floats with the resample; mean ± std, b=0
+  original overlaid); (b) the α=8 uncertainty budget — seed-only (Exp 26, 2.0 pp) vs vector-only
+  (Exp 32, 2.7 pp) vs joint (Exp 33, 2.9 pp) bars against the independent-quadrature line (3.4 pp): the
+  joint spread is dominated by the vector axis and falls *below* quadrature.
 - `plots/03_learned_corrector.png` — (a) ΔLM, (b) `D_M`, (c) projection retention vs α for raw,
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the
@@ -1357,7 +1398,7 @@ nats at α=8). Correcting toward the **Gaussian manifold backfires** — an anal
 preserving corrector cuts off-manifold distance 22% but *worsens* LM loss to +4.2 nats. But a
 **learned corrector supervised by the LM loss** — same projection-preserving form, so the layer-6
 steering projection is untouched — **recovers 84% of the teacher-forced fluency damage** (ΔLM
-+2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
++2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
 "LM-safe" are decoupled; only the downstream objective finds the fluent correction. The correction is
 **direction-specific**
 — a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe

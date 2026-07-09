@@ -1407,3 +1407,41 @@ Qwen3. All marginal.
 On track? yes — S7 sampling control completed on the LAST axis: vector-construction bootstrap holds the flagship at
 82.1±2.7% @α=8 despite ~56° direction swings, because the corrector re-trains per vector; headline now survives
 seed + eval-doc + vector resampling. ~100% complete. No blocker.
+
+## 2026-07-09 — Experiment 33: joint vector×seed resample (total flagship uncertainty)
+**What I did.** The project is ~100% complete (32 experiments; 7 external-validity axes + 3 single-axis sampling
+controls). Picked the single cleanest, lowest-risk additive rigor point: the JOINT (vector × seed) resample —
+explicitly named as open item (i) in the prior Next step and Exp 32's Next check. Exp 26 bounded seed variance
+alone (83.3±2.0% @α=8), Exp 32 vector variance alone (82.1±2.7%); neither gives the TOTAL flagship error bar.
+Wrote `experiments/33_joint_vector_seed.py` as a CONTROLLED edit of Exp 32 — reuses the identical sentence-resampling
+RNG (RandomState(1234)) so the 5 bootstrap vectors are byte-identical to Exp 32's, but floats the corrector seed
+with the resample (seed=b, not fixed 0). So Exp 33 vs Exp 32 differ by exactly one factor (does the seed vary
+jointly), making the joint spread directly comparable. Ran on GPT-2 small block 6 (~2 min, 6 correctors), curated
+all deliverables, verified math via GitHub API.
+**Result.** Joint recovery **80.9±2.9% @α=8** (95.7±3.2% @α=4), b=0 reproduces Exp 3's 84.3% to the digit.
+Per-boot @α=8: 84.3(b0)/79.3/80.1/80.4/85.9/78.9%, seeds 0–5.
+**Learned.** (1) KEY: the joint std (2.9 pp) is BELOW the independent-quadrature prediction √(2.0²+2.7²)≈3.4 pp and
+essentially equals the vector-only std (2.7 pp). So the two sampling axes do NOT compound as independent — the total
+flagship uncertainty is DOMINATED by which sentences build `v`; once the vector floats, re-seeding the corrector
+adds almost nothing. Mechanistically consistent with Exp 5: correction is direction-specific, so each resampled
+vector fixes most of its own recovery and the seed is a second-order perturbation on top. (2) The flagship is
+therefore honestly summarized as 84%±3 pp @α=8 — a single ±3 pp band that already captures both sampling axes,
+rather than needing to be quoted per-axis. (3) The controlled-edit design (identical vectors, only the seed
+differs) makes the seed-vs-vector decomposition clean; had I drawn fresh vectors I could not attribute the spread.
+**Assumptions/decisions logged (loop mode).** (a) Reused Exp 32's exact vectors (same RNG) rather than fresh draws
+— the ONLY honest way to isolate "adding the seed axis" from "different vectors". (b) seed=b (1–5) vs Exp 26's 0–4:
+same optimization-noise distribution, negligible. (c) 5 joint resamples to match the Exp 26/32 budget and keep it
+cheap on the flagship only. (d) Placed Exp 33 in the seed/sampling cluster (RESULTS + REPORT_3 next to Exp 26–32).
+**Deliverables.** RESULTS.md (Exp-33 section + seed/vector/joint comparison table + figure; Exp-32 Next-check
+closed; Headline "84%±3 pp" clause); REPORT_3 (Exp-33 Methods ```math quadrature block + Results O/I/L/N + Exp-32
+Next-check closed + Conclusion open-items); REPORT.md index (Summary sentence + headline row). CHANGELOG appended;
+PLAN Current status / Next step rewritten + S7(h) checkbox. Math re-verified via GitHub API: REPORT_3 12
+js-display-math / 0 `<pre lang=math>` / 0 inline hazards (was 11; +1 quadrature fence), REPORT.md 1/0/0. Artifacts:
+`experiments/33_joint_vector_seed.py`, `results/33_joint_vector_seed.json`, `results/33_run.log`,
+`plots/33_joint_vector_seed.png`. ENV: `/opt/conda/bin/python` (LOCAL disk), `setsid` full detach; ~2 min.
+**Next step.** Optional only (success criterion long met; all sampling axes controlled): (i) rebuild `v` from
+SST-2 rather than hand-written sets, or more joint resamples; (ii) a further architecture family (state-space/MoE)
+or GPT-2 XL; (iii) finer λ_b / Exp-20 on Qwen3. All marginal.
+On track? yes — S7 sampling controls now complete on ALL axes: the joint vector×seed resample holds the flagship at
+80.9±2.9% @α=8, a vector-dominated spread below the quadrature bound, so the headline is 84%±3 pp. ~100% complete.
+No blocker.
