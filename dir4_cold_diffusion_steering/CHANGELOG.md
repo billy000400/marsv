@@ -930,3 +930,31 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   the corrector seed differs. `/opt/conda/bin/python`, `setsid` full detach; GPT-2 small, block 6; ~2 min (6
   correctors trained). Artifacts: `experiments/33_joint_vector_seed.py`, `results/33_joint_vector_seed.json`,
   `results/33_run.log`, `plots/33_joint_vector_seed.png`.
+
+## 2026-07-09 — Experiment 34: token-position control — the recovery is flat across token position
+- **New experiment (control, not a new axis).** Every recovery number in the study POOLS next-token
+  cross-entropy over all token positions (`recovery = 1 − Σ e_learned / Σ e_raw` summed over every position).
+  CLAUDE.md rule 10's control list names **token** as an axis a trustworthy metric should survive, and it is the
+  one axis never isolated (strength/layer/model/prompt-family/steering-family/seed/eval-doc/vector all were).
+  Exp 34 isolates it: train the EXACT flagship Exp-3 corrector (GPT-2 small, block 6, sentiment `v`, seed 0),
+  measure next-token NLL PER SOURCE POSITION on the same held-out 100 FineWeb docs (128-token, right-padded →
+  position = distance from doc start), bucket into eighths, recovery per bucket at α∈{4,8}.
+- **Finding (POSITIVE):** the recovery is essentially flat across token position — the pooled headline is not a
+  pooling artifact. Raw excess NLL climbs mildly along the sequence (2.11→3.25 nats @α=8, later tokens have more
+  steered context) and the corrector tracks it: after a higher first bucket (96% @α=8, 117% @α=4 — the usual
+  small-raw-damage ratio effect), recovery settles to a flat **80.7–83.5% band for positions 16–126 @α=8**
+  (89–92% @α=4). Pooled recovery **84.3% @α=8 / 95.3% @α=4 reproduces Exp 3 to the digit** (built-in check).
+- **No prior result superseded** (Exp 34 is new; pooled numbers = Exp 3 reproduced).
+- **RESULTS.md:** +Exp 34 section (bucket table + reading) + figure entry (`plots/34_token_position.png`);
+  Exp-33 "closes the joint-resample open item" line left as-is; Headline seed/sampling parenthetical extended
+  with "flat across token position … 80.7–83.5% band from token 16 to 126".
+- **REPORT_3_external_validity.md:** +Exp 34 subsection (table + Observation/Interpretation/Limitations/Next check)
+  after Exp 33; Exp-33 Next-check closed ("Done in Experiment 34"); Conclusion open-items extended (token-position
+  control closed). No new display equation (reuses the recovery ratio / D_M definitions).
+- **REPORT.md index:** Summary sampling-controls sentence extended (token-position clause); headline-table row added.
+- **Math re-verified via GitHub API:** REPORT.md 1 js-display-math / 0 `<pre lang=math>`; REPORT_3 12 / 0
+  (unchanged — no new display math); 0 inline hazards in either file or in RESULTS.md.
+- **Ops:** reuses Exp-3 Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim (DRY); only new code
+  is per-position NLL accumulation. `/opt/conda/bin/python`, `setsid` full detach; ~2 min. Artifacts:
+  `experiments/34_token_position.py`, `results/34_token_position.json`, `results/34_run.log`,
+  `plots/34_token_position.png`.

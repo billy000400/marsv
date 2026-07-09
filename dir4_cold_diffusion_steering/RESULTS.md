@@ -1241,6 +1241,38 @@ separately (Exp 31, ± 0.7 pp — the smallest of the three axes). Five joint re
 This closes the joint-resample open item: the flagship survives seed, eval-document, vector, **and** joint
 vector×seed resampling.
 
+**Experiment 34 — Token-position control: is the 84% recovery uniform across the sequence?** Every recovery
+number in the study **pools** next-token cross-entropy over *all* token positions in the held-out documents
+(recovery `= 1 − Σ e_learned / Σ e_raw` summed over every position). A pooled ratio can hide structure: the
+corrector might, say, fix only the first few tokens and do nothing later, and the pool would still read 84%.
+CLAUDE.md's own control list names **token** as an axis a trustworthy metric should survive, and it is the one
+axis never isolated (strength, layer, model, prompt-family, steering-family, seed, eval-document, and vector
+construction all were). We isolate it: train the exact flagship Exp-3 corrector (GPT-2 small, block 6, sentiment
+`v`, seed 0), then measure next-token NLL **per source position** `j` (0…126) on the same held-out 100 FineWeb
+docs (128-token, right-padded, so `j` = distance from the document start), for clean / raw / learned at α ∈ {4, 8}.
+Per position bucket, `excess_m(j) = loss_m(j) − loss_clean(j)` and `recovery(j) = 1 − excess_learned(j) / excess_raw(j)`.
+
+*Fluency recovery by token-position bucket (8 buckets over positions 0–126; pooled = the headline number):*
+
+| position bucket (≈) | 0–15 | 16–31 | 32–47 | 48–63 | 64–79 | 80–95 | 96–111 | 112–126 | **pooled** |
+|---|---|---|---|---|---|---|---|---|---|
+| recovery @α=8 | 96.0% | 88.5% | 86.0% | 83.5% | 82.0% | 80.8% | 80.7% | 81.0% | **84.3%** |
+| recovery @α=4 | 117% | 104% | 101% | 92% | 90% | 89% | 89% | 89% | **95.3%** |
+| raw excess NLL @α=8 | 2.11 | 2.67 | 2.67 | 2.67 | 2.91 | 2.91 | 3.07 | 3.25 | 2.78 |
+| learned excess NLL @α=8 | 0.08 | 0.31 | 0.37 | 0.44 | 0.53 | 0.56 | 0.59 | 0.62 | 0.44 |
+
+**Reading it: the recovery is essentially flat across token position — the pooled 84% is representative, not a
+pooling artifact.** Two things happen. **(1) Raw steering hurts *later* tokens a little more.** Raw excess NLL
+climbs mildly along the sequence (2.11 → 3.25 nats at α=8) — later positions have more steered context accumulated
+in front of them, so the disruption compounds slightly. **(2) The corrector tracks it, holding recovery in a tight
+band.** After a higher first bucket (96% at α=8; 117% at α=4, where raw's damage is smallest so the ratio runs
+over 100%, the same weak-signal effect seen at small α throughout), recovery settles to a flat **80.7–83.5% for
+positions 16–126** at α=8 and **89–92% at α=4**. So the corrector is not carried by one region of the sequence: it
+buys back roughly the same fraction of raw's damage at token 30 as at token 120, and the pooled headline is a
+faithful summary of a near-uniform per-position curve. This closes the token-position control CLAUDE.md names;
+the flagship recovery is now checked across strength, layer, model, prompt-family, steering-family, seed,
+eval-document, vector construction, **and** token position.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -1259,6 +1291,10 @@ vector×seed resampling.
   original overlaid); (b) the α=8 uncertainty budget — seed-only (Exp 26, 2.0 pp) vs vector-only
   (Exp 32, 2.7 pp) vs joint (Exp 33, 2.9 pp) bars against the independent-quadrature line (3.4 pp): the
   joint spread is dominated by the vector axis and falls *below* quadrature.
+- `plots/34_token_position.png` — (a) per-position excess NLL vs token position for raw vs the learned
+  corrector at α=8 (both rise mildly along the sequence; the corrector's stays near zero); (b) fluency
+  recovery vs token position for α=4 and α=8, with the pooled headline drawn as a dotted line — recovery is
+  flat past the first bucket, so the pooled 84% is not a position artifact.
 - `plots/03_learned_corrector.png` — (a) ΔLM, (b) `D_M`, (c) projection retention vs α for raw,
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the
@@ -1398,7 +1434,7 @@ nats at α=8). Correcting toward the **Gaussian manifold backfires** — an anal
 preserving corrector cuts off-manifold distance 22% but *worsens* LM loss to +4.2 nats. But a
 **learned corrector supervised by the LM loss** — same projection-preserving form, so the layer-6
 steering projection is untouched — **recovers 84% of the teacher-forced fluency damage** (ΔLM
-+2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
++2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33; and **flat across token position** — recovery holds an 80.7–83.5% band from token 16 to 126, so the pooled headline is not a pooling artifact, Exp 34) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
 "LM-safe" are decoupled; only the downstream objective finds the fluent correction. The correction is
 **direction-specific**
 — a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe

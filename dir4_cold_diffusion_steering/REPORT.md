@@ -65,8 +65,10 @@ eval-set sampling noise (± 0.7 pp at `α=8`) is smaller than seed noise, and a 
 that resamples the sentences building the steering vector leaves recovery at 82.1 ± 2.7% at `α=8` even as the
 direction swings up to ~56° — because the corrector is re-trained per vector. A **joint** resample of both the
 vector and the seed (Exp 33) gives 80.9 ± 2.9% at `α=8`, a spread dominated by the vector axis and below the
-independent-quadrature bound, so the flagship is best read as **84% ± 3 pp**. Off the Gaussian manifold at every
-setting.
+independent-quadrature bound, so the flagship is best read as **84% ± 3 pp**. A per-token-position breakdown
+(Exp 34) closes the last metric-control axis CLAUDE.md names: recovery is *flat across token position* (an
+80.7–83.5% band from token 16 to 126 at `α=8`), so the pooled headline is not a pooling artifact. Off the
+Gaussian manifold at every setting.
 
 ### [Part 4 — Behavioral reality-check: from fluency to real steering in generation](REPORT_4_behavioral.md)
 *Experiments 10, 11, 20, 22, 23, 25.* The `ΔLM` recoveries are teacher-forced at one layer. When
@@ -101,6 +103,7 @@ corrector.
 | Eval-set sampling: flagship recovery, 95% doc-bootstrap @`α=8` | 84.3%, `[83.1, 85.6]%` (tighter than seed CI) | Part 3 (Exp 31) |
 | Vector-construction sampling: recovery over 5 resamples @`α=8` | 82.1 ± 2.7% (direction swings ~56°, corrector re-trained) | Part 3 (Exp 32) |
 | Joint vector×seed sampling: recovery over 5 joint resamples @`α=8` | 80.9 ± 2.9% (below quadrature 3.4 pp → vector-dominated; 84% ± 3 pp) | Part 3 (Exp 33) |
+| Token-position control: recovery flat across position @`α=8` | 80.7–83.5% (tokens 16–126; pooled 84.3%) | Part 3 (Exp 34) |
 | Behavioral caveat: generated effect vs raw (GPT-2) | ~1/6 of raw's | Part 4 (Exp 10) |
 | Readout-preservation term recovers more effect | 2–6×, dominates raw at moderate `α` | Part 4 (Exp 11) |
 

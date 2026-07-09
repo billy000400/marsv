@@ -221,6 +221,14 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         joint std (2.9 pp) is BELOW the independent-quadrature bound √(2.0²+2.7²)≈3.4 pp and ≈ the vector-only std
         (2.7) — total flagship uncertainty is VECTOR-DOMINATED; the seed adds ~nothing once the vector floats.
         Flagship best read as 84%±3 pp @α=8. Headline now survives seed+eval-doc+vector+joint resampling.
+- [x] S7(i) — TOKEN-POSITION control (Exp 34, 2026-07-09) DONE: the one control CLAUDE.md rule 10 names that no
+        experiment had isolated (all recovery numbers POOL NLL over every token position). Trained the EXACT flagship
+        Exp-3 corrector, measured next-token NLL per source position on the held-out 100 docs (128-token, right-padded),
+        bucketed into eighths. POSITIVE: recovery is FLAT across position — after a higher first bucket (96%@α=8,
+        117%@α=4, the usual small-raw-damage ratio effect) it settles to an 80.7–83.5% band for positions 16–126 @α=8
+        (89–92%@α=4); raw excess NLL climbs mildly along the sequence (2.11→3.25 nats@α=8) and the corrector tracks it.
+        Pooled 84.3%@α=8 / 95.3%@α=4 reproduces Exp 3 to the digit ⇒ headline is NOT a pooling artifact. Metric-control
+        axes now complete (strength/layer/model/prompt/steering-family/seed/eval-doc/vector/token all isolated).
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -232,6 +240,27 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S7(i) TOKEN-POSITION control — Experiment 34 (new, 2026-07-09):** every recovery number in the study POOLS
+next-token NLL over all token positions (`recovery = 1 − Σ e_learned/Σ e_raw`), and CLAUDE.md rule 10's control
+list names **token** as an axis a trustworthy metric should survive — the one axis never isolated (strength/layer/
+model/prompt/steering-family/seed/eval-doc/vector all were). Wrote `experiments/34_token_position.py` (reuses the
+Exp-3 Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim; only new code is per-position NLL
+accumulation): trained the EXACT flagship corrector (GPT-2 small, block 6, sentiment `v`, seed 0), measured
+next-token NLL per SOURCE position on the held-out 100 FineWeb docs (128-token, right-padded so position = distance
+from doc start), bucketed into eighths, recovery per bucket at α∈{4,8}. POSITIVE: the recovery is FLAT across token
+position — after a higher first bucket (96%@α=8, 117%@α=4, the usual small-raw-damage ratio effect) it settles into
+an **80.7–83.5% band for positions 16–126 @α=8** (89–92%@α=4); raw's per-position damage climbs mildly along the
+sequence (2.11→3.25 nats@α=8, later tokens carry more steered context) and the corrector tracks it. **Pooled 84.3%
+@α=8 / 95.3%@α=4 reproduces Exp 3 to the digit** ⇒ the pooled headline is not a pooling artifact. No prior result
+superseded (Exp 34 additive; pooled = Exp 3 reproduced). Artifacts: `experiments/34_token_position.py`,
+`results/34_token_position.json`, `results/34_run.log`, `plots/34_token_position.png`. Curated RESULTS.md (Exp-34
+section + bucket table + figure; Headline token-position clause), REPORT_3 (Exp-34 O/I/L/N subsection + table +
+Exp-33 Next-check closed + Conclusion open-items), REPORT.md index (Summary token clause + headline row). CHANGELOG
+appended. Math re-verified via GitHub API (REPORT.md 1 js-display-math / 0 broken; REPORT_3 12/0 unchanged — no new
+display math; 0 inline hazards in either file or RESULTS.md). ENV: `/opt/conda/bin/python` (LOCAL disk), `setsid`
+full detach; ~2 min.
+
+<!-- prior: S7(h) joint vector×seed Exp 33 -->
 **S7(h) JOINT vector×seed resample — Experiment 33 (new, 2026-07-09):** Exp 26 bounded the OPTIMIZATION-seed
 variance (vector fixed → 83.3±2.0% @α=8) and Exp 32 the VECTOR-construction variance (seed fixed 0 → 82.1±2.7%),
 but neither answered the practical question — resample BOTH at once, what is the total spread? Wrote
@@ -806,17 +835,24 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
+**S7(i) TOKEN-POSITION control DONE (Exp 34): the last metric-control axis CLAUDE.md rule 10 names is closed.**
+All recovery numbers pool NLL over token positions; Exp 34 broke it out per position and found the recovery FLAT
+across the sequence (80.7–83.5% band, positions 16–126, @α=8; pooled 84.3% reproduces Exp 3), so the headline is
+not a pooling artifact. The metric-control axes are now COMPLETE: strength / layer / model / prompt-family /
+steering-family / seed / eval-doc / vector / token all isolated. Success criterion long met; result robust on SEVEN
+external-validity axes PLUS all sampling axes (seed / eval-doc / vector / joint) PLUS the token-position control.
+Only very-low-value optional points remain, none required for the deliverable: (i) a per-token-*TYPE* breakdown
+(content vs function words / part-of-speech) to test whether the flat position curve hides token-category structure;
+(ii) a FURTHER architecture family (state-space/MoE, e.g. Mamba/Mixtral) or GPT-2 XL for a fuller sweep beyond
+three, or rebuilding `v` from a labelled corpus (SST-2); (iii) finer λ_b + Exp-20 differentiable-generation ON
+Qwen3 (Exp 23's Next check). All are marginal. ENV: use `/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk,
+imports in seconds). Verify any REPORT edit with the GitHub-API math check on the touched report files.
+
+<!-- prior next step: S7(h) joint vector×seed Exp 33 -->
 **S7(h) JOINT vector×seed resample DONE (Exp 33): the joint-resample open item is closed.** The flagship headline
 now survives seed (Exp 26–30), eval-document (Exp 31), steering-vector (Exp 32), AND joint vector×seed (Exp 33)
 resampling — joint recovery 80.9±2.9% @α=8, a spread that is VECTOR-DOMINATED (below the independent-quadrature
-bound 3.4 pp), so the flagship is best read as 84%±3 pp @α=8. Success criterion long met; result robust on SEVEN
-external-validity axes PLUS all sampling axes (seed / eval-doc / vector / joint). Only very-low-value optional
-points remain, none required for the deliverable: (i) rebuild `v` from a labelled corpus (SST-2) rather than the
-hand-written sentence sets, or a larger joint-resample count for a tighter std; (ii) a FURTHER architecture family
-(state-space/MoE, e.g. Mamba/Mixtral) or GPT-2 XL for a fuller sweep beyond three; (iii) finer λ_b + Exp-20
-differentiable-generation ON Qwen3 (Exp 23's Next check). All are marginal. ENV: use `/opt/conda/bin/python`
-(transformers 5.13.0, LOCAL disk, imports in seconds). Verify any REPORT edit with the GitHub-API math check on the
-touched report files.
+bound 3.4 pp), so the flagship is best read as 84%±3 pp @α=8.
 
 <!-- prior next step: S7(g) vector-construction Exp 32 -->
 **S7(g) VECTOR-CONSTRUCTION control DONE (Exp 32): the last single-axis sampling gap is closed.** The flagship

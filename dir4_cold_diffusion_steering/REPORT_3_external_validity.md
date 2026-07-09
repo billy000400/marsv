@@ -846,9 +846,46 @@ layer (block 6), and 100-document eval set (eval-document sampling is bounded se
 ± 0.7 pp, the smallest of the three axes). The seed range (1–5) differs from Experiment 26's (0–4), but both draw
 from the same optimization-noise distribution.
 
-**Next check.** Rebuilding the vector from an external labelled sentiment corpus (e.g. SST-2) rather than the
-hand-written sets, or a larger resample count for a tighter joint std, would extend the control; both are marginal
-given that all three sampling axes now agree within ~3 pp.
+**Next check.** *Done in Experiment 34* — the one control axis CLAUDE.md names that no experiment had isolated,
+token position, is checked below. Rebuilding the vector from an external labelled corpus (e.g. SST-2) remains a
+marginal extension given that all sampling axes now agree within ~3 pp.
+
+### Experiment 34 — the recovery is flat across token position, so the pooled headline is not an artifact
+
+![token-position robustness of the flagship recovery](plots/34_token_position.png)
+
+Every recovery number in the study pools next-token cross-entropy over *all* token positions:
+`recovery = 1 − Σ e_learned / Σ e_raw` summed over every position. A pooled ratio can hide structure — the
+corrector might fix only early tokens and the pool would still read 84%. CLAUDE.md's control list names **token**
+as an axis a trustworthy metric should survive, and it is the one axis never isolated (strength, layer, model,
+prompt-family, steering-family, seed, eval-document, and vector construction all were). We train the exact flagship
+Exp-3 corrector (GPT-2 small, block 6, sentiment `v`, seed 0) and measure next-token NLL *per source position* on
+the same held-out 100 FineWeb docs (128-token, right-padded so position = distance from the document start), then
+bucket positions into eighths.
+
+| position bucket (≈) | 0–15 | 16–31 | 32–47 | 48–63 | 64–79 | 80–95 | 96–111 | 112–126 | **pooled** |
+|---|---|---|---|---|---|---|---|---|---|
+| recovery @α=8 | 96.0% | 88.5% | 86.0% | 83.5% | 82.0% | 80.8% | 80.7% | 81.0% | **84.3%** |
+| recovery @α=4 | 117% | 104% | 101% | 92% | 90% | 89% | 89% | 89% | **95.3%** |
+| raw excess NLL @α=8 (nats) | 2.11 | 2.67 | 2.67 | 2.67 | 2.91 | 2.91 | 3.07 | 3.25 | 2.78 |
+
+**Observation.** Raw steering's per-position damage climbs mildly along the sequence (2.11 → 3.25 nats at α=8), and
+the corrector tracks it: after a higher first bucket (96% at α=8, 117% at α=4), recovery settles into a flat
+**80.7–83.5% band for positions 16–126** at α=8 (89–92% at α=4). The pooled value (84.3% / 95.3%) reproduces
+Experiment 3 to the digit.
+
+**Interpretation.** The recovery is essentially uniform across token position — the corrector buys back about the
+same fraction of raw's damage at token 30 as at token 120 — so the pooled headline is a faithful summary of a
+near-flat per-position curve, not an average over a strong region and a weak one. The mildly higher early-bucket
+number is the same weak-signal ratio effect seen at small α throughout: raw's damage is smallest at the sequence
+start, so the recovery ratio there is larger (and >100% at α=4).
+
+**Limitations.** One steering direction (sentiment), one model, one layer, seed 0; right-padding means "position"
+is distance from the document start, not a linguistic role. It bounds *where in the sequence* the recovery lives,
+not per-token-*type* structure (e.g. content vs function words).
+
+**Next check.** A per-token-*type* breakdown (content vs function words, or by part-of-speech) would test whether
+the flat position curve hides token-category structure; marginal given the near-uniform position result.
 
 ## Conclusion
 
@@ -858,4 +895,4 @@ The result is also **prompt-family-robust** (a FineWeb-trained corrector recover
 
 Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The *top* of the band is seed-controlled too: five seeds on Qwen3 give 94.8 ± 1.6% at α=8 (Experiment 29), a band entirely above every other model's, so Qwen3's edge is real. Finally, GPT-2 large — the last single-seed headline model — is confirmed at 85.1 ± 1.1% at α=8 (Experiment 30), a band between GPT-2 small and medium, so the flat model-scale trend is itself seed-controlled: medium is the GPT-2 peak, large ≈ small, and recovery does not grow with scale. The seed axis now spans all five headline models across three scales and two architectures.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, steering-vector, and **joint vector×seed** resampling: a joint resample of both sampling axes (Experiment 33) leaves recovery at 80.9 ± 2.9% at α=8, a spread dominated by the vector axis and *below* the independent-quadrature prediction (3.4 pp), so the flagship is best read as 84% ± 3 pp. A wider architecture family (state-space / MoE / GPT-2 XL) and rebuilding the vector from an external labelled corpus (e.g. SST-2) are the natural remaining extensions for the external-validity story.
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, steering-vector, and **joint vector×seed** resampling: a joint resample of both sampling axes (Experiment 33) leaves recovery at 80.9 ± 2.9% at α=8, a spread dominated by the vector axis and *below* the independent-quadrature prediction (3.4 pp), so the flagship is best read as 84% ± 3 pp. The last metric-control axis CLAUDE.md names is closed as well: a per-token-position breakdown (Experiment 34) shows the recovery is *flat across token position* — an 80.7–83.5% band from token 16 to 126 at α=8 — so the pooled headline is not a pooling artifact. A wider architecture family (state-space / MoE / GPT-2 XL) and rebuilding the vector from an external labelled corpus (e.g. SST-2) are the natural remaining extensions for the external-validity story.

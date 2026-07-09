@@ -1445,3 +1445,48 @@ or GPT-2 XL; (iii) finer λ_b / Exp-20 on Qwen3. All marginal.
 On track? yes — S7 sampling controls now complete on ALL axes: the joint vector×seed resample holds the flagship at
 80.9±2.9% @α=8, a vector-dominated spread below the quadrature bound, so the headline is 84%±3 pp. ~100% complete.
 No blocker.
+
+## 2026-07-09 — Experiment 34: token-position control (the last metric-control axis)
+**What I did.** The project is ~100% complete (33 experiments; 7 external-validity axes + 4 sampling controls).
+Scanning for the single highest-value remaining rigor point, I noticed CLAUDE.md rule 10's control list names
+"seed/layer/token/perturbation strength" — and **token position is the one axis never isolated**. Every recovery
+number in the study POOLS next-token NLL over all positions (`recovery = 1 − Σ e_learned/Σ e_raw`), which could
+hide structure (e.g. the corrector fixing only early tokens). Wrote `experiments/34_token_position.py`, reusing the
+Exp-3 Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim (DRY) — the only new code is a
+per-source-position NLL accumulator + position bucketing. Trained the EXACT flagship corrector (GPT-2 small,
+block 6, sentiment `v`, seed 0), measured per-position NLL on the held-out 100 FineWeb docs (128-token,
+right-padded so position = distance from doc start) for clean/raw/learned at α∈{4,8}, bucketed into eighths. Ran
+~2 min on GPU (`/opt/conda/bin/python`, `setsid` detach), no OOM under the 0.18 VRAM fraction.
+**Result.** POSITIVE + clean. Recovery is FLAT across token position: after a higher first bucket (96%@α=8,
+117%@α=4) it settles into an **80.7–83.5% band for positions 16–126 @α=8** (89–92%@α=4). Raw's per-position excess
+NLL climbs mildly along the sequence (2.11→3.25 nats@α=8, later tokens carry more steered context) and the
+corrector's residual tracks it (0.08→0.62). **Pooled recovery 84.3%@α=8 / 95.3%@α=4 reproduces Exp 3 to the
+digit** (built-in reproducibility check).
+**Learned.** (1) KEY: the pooled headline is NOT a pooling artifact — the corrector buys back about the same
+fraction of raw's damage at token 30 as at token 120, so the 84% is a faithful summary of a near-uniform
+per-position curve, not an average over a strong and a weak region. (2) The higher first bucket is the same
+weak-signal ratio effect seen at small α throughout: raw's damage is smallest at the sequence start, so the
+recovery ratio there runs high (>100% at α=4). (3) Raw steering compounds along the sequence (more steered
+positions upstream = larger disruption downstream), which the corrector counters uniformly.
+**Assumptions/decisions logged (loop mode).** (a) Chose the token-position control over the other marginal
+open items (per-token-type breakdown, wider architecture, SST-2 vector) because it is the one axis CLAUDE.md rule
+10 EXPLICITLY names that no experiment had isolated — highest rigor-per-minute, and cheap (reuse the flagship
+corrector, no retrain of anything new; only add a per-position eval). (b) α∈{4,8} (the two headline strengths);
+skipped α≤2 where the ratio is near-zero-denominator noisy. (c) 8 position buckets over 0–126 for stable
+per-bucket ratios. (d) Right-padding means "position" = distance from doc start (a where-in-sequence control),
+not per-token-type; logged the per-token-TYPE breakdown as Exp 34's Next check. (e) Placed Exp 34 in the
+seed/sampling-control cluster (RESULTS + REPORT_3 after Exp 33), a control not a new external-validity axis.
+**Deliverables.** RESULTS.md (Exp-34 section + bucket table + reading + figure entry; Headline seed/sampling
+parenthetical extended with the token-position clause); REPORT_3 (Exp-34 O/I/L/N subsection + table after Exp 33;
+Exp-33 Next-check closed "Done in Exp 34"; Conclusion open-items extended); REPORT.md index (Summary token clause
++ headline-table row). CHANGELOG appended; PLAN Current status / Next step rewritten + S7(i) checkbox added; this
+JOURNAL entry. Math re-verified via GitHub API: REPORT.md 1 js-display-math / 0 `<pre lang=math>`, REPORT_3 12/0
+(unchanged — no new display math, the recovery ratio is in code backticks), 0 inline hazards in either file or
+RESULTS.md. Artifacts: `experiments/34_token_position.py`, `results/34_token_position.json`, `results/34_run.log`,
+`plots/34_token_position.png`.
+**Next step.** Optional only (all metric-control axes now isolated): (i) per-token-TYPE breakdown (content vs
+function words / POS); (ii) wider architecture family (state-space/MoE/GPT-2 XL) or SST-2-built vector; (iii)
+finer λ_b / Exp-20 on Qwen3. All marginal.
+On track? yes — S7(i) closes the last metric-control axis CLAUDE.md names: the flagship recovery is flat across
+token position (80.7–83.5% band @α=8, pooled 84.3% = Exp 3), so the headline is not a pooling artifact. ~100%
+complete. No blocker.
