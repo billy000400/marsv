@@ -1,0 +1,12 @@
+last-token: train torch.Size([16335, 768]) val torch.Size([1815, 768]) denom=4119.48 top1_var_frac=0.0179
+  k=   2 val_FVU=0.7956 rel_L2=0.6300 cos=0.7641 train_FVU=0.7424 (4s)
+  k=   4 val_FVU=0.7159 rel_L2=0.5943 cos=0.7909 train_FVU=0.6397 (8s)
+  k=   8 val_FVU=0.6487 rel_L2=0.5650 cos=0.8135 train_FVU=0.5551 (11s)
+  k=  16 val_FVU=0.5945 rel_L2=0.5416 cos=0.8309 train_FVU=0.4987 (15s)
+  k=  24 val_FVU=0.5598 rel_L2=0.5263 cos=0.8416 train_FVU=0.4682 (19s)
+  k=  32 val_FVU=0.5375 rel_L2=0.5162 cos=0.8484 train_FVU=0.4506 (22s)
+  k=  48 val_FVU=0.5076 rel_L2=0.5026 cos=0.8574 train_FVU=0.4307 (26s)
+  k=  64 val_FVU=0.4848 rel_L2=0.4920 cos=0.8643 train_FVU=0.4147 (29s)
+  k= 128 val_FVU=0.4355 rel_L2=0.4682 cos=0.8789 train_FVU=0.3778 (33s)
+  k= 256 val_FVU=0.4194 rel_L2=0.4604 cos=0.8833 train_FVU=0.3668 (37s)
+DONE

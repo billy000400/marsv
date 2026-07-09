@@ -1,0 +1,3 @@
+twoNN depends on how many points to sample, do a study about varying the number of points and check if it is the noise
+For AE that did not show elbow, it could because we are reconstructing the pooled tokens that has too many information. try last token reconstruction, see if we can see some elbow this time.
+For replicating lasse.png, it looks like maybe the large k are undertained. plot learning curve (train and val loss vs training steps) for each k and check if they were undertrained when we reproduced the plots. If they were undertrained, what would the real plot look like if they all converged.

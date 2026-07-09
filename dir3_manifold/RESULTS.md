@@ -351,6 +351,52 @@ edge bias). So the honest layer-6 band is **TwoNN ~11.7–12.7, MLE ~13.4–15.2
 with the *sampling* uncertainty at any fixed n much smaller (±0.1) than that n-dependence.
 This neither tightens nor breaks the "low local ID ≈11–15" conclusion — it bounds it.
 
+### TwoNN/MLE depend on the number of sampled points — is the spread noise? (operator request 2026-07-08) — done
+`results/id_vs_n.json`, `experiments/id_vs_n.py` (GPU). The operator asked whether the
+TwoNN estimate's dependence on how many points we sample is just noise. We swept the
+subsample size `n` from 500 to the full 200k on layer 6 and, at each `n`, drew `R`
+independent subsamples (R=8 for n≤100k; n=200k is the whole pool, R=1) and recomputed
+TwoNN + MLE with the robust self-index-masking kNN. This cleanly separates two things:
+**sampling noise at fixed `n`** (the across-repeat std) vs **systematic `n`-dependence**
+(how the mean drifts as `n` grows).
+
+| n | TwoNN mean ± std | MLE mean ± std |
+|--------|------------------|----------------|
+| 500    | 19.83 ± 1.88 | 21.30 ± 1.36 |
+| 1000   | 17.23 ± 0.99 | 20.36 ± 1.30 |
+| 2000   | 15.67 ± 0.73 | 17.21 ± 1.90 |
+| 5000   | 14.51 ± 0.35 | 17.32 ± 1.53 |
+| 10000  | 13.62 ± 0.22 | 16.70 ± 0.15 |
+| 20000  | 12.68 ± 0.12 | 15.20 ± 0.09 |
+| 50000  | 11.66 ± 0.06 | 13.58 ± 0.05 |
+| 100000 | 10.98 ± 0.05 | 12.65 ± 0.05 |
+| 200000 | 10.48 (full)  | 11.81 (full)  |
+
+![TwoNN/MLE intrinsic dimension vs number of sampled points n (layer 6): both estimators drift down monotonically; error bars = across-repeat std](plots/id_vs_n.png)
+
+**Observation.** Both estimators fall **monotonically** as `n` grows — TwoNN 19.8 → 10.5,
+MLE 21.3 → 11.8 — a drift of ≈9–10 units. The across-repeat std (sampling noise at fixed
+`n`) is at most ±1.9 (at n=500) and shrinks to ≤0.1 by n≥20k.
+
+**Interpretation.** The `n`-dependence is **not** sampling noise: the mean's drift (≈9
+units) dwarfs the fixed-`n` scatter (≤1.9, and ≤0.1 in the range we actually report). It is
+the known finite-sample bias of neighbour-ratio ID estimators — with few points the nearest
+neighbours sit farther apart and span more of the ambient 768-d space, inflating the
+estimate; adding points shrinks neighbourhoods and lowers it. The curve is still gently
+declining at n=200k (10.98 → 10.48), so it has not fully converged.
+
+**Limitations.** We cannot go past n=200k (the whole cache), so the true large-sample limit
+is unknown; it could sit somewhat below 10. The bias direction/magnitude is specific to
+these estimators and to the layer-6 cloud.
+
+**Next check.** Richardson-style extrapolation in `1/n` (or a larger cache) would estimate
+the asymptote. **Takeaway for the headline:** the earlier "≈11–15" band is a **fixed-`n`
+reading, not sampling noise** — a single ID number is only meaningful together with the `n`
+it was measured at. The qualitative conclusion (ID an order of magnitude below d_model=768,
+and below the linear d95=94 at layer 6) holds at every `n`; if anything the large-`n` values
+(≈10–12) are **lower**, strengthening the low-ID reading while making the exact value
+`n`-dependent.
+
 ### Layer-11 caveat: hidden_states[11+1] is POST-final-layernorm, not raw resid_post (Codex review 2026-06-23 #5)
 `collect_acts.py` stores `GPT2Model(output_hidden_states=True).hidden_states[L+1]`. For
 HuggingFace `GPT2Model`, that tuple is `(emb, block0_out, …, block10_out, ln_f(block11_out))`
@@ -367,6 +413,54 @@ standardization" claims to **layer 6**. **The headline (layer 6) is unaffected:*
 a genuine interior block output with no ln_f. Re-collecting raw block-11 resid_post (via a
 forward hook on `h[11]` instead of the post-ln_f hidden_states tail) is listed as future work;
 it does not change any layer-6 conclusion.
+
+### Last-token vs pooled AE: does un-pooling reveal an elbow? (operator request 2026-07-08) — done
+`results/ae_results_lasttoken.json`, `experiments/ae_sweep_lasttoken.py`,
+`experiments/collect_lasttoken.py`. The operator hypothesised that the pooled (all-token)
+layer-6 AE shows only a weak bend because pooling carries "too much information," and that
+reconstructing the **last token** of each sequence might reveal a cleaner elbow. We collected
+GPT-2 layer-6 last-token activations (18,150 points: the final position of each
+non-overlapping 64-token FineWeb window, `hidden_states[7]`, raw fp16) and ran the *identical*
+AE sweep (same `768→512→256→k→256→512→768` arch, Adam 1e-3, BATCH=2048, STEPS=1200, 90/10
+split, train-mean centering).
+
+| k   | last-token val_FVU | last-token cosine | last-token train_FVU | pooled val_FVU |
+|-----|--------------------|-------------------|----------------------|----------------|
+| 2   | 0.796 | 0.764 | 0.742 | 0.094 |
+| 4   | 0.716 | 0.791 | 0.640 | 0.083 |
+| 8   | 0.649 | 0.814 | 0.555 | 0.074 |
+| 16  | 0.595 | 0.831 | 0.499 | 0.067 |
+| 32  | 0.538 | 0.848 | 0.451 | 0.062 |
+| 64  | 0.485 | 0.864 | 0.415 | 0.057 |
+| 128 | 0.436 | 0.879 | 0.378 | 0.052 |
+| 256 | 0.419 | 0.883 | 0.367 | 0.051 |
+
+![GPT-2 layer-6 AE, pooled vs last-token: held-out FVU (left) and last-token cosine (right)](plots/ae_pooled_vs_lasttoken.png)
+
+**Observation.** The last-token AE shows **no elbow at all** — held-out FVU declines smoothly
+and monotonically from 0.80 (k=2) to 0.42 (k=256), with a high floor (only ~58% of variance
+captured even at k=256) and no plateau; cosine climbs steadily 0.76 → 0.88. The pooled AE, by
+contrast, is already at FVU 0.094 at k=2. The decisive difference is variance concentration:
+the **last-token** cloud has top-1 PC variance fraction **0.018** (near-isotropic), whereas
+the **pooled** cloud has **0.904** (one massive-activation dimension dominates).
+
+**Interpretation.** The operator's hypothesis is the *reverse* of what the data show:
+un-pooling does **not** sharpen the elbow — it **removes** it. Pooling is what *concentrates*
+the variance (the massive-activation dimension dominates the pooled cloud), and that
+concentration is exactly what produces the pooled AE's early low-FVU "bend." The last-token
+representation is much more isotropic, so its AE has no dominant direction to capture cheaply
+and reconstruction error falls only gradually — no elbow. This is the same rule the Qwen
+study isolated: **a reconstruction elbow tracks concentrated variance, not a low-dimensional
+manifold** (see the cross-model section and `REPORT_AE.md`).
+
+**Limitations.** Only 18k last-token points (vs 200k pooled), so the high-k rows overfit
+mildly (train_FVU 0.367 vs val 0.419 at k=256); and "last token of a 64-token window" is not
+a document-final token. Neither changes the qualitative no-elbow result, which is driven by
+the isotropy (top-1 var 0.018), not sample size.
+
+**Next check.** A TwoNN/MLE local-ID estimate on the same last-token cloud would test whether
+the *nonlinear* ID also rises when variance is de-concentrated, separating "no AE elbow" from
+"genuinely higher intrinsic dimension."
 
 ### Reconciliation (honest, post-review)
 The strong original framing ("two independent methods converge → demonstrated curved

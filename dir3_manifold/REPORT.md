@@ -189,6 +189,18 @@ MLE by +0.17 — the low ID is **not** a duplicate/self-masking artifact.
 
 ![ID bootstrap CIs and self-masking diagnostic](plots/id_diagnostics.png)
 
+### Sample-size dependence — the n-spread is systematic, not noise
+Sweeping the subsample size n from 500 to the full 200k (layer 6), with 8 independent draws per n, both
+estimators fall **monotonically**: TwoNN 19.8 → 10.5, MLE 21.3 → 11.8. The across-repeat scatter at
+fixed n (the error bars below) is at most ±1.9 (n = 500) and ≤ 0.1 for n ≥ 20k — far smaller than the
+≈ 9-unit drift of the mean. So the n-dependence is the **finite-sample bias** of neighbour-ratio
+estimators (too few points → neighbours span more of the space → inflated ID), **not** sampling noise.
+The curve is still declining at n = 200k (10.98 → 10.48), so a single ID number is only meaningful with
+the n it was measured at; the low-ID conclusion holds at every n, and the large-n values (≈ 10–12) are
+if anything **lower** than the headline band.
+
+![TwoNN/MLE intrinsic dimension vs number of sampled points n (layer 6)](plots/id_vs_n.png)
+
 ### Token-position-stratified ID (layer 6)
 Re-collecting 80k layer-6 vectors *with* token position and estimating ID per bucket: ID is **low in
 every bucket, roughly similar with estimator-dependent variation** (TwoNN ~9.6–10 stable; MLE
@@ -241,6 +253,19 @@ nonlinear ID band (12–13). But three checks show the AE signal is **fragile**,
 ![No plateau: ΔFVU per doubling stays ~0.006-0.015 out to k=256](plots/ae_marginal_gain.png)
 
 The **TwoNN/MLE local ID is the robust signal**; the AE merely fails to contradict it.
+
+### Last-token vs pooled AE — un-pooling removes the elbow, it does not sharpen it
+We tested whether reconstructing the **last token** of each sequence (rather than the pooled all-token
+cloud) reveals a cleaner elbow. Collecting 18,150 GPT-2 layer-6 last-token vectors and running the
+*identical* AE sweep, the last-token curve shows **no elbow at all**: held-out FVU declines smoothly from
+0.80 (k = 2) to 0.42 (k = 256) — a high floor (only ~58% of variance captured) with no plateau — while the
+pooled AE is already at FVU 0.094 at k = 2. The reason is variance concentration: the last-token cloud is
+near-isotropic (top-1 PC variance fraction **0.018**), whereas pooling concentrates variance into the
+massive-activation dimension (**0.904**). So pooling is what *creates* the pooled AE's weak early bend;
+un-pooling **removes** it. This is the same rule the Qwen study isolates — a reconstruction elbow tracks
+concentrated variance, not a low-dimensional manifold.
+
+![GPT-2 layer-6 AE, pooled vs last-token: held-out FVU and last-token cosine](plots/ae_pooled_vs_lasttoken.png)
 
 ### Cross-model check: what makes an AE elbow appear? (Qwen3-1.7B)
 A colleague reported a reconstruction *elbow* on **Qwen3-1.7B** using a much larger deep autoencoder
@@ -310,11 +335,14 @@ occupy a low-dimensional set at layer 6, but "~12–16-dimensional curved manifo
   (CPU, GPU, raw-seeds + standardized).
 - `results/ae_results_matched.json` / `ae_matched_param_counts.json` — parameter-matched AE sweep.
 - `results/ae_param_counts.json` — exact AE param count per k (drifting design).
+- `results/id_vs_n.json` — TwoNN/MLE vs subsample size n (layer 6, 8 draws/n).
+- `results/ae_results_lasttoken.json` — last-token AE sweep (layer 6); `data/acts_layer6_lasttoken.npy`.
 - `plots/` — `id_per_layer.png`, `id_validation.png`, `id_diagnostics.png`, `id_by_position.png`,
-  `ae_fvu_sweep.png`, `ae_marginal_gain.png`.
+  `ae_fvu_sweep.png`, `ae_marginal_gain.png`, `id_vs_n.png`, `ae_pooled_vs_lasttoken.png`.
 - `experiments/` — `collect_acts.py`, `pca_pr.py`, `id_estimate.py`, `validate_estimators.py`,
-  `collect_by_position.py`, `id_diagnostics.py`, `ae_sweep.py`, `ae_sweep_gpu.py`,
-  `ae_sweep_gpu_v2.py`, `ae_sweep_matched.py`, `make_plots.py`.
+  `collect_by_position.py`, `id_diagnostics.py`, `id_vs_n.py`, `ae_sweep.py`, `ae_sweep_gpu.py`,
+  `ae_sweep_gpu_v2.py`, `ae_sweep_matched.py`, `collect_lasttoken.py`, `ae_sweep_lasttoken.py`,
+  `make_plots.py`.
 - `RESULTS.md` — full tables, headline, and caveats. `CHANGELOG.md` — dated change history.
 - `REPORT_AE.md` — companion Qwen3-1.7B autoencoder-elbow study (when does an AE reconstruction elbow
   appear?); `ae_study/` — its code, caches, results, and figures (`plots/qwen_*.png`).

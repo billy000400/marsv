@@ -1,0 +1,14 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 38240.44it/s]
+[3s] 1500 texts, seq_len=64, dev=cuda
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (1848 > 1024). Running this sequence through the model will result in indexing errors
+[5s] 18150 full windows
+[6s] 64/18150
+[10s] 2624/18150
+[15s] 5184/18150
+[19s] 7744/18150
+[23s] 10304/18150
+[28s] 12864/18150
+[33s] 15424/18150
+[37s] 17984/18150
+[40s] saved (18150, 768) float16

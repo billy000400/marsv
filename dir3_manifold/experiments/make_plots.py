@@ -252,4 +252,51 @@ ax.legend(fontsize=8, loc="lower right")
 ax.grid(alpha=0.3)
 save(fig, "pca_cumvar_linear.png")
 
+# ---- Fig 7: TwoNN/MLE ID vs subsample size n (operator ask 2026-07-08 #1) ----
+ivn = load("id_vs_n.json")
+sw = ivn["sweep"]
+ns = np.array([r["n"] for r in sw])
+tn_m = np.array([r["twonn_mean"] for r in sw])
+tn_s = np.array([r["twonn_std"] for r in sw])
+ml_m = np.array([r["mle_mean"] for r in sw])
+ml_s = np.array([r["mle_std"] for r in sw])
+fig, ax = plt.subplots(figsize=(7.5, 4.8))
+ax.errorbar(ns, tn_m, yerr=tn_s, marker="o", lw=1.8, capsize=3,
+            color="#1f77b4", label="TwoNN (mean ± across-repeat std)")
+ax.errorbar(ns, ml_m, yerr=ml_s, marker="s", lw=1.8, capsize=3,
+            color="#d62728", label="MLE k=20 (mean ± across-repeat std)")
+ax.set_xscale("log")
+ax.set_xlabel("number of sampled points  n  (log scale)")
+ax.set_ylabel("estimated intrinsic dimension")
+ax.set_title("Nonlinear ID vs sample size, GPT-2 small layer 6\n"
+             "both estimators drift DOWN with n (systematic finite-sample effect),\n"
+             "drift far exceeds across-repeat noise (error bars) -> n-dependence is not noise")
+ax.legend(fontsize=9)
+ax.grid(alpha=0.3, which="both")
+save(fig, "id_vs_n.png")
+
+# ---- Fig 8: pooled vs last-token AE sweep, layer 6 (operator ask 2026-07-08 #2) ----
+pooled = load("ae_results.json")
+lastt = load("ae_results_lasttoken.json")["rows"]
+pk = np.array([r["k"] for r in sorted(pooled, key=lambda r: r["k"])])
+pf = np.array([r["val_fvu"] for r in sorted(pooled, key=lambda r: r["k"])])
+lk = np.array([r["k"] for r in sorted(lastt, key=lambda r: r["k"])])
+lf = np.array([r["val_fvu"] for r in sorted(lastt, key=lambda r: r["k"])])
+lc = np.array([r["val_cos"] for r in sorted(lastt, key=lambda r: r["k"])])
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 4.8))
+a1.plot(pk, pf, "o-", color="#1f77b4", lw=1.8, label="pooled (all-token)")
+a1.plot(lk, lf, "s-", color="#d62728", lw=1.8, label="last-token")
+a1.set_xscale("log", base=2)
+a1.set_xticks(pk); a1.set_xticklabels([str(k) for k in pk], fontsize=7)
+a1.set_xlabel("bottleneck width k"); a1.set_ylabel("held-out FVU")
+a1.set_title("GPT-2 layer-6 AE: pooled vs last-token\nheld-out fraction of variance unexplained")
+a1.legend(fontsize=9); a1.grid(alpha=0.3, which="both")
+a2.plot(lk, lc, "s-", color="#d62728", lw=1.8)
+a2.set_xscale("log", base=2)
+a2.set_xticks(lk); a2.set_xticklabels([str(k) for k in lk], fontsize=7)
+a2.set_xlabel("bottleneck width k"); a2.set_ylabel("held-out cosine similarity")
+a2.set_title("Last-token AE: reconstruction cosine vs k")
+a2.grid(alpha=0.3, which="both")
+save(fig, "ae_pooled_vs_lasttoken.png")
+
 print("done")
