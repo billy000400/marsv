@@ -103,8 +103,19 @@ def main():
 
     out = {"layer": args.layer, "n_steps": args.n_steps, "batch": args.batch,
            "lr": args.lr, "eval_every": args.eval_every, "curves": {}}
+    # Resume: reuse curves already saved with the IDENTICAL config, so an
+    # interrupted run's completed k's are not recomputed.
+    respath = os.path.join(RESULTS, f"qwen_lcurve_L{args.layer}.json")
+    if os.path.exists(respath):
+        prev = json.load(open(respath))
+        if all(prev.get(f) == out[f] for f in ("n_steps", "batch", "lr", "eval_every")):
+            out["curves"] = prev["curves"]
+            print(f"  resume: reuse cached k={sorted(int(x) for x in out['curves'])}", flush=True)
     t0 = time.time()
     for k in args.ks:
+        if str(k) in out["curves"]:
+            print(f"  k={k:4d} cached, skip", flush=True)
+            continue
         curve, npar = train_with_curve(train_gpu, val, train_eval, mu, d_model, k,
                                        args.n_steps, args.batch, args.lr,
                                        args.eval_every, args.seed)

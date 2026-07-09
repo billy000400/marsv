@@ -210,6 +210,21 @@ trainability turns over, not the intrinsic dimension of the activations.** (This
 colleague's ~50k-step curve should have a *higher* and later-onset rise than ours, which it does — their
 minimum sits near `k≈50` at ~0.407 vs our broader `k≈40–100` at ~0.486.)
 
+**(b′) A longer-budget run confirms it directly.** We logged the train + held-out learning curve for
+each `k∈{10,50,100,200,500}` and re-ran the sweep to **8,000 steps** (vs the 3,000-step reproduction).
+Two things happen exactly as (a)+(b) predict. First, at the 3,000-step budget every learning curve is
+**still descending** and the larger `k` are farther from their own 8,000-step value (the 3,000→8,000 drop
+grows monotonically with `k`: 0.010, 0.016, 0.022, 0.026, 0.031 for k=10…500), so bigger bottlenecks are
+undertrained *more* at any fixed budget. Second, training longer **lowers the sweep and shrinks the
+rising branch**: the held-out minimum stays near `k≈100` but drops 0.464→0.442, and the rise out to
+`k=500` shrinks from +0.034 to +0.025 (≈26% smaller). Yet even at 8,000 steps the *train* error still
+rises past the minimum (0.406→0.418→0.435 for k=100/200/500) — the `k≥100` models remain undertrained.
+Extrapolating the containment bound, an unlimited budget would make the held-out sweep **monotone
+non-increasing in `k`** — no U-shape at all; the `k≈50–100` "optimum" is a training-budget turning point,
+not a manifold dimension. (`ae_study/ae_learning_curves.py` → `results/qwen_lcurve_L2.json`.)
+
+![Per-k learning curves (left; all still descending at the 3,000-step budget) and the k-sweep at the 3,000-step vs 8,000-step budget (right; the rising branch shrinks and the floor drops with more training)](plots/qwen_ae_lcurve.png)
+
 **(c) The best bottleneck still reconstructs poorly.** Even at the optimum, FVU ≈0.41 (only ~59% of
 variance explained) and cosine ≈0.85. A genuinely ~50-dimensional manifold would reconstruct far better
 than this; the mediocre optimum is what you expect from genuinely high-dimensional data (next section).

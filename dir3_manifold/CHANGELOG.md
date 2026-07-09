@@ -5,6 +5,36 @@ Current-best numbers live in those files; this file records how they got there.
 
 ---
 
+## 2026-07-09 (Iter 18) — Learning-curve diagnostic: the lasse U-shape's rising branch is undertraining (operator `human_feedback_07082157.md` ask #3)
+- **Operator ask** (`human_feedback_07082157.md`, three parts): (1) TwoNN's dependence on sample size —
+  is the spread noise? (2) AE with no elbow — try last-token reconstruction; (3) for the lasse
+  reproduction, plot train+val loss vs step for each `k` to check if the large-`k` AEs were undertrained,
+  and infer what the plot would look like if they all converged. Asks (1) and (2) were already delivered
+  in prior autoloop iterations (RESULTS.md "TwoNN/MLE depend on the number of sampled points…" →
+  `results/id_vs_n.json`; "Last-token vs pooled AE…" → `results/ae_results_lasttoken.json`). This entry
+  covers ask **(3)**, which was outstanding.
+- **New artifacts:** `ae_study/ae_learning_curves.py` (per-step train+held-out logging of the identical
+  67M `DeepAutoencoder` at `k∈{10,50,100,200,500}`, run to **8,000 steps** vs the 3,000-step
+  reproduction; small resume patch so an interrupted run's completed k's are reused, not recomputed),
+  `ae_study/results/qwen_lcurve_L2.json`, `ae_study/make_lcurve_plots.py` → `plots/qwen_ae_lcurve.png`
+  (left: per-k learning curves; right: k-sweep at 3,000 vs 8,000 steps).
+- **Result (answers ask #3, "yes, undertrained"):** at the 3,000-step lasse budget every learning curve
+  is **still descending**, and larger `k` are farther from their own 8,000-step value (3,000→8,000 drop
+  grows monotonically: 0.010/0.016/0.022/0.026/0.031 for k=10/50/100/200/500). Training to 8,000 steps
+  **lowers the sweep and shrinks the rising branch**: held-out min stays near `k≈100` but drops
+  0.464→0.442, and the rise out to `k=500` shrinks from +0.034 (3,000-step) to +0.025 (8,000-step, ≈26%
+  smaller). Decisively, **at 8,000 steps the *train* rel-L2 still rises past the minimum**
+  (0.406→0.418→0.435 for k=100/200/500) — a containment/dead-wiring bound says train error cannot rise
+  with `k` at convergence, so the `k≥100` models remain undertrained. **Inference for "if all
+  converged":** the held-out sweep would become **monotone non-increasing in `k`** (no U-shape); the
+  `k≈50–100` "optimum" is a fixed-budget turning point, not a manifold dimension. Our 8,000-step run is
+  one concrete step along that trajectory (shallower U, lower floor) but does not reach convergence.
+- **Deliverable impact:** additive. New RESULTS.md subsection under the Qwen study; new point (b′) +
+  figure in REPORT_AE.md §2; one high-level sentence + figure reference in REPORT.md's cross-model
+  section. No prior numbers changed; interpretation of the reproduced elbow (optimization artifact, not
+  ID) is unchanged and now empirically reinforced. Render re-verified: REPORT.md 6/6, REPORT_AE.md 6/6
+  js-display-math, 0 degraded, 0 inline hazards.
+
 ## 2026-07-08 (Iter 17) — Qwen AE elbow REPRODUCED (supersedes the earlier "no elbow"); REPORT_AE.md equation-render fix (operator `human_feedback_07070249.md`)
 - **Operator report:** (1) "what do you mean you cannot reproduce the AE study? His plot is at
   `ae_study/lasse.png` — try to reproduce it." (2) "in REPORT_AE.md the equations under Baselines /

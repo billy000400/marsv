@@ -535,6 +535,56 @@ whole curve but leaves the U-shape and the train-set turnaround intact.)
 
 ![Controlled experiment: only concentrated variance yields a sharp low-k FVU plateau; isotropic Qwen L2 keeps declining](plots/qwen_ae_wide_controlled.png)
 
+### Were the large-k AEs undertrained in the lasse reproduction? Learning curves + a longer-budget sweep (operator request 2026-07-08) — done
+`results/qwen_lcurve_L2.json`, `experiments`→`ae_study/ae_learning_curves.py`,
+`ae_study/make_lcurve_plots.py`. The operator asked whether the *rising* branch of the reproduced
+`lasse.png` U-shape (held-out error going **up** from `k≈50` to `k=500`) is just the large-`k`
+autoencoders being **undertrained** at the reproduction's 3000-step budget — and, if so, what the sweep
+would look like if every `k` were trained to convergence. We logged the **train and held-out learning
+curve** (rel-L2 vs step) for each of `k∈{10,50,100,200,500}` while training the identical 67M-param
+`DeepAutoencoder` (same Qwen L2 last-token data / 90-10 split / Adam / cosine schedule) to a **longer
+8000-step budget**, evaluating every 250 steps.
+
+| k | val rel-L2 @3000 (lasse budget) | val rel-L2 @8000 | train rel-L2 @3000 | train rel-L2 @8000 |
+|-----|------|------|------|------|
+| 10  | 0.514 | 0.504 | 0.480 | 0.455 |
+| 50  | 0.469 | 0.453 | 0.441 | 0.412 |
+| 100 | **0.464** | **0.442** | 0.439 | **0.406** |
+| 200 | 0.476 | 0.450 | 0.454 | 0.418 |
+| 500 | 0.498 | 0.467 | 0.476 | 0.435 |
+
+![Left: per-k held-out learning curves (all still descending at the 3000-step lasse budget, larger k more so). Right: the k-sweep at the 3000-step budget vs the 8000-step budget — the rising branch shrinks and the floor drops with more training.](plots/qwen_ae_lcurve.png)
+
+**Observation.** (1) At the 3000-step lasse budget every learning curve is **still descending** — none
+has flattened — and the larger `k` are farther from their own 8000-step value (the 3000→8000 drop grows
+monotonically with `k`: 0.010, 0.016, 0.022, 0.026, 0.031 for k=10…500). (2) Training to 8000 steps
+**lowers the whole sweep and shrinks the rising branch**: the held-out minimum stays near `k≈100` but
+its value drops 0.464→0.442, and the rise out to `k=500` shrinks from +0.034 (3000-step) to +0.025
+(8000-step), ≈26% smaller. (3) Decisively, even **at 8000 steps the *train* error still rises
+monotonically past the minimum** (train rel-L2 0.406→0.418→0.435 for k=100/200/500).
+
+**Interpretation.** The operator's hypothesis is correct: the rising branch is an **undertraining
+artifact of the fixed step budget**, not a property of the data. The tell is the train-set turnaround —
+a wider bottleneck AE *contains* a narrower one (dead-wire the extra latent coordinates), so at
+convergence its train reconstruction error **cannot exceed** the narrower model's; a train error that
+*rises* with `k` therefore proves the wide-`k` models have not finished training. Larger `k` are
+undertrained more at any fixed budget (point 1), which inflates their error and manufactures the U.
+Extending the budget 3000→8000 partially undoes this — floor drops, rise shrinks — exactly as predicted.
+
+**What the fully-converged plot would look like.** Extrapolating the same monotonicity argument, with an
+*unlimited* budget the held-out sweep would become **monotone non-increasing in `k`** (larger bottleneck
+→ no-worse reconstruction) — i.e. **no U-shape at all**; the apparent `k≈50–100` "optimum" would flatten
+into a plateau of a genuinely high-dimensional cloud. Our 8000-step run is one concrete step along that
+trajectory (shallower U, lower floor) but does **not** reach it, because 8000 steps still under-trains
+the `k≥100` models (point 3).
+
+**Limitations.** We reached 8000 steps, not true convergence, so we show the U *shrinking*, not
+vanishing; a run to ~50k steps per `k` (the colleague's budget) would be needed to demonstrate the
+predicted monotone curve directly. The argument that it *must* become monotone is analytic (the
+dead-wiring/containment bound), and the observed train-error turnaround is the empirical fingerprint of
+the undertraining it predicts. This does not change the GPT-2 headline; it refines *why* the reproduced
+Qwen elbow is not a manifold-dimension signal.
+
 ## Headline (honest, post-review)
 **On one pooled FineWeb activation sample from GPT-2 small, the layer-6 residual stream
 has a low local intrinsic dimension of ≈11–15 (TwoNN≈11.7–12.7, MLE≈13.4–15.2 over

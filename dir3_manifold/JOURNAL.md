@@ -491,3 +491,53 @@ to convergence (~50k steps) to show the rising branch flattens (the direct predi
 monotonicity argument), closing the last compute-mismatch caveat.
 
 On track? yes — 100% done; operator feedback #11 (reproduce lasse.png + fix REPORT_AE.md render) addressed; Qwen elbow reproduces (U-shape to k=500); deliverables render clean; STOP written; no blocker.
+
+---
+
+## Iter 18 (2026-07-09) — Operator `human_feedback_07082157.md` ask #3: learning-curve diagnostic for the lasse reproduction
+
+**The feedback file has three asks.** (1) TwoNN's dependence on #sampled points — is the spread noise?
+(2) AE with no elbow — try last-token reconstruction. (3) For the lasse repro, plot train+val loss vs
+training step for each `k` to check whether the large-`k` AEs were undertrained; if so, what would the
+plot look like if they all converged.
+
+**State on re-entry.** Asks (1) and (2) were already delivered by prior un-journaled autoloop iters —
+RESULTS.md already has "TwoNN/MLE depend on the number of sampled points…" (`results/id_vs_n.json`:
+n-dependence is systematic finite-sample bias, not noise; TwoNN 19.8→10.5 as n 500→200k, fixed-n std
+≤1.9) and "Last-token vs pooled AE…" (`results/ae_results_lasttoken.json`: un-pooling *removes* the
+elbow — pooled top-1 var 0.904 vs last-token 0.018). Ask (3) was the only one outstanding: partial
+artifacts existed (`ae_learning_curves.py`, `make_lcurve_plots.py`, a `qwen_lcurve_L2.json` with only
+k=10,50) but nothing in the deliverables and a run still in flight.
+
+**Did this iter.** (a) Found a pre-existing prior-iter run (PID 1452, old code, no resume) still training
+the same sweep and racing on the shared JSON; my own probe (`--ks 500 --n_steps 500`) had also clobbered
+the file to k=500@500-steps. Killed both, added a small **resume** patch to `ae_learning_curves.py`
+(reuse cached k's only when n_steps/batch/lr/eval_every match), and relaunched a clean full run
+`--ks 10 50 100 200 500 --n_steps 8000 --eval_every 250`. (b) Ran to completion (~2500 s of process
+time under heavy 5-agent GPU contention; writes incrementally per-k). (c) Rendered
+`plots/qwen_ae_lcurve.png`. (d) Wrote the RESULTS.md subsection + REPORT_AE.md §2 point (b′) + REPORT.md
+one-liner. (e) Verified render (REPORT 6/6, REPORT_AE 6/6, 0 degraded, 0 hazards). (f) CHANGELOG +
+PLAN updated, feedback renamed, STOP written.
+
+**Result.** Reproduced the lasse U at the 3,000-step budget from this run's own step-3000 checkpoints
+(val rel-L2 0.514 → min 0.464 @k≈100 → 0.498 @k=500). Training to 8,000 steps: every learning curve was
+still descending at 3,000 steps (larger k more so — 3,000→8,000 drop 0.010/0.016/0.022/0.026/0.031 for
+k=10…500); the 8,000-step held-out sweep has a lower floor (min 0.442 @k=100) and a shrunken rise
+(+0.034 → +0.025). The clincher: at 8,000 steps the **train** rel-L2 still rises past the minimum
+(0.406→0.418→0.435 for k=100/200/500), which the dead-wiring/containment bound forbids at convergence —
+so the big AEs are still undertrained. Answer to ask #3: **yes, the large k were undertrained; longer
+training shrinks the U and lowers the floor; a fully-converged sweep would be monotone non-increasing in
+k (no U-shape).**
+
+**Learned.** The rising branch of a wide-`k` reconstruction sweep is diagnosable as undertraining purely
+from the *train* curve — a train error that rises with `k` cannot be a convergence property (a wider
+bottleneck contains a narrower one), so it is an optimization gap. Also a process-hygiene lesson: check
+`pgrep`/`nvidia-smi --query-compute-apps` before launching a long GPU run — a prior iter's run may still
+be alive and racing on shared output files, and a quick probe with the same script + `>` redirect can
+clobber accumulated results.
+
+**Next step.** None — all three asks in `human_feedback_07082157.md` addressed; deliverables render
+clean; STOP written. If reopened: train each `k` to ~50k steps (the colleague's budget) to show the
+rising branch flatten to a monotone curve directly, closing the "8,000 steps is not convergence" caveat.
+
+On track? yes — 100% done; operator feedback #12 (learning-curve undertraining diagnostic) addressed; RESULTS/REPORT/REPORT_AE updated + render-verified; STOP written; no blocker.

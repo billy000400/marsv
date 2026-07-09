@@ -284,7 +284,11 @@ the elbow measures. **Full study in `REPORT_AE.md`; the high-level result:**
   is not overfitting. And a wider bottleneck AE contains a narrower one as a special case, so at
   convergence error cannot rise with k — the observed rise is under-optimization at the fixed step
   budget. So k ≈ 50 marks where fixed-budget trainability turns over, not the data's dimension; the
-  optimum is also a poor reconstruction (FVU ≈ 0.41).
+  optimum is also a poor reconstruction (FVU ≈ 0.41). Per-k learning curves confirm this directly:
+  every curve is still descending at the 3,000-step reproduction budget (larger k more so), and
+  re-running to 8,000 steps lowers the floor and shrinks the rising branch (+0.034 → +0.025) while the
+  *train* error still rises with k past the minimum — i.e. the big AEs stay undertrained, and an
+  unlimited budget would flatten the U entirely (`plots/qwen_ae_lcurve.png`).
 - **A *different*, genuinely sharp elbow appears only under concentrated variance.** Qwen last-token
   clouds are near-isotropic — PCA participation ratio **245 (layer 2)** / **42 (layer 10)**, ≤ 3.4% of
   variance in any one direction — versus GPT-2 layer 6's **90.4%** in a single "massive-activation"
