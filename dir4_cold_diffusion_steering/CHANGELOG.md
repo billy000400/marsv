@@ -790,3 +790,41 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
 - **Ops:** ran with `/opt/conda/bin/python` (transformers 5.13.0, torch 2.9 cu130, LOCAL disk); 5-seed Pythia
   run completed in ~5 min (training ~15 s/seed). Artifacts: `experiments/28_seed_robustness_pythia.py`,
   `results/28_seed_robustness_pythia.json`, `results/28_run.log`, `plots/28_seed_robustness_pythia.png`.
+
+## 2026-07-09 — Experiment 29: seed robustness on Qwen3-1.7B (error bar on the TOP of the architecture band)
+- **What / why:** Experiments 26/27/28 gave five-seed intervals on GPT-2 small (83.3 ± 2.0%), GPT-2 medium
+  (88.3 ± 2.2%), and Pythia-410m/GPT-NeoX (80.8 ± 1.6%) at α=8. The one remaining single-seed point the study
+  leans on was **Qwen3-1.7B (Exp 21) — the TOP of the reported 81–94% architecture band**, whose 94% @α=8 is the
+  largest single-seed recovery anywhere in the study, exactly where a lone seed is most in doubt (Exp 28's own
+  Next check). Completed a prior iteration's half-run (`experiments/29_seed_robustness_qwen.py` present + a
+  killed-mid-seed-1 `29_run.log`, no JSON/plot) by re-running to completion.
+- **Setup:** the EXACT Experiment-21 Qwen3-1.7B pipeline — DiffMean sentiment vector at block 14/28 (`|v|=38.1`,
+  mean `|h|=301.9`), 400-doc Gaussian fit (clean `D_M=44.7`), 300-doc train / held-out 100-doc eval, 8.39M
+  projection-preserving corrector at `d=2048`, recipe / `α ∼ U(0.5,8)`, matched projection — at five seeds (0–4).
+  Raw ΔLM seed-independent (computed once); only the learned corrector varies. The script reuses the Exp-21
+  module (load/resid_post/make_hat/lm_loss_fn/train_corrector/corrector_acts) verbatim, overriding `exp21.SEED`.
+- **Numbers:** recovery **94.8 ± 1.6% @α=8** (per-seed 94/95/96/92/96%), **108.3 ± 2.1% @α=4**, 162.9 ± 8.2%
+  @α=2; ΔLM learned @α=8 +0.177 ± 0.056 vs raw +3.429; `D_M` learned 123.3 ± 5.4 vs raw 77.8 @α=8 (decoupling
+  holds every seed). Seed 0 reproduces Exp 21 to the digit (94% @α=8, 108% @α=4).
+- **Key result:** Qwen3's α=8 band `[93.2, 96.4]%` sits ENTIRELY ABOVE every other seed-controlled model's —
+  GPT-2 medium `[86.1, 90.5]%` (Exp 27), GPT-2 small `[81.3, 85.3]%` (Exp 26), Pythia `[79.2, 82.4]%` (Exp 28).
+  So across four seed-controlled models the ordering is Qwen3 > medium > {small ≈ Pythia}, and Qwen3's
+  top-of-band 94% edge is a genuine effect, not optimization luck. The seed axis now spans FOUR models across two
+  scales and two architectures.
+- **Deliverables:** RESULTS.md gained the Exp-29 section + table + figure entry; the Headline now carries
+  Qwen3's seed CI; Exp-28's "Next check" marked done. REPORT_3 gained an Exp-29 Methods block + Results
+  subsection (Observation/Interpretation/Limitations/Next check) + Exp-28 Next-check marked done; the Exp-21
+  Results block now cites the Exp-29 confirmation; the Exp-26/27/28 limitation lines + Conclusion/open-items
+  updated to reflect only GPT-2 large remaining single-seed. REPORT.md index: seed-robust headline-table row +
+  Summary now show all four models (83.3/88.3/80.8/94.8%).
+- **Verification:** GitHub-API math check on the 2 touched report files — REPORT.md index 1, REPORT_3 9
+  js-display-math (Exp 29 adds a table + O/I/L/N prose, reuses Exp 12's recovery equation, no new equation);
+  0 broken (`<pre lang=math>`), 0 inline hazards.
+- **Limitation:** varies only the training seed on Qwen3 (init + α-sampling / data-shuffle RNG); eval set,
+  Gaussian fit, and steering vector fixed. GPT-2 large (Exp 19) is now the only headline model still single-seed.
+- **No prior result superseded** (Exp 29 additive; Exp 21's 94% confirmed representative).
+- **Ops:** ran with `/opt/conda/bin/python` (transformers 5.13.0, torch 2.9 cu130, LOCAL disk); Qwen3 loaded
+  from OS page cache; 5-seed run ~15 min under GPU contention. Used `setsid` full detach (prior `nohup &` runs
+  died with the shell process group when the Bash tool returned). Artifacts:
+  `experiments/29_seed_robustness_qwen.py`, `results/29_seed_robustness_qwen.json`, `results/29_run.log`,
+  `plots/29_seed_robustness_qwen.png`.

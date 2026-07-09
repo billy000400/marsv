@@ -1057,7 +1057,45 @@ damage there is only +0.059 nats, inflating the relative spread while the absolu
 *optimization* variance on Pythia, not eval-document or vector-construction sampling variance. The other
 non-GPT-2 architecture (Qwen3, Exp 21) and GPT-2 large (Exp 19) remain single-seed. **Next check.** A five-seed
 control on Qwen3 (the top of the 81–94% band) would test whether its higher recovery is likewise real or seed
-noise.
+noise. *Done in Experiment 29.*
+
+**Experiment 29 — Seed robustness on Qwen3-1.7B: an error bar on the *top* of the cross-architecture band.**
+Experiments 26/27/28 put five-seed intervals on GPT-2 small (83.3 ± 2.0%), GPT-2 medium (88.3 ± 2.2%), and
+Pythia-410m/GPT-NeoX (80.8 ± 1.6%) at α=8. The one remaining single-seed point the paper leans on is
+**Qwen3-1.7B (Experiment 21) — the *top* of the reported 81–94% architecture band**, and its 94% is the largest
+single-seed recovery in the whole study, exactly where a lone seed is most in doubt. We close it by re-running the
+**exact Experiment-21 Qwen3-1.7B pipeline** — same DiffMean sentiment vector (`|v| = 38.1`, mean `|h| = 301.9`),
+same 400-doc Gaussian fit (clean `D_M = 44.7`), same 300-doc training set, same held-out 100-doc eval, same 8.39M
+corrector at `d = 2048`, same recipe / `α ∼ U(0.5, 8)`, steered at block 14/28 — at **five seeds** (`0–4`),
+reporting mean ± sample standard deviation of the fluency recovery `recovery(α) = (ΔLM_raw(α) − ΔLM_learned(α)) /
+ΔLM_raw(α)`. `ΔLM_raw` is seed-independent (computed once); only the learned corrector varies. Seed 0 reproduces
+Experiment 21 to the digit — a built-in check.
+
+| α | ΔLM raw (nats) | **ΔLM learned (mean ± sd)** | **recovery (mean ± sd)** | `D_M` raw | `D_M` learned (mean ± sd) |
+|---|----------------|------------------------------|--------------------------|-----------|----------------------------|
+| 1 | +0.064 | **−0.173 ± 0.014** | 370.1 ± 21.4% | 45.4 | 59.8 ± 3.4 |
+| 2 | +0.243 | **−0.153 ± 0.020** | 162.9 ± 8.2% | 47.5 | 63.9 ± 4.6 |
+| 4 | +1.081 | **−0.090 ± 0.022** | **108.3 ± 2.1%** | 55.0 | 79.2 ± 5.1 |
+| 8 | +3.429 | **+0.177 ± 0.056** | **94.8 ± 1.6%** | 77.8 | 123.3 ± 5.4 |
+
+(Per-seed recovery at α=8: 94 / 95 / 96 / 92 / 96% — Experiment 21's 94% is seed 0's 94%.)
+
+**Reading it: Qwen3's top-of-band recovery is real, not a lucky seed — its interval sits clear above every other
+model tested.** At α=8 the five independently-trained Qwen3 correctors recover **94.8 ± 1.6%** of raw steering's
+fluency damage (range 92–96%), and at α≤4 they land *at or above* the unsteered baseline (recovery ≥ 100%,
+`ΔLM_learned` slightly negative — the free-or-better weak-α behavior seen on every model). This settles the
+architecture ordering at α=8: Qwen3's band (`[93.2, 96.4]%`) sits **entirely above** GPT-2 medium's
+(`[86.1, 90.5]%`, Experiment 27), which sits above GPT-2 small's (`[81.3, 85.3]%`, Experiment 26) and Pythia's
+(`[79.2, 82.4]%`, Experiment 28) — four seed-controlled models, and Qwen3's 94% edge is a genuine effect, not
+optimization noise. The signature decoupling holds every seed: the corrected activation sits *further* off the
+Gaussian manifold than raw at α=8 (`D_M` learned 123.3 ± 5.4 vs raw 77.8). The wide bars at α≤2 are the usual
+ratio artifact — raw's damage there is only +0.06–0.24 nats, inflating the relative spread while the absolute
+`ΔLM_learned` stays tight (±0.01–0.02). **Limitation.** As in Experiments 26/27/28, this varies only the training
+seed (corrector init + α-sampling / data-shuffle RNG); the eval set, Gaussian fit, and steering vector are held
+fixed, so it bounds *optimization* variance on Qwen3, not eval-document or vector-construction sampling variance.
+GPT-2 large (Exp 19) remains the only headline model still single-seed. **Next check.** The seed axis now covers
+four models spanning two scales and two architectures; a further-scaled or non-Transformer family (e.g. a
+state-space model) would extend it, at low marginal value.
 
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
@@ -1189,6 +1227,10 @@ noise.
   Same two panels as Exp 26/27. (b) recovery is 80.8 ± 1.6% at α=8 (five per-seed points 78–82%): its band sits
   below GPT-2 medium's (non-overlapping) but overlaps GPT-2 small's — the recipe is seed-stable across a third,
   non-GPT-2 architecture.
+- `plots/29_seed_robustness_qwen.png` — seed robustness on **Qwen3-1.7B** (block 14/28, 5 seeds). Same two panels
+  as Exp 26/27/28. (b) recovery is 94.8 ± 1.6% at α=8 (five per-seed points 92–96%): its band sits **entirely
+  above** every other model's, so Qwen3's top-of-band 94% is a genuine effect and the recipe is seed-stable on a
+  fourth model.
 
 ## Headline
 Raw linear steering `h + α·v` in GPT-2 drives activations off-manifold and breaks the LM (+2.78
@@ -1236,7 +1278,9 @@ artifact** either: replicating the exact flagship pipeline on **Qwen3-1.7B (bloc
 architecture that swaps LayerNorm→RMSNorm, learned→rotary positions, GELU→SwiGLU, and dense→grouped-query
 attention — recovers **94%** of the fluency damage at α=8 (**108%** at α=4), again by moving *further* off the
 Gaussian manifold than raw (`D_M` 122.2 vs 77.8), so the result is **architecture-robust** across all four
-structural axes that separate Qwen3 from the GPT-2 family (Exp 21). And this is now a genuine **architecture
+structural axes that separate Qwen3 from the GPT-2 family (Exp 21); a five-seed control (Exp 29) confirms this
+is **94.8 ± 1.6%** at α=8 — a band (`[93.2, 96.4]%`) entirely *above* every other model's, so Qwen3's
+top-of-band edge is a genuine effect, not a lucky seed. And this is now a genuine **architecture
 *sweep*, not a single boundary crossing**: adding a **third, structurally distinct family — Pythia-410m /
 GPT-NeoX (block 12/24)**, whose block uses a **parallel residual** (attention and MLP from the same input,
 summed) unlike both GPT-2's and Qwen3's serial residual — recovers **81%** of the fluency damage at α=8 (81% at

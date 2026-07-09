@@ -1238,3 +1238,42 @@ to test whether its 94% edge is real or seed noise; a further architecture famil
 Exp-23 finer-λ_b / Exp-20-on-Qwen3 lever. ENV: `/opt/conda/bin/python` (LOCAL disk, fast).
 On track? yes — S7 seed axis extended to a second architecture (Pythia 80.8±1.6% @α=8); recipe shown seed-stable
 across two model scales AND two architectures. ~100% complete. No blocker.
+
+## 2026-07-09 — Experiment 29: seed robustness on Qwen3-1.7B (error bar on the TOP of the architecture band)
+**Did.** Completed a prior iteration's half-run: `experiments/29_seed_robustness_qwen.py` was already present
+(a clean adaptation reusing the Exp-21 module functions verbatim, overriding `exp21.SEED` per run) plus a
+`29_run.log` that had been killed mid-seed-1 (seed 0 done at 94%, seed 1 at step 850) — no JSON, no plot. Re-ran
+it to completion with `setsid` full detach + `/opt/conda/bin/python`. This closed Exp 28's own Next check: a
+5-seed error bar on the TOP of the reported 81–94% architecture band. Qwen3's 94% @α=8 (Exp 21) was the largest
+single-seed recovery anywhere in the study, so exactly where a lone seed is most in doubt. The EXACT Exp-21
+Qwen3-1.7B pipeline (DiffMean sentiment |v|=38.1 at block 14/28, 400-doc Gaussian fit D_M=44.7, 300-doc train,
+held-out 100-doc eval, 8.39M corrector @ d=2048, recipe, α∼U(0.5,8)) at 5 seeds (0–4); raw ΔLM seed-independent.
+Result POSITIVE + tight: recovery 94.8±1.6% @α=8 (per-seed 94/95/96/92/96%), 108.3±2.1% @α=4, 162.9±8.2% @α=2;
+ΔLM learned @α=8 +0.177±0.056 vs raw +3.429; D_M learned 123.3±5.4 vs raw 77.8 (decoupling every seed). Seed 0
+reproduces Exp 21 to the digit (94%/108%).
+**Learned.** (1) The recipe is seed-stable on a FOURTH model — the corrector's advantage over raw dwarfs its
+seed spread (±1.6% @α=8, ±2.1% @α=4) just as on the three prior models. (2) KEY: Qwen3's α=8 band [93.2,96.4]%
+sits ENTIRELY ABOVE every other seed-controlled model — GPT-2 medium [86.1,90.5]% (Exp 27), small [81.3,85.3]%
+(Exp 26), Pythia [79.2,82.4]% (Exp 28) — so across four seed-controlled models the ordering is Qwen3 > medium >
+{small ≈ Pythia}, and Qwen3's top-of-band 94% edge is a genuine effect, not seed noise. This completes the
+architecture-band seed control (both ends now bounded: Pythia at the low end, Qwen3 at the top). (3) Sanity:
+|v|=38.1, mean|h|=301.9, D_M clean 44.66, raw ΔLM +0.064/+0.243/+1.081/+3.429 all reproduce Exp 21 to the digit —
+the module reuse is faithful.
+**Assumptions/decisions logged (loop mode).** (a) Ran Exp 29 (Qwen3, the band's TOP) as the natural continuation
+of the half-finished script and Exp 28's explicit Next check — highest remaining rigor value; the alternative
+(GPT-2-large seed CI, same architecture, adds no axis) logged as Exp 29's own Next check. (b) 5 seeds (matches
+Exp 26/27/28 for an apples-to-apples CI comparison). (c) Placed Exp 29 in RESULTS + REPORT_3 next to Exp 26/27/28
+(seed cluster), not a new part.
+**Deliverables.** RESULTS.md (Exp-29 section + table + figure entry + Headline Qwen3 seed CI, Exp-28 Next-check
+marked done); REPORT_3 (Exp-29 Methods block + Results O/I/L/N subsection + Exp-21 Results pointer + Exp-26/27/28
+limitation lines + Conclusion/open-items all updated so only GPT-2 large remains single-seed); REPORT.md index
+(seed-robust headline row + Summary now all four models 83.3/88.3/80.8/94.8%). CHANGELOG appended; PLAN Current
+status/Next step rewritten + S7(d) checkbox added; this JOURNAL entry. REPORT math re-verified on the 2 touched
+files (REPORT.md index 1 / REPORT_3 9 js-display-math, 0 broken, 0 inline hazards — reuses Exp 12's recovery
+equation, no new equation). Artifacts: `experiments/29_seed_robustness_qwen.py`,
+`results/29_seed_robustness_qwen.json`, `results/29_run.log`, `plots/29_seed_robustness_qwen.png`.
+**Next step.** Optional only (success criterion long met): (i) a 5-seed control on GPT-2 large (Exp 19) — the last
+single-seed headline model; (ii) a further architecture family (state-space/MoE); (iii) finer λ_b / Exp-20 on
+Qwen3 (Exp 23's Next check). All marginal. ENV: `/opt/conda/bin/python` (LOCAL disk, fast); `setsid` full detach.
+On track? yes — S7 seed axis extended to a fourth model (Qwen3 94.8±1.6% @α=8, top of the band, real edge);
+recipe seed-stable across two scales AND two architectures; only GPT-2 large single-seed. ~100% complete. No blocker.

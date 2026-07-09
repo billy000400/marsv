@@ -179,6 +179,15 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         reproduces Exp 24 to the digit. KEY: Pythia band [79.2,82.4]% sits ENTIRELY BELOW medium's [86.1,90.5]%
         (genuine gap) but OVERLAPS small's [81.3,85.3]% (Pythia≈small within seed noise). Recipe seed-stable on
         a non-GPT-2 family; seed axis now spans two model scales AND two architectures.
+- [x] S7(d) — SEED robustness on QWEN3-1.7B (Exp 29, 2026-07-09) DONE: closed Exp 28's Next check — the TOP of the
+        81–94% architecture band. Qwen3's 94% @α=8 (Exp 21) was the largest single-seed recovery in the study, so
+        most in doubt. Re-ran the EXACT Exp-21 Qwen3 pipeline (DiffMean sentiment |v|=38.1 at block 14/28, 400-doc
+        fit D_M=44.7, 8.39M corrector @ d=2048, recipe, α∼U(0.5,8)) at 5 seeds (0–4). POSITIVE + tight: recovery
+        94.8±1.6% @α=8 (per-seed 94/95/96/92/96%), 108.3±2.1% @α=4; ΔLM learned @α=8 +0.177±0.056 vs raw +3.429;
+        D_M learned 123.3±5.4 vs raw 77.8 (decoupling every seed). Seed 0 reproduces Exp 21 to the digit. KEY:
+        Qwen3 band [93.2,96.4]% sits ENTIRELY ABOVE every other seed-controlled model (medium [86.1,90.5], small
+        [81.3,85.3], Pythia [79.2,82.4]) — so Qwen3's top-of-band edge is real, not seed noise. Seed axis now
+        spans FOUR models / two scales / two architectures; only GPT-2 large (Exp 19) remains single-seed.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -190,6 +199,30 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S7 SEED robustness on QWEN3-1.7B — Experiment 29 (new, 2026-07-09):** completed a prior iteration's half-run
+(`experiments/29_seed_robustness_qwen.py` present + a `29_run.log` killed mid-seed-1, no JSON/plot) by re-running
+to completion. Closed Exp 28's own Next check — a 5-seed error bar on the TOP of the 81–94% architecture band.
+Qwen3's 94% @α=8 (Exp 21) was the largest single-seed recovery anywhere in the study, exactly where a lone seed
+is most in doubt. Re-ran the EXACT Exp-21 Qwen3 pipeline (DiffMean sentiment |v|=38.1 at block 14/28, 400-doc
+Gaussian fit D_M=44.7, 300-doc train, held-out 100-doc eval, 8.39M corrector @ d=2048, recipe, α∼U(0.5,8)) at 5
+seeds (0–4); raw ΔLM seed-independent. The script reuses the Exp-21 module functions verbatim, overriding
+`exp21.SEED` per run. POSITIVE + tight: recovery **94.8±1.6% @α=8** (per-seed 94/95/96/92/96%), **108.3±2.1%
+@α=4**, 162.9±8.2% @α=2; ΔLM learned @α=8 +0.177±0.056 vs raw +3.429; D_M learned 123.3±5.4 vs raw 77.8
+(decoupling every seed). Seed 0 reproduces Exp 21 to the digit (94%/108%). KEY: Qwen3 band [93.2,96.4]% sits
+ENTIRELY ABOVE every other seed-controlled model — GPT-2 medium [86.1,90.5]% (Exp 27), GPT-2 small [81.3,85.3]%
+(Exp 26), Pythia [79.2,82.4]% (Exp 28) — so across four seed-controlled models the ordering is Qwen3 > medium >
+{small ≈ Pythia}, and Qwen3's top-of-band 94% edge is a genuine effect, not optimization luck. Seed axis now
+spans FOUR models / two scales / two architectures; only GPT-2 large (Exp 19) remains single-seed. No prior
+result superseded (Exp 29 additive; Exp 21's 94% confirmed). Artifacts: `experiments/29_seed_robustness_qwen.py`,
+`results/29_seed_robustness_qwen.json`, `results/29_run.log`, `plots/29_seed_robustness_qwen.png`. Curated
+RESULTS.md (Exp-29 section + table + figure + Headline Qwen3 seed CI, Exp-28 Next-check done), REPORT_3 (Exp-29
+Methods + Results O/I/L/N + Exp-21 pointer + Exp-26/27/28 limitation lines + Conclusion/open-items updated to only
+GPT-2 large single-seed) + index (seed-robust row + Summary now all four models). CHANGELOG appended. REPORT math
+re-verified on the 2 touched files (REPORT.md index 1 / REPORT_3 9 js-display-math, 0 broken, 0 inline hazards —
+reuses Exp 12's recovery equation, no new equation). ENV: `/opt/conda/bin/python` (transformers 5.13.0, torch 2.9
+cu130, LOCAL disk); Qwen3 loaded from page cache; 5-seed run ~15 min under GPU contention; `setsid` full detach.
+
+<!-- prior: S7 seed robustness Exp 28 -->
 **S7 SEED robustness on PYTHIA-410m / GPT-NeoX — Experiment 28 (new, 2026-07-09):** picked Exp 27's own Next
 check, the highest-value remaining rigor point. Exp 26/27 gave 5-seed CIs on two GPT-2 SCALES, but the
 cross-ARCHITECTURE number (Exp 24, Pythia) was still single seed-0 — and Pythia sits at the LOW end of the
@@ -652,18 +685,18 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**S7 seed robustness DONE on TWO model scales + TWO architectures (Exp 26 GPT-2 small + Exp 27 GPT-2 medium +
-Exp 28 Pythia/GPT-NeoX).** Seed CI now covers GPT-2 small (83.3±2.0% @α=8), GPT-2 medium (88.3±2.2%), and Pythia
-(80.8±1.6%): medium sits entirely above the other two (real model-scale edge), Pythia overlaps small (≈ within
-seed noise). Success criterion long met; result robust on SEVEN axes (strength/direction/layer/model-scale/
-architecture/prompt-family/steering-family) PLUS seed on two scales and two architectures. Only very-low-value
-optional points remain: (i) a 5-seed control on Qwen3 (the TOP of the 81–94% band, Exp 28's own Next check) to
-test whether its 94% edge is real or seed noise — modest value, the recipe is already shown seed-stable on three
-models; (ii) a FURTHER architecture family (state-space/MoE) for a fuller sweep; (iii) finer λ_b + Exp-20
-differentiable-generation ON Qwen3 (Exp 23's Next check); (iv) a 5-seed control on GPT-2 large (Exp 19). ENV: use
-`/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk, imports in seconds) — the dir9 `cupenv` on /mars-vol
-stalls ~30 min on cold imports under disk contention. Verify any REPORT edit with the GitHub-API math check on
-the touched report files.
+**S7 seed robustness DONE on FOUR models — two scales + two architectures (Exp 26 GPT-2 small 83.3±2.0% + Exp 27
+GPT-2 medium 88.3±2.2% + Exp 28 Pythia/GPT-NeoX 80.8±1.6% + Exp 29 Qwen3-1.7B 94.8±1.6%, all @α=8).** The four
+seed bands give a clean controlled ordering Qwen3 > medium > {small ≈ Pythia}: Qwen3 sits entirely above all
+others (top-of-band edge real), medium above small/Pythia (real model-scale edge), small≈Pythia (overlap).
+Success criterion long met; result robust on SEVEN axes (strength/direction/layer/model-scale/architecture/
+prompt-family/steering-family) PLUS seed on four models. Only very-low-value optional points remain: (i) a 5-seed
+control on GPT-2 large (Exp 19) — the last single-seed headline model; (ii) a FURTHER architecture family
+(state-space/MoE, e.g. Mamba/Mixtral) for a fuller sweep beyond three; (iii) finer λ_b + Exp-20
+differentiable-generation ON Qwen3 (Exp 23's Next check). All are marginal — the seed axis and the external-
+validity story are already comprehensive. ENV: use `/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk,
+imports in seconds) — the dir9 `cupenv` on /mars-vol stalls ~30 min on cold imports under disk contention. Verify
+any REPORT edit with the GitHub-API math check on the touched report files.
 
 <!-- prior next step -->
 **Report restructure DONE (2026-07-09 human feedback).** REPORT.md is now an index + four topic-focused parts
