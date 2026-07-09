@@ -680,3 +680,27 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   all plots/2[1-5]_*.png present.
 - REPORT math re-verified via GitHub API: 26/26 js-display-math, 0 broken (<pre lang=math>),
   0 inline-math hazards. No result superseded; no equation added. STOP file created.
+
+## 2026-07-09 — REPORT restructure per human feedback (no result numbers changed)
+- **Trigger:** operator feedback (`human_feedback_07082201.md`): "the report is too long and too much back and
+  forth and I cannot understand it" → asked to disassemble REPORT.md into 2–4 topic-focused mini reports.
+- **Change:** the 1744-line monolithic REPORT.md was split into a short **index** + **four self-contained parts**,
+  each a clean linear narrative on ONE topic (Summary → Methods → Results → Conclusion; Methods gives Data/Model/
+  Layer and defines every metric & baseline with rendered equations):
+  - `REPORT.md` (was 1744 lines → now 108): overall Summary, the takeaway equation, a headline-numbers table, a
+    limitations overview, and links to the four parts.
+  - `REPORT_1_core_correction.md` — Exp 2,3,4,5,16,17 (Gaussian corrector backfires; LM-supervised fix recovers
+    84% @α=8 by moving further off-manifold; why the Gaussian is the wrong yardstick; diffusion-framing ablation).
+  - `REPORT_2_amortization.md` — Exp 6,7,8,9,14 (direction-conditional corrector on a bank; scaling/curation
+    fail; bank-diversity lever confirmed causally).
+  - `REPORT_3_external_validity.md` — Exp 12,13,19,21,24,15,18 (layer / model-scale / architecture-sweep /
+    prompt-family / steering-vector-family robustness; 81–94% @α=8 across three architectures).
+  - `REPORT_4_behavioral.md` — Exp 10,11,20,22,23,25 (matched projection ≠ matched steering; readout-preservation
+    and differentiable-generation fixes across three architectures).
+- **Fidelity:** all Methods/Results blocks copied VERBATIM from the source — no number, equation, or figure
+  reference altered; only each part's Summary/Conclusion is newly written (topic-scoped, no cross-topic
+  back-and-forth). Added one previously-orphaned figure reference (`plots/25_behavioral_pythia.png`) to Part 4.
+- **Verification:** GitHub-API math check on all five files — 42 js-display-math total (index 1 / P1 16 / P2 6 /
+  P3 9 / P4 10), 0 broken (`<pre lang=math>`), 0 inline-math hazards. Every part has all four top-level sections.
+- **RESULTS.md:** left unchanged (a distinct per-experiment results log; the feedback targeted the narrative
+  report's length/back-and-forth). No experiment re-run; no result superseded.

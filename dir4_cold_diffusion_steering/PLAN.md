@@ -169,6 +169,26 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**REPORT RESTRUCTURE (human feedback, 2026-07-09):** the operator said REPORT.md was "too long and too much
+back and forth" to follow, and asked to disassemble it into 2–4 topic-focused mini reports. Done: the 1744-line
+monolith is now a 108-line **index** (`REPORT.md`: overall Summary + the takeaway equation + headline-numbers
+table + limitations overview + links) plus **four self-contained parts**, each with its own Summary → Methods
+(Data/Model/Layer + every metric & baseline defined with rendered equations) → Results → Conclusion:
+`REPORT_1_core_correction.md` (Exp 2–5,16,17: the negative Gaussian corrector + the LM-supervised fix + why the
+Gaussian is the wrong yardstick + the diffusion-framing ablation), `REPORT_2_amortization.md` (Exp 6–9,14:
+direction-conditional corrector / bank scaling / capacity / curation / the diversity lever),
+`REPORT_3_external_validity.md` (Exp 12,13,19,21,24,15,18: layer / model-scale / architecture-sweep / prompt-family
+/ steering-vector-family robustness), `REPORT_4_behavioral.md` (Exp 10,11,20,22,23,25: the matched-projection≠
+matched-steering caveat + the readout-preservation & differentiable-generation fixes across three architectures).
+All Methods/Results blocks were copied VERBATIM from the source (no number/equation/figure altered); each part's
+Summary/Conclusion is newly written to give that topic a clean linear narrative (no cross-topic back-and-forth).
+Math re-verified via the GitHub API on all five files: 42 js-display-math total (index 1 / P1 16 / P2 6 / P3 9 /
+P4 10), 0 broken (`<pre lang=math>`), 0 inline hazards; every part carries its topic's figures (P4 now also
+references the previously-orphaned `plots/25_behavioral_pythia.png`). RESULTS.md left as-is (a per-experiment
+results log, a distinct deliverable from the narrative REPORT; the feedback was specifically about the report's
+length/back-and-forth). No experiment re-run; no result number changed. CHANGELOG appended.
+
+<!-- prior status below -->
 **S4(l-follow-up) Experiment 25 (new, BEHAVIORAL check on Pythia-410m = Exp 24's own Next check, 2026-07-08):**
 completed an experiment a prior iteration left half-done (script `experiments/25_behavioral_pythia.py` present — a
 clean adaptation of Exp 22 to the Exp-24 Pythia pipeline — but never run: no JSON/plot/log). Exp 24's 81% recovery
@@ -542,6 +562,13 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
+**Report restructure DONE (2026-07-09 human feedback).** REPORT.md is now an index + four topic-focused parts
+(see Current status). Optional follow-ups if a future iter wants them: (a) apply the same split to RESULTS.md if
+the operator finds it too long too (currently left as a single per-experiment results log); (b) the research
+follow-ups below remain low-value and optional. Verify any REPORT edit with the GitHub-API math check on ALL FIVE
+report files, not just REPORT.md.
+
+<!-- prior next-step below -->
 **All three human-feedback asks DONE; optional model-scale (Exp 19), differentiable-generation (Exp 20),
 cross-ARCHITECTURE (Exp 21), the Qwen3 behavioral honesty-check (Exp 22), the Qwen3 behavioral-fix transfer
 (Exp 23), the SECOND non-GPT-2 architecture / architecture SWEEP (Exp 24), AND the Pythia behavioral honesty-check

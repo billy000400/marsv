@@ -1,0 +1,1 @@
+currently the report is too long. Can you disassemble the report into 2-4 mini report that each mini report shares the same topic? right now the report is too long and too much back and forth and I cannot understand it at all

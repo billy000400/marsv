@@ -1086,3 +1086,44 @@ Learned: nothing new numerically; the deliverables pass the CLAUDE.md §8 render
 Next step: none required — success criterion long met. Optional low-value future points (Exp 11/20
 behavioral terms on Pythia; a state-space/MoE 4th architecture) remain but are not needed.
 On track? yes — direction complete (~100%), deliverables current-best + math-verified, STOP written. No blocker.
+
+## 2026-07-09 — REPORT.md disassembled into an index + four topic-focused mini reports (human feedback)
+**Did.** Acted on operator feedback (`human_feedback_07082201.md`): "the report is too long and too much back and
+forth and I cannot understand it… disassemble the report into 2–4 mini reports that each share the same topic."
+Split the 1744-line monolithic REPORT.md into a 108-line **index** (`REPORT.md`: overall Summary + takeaway
+equation + a headline-numbers table + limitations overview + links) and **four self-contained parts**, each a
+clean linear narrative on ONE topic with the full Summary→Methods→Results→Conclusion structure (Methods keeps
+Data/Model/Layer + every metric & baseline defined with rendered equations):
+P1 `core_correction` (Exp 2,3,4,5,16,17 — the negative Gaussian corrector, the LM-supervised fix, why the Gaussian
+is the wrong yardstick, the diffusion-framing ablation); P2 `amortization` (Exp 6,7,8,9,14 — bank corrector +
+diversity lever); P3 `external_validity` (Exp 12,13,19,21,24,15,18 — the six robustness axes); P4 `behavioral`
+(Exp 10,11,20,22,23,25 — matched-projection≠matched-steering + the fixes across three architectures). Executed the
+mechanical VERBATIM extraction of all Methods/Results blocks via four parallel subagents (each given exact source
+line ranges + topic-scoped Summary/Conclusion facts); wrote the index myself. Verified every file's math through
+the GitHub markdown API.
+**Learned.** The report's unreadability was structural, not numerical: 25 experiments interleaved by chronology
+(Exp 10→11→20→12→13→…→22→23→…) forced the reader to hold five threads at once. Grouping by topic and giving each
+group its own Summary/Conclusion removes the back-and-forth without touching a single result. The GitHub-API math
+check must now run on all FIVE report files, not just REPORT.md (recorded in PLAN Next step). Total display math
+42 (index 1 / P1 16 / P2 6 / P3 9 / P4 10), 0 broken, 0 inline hazards; found+fixed one orphaned figure
+(`plots/25_behavioral_pythia.png`) that the source never referenced — now in P4.
+**Assumptions/decisions logged (loop mode).** (a) Chose **4 parts** (the top of the requested 2–4 range) because
+the work has four genuinely distinct topics (core mechanism / amortization / external validity / behavioral) and
+fewer parts would re-create the cross-topic back-and-forth the operator objected to. Grouping: put manifold
+geometry (16) + diffusion ablation (17) INTO the core-mechanism part (they explain *why* the fix works) rather
+than a 5th part, and put steering-vector-family (18) into external-validity (it is a robustness axis). (b) Kept
+`REPORT.md` as a short **index** rather than making Part 1 the entry point, so the overall thesis + headline table
+live in one place and CLAUDE.md §8's "self-contained presentable report with Methods+equations" is satisfied
+**within each part**. Logged as a deliberate reading of §8 for a split report. (c) Left **RESULTS.md unchanged** —
+the feedback named "the report" (the narrative REPORT.md); RESULTS.md is a per-experiment results log with far
+less back-and-forth. Rejected alt: splitting RESULTS.md too (scope creep, not requested); noted in PLAN as an
+optional future step if the operator asks. (d) Delegated verbatim extraction to subagents to keep my context
+small and parallelize; mitigated the paraphrase risk by giving exact line ranges + instructing character-for-
+character copying, then independently re-verified numbers/math on every output.
+**Deliverables.** REPORT.md (index) + REPORT_1..4 (parts). PLAN Current status + Next step updated; CHANGELOG
+appended; this JOURNAL entry. No experiment re-run; no result number changed.
+**Next step.** None required — feedback addressed. Optional: apply the same split to RESULTS.md if the operator
+finds it long too; the prior low-value research follow-ups remain.
+On track? yes — directly resolved the operator's readability complaint by restructuring the report into an index +
+four topic-focused parts with zero change to any result; all five files math-verified (42 js-display-math, 0
+broken, 0 inline hazards). No blocker.
