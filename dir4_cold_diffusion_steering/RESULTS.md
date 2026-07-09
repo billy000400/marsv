@@ -1273,6 +1273,38 @@ faithful summary of a near-uniform per-position curve. This closes the token-pos
 the flagship recovery is now checked across strength, layer, model, prompt-family, steering-family, seed,
 eval-document, vector construction, **and** token position.
 
+**Experiment 35 — Token-type control: does the corrector recover content words as well as cheap function words?**
+Experiment 34 showed the recovery is flat across *where* a token sits; the complementary question (its own Next
+check) is *what kind* of token it is. Function words (`the`, `of`, `a`, `is`) are high-frequency and easy to
+predict, so a corrector could buy back most of the pooled fluency by fixing only those, while leaving the
+meaning-bearing content words (nouns, verbs, adjectives) broken — which would make the pooled 84% misleading. We
+isolate it: train the exact flagship Exp-3 corrector (GPT-2 small, block 6, sentiment `v`, seed 0), then accumulate
+next-token NLL on the same held-out 100 FineWeb docs **split by the type of the target token being predicted**, for
+clean / raw / learned at α ∈ {4, 8}. Each of the 50,257 GPT-2 vocabulary tokens is classified once from its decoded
+string: **FUNCTION** = word-initial (leading space) closed-class function word from a fixed stop-list (383 vocab
+types, 30% of eval tokens); **CONTENT** = word-initial alphabetic token not on the list (open-class content word;
+32k types, 38% of tokens); **OTHER** = subword continuations, punctuation, digits (31% of tokens; reported for
+completeness). Per type, `excess_m = (Σ nll_m − Σ nll_clean)/count` and `recovery = 1 − excess_learned/excess_raw`.
+
+| target-token type | share of tokens | clean NLL (nats) | raw excess @α=8 | learned excess @α=8 | **recovery @α=8** | recovery @α=4 |
+|---|---|---|---|---|---|---|
+| FUNCTION (the, of, a, is…) | 30% | 2.52 | +1.25 | +0.33 | **73.9%** | 75.8% |
+| CONTENT (nouns/verbs/adjs) | 38% | 5.16 | +3.89 | +0.87 | **77.5%** | 82.5% |
+| OTHER (punct/subword/digit) | 31% | 3.17 | +2.90 | +0.003 | **99.9%** | 131% |
+| **pooled (headline)** | 100% | — | +2.78 | +0.44 | **84.3%** | 95.3% |
+
+**Reading it: the corrector recovers content words at least as well as function words, so the pooled 84% is not
+inflated by cheap tokens.** Three points. **(1) Content words take the most absolute damage from steering** — raw
+excess NLL is largest on content words (+3.89 nats at α=8, vs +1.25 on function words), which is expected: steering
+perturbs the meaning-carrying predictions most. **(2) The corrector recovers them slightly *better* than function
+words** — content recovery 77.5% vs function 73.9% at α=8 (82.5% vs 75.8% at α=4). So the fluency win is not a
+function-word artifact; the corrector buys back the bulk of the damage exactly where steering does the most harm.
+**(3) The pooled 84.3% sits above both linguistic classes** because near-perfect recovery of the OTHER class
+(punctuation / subword pieces, 99.9% at α=8 — these are the most predictable-once-context-is-clean tokens) pulls
+the token-weighted pool up; on the two meaningful classes recovery is a still-strong but slightly lower and nearly
+equal 74–78%. Pooled recovery reproduces Exp 3 / Exp 34 to the digit (84.3% / 95.3%). This closes Experiment 34's
+Next check: the flagship recovery is uniform across token *type* as well as token *position*.
+
 ## Figures
 - `plots/01_offmanifold_phenomenon.png` — (a) Mahalanobis distance, (b) norm inflation,
   (c) ΔLM loss, each vs steering strength α. All monotonically increasing.
@@ -1295,6 +1327,10 @@ eval-document, vector construction, **and** token position.
   corrector at α=8 (both rise mildly along the sequence; the corrector's stays near zero); (b) fluency
   recovery vs token position for α=4 and α=8, with the pooled headline drawn as a dotted line — recovery is
   flat past the first bucket, so the pooled 84% is not a position artifact.
+- `plots/35_token_type.png` — (a) fluency recovery by target-token type (FUNCTION / CONTENT / OTHER) for
+  α=4 and α=8, with the pooled headline as a dotted line — content-word recovery (77.5%) matches/exceeds
+  function-word recovery (73.9%) at α=8; (b) per-type excess NLL for raw vs the learned corrector at α=8 —
+  raw damage is largest on content words, and the corrector removes most of it on every type.
 - `plots/03_learned_corrector.png` — (a) ΔLM, (b) `D_M`, (c) projection retention vs α for raw,
   analytic cov-aligned, and the learned LM-supervised corrector. The learned corrector's ΔLM sits
   near zero across α while its `D_M` rises above raw — winning on fluency by going *off* the
@@ -1434,7 +1470,7 @@ nats at α=8). Correcting toward the **Gaussian manifold backfires** — an anal
 preserving corrector cuts off-manifold distance 22% but *worsens* LM loss to +4.2 nats. But a
 **learned corrector supervised by the LM loss** — same projection-preserving form, so the layer-6
 steering projection is untouched — **recovers 84% of the teacher-forced fluency damage** (ΔLM
-+2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33; and **flat across token position** — recovery holds an 80.7–83.5% band from token 16 to 126, so the pooled headline is not a pooling artifact, Exp 34) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
++2.78→+0.44 at α=8; **83.3 ± 2.0% across 5 training seeds**, Exp 26; **84% ± 3 pp under a joint vector×seed resample**, Exp 33; and **flat across token position** — recovery holds an 80.7–83.5% band from token 16 to 126, so the pooled headline is not a pooling artifact, Exp 34, and content words are recovered as well as function words — 77.5% vs 73.9% at α=8, Exp 35) while moving *further* from the Gaussian manifold. Statistical "on-manifold" and
 "LM-safe" are decoupled; only the downstream objective finds the fluent correction. The correction is
 **direction-specific**
 — a corrector trained on one concept does not transfer to a near-orthogonal one — but the **recipe

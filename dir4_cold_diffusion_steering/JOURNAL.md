@@ -1490,3 +1490,43 @@ finer λ_b / Exp-20 on Qwen3. All marginal.
 On track? yes — S7(i) closes the last metric-control axis CLAUDE.md names: the flagship recovery is flat across
 token position (80.7–83.5% band @α=8, pooled 84.3% = Exp 3), so the headline is not a pooling artifact. ~100%
 complete. No blocker.
+
+## 2026-07-09 — Experiment 35: token-TYPE control (closes Exp 34's Next check)
+**What I did.** Project is ~100% complete (34 experiments; 7 external-validity axes + metric-controls through
+token position). Picked Exp 34's own explicit Next check — the per-token-TYPE breakdown — as the highest
+rigor-per-minute step and the last named metric-control gap. Wrote `experiments/35_token_type.py`, reusing the
+Exp-3 Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim (DRY); only new code is a vocab
+token-type map (classify each of the 50,257 GPT-2 tokens once from its decoded string into FUNCTION/CONTENT/OTHER)
+and a per-type NLL accumulator. Trained the EXACT flagship corrector (GPT-2 small, block 6, sentiment `v`, seed 0),
+measured next-token NLL on the held-out 100 FineWeb docs split by target-token type for clean/raw/learned at
+α∈{4,8}. Ran ~1 min on GPU (`/opt/conda/bin/python`, `setsid` detach), no OOM under the 0.18 VRAM fraction.
+**Result.** POSITIVE + clean. Recovery @α=8: FUNCTION 73.9%, CONTENT 77.5%, OTHER 99.9% (α=4: 75.8/82.5/131%).
+Content words take the LARGEST absolute raw damage (+3.89 nats vs function +1.25) yet recover slightly BETTER than
+function words. Pooled 84.3%@α=8 / 95.3%@α=4 reproduces Exp 3/34 to the digit (built-in check).
+**Learned.** (1) KEY: the pooled headline is NOT a cheap-token artifact — the corrector buys back the bulk of the
+damage exactly where steering does the most harm (content words), not just on easy function words. (2) The pooled
+84.3% sits ABOVE both linguistic classes because the OTHER class (punctuation/subword pieces, ~100% recovered)
+carries large excess NLL and pulls the token-weighted pool up; on the two meaningful classes recovery is a
+still-strong nearly-equal 74–78%. (3) Content words have the highest clean NLL (5.16 vs 2.52 function) — they are
+intrinsically hardest to predict, so the steer's absolute disruption there is largest, and the corrector's residual
+there (+0.87) is also the largest absolute but a small fraction of raw's +3.89.
+**Assumptions/decisions logged (loop mode).** (a) Chose token-TYPE over the other marginal open items (wider
+architecture, SST-2 vector) because it is Exp 34's OWN explicit Next check and the last metric-control axis, and is
+cheap (reuse flagship corrector, only add a per-type eval). (b) FUNCTION via a fixed closed-class stop-list, not a
+POS tagger (no extra deps; logged the coarseness as the Limitation and a finer POS split as Exp 35's Next check).
+(c) Word-initial = leading-space decode, so mid-word subword pieces fall into OTHER — a deliberate, conservative
+split reported for completeness. (d) α∈{4,8} (the two headline strengths). (e) Placed Exp 35 in the seed/sampling/
+metric-control cluster (RESULTS + REPORT_3 after Exp 34), a control not a new external-validity axis.
+**Deliverables.** RESULTS.md (Exp-35 section + per-type table + reading + figure entry; Headline token clause
+extended with content-vs-function); REPORT_3 (Exp-35 O/I/L/N subsection + table after Exp 34; Exp-34 Next-check
+closed "Done in Experiment 35"; Conclusion open-items extended); REPORT.md index (Summary token-type clause +
+headline-table row). CHANGELOG appended; PLAN Current status / Next step rewritten + S7(j) checkbox added; this
+JOURNAL entry. Math re-verified via GitHub API: REPORT.md 1 js-display-math / 0 `<pre lang=math>`, REPORT_3 12/0
+(unchanged — no new display math), 0 inline hazards in all three touched files. Artifacts:
+`experiments/35_token_type.py`, `results/35_token_type.json`, `results/35_run.log`, `plots/35_token_type.png`.
+**Next step.** Optional only (all metric-control axes now isolated): (i) finer POS breakdown (nouns/verbs/adjs) of
+the CONTENT class; (ii) wider architecture family (state-space/MoE/GPT-2 XL) or SST-2-built vector; (iii) finer
+λ_b / Exp-20 on Qwen3. All marginal.
+On track? yes — S7(j) closes the last metric-control axis (token TYPE): the flagship recovery is uniform across
+token type (content 77.5% ≥ function 73.9% @α=8, pooled 84.3% = Exp 3/34), so the headline is neither a pooling nor
+a cheap-token artifact. ~100% complete. No blocker.

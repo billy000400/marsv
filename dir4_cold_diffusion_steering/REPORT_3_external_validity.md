@@ -884,8 +884,45 @@ start, so the recovery ratio there is larger (and >100% at α=4).
 is distance from the document start, not a linguistic role. It bounds *where in the sequence* the recovery lives,
 not per-token-*type* structure (e.g. content vs function words).
 
-**Next check.** A per-token-*type* breakdown (content vs function words, or by part-of-speech) would test whether
-the flat position curve hides token-category structure; marginal given the near-uniform position result.
+**Next check.** *Done in Experiment 35* — a per-token-*type* breakdown (content vs function words) tests whether
+the flat position curve hides token-category structure.
+
+### Experiment 35 — the recovery is uniform across token *type*, so the pooled 84% is not a cheap-token artifact
+
+![token-type breakdown of the flagship recovery](plots/35_token_type.png)
+
+Experiment 34 fixed *where* a token sits; this fixes *what kind* it is (Exp 34's own Next check). Function words
+(`the`, `of`, `a`, `is`) are high-frequency and easy to predict, so a corrector could buy back most of the pooled
+fluency by fixing only those while leaving the meaning-bearing content words broken — which would make the pooled
+84% misleading. We train the exact flagship Exp-3 corrector (GPT-2 small, block 6, sentiment `v`, seed 0) and
+accumulate next-token NLL on the same held-out 100 FineWeb docs, split by the type of the **target** token. Each of
+the 50,257 GPT-2 vocabulary tokens is classified once from its decoded string: **FUNCTION** (word-initial
+closed-class function word from a fixed stop-list; 30% of eval tokens), **CONTENT** (word-initial alphabetic token
+not on the list; 38%), **OTHER** (subword continuations, punctuation, digits; 31%).
+
+| target-token type | share | clean NLL | raw excess @α=8 | learned excess @α=8 | **recovery @α=8** | recovery @α=4 |
+|---|---|---|---|---|---|---|
+| FUNCTION | 30% | 2.52 | +1.25 | +0.33 | **73.9%** | 75.8% |
+| CONTENT | 38% | 5.16 | +3.89 | +0.87 | **77.5%** | 82.5% |
+| OTHER | 31% | 3.17 | +2.90 | +0.003 | **99.9%** | 131% |
+| **pooled** | 100% | — | +2.78 | +0.44 | **84.3%** | 95.3% |
+
+**Observation.** Raw steering's absolute damage is largest on content words (+3.89 nats at α=8 vs +1.25 on function
+words). The corrector recovers content words slightly *better* than function words (77.5% vs 73.9% at α=8; 82.5% vs
+75.8% at α=4), and recovers the OTHER class (punctuation / subword pieces) almost completely (99.9%). Pooled
+recovery reproduces Experiment 3 / 34 to the digit (84.3% / 95.3%).
+
+**Interpretation.** The fluency win is not a function-word artifact — the corrector buys back the bulk of raw's
+damage exactly where steering does the most harm (content words). The pooled 84.3% sits *above* both linguistic
+classes because the near-perfectly-recovered OTHER class carries large excess NLL and pulls the token-weighted pool
+up; on the two meaningful classes recovery is a still-strong, nearly-equal 74–78%.
+
+**Limitations.** One steering direction (sentiment), one model, one layer, seed 0. The FUNCTION/CONTENT/OTHER
+split is a coarse stop-list heuristic, not a tagger; a token is classed by its decoded surface form, so rare
+function words outside the list fall into CONTENT.
+
+**Next check.** A finer part-of-speech breakdown (nouns vs verbs vs adjectives) or a proper POS tagger would refine
+the CONTENT class; marginal given content and function words already recover near-equally.
 
 ## Conclusion
 
@@ -895,4 +932,4 @@ The result is also **prompt-family-robust** (a FineWeb-trained corrector recover
 
 Finally, the result is **seed-robust** on both model scales and across the architecture boundary: re-running the exact flagship pipeline at five training seeds gives 83.3 ± 2.0% recovery at α=8 (96.2 ± 0.8% at α=4), so the headline 84% is reproducible to ±2 points and not a single-seed artifact (Experiment 26). The same five-seed control on GPT-2 medium gives 88.3 ± 2.2% at α=8 — a band that sits entirely above GPT-2 small's, so medium's higher recovery is a genuine model-scale effect rather than seed noise (Experiment 27). And on the cross-*architecture* Pythia / GPT-NeoX pipeline the five-seed recovery is 80.8 ± 1.6% at α=8 (Experiment 28): seed-stable on a non-GPT-2 family, its band sitting below GPT-2 medium's (a genuine gap) but overlapping GPT-2 small's. The *top* of the band is seed-controlled too: five seeds on Qwen3 give 94.8 ± 1.6% at α=8 (Experiment 29), a band entirely above every other model's, so Qwen3's edge is real. Finally, GPT-2 large — the last single-seed headline model — is confirmed at 85.1 ± 1.1% at α=8 (Experiment 30), a band between GPT-2 small and medium, so the flat model-scale trend is itself seed-controlled: medium is the GPT-2 peak, large ≈ small, and recovery does not grow with scale. The seed axis now spans all five headline models across three scales and two architectures.
 
-Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, steering-vector, and **joint vector×seed** resampling: a joint resample of both sampling axes (Experiment 33) leaves recovery at 80.9 ± 2.9% at α=8, a spread dominated by the vector axis and *below* the independent-quadrature prediction (3.4 pp), so the flagship is best read as 84% ± 3 pp. The last metric-control axis CLAUDE.md names is closed as well: a per-token-position breakdown (Experiment 34) shows the recovery is *flat across token position* — an 80.7–83.5% band from token 16 to 126 at α=8 — so the pooled headline is not a pooling artifact. A wider architecture family (state-space / MoE / GPT-2 XL) and rebuilding the vector from an external labelled corpus (e.g. SST-2) are the natural remaining extensions for the external-validity story.
+Open items remain. The architecture sweep, though it now spans three families, has not reached GPT-2 XL or structurally different families such as state-space or mixture-of-experts models; and the seed control, now run on all five headline models (GPT-2 small / medium / large, Pythia, and Qwen3), varies mainly the *training* seed; a document-bootstrap of the flagship (Experiment 31) shows eval-set sampling noise is smaller than seed noise (± 0.7 pp vs ± 2.0 pp at α=8), so the seed CI is the binding bound. The last single-axis sampling gap is now closed too: resampling the sentences that build the steering vector (Experiment 32) leaves the flagship recovery at 82.1 ± 2.7% at α=8 — within ~2 points of the un-resampled 84.3% and on the order of the seed CI — even though it swings the steering direction by up to ~56°, because the corrector is re-trained per vector. The headline therefore survives seed, eval-document, steering-vector, and **joint vector×seed** resampling: a joint resample of both sampling axes (Experiment 33) leaves recovery at 80.9 ± 2.9% at α=8, a spread dominated by the vector axis and *below* the independent-quadrature prediction (3.4 pp), so the flagship is best read as 84% ± 3 pp. The last metric-control axis CLAUDE.md names is closed as well: a per-token-position breakdown (Experiment 34) shows the recovery is *flat across token position* — an 80.7–83.5% band from token 16 to 126 at α=8 — so the pooled headline is not a pooling artifact, and a per-token-*type* breakdown (Experiment 35) shows content words recover at least as well as cheap function words (77.5% vs 73.9% at α=8), so the pooled number is not a function-word artifact either. A wider architecture family (state-space / MoE / GPT-2 XL) and rebuilding the vector from an external labelled corpus (e.g. SST-2) are the natural remaining extensions for the external-validity story.

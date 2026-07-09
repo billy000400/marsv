@@ -228,7 +228,14 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
         117%@α=4, the usual small-raw-damage ratio effect) it settles to an 80.7–83.5% band for positions 16–126 @α=8
         (89–92%@α=4); raw excess NLL climbs mildly along the sequence (2.11→3.25 nats@α=8) and the corrector tracks it.
         Pooled 84.3%@α=8 / 95.3%@α=4 reproduces Exp 3 to the digit ⇒ headline is NOT a pooling artifact. Metric-control
-        axes now complete (strength/layer/model/prompt/steering-family/seed/eval-doc/vector/token all isolated).
+        axes now complete (strength/layer/model/prompt/steering-family/seed/eval-doc/vector/token-position all isolated).
+- [x] S7(j) — TOKEN-TYPE control (Exp 35, 2026-07-09) DONE: closed Exp 34's own Next check — the last metric-control
+        axis. Same flagship Exp-3 corrector (GPT-2 small, block 6, seed 0), next-token NLL on the held-out 100 docs
+        SPLIT BY TARGET-TOKEN TYPE (FUNCTION closed-class stop-list 30% / CONTENT alphabetic non-function 38% / OTHER
+        subword-punct 31%). POSITIVE: recovery @α=8 FUNCTION 73.9% / CONTENT 77.5% / OTHER 99.9% — content words take
+        the LARGEST absolute raw damage (+3.89 nats vs function +1.25) yet recover slightly BETTER than function words,
+        so the pooled 84.3% (= Exp 3/34) is NOT a cheap-function-word artifact. Pooled sits above both linguistic
+        classes because near-perfect OTHER (punct/subword) recovery pulls the token-weighted pool up.
   (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
 
 ## Out of scope (do NOT)
@@ -240,6 +247,28 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**S7(j) TOKEN-TYPE control — Experiment 35 (new, 2026-07-09):** closed Experiment 34's own explicit Next check and
+the last named metric-control axis. Exp 34 fixed *where* a token sits (position); Exp 35 fixes *what kind* it is
+(type). A corrector could inflate the pooled 84% by fixing only cheap high-frequency function words while leaving
+meaning-bearing content words broken. Wrote `experiments/35_token_type.py` (reuses the Exp-3 Corrector/
+train_corrector/make_hat/FuncPatcher/batched_ids verbatim; only new code is a vocab token-type map + per-type NLL
+accumulator): trained the EXACT flagship corrector (GPT-2 small, block 6, sentiment `v`, seed 0), accumulated
+next-token NLL on the held-out 100 FineWeb docs SPLIT BY TARGET-TOKEN TYPE (each of the 50,257 GPT-2 tokens classed
+once from its decoded string → FUNCTION closed-class stop-list 30% / CONTENT alphabetic non-function 38% / OTHER
+subword-punct-digit 31%), recovery per type at α∈{4,8}. POSITIVE + clean: recovery @α=8 = FUNCTION 73.9% / CONTENT
+77.5% / OTHER 99.9% (α=4: 75.8/82.5/131%). Content words take the LARGEST absolute raw damage (+3.89 nats vs
+function +1.25) yet recover slightly BETTER than function words ⇒ the pooled headline is NOT a cheap-function-word
+artifact. The pooled 84.3% sits above both linguistic classes because near-perfect OTHER (punct/subword) recovery
+carries large excess NLL and pulls the token-weighted pool up. **Pooled 84.3%@α=8 / 95.3%@α=4 reproduces Exp 3/34
+to the digit.** No prior result superseded (Exp 35 additive; pooled = Exp 3/34 reproduced). Artifacts:
+`experiments/35_token_type.py`, `results/35_token_type.json`, `results/35_run.log`, `plots/35_token_type.png`.
+Curated RESULTS.md (Exp-35 section + per-type table + figure; Headline token clause), REPORT_3 (Exp-35 O/I/L/N
+subsection + table + Exp-34 Next-check closed + Conclusion open-items), REPORT.md index (Summary token-type clause +
+headline row). CHANGELOG appended. Math re-verified via GitHub API (REPORT.md 1 js-display-math / 0 broken; REPORT_3
+12/0 — no new display math; 0 inline hazards in all three files). ENV: `/opt/conda/bin/python` (LOCAL disk),
+`setsid` full detach; ~1 min.
+
+<!-- prior: S7(i) token-position Exp 34 -->
 **S7(i) TOKEN-POSITION control — Experiment 34 (new, 2026-07-09):** every recovery number in the study POOLS
 next-token NLL over all token positions (`recovery = 1 − Σ e_learned/Σ e_raw`), and CLAUDE.md rule 10's control
 list names **token** as an axis a trustworthy metric should survive — the one axis never isolated (strength/layer/
@@ -835,18 +864,24 @@ objective finds it. Artifacts: `experiments/{projections.py(tests PASS),02_corre
 RESULTS/REPORT/CHANGELOG curated to three-experiment current-best; REPORT math verified (9/9).
 
 ## Next step
-**S7(i) TOKEN-POSITION control DONE (Exp 34): the last metric-control axis CLAUDE.md rule 10 names is closed.**
-All recovery numbers pool NLL over token positions; Exp 34 broke it out per position and found the recovery FLAT
-across the sequence (80.7–83.5% band, positions 16–126, @α=8; pooled 84.3% reproduces Exp 3), so the headline is
-not a pooling artifact. The metric-control axes are now COMPLETE: strength / layer / model / prompt-family /
-steering-family / seed / eval-doc / vector / token all isolated. Success criterion long met; result robust on SEVEN
-external-validity axes PLUS all sampling axes (seed / eval-doc / vector / joint) PLUS the token-position control.
-Only very-low-value optional points remain, none required for the deliverable: (i) a per-token-*TYPE* breakdown
-(content vs function words / part-of-speech) to test whether the flat position curve hides token-category structure;
-(ii) a FURTHER architecture family (state-space/MoE, e.g. Mamba/Mixtral) or GPT-2 XL for a fuller sweep beyond
-three, or rebuilding `v` from a labelled corpus (SST-2); (iii) finer λ_b + Exp-20 differentiable-generation ON
-Qwen3 (Exp 23's Next check). All are marginal. ENV: use `/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk,
-imports in seconds). Verify any REPORT edit with the GitHub-API math check on the touched report files.
+**S7(j) TOKEN-TYPE control DONE (Exp 35): the LAST metric-control axis is closed.** Exp 34 fixed token position;
+Exp 35 fixed token type and found the recovery uniform across type — content words (77.5% @α=8) recover at least as
+well as cheap function words (73.9%), even though content words take the largest absolute raw damage — so the pooled
+84.3% is neither a pooling (Exp 34) nor a cheap-function-word (Exp 35) artifact. The metric-control axes are now
+FULLY COMPLETE: strength / layer / model / prompt-family / steering-family / seed / eval-doc / vector / joint /
+token-position / token-type all isolated. Success criterion long met; result robust on SEVEN external-validity axes
+PLUS all sampling axes PLUS both token controls. Only very-low-value optional points remain, none required for the
+deliverable: (i) a finer part-of-speech split (nouns/verbs/adjs) of the CONTENT class; (ii) a FURTHER architecture
+family (state-space/MoE, e.g. Mamba/Mixtral) or GPT-2 XL for a fuller sweep beyond three, or rebuilding `v` from a
+labelled corpus (SST-2); (iii) finer λ_b + Exp-20 differentiable-generation ON Qwen3 (Exp 23's Next check). All are
+marginal. ENV: use `/opt/conda/bin/python` (transformers 5.13.0, LOCAL disk, imports in seconds). Verify any REPORT
+edit with the GitHub-API math check on the touched report files.
+
+<!-- prior next step: S7(i) token-position Exp 34 -->
+**S7(i) TOKEN-POSITION control DONE (Exp 34): the token-position metric-control axis is closed.** All recovery
+numbers pool NLL over token positions; Exp 34 broke it out per position and found the recovery FLAT across the
+sequence (80.7–83.5% band, positions 16–126, @α=8; pooled 84.3% reproduces Exp 3), so the headline is not a pooling
+artifact.
 
 <!-- prior next step: S7(h) joint vector×seed Exp 33 -->
 **S7(h) JOINT vector×seed resample DONE (Exp 33): the joint-resample open item is closed.** The flagship headline

@@ -1,0 +1,17 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 36463.64it/s]
+device: cuda
+vocab type counts (FUNCTION/CONTENT/OTHER): [383, 31721, 18153]
+|v|=11.08
+  ep0 step  25 a= 1.9 LM=3.864 near=0.137
+  ep1 step  50 a= 4.4 LM=4.066 near=0.282
+  ep1 step  75 a= 7.2 LM=4.436 near=0.616
+  ep2 step 100 a= 1.4 LM=3.991 near=0.150
+  ep3 step 125 a= 6.4 LM=4.257 near=0.769
+  ep3 step 150 a= 7.2 LM=4.305 near=0.454
+  ep4 step 175 a= 2.8 LM=4.162 near=0.297
+  ep5 step 200 a= 5.5 LM=4.214 near=0.413
+  ep5 step 225 a= 1.3 LM=3.855 near=0.309
+alpha=4.0: pooled rec=95.3%  per-type rec%={'FUNCTION': 75.8, 'CONTENT': 82.5, 'OTHER': 131.5}
+alpha=8.0: pooled rec=84.3%  per-type rec%={'FUNCTION': 73.9, 'CONTENT': 77.5, 'OTHER': 99.9}
+saved figure + results

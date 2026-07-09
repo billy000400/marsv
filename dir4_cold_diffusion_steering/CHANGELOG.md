@@ -958,3 +958,31 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   is per-position NLL accumulation. `/opt/conda/bin/python`, `setsid` full detach; ~2 min. Artifacts:
   `experiments/34_token_position.py`, `results/34_token_position.json`, `results/34_run.log`,
   `plots/34_token_position.png`.
+
+## 2026-07-09 — Experiment 35: token-type control — content words recover as well as function words
+- **New experiment (control, closes Exp 34's Next check).** Exp 34 showed the flagship recovery is flat across
+  token POSITION; the complementary metric-control question is token TYPE. A corrector could buy back most of the
+  pooled 84% by fixing cheap high-frequency function words (`the`, `of`, `is`) while leaving meaning-bearing
+  content words broken — which would make the pooled number misleading. Exp 35 isolates it: train the EXACT
+  flagship Exp-3 corrector (GPT-2 small, block 6, sentiment `v`, seed 0), accumulate next-token NLL on the same
+  held-out 100 FineWeb docs SPLIT BY THE TYPE of the target token. Each of the 50,257 vocab tokens is classed once
+  from its decoded string: FUNCTION (word-initial closed-class function word, fixed stop-list, 30% of eval tokens),
+  CONTENT (word-initial alphabetic non-function, 38%), OTHER (subword/punct/digit, 31%).
+- **Finding (POSITIVE):** recovery is uniform across token type and NOT a cheap-token artifact. @α=8: FUNCTION
+  73.9%, CONTENT 77.5%, OTHER 99.9% — content words (which take the LARGEST absolute raw damage, +3.89 nats vs
+  +1.25 on function words) recover slightly BETTER than function words. The pooled 84.3% sits above both linguistic
+  classes because the near-perfectly-recovered OTHER class (punct/subword) carries large excess NLL and pulls the
+  token-weighted pool up. Pooled recovery 84.3% @α=8 / 95.3% @α=4 reproduces Exp 3 / Exp 34 to the digit.
+- **No prior result superseded** (Exp 35 is new; pooled numbers = Exp 3/34 reproduced).
+- **RESULTS.md:** +Exp 35 section (per-type table + reading) + figure entry (`plots/35_token_type.png`); Headline
+  token-position parenthetical extended with the content-vs-function clause.
+- **REPORT_3_external_validity.md:** +Exp 35 subsection (table + Observation/Interpretation/Limitations/Next check)
+  after Exp 34; Exp-34 Next-check closed ("Done in Experiment 35"); Conclusion open-items extended (token-type
+  control closed). No new display equation (reuses the recovery-ratio definition).
+- **REPORT.md index:** Summary metric-control sentence extended (token-type clause); headline-table row added.
+- **Math re-verified via GitHub API:** REPORT.md 1 js-display-math / 0 `<pre lang=math>`; REPORT_3 12 / 0
+  (unchanged — no new display math); 0 inline hazards in all three touched files.
+- **Ops:** reuses Exp-3 Corrector/train_corrector/make_hat/FuncPatcher/batched_ids verbatim (DRY); only new code
+  is the vocab token-type map + per-type NLL accumulator. `/opt/conda/bin/python`, `setsid` full detach; ~1 min.
+  Artifacts: `experiments/35_token_type.py`, `results/35_token_type.json`, `results/35_run.log`,
+  `plots/35_token_type.png`.
