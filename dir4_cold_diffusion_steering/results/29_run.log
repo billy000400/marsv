@@ -1,0 +1,48 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   6%|▋         | 20/311 [00:03<00:44,  6.47it/s]Loading weights:   7%|▋         | 21/311 [00:04<01:00,  4.81it/s]Loading weights:   7%|▋         | 22/311 [00:04<01:09,  4.18it/s]Loading weights:   7%|▋         | 23/311 [00:05<01:32,  3.10it/s]Loading weights:   8%|▊         | 24/311 [00:07<02:34,  1.86it/s]Loading weights:   8%|▊         | 25/311 [00:08<02:49,  1.69it/s]Loading weights:   8%|▊         | 26/311 [00:10<02:42,  1.75it/s]Loading weights:   9%|▊         | 27/311 [00:11<05:01,  1.06s/it]Loading weights:   9%|▉         | 28/311 [00:12<04:40,  1.01it/s]Loading weights:   9%|▉         | 29/311 [00:13<05:13,  1.11s/it]Loading weights:  10%|▉         | 30/311 [00:14<05:04,  1.08s/it]Loading weights:  10%|▉         | 31/311 [00:15<04:54,  1.05s/it]Loading weights:  10%|█         | 32/311 [00:16<04:40,  1.00s/it]Loading weights:  11%|█         | 33/311 [00:17<04:31,  1.02it/s]Loading weights:  11%|█         | 34/311 [00:20<06:59,  1.51s/it]Loading weights:  11%|█▏        | 35/311 [00:21<06:08,  1.33s/it]Loading weights:  12%|█▏        | 36/311 [00:22<05:40,  1.24s/it]Loading weights:  12%|█▏        | 37/311 [00:23<05:13,  1.15s/it]Loading weights:  12%|█▏        | 38/311 [00:24<05:41,  1.25s/it]Loading weights:  13%|█▎        | 39/311 [00:25<05:24,  1.19s/it]Loading weights:  13%|█▎        | 40/311 [00:28<07:42,  1.71s/it]Loading weights:  13%|█▎        | 41/311 [00:29<06:35,  1.46s/it]Loading weights:  14%|█▎        | 42/311 [00:34<05:46,  1.29s/it]Loading weights:  14%|█▍        | 43/311 [00:34<09:25,  2.11s/it]Loading weights:  14%|█▍        | 44/311 [00:36<09:05,  2.04s/it]Loading weights:  14%|█▍        | 45/311 [00:37<08:11,  1.85s/it]Loading weights:  15%|█▍        | 46/311 [00:38<06:59,  1.58s/it]Loading weights:  15%|█▌        | 47/311 [00:39<06:10,  1.40s/it]Loading weights:  15%|█▌        | 48/311 [00:40<05:33,  1.27s/it]Loading weights:  16%|█▌        | 49/311 [00:41<05:09,  1.18s/it]Loading weights:  16%|█▌        | 50/311 [00:43<05:37,  1.29s/it]Loading weights:  16%|█▋        | 51/311 [00:44<04:57,  1.14s/it]Loading weights:  17%|█▋        | 52/311 [00:44<04:09,  1.04it/s]Loading weights:  17%|█▋        | 53/311 [00:45<04:12,  1.02it/s]Loading weights:  17%|█▋        | 54/311 [00:46<04:25,  1.03s/it]Loading weights:  18%|█▊        | 55/311 [00:49<06:10,  1.45s/it]Loading weights:  18%|█▊        | 56/311 [00:50<05:19,  1.25s/it]Loading weights:  18%|█▊        | 57/311 [00:50<04:21,  1.03s/it]Loading weights:  19%|█▊        | 58/311 [00:54<07:29,  1.78s/it]Loading weights:  19%|█▉        | 59/311 [00:55<07:24,  1.76s/it]Loading weights:  19%|█▉        | 60/311 [00:57<07:42,  1.84s/it]Loading weights:  20%|█▉        | 61/311 [01:00<08:47,  2.11s/it]Loading weights:  20%|█▉        | 62/311 [01:01<07:20,  1.77s/it]Loading weights:  20%|██        | 63/311 [01:02<06:15,  1.51s/it]Loading weights:  21%|██        | 64/311 [01:04<06:44,  1.64s/it]Loading weights:  21%|██        | 65/311 [01:05<06:01,  1.47s/it]Loading weights:  21%|██        | 66/311 [01:08<07:39,  1.88s/it]Loading weights:  22%|██▏       | 67/311 [01:09<06:25,  1.58s/it]Loading weights:  22%|██▏       | 68/311 [01:10<05:29,  1.36s/it]Loading weights:  22%|██▏       | 69/311 [01:12<06:56,  1.72s/it]Loading weights:  23%|██▎       | 70/311 [01:14<06:58,  1.74s/it]Loading weights:  23%|██▎       | 71/311 [01:16<05:56,  1.49s/it]Loading weights:  23%|██▎       | 72/311 [01:17<06:19,  1.59s/it]Loading weights:  23%|██▎       | 73/311 [01:18<06:01,  1.52s/it]Loading weights:  24%|██▍       | 74/311 [01:20<06:02,  1.53s/it]Loading weights:  24%|██▍       | 75/311 [01:20<05:15,  1.34s/it]Loading weights:  24%|██▍       | 76/311 [01:21<04:42,  1.20s/it]Loading weights:  25%|██▍       | 77/311 [01:24<06:45,  1.73s/it]Loading weights:  25%|██▌       | 78/311 [01:25<05:15,  1.36s/it]Loading weights:  25%|██▌       | 79/311 [01:25<04:14,  1.10s/it]Loading weights:  26%|██▌       | 80/311 [01:27<05:00,  1.30s/it]Loading weights:  26%|██▌       | 81/311 [01:28<04:06,  1.07s/it]Loading weights:  26%|██▋       | 82/311 [01:29<04:34,  1.20s/it]Loading weights:  27%|██▋       | 83/311 [01:31<05:11,  1.37s/it]Loading weights:  27%|██▋       | 84/311 [01:32<04:44,  1.25s/it]Loading weights:  27%|██▋       | 85/311 [01:33<04:23,  1.16s/it]Loading weights:  28%|██▊       | 86/311 [01:35<05:59,  1.60s/it]Loading weights:  28%|██▊       | 87/311 [01:36<04:46,  1.28s/it]Loading weights:  28%|██▊       | 88/311 [01:36<03:26,  1.08it/s]Loading weights:  84%|████████▍ | 262/311 [01:36<00:00, 77.86it/s]Loading weights: 100%|██████████| 311/311 [01:36<00:00,  3.22it/s]
+model=Qwen/Qwen3-1.7B layers=28 d=2048 device=cuda
+|v|=38.10 mean|h|=301.90 clean D_M=44.66
+clean eval loss = 3.415
+ΔLM raw: ['+0.064', '+0.243', '+1.081', '+3.429']
+
+=== seed 0 — training (8.39M) ===
+  ep0 step  50 a= 4.2 LM=4.134 near=0.516
+  ep0 step 100 a= 7.7 LM=3.418 near=1.766
+  ep0 step 150 a= 7.7 LM=3.882 near=1.735
+  ep1 step 200 a= 3.3 LM=4.755 near=0.687
+  ep1 step 250 a= 7.8 LM=3.728 near=1.462
+  ep1 step 300 a= 6.9 LM=3.545 near=2.303
+  ep2 step 350 a= 5.9 LM=3.027 near=1.363
+  ep2 step 400 a= 7.6 LM=3.995 near=2.459
+  ep2 step 450 a= 1.6 LM=3.185 near=1.090
+  ep3 step 500 a= 0.7 LM=3.745 near=0.790
+  ep3 step 550 a= 6.6 LM=3.852 near=2.636
+  ep3 step 600 a= 6.3 LM=4.370 near=2.120
+  ep4 step 650 a= 2.4 LM=2.972 near=1.065
+  ep4 step 700 a= 0.6 LM=4.115 near=0.840
+  ep4 step 750 a= 4.9 LM=3.346 near=1.336
+  ep5 step 800 a= 7.0 LM=3.956 near=2.293
+  ep5 step 850 a= 4.3 LM=4.098 near=1.550
+  ep5 step 900 a= 2.8 LM=4.282 near=1.193
+seed 0 recovery: ['383%', '166%', '108%', '94%']
+
+=== seed 1 — training (8.39M) ===
+  ep0 step  50 a= 5.2 LM=3.567 near=0.685
+  ep0 step 100 a= 2.3 LM=3.667 near=0.311
+  ep0 step 150 a= 1.7 LM=2.532 near=0.569
+  ep1 step 200 a= 5.0 LM=3.835 near=1.670
+  ep1 step 250 a= 2.6 LM=3.567 near=0.842
+  ep1 step 300 a= 6.8 LM=3.024 near=2.357
+  ep2 step 350 a= 3.7 LM=3.114 near=2.118
+  ep2 step 400 a= 5.8 LM=6.193 near=1.886
+  ep2 step 450 a= 2.7 LM=3.875 near=0.931
+  ep3 step 500 a= 1.5 LM=3.455 near=0.601
+  ep3 step 550 a= 2.8 LM=3.368 near=1.295
+  ep3 step 600 a= 5.3 LM=3.761 near=2.584
+  ep4 step 650 a= 2.7 LM=3.012 near=1.099
+  ep4 step 700 a= 3.1 LM=3.492 near=0.876
+  ep4 step 750 a= 5.4 LM=3.717 near=1.797
+  ep5 step 800 a= 1.1 LM=3.236 near=0.852
+  ep5 step 850 a= 4.6 LM=3.121 near=1.317
+  ep5 step 900 a= 6.9 LM=4.134 near=2.331
