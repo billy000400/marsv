@@ -1061,3 +1061,16 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   marked). Results results/38_accuracy_metric.json, log results/38_run.log.
 - REPORT math re-verified via GitHub API: REPORT_3 14/14 js-display-math (12 prior + 2 new: top-k accuracy
   + acc-recovery), REPORT.md 1/1; 0 broken (<pre lang=math>), 0 inline hazards in either touched file.
+
+## 2026-07-09 — Finalization QA pass (no result change)
+- Verified deliverable integrity at close of the direction. All five REPORT files pass the
+  CLAUDE.md rule-8a GitHub-markdown-API check: display-math renders as `js-display-math` with
+  ZERO `<pre lang="math">` code-block degradations — REPORT.md 1, REPORT_1 16, REPORT_2 6,
+  REPORT_3 14, REPORT_4 10 (47 total). Inline-math hazard grep (`\`-escaped ASCII punctuation
+  inside `$…$`) returns 0 hits across all reports AND RESULTS.md.
+- No experiment run this iteration and no result superseded — deliverables remain current-best
+  through Experiment 38 (flagship 84% @α=8 fluency recovery, 83.3±2.0% five-seed; accuracy
+  recovery 75% @α=8). Direction closed: success criterion met, all seven external-validity axes
+  plus the metric-control axis covered; remaining optional points (further architecture families,
+  Qwen3 differentiable-generation) are marginal and expected to land in established bands.
+- Wrote STOP sentinel.

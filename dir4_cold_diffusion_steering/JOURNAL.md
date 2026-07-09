@@ -1655,3 +1655,25 @@ expected to land in an established band: (i) a further architecture family (stat
 (ii) finer λ_b + Exp-20 differentiable-generation ON Qwen3 (Exp 23's Next check). Both marginal.
 On track? yes — Exp 38 adds the metric-control axis (accuracy recovery 75% @α=8 tracks nats 84%); direction
 complete, deliverables curated + math-verified. No blocker.
+
+## 2026-07-09 — Finalization QA + STOP (no new experiment)
+**What I did.** Entered near the time boundary (~22 min) with the direction already complete through
+Exp 38 and deliverables curated last iteration. Chose a QA-only finalization over starting a new
+experiment: with ~20 min and shared-GPU contention, a fresh model/architecture run risks an
+incomplete state, and every remaining optional point was already rejected in prior journals as
+low-value (expected to land in the established 81–94% band). Ran the CLAUDE.md rule-8a math
+verification across ALL five REPORT files via the GitHub markdown API.
+**Learned/verified.** All deliverables render correctly: 47 display-math blocks total
+(REPORT.md 1 / REPORT_1 16 / REPORT_2 6 / REPORT_3 14 / REPORT_4 10), ZERO broken `<pre lang="math">`
+degradations, and 0 inline-math hazards across all reports + RESULTS.md. No result changed; RESULTS.md
+and the report set remain current-best through Exp 38.
+**Assumption/decision logged.** Created the STOP sentinel to close the loop: the success criterion
+(projection-preserving, LM-supervised corrector beats raw at matched projection, with verdict +
+Methods/equations + figures) was met long ago and the result is now robust on eight axes
+(strength/direction/layer/model-scale/architecture/prompt-family/steering-family/seed) plus
+metric-control (nats + accuracy). Continuing would spend shared GPU budget on marginal points.
+Rejected alternative: one more architecture (GPT-2 XL / state-space) — high download/run cost, high
+non-finish risk in the window, expected to reproduce the band.
+**Next step.** None required — direction complete. If ever resumed, the only marginal open items are
+(i) a further architecture family and (ii) Qwen3 differentiable-generation (Exp 23's Next check).
+On track? yes — direction complete, deliverables verified (47/47 math OK), STOP written. No blocker.

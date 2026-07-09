@@ -271,6 +271,18 @@ self-contained result. Minimum acceptable = that, finalized in REPORT.md.
 End each JOURNAL.md entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
 ## Current status
+**DIRECTION COMPLETE — finalized 2026-07-09 (STOP written).** Success criterion met and the flagship
+result (projection-preserving, LM-supervised corrector `ĥ = z + P_{v⊥}r_θ` beats raw steering at matched
+projection: **84% fluency recovery @α=8**, 83.3±2.0% five-seed, accuracy recovery 75% @α=8) is robust on
+EIGHT axes — strength (Exp 4), direction (Exp 5), layer (Exp 12), model-scale (Exp 13/19), architecture
+(Exp 21/24, 81–94% band), prompt-family (Exp 15), steering-family (Exp 18), seed (Exp 26–30) — plus the
+metric-control axis (nats Exp 3–37 + accuracy Exp 38), full sampling controls (eval-doc Exp 31, vector
+Exp 32, joint Exp 33), and token controls (position/type/frequency/OTHER, Exp 34–37). Final QA pass
+verified all five REPORT files render correctly (47/47 display-math via GitHub API, 0 broken, 0 inline
+hazards) and RESULTS.md is clean current-best. Remaining optional points (further architecture family;
+Qwen3 differentiable-generation) are marginal and expected to land in established bands. No blocker.
+
+<!-- prior: S7(m) metric control Exp 38 -->
 **S7(m) METRIC control — Experiment 38 (new, 2026-07-09):** closed the last standing reviewer gap in the
 metric story. Every one of the 37 prior recovery numbers is measured in cross-entropy nats (ΔLM); a CE
 improvement could in principle come entirely from re-shaping the probability TAIL while the model's argmax
