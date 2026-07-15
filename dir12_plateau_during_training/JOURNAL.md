@@ -34,3 +34,32 @@ aligning the same eval examples across adjacent checkpoints. After that the deli
 finish REPORT.md and write STOP.
 
 On track? yes — S1–S3 done, S4 partial (region counts+composition done, lineage heatmap pending), ~85% done, no blocker.
+
+## 2026-07-15 — Iter 2: figure #4 (region composition + lineage), finalize, STOP
+
+**Feedback check:** globbed dir root for `human_feedback*`/`*REVIEW*` without `.addressed.md` — none. Proceeded.
+
+**Did.**
+- `experiments/lineage.py`: for seed 0, recomputed per-example L3 cluster labels at all 13 checkpoints
+  under the frozen protocol; reused sweep_seed0.json's per-cluster `valid` flags. Saved
+  `results/lineage_seed0.json` (per-example labels + preds + validated digits per checkpoint).
+- `experiments/make_lineage_plot.py`: figure #4 = (a) digit×step grid of validated-region presence with
+  per-column validated counts, (b) birth-transition (100→300) and (c) late (75k→100k) membership-overlap
+  heatmaps; plus a printed split/merge audit across every adjacent transition.
+- Embedded fig #4 in RESULTS.md + REPORT.md; added Methods paragraph defining the overlap matrix + split/
+  merge/escalation rule; updated finding #2 and limitations. Re-ran the GitHub markdown-API render check
+  (3/3 js-display-math, 0 pre-lang-math) and the inline-`$…$` backslash-hazard grep (clean).
+
+**Learned.**
+- No predicted digit ever hosts ≥2 validated regions at any checkpoint (max=1) → the key escalation
+  signal is absent; monotonic emergence confirmed by membership, not just by the count trajectory.
+- The raw split/merge audit shows nonzero counts (total 9 splits / 3 merges) but they are all either
+  early region *formation* (births as k grows 2→10) or late silhouette k oscillating 10↔12 — a transient
+  sub-threshold split of the uncertain/mixed cluster that is never validated and never persists across two
+  adjacent checkpoints. So the "validated-region lineage" is clean (0/0) even though raw-k lineage wobbles.
+  Made the figure/caption state this precisely rather than overclaiming "no splits/merges anywhere".
+
+**Next step.** None — all 5 stages complete, verdict is the preregistered expected monotonic emergence,
+deliverables current-best with all 4 figures embedded. Wrote empty `STOP`.
+
+On track? yes — S1–S5 all done, 100% complete, no blocker; STOP written (no unaddressed feedback).

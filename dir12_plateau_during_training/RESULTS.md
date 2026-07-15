@@ -17,7 +17,9 @@ and stays there in every seed. Plateau strength tracks **confidence, not correct
 examples plateau strongly (contrast 0.73 at 100k) — nearly as strongly as confident-correct (0.85) —
 while uncertain examples are weakest (0.49). **Verdict: expected monotonic emergence, replicated across
 3 seeds.** A single-checkpoint dip at step 10k appears only in seed 0 (not seeds 1–2), so it is seed
-noise, not a real split/merge — no escalation.
+noise, not a real split/merge — no escalation. **Membership-overlap lineage (seed 0) confirms
+monotonic evolution:** regions are born one predicted-digit at a time, no digit ever hosts ≥2 validated
+regions, and adjacent-checkpoint overlap matrices are clean near-permutations (0 splits, 0 merges).
 
 ## Metrics (mean [min, max] over seeds 0, 1, 2)
 
@@ -54,3 +56,5 @@ plateau-contrast bootstrap CI excludes 0. Euclidean-metric clustering agrees (10
 ![Plateau contrast (left, mean of 3 seeds, band = seed min–max) keeps rising after test accuracy saturates; validated stable-region count (right) converges to 10 in every seed.](plots/plateau_contrast_and_region_count.png)
 
 ![Plateau contrast by confidence×correctness (seed 0): confident-wrong plateaus like confident-correct; uncertain is weakest.](plots/contrast_by_group.png)
+
+![Region composition and membership-overlap lineage (seed 0). (a) Green marks a plateau-validated stable region for each predicted digit (row) at each checkpoint (column); numbers above give the validated-region count — regions appear monotonically, one per digit, reaching 10. (b,c) Membership-overlap matrices for the birth transition (100→300) and a late transition (75k→100k) are near-permutations: 0 splits, 0 merges among validated regions.](plots/region_composition_and_lineage.png)

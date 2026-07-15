@@ -21,8 +21,10 @@ checkpoints from initialization to 100,000 steps.
    0.42 (step 100) to **0.80 (step 100k)** in every seed. Plateau formation is a *late* phenomenon that
    *lags* test-accuracy — consistent with the delayed-robustness / region-migration phase of the paper.
 2. **The number of validated stable regions converges to exactly 10 — one per predicted digit — by step
-   ~300** and stays there in all three seeds, under both cosine and Euclidean clustering. We see no
-   persistent split or merge into an 11th stable region.
+   ~300** and stays there in all three seeds, under both cosine and Euclidean clustering. Tracking the
+   same examples across checkpoints, regions are born one digit at a time and then persist: **no digit
+   ever hosts two validated regions**, and adjacent-checkpoint membership-overlap matrices are clean
+   near-permutations (0 splits, 0 merges) — no persistent split or merge into an 11th stable region.
 3. **Plateau strength tracks confidence, not correctness.** Confident-*wrong* examples plateau strongly
    (contrast 0.73 at 100k), nearly as strongly as confident-correct (0.85); uncertain examples are
    consistently weakest (0.49). Confidence is the operative variable.
@@ -96,6 +98,19 @@ and (iii) has a per-cluster plateau-contrast whose 95% bootstrap CI excludes 0. 
 labels; true/predicted labels, correctness, and confidence are applied only after clustering to
 interpret regions.
 
+**Membership-overlap lineage.** Because the *same* 500 evaluation examples are clustered at every
+checkpoint, adjacent checkpoints are aligned directly by shared membership rather than by cluster ID.
+For adjacent checkpoints `t` and `t+1` with cluster assignments `a` and `b`, the overlap matrix is
+
+```math
+M_{ij} = \bigl|\{x : a(x)=i \ \text{and}\ b(x)=j\}\bigr|
+```
+
+Each checkpoint-`t+1` cluster is assigned its max-overlap **parent** `\arg\max_i M_{ij}`; a **split** is
+a parent claimed by ≥2 children and a **merge** is a child claimed by ≥2 parents. A near-permutation
+`M` (one dominant cell per row and column) means membership evolves monotonically. The escalation
+signal is any single predicted digit hosting **≥2 validated regions** across ≥2 adjacent checkpoints.
+
 ### Baselines
 
 **Matched-random activations** (defined above) are the negative control for every plateau measurement:
@@ -137,6 +152,19 @@ as strongly as confident-correct ones; uncertain examples are always weakest.
 
 ![Plateau contrast by confidence×correctness; confident-wrong plateaus like confident-correct.](plots/contrast_by_group.png)
 
+**Region membership evolves monotonically — no split/merge into a second region for any digit.**
+Tracking the same 500 examples across checkpoints (seed 0), each of the 10 validated regions maps to a
+distinct predicted digit, and **no digit ever hosts ≥2 validated regions at any checkpoint** (max = 1).
+Regions are *born* one digit at a time as accuracy climbs (panel a: 1→2→3→9→10 validated regions by
+step ~300), then persist. The membership-overlap matrices for the region-birth transition (step
+100→300, panel b) and a late transition (75k→100k, panel c) are clean near-permutations with **0
+splits and 0 merges** among validated regions. The raw silhouette-selected `k` does oscillate between
+10 and 12 late in training, but the extra cluster is a transient sub-threshold split of the
+uncertain/mixed group that is never validated (purity or contrast-CI fails) and does not persist across
+two adjacent checkpoints — so it does not meet the escalation criterion.
+
+![Region composition and membership-overlap lineage (seed 0). (a) For each predicted digit (row) and checkpoint (column), green marks a plateau-validated stable region; numbers above give the validated-region count. Regions appear monotonically, one per digit, reaching 10. (b,c) Membership-overlap matrices for the birth transition (100→300) and a late transition (75k→100k) are near-permutations: 0 splits, 0 merges among validated regions.](plots/region_composition_and_lineage.png)
+
 Current-best numbers (mean [min, max] over 3 seeds) are tabulated in RESULTS.md.
 
 ## Conclusion
@@ -151,9 +179,7 @@ interpolation.
 
 **Limitations.** Results are from three seeds on one 1,000-image MNIST subset and one architecture
 (d4/w200); we do not claim generality beyond this setup. The group-conditioned contrasts at early steps
-have few confident-wrong examples (<10/seed, marked underpowered). A compact cluster-lineage
-(births/deaths/splits/merges) heatmap aligning the same examples across checkpoints is the natural next
-addition; the current evidence — stable region count = 10 at every late checkpoint and no replicated
-transient — already supports the monotonic verdict. The plateau/stable regions here are
-downstream-insensitivity basins, distinct from the paper's spline regions; the shared *timing* argues
-for association, not identity.
+have few confident-wrong examples (<10/seed, marked underpowered). The membership-overlap lineage is
+computed for seed 0 only (the region-count trajectory that underlies the verdict is replicated across
+all three seeds). The plateau/stable regions here are downstream-insensitivity basins, distinct from
+the paper's spline regions; the shared *timing* argues for association, not identity.

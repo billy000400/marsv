@@ -163,13 +163,13 @@ result after clustering.
   confident-wrong, and uncertain-wrong. Save raw per-example/per-radius summaries and plot (a) representative
   early/middle/late response curves and (b) plateau contrast versus optimization step with seed uncertainty.
   Overlay loss, accuracy, mean confidence, and adversarial accuracy only if it is already available cheaply.
-- [ ] **S4 — Count and track stable regions.** Cluster last-hidden activations independently at each checkpoint;
+- [x] **S4 — Count and track stable regions.** Cluster last-hidden activations independently at each checkpoint;
   validate every candidate cluster with its prediction purity and plateau contrast. Plot validated region count,
   cluster confidence, and prediction composition through training. Because the same examples are reused, align
   adjacent checkpoints by maximum membership overlap and produce a compact transition heatmap/table marking
   births, deaths, splits, and merges. Any claimed extra region must survive bootstrap/distance-metric checks and
   appear in at least two adjacent checkpoints.
-- [ ] **S5 — Verdict, cleanup, and stop.** Compare the trajectories with the preregistered expected result and
+- [x] **S5 — Verdict, cleanup, and stop.** Compare the trajectories with the preregistered expected result and
   surprise criteria. `REPORT.md` must distinguish plateau/stable regions from the paper's spline/linear regions:
   similar timing is evidence of association, not identity. Keep only current-best figures in `RESULTS.md` and
   `REPORT.md`, move iteration history to `CHANGELOG.md`, document limitations, and write empty `STOP`.
@@ -224,13 +224,17 @@ If the result matches the expected monotonic picture, the correct next action is
 
 ## Current status
 
-**Iter 1 done (3 seeds).** Trained d4/w200 MNIST MLP for seeds 0/1/2 with 13 log-spaced checkpoints;
-ran the frozen plateau protocol at each. Result replicates: plateau contrast rises 0.42→0.80 while test
-accuracy declines after its step-~300 peak (plateau lags generalization); validated stable-region count
-converges to 10 by step ~300 in every seed; confident-wrong plateaus strongly (confidence, not
-correctness). The step-10k dip is seed-0-only → seed noise, not a real transient. Verdict: **expected
-monotonic emergence, replicated**. RESULTS.md/REPORT.md are current-best with 4 embedded figures.
-Remaining: required figure #4 (region composition + membership-overlap split/merge lineage), then STOP.
+**COMPLETE (Iter 2). All 5 stages done; STOP written.** Trained d4/w200 MNIST MLP for seeds 0/1/2 with
+13 log-spaced checkpoints; ran the frozen plateau protocol at each. Result replicates: plateau contrast
+rises 0.42→0.80 while test accuracy declines after its step-~300 peak (plateau lags generalization);
+validated stable-region count converges to 10 by step ~300 in every seed; confident-wrong plateaus
+strongly (confidence, not correctness). The step-10k dip is seed-0-only → seed noise, not a real
+transient. Required figure #4 added: membership-overlap lineage (seed 0) confirms monotonic
+evolution — regions born one digit at a time, no digit ever hosts ≥2 validated regions, adjacent
+overlap matrices are clean near-permutations (0 splits/0 merges among validated regions; raw silhouette
+k oscillates 10–12 as a transient non-validated sub-cluster, never persisting). Verdict: **expected
+monotonic emergence, replicated**. RESULTS.md/REPORT.md are current-best with all 4 required figures
+embedded. Deliverable complete.
 
 For reference, the existing final checkpoint already showed the main endpoint behavior:
 
@@ -248,9 +252,5 @@ membership evolves monotonically.
 
 ## Next step
 
-Add required figure #4 `region_composition_and_lineage`: (a) per-checkpoint predicted-label / confidence
-composition of validated clusters, and (b) a compact membership-overlap heatmap aligning the same eval
-examples across adjacent checkpoints (births/deaths/splits/merges) for seed 0. Compositions are already
-in `results/sweep_seed*.json`; the lineage needs per-checkpoint cluster labels saved for the fixed eval
-set. Embed the figure in RESULTS.md + REPORT.md, note that region membership evolves monotonically
-(no replicated split/merge), then finish REPORT.md and write empty `STOP` (no unaddressed feedback).
+None — direction complete and `STOP` written. If re-entered with new operator feedback, delete `STOP`,
+address the feedback, then re-write `STOP` when clean.

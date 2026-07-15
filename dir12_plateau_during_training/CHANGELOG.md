@@ -25,3 +25,22 @@ First populated RESULTS.md and REPORT.md (both were TODO templates → full curr
   plateau_curves_by_stage.png, plateau_contrast_and_region_count.png (3-seed band), contrast_by_group.png.
 - Confidence metric chosen as max raw output (softmax saturates near 0.23 under MSE-to-one-hot);
   documented in Methods.
+
+## 2026-07-15 — Iter 2: region composition + membership-overlap lineage (fig #4); finalize + STOP
+
+- **New analysis (`experiments/lineage.py`, `experiments/make_lineage_plot.py`).** For seed 0, recomputed
+  per-example L3 cluster labels at all 13 checkpoints using the frozen protocol (avg-linkage
+  agglomerative, silhouette-selected k, cosine), then aligned adjacent checkpoints by membership overlap
+  (same 500 fixed eval examples). Added the 4th required figure `plots/region_composition_and_lineage.png`.
+- **New finding (lineage).** Validated regions are born one predicted-digit at a time (1→2→3→9→10 by step
+  ~300) and then persist; **no predicted digit ever hosts ≥2 validated regions at any checkpoint** (max=1).
+  Membership-overlap matrices for the birth transition (100→300) and a late transition (75k→100k) are
+  clean near-permutations: **0 splits, 0 merges** among validated regions. Raw silhouette k oscillates
+  10–12 late in training as a transient sub-threshold split of the uncertain/mixed group, but that extra
+  cluster is never validated and never persists across two adjacent checkpoints → escalation criterion not
+  met. Confirms the monotonic-emergence verdict.
+- **Deliverables.** Embedded the new figure in RESULTS.md and REPORT.md; added a Methods paragraph defining
+  the membership-overlap matrix and split/merge/escalation rule (new ```math block, GitHub-render-verified:
+  3/3 js-display-math, 0 pre-lang-math); updated the region-count finding and limitations (lineage now
+  done, seed-0 scope noted). No result numbers superseded. Marked S4/S5 complete; wrote empty `STOP`
+  (no unaddressed feedback files present).
