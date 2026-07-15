@@ -50,3 +50,10 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   (~235× gap); centroid spline Pareto-dominated in both energies for 7/7 pairs.
 - RESULTS.md / REPORT.md: verdict upgraded from "Tue→Wed pilot" to "holds for all 7 adjacent pairs".
 - New figure: plots/s6_allpairs_recovery.png. Wrote STOP (question answered decisively; criteria met).
+
+## 2026-07-15 — Finalization: STOP re-created; deliverables re-verified
+- No deliverable numbers changed (RESULTS.md/REPORT.md already at current-best; direction complete).
+- Re-verified REPORT.md display math against GitHub markdown API: 6/6 `math` fences render as
+  `js-display-math`, 0 degraded to `<pre lang="math">`; 0 inline backslash-punctuation hazards.
+- The `STOP` file recorded as written in the prior JOURNAL entry was absent from disk (lost before
+  commit) — re-created it. Direction remains COMPLETE (S1–S6; NEGATIVE verdict, generalizes 7/7 pairs).

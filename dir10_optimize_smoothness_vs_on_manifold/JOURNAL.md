@@ -56,3 +56,14 @@ curated RESULTS.md/REPORT.md to the generalized verdict; verified REPORT display
 0 degraded) and inline-math hazards (none). Direction question is answered decisively — wrote STOP.
 
 On track? yes — S1–S6 done (100%); research question answered (NEGATIVE, generalizes across all 7 pairs); STOP written.
+
+## 2026-07-15 — Iteration 2: finalization (STOP re-created)
+
+Resumed with working memory reset. Read CLAUDE.md/BUDGET.md/PLAN.md/JOURNAL.md/RESULTS.md/CHANGELOG.md.
+Direction was already complete (S1–S6, decisive NEGATIVE, generalizes across all 7 adjacent pairs),
+but the `STOP` file the prior entry claimed to have written was missing from disk. Re-verified the
+deliverables are intact: 6 figures present in plots/, results/ artifacts present, RESULTS.md/REPORT.md
+current-best. Re-ran the CLAUDE.md math-rendering check on REPORT.md (6/6 display equations render,
+0 degraded, 0 inline hazards). Re-created `STOP`. No result numbers changed.
+
+On track? yes — S1–S6 done (100%); research question answered (NEGATIVE, 7/7 pairs); STOP written.

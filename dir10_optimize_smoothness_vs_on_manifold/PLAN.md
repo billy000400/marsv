@@ -341,17 +341,19 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-S1–S4 complete. Setup reproduced (Llama 3.1 8B base, layer 28; task acc 0.939). The referenced
-`optimize_path.py`/`slerp_relative_distance.py` do NOT exist in this repo — built the pipeline from
-scratch (`experiments/common.py`, `pathlib_opt.py`, `s2_collect.py`, `s4_sweep.py`, `s5_analyze.py`).
-Tail runner validated against the full model. Pilot Tue→Wed lambda sweep (5 λ + output-only, 3 seeds)
-gives a **decisive NEGATIVE**: recovery worsens monotonically with λ; the centroid spline is
-Pareto-dominated in both energies; high-λ paths are init-dependent. S6 all-7-adjacent-pairs run
-(linear init) launched to confirm generalization (criterion #4).
+**COMPLETE (S1–S6, STOP written).** Setup reproduced (Llama 3.1 8B base, layer 28; task acc 0.939).
+The referenced `optimize_path.py`/`slerp_relative_distance.py` do NOT exist in this repo — built the
+pipeline from scratch (`experiments/common.py`, `pathlib_opt.py`, `s2_collect.py`, `s4_sweep.py`,
+`s5_analyze.py`, `s6_allpairs.py`). Tail runner validated against the full model. Pilot Tue→Wed lambda
+sweep (5 λ + output-only, 3 seeds) and the all-7-adjacent-pairs run both give a **decisive NEGATIVE**:
+recovery worsens monotonically with λ (best optimized path = linear chord for every pair), the
+centroid spline is Pareto-dominated in both energies (7/7 pairs), and high-λ paths are init-dependent.
+REPORT.md display math re-verified (6/6 render, 0 degraded). Research question answered.
 
 ## Next step
 
-Confirm the 7-pair generalization from `results/allpairs_summary.json` (recovery worsens with λ and
-spline dominated in both energies for every pair). If so, the research question is fully answered
-(negative) — finalize and write `STOP`. Optional future polish: reproduce the exact Appendix-A.9
-SVD recovery score if the appendix becomes available; add per-pair figures.
+COMPLETE — nothing required. `STOP` written. The 7-pair generalization is confirmed
+(`results/allpairs_summary.json`): best-over-λ equals the linear chord for every pair and the spline
+is Pareto-dominated in both energies 7/7. Research question answered (NEGATIVE). Optional future
+polish only: reproduce the exact Appendix-A.9 SVD recovery score if the appendix becomes available;
+add per-pair figures.
