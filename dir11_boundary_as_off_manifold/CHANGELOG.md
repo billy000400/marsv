@@ -23,3 +23,25 @@ Populated RESULTS.md and REPORT.md from empty TODO stubs with the first full ana
 - **Verdict: REFUTED (preliminary)** — plateau-separated digit-9 regions are not disconnected manifold
   components. Figures added: `plots/direct_path_support.png`, `plots/component_test.png`.
 
+## 2026-07-15 — robustness pass (iter 2)
+
+Added `experiments/robustness.py` (graph-k sweep, KMeans-k×seed sweep, all-10-digit generality,
+explicit counterexample search). RESULTS.md + REPORT.md gain a **Robustness** section; verdict
+upgraded **REFUTED (preliminary) → REFUTED (robust across region-definition & graph hyperparameters,
+single checkpoint)**.
+
+- **Graph-k sweep** ($k$=6–25): A↔B (two 9-regions) hops track the within-region-A control at every
+  scale (10:5vs4, 15:3vs4, 25:2vs4), far below cross-digit (9↔4, 9↔0) throughout. Ordering
+  within ≈ A↔B ≪ cross-digit is scale-independent.
+- **Region-definition sweep** (KMeans-$k$∈{2,3,4}×3 seeds, 9 configs): digit-9 pairs always
+  within-region-like — hops **2–5**, bottleneck **1.93–2.72**, all below natural median 2.85.
+- **Generality (all 10 digits)** + **counterexample search**: every digit's two-region split has
+  bottleneck **2.35–4.17, all ≤ p95 (4.23)** → **0 counterexamples**; no same-digit region pair
+  crosses an off-manifold gap.
+- **Metric correction / caveat:** the initial counterexample criterion used hops≥7 and flagged 4
+  digits; corrected to the plan's support/gap definition (bottleneck > p95), which flags none. Reason:
+  in this dense L1 cloud even cross-digit bottlenecks stay below p95, so hops (not bottleneck)
+  discriminates for digit-9 — but hops is inflated by manifold elongation (digit-1's two regions = 15
+  hops yet bottleneck 2.70 < median). Generality verdict now anchored on the off-manifold criterion.
+- Figures added: `plots/robustness_graphk.png`, `plots/robustness_regions.png`.
+

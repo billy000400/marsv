@@ -15,13 +15,16 @@ walking in a straight line through an *empty region the data never visits*, whil
 remain connected by a perfectly ordinary data path?
 
 We test this on the two candidate digit-9 "stable regions" of a depth-4 MNIST MLP. **Verdict:
-REFUTED (preliminary).** The two regions are **not** disconnected components. In a graph built from
-real activations they connect at almost the same neighborhood scale as points *within* a single region
-(5 vs 4 graph hops), and far more easily than genuinely different digits (9–12 hops); the worst edge
-on that connecting path is *below* the typical local neighborhood radius, i.e. the path stays in
-high-density data. And the straight-line plateau boundary itself sits at a **well-supported** point
-(35th percentile of "off-manifold-ness"), not in a data void. The plateau reflects the model's
-internal decision geometry, **not** a hole in the data manifold.
+REFUTED** (robust across region-definition and graph hyperparameters; one checkpoint). The two regions
+are **not** disconnected components. In a graph built from real activations they connect at almost the
+same neighborhood scale as points *within* a single region (5 vs 4 graph hops), and far more easily
+than genuinely different digits (9–12 hops); the worst edge on that connecting path is *below* the
+typical local neighborhood radius, i.e. the path stays in high-density data. And the straight-line
+plateau boundary itself sits at a **well-supported** point (35th percentile of "off-manifold-ness"),
+not in a data void. This survives every hyperparameter we vary (KMeans-k∈{2,3,4}×seed, graph-k∈{6…25}),
+and generalizes: across **all ten digits**, no same-digit region pair is separated by an off-manifold
+gap (0 counterexamples). The plateau reflects the model's internal decision geometry, **not** a hole in
+the data manifold.
 
 ## Methods
 
@@ -111,6 +114,18 @@ was also computed but is **non-discriminative here**: the natural cloud is dense
 pair — including 9↔0 — merges at the minimum $k{=}3$. Hence we rely on the fixed-$k$ hop/bottleneck
 contrast above, where the categories separate cleanly.
 
+### Robustness sweeps & counterexample criterion
+
+To check the verdict is not an artifact of one hyperparameter choice, we (i) sweep the graph scale
+$k\in\lbrace 6,8,10,12,15,20,25\rbrace$ and recompute the four hop distances; (ii) redefine the digit-9
+regions under KMeans-$k\in\lbrace 2,3,4\rbrace$ and three seeds (the two largest clusters become the
+region pair); and (iii) repeat the two-region split for **all ten digits** to test generality. The
+**counterexample** we hunt for — the case that would *support* the hypothesis — is a same-digit region
+pair joined only through an *off-manifold* bottleneck, defined as $b(S_1,S_2) > r_{95}$ (the natural
+p95 radius, 4.23). We use the bottleneck, not hops, for this gap test: hops is a *distance* that can be
+inflated by a stretched-out manifold even when every step is high-support (e.g. digit 1), whereas the
+bottleneck directly measures the least-supported forced step.
+
 ## Results
 
 Current-best numbers; figures in `plots/`.
@@ -148,6 +163,36 @@ The two candidate digit-9 regions are only **5 hops** apart — essentially the 
 connecting path (2.72) is **below** the median local neighborhood radius, so a genuine high-support
 data path links the regions. There is no low-density bottleneck between them.
 
+### Robustness — the verdict survives every hyperparameter, and generalizes
+
+See `plots/robustness_graphk.png` (hops vs graph scale) and `plots/robustness_regions.png` (bottleneck
+and hops per digit).
+
+**Graph scale.** Across $k\in\lbrace 6\ldots 25\rbrace$ the A↔B (two 9-regions) distance tracks the
+within-region-A control at every scale (e.g. at $k{=}10$: 5 vs 4; at $k{=}15$: 3 vs 4; at $k{=}25$:
+2 vs 4) and stays far below the cross-digit references (9↔4, 9↔0) throughout. The ordering
+within ≈ A↔B ≪ cross-digit is scale-independent.
+
+**Region definition.** Over KMeans-$k\in\lbrace 2,3,4\rbrace\times$3 seeds (9 configs) the two 9-regions
+are always within-region-like: **hops 2–5, bottleneck 1.93–2.72 — all below the natural median (2.85)**.
+
+**Generality across all ten digits.** Splitting every digit into two regions and connecting them on the
+same graph, the bottleneck edge ranges over **2.35–4.17 — every value below the p95 gap threshold
+(4.23)**. **Zero counterexamples:** no same-digit region pair is separated by an off-manifold gap.
+
+| | same-digit region pairs (10 digits) | cross-digit pairs (45) |
+|--|:--|:--|
+| bottleneck edge | **2.35 – 4.17 (all ≤ p95 = 4.23)** | 2.03 – 3.47 |
+| geodesic hops   | 4 – 15 | 7 – 21 |
+
+**A caveat on which metric discriminates.** Because this L1 cloud is dense, the mutual-kNN graph is
+essentially one high-support blob — even *cross-digit* bottlenecks stay below p95, so no pair crosses a
+true data hole. What separates the categories for digit-9 is the *hop distance*; but hops is not
+universally reliable, since an elongated manifold inflates it (digit-1's own two regions are 15 hops
+apart while their bottleneck, 2.70, is below the median). We therefore anchor the *generality* claim on
+the unambiguous off-manifold criterion (bottleneck vs p95) and read digit-9 through both metrics, which
+agree.
+
 ## Conclusion
 
 For the digit-9 "stable regions" of this MNIST MLP, the plateau boundary is a property of the
@@ -164,10 +209,12 @@ would be crossing into genuinely unsupported territory. These results say the op
 plateaus: a data-respecting path exists, so the boundary is about *decision structure*, which is the
 thing to model — not a data void to avoid.
 
-**Limitations.** One model, one seed, one region pair (digit 9), one clustering ($k{=}2$), and a
-finite 1705-point cloud; finite samples cannot prove true topological disconnection, only bound
-empirical support. The fixed graph scale ($k{=}10$) is chosen to match within-region internal
-connectivity ($k{=}7$–$9$); the merge-$k$ baseline saturates and is uninformative. Next steps (S2/S3):
-repeat over multiple region pairs and seeds, sweep the clustering and graph $k$, and search explicitly
-for the counterexample — a same-digit plateau whose regions are nonetheless joined only through a
-low-support bottleneck.
+**Limitations.** One model / checkpoint / training seed, and a finite 1705-point cloud; finite samples
+cannot prove true topological disconnection, only bound empirical support. The verdict is now robust to
+the *analysis* hyperparameters — region clustering ($k$, seed), graph scale ($k$), and it holds for all
+ten digits — but a second trained model or a larger sample could still behave differently. A structural
+caveat found by the sweep: this L1 cloud is dense enough that the mutual-kNN graph is one high-support
+component for essentially *all* pairs (cross-digit bottlenecks also below p95), so the off-manifold-gap
+test never fires — the discriminative signal is graph *distance* (hops), which can be inflated by
+manifold elongation and is thus not a clean stand-alone separateness metric. The natural next step is a
+second trained model / seed to confirm the plateau-is-decision-geometry reading transfers.

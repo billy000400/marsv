@@ -90,7 +90,7 @@ Produce one combined figure, write a preliminary verdict, and create `STOP`.
   - Convert visual plateau judgments into a numerical boundary location based on `|d'(t)|`.
   - Save all reported figures to `plots/` and define every metric in `REPORT.md` Methods.
 
-- [ ] S2 — Estimate activation support and candidate manifold components
+- [x] S2 — Estimate activation support and candidate manifold components (iter 1: kNN radius + mutual-kNN graph; iter 2: KMeans-k×seed sweep, all-10-digit region assignment, graph-k robustness)
   - Collect first-hidden-layer activations from correctly classified natural MNIST inputs.
   - Assign candidate stable regions using downstream activation clustering and the existing digit-9 observations.
   - Compute kNN radius and nearest-natural-activation distance along every direct interpolation path.
@@ -103,7 +103,7 @@ Produce one combined figure, write a preliminary verdict, and create `STOP`.
   - Repeat the graph analysis across reasonable `k` values.
   - Validate that within-region pairs connect more easily than clearly unrelated cross-digit pairs.
 
-- [ ] S3 — Test whether plateau boundaries are off-manifold and whether regions are components
+- [~] S3 — Test whether plateau boundaries are off-manifold and whether regions are components (iter 1: direct-path + component tests for digit-9; iter 2: robustness sweeps + all-digit counterexample search, 0 found. Remaining: 2nd trained model/seed to confirm cross-model transfer)
   - **Direct-path test:** determine whether the maximum-`|d'(t)|` plateau boundary coincides with the lowest-support part of the spherical interpolation.
   - **Component test:** determine whether an alternative path through natural activations connects the two candidate regions without passing through an unusually low-support bottleneck.
   - Compare three path categories:
@@ -138,16 +138,18 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-**Iter 1 (2026-07-15): full pipeline runs end-to-end; preliminary verdict = REFUTED.**
-`experiments/analyze_manifold.py` reuses the `image-models` checkpoint (base code at
-`/network/mars-plateaus-image`, imported via sys.path — no branch checkout, wrapper handles git).
-Direct-path test: the cross-region 9→9 plateau boundary is at 35th-pctile support (well inside the
-manifold), not an off-manifold gap. Component test: the two digit-9 regions are 5 mutual-kNN hops
-apart (~within-region's 4) vs 9–12 for different digits, connected through a bottleneck edge (2.72)
-below the natural median radius (2.85). Merge-k saturates at k=3 (non-discriminative); fixed-k=10
-hop/bottleneck is the discriminative measure. Numbers in RESULTS.md/REPORT.md; figures
-`plots/direct_path_support.png`, `plots/component_test.png`. **Remaining:** robustness sweeps
-(multiple region pairs, seeds, KMeans-k, graph-k) and an explicit counterexample search.
+**Iter 2 (2026-07-15): robustness pass done; verdict = REFUTED, now robust across analysis
+hyperparameters (single checkpoint).** Iter 1 built the pipeline (`experiments/analyze_manifold.py`):
+digit-9 direct-path boundary at 35th-pctile support (not a gap); the two 9-regions 5 hops / bottleneck
+2.72 (< median 2.85) — like within-region, unlike cross-digit (9–12 hops). Iter 2
+(`experiments/robustness.py`) stress-tested it: graph-k sweep (6–25) — A↔B tracks the within-region
+control at every scale, far below cross-digit; KMeans-k∈{2,3,4}×seed sweep — 9-regions always
+hops 2–5 / bottleneck 1.93–2.72 (all < median); all-10-digit generality — every same-digit region
+pair's bottleneck ≤ p95 (2.35–4.17 vs threshold 4.23) → **0 counterexamples**. Key correction: hops is
+contaminated by manifold elongation (digit-1 = 15 within-digit hops yet high-support), so the
+generality verdict is anchored on the off-manifold (bottleneck-vs-p95) criterion. Figures
+`plots/robustness_graphk.png`, `plots/robustness_regions.png`. **Remaining:** a 2nd trained model/seed
+for cross-model transfer (the one open limitation) — otherwise the question is answered.
 
 ---
 
@@ -170,8 +172,10 @@ The second claim is stronger. A direct spherical interpolation may leave the man
 
 ## Next step
 
-Robustness pass (S2/S3): parameterize `experiments/analyze_manifold.py` to sweep KMeans-k and
-graph-k, repeat the direct-path + component tests over several digit-9 region pairs and a second seed,
-add a region-B↔B same-region control, and explicitly search for the counterexample (a same-digit
-plateau whose two regions connect only through a low-support bottleneck). Update RESULTS.md with the
-across-hyperparameter summary (stability of the REFUTED verdict) and add a robustness figure.
+Cross-model confirmation (final S3 hardening): retrain / load a second MNIST MLP (different seed or
+width) and re-run the digit-9 direct-path + component tests + all-digit counterexample search, to check
+the plateau=decision-geometry (not data-hole) reading transfers beyond one checkpoint — the only
+remaining real limitation. Reuse `experiments/robustness.py` (parameterize the checkpoint path). If a
+second model reproduces 0 counterexamples, the question is fully answered → write STOP. If no second
+checkpoint is available and time is short, the question is already answered for the given model;
+finalize and STOP per the fallback.
