@@ -102,13 +102,27 @@ We re-ran the identical frozen pipeline on the existing checkpoints (`experiment
 | d5w200 deeper (85.9%)       | 46 | **0.982** | 30% | 32 |
 | d3w200 shallower (78.1%)*   | 1  | 0.982 | 0% | 1 |
 
-\*The shallow net produces few *sharp* plateaus, so only 1 pair passes the `d(t)` accept filter — it is
-under-powered and we do not weight it. The four well-powered models agree: between-plateau median `G` is
-**0.93–1.00 in every case — never a consistent shift above the within-plateau baseline of 1.0** — and
-each finds many counterexamples. In seed 1 the direction even *reverses* (median 0.925 < 1). Neither
-claim survives replication.
+\*The shallow net is excluded on **structural grounds**, not merely down-weighted (see next section):
+it rarely produces *sharp* plateaus, so only 1 pair passes the `d(t)` accept filter. The four
+well-powered models agree: between-plateau median `G` is **0.93–1.00 in every case — never a consistent
+shift above the within-plateau baseline of 1.0** — and each finds many counterexamples. In seed 1 the
+direction even *reverses* (median 0.925 < 1). Neither claim survives replication.
 
 ![Replication across five checkpoints: (a) between-plateau median G (red, 95% CI) sits on the within-plateau baseline (green) for every model; (b) in every well-powered model ~half the verified pairs fall each side of G=1.](plots/population_replication.png)
+
+### Why the shallow net can't be powered up — and why that doesn't change the verdict
+The natural question is whether the shallow net's single verified pair is just *sampling noise* that
+more endpoint pairs would fix. It is not. The shallow net's downstream distance **ramps rather than
+plateaus**: its mean plateau fraction across all 46 region pairs is **0.25** (max 0.43), so **0/46**
+region pairs reach the 0.5 accept threshold even on average — versus **0.60** (43/46 pairs above 0.5)
+for the base net. Sampling **10× more** endpoint pairs (20 → 200 per region pair) leaves it with only
+**2** verified pairs, not 20 — confirming the gap is structural, not statistical. We deliberately do
+**not** relax the `d(t)` filter to admit these ramps: a ramp is not a plateau, and scoring `G` on
+non-plateau paths would not answer the question. Crucially, the 1–2 genuine plateau transitions the
+shallow net *does* produce are **all counterexamples** (`G ≤ 1`; median `G` 0.76–0.98) — so its sparse
+evidence points the same way as the four well-powered models, never against the verdict.
+
+![(a) The shallow net's d(t) rarely plateaus: its per-region-pair plateau fraction (red) sits far below the 0.5 accept threshold (0/46 pairs pass) while the base net (blue) clears it 43/46 times — a structural gap, not sampling noise. (b) Sampling 10× more endpoint pairs (20→200) does not restore power (still ≤2 verified pairs), and every plateau it does find has G≤1.](plots/population_shallow_power.png)
 
 ## Headline
 **Both claims fail.** Across a depth-4 MNIST MLP and four replication checkpoints, plateau transitions

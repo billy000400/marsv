@@ -3234,5 +3234,20 @@
         }
       ]
     }
-  ]
+  ],
+  "shallow_power": {
+    "n_pairs": 200,
+    "n_verified_pairs": 2,
+    "n_counterexamples": 2,
+    "between_G_median": 0.763606810793171,
+    "between_G_min": 0.6346374120667864,
+    "between_G_max": 0.8925762095195556,
+    "frac_pairs_G_gt_1": 0.0,
+    "within_G_median": 1.0,
+    "within_G_p95": 2.8179028222081404,
+    "boot_between_median_CI": [
+      0.6346374120667864,
+      0.8925762095195556
+    ]
+  }
 }

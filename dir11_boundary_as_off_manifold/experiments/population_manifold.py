@@ -94,7 +94,7 @@ def slerp_path(a, b, n):
     return pts
 
 # ============================================================ per-model analysis
-def analyze(model, ck, label, detailed=False):
+def analyze(model, ck, label, detailed=False, n_pairs=N_PAIRS):
     model = model.to('cpu')
     n_test = ck['config']['n_test']
     _, _, test_x, test_y = load_mnist(DATA)
@@ -175,18 +175,18 @@ def analyze(model, ck, label, detailed=False):
     # ---- within-plateau scale (frozen) ----
     within_scale = {}; within_G = []
     for k, rr in regions.items():
-        bns = np.array([bottleneck(a, b) for a, b in sample_pairs(rr, rr, N_PAIRS, True)])
+        bns = np.array([bottleneck(a, b) for a, b in sample_pairs(rr, rr, n_pairs, True)])
         within_scale[k] = float(np.median(bns))
         within_G.extend((bns / within_scale[k]).tolist())
     within_G = np.array(within_G)
 
     def sub_scale(rr):
-        return float(np.median([bottleneck(a, b) for a, b in sample_pairs(rr, rr, N_PAIRS, True)]))
+        return float(np.median([bottleneck(a, b) for a, b in sample_pairs(rr, rr, n_pairs, True)]))
 
     # ---- between-plateau pairs ----
     def eval_pair(name, ri, rj, rI, rJ, si, sj):
         scale = max(si, sj); gs = []; fracs = []; accept = 0; ex = None
-        for a, b in sample_pairs(rI, rJ, N_PAIRS, False):
+        for a, b in sample_pairs(rI, rJ, n_pairs, False):
             d = d_of_t(a, b); ok, frac = plateau_ok(d); fracs.append(frac)
             g = bottleneck(a, b) / scale
             if ok:
@@ -268,11 +268,64 @@ for label, ckpt, detailed in CHECKPOINTS:
         base = r
     results.append(r)
 
+# ============================================================ shallow-net power restoration
+# d3w200 is under-powered at 20 endpoint pairs (its downstream distance ramps rather than
+# plateaus, so the frozen d(t) accept filter rejects almost every path -> only 1 verified
+# region-pair). PLAN S3 asks us to restore power (sample MORE endpoint pairs) and confirm the
+# verdict is unchanged. We re-run ONLY the shallow net at increasing n_pairs until it clears
+# >=20 verified region-pairs (or a cap), keeping every definition (d(t) filter, G, threshold)
+# frozen. Base and the other models stay at the frozen 20 pairs.
+shallow_ck = os.path.join(RES, 'mnist_mlp_d3_w200_relu_n1000_seed2.pt')
+shallow_power = None; shallow_sweep = []
+if os.path.exists(shallow_ck):
+    m_s, c_s = load_checkpoint(shallow_ck)
+    for np_try in (20, 60, 120, 200):
+        sp = analyze(m_s, c_s, f"d3w200 shallower ({np_try} pairs)", n_pairs=np_try)
+        print(f"[shallow-power np={np_try}] verified_pairs={sp['n_verified_pairs']} "
+              f"between-G med={sp['between_G_median']} counterex={sp['n_counterexamples']}"
+              f"/{sp['n_verified_pairs']} frac>1={sp['frac_pairs_G_gt_1']:.2f}", flush=True)
+        rec = dict(n_pairs=np_try, **{k: sp[k] for k in (
+            'n_verified_pairs', 'n_counterexamples', 'between_G_median', 'between_G_min',
+            'between_G_max', 'frac_pairs_G_gt_1', 'within_G_median', 'within_G_p95',
+            'boot_between_median_CI')})
+        shallow_sweep.append(rec)
+        shallow_power = rec
+        if sp['n_verified_pairs'] >= 20:
+            break
+
+    # ---- figure: why the shallow net can't be powered up (structural, not sampling) ----
+    d3_main = next(r for r in results if 'd3w200' in r['label'])
+    fr_base = np.array([p['plateau_frac_mean'] for p in base['pairs']])
+    fr_d3 = np.array([p['plateau_frac_mean'] for p in d3_main['pairs']])
+    fig, (axp, axq) = plt.subplots(1, 2, figsize=(13, 4.8))
+    axp.hist(fr_base, bins=np.linspace(0, 1, 21), alpha=0.6, color='C0',
+             label=f'base d4w200 ({int((fr_base>=0.5).sum())}/{len(fr_base)} region-pairs plateau)')
+    axp.hist(fr_d3, bins=np.linspace(0, 1, 21), alpha=0.6, color='C3',
+             label=f'd3w200 shallow ({int((fr_d3>=0.5).sum())}/{len(fr_d3)} region-pairs plateau)')
+    axp.axvline(0.5, color='k', ls='--', lw=1.2, label='d(t) accept threshold (0.5)')
+    axp.set_xlabel('mean plateau fraction of d(t) per region pair')
+    axp.set_ylabel('number of region pairs')
+    axp.set_title('(a) Shallow net rarely plateaus: d(t) ramps, so no path\npasses the accept filter — a structural gap, not sampling noise')
+    axp.legend(fontsize=8); axp.grid(alpha=0.3)
+    nn = [r['n_pairs'] for r in shallow_sweep]
+    axq.plot(nn, [r['n_verified_pairs'] for r in shallow_sweep], 'o-', color='C0',
+             label='verified plateau pairs')
+    axq.axhline(20, color='k', ls='--', lw=1, label='well-powered target (20)')
+    for r in shallow_sweep:
+        axq.annotate(f"G={r['between_G_median']:.2f}", (r['n_pairs'], r['n_verified_pairs']),
+                     textcoords='offset points', xytext=(0, 8), fontsize=8, ha='center', color='C3')
+    axq.set_xlabel('endpoint pairs sampled per region pair')
+    axq.set_ylabel('verified plateau pairs (n_verified >= 5)'); axq.set_ylim(0, 22)
+    axq.set_title('(b) Sampling 10x more endpoint pairs does NOT restore power;\nthe few genuine plateaus it finds are all G<=1 (counterexamples)')
+    axq.legend(fontsize=8); axq.grid(alpha=0.3)
+    plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_shallow_power.png'), dpi=140); plt.close()
+
 # ---- persist (drop bulky arrays) ----
 def clean(r):
     return {k: v for k, v in r.items() if not k.startswith('_')}
 with open(os.path.join(RES, 'population.json'), 'w') as f:
-    json.dump(dict(base=clean(base), replication=[clean(r) for r in results]), f, indent=2)
+    json.dump(dict(base=clean(base), replication=[clean(r) for r in results],
+                   shallow_power=shallow_power), f, indent=2)
 
 # ============================================================ figures (base)
 within_G = base['_within_G']; between_G_all = base['_between_G_all']

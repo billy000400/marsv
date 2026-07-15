@@ -144,7 +144,7 @@ the main text only if it changes the verdict.
     the plateau-transition rule, and exclusions with reasons. These are dataset counts, not new metrics.
   - Include the previously studied digit-9 pair in this table exactly like any other pair.
 
-- [~] S3 — Test empirical manifold-component correspondence and write the verdict
+- [x] S3 — Test empirical manifold-component correspondence and write the verdict
   - Build the natural-activation MST and compute `G` for all verified between-plateau pairs and matched
     within-plateau controls.
   - Search explicitly for counterexamples to the universal claim: verified plateau transitions with
@@ -201,7 +201,9 @@ Also answer:
 
 ## Current status
 
-S1–S2 complete and S3 core done (iter 5). The reframed population analysis is implemented in
+**COMPLETE (iter 6) — STOP written.** All stages done; both PLAN claims have a clear, replicated
+verdict and the last open item (shallow-net statistical power) is resolved. S1–S2 complete and S3 core
+done (iter 5). The reframed population analysis is implemented in
 `experiments/population_manifold.py` with all definitions frozen: plateau regions = 10 digit classes
 (confident-correct, output margin ≥ 0.5), natural cloud = 1705 correct L1 activations, `d(t)` accept =
 plateau fraction ≥ 0.5, `G = MST-bottleneck / max(within-region medians)`, 20 pairs/region-pair (seed 0).
@@ -220,7 +222,10 @@ under-powered (only 1 pair passes the `d(t)` sharpness filter) and is down-weigh
 
 ## Next step
 
-Finish S3: restore statistical power for the shallow net (adapt the `d(t)` sharpness threshold or sample
-more endpoint pairs so d3w200 has ≥~20 verified pairs) and confirm the verdict is unchanged; optionally a
-one-line MST k-freeness note. If confirmed, write STOP. Deliverables already curated to current-best; no
-unaddressed feedback files.
+None — direction complete. Shallow-net power was investigated (iter 6): the deficit is **structural, not
+statistical** (d3w200's d(t) ramps rather than plateaus — 0/46 region pairs reach the accept threshold,
+and sampling 10× more endpoint pairs still yields only 2 verified pairs), so it is excluded as an invalid
+plateau test bed; its 1–2 genuine plateaus are all counterexamples, consistent with the verdict. Both
+claims answered (universal REFUTED, typical NOT SUPPORTED), replicated across a second seed and two
+architectures. Deliverables curated to current-best and verified; no unaddressed feedback files. STOP
+written.

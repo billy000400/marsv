@@ -178,3 +178,39 @@ verdicts. d(t) remains a filter, not a reported score.
 On track? yes — S1/S2/S3 core complete (~90%), both claims answered (universal REFUTED, typical NOT
 SUPPORTED) and replicated across a second seed + two architectures; only shallow-net power + final STOP
 remain.
+
+---
+
+## 2026-07-15 — iter 6: shallow-net power resolved (structural), verdict unchanged → STOP
+
+**Did.** Addressed the sole remaining S3 next-step: restore statistical power for the shallow net
+d3w200 (1 verified pair at 20 endpoint pairs) and confirm the verdict holds. Parametrized
+`analyze(..., n_pairs=)` (3-line change; base + other 4 models stay at the frozen 20 pairs) and re-ran
+d3w200 at n_pairs = 20/60/120/200. Added `plots/population_shallow_power.png`, recorded a
+`shallow_power` block in `results/population.json`, and curated both deliverables (footnote + new
+subsection + embedded figure). Verified: GitHub API 3/3 display-math, 0 pre-math, 0 inline hazards; both
+files 0 bare plot paths, all 4 figures embedded.
+
+**Learned.** Sampling MORE pairs does **not** restore power — the deficit is **structural, not
+statistical**. The shallow net's d(t) *ramps* rather than plateaus: mean plateau fraction 0.25 (max
+0.43) across all 46 region pairs, **0/46** reach the 0.5 accept threshold even on average, vs base 0.60
+(43/46 above 0.5). At 10× sampling (200 pairs/region-pair) it still has only 2 verified pairs. I
+deliberately did NOT relax the frozen d(t) filter — a ramp is not a plateau, and scoring G on non-plateau
+paths would not answer the question. The 1–2 genuine plateaus it does produce are **all counterexamples**
+(G ≤ 1, median 0.76–0.98), so its sparse evidence agrees with the four well-powered models. Correct
+resolution: exclude the shallow net as an invalid plateau test bed (stronger, more honest than the old
+"under-powered, down-weighted"), verdict UNCHANGED. Assumption logged: chose structural exclusion +
+report the plateau-fraction diagnostic (rejected relaxing PLATEAU_FRAC, which would admit ramps and
+answer a different question; rejected forcing 20 pairs by sampling, which empirically fails).
+
+**Next.** PLAN success criterion fully met: both claims have a clear verdict (universal REFUTED, typical
+NOT SUPPORTED), replicated across a second seed and two more architectures, and the shallow-net power
+question is resolved. No unaddressed human_feedback*/REVIEW files. Writing STOP.
+
+Metric check: I added NO new reported metric. `plateau_frac` is the existing d(t) inclusion filter's
+internal quantity, surfaced once as a diagnostic — it changes the decision (shallow net moves from
+"down-weighted for noise" to "excluded on structural grounds" and shows more sampling cannot help). G
+remains the sole reported score; d(t) remains a filter.
+
+On track? yes — S1/S2/S3 complete (~100%); both claims answered and replicated, shallow-net power
+question resolved as structural, deliverables curated + verified. Writing STOP.

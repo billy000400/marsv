@@ -117,3 +117,26 @@ from the deliverables per the PLAN's metric budget (history preserved here).
 - Figures added: `plots/population_G.png`, `plots/population_heatmap.png`, `plots/population_dt.png`,
   `plots/population_replication.png` (embedded in both deliverables). REPORT math re-verified via the
   GitHub API: 3/3 display-math, 0 pre-math, 0 inline hazards; 0 bare plot paths in either file.
+
+## 2026-07-15 — shallow-net power restoration + structural exclusion (iter 6)
+
+Closed the one open S3 item: whether the shallow net d3w200's single verified pair is sampling noise
+that more endpoint pairs would fix. Parametrized `analyze(..., n_pairs=)` in
+`experiments/population_manifold.py` (base + other models unchanged at the frozen 20 pairs) and re-ran
+d3w200 at 20/60/120/200 endpoint pairs per region pair.
+
+- **Result: power cannot be restored — the deficit is structural, not statistical.** The shallow net's
+  d(t) *ramps* rather than plateaus: mean plateau fraction 0.25 (max 0.43) across all 46 region pairs,
+  **0/46** reach the 0.5 accept threshold even on average, vs base 0.60 (43/46). Sampling 10× more
+  pairs (20→200) still yields only **2** verified pairs, not 20.
+- We do NOT relax the frozen d(t) filter (a ramp is not a plateau; scoring G on it would not test the
+  claim). The 1–2 genuine plateau transitions it does produce are **all counterexamples** (`G ≤ 1`,
+  median 0.76–0.98) — consistent with the verdict, never against it.
+- RESULTS.md + REPORT.md: the d3w200 replication footnote changed from "under-powered, we do not weight
+  it" → **excluded on structural grounds** (invalid plateau test bed), with a new subsection and figure.
+  Population verdict and all headline numbers are UNCHANGED (base between-G 0.996, 25/45 counterexamples;
+  four well-powered models 0.93–1.00).
+- Figure added: `plots/population_shallow_power.png` (embedded in both deliverables). Math re-verified
+  via GitHub API: 3/3 display-math, 0 pre-math, 0 inline hazards; 0 bare plot paths in either file.
+- S3 and the PLAN success criterion are now fully met (both claims answered, replicated, shallow-net
+  power question resolved). Writing STOP.
