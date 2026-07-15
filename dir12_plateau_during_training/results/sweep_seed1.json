@@ -1,0 +1,2725 @@
+{
+  "seed": 1,
+  "steps": [
+    0,
+    10,
+    30,
+    100,
+    300,
+    1000,
+    3000,
+    10000,
+    20000,
+    30000,
+    50000,
+    75000,
+    100000
+  ],
+  "rhos": [
+    0.0,
+    0.03,
+    0.06,
+    0.09,
+    0.12,
+    0.15,
+    0.18,
+    0.21,
+    0.24,
+    0.27,
+    0.3,
+    0.32999999999999996,
+    0.36,
+    0.39,
+    0.42,
+    0.44999999999999996,
+    0.48,
+    0.51,
+    0.54,
+    0.57,
+    0.6
+  ],
+  "rho_small": 0.2,
+  "checkpoints": [
+    {
+      "step": 0,
+      "contrast": 0.009094917238676059,
+      "contrast_ci": [
+        -0.009854717062386081,
+        0.028159922102446847
+      ],
+      "mean_conf": 0.09514463692903519,
+      "frac_confident": 0.0,
+      "acc_eval": 0.1,
+      "groups": {
+        "conf_correct": {
+          "n": 0,
+          "contrast": null,
+          "ci": [
+            null,
+            null
+          ]
+        },
+        "unc_correct": {
+          "n": 50,
+          "contrast": 0.02341485448288616,
+          "ci": [
+            -0.00792018698066016,
+            0.05521155491482617
+          ]
+        },
+        "conf_wrong": {
+          "n": 0,
+          "contrast": null,
+          "ci": [
+            null,
+            null
+          ]
+        },
+        "unc_wrong": {
+          "n": 450,
+          "contrast": 0.0075038131004303565,
+          "ci": [
+            -0.010357406492117693,
+            0.027059136395098566
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 2,
+          "silhouette": 0.18183141946792603,
+          "n_valid": 0,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 491,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": -0.006486340549999986,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 9,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": -0.145718152817283,
+              "valid": false
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 2,
+          "silhouette": 0.33191803097724915,
+          "n_valid": 0,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 496,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": -0.0059152624210922706,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 4,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": null,
+              "valid": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 10,
+      "contrast": 0.22341377491326064,
+      "contrast_ci": [
+        0.21397273483875529,
+        0.23223599612575935
+      ],
+      "mean_conf": 0.2657160758972168,
+      "frac_confident": 0.002,
+      "acc_eval": 0.646,
+      "groups": {
+        "conf_correct": {
+          "n": 1,
+          "contrast": null,
+          "ci": [
+            null,
+            null
+          ]
+        },
+        "unc_correct": {
+          "n": 322,
+          "contrast": 0.24451888568608604,
+          "ci": [
+            0.23284186613890273,
+            0.25589574862526265
+          ]
+        },
+        "conf_wrong": {
+          "n": 0,
+          "contrast": null,
+          "ci": [
+            null,
+            null
+          ]
+        },
+        "unc_wrong": {
+          "n": 177,
+          "contrast": 0.1850928244940011,
+          "ci": [
+            0.17314754579694577,
+            0.19765945471216234
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 3,
+          "silhouette": 0.380104124546051,
+          "n_valid": 1,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 163,
+              "maj_pred": 0,
+              "purity": 0.44785276073619634,
+              "contrast_lo": 0.15532448062572735,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 265,
+              "maj_pred": 4,
+              "purity": 0.2943396226415094,
+              "contrast_lo": 0.22739047928735065,
+              "valid": false
+            },
+            {
+              "cluster": 2,
+              "size": 72,
+              "maj_pred": 1,
+              "purity": 0.9027777777777778,
+              "contrast_lo": 0.27661452022889416,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 2,
+          "silhouette": 0.4890839457511902,
+          "n_valid": 0,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 497,
+              "maj_pred": 4,
+              "purity": 0.158953722334004,
+              "contrast_lo": 0.2141534868643383,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 3,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": null,
+              "valid": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 30,
+      "contrast": 0.3109232093633696,
+      "contrast_ci": [
+        0.3023980531734519,
+        0.3199489339927395
+      ],
+      "mean_conf": 0.6421481966972351,
+      "frac_confident": 0.382,
+      "acc_eval": 0.846,
+      "groups": {
+        "conf_correct": {
+          "n": 189,
+          "contrast": 0.3742338645696015,
+          "ci": [
+            0.3635790719329241,
+            0.38533466174419195
+          ]
+        },
+        "unc_correct": {
+          "n": 234,
+          "contrast": 0.28173543159084957,
+          "ci": [
+            0.27249213717301024,
+            0.2909812556585996
+          ]
+        },
+        "conf_wrong": {
+          "n": 2,
+          "contrast": null,
+          "ci": [
+            null,
+            null
+          ]
+        },
+        "unc_wrong": {
+          "n": 75,
+          "contrast": 0.24244179012598344,
+          "ci": [
+            0.2298193705423404,
+            0.25479784493867624
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 8,
+          "silhouette": 0.5551090240478516,
+          "n_valid": 5,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 63,
+              "maj_pred": 2,
+              "purity": 0.7777777777777778,
+              "contrast_lo": 0.2449764379862328,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 59,
+              "maj_pred": 1,
+              "purity": 0.9491525423728814,
+              "contrast_lo": 0.378742575229854,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 43,
+              "maj_pred": 3,
+              "purity": 0.9534883720930233,
+              "contrast_lo": 0.25847553734681594,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 94,
+              "maj_pred": 4,
+              "purity": 0.5425531914893617,
+              "contrast_lo": 0.31491331504630243,
+              "valid": false
+            },
+            {
+              "cluster": 4,
+              "size": 90,
+              "maj_pred": 5,
+              "purity": 0.4666666666666667,
+              "contrast_lo": 0.23316737714930555,
+              "valid": false
+            },
+            {
+              "cluster": 5,
+              "size": 53,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.3186534747580126,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 44,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.3143089578777069,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 54,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.320268561330661,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 2,
+          "silhouette": 0.3238082230091095,
+          "n_valid": 0,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 15,
+              "maj_pred": 0,
+              "purity": 0.6666666666666666,
+              "contrast_lo": 0.2901855149187702,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 485,
+              "maj_pred": 4,
+              "purity": 0.12164948453608247,
+              "contrast_lo": 0.30203865609980285,
+              "valid": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 100,
+      "contrast": 0.4182549156457557,
+      "contrast_ci": [
+        0.40484658968503306,
+        0.43064701237007375
+      ],
+      "mean_conf": 0.7977579236030579,
+      "frac_confident": 0.668,
+      "acc_eval": 0.902,
+      "groups": {
+        "conf_correct": {
+          "n": 329,
+          "contrast": 0.47774411235172254,
+          "ci": [
+            0.46781012845338793,
+            0.48818875985287197
+          ]
+        },
+        "unc_correct": {
+          "n": 122,
+          "contrast": 0.32149558091076647,
+          "ci": [
+            0.3014753386554059,
+            0.33963264387290304
+          ]
+        },
+        "conf_wrong": {
+          "n": 5,
+          "contrast": 0.35343013278615754,
+          "ci": [
+            0.2644977947223125,
+            0.4258221858163561
+          ]
+        },
+        "unc_wrong": {
+          "n": 44,
+          "contrast": 0.24909166645719982,
+          "ci": [
+            0.22095402934110445,
+            0.2776258484195753
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 10,
+          "silhouette": 0.7478503584861755,
+          "n_valid": 9,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 46,
+              "maj_pred": 8,
+              "purity": 0.9782608695652174,
+              "contrast_lo": 0.2828379751331254,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 53,
+              "maj_pred": 5,
+              "purity": 0.9245283018867925,
+              "contrast_lo": 0.3156957094739103,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 51,
+              "maj_pred": 6,
+              "purity": 0.9803921568627451,
+              "contrast_lo": 0.4056948742597374,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 40,
+              "maj_pred": 9,
+              "purity": 0.95,
+              "contrast_lo": 0.38762434066514606,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 54,
+              "maj_pred": 2,
+              "purity": 0.9074074074074074,
+              "contrast_lo": 0.3383029813351674,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 54,
+              "maj_pred": 7,
+              "purity": 0.9814814814814815,
+              "contrast_lo": 0.4131972666146371,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 39,
+              "maj_pred": 3,
+              "purity": 0.9743589743589743,
+              "contrast_lo": 0.3699662423991224,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 52,
+              "maj_pred": 0,
+              "purity": 0.9807692307692307,
+              "contrast_lo": 0.40890528709177665,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 54,
+              "maj_pred": 1,
+              "purity": 0.9814814814814815,
+              "contrast_lo": 0.4940018876531848,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 57,
+              "maj_pred": 4,
+              "purity": 0.8947368421052632,
+              "contrast_lo": 0.44851219692755323,
+              "valid": false
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 11,
+          "silhouette": 0.4626966416835785,
+          "n_valid": 8,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 57,
+              "maj_pred": 5,
+              "purity": 0.8596491228070176,
+              "contrast_lo": 0.3050811132039358,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 57,
+              "maj_pred": 4,
+              "purity": 0.8947368421052632,
+              "contrast_lo": 0.4482745144195906,
+              "valid": false
+            },
+            {
+              "cluster": 2,
+              "size": 52,
+              "maj_pred": 0,
+              "purity": 0.9807692307692307,
+              "contrast_lo": 0.40796020024113705,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 42,
+              "maj_pred": 3,
+              "purity": 0.9761904761904762,
+              "contrast_lo": 0.3668851216516665,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 42,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.2917087203428039,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 52,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.5082681423651113,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 50,
+              "maj_pred": 6,
+              "purity": 0.98,
+              "contrast_lo": 0.40917851951780077,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 1,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": null,
+              "valid": false
+            },
+            {
+              "cluster": 8,
+              "size": 51,
+              "maj_pred": 2,
+              "purity": 0.9607843137254902,
+              "contrast_lo": 0.3339165578325959,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 55,
+              "maj_pred": 7,
+              "purity": 0.9818181818181818,
+              "contrast_lo": 0.4128594872261475,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 41,
+              "maj_pred": 9,
+              "purity": 0.9512195121951219,
+              "contrast_lo": 0.383829480021666,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 300,
+      "contrast": 0.39112088048035987,
+      "contrast_ci": [
+        0.37396700576548114,
+        0.40713049824671355
+      ],
+      "mean_conf": 0.840908408164978,
+      "frac_confident": 0.736,
+      "acc_eval": 0.902,
+      "groups": {
+        "conf_correct": {
+          "n": 363,
+          "contrast": 0.46043877895847785,
+          "ci": [
+            0.44761954471145576,
+            0.4735318937557914
+          ]
+        },
+        "unc_correct": {
+          "n": 88,
+          "contrast": 0.23673528218042306,
+          "ci": [
+            0.20892086850687924,
+            0.2646874617907568
+          ]
+        },
+        "conf_wrong": {
+          "n": 5,
+          "contrast": 0.2930959290962455,
+          "ci": [
+            0.22881874713118153,
+            0.37418488149187124
+          ]
+        },
+        "unc_wrong": {
+          "n": 44,
+          "contrast": 0.1391586136566818,
+          "ci": [
+            0.10227234058016041,
+            0.17542058647257674
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 10,
+          "silhouette": 0.793317973613739,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 49,
+              "maj_pred": 6,
+              "purity": 0.9795918367346939,
+              "contrast_lo": 0.3720212299130428,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 53,
+              "maj_pred": 2,
+              "purity": 0.9622641509433962,
+              "contrast_lo": 0.2804768048886369,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 42,
+              "maj_pred": 3,
+              "purity": 0.9523809523809523,
+              "contrast_lo": 0.3325010575733207,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 49,
+              "maj_pred": 5,
+              "purity": 0.9795918367346939,
+              "contrast_lo": 0.2777183464668936,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 42,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.390893868082395,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 58,
+              "maj_pred": 7,
+              "purity": 0.9137931034482759,
+              "contrast_lo": 0.34432454864388756,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 56,
+              "maj_pred": 0,
+              "purity": 0.9642857142857143,
+              "contrast_lo": 0.3548963737481031,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 54,
+              "maj_pred": 4,
+              "purity": 0.9814814814814815,
+              "contrast_lo": 0.43518869530036264,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 45,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.19595876850247373,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 52,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.5149199478024595,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 10,
+          "silhouette": 0.5345041751861572,
+          "n_valid": 9,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 56,
+              "maj_pred": 8,
+              "purity": 0.8214285714285714,
+              "contrast_lo": 0.17659682013483233,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 42,
+              "maj_pred": 5,
+              "purity": 0.9761904761904762,
+              "contrast_lo": 0.30113764535630516,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 55,
+              "maj_pred": 0,
+              "purity": 0.9818181818181818,
+              "contrast_lo": 0.35364715903477706,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 53,
+              "maj_pred": 1,
+              "purity": 0.9811320754716981,
+              "contrast_lo": 0.5098743112436821,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 57,
+              "maj_pred": 7,
+              "purity": 0.9122807017543859,
+              "contrast_lo": 0.3428986659879671,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 49,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.37697267690543657,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 53,
+              "maj_pred": 2,
+              "purity": 0.9622641509433962,
+              "contrast_lo": 0.27620877345331785,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 42,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.3905742790089813,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 39,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.3613182671571279,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 54,
+              "maj_pred": 4,
+              "purity": 0.9814814814814815,
+              "contrast_lo": 0.4346497665752568,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 1000,
+      "contrast": 0.3911807465454872,
+      "contrast_ci": [
+        0.37578271418477105,
+        0.40730854859397764
+      ],
+      "mean_conf": 0.8344709277153015,
+      "frac_confident": 0.734,
+      "acc_eval": 0.9,
+      "groups": {
+        "conf_correct": {
+          "n": 363,
+          "contrast": 0.46138244131397843,
+          "ci": [
+            0.44932007836833887,
+            0.47368387081174856
+          ]
+        },
+        "unc_correct": {
+          "n": 87,
+          "contrast": 0.23086752404295852,
+          "ci": [
+            0.2004752526074551,
+            0.25794076142066785
+          ]
+        },
+        "conf_wrong": {
+          "n": 4,
+          "contrast": null,
+          "ci": [
+            null,
+            null
+          ]
+        },
+        "unc_wrong": {
+          "n": 46,
+          "contrast": 0.14937848277677768,
+          "ci": [
+            0.11228042758684185,
+            0.1863733784014823
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 10,
+          "silhouette": 0.8001446723937988,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 50,
+              "maj_pred": 8,
+              "purity": 0.96,
+              "contrast_lo": 0.18348986992146415,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 54,
+              "maj_pred": 2,
+              "purity": 0.9814814814814815,
+              "contrast_lo": 0.2875340118927351,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 51,
+              "maj_pred": 6,
+              "purity": 0.9803921568627451,
+              "contrast_lo": 0.3734026639891155,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 43,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.3882297462575617,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 53,
+              "maj_pred": 1,
+              "purity": 0.9811320754716981,
+              "contrast_lo": 0.5041134889997222,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 56,
+              "maj_pred": 7,
+              "purity": 0.9285714285714286,
+              "contrast_lo": 0.3459018239971603,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 39,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.36497757182459456,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 54,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.3499701986801468,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 47,
+              "maj_pred": 5,
+              "purity": 0.9787234042553191,
+              "contrast_lo": 0.28881202207414786,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 53,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.4333368085052534,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 10,
+          "silhouette": 0.5465657711029053,
+          "n_valid": 9,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 55,
+              "maj_pred": 8,
+              "purity": 0.8909090909090909,
+              "contrast_lo": 0.15842269874285875,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 49,
+              "maj_pred": 5,
+              "purity": 0.9795918367346939,
+              "contrast_lo": 0.2772106999094143,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 55,
+              "maj_pred": 0,
+              "purity": 0.9818181818181818,
+              "contrast_lo": 0.3519146547061005,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 53,
+              "maj_pred": 1,
+              "purity": 0.9811320754716981,
+              "contrast_lo": 0.5049124379540575,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 57,
+              "maj_pred": 7,
+              "purity": 0.9122807017543859,
+              "contrast_lo": 0.34427703171600543,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 48,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.38658191186240976,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 48,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.3180988342918014,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 42,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.39258816830798515,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 39,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.36768440680173553,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 54,
+              "maj_pred": 4,
+              "purity": 0.9814814814814815,
+              "contrast_lo": 0.4253738502113354,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 3000,
+      "contrast": 0.4456832373590661,
+      "contrast_ci": [
+        0.4312342314796677,
+        0.4592626132461508
+      ],
+      "mean_conf": 0.839632511138916,
+      "frac_confident": 0.73,
+      "acc_eval": 0.9,
+      "groups": {
+        "conf_correct": {
+          "n": 361,
+          "contrast": 0.512812477446273,
+          "ci": [
+            0.501547211125288,
+            0.5238425213491958
+          ]
+        },
+        "unc_correct": {
+          "n": 89,
+          "contrast": 0.29516822486597993,
+          "ci": [
+            0.26877640660232577,
+            0.3204698232776723
+          ]
+        },
+        "conf_wrong": {
+          "n": 4,
+          "contrast": null,
+          "ci": [
+            null,
+            null
+          ]
+        },
+        "unc_wrong": {
+          "n": 46,
+          "contrast": 0.21783445884210983,
+          "ci": [
+            0.1785201981905126,
+            0.2543729938876481
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 10,
+          "silhouette": 0.816495954990387,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 51,
+              "maj_pred": 6,
+              "purity": 0.9803921568627451,
+              "contrast_lo": 0.4185286018790953,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 41,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.4272099967011031,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 54,
+              "maj_pred": 2,
+              "purity": 0.9814814814814815,
+              "contrast_lo": 0.3345050114445784,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 58,
+              "maj_pred": 7,
+              "purity": 0.9310344827586207,
+              "contrast_lo": 0.3997592435129824,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 53,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.4643538781268896,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 50,
+              "maj_pred": 5,
+              "purity": 0.96,
+              "contrast_lo": 0.33353533328789736,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 53,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.40424346298004066,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 42,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.4547585300771591,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 46,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.2943001103902723,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 52,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.5457366999171396,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 10,
+          "silhouette": 0.5783916115760803,
+          "n_valid": 9,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 55,
+              "maj_pred": 8,
+              "purity": 0.8727272727272727,
+              "contrast_lo": 0.24731223496366714,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 57,
+              "maj_pred": 7,
+              "purity": 0.9473684210526315,
+              "contrast_lo": 0.40557028034015147,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 56,
+              "maj_pred": 0,
+              "purity": 0.9642857142857143,
+              "contrast_lo": 0.3999278240418961,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 52,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.5454009910009749,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 49,
+              "maj_pred": 5,
+              "purity": 0.9795918367346939,
+              "contrast_lo": 0.34533019961571143,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 47,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.44134951139909195,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 48,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.37466937915017146,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 39,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.4421119359057547,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 43,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.43954235628011484,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 54,
+              "maj_pred": 4,
+              "purity": 0.9814814814814815,
+              "contrast_lo": 0.46012686564555927,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 10000,
+      "contrast": 0.5602122848774582,
+      "contrast_ci": [
+        0.5365159751629379,
+        0.5836717539897538
+      ],
+      "mean_conf": 0.8801271915435791,
+      "frac_confident": 0.82,
+      "acc_eval": 0.918,
+      "groups": {
+        "conf_correct": {
+          "n": 403,
+          "contrast": 0.6282397968731914,
+          "ci": [
+            0.6089438771720385,
+            0.6466199907714815
+          ]
+        },
+        "unc_correct": {
+          "n": 56,
+          "contrast": 0.29362228841130433,
+          "ci": [
+            0.2349848819511411,
+            0.3487862087062235
+          ]
+        },
+        "conf_wrong": {
+          "n": 7,
+          "contrast": 0.4915204138203001,
+          "ci": [
+            0.3312125272347692,
+            0.6326353132712365
+          ]
+        },
+        "unc_wrong": {
+          "n": 34,
+          "contrast": 0.2071180367958173,
+          "ci": [
+            0.11683106504490905,
+            0.29398386372049323
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 11,
+          "silhouette": 0.8269249200820923,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 26,
+              "maj_pred": 2,
+              "purity": 0.3076923076923077,
+              "contrast_lo": 0.17667615101618128,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 45,
+              "maj_pred": 2,
+              "purity": 0.9555555555555556,
+              "contrast_lo": 0.4045518243331579,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 53,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.47333946638464136,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 41,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.5617882447997744,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 54,
+              "maj_pred": 8,
+              "purity": 0.9629629629629629,
+              "contrast_lo": 0.38406147326708645,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 42,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.4730114281517158,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 54,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.6001015456163423,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 51,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.7417829983267897,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 43,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.5885328071480349,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 47,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.5574536828230306,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 44,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.4468637110552446,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 10,
+          "silhouette": 0.6769570112228394,
+          "n_valid": 9,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 67,
+              "maj_pred": 8,
+              "purity": 0.835820895522388,
+              "contrast_lo": 0.34032450753957355,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 55,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.5771956051656344,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 47,
+              "maj_pred": 3,
+              "purity": 0.9574468085106383,
+              "contrast_lo": 0.39077650485312837,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 45,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.43207677976319847,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 43,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.5194410688138825,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 47,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.55112051300793,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 42,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.451448409288751,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 51,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.7416398909114074,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 52,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.4846505542767175,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 51,
+              "maj_pred": 6,
+              "purity": 0.9607843137254902,
+              "contrast_lo": 0.5557592260536358,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 20000,
+      "contrast": 0.6234217065396257,
+      "contrast_ci": [
+        0.5965704352940597,
+        0.6466957363985353
+      ],
+      "mean_conf": 0.8843708634376526,
+      "frac_confident": 0.82,
+      "acc_eval": 0.906,
+      "groups": {
+        "conf_correct": {
+          "n": 399,
+          "contrast": 0.6955301016478197,
+          "ci": [
+            0.6761181721081801,
+            0.7139726262823687
+          ]
+        },
+        "unc_correct": {
+          "n": 54,
+          "contrast": 0.3547679269078693,
+          "ci": [
+            0.2929029082044827,
+            0.4094194204672783
+          ]
+        },
+        "conf_wrong": {
+          "n": 11,
+          "contrast": 0.4312019066618932,
+          "ci": [
+            0.3304080510336382,
+            0.52855913757973
+          ]
+        },
+        "unc_wrong": {
+          "n": 36,
+          "contrast": 0.2859348246118615,
+          "ci": [
+            0.1880536580552872,
+            0.38109526114235037
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 11,
+          "silhouette": 0.8153383731842041,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 44,
+              "maj_pred": 4,
+              "purity": 0.9772727272727273,
+              "contrast_lo": 0.5459825583227672,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 37,
+              "maj_pred": 5,
+              "purity": 0.972972972972973,
+              "contrast_lo": 0.5284079521952856,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 45,
+              "maj_pred": 3,
+              "purity": 0.9777777777777777,
+              "contrast_lo": 0.4341430808225042,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 48,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.687327450559412,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 36,
+              "maj_pred": 7,
+              "purity": 0.2777777777777778,
+              "contrast_lo": 0.2739986014829522,
+              "valid": false
+            },
+            {
+              "cluster": 5,
+              "size": 52,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.6317482437548976,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 51,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.6997405224135034,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 38,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.7225785662504491,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 48,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.5546902863314654,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 51,
+              "maj_pred": 9,
+              "purity": 0.9607843137254902,
+              "contrast_lo": 0.5902298338923969,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 50,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.4671114437020001,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 11,
+          "silhouette": 0.6780770421028137,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 43,
+              "maj_pred": 4,
+              "purity": 0.9767441860465116,
+              "contrast_lo": 0.5636979031340345,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 55,
+              "maj_pred": 9,
+              "purity": 0.9454545454545454,
+              "contrast_lo": 0.5284040219235436,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 32,
+              "maj_pred": 7,
+              "purity": 0.3125,
+              "contrast_lo": 0.31487260827304897,
+              "valid": false
+            },
+            {
+              "cluster": 3,
+              "size": 48,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.6847850514797654,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 38,
+              "maj_pred": 5,
+              "purity": 0.9736842105263158,
+              "contrast_lo": 0.4948327664433541,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 51,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.6344239089337288,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 43,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.4757277869427561,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 38,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.7170223380812581,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 48,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.5565323421821325,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 51,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.7025530697261995,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 53,
+              "maj_pred": 8,
+              "purity": 0.9811320754716981,
+              "contrast_lo": 0.4470255431682432,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 30000,
+      "contrast": 0.7398704584004308,
+      "contrast_ci": [
+        0.7170283204048375,
+        0.7619252868143409
+      ],
+      "mean_conf": 0.9219056367874146,
+      "frac_confident": 0.882,
+      "acc_eval": 0.912,
+      "groups": {
+        "conf_correct": {
+          "n": 426,
+          "contrast": 0.7934111271404642,
+          "ci": [
+            0.7754012042058255,
+            0.8109019218744801
+          ]
+        },
+        "unc_correct": {
+          "n": 30,
+          "contrast": 0.3239255779575856,
+          "ci": [
+            0.22621245098115192,
+            0.41700459096974873
+          ]
+        },
+        "conf_wrong": {
+          "n": 15,
+          "contrast": 0.6263400051217642,
+          "ci": [
+            0.5214645271111589,
+            0.7336153026065564
+          ]
+        },
+        "unc_wrong": {
+          "n": 29,
+          "contrast": 0.44238695251115756,
+          "ci": [
+            0.3587931388760163,
+            0.5278118522608746
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 11,
+          "silhouette": 0.8525511622428894,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 49,
+              "maj_pred": 9,
+              "purity": 0.9795918367346939,
+              "contrast_lo": 0.6538145524826624,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 31,
+              "maj_pred": 5,
+              "purity": 0.25806451612903225,
+              "contrast_lo": 0.4431864672658684,
+              "valid": false
+            },
+            {
+              "cluster": 2,
+              "size": 48,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.7425466582702184,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 38,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.6374690254369567,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 53,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.7784526118160711,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 45,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.8137987745146459,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 44,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.8045353354285686,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 49,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.7482384634501892,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 48,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.6656013314849452,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 49,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.5394877487288128,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 46,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.5574449302365919,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 11,
+          "silhouette": 0.6993545889854431,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 20,
+              "maj_pred": 9,
+              "purity": 0.25,
+              "contrast_lo": 0.4243087941009303,
+              "valid": false
+            },
+            {
+              "cluster": 1,
+              "size": 45,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.6781034740338492,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 46,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.6010827011098416,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 48,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.6651483731941655,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 50,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.722194543204417,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 44,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.8061736009736504,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 51,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.7389261291327521,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 49,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.5450739841220648,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 48,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.806870271967869,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 46,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.5600878162407626,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 53,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.771706047672882,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 50000,
+      "contrast": 0.8060724841270599,
+      "contrast_ci": [
+        0.7832028779047577,
+        0.8263360224709351
+      ],
+      "mean_conf": 0.9294561743736267,
+      "frac_confident": 0.892,
+      "acc_eval": 0.904,
+      "groups": {
+        "conf_correct": {
+          "n": 422,
+          "contrast": 0.8620227099580858,
+          "ci": [
+            0.8480191302738456,
+            0.8751025662109764
+          ]
+        },
+        "unc_correct": {
+          "n": 30,
+          "contrast": 0.4261664890606516,
+          "ci": [
+            0.28180732631893707,
+            0.5552842631256565
+          ]
+        },
+        "conf_wrong": {
+          "n": 24,
+          "contrast": 0.6827985546713633,
+          "ci": [
+            0.5830517679805669,
+            0.7735422453036752
+          ]
+        },
+        "unc_wrong": {
+          "n": 24,
+          "contrast": 0.4204374365535617,
+          "ci": [
+            0.319585656775559,
+            0.5204622507184201
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 14,
+          "silhouette": 0.8689431548118591,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 43,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.7800799207384111,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 41,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.7372934516798866,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 24,
+              "maj_pred": 5,
+              "purity": 0.2916666666666667,
+              "contrast_lo": 0.22537972041917456,
+              "valid": false
+            },
+            {
+              "cluster": 3,
+              "size": 48,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.761348737869154,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 45,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.7339990179810741,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 51,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.8131962139847287,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 52,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.7991707630364692,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 51,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.8581835182596022,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 43,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.7599862213191275,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 47,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.7074924154140624,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 1,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": null,
+              "valid": false
+            },
+            {
+              "cluster": 11,
+              "size": 48,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.785893146110562,
+              "valid": true
+            },
+            {
+              "cluster": 12,
+              "size": 1,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": null,
+              "valid": false
+            },
+            {
+              "cluster": 13,
+              "size": 5,
+              "maj_pred": 4,
+              "purity": 0.6,
+              "contrast_lo": 0.560481147991094,
+              "valid": false
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 11,
+          "silhouette": 0.7152730226516724,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 53,
+              "maj_pred": 7,
+              "purity": 0.9622641509433962,
+              "contrast_lo": 0.7982912636629595,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 48,
+              "maj_pred": 9,
+              "purity": 0.9375,
+              "contrast_lo": 0.756653106916466,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 48,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.7721193646110069,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 22,
+              "maj_pred": 5,
+              "purity": 0.3181818181818182,
+              "contrast_lo": 0.22539799381622375,
+              "valid": false
+            },
+            {
+              "cluster": 4,
+              "size": 42,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.7413511428190451,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 51,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.8559790940128809,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 47,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.7058170312232267,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 49,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.7735279652654099,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 52,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.8004832371699254,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 42,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.786136428487663,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 46,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.716536212917493,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 75000,
+      "contrast": 0.8293371675366126,
+      "contrast_ci": [
+        0.806745595478569,
+        0.8504565530532463
+      ],
+      "mean_conf": 0.9182034730911255,
+      "frac_confident": 0.88,
+      "acc_eval": 0.89,
+      "groups": {
+        "conf_correct": {
+          "n": 419,
+          "contrast": 0.8824673398465622,
+          "ci": [
+            0.8658145168118929,
+            0.8960661446789875
+          ]
+        },
+        "unc_correct": {
+          "n": 26,
+          "contrast": 0.4230278839625189,
+          "ci": [
+            0.29576658415858825,
+            0.5360589117882851
+          ]
+        },
+        "conf_wrong": {
+          "n": 21,
+          "contrast": 0.625735673233117,
+          "ci": [
+            0.4774742478792948,
+            0.7565056619011808
+          ]
+        },
+        "unc_wrong": {
+          "n": 34,
+          "contrast": 0.6110468897551702,
+          "ci": [
+            0.47701607265502444,
+            0.73281867816528
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 12,
+          "silhouette": 0.9121937155723572,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 48,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.7283687303079308,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 46,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.7078295052174455,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 40,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.7075487005575704,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 39,
+              "maj_pred": 2,
+              "purity": 0.9743589743589743,
+              "contrast_lo": 0.7630430100247836,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 46,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.7753563445691566,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 52,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.9182797848945159,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 53,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.857639087916738,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 46,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.7687193397054072,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 44,
+              "maj_pred": 8,
+              "purity": 0.5,
+              "contrast_lo": 0.5846998371880968,
+              "valid": false
+            },
+            {
+              "cluster": 9,
+              "size": 38,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.7951010844837993,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 47,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.7937644172127529,
+              "valid": true
+            },
+            {
+              "cluster": 11,
+              "size": 1,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": null,
+              "valid": false
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 11,
+          "silhouette": 0.7901949286460876,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 47,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.7642226703420094,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 42,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.748692875128373,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 42,
+              "maj_pred": 8,
+              "purity": 0.5238095238095238,
+              "contrast_lo": 0.5692353832076724,
+              "valid": false
+            },
+            {
+              "cluster": 3,
+              "size": 45,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.7059968390426121,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 46,
+              "maj_pred": 9,
+              "purity": 1.0,
+              "contrast_lo": 0.7750185502694268,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 46,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.7597420260520582,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 53,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.8587504450722471,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 40,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.7039970575420497,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 48,
+              "maj_pred": 6,
+              "purity": 0.9791666666666666,
+              "contrast_lo": 0.7771735540762862,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 52,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.9171826783296663,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 39,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.7682572873719651,
+              "valid": true
+            }
+          ]
+        }
+      }
+    },
+    {
+      "step": 100000,
+      "contrast": 0.8347680631659142,
+      "contrast_ci": [
+        0.8108517222956331,
+        0.8546610534921583
+      ],
+      "mean_conf": 0.8902058005332947,
+      "frac_confident": 0.844,
+      "acc_eval": 0.904,
+      "groups": {
+        "conf_correct": {
+          "n": 405,
+          "contrast": 0.8799980923566202,
+          "ci": [
+            0.8604147561460166,
+            0.8966113013695303
+          ]
+        },
+        "unc_correct": {
+          "n": 47,
+          "contrast": 0.5668029493035509,
+          "ci": [
+            0.4740041248547211,
+            0.6501493668598398
+          ]
+        },
+        "conf_wrong": {
+          "n": 17,
+          "contrast": 0.7333178719484336,
+          "ci": [
+            0.6034910094866988,
+            0.8428338482329236
+          ]
+        },
+        "unc_wrong": {
+          "n": 31,
+          "contrast": 0.7057632818753443,
+          "ci": [
+            0.615404293110207,
+            0.7836143534785126
+          ]
+        }
+      },
+      "regions": {
+        "cosine": {
+          "best_k": 12,
+          "silhouette": 0.8808061480522156,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 51,
+              "maj_pred": 9,
+              "purity": 0.9607843137254902,
+              "contrast_lo": 0.687656918000302,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 40,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.8090323248784201,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 33,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.7465170246889619,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 39,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.7342637835139958,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 43,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.901126015549386,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 63,
+              "maj_pred": 3,
+              "purity": 0.4444444444444444,
+              "contrast_lo": 0.607867761773613,
+              "valid": false
+            },
+            {
+              "cluster": 6,
+              "size": 43,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.8691012015677495,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 51,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.9250514435603754,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 42,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.6278261083859759,
+              "valid": true
+            },
+            {
+              "cluster": 9,
+              "size": 51,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.9363441059459561,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 1,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": null,
+              "valid": false
+            },
+            {
+              "cluster": 11,
+              "size": 43,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.7539381522987894,
+              "valid": true
+            }
+          ]
+        },
+        "euclidean": {
+          "best_k": 11,
+          "silhouette": 0.7849173545837402,
+          "n_valid": 10,
+          "composition": [
+            {
+              "cluster": 0,
+              "size": 43,
+              "maj_pred": 7,
+              "purity": 1.0,
+              "contrast_lo": 0.6197126877580272,
+              "valid": true
+            },
+            {
+              "cluster": 1,
+              "size": 48,
+              "maj_pred": 8,
+              "purity": 1.0,
+              "contrast_lo": 0.760083766693358,
+              "valid": true
+            },
+            {
+              "cluster": 2,
+              "size": 44,
+              "maj_pred": 2,
+              "purity": 1.0,
+              "contrast_lo": 0.7103729064510415,
+              "valid": true
+            },
+            {
+              "cluster": 3,
+              "size": 51,
+              "maj_pred": 9,
+              "purity": 0.9607843137254902,
+              "contrast_lo": 0.68356035119142,
+              "valid": true
+            },
+            {
+              "cluster": 4,
+              "size": 37,
+              "maj_pred": 3,
+              "purity": 1.0,
+              "contrast_lo": 0.7021600578400431,
+              "valid": true
+            },
+            {
+              "cluster": 5,
+              "size": 51,
+              "maj_pred": 1,
+              "purity": 1.0,
+              "contrast_lo": 0.9380173830501922,
+              "valid": true
+            },
+            {
+              "cluster": 6,
+              "size": 40,
+              "maj_pred": 5,
+              "purity": 1.0,
+              "contrast_lo": 0.8030349010551067,
+              "valid": true
+            },
+            {
+              "cluster": 7,
+              "size": 51,
+              "maj_pred": 0,
+              "purity": 1.0,
+              "contrast_lo": 0.924612807224338,
+              "valid": true
+            },
+            {
+              "cluster": 8,
+              "size": 49,
+              "maj_pred": 3,
+              "purity": 0.4897959183673469,
+              "contrast_lo": 0.7192007726613021,
+              "valid": false
+            },
+            {
+              "cluster": 9,
+              "size": 43,
+              "maj_pred": 6,
+              "purity": 1.0,
+              "contrast_lo": 0.8981804677424404,
+              "valid": true
+            },
+            {
+              "cluster": 10,
+              "size": 43,
+              "maj_pred": 4,
+              "purity": 1.0,
+              "contrast_lo": 0.7544478577407708,
+              "valid": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

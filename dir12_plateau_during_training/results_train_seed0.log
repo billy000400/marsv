@@ -1,0 +1,27 @@
+step 0: loss=0.10847 tr_acc=0.096 te_acc=0.089 te_conf=0.111
+step 2: loss=0.09451 tr_acc=0.334 te_acc=0.274 te_conf=0.105
+step 5: loss=0.08446 tr_acc=0.330 te_acc=0.315 te_conf=0.111
+step 10: loss=0.06928 tr_acc=0.665 te_acc=0.595 te_conf=0.115
+step 20: loss=0.04374 tr_acc=0.789 te_acc=0.716 te_conf=0.152
+step 30: loss=0.03061 tr_acc=0.881 te_acc=0.777 te_conf=0.170
+step 50: loss=0.01546 tr_acc=0.958 te_acc=0.854 te_conf=0.188
+step 100: loss=0.00436 tr_acc=0.994 te_acc=0.878 te_conf=0.201
+step 200: loss=0.00051 tr_acc=1.000 te_acc=0.877 te_conf=0.204
+step 300: loss=0.00014 tr_acc=1.000 te_acc=0.879 te_conf=0.203
+step 500: loss=0.00003 tr_acc=1.000 te_acc=0.880 te_conf=0.202
+step 1000: loss=0.00001 tr_acc=1.000 te_acc=0.881 te_conf=0.202
+step 2000: loss=0.00000 tr_acc=1.000 te_acc=0.881 te_conf=0.203
+step 3000: loss=0.00001 tr_acc=1.000 te_acc=0.881 te_conf=0.202
+step 5000: loss=0.00007 tr_acc=1.000 te_acc=0.881 te_conf=0.204
+step 7000: loss=0.00000 tr_acc=1.000 te_acc=0.875 te_conf=0.207
+step 10000: loss=0.00000 tr_acc=1.000 te_acc=0.873 te_conf=0.205
+step 15000: loss=0.00000 tr_acc=1.000 te_acc=0.874 te_conf=0.210
+step 20000: loss=0.00000 tr_acc=1.000 te_acc=0.866 te_conf=0.215
+step 30000: loss=0.00000 tr_acc=1.000 te_acc=0.861 te_conf=0.208
+step 40000: loss=0.00000 tr_acc=1.000 te_acc=0.853 te_conf=0.216
+step 50000: loss=0.00000 tr_acc=1.000 te_acc=0.854 te_conf=0.208
+step 60000: loss=0.00000 tr_acc=1.000 te_acc=0.856 te_conf=0.217
+step 75000: loss=0.00000 tr_acc=1.000 te_acc=0.851 te_conf=0.217
+step 90000: loss=0.00000 tr_acc=1.000 te_acc=0.853 te_conf=0.216
+step 100000: loss=0.00000 tr_acc=1.000 te_acc=0.848 te_conf=0.212
+saved 13 checkpoints to /workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/ckpts/seed0
