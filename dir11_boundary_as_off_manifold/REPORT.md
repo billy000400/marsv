@@ -15,7 +15,8 @@ walking in a straight line through an *empty region the data never visits*, whil
 remain connected by a perfectly ordinary data path?
 
 We test this on the two candidate digit-9 "stable regions" of a depth-4 MNIST MLP. **Verdict:
-REFUTED** (robust across region-definition and graph hyperparameters; one checkpoint). The two regions
+REFUTED** (robust across region-definition and graph hyperparameters, and confirmed on a second
+independently trained model). The two regions
 are **not** disconnected components. In a graph built from real activations they connect at almost the
 same neighborhood scale as points *within* a single region (5 vs 4 graph hops), and far more easily
 than genuinely different digits (9–12 hops); the worst edge on that connecting path is *below* the
@@ -23,8 +24,9 @@ typical local neighborhood radius, i.e. the path stays in high-density data. And
 plateau boundary itself sits at a **well-supported** point (35th percentile of "off-manifold-ness"),
 not in a data void. This survives every hyperparameter we vary (KMeans-k∈{2,3,4}×seed, graph-k∈{6…25}),
 and generalizes: across **all ten digits**, no same-digit region pair is separated by an off-manifold
-gap (0 counterexamples). The plateau reflects the model's internal decision geometry, **not** a hole in
-the data manifold.
+gap (0 counterexamples). A **second, independently trained MLP (different seed, 86.9% accuracy)
+reproduces all three tests**. The plateau reflects the model's internal decision geometry, **not** a
+hole in the data manifold.
 
 ## Methods
 
@@ -126,6 +128,14 @@ p95 radius, 4.23). We use the bottleneck, not hops, for this gap test: hops is a
 inflated by a stretched-out manifold even when every step is high-support (e.g. digit 1), whereas the
 bottleneck directly measures the least-supported forced step.
 
+### Cross-model confirmation
+
+To check the verdict is not an artifact of one trained network, we train a **second MLP from scratch**
+with the *same* configuration (depth-4, width-200, ReLU, 1000-image subset, 100k AdamW/MSE steps) but a
+**different random seed (1)**, reaching 86.9% test accuracy, and re-run all three tests on it (its own
+natural cloud, its own digit-9 regions, its own graph). This tests whether "plateau = decision geometry,
+not data hole" is a property of the phenomenon or of one particular set of weights.
+
 ## Results
 
 Current-best numbers; figures in `plots/`.
@@ -193,6 +203,28 @@ apart while their bottleneck, 2.70, is below the median). We therefore anchor th
 the unambiguous off-manifold criterion (bottleneck vs p95) and read digit-9 through both metrics, which
 agree.
 
+### Cross-model confirmation — the verdict transfers to a second seed
+
+See `plots/cross_model.png` (a: direct-path boundary percentiles for both models; b: component-test
+hops; c: model-2 all-digit counterexample search; d: model-2 cross-region 9→9 curve).
+
+| Test | model 1 (seed 0) | **model 2 (seed 1)** |
+|------|:--|:--|
+| test accuracy / natural-cloud size | 85.3% / 1705 | 86.9% / 1739 |
+| cross-region 9→9 boundary support percentile | 35 | **53** |
+| cross-digit 9→0 boundary percentile | 89 | **88** |
+| A ↔ B (two 9-regions) hops (within-A control) | 5 (4) | **4 (4)** |
+| A ↔ B bottleneck (natural median) | 2.72 (2.85) | **1.54 (1.95)** |
+| 9↔4, 9↔0 hops (different digits) | 9, 12 | **8, 26** |
+| same-digit counterexamples (bottleneck > p95, 10 digits) | **0** | **0** |
+
+The second, independently trained model reproduces every qualitative finding: the same-digit
+cross-region plateau boundary is well-supported (53rd percentile, right at the median — not a void),
+off-manifold-ness still spikes for a genuinely different digit (9→0, 88th percentile), the two 9-regions
+connect at **exactly the within-region hop distance** (4 = 4) through a below-median bottleneck, and no
+same-digit region pair across the ten digits crosses an off-manifold gap. The REFUTED verdict is a
+property of the phenomenon, not of one checkpoint.
+
 ## Conclusion
 
 For the digit-9 "stable regions" of this MNIST MLP, the plateau boundary is a property of the
@@ -209,12 +241,14 @@ would be crossing into genuinely unsupported territory. These results say the op
 plateaus: a data-respecting path exists, so the boundary is about *decision structure*, which is the
 thing to model — not a data void to avoid.
 
-**Limitations.** One model / checkpoint / training seed, and a finite 1705-point cloud; finite samples
-cannot prove true topological disconnection, only bound empirical support. The verdict is now robust to
-the *analysis* hyperparameters — region clustering ($k$, seed), graph scale ($k$), and it holds for all
-ten digits — but a second trained model or a larger sample could still behave differently. A structural
-caveat found by the sweep: this L1 cloud is dense enough that the mutual-kNN graph is one high-support
-component for essentially *all* pairs (cross-digit bottlenecks also below p95), so the off-manifold-gap
-test never fires — the discriminative signal is graph *distance* (hops), which can be inflated by
-manifold elongation and is thus not a clean stand-alone separateness metric. The natural next step is a
-second trained model / seed to confirm the plateau-is-decision-geometry reading transfers.
+**Limitations.** The verdict is now robust to the *analysis* hyperparameters — region clustering
+($k$, seed), graph scale ($k$) — holds for all ten digits, and is **confirmed on a second independently
+trained model** (seed 1). What remains fixed is the *architecture and dataset*: both models are depth-4
+width-200 ReLU MLPs on the same 1000-image MNIST subset, with finite ~1700-point clouds; finite samples
+cannot prove true topological disconnection, only bound empirical support, and a different architecture,
+dataset, or much larger sample could still behave differently. A structural caveat found by the sweep:
+these L1 clouds are dense enough that the mutual-kNN graph is one high-support component for essentially
+*all* pairs (cross-digit bottlenecks also below p95), so the off-manifold-gap test never fires — the
+discriminative signal is graph *distance* (hops), which can be inflated by manifold elongation and is
+thus not a clean stand-alone separateness metric; we therefore read same-digit pairs through both hops
+and the bottleneck, which agree in both models.

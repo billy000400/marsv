@@ -103,7 +103,7 @@ Produce one combined figure, write a preliminary verdict, and create `STOP`.
   - Repeat the graph analysis across reasonable `k` values.
   - Validate that within-region pairs connect more easily than clearly unrelated cross-digit pairs.
 
-- [~] S3 — Test whether plateau boundaries are off-manifold and whether regions are components (iter 1: direct-path + component tests for digit-9; iter 2: robustness sweeps + all-digit counterexample search, 0 found. Remaining: 2nd trained model/seed to confirm cross-model transfer)
+- [x] S3 — Test whether plateau boundaries are off-manifold and whether regions are components (iter 1: direct-path + component tests for digit-9; iter 2: robustness sweeps + all-digit counterexample search, 0 found; iter 3: cross-model confirmation — 2nd MLP seed 1 reproduces all 3 tests, 0 counterexamples. Question answered → STOP)
   - **Direct-path test:** determine whether the maximum-`|d'(t)|` plateau boundary coincides with the lowest-support part of the spherical interpolation.
   - **Component test:** determine whether an alternative path through natural activations connects the two candidate regions without passing through an unusually low-support bottleneck.
   - Compare three path categories:
@@ -138,18 +138,19 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-**Iter 2 (2026-07-15): robustness pass done; verdict = REFUTED, now robust across analysis
-hyperparameters (single checkpoint).** Iter 1 built the pipeline (`experiments/analyze_manifold.py`):
-digit-9 direct-path boundary at 35th-pctile support (not a gap); the two 9-regions 5 hops / bottleneck
-2.72 (< median 2.85) — like within-region, unlike cross-digit (9–12 hops). Iter 2
-(`experiments/robustness.py`) stress-tested it: graph-k sweep (6–25) — A↔B tracks the within-region
-control at every scale, far below cross-digit; KMeans-k∈{2,3,4}×seed sweep — 9-regions always
-hops 2–5 / bottleneck 1.93–2.72 (all < median); all-10-digit generality — every same-digit region
-pair's bottleneck ≤ p95 (2.35–4.17 vs threshold 4.23) → **0 counterexamples**. Key correction: hops is
-contaminated by manifold elongation (digit-1 = 15 within-digit hops yet high-support), so the
-generality verdict is anchored on the off-manifold (bottleneck-vs-p95) criterion. Figures
-`plots/robustness_graphk.png`, `plots/robustness_regions.png`. **Remaining:** a 2nd trained model/seed
-for cross-model transfer (the one open limitation) — otherwise the question is answered.
+**Iter 3 (2026-07-15): DONE — question answered, STOP written.** Verdict = **REFUTED**, robust across
+analysis hyperparameters AND a second independent training seed. Iter 1 built the pipeline
+(`experiments/analyze_manifold.py`): digit-9 direct-path boundary at 35th-pctile support (not a gap);
+the two 9-regions 5 hops / bottleneck 2.72 (< median 2.85) — like within-region, unlike cross-digit
+(9–12 hops). Iter 2 (`experiments/robustness.py`): graph-k sweep (6–25), KMeans-k∈{2,3,4}×seed sweep,
+all-10-digit generality → **0 counterexamples** (bottleneck ≤ p95). Iter 3
+(`experiments/cross_model.py`): trained a **2nd MLP from scratch (seed 1, 86.9% acc)** and re-ran all
+three tests — cross-region 9→9 boundary at **53rd** pctile (well-supported), A↔B = **4 hops = within-A
+(4)**, bottleneck 1.54 < median 1.95, **0 counterexamples** across all digits. Base model re-analyzed
+by the same code reproduced its reported numbers exactly (regression check). Figures
+`plots/direct_path_support.png`, `plots/component_test.png`, `plots/robustness_graphk.png`,
+`plots/robustness_regions.png`, `plots/cross_model.png`. The sole remaining limitation is now
+architecture/dataset (both models are depth-4 w200 ReLU on the same 1000-image MNIST subset), not seed.
 
 ---
 
@@ -172,10 +173,9 @@ The second claim is stronger. A direct spherical interpolation may leave the man
 
 ## Next step
 
-Cross-model confirmation (final S3 hardening): retrain / load a second MNIST MLP (different seed or
-width) and re-run the digit-9 direct-path + component tests + all-digit counterexample search, to check
-the plateau=decision-geometry (not data-hole) reading transfers beyond one checkpoint — the only
-remaining real limitation. Reuse `experiments/robustness.py` (parameterize the checkpoint path). If a
-second model reproduces 0 counterexamples, the question is fully answered → write STOP. If no second
-checkpoint is available and time is short, the question is already answered for the given model;
-finalize and STOP per the fallback.
+**None — direction complete, STOP written.** The PLAN success criterion is fully met: reproducible
+smooth / plateau-crossing / cross-class paths with d(t), boundary, and support; a mutual-kNN
+connectivity analysis with within/between-region scales and bottlenecks; robustness across region and
+graph hyperparameters; and a cross-model confirmation — all yielding a clear **REFUTED** verdict. Any
+future extension (a different architecture or dataset, or an LLM analog) would be a NEW direction, out
+of scope here.

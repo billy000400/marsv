@@ -61,3 +61,32 @@ test into the multi-region/multi-digit sweep. Otherwise the question is answered
 
 On track? yes — S2/S3 done (~85%), verdict REFUTED and now robust across analysis hyperparameters;
 only cross-model/seed generalization remains.
+
+---
+
+## 2026-07-15 — iter 3: cross-model confirmation (final S3 hardening)
+
+**Did.** Wrote `experiments/cross_model.py` (trains on GPU under memory-fraction 0.225, analyzes on
+CPU). Trained a second depth-4/width-200/ReLU MLP from scratch, seed 1, 100k AdamW/MSE steps, 1000-image
+subset → test acc 86.9%, saved `results/mnist_mlp_d4_w200_relu_n1000_seed1.pt`. Re-ran all three
+decisive tests (direct-path boundary percentile, component hops/bottleneck at k=10, all-10-digit
+counterexample search) on both model 2 and — as a control — model 1. Produced `plots/cross_model.png`,
+`results/cross_model.json`. Curated RESULTS.md (new Cross-model section + upgraded headline) and
+REPORT.md (Summary + Methods + new Results subsection + Limitations); math re-verified 4/4 display,
+0 pre-math, 0 inline hazards via GitHub API. CHANGELOG appended.
+
+**Learned.** The REFUTED verdict transfers cleanly to an independently trained model. Model 2:
+cross-region 9→9 plateau boundary at the **53rd** support percentile (right at its median — not a
+data hole), while cross-digit 9→0 is at 88th; the two digit-9 regions connect at **exactly the
+within-region hop distance (4 = 4)** through a bottleneck (1.54) below the natural median (1.95);
+0 counterexamples across all ten digits. Re-running model 1 through the identical code reproduced the
+originally reported numbers exactly (good regression check). One nuance: model 2's cross-region
+argmax-|d'| boundary lands at t≈0.99 (near endpoint B) but its support percentile (53) is still the
+decisive number and is well-supported. The plateau-is-decision-geometry reading is a property of the
+phenomenon, not one checkpoint. The remaining limitation is now architecture/dataset, not seed.
+
+**Next.** Question fully answered per PLAN success criterion (direct-path + component + connectivity +
+robustness + cross-model, clear REFUTED verdict). Writing STOP.
+
+On track? yes — S1/S2/S3 complete (~100%); verdict REFUTED, robust across analysis hyperparameters and a
+second independent training seed; finalizing and STOP.

@@ -87,20 +87,44 @@ manifold with a tiny 8-point outlier cluster) yet their bottleneck (2.70) is bel
 therefore anchor the generality verdict on the unambiguous off-manifold (bottleneck-vs-p95) criterion,
 and read digit-9 through both hops and bottleneck, which agree.
 
+## Cross-model confirmation — does the verdict transfer to a second trained model?
+We trained a **second, independent MNIST MLP** (identical config: depth-4, width-200, ReLU, 1000-image
+subset, 100k AdamW steps; **different seed = 1**, test acc **86.9%**) and re-ran all three decisive
+tests on it. Its natural cloud has **1739** correct activations (median radius 1.95, p95 3.15) and its
+two digit-9 regions are 157 / 15. (`experiments/cross_model.py`; figure `plots/cross_model.png`.)
+
+| Test | model 1 (seed 0) | **model 2 (seed 1)** |
+|------|:--|:--|
+| cross-region 9→9 boundary support percentile | 35 (well-supported) | **53 (well-supported, ≈ median)** |
+| cross-digit 9→0 boundary percentile | 89 (off-manifold) | **88 (off-manifold)** |
+| A↔B (two 9-regions) hops / bottleneck vs within-A | 5 / 2.72  (within-A = 4) | **4 / 1.54  (within-A = 4)** |
+| 9↔4, 9↔0 hops (different digits) | 9, 12 | **8, 26** |
+| A↔B bottleneck vs natural median | 2.72 < 2.85 | **1.54 < 1.95** |
+| same-digit counterexamples (bottleneck > p95, all 10 digits) | **0** | **0** |
+
+The second model **reproduces every qualitative result**: the same-digit cross-region plateau boundary
+is well-supported (53rd pctile, right at the median — not a data void), while off-manifold-ness still
+spikes for a genuinely different digit (9→0, 88th pctile); the two 9-regions connect in **exactly the
+within-region hop distance (4 = 4)** through a below-median bottleneck; and across all ten digits there
+are **0 off-manifold-gap counterexamples**. The REFUTED verdict is not an artifact of one checkpoint.
+
 ## Figures
+- `plots/cross_model.png` — side-by-side confirmation on a second seed: (a) direct-path boundary percentiles, (b) component-test hops, (c) model-2 all-digit counterexample search, (d) model-2 cross-region 9→9 d(t) + support.
 - `plots/direct_path_support.png` — d(t) (downstream) + k-NN support radius along the four slerp paths; the cross-region 9→9 boundary is at high support.
 - `plots/component_test.png` — geodesic hops and bottleneck edge per pair category at k=10; A↔B looks like within-region, not cross-digit.
 - `plots/robustness_graphk.png` — geodesic hops vs graph scale k; A↔B tracks the within-region control, far below cross-digit, at every k.
 - `plots/robustness_regions.png` — bottleneck (left) and hops (right) for every digit's two-region split vs the cross-digit band; digit 9 highlighted, no gap-crossing pair.
 
 ## Headline
-**REFUTED (robust across region-definition & graph hyperparameters; single checkpoint/seed).**
+**REFUTED (robust across region-definition & graph hyperparameters AND a second independent training seed).**
 The plateau-separated digit-9 regions are **not** disconnected manifold components: the straight-line
 plateau boundary sits at a *well-supported* point (35th pctile), and in the natural activation graph the
 two regions connect at a near-within-region scale (5 vs 4 hops) through a high-support path (bottleneck
 below the median radius) — stable across KMeans-k∈{2,3,4}×seed and graph-k∈{6…25}. The finding
 generalizes: **no** same-digit region pair, across all ten digits, is separated by an off-manifold gap
-(bottleneck ≤ p95; 0 counterexamples). The plateau reflects the model's decision geometry, not a hole
-in the data manifold. Caveats: one model/checkpoint; the L1 cloud is dense enough that graph *hops*
-(not the bottleneck) is what discriminates categories, and hops can be inflated by manifold elongation
+(bottleneck ≤ p95; 0 counterexamples), and a **second independently trained model (seed 1, 86.9% acc)
+reproduces all three tests** (cross-region boundary at 53rd pctile; A↔B = 4 hops = within-region;
+0 counterexamples). The plateau reflects the model's decision geometry, not a hole in the data manifold.
+Caveats: two models but one architecture/dataset; the L1 cloud is dense enough that graph *hops* (not
+the bottleneck) is what discriminates categories, and hops can be inflated by manifold elongation
 (digit-1) — so we anchor generality on the off-manifold criterion.

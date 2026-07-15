@@ -45,3 +45,20 @@ single checkpoint)**.
   hops yet bottleneck 2.70 < median). Generality verdict now anchored on the off-manifold criterion.
 - Figures added: `plots/robustness_graphk.png`, `plots/robustness_regions.png`.
 
+
+## 2026-07-15 — cross-model confirmation (iter 3)
+
+Added `experiments/cross_model.py`: trains a **second MNIST MLP from scratch** (same depth-4/width-200/
+ReLU/1000-subset/100k-step config, **seed 1**, test acc **86.9%**) and re-runs the direct-path,
+component, and all-digit counterexample tests on it. RESULTS.md + REPORT.md gain a **Cross-model
+confirmation** section; verdict upgraded **REFUTED (…single checkpoint/seed) → REFUTED (…AND a second
+independent training seed)**.
+
+- **Model 2 (seed 1)** reproduces every qualitative result: cross-region 9→9 boundary support
+  percentile **53** (well-supported, ≈ median — not an off-manifold void) vs cross-digit 9→0 = **88**;
+  component test A↔B (two 9-regions) = **4 hops = within-region-A (4)**, bottleneck **1.54 < natural
+  median 1.95**; different digits 9↔4/9↔0 = 8/26 hops; all-10-digit counterexample search = **0**.
+- Base model 1 re-analyzed by the same code as a control — numbers match the previously reported values
+  exactly (cross-region pctile 35, A↔B 5 hops / 2.72, 0 counterexamples).
+- Figure added: `plots/cross_model.png` (4-panel side-by-side). This closes the sole remaining
+  limitation (single checkpoint); the direction's question is answered → STOP.
