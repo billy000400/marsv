@@ -1,254 +1,209 @@
-# REPORT — Are plateau-separated digit-9 regions separate manifold components?
+# REPORT — Do plateau transitions correspond to activation-manifold transitions?
 
 > Final, presentable, current-best only (no history — see CHANGELOG.md). Read before rewriting.
 
 ## Summary
 
-When you linearly interpolate the internal activations of a small image classifier between two
-examples of the *same* digit, the network's downstream representation sometimes does not slide
-smoothly from one to the other. Instead it **stays put, jumps sharply, then stays put again** — a
-"plateau → boundary → plateau" shape. This looks as if the two same-digit examples live in two
-*separate stable regions*. The safety-relevant question is **what that boundary means**: is it a real
-*gap in the data* — two disconnected pieces of the natural activation manifold, which would matter for
-steering, interpolation-based editing, and off-distribution detection — or is it just an artifact of
-walking in a straight line through an *empty region the data never visits*, while the two regions
-remain connected by a perfectly ordinary data path?
+Interpretability research often pictures a neural network's internal activations as living on a
+low-dimensional **manifold**, with distinct behaviors sitting on distinct, *separated* pieces of it. A
+striking piece of apparent evidence is a **plateau**: when you interpolate a network's hidden
+activations from one example to another, the downstream representation sometimes does not slide
+smoothly across. Instead it **stays put near output A, jumps abruptly, then stays put near output B** —
+a "plateau → sharp boundary → plateau" shape, as if there were a wall between two stable basins.
 
-We test this on the two candidate digit-9 "stable regions" of a depth-4 MNIST MLP. **Verdict:
-REFUTED** (robust across region-definition and graph hyperparameters, and confirmed on a second
-independently trained model). The two regions
-are **not** disconnected components. In a graph built from real activations they connect at almost the
-same neighborhood scale as points *within* a single region (5 vs 4 graph hops), and far more easily
-than genuinely different digits (9–12 hops); the worst edge on that connecting path is *below* the
-typical local neighborhood radius, i.e. the path stays in high-density data. And the straight-line
-plateau boundary itself sits at a **well-supported** point (35th percentile of "off-manifold-ness"),
-not in a data void. This survives every hyperparameter we vary (KMeans-k∈{2,3,4}×seed, graph-k∈{6…25}),
-and generalizes: across **all ten digits**, no same-digit region pair is separated by an off-manifold
-gap (0 counterexamples). A **second, independently trained MLP (different seed, 86.9% accuracy)
-reproduces all three tests**. The plateau reflects the model's internal decision geometry, **not** a
-hole in the data manifold.
+If that wall were a real **gap in the data** — two disconnected components of the natural activation
+manifold — it would matter a lot for safety: we could localize, monitor, and steer behaviors by their
+manifold component, and off-distribution detectors could flag the wall. If instead the wall is only an
+artifact of walking in a *straight line* through an empty region the data never visits — while the two
+plateaus stay connected by an ordinary high-density data path — then the plateau tells us about the
+model's **decision geometry**, not about the shape of the data manifold.
+
+We test this **at the population level** across a depth-4 MNIST classifier — every sufficiently
+populated plateau pair, not one hand-picked case — with a **single frozen metric**. We separate two
+claims: the **universal** claim (every plateau transition is a manifold-component transition; one
+counterexample refutes it) and the weaker **typical-association** claim (plateau pairs are *usually*
+more separated than within-plateau controls).
+
+**Both claims fail.** The universal claim is **refuted decisively**: 25 of 45 verified plateau
+transitions on the base model connect through the natural activation cloud with *no larger gap than
+normal travel inside a single plateau*, and this holds in every well-powered replication (a second seed
+and two more architectures). The typical-association claim is **not supported**: the between-plateau
+"connection gap" metric sits essentially *on top of* the within-plateau baseline in all four
+well-powered models, with overlapping confidence intervals and no consistent direction. Plateaus
+reflect the model's decision geometry, **not** a hole in the data manifold. The original digit-9 case
+that motivated this direction turns out to be one ordinary counterexample among many.
 
 ## Methods
 
 ### Data & Model
 
-**Dataset.** MNIST (raw IDX, pixels scaled to $[0,1]$). We use the first 2000 test images; **1705**
-are correctly classified and form the *natural activation reference cloud*.
+**Model.** The `image-models` checkpoint `mnist_mlp_d4_w200_relu`: a fully-connected MNIST classifier
+784→200→200→200→10 with ReLU activations, trained with MSE to one-hot targets on a 1000-image subset;
+test accuracy **85.3%**. For replication we reuse four existing checkpoints trained the same way: a
+**second seed** (d4w200, 86.9%) and three architectures — **d3w200** shallower (78.1%), **d4w400**
+wider (86.9%), **d5w200** deeper (85.9%).
 
-**Model.** The existing `image-models` checkpoint `mnist_mlp_d4_w200_relu_n1000_s100000` — a depth-4
-ReLU MLP $784 \to 200 \to 200 \to 200 \to 10$ (depth counts linear layers, ReLU after all but the
-last), trained on a 1000-image MNIST subset (AdamW, MSE on one-hot targets). Test accuracy **85.3%**.
-Weights are frozen; no retraining.
+**Layers.** We interpolate the **first hidden layer L1** (200-dim, post-ReLU) — the "intervention
+layer" — and measure downstream behavior at the **last hidden layer L3** (200-dim). "OOD" = out of
+distribution; "MST" = minimum spanning tree; "slerp" = spherical linear interpolation (constant angular
+velocity along the great circle, magnitude interpolated linearly).
 
-**Layers (fixed convention).** "Hidden layer $L$" is the post-ReLU output of the $L$-th linear layer.
+**Natural activation cloud.** The empirical manifold reference is the set of L1 activations of all
+**1705** correctly-classified test images (of 2000).
 
-- **Interpolation layer:** first hidden layer **L1** (200-dim). All paths are drawn in L1 activation space.
-- **Downstream measurement layer:** last hidden layer **L3** (200-dim). All plateau distances are read here.
-
-**Candidate stable regions.** Among the **177** correctly-classified digit-9 test images, we run
-KMeans ($k=2$) on their **L3** activations, giving region **A** (151 images) and region **B** (26 — the
-outlier cluster). A region's *medoid* is the image whose L3 activation is closest to its cluster
-centroid.
-
-**Interpolation.** The existing spherical interpolation (`slerp`) between two L1 activations $v_0,v_1$:
-constant-angular-velocity direction with linearly interpolated magnitude, sampled at 200 points
-$t \in [0,1]$. We then run the network forward *from L1* to obtain L3 and the logits at every $t$.
+**Plateau regions (defined from output behavior, before any manifold test).** We take the **10 digit
+classes** as the class-aligned stable output regions. Endpoints must be correctly classified and pass a
+fixed **confidence rule**: output **margin** (top-1 minus top-2 logit) ≥ 0.5. (Softmax is uninformative
+here because the net regresses to one-hot targets, so we use the logit margin.) 1604 examples pass,
+≥130 per digit. Confidence is an *inclusion rule*, not a reported metric. The previously-studied
+**digit-9 A/B** sub-plateau (KMeans with `k=2` on L3 activations of the confident 9s) is included as
+**one extra transition, treated exactly like any other pair.** We sample **20 endpoint pairs per region
+pair** (seed 0), and the same count for within-plateau controls, so digit frequency cannot dominate.
 
 ### Metrics
 
-Write $h(t)$ for the L3 activation at interpolation parameter $t$, and $h_A=h(0)$, $h_B=h(1)$.
+We use exactly two quantitative objects. The first is only a filter; the second is the sole reported
+score.
 
-**Downstream distance $d(t)$** — how far along the path the *downstream* representation has moved from
-endpoint A toward endpoint B. A plateau is $d\approx 0$ then a sharp rise then $d\approx 1$:
-
-```math
-d(t) = \frac{\lVert h(t) - h_A \rVert_2}{\lVert h(t) - h_A \rVert_2 + \lVert h(t) - h_B \rVert_2}
-```
-
-**Plateau boundary $t^{*}$** — the location of the sharp jump, taken as the argmax of the
-box-smoothed absolute derivative of $d$ (smoothing window 5 samples):
+**Plateau observable `d(t)` — verifies a path is genuinely plateau-to-plateau.** For a slerp path
+`x_t` in L1 from endpoint `x_0` (region A) to `x_1` (region B), the normalized downstream distance at
+L3 is:
 
 ```math
-t^{*} = \arg\max_t \; \big( \lvert d'(t) \rvert * \mathrm{box}_5 \big)
+d(t) \;=\; \frac{\lVert h_3(x_t) - h_3(x_0) \rVert}{\lVert h_3(x_t) - h_3(x_0) \rVert \;+\; \lVert h_3(x_t) - h_3(x_1) \rVert}
 ```
 
-**Support radius $r_k(t)$ (primary support metric)** — how well the interpolated activation is
-*supported* by real data. For the L1 point $p(t)$ on the path, $r_k(t)$ is its Euclidean distance to
-its $k$-th nearest neighbor in the natural cloud $\mathcal{N}$ ($k=10$). **Larger = lower support =
-more off-manifold.**
+`d(t)` runs from 0 (downstream state at A) to 1 (downstream state at B). A **plateau transition** is a
+path that is mostly *flat near an endpoint* with a *sharp jump* between. We **accept** a between-region
+path as a verified transition iff its **plateau fraction** — the fraction of `t` with `d(t)<0.2` or
+`d(t)>0.8` — is at least 0.5, it starts below 0.2, and it ends above 0.8. This is an inclusion filter;
+`d(t)` is never reported as a score.
+
+**Manifold observable `G` — the normalized connection bottleneck (the only reported metric).** Build a
+Euclidean **minimum spanning tree** `T` over the natural L1 cloud. For two endpoints `u,v`, the
+**bottleneck** `B(u,v)` is the largest edge on their unique path through `T`. Equivalently it is the
+minimax over *all* paths in the complete Euclidean graph — the smallest step size at which `u` and `v`
+become connected through the sampled natural cloud:
 
 ```math
-r_k(t) = \big\lVert\, p(t) - \mathrm{NN}_k\big(p(t),\, \mathcal{N}\big) \,\big\rVert_2
+B(u,v) \;=\; \min_{P:\,u\rightsquigarrow v}\ \max_{(p,q)\in P}\ \lVert a_p - a_q \rVert
 ```
 
-**Boundary off-manifold percentile** — to judge whether the boundary is *unusually* unsupported, we
-compare $r_k(t^{*})$ to the distribution of the natural points' *own* $k$-NN radii $\lbrace r_k(x)\rbrace_{x\in
-\mathcal{N}}$. The percentile is the fraction of natural points with a *smaller* radius; 50 means
-"as typical as a random real activation," 90 means "more isolated than 90% of real activations."
-
-**Mutual-kNN graph & geodesic hops (component metric).** On the natural L1 cloud we build the
-**mutual** $k$-NN graph: an undirected edge $\lbrace i,j\rbrace$ exists iff $i$ is among $j$'s $k$ nearest
-neighbors **and** $j$ is among $i$'s. Region separateness is then a graph question. At a fixed
-within-manifold scale $k{=}10$ we report the **geodesic hop distance** (shortest number of edges)
-between two region medoids — fewer hops = closer to being the same component.
-
-**Bottleneck edge.** On the Euclidean-shortest connecting path between the two node-sets, the
-**longest single edge**:
+where `a_p` are natural L1 activations and `P` ranges over paths in the cloud. We normalize `B` by the
+**within-plateau connection scale** so the number is comparable across regions of different density.
+Let `s_r` be the median within-region bottleneck of region `r` (frozen from the within-plateau control
+pairs, before any between-plateau result was examined). For a pair with endpoints in regions `i,j`:
 
 ```math
-b(S_1,S_2) = \min_{\text{path } \pi:\,S_1 \to S_2}\; \max_{(i,j)\in \pi}\; \lVert x_i - x_j \rVert_2
+G \;=\; \frac{B(u,v)}{\max(s_i,\, s_j)}
 ```
 
-This is the least-supported step you are forced to take to get from one region to the other. Compared
-against the natural median $k$-NN radius (2.85): **below it = the connecting path never leaves
-high-density data.**
+**How to read `G`:** `G = 1` means "no larger gap than is normally required inside a plateau"; `G > 1`
+means an unusually large bridge is needed (candidate manifold-component separation); `G \le 1` means the
+two plateaus connect through natural activations as easily as two points *within* one plateau — a
+**counterexample** to the universal claim. Higher `G` = more evidence of separation.
 
-### Baselines / controls
+### Baselines
 
-The digit-9 measurements are only interpretable against reference categories on the *same* graph:
+**Within-plateau control.** The reference distribution is the set of `G` values for **within-region**
+endpoint pairs (endpoints from the *same* digit, same sampling and normalization). By construction its
+median is 1. Its spread (median 1.00, 95th percentile 1.39 on the base model) is the natural yardstick:
+a between-plateau pair only shows real separation if its `G` sits *clearly above* this control band.
 
-- **Within-region A** (a genuinely single region) — a lower bound on hops/bottleneck for "one component."
-- **Cross-digit 9↔4 and 9↔0** (genuinely different classes) — an upper reference for "different regions."
-- **Natural radius distribution** $\lbrace r_k(x)\rbrace$ — median 2.85, p95 4.23 — calibrates what "off-manifold" means.
+**`G = 1` threshold.** The counterexample threshold follows directly from the frozen within-plateau
+normalization — it is *not* tuned after seeing between-plateau results.
 
-A saturating **merge-$k$** baseline (smallest $k$ at which two node-sets share a connected component)
-was also computed but is **non-discriminative here**: the natural cloud is dense enough that *every*
-pair — including 9↔0 — merges at the minimum $k{=}3$. Hence we rely on the fixed-$k$ hop/bottleneck
-contrast above, where the categories separate cleanly.
+### Verdict rules
 
-### Robustness sweeps & counterexample criterion
-
-To check the verdict is not an artifact of one hyperparameter choice, we (i) sweep the graph scale
-$k\in\lbrace 6,8,10,12,15,20,25\rbrace$ and recompute the four hop distances; (ii) redefine the digit-9
-regions under KMeans-$k\in\lbrace 2,3,4\rbrace$ and three seeds (the two largest clusters become the
-region pair); and (iii) repeat the two-region split for **all ten digits** to test generality. The
-**counterexample** we hunt for — the case that would *support* the hypothesis — is a same-digit region
-pair joined only through an *off-manifold* bottleneck, defined as $b(S_1,S_2) > r_{95}$ (the natural
-p95 radius, 4.23). We use the bottleneck, not hops, for this gap test: hops is a *distance* that can be
-inflated by a stretched-out manifold even when every step is high-support (e.g. digit 1), whereas the
-bottleneck directly measures the least-supported forced step.
-
-### Cross-model confirmation
-
-To check the verdict is not an artifact of one trained network, we train a **second MLP from scratch**
-with the *same* configuration (depth-4, width-200, ReLU, 1000-image subset, 100k AdamW/MSE steps) but a
-**different random seed (1)**, reaching 86.9% test accuracy, and re-run all three tests on it (its own
-natural cloud, its own digit-9 regions, its own graph). This tests whether "plateau = decision geometry,
-not data hole" is a property of the phenomenon or of one particular set of weights.
+- **Universal claim refuted** iff at least one well-powered verified plateau pair has `G \le 1` (stable
+  under resampling / replication).
+- **Typical association supported** iff the between-plateau `G` distribution is consistently shifted
+  above the within-plateau control across replications; **not supported** if the distributions overlap
+  or the direction is unstable.
 
 ## Results
 
-Current-best numbers; figures in `plots/`.
+### Population verdict on the base model
 
-### Direct-path test — the plateau boundary is *not* an off-manifold gap
+Across 45 cross-digit plateau pairs plus the digit-9 sub-plateau (all verified by `d(t)`):
 
-See `plots/direct_path_support.png` (downstream $d(t)$ in blue, support radius $r_k(t)$ in red;
-dotted lines mark the natural median and p95 radius).
+| quantity | value |
+|--|--|
+| within-plateau `G`: median / 95th pct | 1.00 / 1.39 |
+| **between-plateau median `G`** (45 verified pairs) | **0.996**  (95% CI 0.97–1.03) |
+| between-plateau median `G`: min – max pair | 0.84 – 1.67 |
+| verified pairs with median `G > 1` | 44% (20/45) |
+| **counterexamples** (median `G ≤ 1`) | **25 / 45** |
+| digit-9 A/B sub-plateau (original case) | **G = 1.00** |
 
-| Path | boundary $t^{*}$ | $r_k$ @ boundary | off-manifold **percentile** | max $r_k$ on path |
-|------|-----------:|------------------:|-------------------:|-------------------:|
-| same-region 9→9      | 0.01 | 3.27 | 70 | 3.28 |
-| **cross-region 9→9** | 0.68 | **2.54** | **35** | 2.91 |
-| cross-digit 9→4      | 0.42 | 3.42 | 77 | 3.55 |
-| cross-digit 9→0      | 0.50 | 3.86 | 89 | 3.97 |
+**Universal claim — REFUTED.** 25 of 45 verified plateau transitions connect through the natural cloud
+with **no larger bottleneck than normal within-plateau travel** (`G ≤ 1`), including the original
+digit-9 sub-plateau. A wall between plateaus is not required.
 
-The cross-region 9→9 plateau boundary lands at the **35th percentile** of off-manifold-ness — *more*
-supported than a typical real activation, the opposite of an off-manifold void. Off-manifold-ness at
-the boundary instead rises with genuine class change (9→4: 77, 9→0: 89). So for digit 9 the plateau
-boundary is **not** explained by the straight path leaving the data manifold.
+**Typical-association claim — NOT SUPPORTED.** The between-plateau median `G` (0.996) sits on the
+within-plateau baseline (1.00); its bootstrap CI (0.97–1.03) overlaps the within-plateau CI
+(0.99–1.02). The per-pair distributions overlap almost completely — 44% of pairs above `G=1`, 56% at or
+below — and the single largest bridge required (`G=1.67`, digit 1↔8) barely exceeds the *within*-plateau
+95th percentile (1.39). There is no pair separated by a dramatic data hole.
 
-### Component test — the two regions behave like one connected component
+![Per-pair G: between-plateau (red) and within-plateau (green) distributions overlap almost completely, both centered at G=1 (a); median G per plateau pair, ~half each side of the G=1 line, digit-9 sub-plateau (orange) exactly at 1 (b).](plots/population_G.png)
 
-See `plots/component_test.png` (left: geodesic hops; right: bottleneck edge vs the natural median).
+The only pairs needing a modestly larger bridge involve digit **1** (1↔8=1.67, 0↔1=1.57, 1↔3=1.46), an
+elongated thin manifold whose *own* internal scale `s_1` is small — inflating the ratio — not a genuine
+void. The digit×digit heatmap shows no block structure: no set of digits forms its own component.
 
-| Pair | geodesic **hops** ($k{=}10$) | bottleneck edge | vs natural median 2.85 |
-|------|------------------:|----------------:|:-----------------------|
-| within region A          | 4  | 2.67 | below |
-| **A ↔ B (two 9-regions)**| **5**  | **2.72** | **below** |
-| 9 ↔ 4 (different digit)  | 9  | 2.99 | above |
-| 9 ↔ 0 (different digit)  | 12 | 2.74 | ~at |
+![Median normalized bottleneck G for every digit pair (diagonal = within-plateau = 1). Values hug 1; the only mild elevations involve digit 1.](plots/population_heatmap.png)
 
-The two candidate digit-9 regions are only **5 hops** apart — essentially the *within-region* distance
-(4) — and dramatically closer than truly different digits (**9–12 hops**). The worst edge on the
-connecting path (2.72) is **below** the median local neighborhood radius, so a genuine high-support
-data path links the regions. There is no low-density bottleneck between them.
+Representative verified transitions confirm `d(t)` selects genuine flat→jump→flat plateaus, yet even the
+largest-`G` pair needs a bridge only ~1.7× the normal within-plateau step:
 
-### Robustness — the verdict survives every hyperparameter, and generalizes
+![Three representative verified plateau-to-plateau d(t) curves (largest-G, digit-9 sub-plateau, smallest-G): all flat-near-A, sharp jump, flat-near-B; all connect at G≈1–1.7.](plots/population_dt.png)
 
-See `plots/robustness_graphk.png` (hops vs graph scale) and `plots/robustness_regions.png` (bottleneck
-and hops per digit).
+### Replication — second seed and three architectures
 
-**Graph scale.** Across $k\in\lbrace 6\ldots 25\rbrace$ the A↔B (two 9-regions) distance tracks the
-within-region-A control at every scale (e.g. at $k{=}10$: 5 vs 4; at $k{=}15$: 3 vs 4; at $k{=}25$:
-2 vs 4) and stays far below the cross-digit references (9↔4, 9↔0) throughout. The ordering
-within ≈ A↔B ≪ cross-digit is scale-independent.
+The identical frozen pipeline on the existing checkpoints:
 
-**Region definition.** Over KMeans-$k\in\lbrace 2,3,4\rbrace\times$3 seeds (9 configs) the two 9-regions
-are always within-region-like: **hops 2–5, bottleneck 1.93–2.72 — all below the natural median (2.85)**.
+| model (test acc) | verified pairs | between-plateau median `G` | % pairs `G>1` | counterexamples (`G≤1`) |
+|--|--:|--:|--:|--:|
+| base d4w200, seed 0 (85.3%) | 45 | **0.996** | 44% | 25 |
+| seed 1 d4w200 (86.9%)       | 45 | **0.925** | 22% | 35 |
+| d4w400 wider (86.9%)        | 46 | **0.987** | 43% | 26 |
+| d5w200 deeper (85.9%)       | 46 | **0.982** | 30% | 32 |
+| d3w200 shallower (78.1%)*   | 1  | 0.982 | 0% | 1 |
 
-**Generality across all ten digits.** Splitting every digit into two regions and connecting them on the
-same graph, the bottleneck edge ranges over **2.35–4.17 — every value below the p95 gap threshold
-(4.23)**. **Zero counterexamples:** no same-digit region pair is separated by an off-manifold gap.
+\*The shallow net produces few *sharp* plateaus, so only 1 pair passes the `d(t)` accept filter; it is
+under-powered and we do not weight it. The four well-powered models agree: between-plateau median `G` is
+**0.93–1.00 in every case — never a consistent shift above the within-plateau baseline of 1.0** — and
+each finds many counterexamples. In seed 1 the direction even *reverses* (median 0.925 < 1). Neither
+claim survives replication.
 
-| | same-digit region pairs (10 digits) | cross-digit pairs (45) |
-|--|:--|:--|
-| bottleneck edge | **2.35 – 4.17 (all ≤ p95 = 4.23)** | 2.03 – 3.47 |
-| geodesic hops   | 4 – 15 | 7 – 21 |
-
-**A caveat on which metric discriminates.** Because this L1 cloud is dense, the mutual-kNN graph is
-essentially one high-support blob — even *cross-digit* bottlenecks stay below p95, so no pair crosses a
-true data hole. What separates the categories for digit-9 is the *hop distance*; but hops is not
-universally reliable, since an elongated manifold inflates it (digit-1's own two regions are 15 hops
-apart while their bottleneck, 2.70, is below the median). We therefore anchor the *generality* claim on
-the unambiguous off-manifold criterion (bottleneck vs p95) and read digit-9 through both metrics, which
-agree.
-
-### Cross-model confirmation — the verdict transfers to a second seed
-
-See `plots/cross_model.png` (a: direct-path boundary percentiles for both models; b: component-test
-hops; c: model-2 all-digit counterexample search; d: model-2 cross-region 9→9 curve).
-
-| Test | model 1 (seed 0) | **model 2 (seed 1)** |
-|------|:--|:--|
-| test accuracy / natural-cloud size | 85.3% / 1705 | 86.9% / 1739 |
-| cross-region 9→9 boundary support percentile | 35 | **53** |
-| cross-digit 9→0 boundary percentile | 89 | **88** |
-| A ↔ B (two 9-regions) hops (within-A control) | 5 (4) | **4 (4)** |
-| A ↔ B bottleneck (natural median) | 2.72 (2.85) | **1.54 (1.95)** |
-| 9↔4, 9↔0 hops (different digits) | 9, 12 | **8, 26** |
-| same-digit counterexamples (bottleneck > p95, 10 digits) | **0** | **0** |
-
-The second, independently trained model reproduces every qualitative finding: the same-digit
-cross-region plateau boundary is well-supported (53rd percentile, right at the median — not a void),
-off-manifold-ness still spikes for a genuinely different digit (9→0, 88th percentile), the two 9-regions
-connect at **exactly the within-region hop distance** (4 = 4) through a below-median bottleneck, and no
-same-digit region pair across the ten digits crosses an off-manifold gap. The REFUTED verdict is a
-property of the phenomenon, not of one checkpoint.
+![Replication across five checkpoints: between-plateau median G (red, 95% CI) sits on the within-plateau baseline (green) for every model (a); in every well-powered model ~half the verified pairs fall each side of G=1 (b).](plots/population_replication.png)
 
 ## Conclusion
 
-For the digit-9 "stable regions" of this MNIST MLP, the plateau boundary is a property of the
-**model's downstream geometry, not a gap in the data manifold**. Two independent measurements agree:
-(1) the straight-line plateau boundary sits at a *well-supported* activation, and (2) in the real
-activation graph the two regions connect at a near-within-region scale through a high-support path,
-unlike genuinely different digits. Under the plan's rubric this **refutes** the hypothesis that
-plateau-separated regions are disconnected/low-density-separated manifold components — the plateau is
-an artifact of interpolating straight through a region the data curves around, while both endpoints
-belong to one connected data component.
+At the population level, across a depth-4 MNIST MLP and four replication checkpoints, **plateau
+transitions are not transitions between separate empirical manifold components.**
 
-**Why it matters.** If plateaus marked true manifold gaps, activation steering/editing across them
-would be crossing into genuinely unsupported territory. These results say the opposite for same-digit
-plateaus: a data-respecting path exists, so the boundary is about *decision structure*, which is the
-thing to model — not a data void to avoid.
+- **Universal claim — REFUTED:** 25/45 verified plateau pairs on the base model (and 26–35 of 45–46 in
+  every well-powered model) connect through the natural activation cloud with `G ≤ 1` — no larger gap
+  than normal within-plateau travel. The digit-9 case that first motivated this work is one such
+  counterexample (`G = 1.00`).
+- **Typical-association claim — NOT SUPPORTED:** the between-plateau median `G` (0.93–1.00) sits on the
+  within-plateau baseline (1.00) in all four well-powered models, with overlapping bootstrap CIs and no
+  consistent direction. The `G` distributions overlap almost completely.
 
-**Limitations.** The verdict is now robust to the *analysis* hyperparameters — region clustering
-($k$, seed), graph scale ($k$) — holds for all ten digits, and is **confirmed on a second independently
-trained model** (seed 1). What remains fixed is the *architecture and dataset*: both models are depth-4
-width-200 ReLU MLPs on the same 1000-image MNIST subset, with finite ~1700-point clouds; finite samples
-cannot prove true topological disconnection, only bound empirical support, and a different architecture,
-dataset, or much larger sample could still behave differently. A structural caveat found by the sweep:
-these L1 clouds are dense enough that the mutual-kNN graph is one high-support component for essentially
-*all* pairs (cross-digit bottlenecks also below p95), so the off-manifold-gap test never fires — the
-discriminative signal is graph *distance* (hops), which can be inflated by manifold elongation and is
-thus not a clean stand-alone separateness metric; we therefore read same-digit pairs through both hops
-and the bottleneck, which agree in both models.
+**What this means.** A sharp plateau marks a place where the model's **decision geometry** changes
+abruptly — a straight interpolation briefly leaves the data manifold — but it does **not** mark a hole
+in the data manifold. The two plateaus remain connected by an ordinary high-density path. For safety
+work this is a caution: **plateaus and low-density interpolations are not reliable evidence that two
+behaviors occupy disconnected regions of activation space**; behavior boundaries and data-manifold
+components are different things.
+
+**Limitations (stated plainly).** (1) Finite activation samples can *support or undermine* an empirical
+component split but **cannot prove true topological disconnection** — a denser sample could always
+reveal a bridge, and a sparser one could manufacture a gap; `G` measures empirical connectivity at the
+sampled scale, nothing stronger. (2) All models share the same 1000-image MNIST training subset; a
+genuinely different dataset would be a separate direction. (3) The mild `G>1` pairs (digit-1) reflect an
+elongated manifold's small internal scale, not a genuine void — the metric's ratio form is sensitive to
+anisotropic regions, which is why we anchor the verdict on the *distribution* of `G` and its overlap
+with the control band rather than on any single pair.

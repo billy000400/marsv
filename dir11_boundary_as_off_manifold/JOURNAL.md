@@ -90,3 +90,91 @@ robustness + cross-model, clear REFUTED verdict). Writing STOP.
 
 On track? yes — S1/S2/S3 complete (~100%); verdict REFUTED, robust across analysis hyperparameters and a
 second independent training seed; finalizing and STOP.
+
+---
+
+## 2026-07-15 — iter 4: architecture generalization (final limitation closed)
+
+**Did.** Found the base repo had moved `/network/mars-plateaus-image` → `/workspace/mars-plateaus-image`
+(no `/network` mount this run), so made `cross_model.py` path-agnostic (BASE detection, `HERE` from
+`__file__`) and wrapped its run/plot block in `main()` under `if __name__=='__main__':` so `analyze()` is
+importable. Wrote `experiments/arch_generalize.py`: trains 3 new-architecture MLPs from scratch
+(d3w200 shallower seed2 / d4w400 wider seed3 / d5w200 deeper seed4, ~127s each on GPU under mem-frac
+0.225) + base d4w200 reference, re-runs direct-path / component / all-digit counterexample tests via the
+reused `analyze()`. Produced `plots/arch_generalize.png`, `results/arch_generalize.json`. Curated
+RESULTS.md + REPORT.md (new Architecture-generalization sections; verdict → "…AND four architectures";
+narrowed limitation to dataset-only) and — while curating — fixed a standing rule-12 violation: REPORT.md
+figures were bare `See plots/…` prose (don't render); converted all 6 refs in both files to embedded
+`![…](…)` images. Math re-verified via GitHub API: REPORT 4/4 display-math, 0 pre-math, 0 inline
+hazards; both files 6/6 plot paths embedded, 0 bare.
+
+**Learned.** The REFUTED verdict is **architecture-robust on its decisive test**: 0 same-digit
+counterexamples in all 4 architectures, and the direct cross-region 9→9 path's max radius stays ≤ that
+model's own p95 in every net (never leaves the manifold), while cross-digit 9→0 exceeds p95 in 2/4 and is
+even fully *disconnected* at k=10 in the shallow net — exactly the same-vs-different asymmetry the verdict
+predicts. **Important honesty finding:** the two *summary* metrics I'd been quoting are architecture-
+fragile — (a) the single-point `argmax|d′|` boundary percentile lands at a sparse path *endpoint* in the
+deeper net (t≈0.99 → 94th pctile) despite the whole path being ≤ p95, and (b) hop ordering scrambles under
+manifold elongation (d4w400: within-region A = 9 hops > A↔B = 5). So I re-anchored the verdict explicitly
+on the off-manifold-gap (max-radius / bottleneck vs p95) criterion and down-weighted boundary-percentile
+and raw hops to "fragile summaries" in both deliverables. Assumption logged: chose max-radius-vs-own-p95
+as the per-architecture direct-path statistic (rejected: cross-architecture percentile comparison, which
+is not commensurable since each net has a different radius scale).
+
+**Next.** Question fully answered per PLAN success criterion and now robust across analysis
+hyperparameters, a second seed, AND four architectures; only the shared 1000-image MNIST *dataset*
+remains fixed (a genuinely new dataset would be a new direction). No unaddressed feedback files. Writing
+STOP.
+
+On track? yes — S1/S2/S3 complete (~100%); verdict REFUTED, robust across analysis hyperparameters, a
+second training seed, and four architectures; finalizing and STOP.
+
+---
+
+## 2026-07-15 — iter 5: population-level reframe + frozen G metric (S1→S3 core)
+
+**Did.** The PLAN was reframed (digit-9 = one case, not the organizing question) around a single frozen
+manifold metric **G = MST bottleneck / within-plateau scale**. Implemented it end-to-end in
+`experiments/population_manifold.py`: (1) natural L1 cloud = 1705 correct test activations; (2) plateau
+regions = 10 digit classes, endpoints filtered by output margin (top1−top2 logit) ≥ 0.5 — softmax is
+useless here since the net is MSE-to-one-hot (max softmax < 0.5 for everything), so I froze margin as
+the confidence rule (≥130/class retained); (3) Euclidean MST over the cloud, bottleneck B(u,v) = max
+edge on the unique MST path via memoized DFS; (4) `d(t)` accept filter (plateau fraction ≥ 0.5,
+start<0.2, end>0.8) to verify genuine plateau-to-plateau paths; (5) `s_r` = median within-region
+bottleneck (frozen before between-results), `G = B/max(s_i,s_j)`; (6) 20 pairs per pair over all 45
+cross-digit pairs + digit-9 A/B sub-plateau + 10 within controls; (7) ran base + the 4 existing
+replication checkpoints (reused, no retraining). Rewrote RESULTS.md + REPORT.md around G, embedded 4 new
+figures, retired the old hops/percentile metrics from the deliverables (kept in CHANGELOG). Math
+verified via GitHub API (3/3 display, 0 pre-math, 0 inline hazards; 0 bare plot paths).
+
+**Learned.** Both PLAN claims **fail**, and this is a cleaner, stronger statement than the old digit-9
+"REFUTED". (a) **Universal claim REFUTED decisively:** base model has **25/45 verified plateau pairs
+with median G ≤ 1** — they connect through natural activations with no larger gap than normal
+within-plateau travel; the original digit-9 sub-plateau is just one of them (G = 1.00). (b)
+**Typical-association NOT SUPPORTED:** between-plateau median G = 0.996 sits exactly on the within-plateau
+baseline (1.00), bootstrap CIs overlap (0.97–1.03 vs 0.99–1.02), 44% of pairs above 1 / 56% below — no
+shift. Replication is consistent: seed1 0.925 (direction even reverses), d4w400 0.987, d5w200 0.982; the
+only elevated pairs involve digit-1 (elongated thin manifold → small internal scale s_1 inflates the
+ratio), max G = 1.67, barely above the within-plateau p95 (1.39). **Honest coverage gap:** d3w200
+shallower yields only 1 verified pair — its downstream distance ramps rather than plateaus, so the d(t)
+filter rejects almost everything; I down-weighted it and said so. Assumptions logged: margin≥0.5 as the
+confidence rule (rejected softmax — degenerate under MSE training); G normalized by max(s_i,s_j)
+(rejected a single global scale — less faithful to "no larger than normal *inside* a plateau"); anchored
+verdict on the G *distribution* vs the control band rather than any single pair (rejected per-pair
+hard-threshold counting as the headline, since the ratio is anisotropy-sensitive).
+
+**Next.** The population question is answered per the success criterion (both claims have a clear
+verdict, replicated across a second seed and two more architectures). Remaining nice-to-haves, not
+blockers: (i) restore statistical power for the shallow net (relax/adapt the d(t) sharpness filter or
+sample more pairs) so all 5 models are well-powered; (ii) a k-sensitivity note that MST bottleneck is
+parameter-free (no k), which the PLAN flags as a plus over the retired kNN graph. If next iter confirms
+(i) doesn't change the verdict, write STOP. No unaddressed feedback files.
+
+Metric check: I added ONE reported quantity (G) and removed several (hops, boundary percentile,
+merge-k, nearest-natural distance). G is required because it is the PLAN's designated manifold observable
+and directly decides both the universal (G≤1 counterexample) and typical-association (distribution shift)
+verdicts. d(t) remains a filter, not a reported score.
+
+On track? yes — S1/S2/S3 core complete (~90%), both claims answered (universal REFUTED, typical NOT
+SUPPORTED) and replicated across a second seed + two architectures; only shallow-net power + final STOP
+remain.

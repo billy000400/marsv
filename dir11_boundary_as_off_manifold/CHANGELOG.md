@@ -62,3 +62,58 @@ independent training seed)**.
   exactly (cross-region pctile 35, A↔B 5 hops / 2.72, 0 counterexamples).
 - Figure added: `plots/cross_model.png` (4-panel side-by-side). This closes the sole remaining
   limitation (single checkpoint); the direction's question is answered → STOP.
+
+## 2026-07-15 — architecture generalization (iter 4)
+
+Added `experiments/arch_generalize.py`: trains **three additional MNIST MLPs from scratch** with
+different shapes (**d3w200** shallower / **d4w400** wider / **d5w200** deeper, new seeds) and re-runs the
+three decisive tests via the reused, architecture-agnostic `analyze()` (refactored `cross_model.py`
+under a `main()`/`__main__` guard and made its paths mount-agnostic `/network`↔`/workspace` so it is
+importable). RESULTS.md + REPORT.md gain an **Architecture generalization** section; verdict upgraded
+**REFUTED (…second seed) → REFUTED (…second seed AND four architectures)**. Also converted the REPORT.md
+figure references from bare `See plots/…` prose (which does NOT render) to embedded `![…](…)` images, and
+embedded the RESULTS.md Figures list likewise (rule 12).
+
+- **All 4 architectures → 0 same-digit counterexamples** (no same-digit region pair separated by an
+  off-manifold gap, bottleneck ≤ p95). The direct cross-region 9→9 path's **max radius ≤ own p95 in every
+  net** (stays on-manifold): base 2.91≤4.23, d3w200 0.71≤0.93, d4w400 4.72≤7.08, d5w200 6.50≤6.50 —
+  whereas cross-digit 9→0 *exceeds* p95 in 2/4 (d3w200 1.16>0.93, d4w400 7.21>7.08), and in d3w200 the
+  9↔0 pair is fully disconnected at k=10 (a real data gap) while the two 9-regions stay connected.
+- **Honest caveat recorded:** the single-point `argmax|d′|` boundary *percentile* is NOT
+  architecture-robust — in d5w200 it lands at a sparse path endpoint (t≈0.99) reading 94th pctile even
+  though the whole path stays ≤ p95. Verdict re-anchored on the off-manifold-gap (max-radius / bottleneck
+  vs p95) criterion, which is architecture-robust; boundary-percentile and raw hops flagged as fragile
+  summaries. Limitation narrowed from "architecture and dataset" → **dataset only**.
+- Figure added: `plots/arch_generalize.png` (direct-path support, component hops, all-digit
+  counterexample search across the 4 architectures).
+
+## 2026-07-15 — population-level reframe with the normalized bottleneck G (iter 5)
+
+Reframed the deliverables from the digit-9 case study to the PLAN's population-level question ("do
+plateau transitions correspond to activation-manifold transitions across the whole model?") using the
+single frozen metric **G = MST bottleneck / within-plateau scale**. Added
+`experiments/population_manifold.py` (Euclidean MST over the natural L1 cloud; per-pair bottleneck via
+max-edge on the MST path; `d(t)` plateau-accept filter; 20 endpoint pairs per region pair over all 45
+cross-digit pairs + the digit-9 A/B sub-plateau + 10 within-plateau controls; run on the base model plus
+the four existing replication checkpoints). RESULTS.md and REPORT.md fully rewritten around G; the old
+digit-9-specific hops/percentile narrative (mutual-kNN hops, argmax-|d'| boundary percentile) is retired
+from the deliverables per the PLAN's metric budget (history preserved here).
+
+- **Frozen definitions:** plateau regions = 10 digit classes (confident-correct, output margin ≥ 0.5);
+  natural cloud = 1705 correct L1 activations; `d(t)` accept = plateau fraction ≥ 0.5 with start<0.2,
+  end>0.8; `s_r` = median within-region MST bottleneck; `G = B / max(s_i,s_j)`; 20 pairs/region-pair,
+  seed 0.
+- **Base model (d4w200, seed 0):** within-plateau `G` median 1.00 / p95 1.39; **between-plateau median
+  `G` = 0.996** (95% CI 0.97–1.03), range 0.84–1.67; **25/45 counterexamples** (`G ≤ 1`); digit-9 sub
+  `G = 1.00`.
+- **Verdicts (supersede the old digit-9 "REFUTED"):**
+  - **Universal claim → REFUTED decisively** (25/45 verified pairs with `G ≤ 1`; the digit-9 case is
+    one of them). Old framing had reported digit-9 as a single candidate counterexample; now shown to be
+    typical.
+  - **Typical-association claim → NOT SUPPORTED** (between-plateau median `G` sits on the within-plateau
+    baseline in all 4 well-powered models; CIs overlap; seed-1 direction reverses to 0.925).
+- **Replication:** seed 1 median `G` 0.925 (35/45 cx), d4w400 0.987 (26/46 cx), d5w200 0.982 (32/46 cx);
+  d3w200 shallower under-powered (1 verified pair — few sharp plateaus) and down-weighted.
+- Figures added: `plots/population_G.png`, `plots/population_heatmap.png`, `plots/population_dt.png`,
+  `plots/population_replication.png` (embedded in both deliverables). REPORT math re-verified via the
+  GitHub API: 3/3 display-math, 0 pre-math, 0 inline hazards; 0 bare plot paths in either file.

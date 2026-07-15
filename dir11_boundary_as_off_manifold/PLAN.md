@@ -1,134 +1,193 @@
-# PLAN — Direction: Are plateau-separated activation regions manifold components?
+# PLAN — Direction: Do plateau transitions correspond to activation-manifold transitions?
 
 > Working folder: `dir11_boundary_as_off_manifold`. Agent REWRITES "Current status"/"Next step" + ticks stages each
 > iteration. Disk (PLAN/JOURNAL/RESULTS/CHANGELOG + ../BUDGET.md + ../CLAUDE.md) is the only memory.
 
 ## Success criterion (definition of "done")
 
-`RESULTS.md` and `REPORT.md` give a clear empirical verdict on the following question:
+`RESULTS.md` and `REPORT.md` give a clear population-level answer to:
 
-> Do plateau-separated stable regions correspond to disconnected or strongly density-separated components of the natural activation manifold?
+> When an activation path moves from one stable output plateau to another, do the two plateaus lie on different empirical components of the natural activation manifold?
 
-Build on the existing MNIST experiments in the `image-models` branch. The final report must contain:
+The digit-9 pair already studied is one case, not the organizing question. Analyze all sufficiently
+populated plateau regions in the model and all plateau pairs for which reproducible plateau-to-plateau
+paths can be constructed.
 
-1. A reproducible set of:
-   - smooth same-region interpolation paths;
-   - plateau-crossing same-class paths, especially the candidate digit-9 regions;
-   - cross-class plateau paths as controls.
+The report must distinguish two claims:
 
-2. For every path:
-   - normalized downstream distance curve `d(t)`;
-   - estimated plateau-boundary position;
-   - activation-support score along the path.
+1. **Universal claim:** every plateau transition implies a transition between empirical manifold
+   components. A single reliable counterexample refutes this claim.
+2. **Typical-association claim:** plateau pairs are usually more separated in the natural activation
+   cloud than within-plateau controls. This requires a comparison across the full set of plateau pairs.
 
-3. A connectivity analysis of the natural activation cloud:
-   - mutual-kNN graph;
-   - within-region connectivity scale;
-   - between-region connectivity scale;
-   - minimum-support or maximum-edge bottleneck between candidate regions.
+Use only two quantitative objects in the main analysis:
 
-4. A clear verdict:
-   - **Supported:** plateau-separated regions remain disconnected, or merge only through a much lower-support bottleneck than within-region paths.
-   - **Refuted:** the regions are connected by a comparably high-support natural activation path, despite direct interpolation showing a plateau boundary.
-   - **Inconclusive:** the result is unstable across reasonable graph or density hyperparameters.
+1. **Plateau observable — `d(t)`:** the existing normalized downstream-distance curve, used only to
+   verify that a sampled path genuinely begins in one stable region and ends in another. Do not add a
+   second plateauness score unless `d(t)` demonstrably cannot make this decision.
+2. **Manifold observable — normalized connection bottleneck `G`:** build a minimum spanning tree (MST)
+   over natural activations at the intervention layer. For two endpoints, let `B` be the largest edge on
+   their MST path; this is the smallest step size needed to connect them through the sampled natural
+   activation cloud. Normalize `B` by the corresponding within-plateau connection scale, so `G = 1`
+   means “no larger gap than is normally required inside a plateau” and `G > 1` means an unusually large
+   bridge is required. Define the exact within-plateau normalization once, before examining between-
+   plateau results, and keep it fixed.
 
-Finite samples cannot prove true topological disconnection. Phrase conclusions as evidence about empirical activation-manifold components.
+The final deliverable contains:
 
-Null or negative results are COMPLETE if the question is answered. When done, the loop writes an empty `STOP` file.
+- one main figure comparing `G` for between-plateau pairs against within-plateau controls;
+- one compact pairwise table or heatmap showing which plateau pairs do or do not exhibit a manifold gap;
+- at most one small illustrative `d(t)` panel showing representative verified transitions;
+- a direct verdict on both the universal and typical-association claims;
+- a clearly labeled limitation that finite activation samples can support or undermine empirical
+  component separation, but cannot prove true topological disconnection.
+
+Null, mixed, and negative results are COMPLETE if the general question is answered. When done, the loop
+writes an empty `STOP` file.
 
 ## Fallback (if time runs short)
 
-Use the existing trained model and analyze:
+On the existing base checkpoint:
 
-- one smooth digit-9-to-9 interpolation;
-- one plateau-crossing digit-9-to-9 interpolation;
-- several cross-digit interpolation paths.
+1. define the class-aligned stable output regions using correctly classified, high-confidence MNIST
+   examples;
+2. test every sufficiently populated pair of regions rather than selecting digit 9;
+3. sample at least 10 endpoint pairs per between-plateau pair and matched within-plateau controls;
+4. verify the between-plateau paths with `d(t)`;
+5. build one natural-activation MST and report the normalized bottleneck `G`.
 
-For each path, plot:
-
-- `d(t)`;
-- kNN radius relative to natural activations;
-- nearest-natural-activation distance.
-
-Also build one mutual-kNN graph and report whether the two candidate digit-9 regions connect at a normal within-region neighborhood scale.
-
-Produce one combined figure, write a preliminary verdict, and create `STOP`.
+Produce the main comparison figure, the pairwise summary, a preliminary general verdict, and `STOP`.
+Do not spend fallback time adding metrics or running another architecture.
 
 ## Setup (fixed)
 
-- **Base code:** build directly upon the `image-models` branch of `FranciscoHS/mars-plateaus`.
-- **Development branch:** create a new branch from `image-models`, such as `dir11-boundary-as-off-manifold`.
-- **Code policy:** reuse the existing model, checkpoint, activation hooks, interpolation code, and plateau metrics. Do not duplicate working implementations unless necessary.
-- **Primary model:** the existing four-layer ReLU MNIST MLP from the sprint experiments.
-- **Data:** correctly classified MNIST examples. Use the largest already-supported train/test split available in the branch.
+- **Base code:** build directly upon the `image-models` branch of `FranciscoHS/mars-plateaus` and reuse
+  the existing `dir11` analysis wherever it is correct.
+- **Development branch:** continue the existing direction branch if available; do not start a separate
+  implementation merely because the scientific question has been reframed.
+- **Primary model:** the existing four-layer ReLU MNIST MLP.
+- **Data:** correctly classified natural MNIST examples. Apply one fixed confidence threshold to remove
+  ambiguous endpoints; confidence is an inclusion rule, not a reported metric.
 - **Intervention layer:** the same first hidden layer used in the existing plateau experiments.
-- **Downstream measurement layer:** the same final hidden layer used in the existing distance experiments. Logits are a secondary measurement.
-- **Interpolation:** use the existing spherical interpolation implementation for direct-path tests.
-- **Natural activation reference set:** first-hidden-layer activations produced by real MNIST inputs.
-- **Candidate stable regions:** initially use the existing digit-9 outliers and smooth digit-9 examples. Later define region assignments systematically using downstream activation clustering.
-- **Plateau metric:** normalized downstream distance `d(t)`.
-- **Plateau boundary:** the path location with maximum smoothed absolute derivative `|d'(t)|`.
-- **Primary support metric:** kNN radius from each interpolated activation to the natural activation reference cloud. Larger radius means lower empirical support.
-- **Secondary support metric:** nearest-natural-activation distance.
-- **Component metric:** connectivity in a mutual-kNN graph of natural activations.
-- **Robustness:** repeat graph results over a reasonable range of `k` values rather than selecting one favorable value.
+- **Downstream measurement layer:** the same final hidden layer used for the existing `d(t)` analysis.
+- **Direct paths:** use the existing spherical interpolation implementation only to verify plateau
+  transitions. A direct interpolation leaving the activation cloud is not evidence that the endpoint
+  plateaus are different manifold components.
+- **Plateau-region definition:** determine stable regions from downstream/output behavior before looking
+  at intervention-layer manifold connectivity. Start with the expected class-aligned plateaus; include
+  reproducible within-class sub-plateaus if the output-side evidence supports them. Do not use the
+  intervention-layer graph to define the groups that the same graph will later test.
+- **Coverage:** include every stable region with at least 30 eligible natural examples and every pair
+  that passes the fixed plateau-transition verification rule. Sample the same number of endpoint pairs
+  per region pair (target: 20) so digit frequency does not dominate the result.
+- **Controls:** use within-plateau endpoint pairs sampled from the same regions and with the same endpoint
+  selection rules. These define the normal connection scale.
+- **Primary manifold test:** Euclidean MST over the natural intervention-layer activation cloud. If an
+  approximate kNN graph is required for memory, verify once that increasing `k` no longer changes the
+  MST bottlenecks; do not turn the `k` sweep into a headline result.
+- **Replication:** after the base-model analysis is complete, reuse the already-trained second seed and
+  architecture checkpoints for confirmation. Do not train more models unless the existing checkpoints
+  are unusable.
 - **Shared limits in `../BUDGET.md`; operator rules in `../CLAUDE.md` — read both every iteration.**
-- **Deliverable hygiene (see CLAUDE.md):** RESULTS.md/REPORT.md = current-best only, no history; CHANGELOG.md = the history.
-- **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, flax** — they break the CUDA build.
+- **Deliverable hygiene (see CLAUDE.md):** RESULTS.md/REPORT.md = current-best only, no history;
+  CHANGELOG.md = the history.
+- **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, flax** — they break the
+  CUDA build.
+
+### Metric and readability budget
+
+The main report is limited to `d(t)` and `G`. A quantity does not belong in `REPORT.md` merely because
+the code can compute it. Before adding anything else, write in `JOURNAL.md` what decision it changes;
+if it changes no decision, omit it.
+
+Remove the following from the main analysis because they are redundant, fragile, or do not answer the
+component question:
+
+- nearest-natural-activation distance;
+- kNN radius along the direct interpolation;
+- graph hop count;
+- the percentile or exact location of `argmax |d'(t)|`;
+- alignment between a single derivative peak and a single support peak;
+- multiple clustering-quality scores;
+- raw bottleneck distances when the normalized `G` is already shown;
+- PCA/UMAP separation as evidence of manifold components;
+- separate plots for every graph hyperparameter, seed, or architecture.
+
+Robustness settings may be logged and summarized in one compact table. Promote a robustness result into
+the main text only if it changes the verdict.
 
 ## Stages (checklist)
 
-- [x] S1 — Reproduce and organize the existing image-model plateau experiments (iter 1: paths + d(t) + |d'| boundary reproduced in analyze_manifold.py; base code mapped in JOURNAL)
-  - Inspect the `image-models` branch before changing code.
-  - Record the relevant scripts, checkpoint, model architecture, layer hooks, metrics, and output files in `JOURNAL.md`.
-  - Reproduce:
-    - a cross-digit plateau;
-    - the real-activation versus random-activation perturbation result;
-    - a plateau-crossing digit-9-to-9 path;
-    - a smooth digit-9-to-9 path.
-  - Save endpoint indices, images, activations, model seed, and interpolation configuration.
-  - Convert visual plateau judgments into a numerical boundary location based on `|d'(t)|`.
-  - Save all reported figures to `plots/` and define every metric in `REPORT.md` Methods.
+- [x] S1 — Reframe the existing work and freeze the minimal measurement procedure
+  - Inspect the current `dir11` scripts, `RESULTS.md`, `REPORT.md`, figures, and completed digit-9 runs.
+  - Record which existing outputs can be reused and which only answer the old digit-9-specific question.
+  - Treat the prior digit-9 result as a pilot/candidate counterexample, not as the final population-level
+    answer.
+  - Define, before testing manifold connectivity:
+    - the output-side plateau-region assignment;
+    - the fixed `d(t)` rule for accepting a path as plateau-to-plateau;
+    - the within-plateau normalization used in `G`;
+    - endpoint sampling count and random seed.
+  - Remove weak metrics from the main report and figures. Preserve historical results in `CHANGELOG.md`
+    rather than carrying them into the current-best narrative.
+  - If an old `STOP` marks the digit-9-specific question as complete, remove it when this reframed work
+    begins.
 
-- [x] S2 — Estimate activation support and candidate manifold components (iter 1: kNN radius + mutual-kNN graph; iter 2: KMeans-k×seed sweep, all-10-digit region assignment, graph-k robustness)
-  - Collect first-hidden-layer activations from correctly classified natural MNIST inputs.
-  - Assign candidate stable regions using downstream activation clustering and the existing digit-9 observations.
-  - Compute kNN radius and nearest-natural-activation distance along every direct interpolation path.
-  - Build a mutual-kNN graph using natural first-layer activations.
-  - Measure:
-    - connectivity within each candidate region;
-    - connectivity between candidate regions;
-    - the graph scale at which each pair of regions merges;
-    - the largest edge or lowest-support bottleneck on the best connecting path.
-  - Repeat the graph analysis across reasonable `k` values.
-  - Validate that within-region pairs connect more easily than clearly unrelated cross-digit pairs.
+- [x] S2 — Build a balanced set of plateau transitions across the model
+  - Collect natural first-hidden-layer activations and downstream outputs for all eligible MNIST examples.
+  - Identify all sufficiently populated stable output regions without privileging any digit.
+  - Enumerate all candidate region pairs and sample the same number of endpoint pairs from each.
+  - Compute `d(t)` for the sampled direct paths and retain only pairs that satisfy the predeclared
+    plateau-transition rule.
+  - Sample matched within-plateau controls from every included region.
+  - Report coverage plainly: number of stable regions, number of possible region pairs, number passing
+    the plateau-transition rule, and exclusions with reasons. These are dataset counts, not new metrics.
+  - Include the previously studied digit-9 pair in this table exactly like any other pair.
 
-- [x] S3 — Test whether plateau boundaries are off-manifold and whether regions are components (iter 1: direct-path + component tests for digit-9; iter 2: robustness sweeps + all-digit counterexample search, 0 found; iter 3: cross-model confirmation — 2nd MLP seed 1 reproduces all 3 tests, 0 counterexamples. Question answered → STOP)
-  - **Direct-path test:** determine whether the maximum-`|d'(t)|` plateau boundary coincides with the lowest-support part of the spherical interpolation.
-  - **Component test:** determine whether an alternative path through natural activations connects the two candidate regions without passing through an unusually low-support bottleneck.
-  - Compare three path categories:
-    - same stable region;
-    - different stable regions within the same digit;
-    - different digits.
-  - Report the alignment between:
-    - plateau-boundary location;
-    - maximum kNN radius;
-    - maximum nearest-natural-activation distance.
-  - Search explicitly for the main counterexample:
-    - a direct path with a plateau boundary between two regions that are nevertheless connected at a normal natural-activation neighborhood scale.
-  - Produce final figures, statistical summaries, and the verdict in `REPORT.md`.
+- [~] S3 — Test empirical manifold-component correspondence and write the verdict
+  - Build the natural-activation MST and compute `G` for all verified between-plateau pairs and matched
+    within-plateau controls.
+  - Search explicitly for counterexamples to the universal claim: verified plateau transitions with
+    `G <= 1`, meaning that the plateaus can be connected through natural activations without a larger
+    gap than normal within-plateau travel.
+  - Compare the full between-plateau and within-plateau `G` distributions to assess the typical-
+    association claim. Report the distribution and uncertainty without adding a collection of effect-
+    size metrics.
+  - Repeat the same frozen analysis on the existing independent seed and architecture checkpoints.
+    Summarize replication in one table; investigate only verdict-changing failures.
+  - Write `REPORT.md` around the general claim, with the digit-9 case mentioned only if it is a useful
+    representative example or counterexample.
+  - Save only the current-best figures to `plots/`, update `RESULTS.md` and `CHANGELOG.md`, and create
+    `STOP` once both claims have a clear verdict.
+
+## Verdict rules
+
+- **Universal claim supported:** every well-powered verified plateau pair has `G > 1`, and this remains
+  true under resampling and the existing model replications.
+- **Universal claim refuted:** at least one reproducible verified plateau pair has `G <= 1` across
+  resampling/model replication. Do not let a majority trend hide this counterexample.
+- **Typical association supported:** the between-plateau `G` distribution is consistently shifted above
+  within-plateau controls across model replications.
+- **Typical association not supported:** the distributions substantially overlap or the direction is not
+  stable across replications.
+- **Mixed:** separation is real for some plateau pairs but depends strongly on class pair, seed, or
+  architecture. State this directly instead of forcing a binary conclusion.
+
+The threshold `G = 1` must follow from the frozen within-plateau normalization, not be tuned after seeing
+between-plateau results.
 
 ## Out of scope (do NOT)
 
-- Do not run the LLM lambda-sweep experiments in this direction.
-- Do not optimize output-smooth activation paths.
-- Do not reproduce all experiments from the manifold-steering paper.
-- Do not claim that low density alone proves a separate manifold component.
-- Do not claim that clustering alone proves disconnectedness.
-- Do not use two-dimensional PCA or UMAP visualizations as the primary evidence.
-- Do not switch to an LLM until the MNIST experiment has a clear measurement procedure and verdict.
+- Do not make the two digit-9 regions the primary experimental object.
+- Do not infer the general answer from one same-digit pair or a few hand-selected cross-digit paths.
+- Do not optimize a smooth activation path; this direction tests connectivity through natural
+  activations.
+- Do not equate a direct interpolation leaving the activation cloud with distinct manifold components.
+- Do not claim that low density, clustering, PCA, or UMAP alone proves component separation.
+- Do not revive removed metrics for visual variety.
+- Do not run the LLM lambda-sweep experiments or switch datasets/models before the MNIST population-level
+  result is complete.
 - Do not refactor unrelated parts of the `image-models` branch.
-- Do not train a new model unless the existing checkpoint cannot reproduce the reported result.
 
 ## On-track check (required every iteration)
 
@@ -136,46 +195,32 @@ End each `JOURNAL.md` entry with:
 
 `On track? <yes/no> — <stage, % done, blocker if any>`
 
+Also answer:
+
+`Metric check: Did I add a reported quantity? If yes, what verdict-changing decision requires it?`
+
 ## Current status
 
-**Iter 3 (2026-07-15): DONE — question answered, STOP written.** Verdict = **REFUTED**, robust across
-analysis hyperparameters AND a second independent training seed. Iter 1 built the pipeline
-(`experiments/analyze_manifold.py`): digit-9 direct-path boundary at 35th-pctile support (not a gap);
-the two 9-regions 5 hops / bottleneck 2.72 (< median 2.85) — like within-region, unlike cross-digit
-(9–12 hops). Iter 2 (`experiments/robustness.py`): graph-k sweep (6–25), KMeans-k∈{2,3,4}×seed sweep,
-all-10-digit generality → **0 counterexamples** (bottleneck ≤ p95). Iter 3
-(`experiments/cross_model.py`): trained a **2nd MLP from scratch (seed 1, 86.9% acc)** and re-ran all
-three tests — cross-region 9→9 boundary at **53rd** pctile (well-supported), A↔B = **4 hops = within-A
-(4)**, bottleneck 1.54 < median 1.95, **0 counterexamples** across all digits. Base model re-analyzed
-by the same code reproduced its reported numbers exactly (regression check). Figures
-`plots/direct_path_support.png`, `plots/component_test.png`, `plots/robustness_graphk.png`,
-`plots/robustness_regions.png`, `plots/cross_model.png`. The sole remaining limitation is now
-architecture/dataset (both models are depth-4 w200 ReLU on the same 1000-image MNIST subset), not seed.
+S1–S2 complete and S3 core done (iter 5). The reframed population analysis is implemented in
+`experiments/population_manifold.py` with all definitions frozen: plateau regions = 10 digit classes
+(confident-correct, output margin ≥ 0.5), natural cloud = 1705 correct L1 activations, `d(t)` accept =
+plateau fraction ≥ 0.5, `G = MST-bottleneck / max(within-region medians)`, 20 pairs/region-pair (seed 0).
+Ran base + the four existing replication checkpoints (no retraining).
 
----
+**Both PLAN claims answered (supersedes the old digit-9 "REFUTED"):**
+- **Universal claim → REFUTED decisively:** 25/45 verified plateau pairs on the base model have median
+  `G ≤ 1` (and 26–35/45–46 in every well-powered model); the digit-9 case is one ordinary counterexample
+  (`G = 1.00`).
+- **Typical-association claim → NOT SUPPORTED:** between-plateau median `G` (0.93–1.00) sits on the
+  within-plateau baseline (1.00) in all four well-powered models; bootstrap CIs overlap; seed-1 direction
+  reverses. Distributions overlap almost completely.
 
-The `image-models` branch has already produced preliminary evidence that:
-
-- the MNIST MLP exhibits plateau-like downstream behavior;
-- real activations show stronger plateaus than matched random activations;
-- same-digit downstream activations are usually closer than different-digit activations;
-- some digit-9-to-9 interpolations show plateau-boundary-plateau behavior;
-- other digit-9-to-9 interpolations are short and smooth.
-
-This suggests that digit 9 may contain multiple downstream stable regions. It does not yet show whether these regions are separate components of the natural activation manifold.
-
-Two distinct claims must be tested:
-
-1. **Direct-path claim:** the sharp plateau crossing occurs where the interpolated first-layer activation has low support under natural activations.
-2. **Component claim:** there is no alternative high-support path through natural activations connecting the two stable regions.
-
-The second claim is stronger. A direct spherical interpolation may leave the manifold even when both endpoint regions belong to one connected manifold component.
+Replicated across a second seed (d4w200) and two architectures (d4w400, d5w200). The shallow d3w200 is
+under-powered (only 1 pair passes the `d(t)` sharpness filter) and is down-weighted, stated honestly.
 
 ## Next step
 
-**None — direction complete, STOP written.** The PLAN success criterion is fully met: reproducible
-smooth / plateau-crossing / cross-class paths with d(t), boundary, and support; a mutual-kNN
-connectivity analysis with within/between-region scales and bottlenecks; robustness across region and
-graph hyperparameters; and a cross-model confirmation — all yielding a clear **REFUTED** verdict. Any
-future extension (a different architecture or dataset, or an LLM analog) would be a NEW direction, out
-of scope here.
+Finish S3: restore statistical power for the shallow net (adapt the `d(t)` sharpness threshold or sample
+more endpoint pairs so d3w200 has ≥~20 verified pairs) and confirm the verdict is unchanged; optionally a
+one-line MST k-freeness note. If confirmed, write STOP. Deliverables already curated to current-best; no
+unaddressed feedback files.

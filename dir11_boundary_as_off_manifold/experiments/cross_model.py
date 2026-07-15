@@ -26,7 +26,10 @@ under the shared-resource memory fraction, analyzes on CPU.
 Outputs results/cross_model.json, plots/cross_model.png.
 """
 import os, sys, json
-sys.path.insert(0, '/network/mars-plateaus-image')
+# base repo + this direction may be mounted under /network (loop) or /workspace (local)
+BASE = '/network/mars-plateaus-image' if os.path.isdir('/network/mars-plateaus-image') \
+    else '/workspace/mars-plateaus-image'
+sys.path.insert(0, BASE)
 
 import matplotlib
 matplotlib.use('Agg')
@@ -45,11 +48,11 @@ torch.set_num_threads(2)
 if torch.cuda.is_available():
     torch.cuda.set_per_process_memory_fraction(0.225)
 
-HERE = '/network/marsv_agent_haoyang/dir11_boundary_as_off_manifold'
+HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(HERE, 'results'); PLOT = os.path.join(HERE, 'plots')
 os.makedirs(RES, exist_ok=True); os.makedirs(PLOT, exist_ok=True)
-DATA = '/network/mars-plateaus-image/data/mnist'
-CKPT1 = '/network/mars-plateaus-image/results/image/mnist_mlp_d4_w200_relu_n1000_s100000.pt'
+DATA = os.path.join(BASE, 'data/mnist')
+CKPT1 = os.path.join(BASE, 'results/image/mnist_mlp_d4_w200_relu_n1000_s100000.pt')
 CKPT2 = os.path.join(RES, 'mnist_mlp_d4_w200_relu_n1000_seed1.pt')
 
 N_POINTS = 200
@@ -220,104 +223,102 @@ def analyze(model, ck):
                 counterexamples=[int(c) for c in counter])
 
 # ============================================================ run
-train_second(seed=1)
-print("\n=== analyzing model 2 (seed 1) ===")
-m2, ck2 = load_checkpoint(CKPT2)
-r2 = analyze(m2, ck2)
-print("\n=== analyzing model 1 (seed 0, base) ===")
-m1, ck1 = load_checkpoint(CKPT1)
-r1 = analyze(m1, ck1)
+def main():
+    train_second(seed=1)
+    print("\n=== analyzing model 2 (seed 1) ===")
+    m2, ck2 = load_checkpoint(CKPT2)
+    r2 = analyze(m2, ck2)
+    print("\n=== analyzing model 1 (seed 0, base) ===")
+    m1, ck1 = load_checkpoint(CKPT1)
+    r1 = analyze(m1, ck1)
 
-out = dict(model1=r1, model2=r2)
-# strip heavy curves from the JSON except model2 (for the plot) -> keep both, small
-with open(os.path.join(RES, 'cross_model.json'), 'w') as f:
-    json.dump({'model1': {k: v for k, v in r1.items() if k != 'direct_curves'},
-               'model2': {k: v for k, v in r2.items() if k != 'direct_curves'}},
-              f, indent=2)
+    with open(os.path.join(RES, 'cross_model.json'), 'w') as f:
+        json.dump({'model1': {k: v for k, v in r1.items() if k != 'direct_curves'},
+                   'model2': {k: v for k, v in r2.items() if k != 'direct_curves'}},
+                  f, indent=2)
 
-def summarize(tag, r):
-    print(f"\n----- {tag} -----")
-    print(f"test_acc={r['test_acc']:.3f}  n_nat={r['n_natural']}  9-regions={r['region_sizes']}  "
-          f"rad_med={r['rad_med']:.2f} p95={r['rad_p95']:.2f}")
-    print("  direct-path boundary percentile (higher=more off-manifold):")
-    for k, v in r['direct'].items():
-        print(f"    {k:16s}: t={v['t']:.2f} pctile={v['pctile']:.0f} rad@bnd={v['rad_at_bnd']:.2f}")
-    print("  component (k=10) hops / bottleneck:")
-    for k, v in r['component'].items():
-        print(f"    {k:10s}: hops={v['hops']} bn={v['bottleneck']:.2f}")
-    print(f"  same-digit counterexamples (bn>p95): {r['counterexamples']}")
-summarize('MODEL 1 (seed 0)', r1)
-summarize('MODEL 2 (seed 1)', r2)
+    def summarize(tag, r):
+        print(f"\n----- {tag} -----")
+        print(f"test_acc={r['test_acc']:.3f}  n_nat={r['n_natural']}  9-regions={r['region_sizes']}  "
+              f"rad_med={r['rad_med']:.2f} p95={r['rad_p95']:.2f}")
+        print("  direct-path boundary percentile (higher=more off-manifold):")
+        for k, v in r['direct'].items():
+            print(f"    {k:16s}: t={v['t']:.2f} pctile={v['pctile']:.0f} rad@bnd={v['rad_at_bnd']:.2f}")
+        print("  component (k=10) hops / bottleneck:")
+        for k, v in r['component'].items():
+            print(f"    {k:10s}: hops={v['hops']} bn={v['bottleneck']:.2f}")
+        print(f"  same-digit counterexamples (bn>p95): {r['counterexamples']}")
+    summarize('MODEL 1 (seed 0)', r1)
+    summarize('MODEL 2 (seed 1)', r2)
 
-# ============================================================ plot
-fig, axes = plt.subplots(2, 2, figsize=(14, 9))
+    # ======================================================== plot
+    fig, axes = plt.subplots(2, 2, figsize=(14, 9))
+    ax = axes[0, 0]
+    paths = ['same_region_9', 'cross_region_9', 'cross_digit_9v4', 'cross_digit_9v0']
+    disp = ['same-region\n9->9', 'cross-region\n9->9', '9->4', '9->0']
+    x = np.arange(len(paths)); wdt = 0.38
+    p1 = [r1['direct'][p]['pctile'] for p in paths]
+    p2 = [r2['direct'][p]['pctile'] for p in paths]
+    ax.bar(x - wdt / 2, p1, wdt, color='C0', label='model 1 (seed 0)')
+    ax.bar(x + wdt / 2, p2, wdt, color='C1', label='model 2 (seed 1)')
+    ax.axhline(50, color='k', ls=':', lw=1, label='median support (50th pctile)')
+    ax.set_xticks(x); ax.set_xticklabels(disp)
+    ax.set_ylabel('boundary kNN-radius percentile\n(higher = more off-manifold)')
+    ax.set_title('(a) Direct-path test: cross-region 9->9 boundary is well-supported\n'
+                 'in BOTH models; off-manifold-ness grows with cross-digit-ness')
+    ax.legend(fontsize=8); ax.grid(alpha=0.3, axis='y')
 
-# (a) direct-path boundary percentile: both models, 4 paths
-ax = axes[0, 0]
-paths = ['same_region_9', 'cross_region_9', 'cross_digit_9v4', 'cross_digit_9v0']
-disp = ['same-region\n9->9', 'cross-region\n9->9', '9->4', '9->0']
-x = np.arange(len(paths)); wdt = 0.38
-p1 = [r1['direct'][p]['pctile'] for p in paths]
-p2 = [r2['direct'][p]['pctile'] for p in paths]
-ax.bar(x - wdt / 2, p1, wdt, color='C0', label='model 1 (seed 0)')
-ax.bar(x + wdt / 2, p2, wdt, color='C1', label='model 2 (seed 1)')
-ax.axhline(50, color='k', ls=':', lw=1, label='median support (50th pctile)')
-ax.set_xticks(x); ax.set_xticklabels(disp)
-ax.set_ylabel('boundary kNN-radius percentile\n(higher = more off-manifold)')
-ax.set_title('(a) Direct-path test: cross-region 9->9 boundary is well-supported\n'
-             'in BOTH models; off-manifold-ness grows with cross-digit-ness')
-ax.legend(fontsize=8); ax.grid(alpha=0.3, axis='y')
+    ax = axes[0, 1]
+    comps = ['within_A', 'A_vs_B_9', '9_vs_4', '9_vs_0']
+    cdisp = ['within\nA', 'A<->B\n(9 regions)', '9<->4', '9<->0']
+    h1 = [r1['component'][c]['hops'] or 0 for c in comps]
+    h2 = [r2['component'][c]['hops'] or 0 for c in comps]
+    ax.bar(x - wdt / 2, h1, wdt, color='C0', label='model 1')
+    ax.bar(x + wdt / 2, h2, wdt, color='C1', label='model 2')
+    ax.set_xticks(x); ax.set_xticklabels(cdisp)
+    ax.set_ylabel(f'geodesic hops (k={K_FIX})')
+    ax.set_title('(b) Component test: the two 9-regions (A<->B) sit near the\n'
+                 'within-region control, far below different digits')
+    ax.legend(fontsize=8); ax.grid(alpha=0.3, axis='y')
 
-# (b) component test hops, both models
-ax = axes[0, 1]
-comps = ['within_A', 'A_vs_B_9', '9_vs_4', '9_vs_0']
-cdisp = ['within\nA', 'A<->B\n(9 regions)', '9<->4', '9<->0']
-h1 = [r1['component'][c]['hops'] or 0 for c in comps]
-h2 = [r2['component'][c]['hops'] or 0 for c in comps]
-ax.bar(x - wdt / 2, h1, wdt, color='C0', label='model 1')
-ax.bar(x + wdt / 2, h2, wdt, color='C1', label='model 2')
-ax.set_xticks(x); ax.set_xticklabels(cdisp)
-ax.set_ylabel(f'geodesic hops (k={K_FIX})')
-ax.set_title('(b) Component test: the two 9-regions (A<->B) sit near the\n'
-             'within-region control, far below different digits')
-ax.legend(fontsize=8); ax.grid(alpha=0.3, axis='y')
+    ax = axes[1, 0]
+    sd = r2['same_digit']
+    ds = sorted(int(d) for d in sd)
+    bvals = [sd[str(d)]['bottleneck'] for d in ds]
+    barcol = ['C4' if d == 9 else 'C1' for d in ds]
+    ax.bar(np.arange(len(ds)), bvals, color=barcol)
+    ax.axhline(r2['rad_med'], color='k', ls='--', lw=1, label=f"nat median {r2['rad_med']:.2f}")
+    ax.axhline(r2['rad_p95'], color='gray', ls=':', lw=1.4, label=f"nat p95 {r2['rad_p95']:.2f} (gap threshold)")
+    ax.set_xticks(np.arange(len(ds))); ax.set_xticklabels([str(d) for d in ds])
+    ax.set_xlabel('digit (two regions via KMeans-2 on L3)')
+    ax.set_ylabel('bottleneck edge')
+    ax.set_title("(c) Model 2 counterexample search: every same-digit pair\n"
+                 "below p95 -> 0 counterexamples (digit 9 = purple)")
+    ax.legend(fontsize=8); ax.grid(alpha=0.3, axis='y')
 
-# (c) same-digit bottleneck vs p95, model 2 (counterexample search)
-ax = axes[1, 0]
-sd = r2['same_digit']
-ds = sorted(int(d) for d in sd)
-bvals = [sd[str(d)]['bottleneck'] for d in ds]
-barcol = ['C4' if d == 9 else 'C1' for d in ds]
-ax.bar(np.arange(len(ds)), bvals, color=barcol)
-ax.axhline(r2['rad_med'], color='k', ls='--', lw=1, label=f"nat median {r2['rad_med']:.2f}")
-ax.axhline(r2['rad_p95'], color='gray', ls=':', lw=1.4, label=f"nat p95 {r2['rad_p95']:.2f} (gap threshold)")
-ax.set_xticks(np.arange(len(ds))); ax.set_xticklabels([str(d) for d in ds])
-ax.set_xlabel('digit (two regions via KMeans-2 on L3)')
-ax.set_ylabel('bottleneck edge')
-ax.set_title(f"(c) Model 2 counterexample search: every same-digit pair\n"
-             f"below p95 -> 0 counterexamples (digit 9 = purple)")
-ax.legend(fontsize=8); ax.grid(alpha=0.3, axis='y')
+    ax = axes[1, 1]
+    cr = r2['direct_curves']['cross_region_9']
+    t = np.linspace(0, 1, N_POINTS)
+    ax.plot(t, cr['d'], 'C0', lw=2, label='d(t) downstream')
+    bnd_t = cr['t']
+    ax.axvline(bnd_t, color='k', ls='--', lw=1, label=f'plateau boundary (t={bnd_t:.2f})')
+    ax.set_xlabel('t'); ax.set_ylabel('d(t)'); ax.set_ylim(-0.05, 1.15)
+    ax2 = ax.twinx()
+    ax2.plot(t, cr['rad'], 'C3', lw=1.4, alpha=0.8, label='kNN radius (k=10)')
+    ax2.axhline(r2['rad_med'], color='C3', ls=':', lw=1, alpha=0.7)
+    ax2.axhline(r2['rad_p95'], color='C1', ls=':', lw=1, alpha=0.7)
+    ax2.set_ylabel('support: kNN radius')
+    ax.set_title(f"(d) Model 2 cross-region 9->9 path: sharp d(t) plateau boundary\n"
+                 f"sits at high support (pctile {cr['pctile']:.0f}), not a radius spike")
+    ax.legend(loc='center left', fontsize=8); ax2.legend(loc='center right', fontsize=8)
+    ax.grid(alpha=0.3)
 
-# (d) cross-region 9->9 d(t) + support for model 2
-ax = axes[1, 1]
-cr = r2['direct_curves']['cross_region_9']
-t = np.linspace(0, 1, N_POINTS)
-ax.plot(t, cr['d'], 'C0', lw=2, label='d(t) downstream')
-bnd_t = cr['t']
-ax.axvline(bnd_t, color='k', ls='--', lw=1, label=f'plateau boundary (t={bnd_t:.2f})')
-ax.set_xlabel('t'); ax.set_ylabel('d(t)'); ax.set_ylim(-0.05, 1.15)
-ax2 = ax.twinx()
-ax2.plot(t, cr['rad'], 'C3', lw=1.4, alpha=0.8, label='kNN radius (k=10)')
-ax2.axhline(r2['rad_med'], color='C3', ls=':', lw=1, alpha=0.7)
-ax2.axhline(r2['rad_p95'], color='C1', ls=':', lw=1, alpha=0.7)
-ax2.set_ylabel('support: kNN radius')
-ax.set_title(f"(d) Model 2 cross-region 9->9 path: sharp d(t) plateau boundary\n"
-             f"sits at high support (pctile {cr['pctile']:.0f}), not a radius spike")
-ax.legend(loc='center left', fontsize=8); ax2.legend(loc='center right', fontsize=8)
-ax.grid(alpha=0.3)
+    fig.suptitle('Cross-model confirmation: a second independently trained MNIST MLP (seed 1) '
+                 'reproduces the REFUTED verdict', fontsize=12)
+    plt.tight_layout()
+    plt.savefig(os.path.join(PLOT, 'cross_model.png'), dpi=140); plt.close()
+    print("\nsaved plots/cross_model.png + results/cross_model.json")
 
-fig.suptitle('Cross-model confirmation: a second independently trained MNIST MLP (seed 1) '
-             'reproduces the REFUTED verdict', fontsize=12)
-plt.tight_layout()
-plt.savefig(os.path.join(PLOT, 'cross_model.png'), dpi=140); plt.close()
-print("\nsaved plots/cross_model.png + results/cross_model.json")
+
+if __name__ == '__main__':
+    main()
