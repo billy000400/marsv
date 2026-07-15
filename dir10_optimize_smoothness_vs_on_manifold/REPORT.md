@@ -207,6 +207,9 @@ for every adjacent weekday pair gives the identical pattern (`plots/s6_allpairs_
 For every pair the best optimized path over the whole $\lambda$ grid is *exactly* the linear chord (no
 $\lambda$ improves recovery), the spline target is ~235× closer to itself, and the spline is
 Pareto-dominated in both energies. The negative result is robust, not a Tuesday→Wednesday artifact.
+The per-pair energy trade-off (`plots/s6_allpairs_energy_tradeoff.png`) makes the domination visual:
+for all 7 pairs the optimized-path family (chord → λ grid → output-only) traces the lower-left
+frontier while every fitted spline (★) sits alone in the dominated top-right corner.
 
 ## Conclusion
 

@@ -84,6 +84,7 @@ would never select it.
 - `plots/s4_dt_curves.png` — downstream behavior displacement d(t) along each path.
 - `plots/s4_pca_geometry.png` — PCA view of the chord, output-only, spline, and λ-paths.
 - `plots/s6_allpairs_recovery.png` — recovery for all 7 pairs: optimized ≈ chord, spline far below.
+- `plots/s6_allpairs_energy_tradeoff.png` — E_act vs E_out for all 7 pairs: every fitted spline (★) sits in the dominated top-right corner.
 
 ## Headline
 Generic combined kinetic smoothness (activation + behavior) does **not** explain the fitted weekday

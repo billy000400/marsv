@@ -67,3 +67,15 @@ current-best. Re-ran the CLAUDE.md math-rendering check on REPORT.md (6/6 displa
 0 degraded, 0 inline hazards). Re-created `STOP`. No result numbers changed.
 
 On track? yes — S1–S6 done (100%); research question answered (NEGATIVE, 7/7 pairs); STOP written.
+
+## 2026-07-15 — Iteration 3: per-pair energy trade-off figure + finalize (STOP re-created)
+Resumed with memory reset; direction already COMPLETE (S1–S6, decisive NEGATIVE, generalizes 7/7).
+`STOP` was again missing from disk. Smallest useful advance (plan's flagged optional polish, and a
+real gap — the energy trade-off figure only covered Tue→Wed): built `experiments/s6_energy_plot.py`,
+a pure post-processor of `results/allpairs_summary.json` (no model, no GPU), producing
+`plots/s6_allpairs_energy_tradeoff.png` — E_act vs E_out for all 7 pairs with each fitted spline in
+the dominated top-right corner. Script independently re-confirms spline dominated in both energies
+7/7. Referenced the figure from RESULTS.md/REPORT.md; no numbers changed. Re-verified REPORT math
+(6/6, 0 degraded, 0 inline hazards). Re-created `STOP`.
+
+On track? yes — S1–S6 done (100%); research question answered (NEGATIVE, 7/7 pairs); STOP written.

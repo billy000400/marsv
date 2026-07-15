@@ -57,3 +57,14 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   `js-display-math`, 0 degraded to `<pre lang="math">`; 0 inline backslash-punctuation hazards.
 - The `STOP` file recorded as written in the prior JOURNAL entry was absent from disk (lost before
   commit) — re-created it. Direction remains COMPLETE (S1–S6; NEGATIVE verdict, generalizes 7/7 pairs).
+
+## 2026-07-15 — Added per-pair energy trade-off figure; STOP re-created
+- No result numbers changed (direction already at current-best, decisive NEGATIVE, 7/7 pairs).
+- Added `experiments/s6_energy_plot.py` (pure post-processing of `results/allpairs_summary.json`,
+  no model re-run) → new figure `plots/s6_allpairs_energy_tradeoff.png`: E_act vs E_out for all 7
+  adjacent pairs, showing every fitted centroid spline (★) alone in the dominated top-right corner
+  while the optimized-path families trace the lower-left frontier. Script re-confirms spline
+  Pareto-dominated in both energies 7/7. Referenced from RESULTS.md and REPORT.md (fills the gap
+  where the energy trade-off figure previously only covered Tuesday→Wednesday).
+- Re-verified REPORT.md display math (6/6 render as js-display-math, 0 degraded, 0 inline hazards).
+- Re-created `STOP` (again absent from disk on resume). Direction remains COMPLETE (S1–S6).

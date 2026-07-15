@@ -354,6 +354,6 @@ REPORT.md display math re-verified (6/6 render, 0 degraded). Research question a
 
 COMPLETE — nothing required. `STOP` written. The 7-pair generalization is confirmed
 (`results/allpairs_summary.json`): best-over-λ equals the linear chord for every pair and the spline
-is Pareto-dominated in both energies 7/7. Research question answered (NEGATIVE). Optional future
-polish only: reproduce the exact Appendix-A.9 SVD recovery score if the appendix becomes available;
-add per-pair figures.
+is Pareto-dominated in both energies 7/7. Research question answered (NEGATIVE). Per-pair energy
+trade-off figure now added (`plots/s6_allpairs_energy_tradeoff.png`). Only remaining optional polish:
+reproduce the exact Appendix-A.9 SVD recovery score if the appendix becomes available.
