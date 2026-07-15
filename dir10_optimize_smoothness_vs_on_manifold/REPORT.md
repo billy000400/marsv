@@ -45,8 +45,10 @@ RMSNorm + unembedding) is resident on the GPU.
 Q: What day is {k} days after {entity}?\nA:
 ```
 
-with `entity` ∈ {Monday…Sunday} and `k` ∈ {one…seven}; ground truth wraps cyclically mod 7 (exactly
-seven prompts per ground-truth weekday).
+with `entity` ∈ {Monday…Sunday} and `k` ∈ {one…seven}; ground truth wraps cyclically mod 7 — so
+there are **exactly 7 prompt sequences per ground-truth weekday** (49 = 7 weekdays × 7 increments),
+each averaged into one centroid. Behavior energies are averaged over $N_{\mathrm{base}}=16$ base
+prompts (a fixed seeded subset of the 49).
 
 **Activation site.** Residual stream at **layer 28** (`hidden_states[28]`, the 28th block's output),
 at the final answer-predicting token position (the answer token is *not* appended). PCA is fit over
@@ -55,6 +57,12 @@ all 48 non-degenerate components. The first-32 optimization subspace and the PCA
 are unaffected.* Seven weekday **centroids** are the mean PCA projection grouped by **ground-truth
 answer**. The **activation manifold** reference is a **periodic cubic spline** through the seven
 centroids (Appendix A.3).
+
+*How representative are the first 2–3 PCs?* Only weakly: PC1–PC2 capture **31.4%** of the layer-28
+activation variance and PC1–PC3 **43.6%**; **18** PCs are needed for 90% and 32 reach 98.1% (scree
+figure in Results). The 2-D PCA scatter is therefore illustrative only — the weekday geometry is
+genuinely high-dimensional, so all recovery/energy conclusions are computed in the **PCA-32**
+optimization subspace, never in the 2-D picture.
 
 **Behavior representation.** Full-vocab softmax at the answer position; probability mass for each
 weekday's tokenizer-valid spelling variants is summed into one bin (2–3 token IDs each), and all
@@ -135,6 +143,16 @@ d(t) = \frac{1}{N_{\mathrm{base}}}\sum_p \frac{1}{\sqrt{2}}\big\lVert H_t^{(p)} 
 exist in this repository; we define $d(t)$ as above and use it only as a downstream diagnostic, never
 as a substitute for activation-space path distance.*
 
+**Plateau coordinate $p(t)$** (diagnostic, added per operator request) — a normalized downstream
+progress metric that is 0 at the start behavior and 1 at the end behavior, so a *plateau* (behavior
+lingering near an endpoint before switching) shows as a flat stretch. With $h(t)=H_t^{(p)}$ the
+Hellinger-coordinate behavior at waypoint $t$ and $h_A,h_B$ the start/end endpoint behaviors:
+
+```math
+p(t) = \frac{1}{N_{\mathrm{base}}}\sum_p
+\frac{\lVert H_t^{(p)}-H_0^{(p)}\rVert}{\lVert H_t^{(p)}-H_0^{(p)}\rVert + \lVert H_t^{(p)}-H_{N-1}^{(p)}\rVert}
+```
+
 ### Baselines / reference paths
 
 - **Linear chord** — the straight line between the two centroids (the $\lambda=0$ minimizer; the
@@ -148,7 +166,16 @@ as a substitute for activation-space path distance.*
 **Setup validation (S2).** The paper-consistent weekday setup reproduces cleanly: task accuracy
 **0.939** (46/49), mean weekday probability mass **0.743**, mean `other` mass **0.257**. The seven
 ground-truth centroids are well separated (adjacent L2 spacing 8.5–11.8 in PCA-48), so the periodic
-spline is well-posed (`plots/s2_pca_weekday_manifold.png`).
+spline is well-posed. In the PCA scatter below, the **star (★) markers are the seven ground-truth
+weekday centroids** (mean of each weekday's 7 prompts), the small dots are the 49 individual prompt
+activations, and the gray curve is the fitted periodic spline.
+
+![PCA (PC1-PC2) of the 49 layer-28 weekday activations. Dots = individual prompts (7 per weekday); stars = the 7 ground-truth centroids; gray line = fitted periodic cubic spline.](plots/s2_pca_weekday_manifold.png)
+
+The scree plot confirms 2–3 PCs are *not* representative (PC1–2 ≈ 31%, PC1–3 ≈ 44%; 18 PCs for 90%),
+which is why every quantitative result uses the PCA-32 subspace rather than this 2-D view.
+
+![Explained variance vs. number of principal components. Bars = per-PC variance; red curve = cumulative. PC1-2 reach only ~31%, PC1-3 ~44%.](plots/s2_pca_cumvar.png)
 
 **Sanity checks (S4).** $\lambda=0$ recovers the linear chord for every seed (endpoint error 0,
 $E_{\mathrm{act}}$ at its global minimum 88.8, recovery 0.961). Output-only reduces $E_{\mathrm{out}}$
@@ -172,6 +199,8 @@ diverge wildly in activation space ($E_{\mathrm{act}}\approx 306$–$313$ vs $93
 at nearly identical $E_{\mathrm{out}}\approx 0.94$): the behavior objective has a broad flat minimum
 and does **not determine the activation path**.
 
+![Manifold-recovery distance vs λ for all three seeds. Optimized paths near 1.0; the centroid-spline target near 0 — a ~250x gap no λ closes.](plots/s4_recovery_vs_lambda.png)
+
 **Energy trade-off.** Raw energies (lower = smoother):
 
 | path | $E_{\mathrm{act}}$ | $E_{\mathrm{out}}$ |
@@ -186,12 +215,33 @@ The fitted spline occupies the **worst corner** of the trade-off plane — the h
 both energies. The optimized paths trace the true lower-left frontier; the reference we were asked to
 reconstruct is nowhere near it.
 
-**Downstream diagnostic.** $d(t)$ rises smoothly along every path (`plots/s4_dt_curves.png`); higher
-$\lambda$ flattens it modestly, confirming the objective does act on downstream behavior — but, as the
-recovery result shows, a flatter behavior curve does **not** imply an on-manifold activation path.
+![E_act vs E_out for Tuesday→Wednesday. Optimized paths trace the lower-left frontier; the fitted centroid spline (star) sits alone in the dominated top-right corner.](plots/s4_energy_tradeoff.png)
+
+**Downstream diagnostic.** $d(t)$ rises smoothly along every path; higher $\lambda$ flattens it
+modestly, confirming the objective does act on downstream behavior — but, as the recovery result
+shows, a flatter behavior curve does **not** imply an on-manifold activation path.
+
+![Downstream displacement d(t) = mean Hellinger distance from the start behavior along each path.](plots/s4_dt_curves.png)
+
+**Plateau metric (operator request).** The normalized plateau coordinate $p(t)$ rises smoothly and
+nearly monotonically from 0 to 1 along *every* path — there is **no sharp plateau**. Decisively, the
+**centroid spline's $p(t)$ curve is essentially identical to the linear chord's** (both ≈ 0.59 at the
+midpoint), so downstream behavior progresses the same way along the fitted manifold and along the
+trivial straight line. Behavior does not single out the on-manifold path. Higher-$\lambda$ /
+output-only paths are only slightly flatter (midpoint ≈ 0.51–0.53), the expected mild effect of
+penalizing behavior kinetic energy.
+
+![Plateau coordinate p(t) for Tuesday→Wednesday. All paths rise smoothly 0→1 with no plateau; the centroid spline overlaps the linear chord almost exactly.](plots/s7_plateau_metric.png)
+
+The illustrative PCA geometry of the paths (conclusions use the PCA-32 metric, not this 2-D view):
+
+![PCA (PC1-PC2) view of the chord, output-only path, fitted spline, and λ-paths.](plots/s4_pca_geometry.png)
 
 **Generalization to all seven adjacent pairs.** Repeating the coarse grid + output-only (linear init)
-for every adjacent weekday pair gives the identical pattern (`plots/s6_allpairs_recovery.png`):
+for every adjacent weekday pair gives the identical pattern:
+
+![Recovery for all 7 adjacent pairs: optimized paths (≈ chord) far above the centroid-spline target (≈0).](plots/s6_allpairs_recovery.png)
+
 
 | pair | linear chord = best optimized | centroid spline | spline dominated in both energies |
 |---|---|---|---|
@@ -207,9 +257,11 @@ for every adjacent weekday pair gives the identical pattern (`plots/s6_allpairs_
 For every pair the best optimized path over the whole $\lambda$ grid is *exactly* the linear chord (no
 $\lambda$ improves recovery), the spline target is ~235× closer to itself, and the spline is
 Pareto-dominated in both energies. The negative result is robust, not a Tuesday→Wednesday artifact.
-The per-pair energy trade-off (`plots/s6_allpairs_energy_tradeoff.png`) makes the domination visual:
-for all 7 pairs the optimized-path family (chord → λ grid → output-only) traces the lower-left
-frontier while every fitted spline (★) sits alone in the dominated top-right corner.
+The per-pair energy trade-off makes the domination visual: for all 7 pairs the optimized-path family
+(chord → λ grid → output-only) traces the lower-left frontier while every fitted spline (★) sits alone
+in the dominated top-right corner.
+
+![E_act vs E_out for all 7 pairs: optimized families on the lower-left frontier; every fitted spline (star) in the dominated top-right corner.](plots/s6_allpairs_energy_tradeoff.png)
 
 ## Conclusion
 
@@ -228,7 +280,10 @@ Interpreted through the plan's decision rule, this is the "centroid spline is do
 energies" outcome: these two kinetic terms do not explain why that reference path should be preferred.
 The safety-relevant implication is that the fitted weekday manifold encodes model-specific geometry
 that a generic smoothness prior does not capture — so steering methods that assume "smooth = natural"
-would not, by that assumption alone, stay on this manifold.
+would not, by that assumption alone, stay on this manifold. A fourth, independent check reinforces
+this: the normalized downstream plateau coordinate $p(t)$ progresses *identically* along the fitted
+spline and the trivial straight chord, so downstream behavior cannot be what distinguishes the
+manifold either.
 
 **Limitations.** (1) The three-seed initialization study was run for the Tuesday→Wednesday pilot; the
 seven-pair generalization uses the linear init only (its best-over-λ already equals the chord, so an

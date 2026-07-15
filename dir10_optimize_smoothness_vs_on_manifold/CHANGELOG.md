@@ -68,3 +68,28 @@ RESULTS.md and REPORT.md themselves stay current-best with no history.
   where the energy trade-off figure previously only covered Tuesday→Wednesday).
 - Re-verified REPORT.md display math (6/6 render as js-display-math, 0 degraded, 0 inline hazards).
 - Re-created `STOP` (again absent from disk on resume). Direction remains COMPLETE (S1–S6).
+
+## 2026-07-15 — Operator feedback (human_feedback_07140930) addressed; +2 metrics, all figures embedded
+- **Addressed `human_feedback_07140930.md`** (renamed to `.addressed.md`). Four asks, all answered in
+  RESULTS.md + REPORT.md:
+  1. *What are the stars in `s2_pca_weekday_manifold.png`?* → the **seven ground-truth weekday
+     centroids** (mean PCA position of each weekday's 7 prompts). Regenerated the figure
+     (`experiments/s7_feedback_plots.py`, from saved `weekday_setup.npz`, no model) with an explicit
+     legend + weekday labels distinguishing dots (49 prompts) from ★ centroids.
+  2. *How many sequences per weekday?* → **7** (49 = 7 weekdays × 7 increments); stated in both files.
+  3. *Cumulative-variance vs #PCs plot* → NEW `plots/s2_pca_cumvar.png`. Answer: 2–3 PCs are **not**
+     representative — PC1–2 = 31.4%, PC1–3 = 43.6%, 18 PCs for 90%, 32 for 98.1%. Motivates using
+     PCA-32 for all conclusions rather than the 2-D scatter.
+  4. *Plateau metric `|h−hA|/(|h−hA|+|h−hB|)`* → NEW `experiments/s7_plateau.py` (model tail on saved
+     Tue→Wed sweep paths) + `plots/s7_plateau_metric.png` + `results/s7_plateau.json`. Result: no
+     sharp plateau; p(t) rises smoothly 0→1 on every path, and the **centroid spline's curve is
+     essentially identical to the linear chord's** (both ≈0.59 at midpoint) — downstream behavior does
+     not single out the on-manifold path. Adds a fourth independent strike to the NEGATIVE verdict.
+- **Rule-12 fix:** RESULTS.md and REPORT.md previously referenced figures only as bare paths (0
+  embedded images). Now **all 9 figures are embedded as rendered `![caption](plots/…)` images** in
+  BOTH files. Verified: 9/9 embeds each, 0 bare unembedded refs.
+- **Infra fix:** HF cache moved `/network/hf_cache` → `/workspace/hf_cache`; `common.py` now picks
+  whichever exists (MODEL_ID + HF_HOME), so the model tail loads again. No numeric results changed.
+- Re-verified display math: REPORT 7/7 render as js-display-math (0 degraded), RESULTS 1/1; 0 inline
+  backslash-punctuation hazards. No prior result numbers superseded — this iteration only adds
+  feedback-requested metrics/figures and embeds existing figures.

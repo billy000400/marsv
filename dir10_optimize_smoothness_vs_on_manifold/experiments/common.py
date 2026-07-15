@@ -15,7 +15,9 @@ import numpy as np
 import torch
 
 os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
-os.environ["HF_HOME"] = "/network/hf_cache"
+os.environ["HF_HOME"] = ("/network/hf_cache"
+                         if os.path.isdir("/network/hf_cache")
+                         else "/workspace/hf_cache")
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
@@ -31,8 +33,11 @@ PLOTS = os.path.join(ROOT, "plots")
 os.makedirs(RESULTS, exist_ok=True)
 os.makedirs(PLOTS, exist_ok=True)
 
-MODEL_ID = ("/network/hf_cache/hub/models--meta-llama--Llama-3.1-8B/"
-            "snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b")
+_SNAP = ("hub/models--meta-llama--Llama-3.1-8B/"
+         "snapshots/d04e592bb4f6aa9cfee91e2e20afa771667e1d4b")
+MODEL_ID = (f"/network/hf_cache/{_SNAP}"
+            if os.path.isdir(f"/network/hf_cache/{_SNAP}")
+            else f"/workspace/hf_cache/{_SNAP}")
 LAYER = 28  # hidden_states index (1-indexed block output)
 WEEKDAYS = ["Monday", "Tuesday", "Wednesday", "Thursday",
             "Friday", "Saturday", "Sunday"]

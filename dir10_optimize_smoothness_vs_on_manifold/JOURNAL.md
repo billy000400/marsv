@@ -79,3 +79,34 @@ the dominated top-right corner. Script independently re-confirms spline dominate
 (6/6, 0 degraded, 0 inline hazards). Re-created `STOP`.
 
 On track? yes — S1–S6 done (100%); research question answered (NEGATIVE, 7/7 pairs); STOP written.
+
+## 2026-07-15 — Iteration 4: operator feedback addressed (human_feedback_07140930)
+Resumed with memory reset. Found ONE unaddressed feedback file — Part C says addressing it IS the
+iteration. Four asks, all done:
+1. Stars in s2 plot = the 7 ground-truth weekday centroids (mean of each weekday's 7 prompts).
+   Regenerated the figure with an explicit legend (dots=49 prompts, ★=centroids) + weekday labels.
+2. Sequences per weekday = 7 (49 = 7×7). Stated in RESULTS + REPORT.
+3. New cumulative-variance/scree figure (`s2_pca_cumvar.png`). Finding: 2–3 PCs are NOT
+   representative (PC1–2=31.4%, PC1–3=43.6%, 18 PCs for 90%) — justifies the PCA-32 metric.
+4. New plateau metric p(t)=|h−hA|/(|h−hA|+|h−hB|) in Hellinger coords (`s7_plateau.py`,
+   `s7_plateau_metric.png`). Finding: no sharp plateau; the centroid spline's p(t) is nearly
+   identical to the linear chord's — downstream behavior does not distinguish the on-manifold path.
+   This is a genuinely useful *fourth* strike against the hypothesis (matches the plan's
+   "only d(t) matches but activation recovery does not" decision-branch, generalized: not even the
+   normalized downstream progress metric distinguishes the spline).
+
+Also fixed two things found while doing the work: (a) HF cache path moved
+`/network/hf_cache`→`/workspace/hf_cache`; `common.py` now auto-selects (needed to run the model at
+all). (b) Rule-12 violation — neither RESULTS nor REPORT actually embedded any figures as `![]()`
+(only bare paths). Now all 9 figures embedded as rendered images in BOTH files.
+
+Learned: the fitted manifold is not distinguished from the trivial chord by *any* of the four lenses
+tried (recovery distance, both kinetic energies, and now normalized downstream plateau progress).
+Verification: REPORT 7/7 display math renders (0 degraded), RESULTS 1/1, 0 inline hazards, 9/9 figures
+embedded each file, 0 bare refs. No prior numbers changed. Renamed feedback file to `.addressed.md`.
+
+Next step: none required — feedback cleared, plan complete (S1–S6). Writing STOP (no unaddressed
+feedback remains).
+
+On track? yes — S1–S6 done + operator feedback fully addressed (100%); NEGATIVE verdict now backed by
+four independent metrics; STOP written.

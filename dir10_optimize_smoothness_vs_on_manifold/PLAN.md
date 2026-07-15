@@ -348,12 +348,16 @@ pipeline from scratch (`experiments/common.py`, `pathlib_opt.py`, `s2_collect.py
 sweep (5 λ + output-only, 3 seeds) and the all-7-adjacent-pairs run both give a **decisive NEGATIVE**:
 recovery worsens monotonically with λ (best optimized path = linear chord for every pair), the
 centroid spline is Pareto-dominated in both energies (7/7 pairs), and high-λ paths are init-dependent.
-REPORT.md display math re-verified (6/6 render, 0 degraded). Research question answered.
+Operator feedback (human_feedback_07140930) addressed: star markers = 7 centroids, 7 seqs/weekday,
+new cumulative-variance + plateau-metric figures, all 9 figures embedded as images. REPORT display
+math re-verified (7/7 render, 0 degraded). Research question answered.
 
 ## Next step
 
-COMPLETE — nothing required. `STOP` written. The 7-pair generalization is confirmed
-(`results/allpairs_summary.json`): best-over-λ equals the linear chord for every pair and the spline
-is Pareto-dominated in both energies 7/7. Research question answered (NEGATIVE). Per-pair energy
-trade-off figure now added (`plots/s6_allpairs_energy_tradeoff.png`). Only remaining optional polish:
-reproduce the exact Appendix-A.9 SVD recovery score if the appendix becomes available.
+COMPLETE — nothing required. Operator feedback `human_feedback_07140930.md` fully addressed (renamed
+`.addressed.md`): star markers explained (= 7 weekday centroids), 7 sequences/weekday stated, new
+cumulative-variance figure (`plots/s2_pca_cumvar.png`; 2–3 PCs NOT representative — PC1–3 = 44%), and
+the requested plateau metric `p(t)=|h−hA|/(|h−hA|+|h−hB|)` implemented (`plots/s7_plateau_metric.png`;
+spline's p(t) ≈ chord's — a fourth strike). All 9 figures now embedded as rendered images in both
+deliverables (rule-12 fix). HF cache path auto-detect fixed in `common.py`. `STOP` written. Only
+remaining optional polish: reproduce the exact Appendix-A.9 SVD recovery score if it becomes available.
