@@ -253,3 +253,51 @@ resampling stability ("stable under resampling / model replication"), which no p
 On track? yes — S1/S2/S3 complete (100%); both claims answered (universal REFUTED, typical NOT
 SUPPORTED), now explicitly stable under endpoint resampling and replicated across seeds/architectures.
 STOP written.
+
+---
+
+## 2026-07-16 — iter 8: operator feedback — both investigations, annotated direct-path figure → STOP
+
+**Did.** FEEDBACK FIRST: found unaddressed `human_feedback_0716.txt` (no STOP on disk). It asked to
+(1) report BOTH investigations — the component verdict AND the "low-density region real activations
+don't live in" finding that the iter-5 reframe had retired; (2) revive the iter-1
+`direct_path_support.png` the operator liked; (3) state the interpolation layer, the layer where d is
+measured, and the sample counts, in the figure or REPORT.md. Wrote
+`experiments/direct_path_offmanifold.py` (reuses the frozen population conventions by importing
+slerp/MARGIN/N_PAIRS/PLATEAU_FRAC from `population_manifold.py`): regenerated the 4-panel digit-9
+figure with every requested annotation written on it (slerp in L1 200-d post-ReLU; d(t) at L3; support
+r_10 at L1 vs the 1705-pt natural cloud; 200 pts/path; 1 endpoint pair per panel = region medoids),
+and — so the corridor claim isn't anecdotal — ran the direct-path test over the whole frozen
+population (46 region pairs × 20 endpoint pairs, seed 0, d(t) accept filter): per-path excursion
+E = percentile of max r_10 vs the natural baseline. New `plots/direct_path_population.png`,
+`results/direct_path.json`. Restructured RESULTS.md + REPORT.md as two complementary investigations
+(all Investigation-1 numbers unchanged), embedded both figures in both files, answered the layer/
+sample questions verbatim in REPORT.md Methods AND in the figure captions/annotations. Renamed the
+feedback file `.addressed.md`. Verified rendering: 5/5 display math (added r_k and E equations),
+0 pre-math, 0 inline hazards, 0 bare plot paths, 8 embedded figures per file.
+
+**Learned.** The operator's instinct was right — the corridor finding is strong at population level,
+not just in the pilot panels: verified between-plateau direct paths have median excursion at the
+**95.4th pctile** of natural support (53% beyond p95) vs 65.2 (12%) for within-plateau controls, and
+the r_10(t) profile bulges mid-path exactly where d(t) jumps. It also *sharpens* the headline rather
+than contradicting it: the digit-9 sub-plateau pair is connected (G=1.00) AND its direct path never
+leaves the support (52nd pctile) — a plateau can arise purely from decision geometry on-manifold —
+while typical cross-digit transitions are connected through the data (G≈1) yet their straight route
+crosses near-empty space. Combined one-liner now in both deliverables: "the plateaus are connected;
+the straight path between them is not where the data lives." Assumption logged: interpreted the
+feedback's "which layer you are measuring the d" as covering both the d(t) curve (L3) and the support
+distance (L1) and answered both explicitly (rejected: answering only d(t), which would leave the red
+curve's layer ambiguous). Used max-r_10-percentile as the excursion statistic per the iter-4 lesson
+(single-point boundary percentile is architecture-fragile; max-along-path is robust).
+
+**Next.** Feedback fully addressed (file renamed); plan remains complete and both investigations now
+live in the deliverables. Zero unaddressed feedback files → writing STOP.
+
+Metric check: I added ONE reported quantity (off-manifold excursion E, with its r_k support radius)
+because the operator feedback explicitly requested this investigation be included; it decides the new
+Investigation-2 verdict (corridor real vs not). It is anchored to the same frozen sampling and d(t)
+filter as G, and the fragile alternatives the PLAN retired (boundary-point percentile, hop counts)
+stay retired.
+
+On track? yes — plan complete (100%), feedback addressed, both investigations reported and verified;
+STOP written.

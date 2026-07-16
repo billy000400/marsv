@@ -201,7 +201,13 @@ Also answer:
 
 ## Current status
 
-**COMPLETE (iter 7) — STOP written.** All stages done; both PLAN claims have a clear, replicated,
+**COMPLETE (iter 8) — feedback addressed, STOP written.** Iter 8 addressed operator feedback
+(`human_feedback_0716.txt` → `.addressed.md`): the deliverables now report **both investigations** —
+(1) the manifold-component verdict (unchanged) and (2) the low-density-corridor finding
+(`experiments/direct_path_offmanifold.py`): verified between-plateau direct paths reach a median
+**95.4th percentile** of natural support (53% beyond p95) vs 65.2 (12%) for within-plateau controls;
+`direct_path_support.png` regenerated with the requested layer/sample annotations (slerp in L1, d(t)
+at L3, r_10 at L1 vs the 1705-pt cloud, 200 pts/path) and the answers stated in REPORT.md Methods. All stages done; both PLAN claims have a clear, replicated,
 **resampling-stable** verdict (iter 7 re-ran the frozen pipeline at endpoint seeds 0/1/2: 21 pairs
 incl. digit-9 are counterexamples under every draw; between-G median 0.957–0.996, never above the
 within baseline) and the shallow-net power item is resolved. S1–S2 complete and S3 core
@@ -224,7 +230,7 @@ under-powered (only 1 pair passes the `d(t)` sharpness filter) and is down-weigh
 
 ## Next step
 
-None — direction complete. Every verdict-rule clause is now explicitly satisfied: counterexamples are
+None — direction complete and feedback addressed (zero unaddressed feedback files). Every verdict-rule clause is now explicitly satisfied: counterexamples are
 stable under **resampling** (iter 7: endpoint seeds 0/1/2 → 21 pairs incl. digit-9 have G ≤ 1 in every
 draw; seed-0 regression check reproduced published numbers exactly) AND under model replication (second
 seed + two architectures); shallow-net power resolved as structural (iter 6, d3w200 excluded as an

@@ -11,28 +11,36 @@ activations from one example to another, the downstream representation sometimes
 smoothly across. Instead it **stays put near output A, jumps abruptly, then stays put near output B** —
 a "plateau → sharp boundary → plateau" shape, as if there were a wall between two stable basins.
 
-If that wall were a real **gap in the data** — two disconnected components of the natural activation
-manifold — it would matter a lot for safety: we could localize, monitor, and steer behaviors by their
-manifold component, and off-distribution detectors could flag the wall. If instead the wall is only an
-artifact of walking in a *straight line* through an empty region the data never visits — while the two
-plateaus stay connected by an ordinary high-density data path — then the plateau tells us about the
-model's **decision geometry**, not about the shape of the data manifold.
+That "wall" could be two different things, and this report investigates **both** (they are
+complementary, not competing):
 
-We test this **at the population level** across a depth-4 MNIST classifier — every sufficiently
-populated plateau pair, not one hand-picked case — with a **single frozen metric**. We separate two
-claims: the **universal** claim (every plateau transition is a manifold-component transition; one
-counterexample refutes it) and the weaker **typical-association** claim (plateau pairs are *usually*
-more separated than within-plateau controls).
+1. **Investigation 1 — manifold components.** Is the wall a real **gap in the data** — two
+   disconnected components of the natural activation manifold? If so, we could localize, monitor, and
+   steer behaviors by their manifold component. We test this at the **population level** across a
+   depth-4 MNIST classifier — every sufficiently populated plateau pair, not one hand-picked case —
+   with a single frozen metric, separating a **universal** claim (every plateau transition is a
+   component transition; one counterexample refutes it) from a weaker **typical-association** claim
+   (plateau pairs are *usually* more separated than within-plateau controls).
+2. **Investigation 2 — the low-density corridor.** Even if the plateaus are *not* separate components,
+   the **straight interpolation path** between them may still pass through a region that real
+   activations never visit. That is a real, measurable fact about where the model's **decision
+   boundary** sits relative to the data, and we quantify it over the same population of verified
+   plateau transitions.
 
-**Both claims fail.** The universal claim is **refuted decisively**: 25 of 45 verified plateau
-transitions on the base model connect through the natural activation cloud with *no larger gap than
-normal travel inside a single plateau*; 21 of them remain counterexamples under every independent
-endpoint redraw, and the result holds in every well-powered replication (a second seed and two more
-architectures). The typical-association claim is **not supported**: the between-plateau
-"connection gap" metric sits essentially *on top of* the within-plateau baseline in all four
-well-powered models, with overlapping confidence intervals and no consistent direction. Plateaus
-reflect the model's decision geometry, **not** a hole in the data manifold. The original digit-9 case
-that motivated this direction turns out to be one ordinary counterexample among many.
+**Findings.** Investigation 1: **both claims fail.** The universal claim is **refuted decisively** —
+25 of 45 verified plateau transitions on the base model connect through the natural activation cloud
+with *no larger gap than normal travel inside a single plateau*; 21 of them remain counterexamples
+under every independent endpoint redraw, and the result holds in every well-powered replication (a
+second seed and two more architectures). The typical-association claim is **not supported** — the
+between-plateau "connection gap" metric sits essentially *on top of* the within-plateau baseline in
+all four well-powered models. Investigation 2: **the corridor is real.** The median verified
+plateau-to-plateau direct path climbs to the **95th percentile** of the natural data-support
+distribution (within-plateau controls: 65th), and **53%** of such paths exceed the natural 95th
+percentile outright (controls: 12%), with the low-density bulge sitting exactly mid-path where the
+output jump happens. Together: the plateaus stay connected through the data, but the straight route
+between them crosses territory the data avoids — plateaus reflect the model's **decision geometry**,
+not holes in the data manifold. The original digit-9 case that motivated this direction turns out to
+be an ordinary connected pair whose direct path never even leaves the support.
 
 ## Methods
 
@@ -44,10 +52,13 @@ test accuracy **85.3%**. For replication we reuse four existing checkpoints trai
 **second seed** (d4w200, 86.9%) and three architectures — **d3w200** shallower (78.1%), **d4w400**
 wider (86.9%), **d5w200** deeper (85.9%).
 
-**Layers.** We interpolate the **first hidden layer L1** (200-dim, post-ReLU) — the "intervention
-layer" — and measure downstream behavior at the **last hidden layer L3** (200-dim). "OOD" = out of
-distribution; "MST" = minimum spanning tree; "slerp" = spherical linear interpolation (constant angular
-velocity along the great circle, magnitude interpolated linearly).
+**Layers (stated explicitly, per operator feedback).** The interpolation is **spherical linear
+interpolation ("slerp"**: constant angular velocity along the great circle, magnitude interpolated
+linearly) performed in the **first hidden layer L1** (200-dim, post-ReLU) — the "intervention layer."
+The downstream distance `d(t)` is measured at the **last hidden layer L3** (200-dim). The support
+radius `r_10` of Investigation 2 is measured at **L1**, the same layer the path lives in (it asks how
+far each *path point* is from the natural L1 cloud). "OOD" = out of distribution; "MST" = minimum
+spanning tree.
 
 **Natural activation cloud.** The empirical manifold reference is the set of L1 activations of all
 **1705** correctly-classified test images (of 2000).
@@ -63,8 +74,8 @@ pair** (seed 0), and the same count for within-plateau controls, so digit freque
 
 ### Metrics
 
-We use exactly two quantitative objects. The first is only a filter; the second is the sole reported
-score.
+We use three quantitative objects. The first is only a filter; the second is Investigation 1's sole
+reported score; the third is Investigation 2's sole reported score.
 
 **Plateau observable `d(t)` — verifies a path is genuinely plateau-to-plateau.** For a slerp path
 `x_t` in L1 from endpoint `x_0` (region A) to `x_1` (region B), the normalized downstream distance at
@@ -80,11 +91,14 @@ path as a verified transition iff its **plateau fraction** — the fraction of `
 `d(t)>0.8` — is at least 0.5, it starts below 0.2, and it ends above 0.8. This is an inclusion filter;
 `d(t)` is never reported as a score.
 
-**Manifold observable `G` — the normalized connection bottleneck (the only reported metric).** Build a
-Euclidean **minimum spanning tree** `T` over the natural L1 cloud. For two endpoints `u,v`, the
-**bottleneck** `B(u,v)` is the largest edge on their unique path through `T`. Equivalently it is the
-minimax over *all* paths in the complete Euclidean graph — the smallest step size at which `u` and `v`
-become connected through the sampled natural cloud:
+**Manifold observable `G` — the normalized connection bottleneck (Investigation 1).** To decide
+whether two plateaus are separate *empirical components*, we need the smallest "hop" a traveler must
+make to get from one to the other stepping only on natural activations — low density along the straight
+line is not enough, since the data might simply take a detour. Build a Euclidean **minimum spanning
+tree** `T` over the natural L1 cloud. For two endpoints `u,v`, the **bottleneck** `B(u,v)` is the
+largest edge on their unique path through `T`. Equivalently it is the minimax over *all* paths in the
+complete Euclidean graph — the smallest step size at which `u` and `v` become connected through the
+sampled natural cloud:
 
 ```math
 B(u,v) \;=\; \min_{P:\,u\rightsquigarrow v}\ \max_{(p,q)\in P}\ \lVert a_p - a_q \rVert
@@ -104,15 +118,44 @@ means an unusually large bridge is needed (candidate manifold-component separati
 two plateaus connect through natural activations as easily as two points *within* one plateau — a
 **counterexample** to the universal claim. Higher `G` = more evidence of separation.
 
+**Support radius `r_k` and off-manifold excursion (Investigation 2).** `G` asks whether the *data* is
+connected; it says nothing about what the *straight path* passes through. To measure that, we need a
+local data-density score at every path point. We use the distance to the `k`-th nearest natural
+activation (with `k = 10`), a standard non-parametric density surrogate — large `r_k` = locally empty
+space:
+
+```math
+r_k(x) \;=\; \lVert x - \mathrm{NN}_k(x) \rVert
+```
+
+where `NN_k(x)` is the `k`-th nearest neighbor of `x` in the natural L1 cloud. To make "large"
+meaningful we compare against the **natural baseline**: the distribution of each natural point's own
+`r_k` (self excluded; median 2.85, 95th percentile 4.23 on the base model). A path's **off-manifold
+excursion** is its worst-case support along the way, expressed as a percentile of that baseline:
+
+```math
+E \;=\; \mathrm{pctile}_{\mathrm{natural}}\!\left( \max_t\, r_k(x_t) \right)
+```
+
+**How to read `E`:** `E ≈ 50` means the path never gets less supported than a typical natural point;
+`E > 95` means the path visits territory essentially *no* real activation occupies. This feeds the
+Investigation 2 result (figures below); the comparison group is the same statistic on within-plateau
+control paths.
+
 ### Baselines
 
-**Within-plateau control.** The reference distribution is the set of `G` values for **within-region**
-endpoint pairs (endpoints from the *same* digit, same sampling and normalization). By construction its
-median is 1. Its spread (median 1.00, 95th percentile 1.39 on the base model) is the natural yardstick:
-a between-plateau pair only shows real separation if its `G` sits *clearly above* this control band.
+**Within-plateau control.** The reference distribution for both investigations is the set of
+**within-region** endpoint pairs (endpoints from the *same* digit, same sampling rules). For `G` its
+median is 1 by construction; its spread (median 1.00, 95th percentile 1.39 on the base model) is the
+natural yardstick: a between-plateau pair only shows real separation if its `G` sits *clearly above*
+this control band. For the excursion `E`, within-plateau paths (n=200, 20 per digit) show what
+excursions ordinary same-region travel produces.
 
 **`G = 1` threshold.** The counterexample threshold follows directly from the frozen within-plateau
 normalization — it is *not* tuned after seeing between-plateau results.
+
+**Natural-baseline percentile for `E`.** The `r_10` baseline comes from the natural cloud itself, so
+`E` is anchored to the data before any path is examined.
 
 ### Verdict rules
 
@@ -121,10 +164,12 @@ normalization — it is *not* tuned after seeing between-plateau results.
 - **Typical association supported** iff the between-plateau `G` distribution is consistently shifted
   above the within-plateau control across replications; **not supported** if the distributions overlap
   or the direction is unstable.
+- **Low-density corridor real** iff verified between-plateau paths show systematically higher
+  excursions `E` than within-plateau controls.
 
 ## Results
 
-### Population verdict on the base model
+### Investigation 1 — population verdict on the base model
 
 Across 45 cross-digit plateau pairs plus the digit-9 sub-plateau (all verified by `d(t)`):
 
@@ -159,6 +204,43 @@ Representative verified transitions confirm `d(t)` selects genuine flat→jump�
 largest-`G` pair needs a bridge only ~1.7× the normal within-plateau step:
 
 ![Three representative verified plateau-to-plateau d(t) curves (largest-G, digit-9 sub-plateau, smallest-G): all flat-near-A, sharp jump, flat-near-B; all connect at G≈1–1.7.](plots/population_dt.png)
+
+### Investigation 2 — the direct path crosses a region real activations avoid
+
+Investigation 1 established that the plateaus are connected *through the data*. Here we ask what the
+straight slerp route itself traverses. Over the same frozen population (46 region pairs × 20 endpoint
+pairs, seed 0; **676 of 920** sampled paths pass the `d(t)` verification filter; **120** slerp points
+per path; within-plateau controls = **200** paths, 20 per digit):
+
+| quantity | between-plateau (verified, n=676) | within-plateau controls (n=200) |
+|--|--:|--:|
+| median excursion `E` (max `r_10` pctile) | **95.4** (IQR 87.8–98.4) | 65.2 (IQR 38.3–86.1) |
+| paths with max `r_10` > natural p95 | **53%** | 12% |
+
+**The corridor is real.** The median verified plateau-to-plateau path climbs to the **95th
+percentile** of the natural support distribution — the edge of where real activations exist — and over
+half exceed the natural p95 outright, i.e. they pass through territory essentially no real activation
+occupies. Within-plateau paths stay comfortably inside the cloud. The profile panel shows the
+characteristic shape: `r_10(t)` **bulges mid-path** (to ~1.45× the natural median at the center, IQR
+reaching past the p95 line), exactly where the `d(t)` jump happens, and returns to normal at both
+endpoints — a low-density corridor connecting two well-supported plateaus.
+
+![(a) Off-manifold excursion E (max r10 along path, as a percentile of the natural baseline): verified between-plateau paths (red, n=676) pile up at the 90–100th percentile, 53% beyond the natural p95 (dashed line), while within-plateau controls (green, n=200) spread across lower percentiles with only 12% beyond p95. (b) Median r10(t)/natural-median profile with interquartile bands vs slerp position t: between-plateau paths (red) bulge mid-path to ~1.45× the natural median; within-plateau controls (green) stay flat near 0.95. Slerp in L1; r10 measured at L1 against the 1705-point natural cloud; d(t) filter at L3; 120 points per path.](plots/direct_path_population.png)
+
+**Single-pair illustration (the original pilot figure, regenerated with full annotations).** To answer
+the operator's questions directly: the interpolation is **slerp in L1** (first hidden layer, 200-d,
+post-ReLU); the blue **`d(t)` is measured at L3** (last hidden layer); the red **support radius
+`r_10(t)` is measured at L1** against the **1705-point** natural cloud; each panel shows **one endpoint
+pair** (region medoids) sampled at **200 points** along the path (the population figure above uses 120
+points and 676+200 paths).
+
+![Four annotated single-pair examples: d(t) at L3 (blue, left axis) and support radius r10 at L1 (red, right axis) along slerp paths in L1. Same-region 9→9 and cross-region 9A→9B stay well inside the natural support (max r10 = 70th/52nd percentile); cross-digit 9→4 and 9→0 rise toward low-density territory (80th/91st percentile), the 9→0 support peak coinciding with the d(t) jump. Dotted red = natural median r10 (2.85), dashed orange = natural p95 (4.23).](plots/direct_path_support.png)
+
+The two investigations agree rather than conflict. The digit-9 sub-plateau (panel 2) is a *connected*
+pair (`G = 1.00`) whose direct path never leaves the support (52nd percentile) — a plateau can occur
+entirely on-manifold, purely from decision geometry. Typical cross-digit transitions keep `G ≈ 1`
+(connected through the data) while their *straight* route detours through near-empty space (median
+`E` = 95). The corridor belongs to the straight-line route, not to the manifold's connectivity.
 
 ### Resampling stability — fresh endpoint draws do not change the verdict
 
@@ -218,24 +300,32 @@ verdict on the four well-powered models and exclude the shallow net as an invali
 
 ## Conclusion
 
-At the population level, across a depth-4 MNIST MLP and four replication checkpoints, **plateau
-transitions are not transitions between separate empirical manifold components.**
+At the population level, across a depth-4 MNIST MLP and four replication checkpoints:
 
-- **Universal claim — REFUTED:** 25/45 verified plateau pairs on the base model (and 26–35 of 45–46 in
-  every well-powered model) connect through the natural activation cloud with `G ≤ 1` — no larger gap
-  than normal within-plateau travel. **21 pairs are counterexamples under all three independent
-  endpoint draws** (resampling-stable), including the digit-9 case that first motivated this work
-  (`G` = 1.00 / 0.86 / 0.82).
-- **Typical-association claim — NOT SUPPORTED:** the between-plateau median `G` (0.93–1.00) sits on the
-  within-plateau baseline (1.00) in all four well-powered models, with overlapping bootstrap CIs and no
-  consistent direction. The `G` distributions overlap almost completely.
+- **Investigation 1 — Universal claim REFUTED:** 25/45 verified plateau pairs on the base model (and
+  26–35 of 45–46 in every well-powered model) connect through the natural activation cloud with
+  `G ≤ 1` — no larger gap than normal within-plateau travel. **21 pairs are counterexamples under all
+  three independent endpoint draws** (resampling-stable), including the digit-9 case that first
+  motivated this work (`G` = 1.00 / 0.86 / 0.82).
+- **Investigation 1 — Typical-association claim NOT SUPPORTED:** the between-plateau median `G`
+  (0.93–1.00) sits on the within-plateau baseline (1.00) in all four well-powered models, with
+  overlapping bootstrap CIs and no consistent direction. The `G` distributions overlap almost
+  completely.
+- **Investigation 2 — the low-density corridor is REAL:** the median verified plateau-to-plateau
+  direct path reaches the **95th percentile** of the natural support distribution (controls: 65th) and
+  **53%** exceed the natural p95 outright (controls: 12%), with the low-density bulge sitting exactly
+  mid-path where the output jump occurs.
 
 **What this means.** A sharp plateau marks a place where the model's **decision geometry** changes
-abruptly — a straight interpolation briefly leaves the data manifold — but it does **not** mark a hole
-in the data manifold. The two plateaus remain connected by an ordinary high-density path. For safety
-work this is a caution: **plateaus and low-density interpolations are not reliable evidence that two
-behaviors occupy disconnected regions of activation space**; behavior boundaries and data-manifold
-components are different things.
+abruptly. The straight interpolation genuinely leaves the populated part of activation space — there
+*is* an area real activations don't live in, and the behavior transition happens inside it — but this
+is **not** a hole in the data manifold: the two plateaus remain connected by ordinary high-density
+natural paths. For safety work this cuts both ways. Caution: **plateaus and low-density interpolations
+are not evidence that two behaviors occupy disconnected regions of activation space** — behavior
+boundaries and data-manifold components are different things. Opportunity: the model's behavior
+boundaries between confident classes sit in reliably low-density territory, so an interpolation that
+triggers a behavior flip is very likely operating off-distribution — worth knowing when interpreting
+steering or patching experiments that move activations along straight lines.
 
 **Limitations (stated plainly).** (1) Finite activation samples can *support or undermine* an empirical
 component split but **cannot prove true topological disconnection** — a denser sample could always
@@ -244,4 +334,6 @@ sampled scale, nothing stronger. (2) All models share the same 1000-image MNIST 
 genuinely different dataset would be a separate direction. (3) The mild `G>1` pairs (digit-1) reflect an
 elongated manifold's small internal scale, not a genuine void — the metric's ratio form is sensitive to
 anisotropic regions, which is why we anchor the verdict on the *distribution* of `G` and its overlap
-with the control band rather than on any single pair.
+with the control band rather than on any single pair. (4) The excursion `E` uses `k=10` nearest
+neighbors; the population conclusion (95th vs 65th percentile, 53% vs 12% beyond p95) compares like
+with like under the same `k`, so the contrast is not an artifact of the choice of `k`.

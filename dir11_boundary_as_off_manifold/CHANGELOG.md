@@ -163,3 +163,31 @@ model at endpoint-sampling seeds 0/1/2; seed 0 doubles as a regression check) an
 - Verified: GitHub API 3/3 display-math, 0 pre-math, 0 inline hazards; 0 bare plot paths; 6 embedded
   figures in each deliverable. New artifact: `results/resample_check.json`. Verdicts UNCHANGED and now
   explicitly resampling-stable → re-writing STOP.
+
+## 2026-07-16 — operator feedback: both investigations + annotated direct-path figures (iter 8)
+
+Addressed `human_feedback_0716.txt` (renamed `.addressed.md`): the operator asked to (1) keep BOTH
+investigations — the manifold-component verdict AND the "low-density region real activations don't
+live in" finding (retired from the deliverables in the iter-5 reframe) — (2) revive
+`plots/direct_path_support.png`, and (3) state in the figure/REPORT.md which layer the interpolation
+is done in, which layer `d` is measured at, and how many samples the plot uses.
+
+- Added `experiments/direct_path_offmanifold.py`: regenerates `plots/direct_path_support.png` with
+  full annotations (slerp in L1, 200-d post-ReLU; d(t) at L3; support radius r_10 at L1 vs the
+  1705-point natural cloud; 200 points per path; 1 endpoint pair per panel) AND elevates the
+  direct-path finding to **population level** with the frozen sampling (46 region pairs × 20 endpoint
+  pairs, seed 0, d(t) accept filter): per-path off-manifold excursion E = max r_10 along path as a
+  percentile of the natural baseline.
+- **New population result (Investigation 2):** verified between-plateau direct paths (n=676) have
+  median excursion at the **95.4th percentile** (IQR 87.8–98.4) of the natural support distribution
+  and **53%** exceed the natural p95; within-plateau controls (n=200): 65.2 (38.3–86.1), 12%. The
+  r_10(t) profile bulges mid-path (~1.45× natural median) exactly where the d(t) jump occurs — a
+  genuine low-density corridor. Single-pair panels: 9A→9B stays at the 52nd pctile (on-manifold),
+  9→0 reaches the 91st.
+- RESULTS.md + REPORT.md restructured as **two complementary investigations** (components: both
+  claims still fail, all numbers unchanged; corridor: real). New figures embedded in both:
+  `plots/direct_path_support.png` (annotated), `plots/direct_path_population.png`. Headline/Summary/
+  Conclusion updated to the combined statement: "the plateaus are connected; the straight path between
+  them is not where the data lives." New artifact: `results/direct_path.json`.
+- Verified: GitHub API 5/5 display-math (added r_k and E equations), 0 pre-math, 0 inline hazards;
+  0 bare plot paths; 8 embedded figures per deliverable.
