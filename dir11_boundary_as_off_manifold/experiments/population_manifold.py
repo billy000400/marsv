@@ -94,7 +94,7 @@ def slerp_path(a, b, n):
     return pts
 
 # ============================================================ per-model analysis
-def analyze(model, ck, label, detailed=False, n_pairs=N_PAIRS):
+def analyze(model, ck, label, detailed=False, n_pairs=N_PAIRS, sample_seed=0):
     model = model.to('cpu')
     n_test = ck['config']['n_test']
     _, _, test_x, test_y = load_mnist(DATA)
@@ -146,7 +146,7 @@ def analyze(model, ck, label, detailed=False, n_pairs=N_PAIRS):
     sub9A = np.array([pos[int(i)] for i in nine_g[lab9 == 0]])
     sub9B = np.array([pos[int(i)] for i in nine_g[lab9 == 1]])
 
-    rng = np.random.RandomState(0)
+    rng = np.random.RandomState(sample_seed)
     def sample_pairs(rA, rB, n, same):
         out = []
         for _ in range(n * 6):
@@ -245,181 +245,186 @@ def analyze(model, ck, label, detailed=False, n_pairs=N_PAIRS):
     return out
 
 
-# ============================================================ run all models
-CHECKPOINTS = [
-    ("base d4w200 (seed 0)", os.path.join(BASE, 'results/image/mnist_mlp_d4_w200_relu_n1000_s100000.pt'), True),
-    ("seed 1 d4w200", os.path.join(RES, 'mnist_mlp_d4_w200_relu_n1000_seed1.pt'), False),
-    ("d3w200 shallower", os.path.join(RES, 'mnist_mlp_d3_w200_relu_n1000_seed2.pt'), False),
-    ("d4w400 wider", os.path.join(RES, 'mnist_mlp_d4_w400_relu_n1000_seed3.pt'), False),
-    ("d5w200 deeper", os.path.join(RES, 'mnist_mlp_d5_w200_relu_n1000_seed4.pt'), False),
-]
-results = []
-base = None
-for label, ckpt, detailed in CHECKPOINTS:
-    if not os.path.exists(ckpt):
-        print(f"[skip] missing {ckpt}"); continue
-    model, ck = load_checkpoint(ckpt)
-    r = analyze(model, ck, label, detailed=detailed)
-    print(f"[{label}] acc={r['test_acc']:.3f}  within-G med={r['within_G_median']:.3f} p95={r['within_G_p95']:.3f}"
-          f"  between-G med={r['between_G_median']:.3f} ({r['between_G_min']:.3f}-{r['between_G_max']:.3f})"
-          f"  frac>1={r['frac_pairs_G_gt_1']:.2f}  counterex={r['n_counterexamples']}/{r['n_verified_pairs']}",
-          flush=True)
-    if detailed:
-        base = r
-    results.append(r)
+def _main():
+    # ============================================================ run all models
+    CHECKPOINTS = [
+        ("base d4w200 (seed 0)", os.path.join(BASE, 'results/image/mnist_mlp_d4_w200_relu_n1000_s100000.pt'), True),
+        ("seed 1 d4w200", os.path.join(RES, 'mnist_mlp_d4_w200_relu_n1000_seed1.pt'), False),
+        ("d3w200 shallower", os.path.join(RES, 'mnist_mlp_d3_w200_relu_n1000_seed2.pt'), False),
+        ("d4w400 wider", os.path.join(RES, 'mnist_mlp_d4_w400_relu_n1000_seed3.pt'), False),
+        ("d5w200 deeper", os.path.join(RES, 'mnist_mlp_d5_w200_relu_n1000_seed4.pt'), False),
+    ]
+    results = []
+    base = None
+    for label, ckpt, detailed in CHECKPOINTS:
+        if not os.path.exists(ckpt):
+            print(f"[skip] missing {ckpt}"); continue
+        model, ck = load_checkpoint(ckpt)
+        r = analyze(model, ck, label, detailed=detailed)
+        print(f"[{label}] acc={r['test_acc']:.3f}  within-G med={r['within_G_median']:.3f} p95={r['within_G_p95']:.3f}"
+              f"  between-G med={r['between_G_median']:.3f} ({r['between_G_min']:.3f}-{r['between_G_max']:.3f})"
+              f"  frac>1={r['frac_pairs_G_gt_1']:.2f}  counterex={r['n_counterexamples']}/{r['n_verified_pairs']}",
+              flush=True)
+        if detailed:
+            base = r
+        results.append(r)
 
-# ============================================================ shallow-net power restoration
-# d3w200 is under-powered at 20 endpoint pairs (its downstream distance ramps rather than
-# plateaus, so the frozen d(t) accept filter rejects almost every path -> only 1 verified
-# region-pair). PLAN S3 asks us to restore power (sample MORE endpoint pairs) and confirm the
-# verdict is unchanged. We re-run ONLY the shallow net at increasing n_pairs until it clears
-# >=20 verified region-pairs (or a cap), keeping every definition (d(t) filter, G, threshold)
-# frozen. Base and the other models stay at the frozen 20 pairs.
-shallow_ck = os.path.join(RES, 'mnist_mlp_d3_w200_relu_n1000_seed2.pt')
-shallow_power = None; shallow_sweep = []
-if os.path.exists(shallow_ck):
-    m_s, c_s = load_checkpoint(shallow_ck)
-    for np_try in (20, 60, 120, 200):
-        sp = analyze(m_s, c_s, f"d3w200 shallower ({np_try} pairs)", n_pairs=np_try)
-        print(f"[shallow-power np={np_try}] verified_pairs={sp['n_verified_pairs']} "
-              f"between-G med={sp['between_G_median']} counterex={sp['n_counterexamples']}"
-              f"/{sp['n_verified_pairs']} frac>1={sp['frac_pairs_G_gt_1']:.2f}", flush=True)
-        rec = dict(n_pairs=np_try, **{k: sp[k] for k in (
-            'n_verified_pairs', 'n_counterexamples', 'between_G_median', 'between_G_min',
-            'between_G_max', 'frac_pairs_G_gt_1', 'within_G_median', 'within_G_p95',
-            'boot_between_median_CI')})
-        shallow_sweep.append(rec)
-        shallow_power = rec
-        if sp['n_verified_pairs'] >= 20:
-            break
+    # ============================================================ shallow-net power restoration
+    # d3w200 is under-powered at 20 endpoint pairs (its downstream distance ramps rather than
+    # plateaus, so the frozen d(t) accept filter rejects almost every path -> only 1 verified
+    # region-pair). PLAN S3 asks us to restore power (sample MORE endpoint pairs) and confirm the
+    # verdict is unchanged. We re-run ONLY the shallow net at increasing n_pairs until it clears
+    # >=20 verified region-pairs (or a cap), keeping every definition (d(t) filter, G, threshold)
+    # frozen. Base and the other models stay at the frozen 20 pairs.
+    shallow_ck = os.path.join(RES, 'mnist_mlp_d3_w200_relu_n1000_seed2.pt')
+    shallow_power = None; shallow_sweep = []
+    if os.path.exists(shallow_ck):
+        m_s, c_s = load_checkpoint(shallow_ck)
+        for np_try in (20, 60, 120, 200):
+            sp = analyze(m_s, c_s, f"d3w200 shallower ({np_try} pairs)", n_pairs=np_try)
+            print(f"[shallow-power np={np_try}] verified_pairs={sp['n_verified_pairs']} "
+                  f"between-G med={sp['between_G_median']} counterex={sp['n_counterexamples']}"
+                  f"/{sp['n_verified_pairs']} frac>1={sp['frac_pairs_G_gt_1']:.2f}", flush=True)
+            rec = dict(n_pairs=np_try, **{k: sp[k] for k in (
+                'n_verified_pairs', 'n_counterexamples', 'between_G_median', 'between_G_min',
+                'between_G_max', 'frac_pairs_G_gt_1', 'within_G_median', 'within_G_p95',
+                'boot_between_median_CI')})
+            shallow_sweep.append(rec)
+            shallow_power = rec
+            if sp['n_verified_pairs'] >= 20:
+                break
 
-    # ---- figure: why the shallow net can't be powered up (structural, not sampling) ----
-    d3_main = next(r for r in results if 'd3w200' in r['label'])
-    fr_base = np.array([p['plateau_frac_mean'] for p in base['pairs']])
-    fr_d3 = np.array([p['plateau_frac_mean'] for p in d3_main['pairs']])
-    fig, (axp, axq) = plt.subplots(1, 2, figsize=(13, 4.8))
-    axp.hist(fr_base, bins=np.linspace(0, 1, 21), alpha=0.6, color='C0',
-             label=f'base d4w200 ({int((fr_base>=0.5).sum())}/{len(fr_base)} region-pairs plateau)')
-    axp.hist(fr_d3, bins=np.linspace(0, 1, 21), alpha=0.6, color='C3',
-             label=f'd3w200 shallow ({int((fr_d3>=0.5).sum())}/{len(fr_d3)} region-pairs plateau)')
-    axp.axvline(0.5, color='k', ls='--', lw=1.2, label='d(t) accept threshold (0.5)')
-    axp.set_xlabel('mean plateau fraction of d(t) per region pair')
-    axp.set_ylabel('number of region pairs')
-    axp.set_title('(a) Shallow net rarely plateaus: d(t) ramps, so no path\npasses the accept filter — a structural gap, not sampling noise')
-    axp.legend(fontsize=8); axp.grid(alpha=0.3)
-    nn = [r['n_pairs'] for r in shallow_sweep]
-    axq.plot(nn, [r['n_verified_pairs'] for r in shallow_sweep], 'o-', color='C0',
-             label='verified plateau pairs')
-    axq.axhline(20, color='k', ls='--', lw=1, label='well-powered target (20)')
-    for r in shallow_sweep:
-        axq.annotate(f"G={r['between_G_median']:.2f}", (r['n_pairs'], r['n_verified_pairs']),
-                     textcoords='offset points', xytext=(0, 8), fontsize=8, ha='center', color='C3')
-    axq.set_xlabel('endpoint pairs sampled per region pair')
-    axq.set_ylabel('verified plateau pairs (n_verified >= 5)'); axq.set_ylim(0, 22)
-    axq.set_title('(b) Sampling 10x more endpoint pairs does NOT restore power;\nthe few genuine plateaus it finds are all G<=1 (counterexamples)')
-    axq.legend(fontsize=8); axq.grid(alpha=0.3)
-    plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_shallow_power.png'), dpi=140); plt.close()
+        # ---- figure: why the shallow net can't be powered up (structural, not sampling) ----
+        d3_main = next(r for r in results if 'd3w200' in r['label'])
+        fr_base = np.array([p['plateau_frac_mean'] for p in base['pairs']])
+        fr_d3 = np.array([p['plateau_frac_mean'] for p in d3_main['pairs']])
+        fig, (axp, axq) = plt.subplots(1, 2, figsize=(13, 4.8))
+        axp.hist(fr_base, bins=np.linspace(0, 1, 21), alpha=0.6, color='C0',
+                 label=f'base d4w200 ({int((fr_base>=0.5).sum())}/{len(fr_base)} region-pairs plateau)')
+        axp.hist(fr_d3, bins=np.linspace(0, 1, 21), alpha=0.6, color='C3',
+                 label=f'd3w200 shallow ({int((fr_d3>=0.5).sum())}/{len(fr_d3)} region-pairs plateau)')
+        axp.axvline(0.5, color='k', ls='--', lw=1.2, label='d(t) accept threshold (0.5)')
+        axp.set_xlabel('mean plateau fraction of d(t) per region pair')
+        axp.set_ylabel('number of region pairs')
+        axp.set_title('(a) Shallow net rarely plateaus: d(t) ramps, so no path\npasses the accept filter — a structural gap, not sampling noise')
+        axp.legend(fontsize=8); axp.grid(alpha=0.3)
+        nn = [r['n_pairs'] for r in shallow_sweep]
+        axq.plot(nn, [r['n_verified_pairs'] for r in shallow_sweep], 'o-', color='C0',
+                 label='verified plateau pairs')
+        axq.axhline(20, color='k', ls='--', lw=1, label='well-powered target (20)')
+        for r in shallow_sweep:
+            axq.annotate(f"G={r['between_G_median']:.2f}", (r['n_pairs'], r['n_verified_pairs']),
+                         textcoords='offset points', xytext=(0, 8), fontsize=8, ha='center', color='C3')
+        axq.set_xlabel('endpoint pairs sampled per region pair')
+        axq.set_ylabel('verified plateau pairs (n_verified >= 5)'); axq.set_ylim(0, 22)
+        axq.set_title('(b) Sampling 10x more endpoint pairs does NOT restore power;\nthe few genuine plateaus it finds are all G<=1 (counterexamples)')
+        axq.legend(fontsize=8); axq.grid(alpha=0.3)
+        plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_shallow_power.png'), dpi=140); plt.close()
 
-# ---- persist (drop bulky arrays) ----
-def clean(r):
-    return {k: v for k, v in r.items() if not k.startswith('_')}
-with open(os.path.join(RES, 'population.json'), 'w') as f:
-    json.dump(dict(base=clean(base), replication=[clean(r) for r in results],
-                   shallow_power=shallow_power), f, indent=2)
+    # ---- persist (drop bulky arrays) ----
+    def clean(r):
+        return {k: v for k, v in r.items() if not k.startswith('_')}
+    with open(os.path.join(RES, 'population.json'), 'w') as f:
+        json.dump(dict(base=clean(base), replication=[clean(r) for r in results],
+                       shallow_power=shallow_power), f, indent=2)
 
-# ============================================================ figures (base)
-within_G = base['_within_G']; between_G_all = base['_between_G_all']
-verified = base['_verified']; rec9 = base['_rec9']
+    # ============================================================ figures (base)
+    within_G = base['_within_G']; between_G_all = base['_between_G_all']
+    verified = base['_verified']; rec9 = base['_rec9']
 
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5.4))
-ax1.hist(within_G, bins=30, alpha=0.55, color='C2', density=True, label='within-plateau controls')
-ax1.hist(between_G_all, bins=30, alpha=0.55, color='C3', density=True, label='between-plateau pairs')
-ax1.axvline(1.0, color='k', ls='--', lw=1.2, label='G = 1 (normal within-plateau gap)')
-ax1.set_xlabel('normalized connection bottleneck  G = B / within-plateau scale')
-ax1.set_ylabel('density'); ax1.set_title('(a) Per-pair G: between-plateau vs within-plateau')
-ax1.legend(fontsize=9); ax1.grid(alpha=0.3)
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5.4))
+    ax1.hist(within_G, bins=30, alpha=0.55, color='C2', density=True, label='within-plateau controls')
+    ax1.hist(between_G_all, bins=30, alpha=0.55, color='C3', density=True, label='between-plateau pairs')
+    ax1.axvline(1.0, color='k', ls='--', lw=1.2, label='G = 1 (normal within-plateau gap)')
+    ax1.set_xlabel('normalized connection bottleneck  G = B / within-plateau scale')
+    ax1.set_ylabel('density'); ax1.set_title('(a) Per-pair G: between-plateau vs within-plateau')
+    ax1.legend(fontsize=9); ax1.grid(alpha=0.3)
 
-names = [r['name'] for r in verified]; meds = [r['G_median'] for r in verified]
-order = np.argsort(meds); names = [names[i] for i in order]; meds = [meds[i] for i in order]
-colors = ['C1' if n == '9A-9B' else ('C3' if m > 1 else 'C0') for n, m in zip(names, meds)]
-ax2.barh(range(len(meds)), meds, color=colors)
-ax2.axvline(1.0, color='k', ls='--', lw=1.2)
-ax2.set_yticks(range(len(names))); ax2.set_yticklabels(names, fontsize=6)
-ax2.set_xlabel('median G over verified plateau transitions')
-ax2.set_title(f'(b) Median G per plateau pair ({len(verified)} pairs)\n'
-              f'orange = digit-9 sub-plateau; blue = G<=1 (counterexample); red = G>1')
-ax2.grid(alpha=0.3, axis='x')
-plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_G.png'), dpi=140); plt.close()
+    names = [r['name'] for r in verified]; meds = [r['G_median'] for r in verified]
+    order = np.argsort(meds); names = [names[i] for i in order]; meds = [meds[i] for i in order]
+    colors = ['C1' if n == '9A-9B' else ('C3' if m > 1 else 'C0') for n, m in zip(names, meds)]
+    ax2.barh(range(len(meds)), meds, color=colors)
+    ax2.axvline(1.0, color='k', ls='--', lw=1.2)
+    ax2.set_yticks(range(len(names))); ax2.set_yticklabels(names, fontsize=6)
+    ax2.set_xlabel('median G over verified plateau transitions')
+    ax2.set_title(f'(b) Median G per plateau pair ({len(verified)} pairs)\n'
+                  f'orange = digit-9 sub-plateau; blue = G<=1 (counterexample); red = G>1')
+    ax2.grid(alpha=0.3, axis='x')
+    plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_G.png'), dpi=140); plt.close()
 
-# heatmap
-H = np.full((10, 10), np.nan)
-for r in base['pairs']:
-    if r['name'] == '9A-9B' or r['G_median'] is None:
-        continue
-    i, j = int(r['ri']), int(r['rj']); H[i, j] = H[j, i] = r['G_median']
-for d in range(10):
-    H[d, d] = 1.0
-fig, ax = plt.subplots(figsize=(7.4, 6.2))
-vmax = np.nanmax(H); im = ax.imshow(H, cmap='RdBu_r', vmin=2 - vmax, vmax=vmax)
-ax.set_xticks(range(10)); ax.set_yticks(range(10)); ax.set_xlabel('digit'); ax.set_ylabel('digit')
-ax.set_title('Median normalized bottleneck G between plateau pairs\n'
-             '(diagonal = within-plateau = 1; blue > 1 = larger bridge required)')
-for i in range(10):
-    for j in range(10):
-        if not np.isnan(H[i, j]):
-            ax.text(j, i, f'{H[i,j]:.1f}', ha='center', va='center', fontsize=6,
-                    color='white' if abs(H[i, j] - 1) > (vmax - 1) * 0.5 else 'black')
-fig.colorbar(im, label='median G'); plt.tight_layout()
-plt.savefig(os.path.join(PLOT, 'population_heatmap.png'), dpi=140); plt.close()
+    # heatmap
+    H = np.full((10, 10), np.nan)
+    for r in base['pairs']:
+        if r['name'] == '9A-9B' or r['G_median'] is None:
+            continue
+        i, j = int(r['ri']), int(r['rj']); H[i, j] = H[j, i] = r['G_median']
+    for d in range(10):
+        H[d, d] = 1.0
+    fig, ax = plt.subplots(figsize=(7.4, 6.2))
+    vmax = np.nanmax(H); im = ax.imshow(H, cmap='RdBu_r', vmin=2 - vmax, vmax=vmax)
+    ax.set_xticks(range(10)); ax.set_yticks(range(10)); ax.set_xlabel('digit'); ax.set_ylabel('digit')
+    ax.set_title('Median normalized bottleneck G between plateau pairs\n'
+                 '(diagonal = within-plateau = 1; blue > 1 = larger bridge required)')
+    for i in range(10):
+        for j in range(10):
+            if not np.isnan(H[i, j]):
+                ax.text(j, i, f'{H[i,j]:.1f}', ha='center', va='center', fontsize=6,
+                        color='white' if abs(H[i, j] - 1) > (vmax - 1) * 0.5 else 'black')
+    fig.colorbar(im, label='median G'); plt.tight_layout()
+    plt.savefig(os.path.join(PLOT, 'population_heatmap.png'), dpi=140); plt.close()
 
-# representative d(t)
-lowG = min((r for r in verified if r['name'] != '9A-9B'), key=lambda r: r['G_median'])
-highG = max((r for r in verified if r['name'] != '9A-9B'), key=lambda r: r['G_median'])
-examples = [(f"{highG['name']}  (G={highG['G_median']:.2f}, largest bridge)", highG['example']),
-            (f"9A-9B digit-9 sub  (G={rec9['G_median']:.2f})" if rec9['example'] else "9A-9B (none)", rec9['example']),
-            (f"{lowG['name']}  (G={lowG['G_median']:.2f}, smallest bridge)", lowG['example'])]
-fig, axes = plt.subplots(1, 3, figsize=(15, 4.2)); t = np.linspace(0, 1, N_POINTS)
-for ax, (title, ex) in zip(axes, examples):
-    if ex is None:
-        ax.set_title(title + '\n(no verified path)'); continue
-    ax.plot(t, ex[2], 'C0', lw=2)
-    ax.axhspan(0, 0.2, color='C2', alpha=0.15); ax.axhspan(0.8, 1.0, color='C3', alpha=0.15)
-    ax.set_ylim(-0.05, 1.05); ax.set_xlabel('t'); ax.set_ylabel('d(t) downstream'); ax.set_title(title)
-    ax.grid(alpha=0.3)
-fig.suptitle('Representative verified plateau-to-plateau transitions d(t): flat near A, sharp jump, flat near B\n'
-             '(shaded = plateau bands used by the accept rule)', fontsize=11)
-plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_dt.png'), dpi=140); plt.close()
+    # representative d(t)
+    lowG = min((r for r in verified if r['name'] != '9A-9B'), key=lambda r: r['G_median'])
+    highG = max((r for r in verified if r['name'] != '9A-9B'), key=lambda r: r['G_median'])
+    examples = [(f"{highG['name']}  (G={highG['G_median']:.2f}, largest bridge)", highG['example']),
+                (f"9A-9B digit-9 sub  (G={rec9['G_median']:.2f})" if rec9['example'] else "9A-9B (none)", rec9['example']),
+                (f"{lowG['name']}  (G={lowG['G_median']:.2f}, smallest bridge)", lowG['example'])]
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.2)); t = np.linspace(0, 1, N_POINTS)
+    for ax, (title, ex) in zip(axes, examples):
+        if ex is None:
+            ax.set_title(title + '\n(no verified path)'); continue
+        ax.plot(t, ex[2], 'C0', lw=2)
+        ax.axhspan(0, 0.2, color='C2', alpha=0.15); ax.axhspan(0.8, 1.0, color='C3', alpha=0.15)
+        ax.set_ylim(-0.05, 1.05); ax.set_xlabel('t'); ax.set_ylabel('d(t) downstream'); ax.set_title(title)
+        ax.grid(alpha=0.3)
+    fig.suptitle('Representative verified plateau-to-plateau transitions d(t): flat near A, sharp jump, flat near B\n'
+                 '(shaded = plateau bands used by the accept rule)', fontsize=11)
+    plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_dt.png'), dpi=140); plt.close()
 
-# replication across 5 models
-fig, (axa, axb) = plt.subplots(1, 2, figsize=(14, 5.2))
-labels = [r['label'] for r in results]
-btw_med = [r['between_G_median'] for r in results]
-btw_lo = [r['boot_between_median_CI'][0] for r in results]
-btw_hi = [r['boot_between_median_CI'][1] for r in results]
-wth_med = [r['within_G_median'] for r in results]
-x = np.arange(len(results))
-axa.errorbar(x, btw_med, yerr=[np.array(btw_med) - btw_lo, np.array(btw_hi) - btw_med],
-             fmt='o', color='C3', capsize=4, label='between-plateau median G (95% CI)')
-axa.plot(x, wth_med, 's', color='C2', label='within-plateau median G')
-axa.axhline(1.0, color='k', ls='--', lw=1)
-axa.set_xticks(x); axa.set_xticklabels(labels, rotation=20, fontsize=8, ha='right')
-axa.set_ylabel('median G'); axa.set_title('(a) Between- vs within-plateau median G across models')
-axa.legend(fontsize=8); axa.grid(alpha=0.3)
+    # replication across 5 models
+    fig, (axa, axb) = plt.subplots(1, 2, figsize=(14, 5.2))
+    labels = [r['label'] for r in results]
+    btw_med = [r['between_G_median'] for r in results]
+    btw_lo = [r['boot_between_median_CI'][0] for r in results]
+    btw_hi = [r['boot_between_median_CI'][1] for r in results]
+    wth_med = [r['within_G_median'] for r in results]
+    x = np.arange(len(results))
+    axa.errorbar(x, btw_med, yerr=[np.array(btw_med) - btw_lo, np.array(btw_hi) - btw_med],
+                 fmt='o', color='C3', capsize=4, label='between-plateau median G (95% CI)')
+    axa.plot(x, wth_med, 's', color='C2', label='within-plateau median G')
+    axa.axhline(1.0, color='k', ls='--', lw=1)
+    axa.set_xticks(x); axa.set_xticklabels(labels, rotation=20, fontsize=8, ha='right')
+    axa.set_ylabel('median G'); axa.set_title('(a) Between- vs within-plateau median G across models')
+    axa.legend(fontsize=8); axa.grid(alpha=0.3)
 
-frac = [r['frac_pairs_G_gt_1'] * 100 for r in results]
-ncx = [r['n_counterexamples'] for r in results]
-nvp = [r['n_verified_pairs'] for r in results]
-axb.bar(x - 0.2, frac, 0.4, color='C0', label='% verified pairs with G>1')
-axb.bar(x + 0.2, [100 * c / n for c, n in zip(ncx, nvp)], 0.4, color='C1',
-        label='% counterexamples (G<=1)')
-axb.set_xticks(x); axb.set_xticklabels(labels, rotation=20, fontsize=8, ha='right')
-axb.set_ylabel('percent of verified plateau pairs'); axb.set_ylim(0, 100)
-axb.set_title('(b) Neither claim holds: ~half of pairs sit each side of G=1')
-axb.legend(fontsize=8); axb.grid(alpha=0.3, axis='y')
-plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_replication.png'), dpi=140); plt.close()
+    frac = [r['frac_pairs_G_gt_1'] * 100 for r in results]
+    ncx = [r['n_counterexamples'] for r in results]
+    nvp = [r['n_verified_pairs'] for r in results]
+    axb.bar(x - 0.2, frac, 0.4, color='C0', label='% verified pairs with G>1')
+    axb.bar(x + 0.2, [100 * c / n for c, n in zip(ncx, nvp)], 0.4, color='C1',
+            label='% counterexamples (G<=1)')
+    axb.set_xticks(x); axb.set_xticklabels(labels, rotation=20, fontsize=8, ha='right')
+    axb.set_ylabel('percent of verified plateau pairs'); axb.set_ylim(0, 100)
+    axb.set_title('(b) Neither claim holds: ~half of pairs sit each side of G=1')
+    axb.legend(fontsize=8); axb.grid(alpha=0.3, axis='y')
+    plt.tight_layout(); plt.savefig(os.path.join(PLOT, 'population_replication.png'), dpi=140); plt.close()
 
-print("\nsaved population.json + 4 plots")
-print(json.dumps({r['label']: dict(acc=round(r['test_acc'], 3),
-      between_G_med=round(r['between_G_median'], 3),
-      frac_gt1=round(r['frac_pairs_G_gt_1'], 2),
-      counterex=f"{r['n_counterexamples']}/{r['n_verified_pairs']}") for r in results}, indent=2))
+    print("\nsaved population.json + 4 plots")
+    print(json.dumps({r['label']: dict(acc=round(r['test_acc'], 3),
+          between_G_med=round(r['between_G_median'], 3),
+          frac_gt1=round(r['frac_pairs_G_gt_1'], 2),
+          counterex=f"{r['n_counterexamples']}/{r['n_verified_pairs']}") for r in results}, indent=2))
+
+
+if __name__ == '__main__':
+    _main()

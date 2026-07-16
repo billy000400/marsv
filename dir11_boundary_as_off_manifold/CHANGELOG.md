@@ -140,3 +140,26 @@ d3w200 at 20/60/120/200 endpoint pairs per region pair.
   via GitHub API: 3/3 display-math, 0 pre-math, 0 inline hazards; 0 bare plot paths in either file.
 - S3 and the PLAN success criterion are now fully met (both claims answered, replicated, shallow-net
   power question resolved). Writing STOP.
+
+## 2026-07-16 — endpoint-resampling stability check (iter 7)
+
+Re-entered with a fresh wall-clock budget and no STOP file on disk (iter 6's STOP did not persist /
+was cleared by the wrapper relaunch). The one verdict-rule requirement not yet *explicitly* tested was
+stability under **resampling** (all endpoint sampling had used seed 0; bootstrap CIs only resample the
+seed-0 measurements). Added `experiments/resample_check.py` (re-runs the frozen pipeline on the base
+model at endpoint-sampling seeds 0/1/2; seed 0 doubles as a regression check) and parametrized
+`analyze(..., sample_seed=)` in `experiments/population_manifold.py`, wrapping its run-all block in a
+`_main()` guard so `analyze()` is importable (same pattern as `cross_model.py`, iter 4).
+
+- **Regression check passed:** seed 0 reproduces the published numbers exactly (between-G median
+  0.996, 25/45 counterexamples, digit-9 G = 1.00).
+- **Fresh draws (seeds 1, 2):** between-G median 0.977 (CI 0.95–1.02) and 0.957 (CI 0.90–1.00);
+  counterexamples 25/46 and 30/46; digit-9 sub G = 0.86 and 0.82.
+- **21 plateau pairs — including 9A-9B — are counterexamples (G ≤ 1) under ALL three endpoint
+  draws**; 45 pairs verified in all three seeds; per-pair median G hugs y=x across draws.
+- RESULTS.md + REPORT.md: added a "Resampling stability" section with the table + new embedded figure
+  `plots/population_resample.png`; headline/conclusion universal-claim bullets now cite the 21
+  resampling-stable counterexamples (digit-9 G = 1.00/0.86/0.82). All other numbers unchanged.
+- Verified: GitHub API 3/3 display-math, 0 pre-math, 0 inline hazards; 0 bare plot paths; 6 embedded
+  figures in each deliverable. New artifact: `results/resample_check.json`. Verdicts UNCHANGED and now
+  explicitly resampling-stable → re-writing STOP.

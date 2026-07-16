@@ -201,8 +201,10 @@ Also answer:
 
 ## Current status
 
-**COMPLETE (iter 6) — STOP written.** All stages done; both PLAN claims have a clear, replicated
-verdict and the last open item (shallow-net statistical power) is resolved. S1–S2 complete and S3 core
+**COMPLETE (iter 7) — STOP written.** All stages done; both PLAN claims have a clear, replicated,
+**resampling-stable** verdict (iter 7 re-ran the frozen pipeline at endpoint seeds 0/1/2: 21 pairs
+incl. digit-9 are counterexamples under every draw; between-G median 0.957–0.996, never above the
+within baseline) and the shallow-net power item is resolved. S1–S2 complete and S3 core
 done (iter 5). The reframed population analysis is implemented in
 `experiments/population_manifold.py` with all definitions frozen: plateau regions = 10 digit classes
 (confident-correct, output margin ≥ 0.5), natural cloud = 1705 correct L1 activations, `d(t)` accept =
@@ -222,10 +224,11 @@ under-powered (only 1 pair passes the `d(t)` sharpness filter) and is down-weigh
 
 ## Next step
 
-None — direction complete. Shallow-net power was investigated (iter 6): the deficit is **structural, not
-statistical** (d3w200's d(t) ramps rather than plateaus — 0/46 region pairs reach the accept threshold,
-and sampling 10× more endpoint pairs still yields only 2 verified pairs), so it is excluded as an invalid
-plateau test bed; its 1–2 genuine plateaus are all counterexamples, consistent with the verdict. Both
-claims answered (universal REFUTED, typical NOT SUPPORTED), replicated across a second seed and two
-architectures. Deliverables curated to current-best and verified; no unaddressed feedback files. STOP
-written.
+None — direction complete. Every verdict-rule clause is now explicitly satisfied: counterexamples are
+stable under **resampling** (iter 7: endpoint seeds 0/1/2 → 21 pairs incl. digit-9 have G ≤ 1 in every
+draw; seed-0 regression check reproduced published numbers exactly) AND under model replication (second
+seed + two architectures); shallow-net power resolved as structural (iter 6, d3w200 excluded as an
+invalid plateau test bed — its d(t) ramps, 0/46 region pairs reach the accept threshold even at 10×
+sampling; its 1–2 genuine plateaus are all counterexamples). Both claims answered (universal REFUTED,
+typical NOT SUPPORTED). Deliverables curated to current-best and verified; no unaddressed feedback
+files. STOP written.

@@ -214,3 +214,42 @@ remains the sole reported score; d(t) remains a filter.
 
 On track? yes — S1/S2/S3 complete (~100%); both claims answered and replicated, shallow-net power
 question resolved as structural, deliverables curated + verified. Writing STOP.
+
+---
+
+## 2026-07-16 — iter 7: endpoint-resampling stability (last verdict-rule box ticked) → STOP
+
+**Did.** Re-entered to find NO STOP file on disk despite iter 6 ending with "Writing STOP" (fresh
+240-min wrapper session; either the file never persisted or the relaunch cleared it — no unaddressed
+feedback files in this direction, though; checked). Rather than blindly re-writing STOP, used the
+fresh budget for the one verdict-rule clause never explicitly tested: "stable under resampling" —
+every prior run drew endpoint pairs with seed 0 only, and the bootstrap CI resamples seed-0
+measurements rather than drawing fresh endpoints. Parametrized `analyze(..., sample_seed=)` and
+wrapped `population_manifold.py`'s run-all block in a `_main()` guard (import-safe, same pattern as
+`cross_model.py`); wrote `experiments/resample_check.py` running the frozen pipeline on the base model
+at endpoint seeds 0/1/2 (19 s total). Added the table + `plots/population_resample.png` to both
+deliverables as a "Resampling stability" section, updated the universal-claim bullets, re-verified
+rendering (3/3 display math, 0 pre-math, 0 inline hazards, 0 bare plot paths, 6 embedded figures per
+file). CHANGELOG appended.
+
+**Learned.** The verdict is resampling-stable, decisively: seed 0 re-run reproduced published numbers
+exactly (0.996, 25/45, digit-9 G=1.00 — good regression check of the guard refactor too); fresh seeds
+give between-G medians 0.977 / 0.957 (never above the within baseline — seed 2 even sits below with CI
+0.90–1.00), counterexample counts 25/46 and 30/46, and **21 pairs including the digit-9 sub-plateau
+are G ≤ 1 under all three draws** (digit-9: 1.00/0.86/0.82). The universal-claim refutation no longer
+rests on any single endpoint draw. Assumption logged: 3 seeds × the frozen 20 pairs/region-pair is
+enough to demonstrate draw-stability given the per-pair scatter hugs y=x (rejected: a large seed sweep,
+which would burn budget without any plausible verdict change; rejected: increasing n_pairs, which
+tests a different axis already covered by bootstrap CIs).
+
+**Next.** Nothing — every PLAN verdict-rule clause is now explicitly satisfied (counterexamples stable
+under resampling AND replication; typical-association overlap stable across models and draws). No
+unaddressed human_feedback*/REVIEW files. Writing STOP (again).
+
+Metric check: I added NO new reported metric — the resampling table reports the same G statistics
+under fresh draws; it exists because the PLAN's universal-claim verdict rule explicitly requires
+resampling stability ("stable under resampling / model replication"), which no prior result tested.
+
+On track? yes — S1/S2/S3 complete (100%); both claims answered (universal REFUTED, typical NOT
+SUPPORTED), now explicitly stable under endpoint resampling and replicated across seeds/architectures.
+STOP written.

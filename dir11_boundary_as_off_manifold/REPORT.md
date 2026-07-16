@@ -26,8 +26,9 @@ more separated than within-plateau controls).
 
 **Both claims fail.** The universal claim is **refuted decisively**: 25 of 45 verified plateau
 transitions on the base model connect through the natural activation cloud with *no larger gap than
-normal travel inside a single plateau*, and this holds in every well-powered replication (a second seed
-and two more architectures). The typical-association claim is **not supported**: the between-plateau
+normal travel inside a single plateau*; 21 of them remain counterexamples under every independent
+endpoint redraw, and the result holds in every well-powered replication (a second seed and two more
+architectures). The typical-association claim is **not supported**: the between-plateau
 "connection gap" metric sits essentially *on top of* the within-plateau baseline in all four
 well-powered models, with overlapping confidence intervals and no consistent direction. Plateaus
 reflect the model's decision geometry, **not** a hole in the data manifold. The original digit-9 case
@@ -159,6 +160,27 @@ largest-`G` pair needs a bridge only ~1.7× the normal within-plateau step:
 
 ![Three representative verified plateau-to-plateau d(t) curves (largest-G, digit-9 sub-plateau, smallest-G): all flat-near-A, sharp jump, flat-near-B; all connect at G≈1–1.7.](plots/population_dt.png)
 
+### Resampling stability — fresh endpoint draws do not change the verdict
+
+The verdict rules require counterexamples to be stable under **resampling**, not just replication:
+a counterexample produced by one lucky draw of 20 endpoint pairs would not refute anything. We re-ran
+the identical frozen pipeline on the base model with two *fresh* endpoint-sampling seeds (every
+definition unchanged; re-running seed 0 as a regression check reproduced 0.996 / 25 of 45 / digit-9
+`G = 1.00` exactly):
+
+| endpoint seed | between-plateau median `G` (95% CI) | counterexamples (`G≤1`) | digit-9 sub `G` |
+|--:|--|--:|--:|
+| 0 (frozen) | 0.996 (0.97–1.03) | 25 / 45 | 1.00 |
+| 1 | 0.977 (0.95–1.02) | 25 / 46 | 0.86 |
+| 2 | 0.957 (0.90–1.00) | 30 / 46 | 0.82 |
+
+**21 plateau pairs — including the digit-9 sub-plateau — are counterexamples under all three
+independent endpoint draws**, and the between-plateau median `G` stays on (seeds 0–1) or below
+(seed 2) the within-plateau baseline in every draw. Per-pair median `G` is tightly reproducible
+(figure b). Both verdicts are resampling-stable, closing the last requirement of the verdict rules.
+
+![(a) Between-plateau median G (red, 95% bootstrap CI) vs within-plateau median G (green) for three independent endpoint-sampling seeds — the between value never rises above the baseline. (b) Per-pair median G, seed 0 vs fresh seeds 1 and 2: points hug the y=x line; 21 pairs sit at G≤1 in every draw.](plots/population_resample.png)
+
 ### Replication — second seed and three architectures
 
 The identical frozen pipeline on the existing checkpoints:
@@ -201,8 +223,9 @@ transitions are not transitions between separate empirical manifold components.*
 
 - **Universal claim — REFUTED:** 25/45 verified plateau pairs on the base model (and 26–35 of 45–46 in
   every well-powered model) connect through the natural activation cloud with `G ≤ 1` — no larger gap
-  than normal within-plateau travel. The digit-9 case that first motivated this work is one such
-  counterexample (`G = 1.00`).
+  than normal within-plateau travel. **21 pairs are counterexamples under all three independent
+  endpoint draws** (resampling-stable), including the digit-9 case that first motivated this work
+  (`G` = 1.00 / 0.86 / 0.82).
 - **Typical-association claim — NOT SUPPORTED:** the between-plateau median `G` (0.93–1.00) sits on the
   within-plateau baseline (1.00) in all four well-powered models, with overlapping bootstrap CIs and no
   consistent direction. The `G` distributions overlap almost completely.
