@@ -180,28 +180,28 @@ coverage are limited. The wrapper reserves the last 20 minutes to finalize + STO
 
 ## Stages (checklist)
 
-- [ ] **S1 — Match the post at the final checkpoint.** Read `../BUDGET.md` and `../CLAUDE.md`. Read
+- [x] **S1 — Match the post at the final checkpoint.** Read `../BUDGET.md` and `../CLAUDE.md`. Read
   `interpolate_digits.py` end to end and use its `slerp_path` and relative-distance convention as the starting
   point. Extend/test it for norm-rescaled SLERP at hidden layer 1, downstream recording,
   and relative endpoint distance. At the 100,000-step checkpoint, reproduce plateau and non-plateau examples
   with 50 interpolation points and predicted class along the path. Verify that `alpha=0/1` exactly reproduce the
   two unpatched endpoint outputs.
-- [ ] **S2 — Lock pairs, schema, and checkpoints.** Freeze the 55 image pairs, checkpoint schedule, plot axes,
+- [x] **S2 — Lock pairs, schema, and checkpoints.** Freeze the 55 image pairs, checkpoint schedule, plot axes,
   and saved-record schema. Write a manifest test that checks every file contains endpoints, 50 interpolation
   points, all downstream layers, logits, per-point predictions, and metadata.
-- [ ] **S3 — Run and record the primary training movie.** Train the primary seed, save the scheduled state dicts
+- [x] **S3 — Run and record the primary training movie.** Train the primary seed, save the scheduled state dicts
   and training metrics, then evaluate the exact same `interpolate_digits.py`-based protocol at every checkpoint.
   Evaluation may run online or offline, but it must use the checkpointed weights and fixed pair IDs. Do not save
   figures without the underlying numeric arrays. Do not substitute radial perturbations for this stage.
-- [ ] **S4 — Render the animation and static summary.** Produce a main MP4/GIF with training step visible in every
+- [x] **S4 — Render the animation and static summary.** Produce a main MP4/GIF with training step visible in every
   frame, fixed axes, logit `d(alpha)` curves for the fixed ten-pair subset, and a compact accuracy/confidence
   inset. Produce one static training-step-by-interpolation heatmap for representative pairs and one layerwise
   early/middle/late plot. Avoid a wall of checkpoint figures in `REPORT.md`.
-- [ ] **S5 — Resolve timing and confirm.** Inspect adjacent animation frames to identify the transition interval.
+- [x] **S5 — Resolve timing and confirm.** Inspect adjacent animation frames to identify the transition interval.
   If 500-step resolution is insufficient, rerun densely at 50-step spacing inside that interval. Repeat the
   frozen main protocol for two additional seeds and compare whether the emergence time and qualitative movie
   are stable.
-- [ ] **S6 — Verdict and stop.** State whether plateaus appear gradually or abruptly, whether different digit
+- [x] **S6 — Verdict and stop.** State whether plateaus appear gradually or abruptly, whether different digit
   pairs synchronize, and whether sharpening continues after test accuracy stabilizes. Keep only the main
   animation, minimal static figures, and required tables in REPORT/RESULTS; move development history to
   CHANGELOG; write empty `STOP`.
@@ -235,14 +235,16 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocke
 
 ## Current status
 
-The branch already contains `interpolate_digits.py`, which implements the relevant endpoint-activation SLERP,
-relative-distance `d(t)` curve, and predicted-class trajectory at the final trained model. What is missing is an
-extension of that exact experiment across fixed training checkpoints, with raw activations saved for animation.
+COMPLETE (2026-07-16). All six stages done. Seed 0: 205-checkpoint movie (steps 0,10,30,100,300 then every 500
+to 100k), 55-pair frozen SLERP protocol at every checkpoint, all records + state dicts saved and
+manifest-verified; seeds 1–2 confirm with 56 checkpoints each. Deliverables: plots/plateau_evolution.gif (205
+frames), frames_selected_steps.png, plateau_training_heatmap.png, layerwise_selected_steps.png,
+seed_comparison.png, dense_zoom.png (50-step deterministic zoom into the largest late boundary flip,
+82,000→82,500, bit-exact reproduction), training_context.png; results/checkpoint_manifest.json. Verdict in
+REPORT.md: plateaus emerge gradually out of a diagonal (none at init), pairs do not synchronize, sharpening and
+outright boundary relocation continue long after test accuracy stabilizes. Operator feedback 07161151 (use the
+first 2,000 test images) is baked into the protocol (endpoints + test accuracy). STOP written.
 
 ## Next step
 
-Read `../BUDGET.md`, `../CLAUDE.md`, Matthew's post, and `interpolate_digits.py`. Run that script unchanged on its
-existing final-checkpoint example first. Then make the smallest extension needed to emit one checkpoint record
-containing endpoint activations, 50 SLERP points, downstream activations, logits, `d(alpha)`, and predicted class
-along the path. Confirm exact endpoint reproduction before locking the pair bank and launching checkpointed
-training.
+None — direction complete; STOP file present (zero unaddressed feedback files).

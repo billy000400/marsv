@@ -1,60 +1,75 @@
-# RESULTS — How plateau/stable regions evolve during training (MNIST MLP)
+# RESULTS — Animating plateau formation through training (MNIST MLP)
 
-> CURRENT-BEST ONLY. One row per experiment. History lives in CHANGELOG.md.
-> Model: 4-layer ReLU MLP (784→200→200→200→10), 1000-sample MNIST subset, AdamW
-> (lr 1e-3, wd 0.01), MSE on one-hot targets, batch 200, 100k steps. Perturb first
-> hidden $h_1$ (post-ReLU), measure last-hidden $L_3$ displacement. Full definitions in REPORT.md.
-> **3 seeds** (0 primary, 1–2 confirmation); numbers are mean [min, max] across seeds.
+> CURRENT-BEST ONLY. History lives in CHANGELOG.md. Full definitions in REPORT.md.
+> Model: 4-layer ReLU MLP (784→200→200→200→10), 1,000-sample MNIST subset, AdamW
+> (lr 1e-3, wd 0.01), MSE on one-hot, batch 200, 100k steps. Primary protocol: 50-point
+> norm-rescaled SLERP between the post-ReLU first-hidden activations $h_1$ of two fixed test
+> images, patched at $h_1$ and propagated; $d(\alpha)$ = relative L2 distance of the
+> propagated logits to the two endpoint outputs. 55 fixed pairs (45 cross-class, 10
+> within-class), all endpoints from the **first 2,000 test images** (operator feedback
+> 07161151). Seed 0: 205 checkpoints (steps 0, 10, 30, 100, 300, then every 500 to 100k);
+> seeds 1–2: 56 checkpoints (every 2,000). All records verified complete by
+> `experiments/manifest_check.py`.
 
 ## Headline
 
-**Plateaus emerge and keep strengthening *after* the network already generalizes.** Test accuracy
-peaks by step ~300 (0.90) and then drifts down to ~0.87, but the **plateau contrast keeps climbing**
-from 0.42 (step 100) to **0.80 (step 100k)** across all three seeds — the plateau/robustness phase
-*lags* generalization, matching the delayed-robustness picture in *Deep Networks Always Grok*. The
-number of validated stable regions **converges to exactly 10, one per predicted digit**, by step ~300
-and stays there in every seed. Plateau strength tracks **confidence, not correctness**: confident-*wrong*
-examples plateau strongly (contrast 0.73 at 100k) — nearly as strongly as confident-correct (0.85) —
-while uncertain examples are weakest (0.49). **Verdict: expected monotonic emergence, replicated across
-3 seeds.** A single-checkpoint dip at step 10k appears only in seed 0 (not seeds 1–2), so it is seed
-noise, not a real split/merge — no escalation. **Membership-overlap lineage (seed 0) confirms
-monotonic evolution:** regions are born one predicted-digit at a time, no digit ever hosts ≥2 validated
-regions, and adjacent-checkpoint overlap matrices are clean near-permutations (0 splits, 0 merges).
+**Plateaus form gradually and keep sharpening (and moving) long after test accuracy has
+stabilized.** At initialization $d(\alpha)$ is the featureless diagonal — no plateaus. Test
+accuracy saturates at ~0.88 within a few hundred steps, but plateau–boundary–plateau structure
+matures over tens of thousands of steps: the plateau fraction (share of path points with
+$d<0.1$ or $d>0.9$; diagonal baseline ≈ 0.20) rises from ~0.20 at init to ~0.34 (step 100),
+~0.4 (step 10k), and 0.54–0.61 at 100k across all three seeds, with no sudden global
+transition. By 100k, 22–29 of 45 cross-class pairs show a textbook plateau→boundary→plateau
+curve, many as multi-step staircases through third-class regions. Late in training the
+plateaus persist but their **boundaries keep relocating abruptly**: the largest movie jump
+(pair 5→6, steps 82,000→82,500, seed 0) is a complete boundary flip that a deterministic
+50-step-resolution rerun resolves to ~150 steps. Within-class controls stay boundary-free
+(8/10 pairs keep one predicted class along the whole path; the 2 exceptions have a genuinely
+misclassified endpoint). The radial-perturbation control replicates the timing: plateau
+contrast vs matched-random activations rises 0.42→0.80 between step 100 and 100k while test
+accuracy declines.
 
-## Metrics (mean [min, max] over seeds 0, 1, 2)
+## Plateau fraction and test accuracy (seeds 0 / 1 / 2)
 
-| step | plateau contrast | valid regions (cosine) | conf-correct | conf-wrong | uncertain | test acc (s0) |
-|-----:|:----------------:|:----------------------:|:------------:|:----------:|:---------:|:-------------:|
-| 0       | 0.02 [0.01, 0.05] | 1 [0, 1]   | —    | —    | 0.02 | 0.10 |
-| 10      | 0.22 [0.20, 0.23] | 1 [1, 2]   | —    | —    | 0.21 | 0.60 |
-| 30      | 0.30 [0.28, 0.31] | 4 [3, 5]   | 0.37 | —    | 0.25 | 0.77 |
-| 100     | 0.42 [0.39, 0.44] | 9 [9, 9]   | 0.48 | 0.40 | 0.27 | 0.90 |
-| 300     | 0.38 [0.37, 0.39] | 10 [10, 10]| 0.45 | —    | 0.19 | 0.90 |
-| 1 000   | 0.38 [0.37, 0.39] | 10 [9, 10] | 0.45 | —    | 0.18 | 0.90 |
-| 3 000   | 0.43 [0.41, 0.45] | 9 [9, 10]  | 0.49 | —    | 0.23 | 0.90 |
-| 10 000  | 0.44 [0.30, 0.56] | 9 [9, 10]  | 0.53 | 0.20 | 0.08 | 0.89 |
-| 20 000  | 0.65 [0.62, 0.66] | 10 [9, 10] | 0.71 | 0.47 | 0.31 | 0.89 |
-| 30 000  | 0.71 [0.66, 0.74] | 10 [10, 10]| 0.77 | 0.63 | 0.37 | 0.88 |
-| 50 000  | 0.77 [0.75, 0.81] | 10 [10, 10]| 0.83 | 0.68 | 0.41 | 0.87 |
-| 75 000  | 0.78 [0.75, 0.83] | 10 [10, 10]| 0.85 | 0.60 | 0.38 | 0.86 |
-| 100 000 | 0.80 [0.77, 0.84] | 10 [10, 10]| 0.85 | 0.73 | 0.49 | 0.87 |
+| step | plateau fraction (s0 / s1 / s2) | test acc on first 2,000 (s0 / s1 / s2) |
+|-----:|:-------------------------------:|:--------------------------------------:|
+|       0 | 0.19 / 0.21 / 0.20 | 0.089 / 0.097 / 0.109 |
+|      10 | 0.25 / 0.26 / 0.25 | 0.595 / 0.654 / 0.594 |
+|     100 | 0.34 / 0.34 / 0.33 | 0.878 / 0.891 / 0.877 |
+|   1,000 | 0.37 / 0.37 / 0.35 | 0.881 / 0.891 / 0.886 |
+|  10,000 | 0.38 / 0.42 / 0.39 | 0.873 / 0.896 / 0.889 |
+|  20,000 | 0.53 / 0.41 / 0.41 | 0.865 / 0.871 / 0.882 |
+|  50,000 | 0.47 / 0.65 / 0.64 | 0.854 / 0.873 / 0.869 |
+| 100,000 | 0.56 / 0.54 / 0.61 | 0.848 / 0.869 / 0.858 |
 
-Confidence = max raw output (MSE-to-one-hot drives the correct output→1; softmax saturates near 0.23
-and is uninformative). "Confident" = max output ≥ 0.7. Group columns = mean plateau contrast for
-confident-correct / confident-wrong / uncertain examples across seeds (dash = <10 such examples per
-seed at that step, underpowered). Region count = average-linkage agglomerative clustering of $L_3$,
-$k$ by silhouette; a region is *validated* only if ≥20 examples, ≥90% predicted-label purity, and its
-plateau-contrast bootstrap CI excludes 0. Euclidean-metric clustering agrees (10 validated regions at
-100k in all seeds).
+Plateau fraction = mean over the 45 cross-class pairs of the fraction of the 50 path points
+with $d<0.1$ or $d>0.9$ (the one curve-derived summary; a straight diagonal scores ≈ 0.20, a
+perfect two-plateau step function scores 1). Protocol checks: patched $\alpha=0/1$ outputs
+reproduce the unpatched endpoint outputs to 3.7e-4; the vectorized SLERP matches the branch
+`slerp_path` to 9.5e-7; the dense rerun reproduces the movie records bit-exactly.
 
 ## Figures
 
-![Training dynamics: train/test accuracy and confidence vs step. Test accuracy peaks by step ~300, then declines slightly while training continues.](plots/training_dynamics.png)
+![Animation: logit-space d(alpha) for ten fixed cross-class pairs (squares under each curve: predicted class along the path), with train/test accuracy and confidence inset; one frame per checkpoint, training step in the title.](plots/plateau_evolution.gif)
 
-![Response curves early/mid/late: natural activations stay flatter than the matched-random control near radius 0, and the gap widens with training.](plots/plateau_curves_by_stage.png)
+![Selected animation frames (steps 0, 100, 1,000, 20,000, 100,000): d(alpha) is the diagonal at init, develops soft sigmoid shape by a few hundred steps, and sharpens into plateau-boundary-plateau staircases by tens of thousands of steps.](plots/frames_selected_steps.png)
 
-![Plateau contrast (left, mean of 3 seeds, band = seed min–max) keeps rising after test accuracy saturates; validated stable-region count (right) converges to 10 in every seed.](plots/plateau_contrast_and_region_count.png)
+![Heatmap of d(alpha) (color, blue=0 red=1) vs interpolation alpha (x) and training checkpoint (y, non-uniform early steps then every 500): plateaus consolidate gradually and boundary positions keep shifting late in training; within-class pairs (right two panels) stay boundary-free.](plots/plateau_training_heatmap.png)
 
-![Plateau contrast by confidence×correctness (seed 0): confident-wrong plateaus like confident-correct; uncertain is weakest.](plots/contrast_by_group.png)
+![Layerwise d(alpha) at h2, h3 and logits for early/middle/late checkpoints: successive layers sharpen the same underlying transition.](plots/layerwise_selected_steps.png)
 
-![Region composition and membership-overlap lineage (seed 0). (a) Green marks a plateau-validated stable region for each predicted digit (row) at each checkpoint (column); numbers above give the validated-region count — regions appear monotonically, one per digit, reaching 10. (b,c) Membership-overlap matrices for the birth transition (100→300) and a late transition (75k→100k) are near-permutations: 0 splits, 0 merges among validated regions.](plots/region_composition_and_lineage.png)
+![Seed comparison: plateau fraction vs training step for seeds 0-2 (left) and all 45 cross-pair d(alpha) curves overlaid at matched steps (right): gradual sharpening, consistent across seeds.](plots/seed_comparison.png)
+
+![Dense 50-step zoom into the largest late movie jump (pair 5 to 6, seed 0, steps 82,000-82,500): the boundary flip completes within ~150 steps.](plots/dense_zoom.png)
+
+![Training context (seed 0): train/test accuracy and confidence (max raw output) vs step; test accuracy saturates within a few hundred steps and drifts slightly down late.](plots/training_context.png)
+
+## Perturbation control (secondary; 13 log-spaced checkpoints, 3 seeds)
+
+Local-robustness control consistent with the interpolation movie: plateau contrast of natural
+$h_1$ activations vs norm-and-sparsity-matched random activations rises 0.42 (step 100) →
+0.80 (step 100k) while the validated stable-region count converges to 10 (one per predicted
+digit) by step ~300; contrast tracks confidence, not correctness (confident-wrong 0.73 vs
+confident-correct 0.85 vs uncertain 0.49 at 100k).
+
+![Perturbation control: plateau contrast vs matched-random activations keeps rising after test accuracy saturates (left; mean of 3 seeds, band = min-max); validated stable-region count converges to 10 (right).](plots/plateau_contrast_and_region_count.png)

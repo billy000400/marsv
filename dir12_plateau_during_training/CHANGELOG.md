@@ -71,3 +71,41 @@ no result numbers changed.
   Results figure consumes it.
 - Renamed `human_feedback_07161227.txt` → `human_feedback_07161227.txt.addressed.md`. Re-wrote `STOP`
   (plan complete, zero unaddressed feedback).
+
+## 2026-07-16 — Iter 4: NEW primary experiment (SLERP interpolation movie) per rewritten PLAN; feedback 07161151 addressed; RESULTS/REPORT rewritten
+
+The operator rewrote PLAN.md around a new primary experiment (the post's activation-interpolation
+protocol animated across training checkpoints), deleted STOP, and dropped feedback
+`human_feedback_07161151.txt` ("Use the first 2,000 of the 10K test images to test").
+
+- **Feedback addressed.** The new protocol draws all 55 interpolation endpoints from the first
+  2,000 test images (in fact the first 233) and computes per-checkpoint test accuracy on
+  test[:2000]; stated explicitly in Methods. (The prior perturbation study already complied: its
+  500-example eval set lies within test[:583] and its training script tested on test[:2000].)
+  Renamed the file to `.addressed.md`.
+- **New experiment (primary).** `experiments/plateau_protocol.py` (frozen 55-pair bank, vectorized
+  norm-rescaled SLERP validated against the branch `slerp_path` to 9.5e-7, per-checkpoint records),
+  `train_and_record.py` (seed 0: 205 checkpoints, steps 0,10,30,100,300 + every 500 to 100k; seeds
+  1–2: 56 checkpoints every 2,000), `manifest_check.py` (all 317 records pass), `render_movie.py`,
+  `seed_comparison.py`, `dense_zoom.py`, `s1_final_checkpoint.py` (endpoint patching reproduces
+  unpatched outputs to 3.7e-4).
+- **RESULTS.md / REPORT.md rewritten around the new primary result.** Headline: plateaus absent at
+  init (d(α) = diagonal), form gradually with no synchronized transition (plateau fraction
+  0.20 → 0.34 @100 → ~0.4 @10k → 0.54–0.61 @100k across 3 seeds; 22–29/45 clean
+  plateau→boundary→plateau pairs at 100k), and keep sharpening AND relocating boundaries long
+  after test accuracy saturates (largest late flip, pair 5→6 @82,000–82,500, resolved by a
+  bit-exact deterministic 50-step rerun to a ~150-step relocation). Within-class controls: 8/10
+  boundary-free; 2 exceptions have a misclassified endpoint.
+- **Old perturbation results demoted, not deleted:** now the "perturbation control (secondary)"
+  section (PLAN's optional control), keeping contrast 0.42→0.80, region count →10, and
+  confidence-not-correctness numbers with one embedded figure
+  (plateau_contrast_and_region_count.png). Figures training_dynamics/plateau_curves_by_stage/
+  contrast_by_group/region_composition_and_lineage/s1_final_checkpoint_examples remain in plots/
+  but are no longer embedded (superseded as primary evidence; history here).
+- **New figures embedded in both deliverables:** plateau_evolution.gif (205 frames),
+  frames_selected_steps.png, plateau_training_heatmap.png, layerwise_selected_steps.png,
+  seed_comparison.png, dense_zoom.png, training_context.png. GitHub render checks pass (3/3
+  js-display-math, 0 pre-lang-math, hazard grep clean, all plot refs embedded).
+- New data: results/checkpoint_manifest.json, results/plateau_records/seed_{0,1,2}(+_dense)/,
+  results/ckpts_movie/seed{0,1,2}/ (state dicts at every scheduled step).
+- Plan complete → STOP re-written (zero unaddressed feedback files).

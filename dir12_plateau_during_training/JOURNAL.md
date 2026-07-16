@@ -96,3 +96,46 @@ symbols to `$…$` at first writing, not just display blocks.
 **Next step.** None — direction complete, feedback addressed, STOP re-written.
 
 On track? yes — S1–S5 done + feedback addressed, 100% complete, no blocker; STOP written.
+
+## 2026-07-16 — Iter 4: redirected PLAN executed end-to-end (SLERP movie), feedback 07161151, STOP
+
+**Feedback check:** found `human_feedback_07161151.txt` unaddressed ("Use the first 2,000 of the
+10K test images to test") and a rewritten PLAN.md (new primary experiment: checkpointed
+interpolation animation; STOP had been deleted). Both drove this iteration.
+
+**Did.** Built the frozen protocol lib (`plateau_protocol.py`): 55-pair deterministic bank (cross
+pair (a,b) = rank-b image of class a + rank-a image of class b; within-class = ranks 10/11 — all
+within test[:233] ⊂ test[:2000] per feedback), vectorized SLERP (validated vs `slerp_path`,
+9.5e-7), 50 points, patch at h1, record h2/h3/logits + d(α) + preds. S1 on the existing 100k
+checkpoint passed (endpoint reproduction 3.7e-4; 24/45 pairs clean plateaus). Trained seed 0 with
+205 checkpoints (138 s) + seeds 1–2 with 56 each; manifest check 317/317. Rendered 205-frame GIF,
+static frames, step×α heatmap, layerwise plot, seed comparison (one transparent summary: plateau
+fraction, floor ≈0.2), training context. Dense 50-step rerun of steps 82,000–82,500 reproduced the
+movie records BIT-EXACTLY and resolved the largest late jump (pair 5→6) to a ~150-step boundary
+flip. Rewrote RESULTS.md/REPORT.md around the new result; old perturbation study kept as the
+plan's optional secondary control. Renamed feedback to `.addressed.md`; wrote STOP.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Feedback interpreted as: endpoints AND test metrics restricted to test[:2000] (old work already
+  complied, so no rerun of the perturbation sweep was needed).
+- Storage: full 50-point h1/h2/h3 raw arrays saved at 16 anchor steps; every checkpoint saves
+  state_dict + endpoint activations + logits + d-curves, so every frame is regenerable without
+  retraining (verified bit-exact determinism makes even full regeneration cheap). Alternative
+  (raw arrays at all 205 ckpts, ~800 MB more in git) rejected to keep the shared repo pushable.
+- Seeds 1–2 use the PLAN's fallback 2,000-step density (primary gets the full 500-step movie);
+  rejected running them at full density — the comparison only needs emergence timing.
+- GIF (pillow) instead of MP4 — no ffmpeg on the box.
+- Animation subset preregistered by digit identity: (0,1),(2,3),(4,5),(6,7),(8,9),(0,8),(1,7),
+  (3,5),(4,9),(2,6) — every digit exactly twice.
+
+**Learned.** (1) Plateaus are genuinely absent at init — d(α) is the diagonal, so the phenomenon
+is 100% learned. (2) Emergence is gradual and asynchronous across pairs; no grokking-style jump in
+this metric. (3) The most surprising bit: at step ~82k (train acc 1.0 for ~82k steps) a boundary
+can still sweep across the entire path in ~150 steps — late training keeps rearranging region
+geometry while test accuracy only wobbles by ~0.03. (4) Within-class paths cross boundaries only
+when an endpoint is genuinely misclassified — a nice internal consistency check of the
+region-per-predicted-class picture.
+
+**Next step.** None — plan complete, verdict written, STOP present.
+
+On track? yes — S1–S6 all done, 100% complete, no blocker; STOP written (no unaddressed feedback).
