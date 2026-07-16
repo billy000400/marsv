@@ -191,3 +191,30 @@ is done in, which layer `d` is measured at, and how many samples the plot uses.
   them is not where the data lives." New artifact: `results/direct_path.json`.
 - Verified: GitHub API 5/5 display-math (added r_k and E equations), 0 pre-math, 0 inline hazards;
   0 bare plot paths; 8 embedded figures per deliverable.
+
+## 2026-07-16 — operator feedback: readability rewrite + MST explainer figure (iter 9)
+
+Addressed `human_feedback_07161625.txt` (renamed `.addressed.md`): (1) explain the minimum spanning
+tree; (2) shorten/simplify the Summary; (3) break up overloaded sentences; (4) reduce terminology with
+a "How to read the plots" box; (5) cut repetition and shorten figure captions. No numbers changed —
+this is a presentation rewrite of both deliverables; every result, table, and verdict is identical.
+
+- **MST explained plainly:** REPORT.md Methods gains a stepping-stones paragraph (spanning tree →
+  minimum spanning tree → why the largest MST-path edge is the smallest unavoidable hop between two
+  points) plus a new toy 2-D schematic `plots/mst_explainer.png`
+  (`experiments/mst_explainer_fig.py`), embedded in both deliverables.
+- **Summary rewritten:** now motivation → three principal findings → one-line verdict; pair counts,
+  CIs, seeds, and the shallow-net resolution moved entirely to Results.
+- **Core vocabulary reduced to `d(t)` (filter), `G`, `E`** via a "How to read the plots" box in
+  REPORT.md Methods (with plot color conventions); RESULTS.md metric section condensed to the same
+  three quantities with a pointer to REPORT.md for the equations. Terms like "plateau fraction" are
+  now described inline where used rather than treated as standalone vocabulary.
+- **Captions shortened** to 1–3 lines each; axis/legend definitions moved into the adjacent prose
+  (still satisfying the every-figure-readable rule). Repetition between Summary/Results/Conclusion
+  removed — each finding is stated fully once in Results; Summary and Conclusion reference it briefly.
+- Note: feedback point 5 quotes phrases ("gradual emergence", "late boundary movement", "after
+  accuracy saturates") and line numbers that do not occur in this direction's REPORT.md — they appear
+  to reference another direction's report. The general asks (dedupe, shorten captions) were applied
+  here regardless.
+- Verified: GitHub API 5/5 display-math in REPORT.md, 0 pre-math, 0 inline hazards; 0 bare plot
+  paths; 9 embedded figures per deliverable (8 prior + `mst_explainer.png`).

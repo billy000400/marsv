@@ -301,3 +301,41 @@ stay retired.
 
 On track? yes — plan complete (100%), feedback addressed, both investigations reported and verified;
 STOP written.
+
+---
+
+## 2026-07-16 — iter 9: readability feedback (MST explainer, simpler Summary, shorter captions) → STOP
+
+**Did.** FEEDBACK FIRST: found unaddressed `human_feedback_07161625.txt` (and no STOP on disk — the
+wrapper relaunch cleared it again). Five asks, all presentation-level: (1) explain the minimum
+spanning tree; (2) shorten/simplify the Summary to motivation + three findings + verdict; (3) one
+claim per sentence; (4) reduce terminology, add a "How to read the plots" box distinguishing the
+primary metric from secondary controls; (5) remove repetition and shorten captions. Rewrote REPORT.md
+and RESULTS.md accordingly (all numbers/tables/verdicts unchanged): new plain-words MST paragraph
+(stepping stones → cheapest skeleton → largest MST-path edge = smallest unavoidable hop) plus a toy
+2-D schematic `plots/mst_explainer.png` (new `experiments/mst_explainer_fig.py`, deterministic,
+scipy MST, headless Agg); Summary cut to ~1/2 length with all counts/CIs moved to Results; core
+vocabulary reduced to d(t)/G/E in a quoted "How to read the plots" box (colors + reference lines
+included); captions cut to 1–3 lines with axis/legend definitions moved to adjacent prose (rule-12
+readability preserved); Conclusion de-duplicated to brief references. Renamed the feedback file
+`.addressed.md`, appended CHANGELOG.
+
+**Learned.** Two of feedback point 5's quoted phrases and all four quoted line numbers ("gradual
+emergence", "late boundary movement", "after accuracy saturates"; lines 190/194/202/219) do not occur
+in this direction's REPORT.md — they look like they reference dir12's training-dynamics report.
+Assumption logged: applied the *general* principles of point 5 (dedupe findings, shorten captions)
+here rather than hunting phrases that don't exist; rejected ignoring point 5 entirely (the captions
+here genuinely were 3–6 lines and repetitive). RESULTS.md now carries 0 display equations by design —
+definitions live once in REPORT.md Methods (rule 8 applies to REPORT.md; duplication was part of the
+terminology overload the operator flagged). Verified rendering: REPORT 5/5 display math, 0 pre-math,
+0 inline hazards, 0 bare plot paths, 9 embedded figures per deliverable.
+
+**Next.** Feedback fully addressed (file renamed); plan complete; zero unaddressed feedback files →
+writing STOP.
+
+Metric check: I added NO reported quantity. The only new artifact is an explanatory schematic
+(`mst_explainer.png`, toy 2-D, labeled "schematic, not data") requested implicitly by "explain MST";
+it reports no numbers and changes no verdict.
+
+On track? yes — plan complete (100%), readability feedback addressed, deliverables re-verified;
+STOP written.

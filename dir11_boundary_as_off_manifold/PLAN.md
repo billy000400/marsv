@@ -201,7 +201,11 @@ Also answer:
 
 ## Current status
 
-**COMPLETE (iter 8) — feedback addressed, STOP written.** Iter 8 addressed operator feedback
+**COMPLETE (iter 9) — all feedback addressed, STOP written.** Iter 9 addressed readability feedback
+(`human_feedback_07161625.txt` → `.addressed.md`): plain-words MST explanation + toy schematic
+(`plots/mst_explainer.png`), Summary shortened to motivation + three findings + verdict, core
+vocabulary reduced to d(t)/G/E with a "How to read the plots" box, captions shortened, repetition
+removed — all numbers/verdicts unchanged. Iter 8 addressed operator feedback
 (`human_feedback_0716.txt` → `.addressed.md`): the deliverables now report **both investigations** —
 (1) the manifold-component verdict (unchanged) and (2) the low-density-corridor finding
 (`experiments/direct_path_offmanifold.py`): verified between-plateau direct paths reach a median
@@ -230,7 +234,8 @@ under-powered (only 1 pair passes the `d(t)` sharpness filter) and is down-weigh
 
 ## Next step
 
-None — direction complete and feedback addressed (zero unaddressed feedback files). Every verdict-rule clause is now explicitly satisfied: counterexamples are
+None — direction complete and all feedback addressed (zero unaddressed feedback files; iter 9 handled
+the 2026-07-16 readability review). Every verdict-rule clause is explicitly satisfied: counterexamples are
 stable under **resampling** (iter 7: endpoint seeds 0/1/2 → 21 pairs incl. digit-9 have G ≤ 1 in every
 draw; seed-0 regression check reproduced published numbers exactly) AND under model replication (second
 seed + two architectures); shallow-net power resolved as structural (iter 6, d3w200 excluded as an
