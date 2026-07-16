@@ -77,16 +77,24 @@ def main():
             ax.set_xlabel(r'$\alpha$', fontsize=9)
         ax.tick_params(labelsize=7)
         axes.append(ax); lines.append(ln); dots.append(sc)
-    ax_acc = fig.add_subplot(gs[:, 5])
+    ax_acc = fig.add_subplot(gs[0, 5])
     ax_acc.plot(hist['step'], hist['test_acc'], color='C3', lw=1.5, label='test acc')
     ax_acc.plot(hist['step'], hist['train_acc'], color='C3', lw=1, ls='--', alpha=0.6,
                 label='train acc')
     ax_acc.plot(hist['step'], hist['test_conf'], color='C4', lw=1.5, label='test conf')
     ax_acc.set_xscale('symlog', linthresh=10)
-    ax_acc.set_xlabel('step'); ax_acc.set_ylim(0, 1.05)
-    ax_acc.legend(fontsize=7, loc='lower right')
+    ax_acc.set_ylim(0, 1.05)
+    ax_acc.legend(fontsize=6, loc='lower right')
     ax_acc.tick_params(labelsize=7); ax_acc.grid(alpha=0.25)
     vline = ax_acc.axvline(0, color='k', lw=1)
+    ax_loss = fig.add_subplot(gs[1, 5])
+    ax_loss.plot(hist['step'], hist['train_loss'], color='C0', lw=1.5, label='train loss')
+    ax_loss.plot(hist['step'], hist['test_loss'], color='C1', lw=1.5, label='test loss')
+    ax_loss.set_xscale('symlog', linthresh=10); ax_loss.set_yscale('log')
+    ax_loss.set_xlabel('step', fontsize=8)
+    ax_loss.legend(fontsize=6, loc='lower left')
+    ax_loss.tick_params(labelsize=7); ax_loss.grid(alpha=0.25)
+    vline_l = ax_loss.axvline(0, color='k', lw=1)
     title = fig.suptitle('', fontsize=13)
 
     def draw(f):
@@ -94,6 +102,7 @@ def main():
             lines[k].set_data(t, D[f, i])
             dots[k].set_array(PRED[f, i].astype(float))
         vline.set_xdata([max(steps[f], 1e-3)] * 2)
+        vline_l.set_xdata([max(steps[f], 1e-3)] * 2)
         title.set_text(f'Plateau evolution (seed {seed}) — training step '
                        f'{steps[f]:,}   |   logit-space $d(\\alpha)$, squares: '
                        f'predicted class along the path')

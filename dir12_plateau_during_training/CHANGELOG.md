@@ -109,3 +109,39 @@ protocol animated across training checkpoints), deleted STOP, and dropped feedba
 - New data: results/checkpoint_manifest.json, results/plateau_records/seed_{0,1,2}(+_dense)/,
   results/ckpts_movie/seed{0,1,2}/ (state dicts at every scheduled step).
 - Plan complete → STOP re-written (zero unaddressed feedback files).
+## 2026-07-16 — Iter 5: operator feedback 07161530 (8 points) — early-phase linear-time movie, loss insets, readability rewrite
+
+Operator had deleted STOP and dropped `human_feedback_07161530.txt` (5 readability points + 3
+substantive asks). All 8 addressed; no prior result numbers changed.
+
+- **Pt 2 (focus on early training, linear time scale) — NEW experiment** `experiments/early_movie.py`:
+  deterministic seed-0 rerun recording the frozen protocol **every 5 steps from 0 to 1,000** (201
+  linearly spaced frames; bit-exact = 0.00e+00 vs the movie records at all 7 overlapping steps).
+  New figures embedded in RESULTS+REPORT: `plots/plateau_evolution_early.gif` (linear-time animation)
+  and `plots/plateau_early_heatmap.png` (linear-y heatmap). New records
+  `results/plateau_records/seed_0_early/` (+ manifest, metrics). New numbers: train acc 1.0 at step
+  145; test acc ~0.88 by step ~70–120; PF 0.19→0.27 (25)→0.34 (100)→~0.37 (200–1,000, frozen);
+  curves flicker during first ~150–200 steps then settle into soft sigmoids.
+- **Pt 8 (train/val loss in animation)** — `render_movie.py` inset split into two panels
+  (acc/conf top, train/test loss bottom, log y); main `plateau_evolution.gif` re-rendered (205
+  frames); early animation has the same insets on a linear step axis.
+- **Pt 6 (how are accuracy/confidence calculated)** — new Methods subsection "Accuracy, confidence,
+  and loss" with rendered equations for acc(t), MSE loss (incl. the 1/(10N) convention), and
+  conf(t) = mean max raw output, with reading guidance.
+- **Pt 7 (which layer)** — Methods now states "d(alpha) is computed on the logits unless a figure
+  says otherwise"; every caption in both deliverables names logit-space (layerwise figure flagged
+  as the only exception); RESULTS preamble states it too.
+- **Pt 1 (shorter Summary)** — Summary cut to question / what-we-did / 3 findings / verdict; pair
+  counts, seed counts, rerun resolutions, per-step numbers moved to Methods/Results.
+- **Pt 3 (overloaded sentences)** — Checkpoints paragraph and perturbation-control paragraph
+  rewritten as short single-claim sentences.
+- **Pt 4 (terminology)** — new "How to read the plots" box at the end of Methods defining the shared
+  axes/legend format and explicitly separating primary metric (logit d) / summary number (PF) /
+  secondary-only quantities (plateau contrast, stable-region count).
+- **Pt 5 (repetition, long captions)** — findings stated fully once (Summary brief, Results carry
+  evidence, Conclusion one paragraph); the four flagged captions (main gif, frames, heatmap, seed
+  comparison) shortened.
+- Render checks: REPORT 6/6 js-display-math, 0 pre-lang-math (RESULTS 0/0), inline-math hazard grep
+  clean, all plot refs embedded as images in both files.
+- Renamed `human_feedback_07161530.txt` → `.addressed.md`; STOP re-written (plan complete, zero
+  unaddressed feedback).

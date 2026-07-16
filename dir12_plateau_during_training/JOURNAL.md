@@ -139,3 +139,41 @@ region-per-predicted-class picture.
 **Next step.** None — plan complete, verdict written, STOP present.
 
 On track? yes — S1–S6 all done, 100% complete, no blocker; STOP written (no unaddressed feedback).
+## 2026-07-16 — Iter 5: feedback 07161530 (early-phase linear-time movie + loss insets + readability)
+
+**Feedback check:** found `human_feedback_07161530.txt` unaddressed (operator had deleted STOP).
+Addressing its 8 points WAS the iteration.
+
+**Did.**
+- `experiments/early_movie.py`: deterministic seed-0 rerun, frozen protocol every 5 steps 0–1,000
+  (201 frames), consistency check 0.00e+00 vs movie records at steps {0,10,30,100,300,500,1000};
+  rendered `plateau_evolution_early.gif` (LINEAR time axis, per pt 2) and `plateau_early_heatmap.png`;
+  compact records + metrics in `results/plateau_records/seed_0_early/`.
+- `render_movie.py`: inset split into acc/conf (top) + train/test loss (bottom, log y) panels (pt 8);
+  re-rendered the main 205-frame gif — verified frame 120 shows both insets with step marker.
+- REPORT.md rewritten: short Summary (pt 1), acc/conf/loss equations (pt 6), "computed on the logits
+  unless labeled otherwise" + per-caption layer labels (pt 7), "How to read the plots" box separating
+  primary d / summary PF / secondary contrast+region-count (pt 4), short sentences in the Checkpoints
+  and perturbation paragraphs (pt 3), findings stated once + shortened captions (pt 5). RESULTS.md
+  updated to match (early-phase headline paragraph + 2 new embedded figures).
+- Render checks pass (6/6 display math, 0 pre-lang-math, hazard grep clean, no bare plot refs).
+  Renamed feedback → `.addressed.md`.
+
+**Assumptions logged (loop mode).**
+- "Period between training starts and training starts to plateau for hundreds of steps" read as
+  steps 0–1,000 (train acc 1.0 at 145, test acc plateaued from ~70–120 → window covers the whole rise
+  plus ~850 flat steps) at 5-step resolution. Alternatives rejected: 0–2,000 every 10 (rise = only
+  first 15% of frames) and replacing the main movie's log-schedule animation (both views are useful;
+  kept both, feedback wanted an early focus, not the removal of the full movie).
+- "val" loss/accuracy = the test[:2000] metrics (no separate validation split exists in this setup).
+- Early rerun saves compact records (d-curves + preds, no state_dicts): run is bit-exact regenerable;
+  saving 201 extra state_dicts (~200 MB) rejected to keep the shared repo pushable.
+
+**Learned.** On a linear time axis the early story is: diagonal deforms within tens of steps, curves
+flicker while train loss falls fastest (~first 150–200 steps), then freeze into soft sigmoids whose
+PF (~0.37) barely moves from step 200 to 1,000 — a clean two-phase picture (fast soft-structure
+formation, then slow tens-of-thousands-of-steps sharpening) that the log-schedule movie compressed.
+
+**Next step.** None — plan complete, all feedback addressed, STOP re-written.
+
+On track? yes — S1–S6 done + feedback 07161530 addressed, 100% complete, no blocker; STOP written (zero unaddressed feedback).
