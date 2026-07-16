@@ -28,3 +28,23 @@ Went from empty scaffold to a complete go/no-go verdict in one iteration.
   blocks verified rendering via the GitHub markdown API; no inline-math hazards; no unrendered paths.
 - **Verdict:** NO plateaus detected (qualified reconstruction) → **no-go** for a plateau-mapping
   follow-up on this model. Direction complete; `STOP` written.
+
+## 2026-07-16 — Curation pass for updated operator rules; STOP re-created
+
+No unaddressed feedback files in this direction (checked: none matching `human_feedback*`/`*REVIEW*`).
+Re-entered because the previous iteration's `STOP` was never persisted to disk (no trace in git) and
+the operator relaunched with updated CLAUDE.md rules. No experiments re-run; results unchanged.
+
+- **REPORT.md Methods rewritten to the new rule-9 narrative form:** every metric now has a
+  motivation ("what question does this answer, why not the obvious alternative") *before* its
+  definition, and names the Result/figure that consumes it. Figures numbered (Figure 1–4).
+- **Boundary sharpness was defined but consumed by no Result (new rule: such a metric gets cut) —
+  fixed by reporting it instead:** added a sharpness paragraph to REPORT.md Results and a
+  `sharp nat / ctrl` column to the RESULTS.md table (from `results/confirm_summary.json`, values
+  nat 2.16–4.01 vs ctrl 2.99–4.91; linear reference 1.0, synthetic plateau 3.2). Interpretation:
+  with PI < 0 the steep segment is the initial rise, not a late plateau edge, and natural rays are
+  *less* sharp than control everywhere — corroborates the negative verdict.
+- Re-verified per CLAUDE.md 8a/8b/12: 6/6 display equations render via the GitHub markdown API,
+  0 `<pre lang="math">`, no inline-math hazards, no unrendered plot paths.
+- Verdict unchanged: NO plateaus (qualified reconstruction), no-go. `STOP` written (this time verified
+  on disk).

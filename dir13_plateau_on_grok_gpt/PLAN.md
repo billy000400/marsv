@@ -132,7 +132,9 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**COMPLETE — verdict: NO plateaus detected (qualified reconstruction). `STOP` written.**
+**COMPLETE — verdict: NO plateaus detected (qualified reconstruction). `STOP` written and verified
+on disk (2026-07-16; the 2026-07-15 STOP never persisted). Deliverables re-curated to the updated
+CLAUDE.md rule 9 (narrative Methods, sharpness now consumed by Results); all render checks pass.**
 
 Source audit (S1) found the paper's GPT code/checkpoint are unreleased (repo has only MNIST-MLP +
 CIFAR-ResNet), so a faithful 12L/12H GeLU char-GPT reconstruction was trained (val acc 0.560) and

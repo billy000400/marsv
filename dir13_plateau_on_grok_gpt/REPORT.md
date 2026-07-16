@@ -55,17 +55,23 @@ reconstruction rather than the paper's exact checkpoint.**
 
 We perturb a final-position activation `h` at block `l` along a fixed unit direction `u` and scale the
 step by the layer's natural scale `s_l` (the median L2 distance between random pairs of held-out
-final-position activations at that block), so `alpha = rho * s_l` is comparable across layers.
+final-position activations at that block), so `alpha = rho * s_l` is comparable across layers. Each
+metric below answers one specific question in the chain "is there a plateau?":
 
-**Downstream response** — how far the pre-head residual `z` moves for a perturbation of size `alpha`,
-normalized by width so it is comparable across layers:
+**Downstream response** — *how much did the perturbation change the network's computation?* We need a
+per-radius response value to draw a curve at all. Logit or loss changes conflate this with how the head
+weighs directions, so we measure movement of the pre-head residual `z` itself, normalized by width so
+blocks of different depth are comparable. This is the y-axis of the response-curve figure (Fig. 2) and
+the individual-ray figure (Fig. 4):
 
 ```math
 d_{\mathrm{hidden}}(\alpha) = \frac{\lVert z(h + \alpha u) - z(h) \rVert_2}{\sqrt{d_{\mathrm{model}}}}
 ```
 
-**Plateau index (PI)** — the shape statistic. Normalize each ray to `x = rho/rho_max` and
-`y = d(rho)/d(rho_max)` (both run 0→1) and integrate the gap to the straight line:
+**Plateau index (PI)** — *is the curve flat-then-steep?* Eyeballing 48 × 8 × 11 × 2 rays does not
+scale, and averaging curves can hide or manufacture shape, so we score **each ray** with one signed
+shape statistic. Normalize the ray to `x = rho/rho_max` and `y = d(rho)/d(rho_max)` (both run 0→1) and
+integrate the gap to the straight line:
 
 ```math
 \mathrm{PI} = \int_0^1 \big[\, x - y(x) \,\big]\, dx
@@ -73,29 +79,40 @@ d_{\mathrm{hidden}}(\alpha) = \frac{\lVert z(h + \alpha u) - z(h) \rVert_2}{\sqr
 
 Read it as: `PI > 0` means the response is **delayed** relative to a straight line (flat-then-steep =
 a **plateau**); `PI = 0` is linear; `PI < 0` means the response is **front-loaded / saturating**
-(steep-then-flat). Higher is more plateau-like.
+(steep-then-flat). Higher is more plateau-like. The sign of the median PI is the headline result
+(Fig. 3 left, and the per-block table in `RESULTS.md`).
 
-**Boundary sharpness** — the steepness of the sharpest transition relative to the average slope, so a
-plateau must be both delayed *and* have a sharp edge:
+**Boundary sharpness** — *does the curve have a sharp wall?* PI alone cannot distinguish a gentle
+S-curve from the paper's picture of a flat region ending at a hard region boundary, so we also score
+each ray's steepest transition relative to its average slope:
 
 ```math
 \mathrm{sharp} = \frac{\max_i \big[ \Delta y_i / \Delta x_i \big]}{\overline{\Delta y / \Delta x}}
 ```
 
-**Functional response (JSD)** — the same experiment scored on the model's *output* instead of its
-hidden state, via the Jensen–Shannon divergence between the baseline and perturbed next-character
+A straight line scores 1.0; our synthetic flat-then-steep test curve scores 3.2. Sharpness is evidence
+of a plateau **only together with** `PI > 0` (the max-slope segment must come *late*); with `PI < 0`
+a high value just means a steep initial rise. Consumed in the sharpness paragraph of Results.
+
+**Functional response (JSD)** — *does the hidden-state conclusion hold for the model's output?* A
+plateau in the paper's sense is about the network's *function* staying constant, and a hidden state
+could in principle move in directions the head ignores (or vice versa). So we re-score every ray on
+the output: the Jensen–Shannon divergence between the baseline and perturbed next-character
 distributions `p_0, p`:
 
 ```math
 \mathrm{JSD}(p_0 \Vert p) = \tfrac{1}{2}\,\mathrm{KL}\!\big(p_0 \Vert m\big) + \tfrac{1}{2}\,\mathrm{KL}\!\big(p \Vert m\big), \quad m = \tfrac{1}{2}(p_0 + p)
 ```
 
-We compute a PI on the JSD curve as well; the hidden-state and JSD conclusions must agree. We also
-record the fraction of rays whose top-1 next character flips at the largest radius (a calibration that
-the perturbation range is functionally large).
+We compute a PI on the JSD curve as well; the hidden-state and JSD conclusions must agree (the
+`ΔPI (JSD)` column of the table in `RESULTS.md`). We also record the fraction of rays whose top-1 next
+character flips at the largest radius — a calibration that the perturbation range is functionally
+large, consumed in the calibration checklist below.
 
-**Group comparison.** The plateau effect is the control-calibrated difference of medians, with a
-hierarchical bootstrap (resample contexts, then directions) for the 95% interval:
+**Group comparison** — *is any shape difference specific to trained representations?* A raw PI value
+could reflect generic architecture geometry rather than learned structure, so the pre-registered
+effect is the difference of medians against the matched control (next subsection), with a hierarchical
+bootstrap (resample contexts, then directions within them) for the 95% interval:
 
 ```math
 \Delta \mathrm{PI} = \operatorname{median}\big(\mathrm{PI}_{\text{natural}}\big) - \operatorname{median}\big(\mathrm{PI}_{\text{control}}\big)
@@ -103,7 +120,7 @@ hierarchical bootstrap (resample contexts, then directions) for the 95% interval
 
 Effect size is Cliff's delta between the pooled natural and control PI values (`|delta| > 0.474` is a
 "large" effect). A tiny-but-significant `ΔPI` is treated as inconclusive on its own — the **sign of PI
-itself** decides whether a plateau exists.
+itself** decides whether a plateau exists. Consumed in Fig. 3 (right) and the table in `RESULTS.md`.
 
 ### Baselines
 
@@ -139,14 +156,14 @@ as the dashed line in the individual-ray figure.
 **Training.** The model trains normally to val loss 1.494 / accuracy 0.560 — clearly a trained network,
 not a random one.
 
-![Training curves: cross-entropy falls to ~1.49 on validation; next-char accuracy rises to 0.56.](plots/training_curves.png)
+![Figure 1 — Training curves: cross-entropy falls to ~1.49 on validation; next-char accuracy rises to 0.56.](plots/training_curves.png)
 
 **No plateau at any block.** Across all 11 intervention blocks the median `PI` of *natural* activations
 is **negative** (−0.15 to −0.30): the downstream response rises quickly and then saturates, the
 opposite of the flat-then-steep plateau shape. The response curves sit **above** the linear diagonal
 (concave), for both natural and control basepoints.
 
-![Downstream response vs perturbation radius, per block. Natural (blue) and matched-control (red) curves are both concave and saturating, above the linear diagonal — no plateau at any block.](plots/response_by_layer.png)
+![Figure 2 — Downstream response vs perturbation radius, per block. Natural (blue) and matched-control (red) curves are both concave and saturating, above the linear diagonal — no plateau at any block.](plots/response_by_layer.png)
 
 **The natural-vs-control difference is real but not a plateau.** `ΔPI` is positive at every block with
 95% CIs excluding zero (peaking at `ΔPI = +0.096`, Cliff's δ = +0.91 around blocks 2–3), meaning
@@ -154,12 +171,18 @@ natural activations saturate *slightly less* than the random control. The JSD-ba
 sign at every block. But because *both* PIs are negative, this is a difference between two non-plateau
 shapes — it signals mild on-manifold structure, not a plateau.
 
-![Plateau index by block. Left: PI is negative (saturating) for both natural and control at all 11 blocks. Right: ΔPI (nat−ctrl) is small, positive, and significant, decaying from early to late blocks.](plots/plateau_score_by_layer.png)
+![Figure 3 — Plateau index by block. Left: PI is negative (saturating) for both natural and control at all 11 blocks. Right: ΔPI (nat−ctrl) is small, positive, and significant, decaying from early to late blocks.](plots/plateau_score_by_layer.png)
+
+**Sharpness shows no late wall.** Mean boundary sharpness of natural rays is 2.2–4.0 across blocks
+(linear reference 1.0; synthetic plateau 3.2), but with `PI < 0` the steepest segment is the *initial*
+rise near `ρ = 0`, not a late region boundary — the opposite end of the curve from a plateau edge.
+Natural rays are also consistently *less* sharp than the matched control at every block (e.g. 2.75 vs
+3.51 at block 0, 4.01 vs 4.91 at block 10), so there is no trained-representation-specific wall either.
 
 **Not an averaging artifact.** Every individual ray is concave; none shows a flat region followed by a
 steep edge. An average therefore cannot be hiding a plateau.
 
-![Individual rays (blue=natural, red=control, dashed=linear reference). Each ray is concave/saturating; no ray is flat-then-steep.](plots/individual_curves.png)
+![Figure 4 — Individual rays (blue=natural, red=control, dashed=linear reference). Each ray is concave/saturating; no ray is flat-then-steep.](plots/individual_curves.png)
 
 Full numbers per block are in `RESULTS.md`; the tidy per-ray table is `results/tidy_results.csv` (one
 row per context × direction × block × basepoint × radius).

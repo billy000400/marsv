@@ -31,28 +31,32 @@ every confirmed-vs-reconstructed field in `MODEL_SPEC.md`.
 The **plateau index** `PI` measures curve shape: `PI > 0` = delayed-then-steep (**plateau**);
 `PI = 0` = straight line; `PI < 0` = **front-loaded/saturating**. `ΔPI = median(PI_natural) −
 median(PI_control)` compares real activations to a norm-matched random control. Cliff's δ is the
-effect size of that comparison (|δ|>0.47 = "large"). 95% CIs are hierarchical bootstraps over
-contexts then directions.
+effect size of that comparison (|δ|>0.47 = "large"). **Sharpness** = a ray's max finite-difference
+slope over its mean slope (linear = 1.0; our synthetic plateau = 3.2); it indicates a plateau *edge*
+only when paired with `PI > 0`. 95% CIs are hierarchical bootstraps over contexts then directions.
 
-| Block | median PI (natural) | median PI (control) | ΔPI (hidden) | ΔPI 95% CI | Cliff's δ | ΔPI (JSD) | flip frac @ max ρ |
-|------:|--------------------:|--------------------:|-------------:|:----------:|----------:|----------:|------------------:|
-| 0  | −0.180 | −0.242 | +0.062 | [0.048, 0.078] | +0.75 | +0.18 | 0.88 |
-| 1  | −0.154 | −0.245 | +0.091 | [0.077, 0.104] | +0.85 | +0.26 | 0.83 |
-| 2  | −0.174 | −0.270 | +0.096 | [0.082, 0.106] | +0.89 | +0.28 | 0.84 |
-| 3  | −0.183 | −0.276 | +0.093 | [0.080, 0.101] | +0.91 | +0.25 | 0.85 |
-| 4  | −0.187 | −0.267 | +0.080 | [0.070, 0.088] | +0.90 | +0.25 | 0.83 |
-| 5  | −0.208 | −0.268 | +0.060 | [0.049, 0.068] | +0.82 | +0.23 | 0.84 |
-| 6  | −0.220 | −0.263 | +0.043 | [0.033, 0.050] | +0.73 | +0.19 | 0.81 |
-| 7  | −0.267 | −0.288 | +0.021 | [0.015, 0.028] | +0.53 | +0.14 | 0.82 |
-| 8  | −0.280 | −0.292 | +0.012 | [0.008, 0.018] | +0.36 | +0.09 | 0.83 |
-| 9  | −0.290 | −0.303 | +0.013 | [0.007, 0.017] | +0.34 | +0.09 | 0.81 |
-| 10 | −0.298 | −0.310 | +0.012 | [0.009, 0.016] | +0.40 | +0.13 | 0.82 |
+| Block | median PI (natural) | median PI (control) | ΔPI (hidden) | ΔPI 95% CI | Cliff's δ | ΔPI (JSD) | sharp nat / ctrl | flip frac @ max ρ |
+|------:|--------------------:|--------------------:|-------------:|:----------:|----------:|----------:|:----------------:|------------------:|
+| 0  | −0.180 | −0.242 | +0.062 | [0.048, 0.078] | +0.75 | +0.18 | 2.75 / 3.51 | 0.88 |
+| 1  | −0.154 | −0.245 | +0.091 | [0.077, 0.104] | +0.85 | +0.26 | 2.27 / 2.99 | 0.83 |
+| 2  | −0.174 | −0.270 | +0.096 | [0.082, 0.106] | +0.89 | +0.28 | 2.33 / 3.36 | 0.84 |
+| 3  | −0.183 | −0.276 | +0.093 | [0.080, 0.101] | +0.91 | +0.25 | 2.26 / 3.57 | 0.85 |
+| 4  | −0.187 | −0.267 | +0.080 | [0.070, 0.088] | +0.90 | +0.25 | 2.16 / 3.58 | 0.83 |
+| 5  | −0.208 | −0.268 | +0.060 | [0.049, 0.068] | +0.82 | +0.23 | 2.27 / 3.65 | 0.84 |
+| 6  | −0.220 | −0.263 | +0.043 | [0.033, 0.050] | +0.73 | +0.19 | 2.35 / 3.59 | 0.81 |
+| 7  | −0.267 | −0.288 | +0.021 | [0.015, 0.028] | +0.53 | +0.14 | 2.97 / 4.26 | 0.82 |
+| 8  | −0.280 | −0.292 | +0.012 | [0.008, 0.018] | +0.36 | +0.09 | 3.28 / 4.33 | 0.83 |
+| 9  | −0.290 | −0.303 | +0.013 | [0.007, 0.017] | +0.34 | +0.09 | 3.61 / 4.62 | 0.81 |
+| 10 | −0.298 | −0.310 | +0.012 | [0.009, 0.016] | +0.40 | +0.13 | 4.01 / 4.91 | 0.82 |
 
 **How to read it.** `median PI (natural)` is **negative at every block** — the real activations are
 saturating, never plateaued. `ΔPI` is positive everywhere (natural is *less* saturating than the
 random control), and the hidden-state and next-char (JSD) metrics agree in sign — but that difference
-is between two non-plateau shapes, so it does **not** meet the plateau bar. `flip frac @ max ρ ≥ 0.81`
-confirms the perturbation range is large enough to change predictions (calibration passed).
+is between two non-plateau shapes, so it does **not** meet the plateau bar. Sharpness values are
+elevated, but with `PI < 0` the steepest segment is the *initial* rise, not a late plateau edge — and
+natural rays are *less* sharp than control at every block, so there is no learned wall. `flip frac @
+max ρ ≥ 0.81` confirms the perturbation range is large enough to change predictions (calibration
+passed).
 
 ## Figures
 

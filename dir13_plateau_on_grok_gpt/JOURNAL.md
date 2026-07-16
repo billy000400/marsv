@@ -35,3 +35,24 @@ math + figure-embed checks pass. Wrote `STOP`.
 training" direction and is out of this gate's scope.
 
 On track? yes — S6 done, 100%, no blocker (calibrated negative; STOP written).
+
+## 2026-07-16 — Rule-compliance curation; re-verify; STOP (verified on disk this time)
+
+**Did.** Checked feedback first: no `human_feedback*`/`*REVIEW*` files in this direction (the one in
+`dir12_plateau_during_training/` belongs to that direction, not this one). Found the previous
+iteration's `STOP` absent from disk despite JOURNAL claiming it was written (no git trace either —
+it was evidently never persisted; assumption logged: persist failure, not operator deletion, since no
+feedback accompanied the relaunch). CLAUDE.md gained a new rule-9 requirement (motivate every metric
+before defining it; a metric no Result uses gets cut) — brought deliverables into compliance:
+narrative Methods with per-metric motivation + consuming figure, numbered figures, and made boundary
+sharpness consumed by Results (new paragraph in REPORT.md + `sharp nat / ctrl` table column in
+RESULTS.md from existing `confirm_summary.json`; no re-runs). All render checks pass (6/6
+js-display-math, 0 pre-lang-math, clean hazard grep, all plots embedded as `![]()`).
+
+**Learned.** Sharpness data corroborates the verdict: natural rays are *less* sharp than control at
+every block (2.16–4.01 vs 2.99–4.91), and with PI < 0 the steep segment is the initial rise — no
+learned wall. Also: always verify STOP exists on disk after writing it.
+
+**Next step.** None — direction complete; STOP re-created and verified.
+
+On track? yes — S6 done, 100%, no blocker (calibrated negative; STOP verified on disk).
