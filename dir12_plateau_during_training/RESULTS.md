@@ -3,7 +3,7 @@
 > CURRENT-BEST ONLY. One row per experiment. History lives in CHANGELOG.md.
 > Model: 4-layer ReLU MLP (784→200→200→200→10), 1000-sample MNIST subset, AdamW
 > (lr 1e-3, wd 0.01), MSE on one-hot targets, batch 200, 100k steps. Perturb first
-> hidden `h1` (post-ReLU), measure last-hidden `L3` displacement. Full definitions in REPORT.md.
+> hidden $h_1$ (post-ReLU), measure last-hidden $L_3$ displacement. Full definitions in REPORT.md.
 > **3 seeds** (0 primary, 1–2 confirmation); numbers are mean [min, max] across seeds.
 
 ## Headline
@@ -42,8 +42,8 @@ regions, and adjacent-checkpoint overlap matrices are clean near-permutations (0
 Confidence = max raw output (MSE-to-one-hot drives the correct output→1; softmax saturates near 0.23
 and is uninformative). "Confident" = max output ≥ 0.7. Group columns = mean plateau contrast for
 confident-correct / confident-wrong / uncertain examples across seeds (dash = <10 such examples per
-seed at that step, underpowered). Region count = average-linkage agglomerative clustering of `L3`, `k`
-by silhouette; a region is *validated* only if ≥20 examples, ≥90% predicted-label purity, and its
+seed at that step, underpowered). Region count = average-linkage agglomerative clustering of $L_3$,
+$k$ by silhouette; a region is *validated* only if ≥20 examples, ≥90% predicted-label purity, and its
 plateau-contrast bootstrap CI excludes 0. Euclidean-metric clustering agrees (10 validated regions at
 100k in all seeds).
 

@@ -224,7 +224,9 @@ If the result matches the expected monotonic picture, the correct next action is
 
 ## Current status
 
-**COMPLETE (Iter 2). All 5 stages done; STOP written.** Trained d4/w200 MNIST MLP for seeds 0/1/2 with
+**COMPLETE (Iter 3). All 5 stages done; operator feedback `human_feedback_07161227.txt` addressed
+(ε value stated, "positive entries" defined+motivated, inline symbols converted to rendered `$…$`
+math, Methods rewritten as motivated narrative — docs-only, no numbers changed); STOP re-written.** Trained d4/w200 MNIST MLP for seeds 0/1/2 with
 13 log-spaced checkpoints; ran the frozen plateau protocol at each. Result replicates: plateau contrast
 rises 0.42→0.80 while test accuracy declines after its step-~300 peak (plateau lags generalization);
 validated stable-region count converges to 10 by step ~300 in every seed; confident-wrong plateaus

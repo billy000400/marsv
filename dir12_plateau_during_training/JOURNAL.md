@@ -63,3 +63,36 @@ On track? yes — S1–S3 done, S4 partial (region counts+composition done, line
 deliverables current-best with all 4 figures embedded. Wrote empty `STOP`.
 
 On track? yes — S1–S5 all done, 100% complete, no blocker; STOP written (no unaddressed feedback).
+
+## 2026-07-16 — Iter 3: operator feedback addressed (docs-only iteration)
+
+**Feedback check:** found `human_feedback_07161227.txt` (unaddressed; no stale STOP present). Per
+CLAUDE.md Part C this WAS the iteration. Four points:
+
+1. *"add the numerical value of epsilon"* → grepped `analyze_sweep.py`: `EPS = 1e-8`, used in both the
+   R_t denominator and the AUC ratio. Stated $10^{-8}$ in the equation + a sentence on why it never
+   affects reported values.
+2. *"define positive entries, and why it matters"* → the phrase lived in the matched-random-control
+   paragraph. Now defined (post-ReLU ⇒ entries ≥ 0; positive entries = active neurons = sparsity) and
+   motivated (unmatched norm/sparsity ⇒ contrast could be a scale artifact, undermining the headline
+   claim that flatness is learned).
+3. *"a lot of in-line symbols are not rendered correct"* → root cause: symbols were in backtick code
+   spans (render as literal code), incl. a raw `\arg\max_i M_{ij}`. Converted to inline `$…$` math in
+   REPORT.md + RESULTS.md using 8b-safe macros (`\lbrace/\rbrace` instead of `\{`). Verified via the
+   GitHub markdown API: 34 inline spans render, 3/3 display blocks, 0 pre-lang-math, hazard grep clean.
+4. *"reads like a list of definitions"* → rewrote Methods/Metrics as narrative per CLAUDE.md rule 9:
+   opening paragraph maps the research questions to the measurements; each metric gets
+   motivation-before-definition ("the obvious measure fails because …") and names the figure that
+   consumes it.
+
+No experiments re-run; no numbers changed. Renamed feedback file to
+`human_feedback_07161227.txt.addressed.md`; appended CHANGELOG; updating PLAN status; re-writing STOP
+(plan complete AND zero unaddressed feedback).
+
+**Learned.** The `js-display-math` API check doesn't catch backtick-wrapped pseudo-math — visually it
+"renders" as code and silently reads as unrendered symbols to a human. Worth converting ALL inline
+symbols to `$…$` at first writing, not just display blocks.
+
+**Next step.** None — direction complete, feedback addressed, STOP re-written.
+
+On track? yes — S1–S5 done + feedback addressed, 100% complete, no blocker; STOP written.

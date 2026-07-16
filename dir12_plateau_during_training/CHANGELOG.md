@@ -44,3 +44,30 @@ First populated RESULTS.md and REPORT.md (both were TODO templates → full curr
   3/3 js-display-math, 0 pre-lang-math); updated the region-count finding and limitations (lineage now
   done, seed-0 scope noted). No result numbers superseded. Marked S4/S5 complete; wrote empty `STOP`
   (no unaddressed feedback files present).
+
+## 2026-07-16 — Iter 3: address operator feedback (human_feedback_07161227) — Methods rewrite + inline-math fixes
+
+Operator feedback (4 points) addressed in REPORT.md (+ small RESULTS.md fixes); no experiments re-run,
+no result numbers changed.
+
+- **ε value added.** The response equation now states $\varepsilon = 10^{-8}$ explicitly (matching
+  `EPS = 1e-8` in `experiments/analyze_sweep.py`), with a sentence explaining it is a division-by-zero
+  guard that is orders of magnitude below typical L3 norms; also noted the same guard in the
+  plateau-contrast denominator.
+- **"Positive entries" defined + motivated.** Matched-random-control paragraph now explains that h1 is
+  post-ReLU (entries ≥ 0), that its positive entries are exactly the neurons the input activates
+  (sparsity), and why matching norm + positive-entry count matters: an unmatched control would differ in
+  scale/sparsity regime, making the contrast an artifact rather than evidence of learned structure.
+- **Inline-symbol rendering fixed.** All inline symbols previously in backtick code spans (`h1`, `L3`,
+  `G_t`, `R_t`, `ρ`, `k ∈ {2..15}`, the raw un-rendered `\arg\max_i M_{ij}`, etc.) converted to proper
+  inline `$…$` math across REPORT.md and RESULTS.md, using 8b-safe forms (`\lbrace/\rbrace`, no
+  backslash-punctuation). Render verified via GitHub markdown API: REPORT.md 3/3 js-display-math,
+  0 pre-lang-math, 34 inline-math spans all intact (spot-checked `\lbrace`, `\arg\max`, `\varepsilon`);
+  hazard grep clean; all plots still embedded as `![…](…)`.
+- **Metrics section rewritten as a motivated narrative** (was a bare list of definitions): new opening
+  paragraph maps the four research questions to the four measurements; each metric now states the
+  question it answers, why the obvious alternative fails (absolute distances not comparable across
+  checkpoints; a bare cluster is not a stable region; counts/IDs cannot detect member swaps), and which
+  Results figure consumes it.
+- Renamed `human_feedback_07161227.txt` → `human_feedback_07161227.txt.addressed.md`. Re-wrote `STOP`
+  (plan complete, zero unaddressed feedback).
