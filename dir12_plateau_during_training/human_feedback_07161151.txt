@@ -1,0 +1,1 @@
+Use the first 2,000 of the 10K test images to test

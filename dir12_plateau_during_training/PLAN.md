@@ -1,258 +1,248 @@
-# PLAN — Direction: How plateau/stable regions evolve during training in the MNIST MLP
+# PLAN — Direction: Animate plateau formation through training in the MNIST MLP
 
 > Working folder: `plateau_during_training`. Agent REWRITES "Current status"/"Next step" + ticks stages each
 > iteration. Disk (PLAN/JOURNAL/RESULTS/CHANGELOG + ../BUDGET.md + ../CLAUDE.md) is the only memory.
 
-## Priority and decision framing
-
-This is a **bounded validation study**, not the highest-upside direction. The expected result is already strong:
-as training progresses, approximately ten stable regions should emerge, one for each confident model prediction,
-while low-confidence points remain outside those stable regions. This is qualitatively consistent with the robust
-partition/region-migration picture in *Deep Networks Always Grok and Here is Why*.
-
-The experiment is worth doing only if it cheaply establishes **when** the regions appear and whether their
-evolution contains a nontrivial split, merge, lag, or transient extra region. If the expected monotonic picture is
-confirmed, finish the report and stop; do not expand this into a large sweep.
-
 ## Research question
 
-How do plateau-bearing stable regions evolve over training in the existing 4-layer ReLU MNIST MLP?
+How do activation plateaus emerge and sharpen as the 4-layer ReLU MNIST MLP is trained?
 
-Specifically:
+The central experiment is longitudinal: at many fixed training checkpoints, run exactly the same early-layer
+activation interpolation, save the resulting downstream activations, and render the plateau curve as one frame
+of an animation. The movie should show whether plateau -> boundary -> plateau structure appears gradually,
+suddenly, or at different times for different digit pairs.
 
-1. Does plateau strength increase with prediction confidence rather than correctness?
-2. Does the number of validated stable regions converge to approximately ten, one per predicted digit?
-3. Do stable regions arise monotonically, or do persistent splits/merges/transient extra regions occur?
-4. Does plateau emergence coincide with training interpolation, test confidence/generalization, or the later
-   robustness/region-migration phase described in the grokking paper?
+## Authoritative definition and implementation anchor
 
-## Expected result and surprise criteria
+The target phenomenon is defined by Matthew Shinkle and StefanHex's post
+[*Activation Plateaus: Where and How They Emerge*](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge):
+interpolate between two early activations, patch every interpolation point into the model, and plot its relative
+downstream distance to the two endpoint outputs. A plateau -> boundary -> plateau appears when `d(t)` stays near
+0, transitions rapidly, then stays near 1.
 
-### Expected / low-surprise outcome
+The canonical implementation in this branch is `interpolate_digits.py`, including its `slerp_path` routine.
+**Read and reuse that script before writing any new plateau code.** Extend it to load training checkpoints and
+save per-checkpoint records; do not replace it with the radial-perturbation pipeline. If any wording in this PLAN
+is ambiguous, the post's interpolation experiment and `interpolate_digits.py` take precedence.
 
-- Plateau strength grows during training as confidence grows.
-- Confident-correct and confident-wrong examples both show plateaus; uncertain examples do not.
-- Validated stable-region count approaches approximately ten and the regions are organized by **predicted**
-  class, not true class.
-- Any early extra clusters are small, low-confidence, unstable under resampling, or fail the plateau test.
-
-This outcome is a complete result. Report it clearly and stop.
-
-### Result worth escalating
-
-Escalate only if at least one of the following is replicated across at least two seeds:
-
-- a predicted class contains two or more plateau-validated regions that persist for at least two adjacent
-  checkpoints;
-- plateau-validated regions split or merge non-monotonically rather than simply becoming more pronounced;
-- strong plateaus appear in low-confidence examples, or plateau strength tracks correctness after controlling
-  for confidence;
-- plateau emergence substantially precedes or lags confidence/generalization/robustness rather than moving with
-  them;
-- plateau strength weakens late in training while confidence continues to rise.
-
-Transient agglomerative-clustering artifacts alone are **not** a surprise. They must also pass the plateau test.
+Random-direction perturbation measures local robustness around one activation. It is related evidence, but it is
+not the definition of a plateau in this direction.
 
 ## Success criterion (definition of "done")
 
-`RESULTS.md` and `REPORT.md` give a reproducible, current-best answer to the four research questions above.
-Completion requires:
+`REPORT.md` and `RESULTS.md` contain:
 
-- one primary run plus two confirmation seeds using the existing MNIST MLP setup;
-- a fixed checkpoint sweep from initialization to 100,000 optimization steps, with denser coverage near any
-  observed transition;
-- training/test loss, accuracy, confidence, and (if already available in the branch) adversarial accuracy at each
-  checkpoint;
-- plateau response curves and a scalar plateau-contrast trajectory, broken down by confidence and correctness;
-- a plateau-validated stable-region count and cluster composition at each checkpoint;
-- a compact split/merge analysis using the same held-out examples across checkpoints;
-- figures saved under `plots/`, raw summary tables saved under `results/`, and every reported metric defined in
-  `REPORT.md` Methods;
-- a direct verdict: **expected monotonic emergence**, **replicated surprise**, or **inconclusive**, with limitations.
+- a checkpointed training run from initialization to 100,000 optimization steps;
+- the same fixed activation-interpolation experiment evaluated at every saved checkpoint;
+- raw endpoint, interpolated, downstream-layer, and logit activations saved so every frame can be regenerated
+  without rerunning training;
+- a clear animation showing plateau evolution through training;
+- a static heatmap or selected frames that remain understandable without playing the animation;
+- train/test accuracy and confidence shown alongside the plateau evolution;
+- confirmation on two additional seeds after the primary animation works;
+- a concise verdict on when plateaus emerge and whether the evolution is consistent across pairs and seeds.
 
-Null/expected results are COMPLETE. When the answer is documented, write an empty `STOP` file.
+Expected, null, and non-monotonic results are all COMPLETE. When the question is answered, write an empty
+`STOP` file.
+
+## Core plateau protocol
+
+Match the basic protocol in *Activation Plateaus: Where and How They Emerge* as closely as the MLP architecture
+allows:
+
+1. Choose two fixed MNIST test images, `A` and `B`.
+2. Run both through the checkpointed model and record their post-ReLU first-hidden-layer activations,
+   `h1_A` and `h1_B`.
+3. Generate 50 interpolation points using spherical interpolation with linearly interpolated endpoint norms,
+   matching the post's `slerp_rescale` convention.
+4. Patch each interpolated activation at the output of hidden layer 1.
+5. Propagate through the remainder of the model and record hidden layers 2, 3, the final hidden layer, and logits.
+6. At every recorded layer, compute the post's relative endpoint distance:
+
+   `d(alpha) = ||x(alpha) - A|| / (||x(alpha) - A|| + ||x(alpha) - B||)`.
+
+7. Plot `d(alpha)` against interpolation position `alpha`. A plateau-boundary-plateau curve stays close to 0,
+   changes rapidly over a narrow interval, and stays close to 1.
+
+The primary animation uses logit-space `d(alpha)`, which is the closest analogue to the post. Layerwise curves
+are saved and shown at selected checkpoints to reveal how the plateau is sharpened by successive MLP layers.
+
+## Intervention layer
+
+Use the **post-ReLU output of hidden layer 1** as the primary intervention point.
+
+This is the earliest hidden representation in the 4-layer MLP and is the direct analogue of interpolating at an
+early `resid_post` layer in the post. Intervening earlier would mean interpolating raw MNIST pixels. That asks a
+different question about input-space image morphing and is not part of the primary experiment.
+
+Do not vary the intervention layer in the main training animation. Holding it fixed ensures that changes between
+frames are caused by training, not by changing the number of downstream layers.
+
+## Fixed image-pair bank
+
+Select all pairs before inspecting intermediate-checkpoint plateau curves and save their test-set indices:
+
+- one deterministic pair for each unordered pair of different true digits: 45 cross-class pairs;
+- one deterministic within-class pair for each digit: 10 within-class controls.
+
+Use a fixed seed and record the exact image IDs. Do not replace a pair because its animation looks uninteresting.
+At each checkpoint, save both true labels and current predictions/confidences, since early checkpoints may not
+yet classify the endpoints correctly.
+
+For the main animation, show a fixed readable subset of ten cross-class pairs chosen by digit identity before
+viewing results. Save individual animations/heatmaps for all 55 pairs so heterogeneous behavior is not hidden.
+
+## Checkpoint schedule
+
+The model is small, so use a simple high-resolution schedule rather than trying to guess the transition time:
+
+- save steps `0, 10, 30, 100, 300` to capture very early learning;
+- save every 500 optimization steps from `500` through `100,000`.
+
+This gives 205 frames and avoids cherry-picking checkpoints after seeing the result. Save model `state_dict`,
+training step, optimizer/config metadata, train/test loss, train/test accuracy, and mean prediction confidence.
+Optimizer state is needed only for resumability and may be stored less frequently if disk limits require it.
+
+After the primary-seed movie is rendered, identify any adjacent 500-step frames between which the plateau changes
+abruptly. If the timing cannot be resolved, rerun that seed deterministically and save every 50 steps only within
+the relevant interval. Do not globally increase checkpoint density unless the transition genuinely requires it.
+
+## What to save at every checkpoint
+
+For every fixed pair, save one self-contained record containing:
+
+- checkpoint step and seed;
+- endpoint image IDs, true labels, predictions, and confidences;
+- endpoint activations at every hidden layer and endpoint logits;
+- the 50 interpolation coefficients;
+- the 50 interpolated hidden-layer-1 activations;
+- downstream activations at every remaining hidden layer for all interpolation points;
+- logits for all interpolation points;
+- relative-distance curves `d(alpha)` at every recorded layer;
+- predicted class and maximum softmax probability at every interpolation point.
+
+Use a documented stable schema such as one `.pt` or `.npz` file per checkpoint and seed. Include a manifest that
+lists every expected checkpoint and flags missing/corrupt files. Save numeric arrays, not only PNG frames.
+
+## Optional perturbation control (after the interpolation deliverable)
+
+The existing random-direction perturbation experiment may be rerun at a small number of selected checkpoints
+only after the interpolation animation is complete:
+
+- choose a fixed class-balanced set of natural first-hidden-layer activations;
+- use the same perturbation directions and radius grid at the selected checkpoints;
+- measure last-hidden and logit displacement;
+- compare the aggregate natural-activation response with norm-and-sparsity-matched random activations.
+
+Its role is only to ask whether local robustness changes consistently with the interpolation curves. It is not a
+required animation, must not determine checkpoint selection, and must not be used to define or count plateaus.
+
+## Minimal reported quantities
+
+Keep the report readable. The primary evidence is the saved `d(alpha)` curves, predicted-class trajectories,
+and their animation. Report only:
+
+1. train/test accuracy and mean confidence versus training step;
+2. the raw relative-distance curves `d(alpha)`;
+3. predicted class along the interpolation path.
+
+Do not impose a scalar threshold that decides whether a curve "is a plateau" in the primary analysis. First show
+the curves and animation using the post's phenomenology. If the visual transition is too ambiguous to describe,
+add at most one transparent curve-derived summary and explain why it is necessary.
+
+Do not add Jacobian norms, silhouette scores, cluster counts, manifold distances, AUC variants, or additional
+sharpness metrics unless the primary experiment reveals a specific ambiguity they are required to resolve.
 
 ## Fallback (if time runs short)
 
-Use one seed and six checkpoints: initialization, early training, first near-zero training error, an intermediate
-post-interpolation point, late training, and 100,000 steps. Reuse the existing final-checkpoint measurement
-protocol; report class/confidence-conditioned response curves, plateau contrast, and the number of predicted
-classes with a validated plateau. Skip full cluster-lineage analysis. Produce `REPORT.md`, state that the result is
-single-seed, and write `STOP`. The wrapper reserves the last 20 minutes to finalize + STOP.
+Run one seed and save every 2,000 steps plus `0, 10, 30, 100, 300`, giving at least 55 frames. Evaluate ten fixed
+cross-class pairs and the ten within-class controls, save all downstream activations/logits, and produce one
+logit-relative-distance animation plus a static early/middle/late comparison. State clearly that seed and pair
+coverage are limited. The wrapper reserves the last 20 minutes to finalize + STOP.
 
 ## Setup (fixed)
 
-- Build on the existing `image-models` branch and reuse its current training and plateau-analysis code rather
-  than creating a parallel implementation.
+- Build on the existing `image-models` branch and reuse its model and training configuration.
 - Model: 4-layer ReLU MLP, hidden width 200.
-- Data: the same fixed 1,000-sample MNIST training subset and the same train/test split used in the existing
-  reproduction.
-- Training: batch size 200, 100,000 optimization steps, and the exact optimizer, learning rate, weight decay,
-  initialization, preprocessing, and evaluation conventions already used by the branch. Record all values in
-  `REPORT.md`; do not silently substitute defaults.
-- Seeds: one primary seed and two confirmation seeds. Keep the dataset subset fixed across seeds unless the
-  existing experiment defines the subset from the seed; document whichever convention is already in use.
-- Intervention point: first hidden-layer post-ReLU activation.
-- Primary downstream measurement: L2 displacement at the last hidden-layer activation, matching the current
-  experiment. Logit-space displacement is a secondary robustness check.
-- Evaluation set: choose one fixed, class-balanced held-out set before the sweep and preserve example IDs across
-  all checkpoints. Do not filter to correctly classified examples before the primary analysis.
-- Use the same perturbation directions for all checkpoints within a seed and the same radius grid across seeds.
-- Include norm-and-sparsity-matched random first-layer activations as the negative control at every checkpoint.
+- Data: the same fixed 1,000-example MNIST training subset and train/test split used in the existing experiment.
+- Training: batch size 200 for 100,000 optimization steps. Recover and record the exact optimizer, learning rate,
+  weight decay, initialization, preprocessing, and data-order conventions from the branch.
+- Seeds: one primary seed and two confirmation seeds.
+- Primary intervention: first hidden-layer post-ReLU activation.
+- Interpolation: 50-point norm-rescaled SLERP from `alpha=0` to `alpha=1`.
+- Primary recording: logits. Also record every downstream hidden-layer activation.
+- Fix pair IDs, interpolation coefficients, plot limits, colors, and animation layout across checkpoints.
 - **Shared limits in `../BUDGET.md`; operator rules in `../CLAUDE.md` — read both every iteration.**
 - **Deliverable hygiene (see CLAUDE.md):** RESULTS.md/REPORT.md = current-best only, no history; CHANGELOG.md
   = the history.
 - **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, flax** — they break the CUDA
   build.
 
-## Operational definitions (lock before running the sweep)
-
-Let `h1(x)` be the first hidden-layer post-ReLU activation and let `G_t` be the checkpoint-`t` mapping from
-`h1` to the last hidden layer. For relative perturbation radius `rho` and random unit direction `u`, use the
-cross-checkpoint response
-
-`R_t(x, rho) = median_u ||G_t(h1 + rho * ||h1|| * u) - G_t(h1)||_2 / (||G_t(h1)||_2 + eps)`.
-
-Also retain the branch's existing absolute-distance plot so the final checkpoint can be compared directly with
-the current result.
-
-Before examining intermediate checkpoints, freeze:
-
-- the perturbation-radius grid and number of directions;
-- the small-radius interval used for scalar summaries;
-- confidence bins (use absolute probability bins, not per-checkpoint quantiles);
-- clustering preprocessing, distance metrics, candidate cluster counts, minimum cluster size, and bootstrap
-  procedure.
-
-Primary scalar metric:
-
-`plateau_contrast = 1 - AUC(response_data) / AUC(response_matched_random)`
-
-over the frozen small-radius interval. Larger positive values mean stronger suppression near natural activations
-relative to the matched-random control. Report bootstrap confidence intervals over examples. A descriptive knee
-or breakpoint radius may also be reported, but return `NA` when a two-segment fit is not better supported than a
-single smooth curve; do not force a knee into every checkpoint.
-
-Candidate regions are obtained by average-linkage agglomerative clustering of last-hidden-layer activations on
-the fixed evaluation set. Check both cosine and Euclidean distance, as in the existing analysis. A cluster counts
-as a **validated stable region** only if it:
-
-1. contains at least 20 evaluation examples;
-2. has at least 90% purity in the model's predicted label; and
-3. has a positive plateau contrast whose 95% bootstrap interval excludes zero.
-
-Select the candidate cluster count without labels (for example, silhouette over `k=2..15`) and report sensitivity
-to the two distance metrics. Use true labels, predicted labels, correctness, and confidence only to interpret the
-result after clustering.
-
 ## Stages (checklist)
 
-- [x] **S1 — Audit and reproduce the endpoint.** Read `../BUDGET.md` and `../CLAUDE.md`; map the existing
-  training, checkpoint, activation-hook, perturbation, clustering, and plotting code. Record exact conventions in
-  `JOURNAL.md`. Reproduce the current 100,000-step findings: stable class clusters show plateaus, the uncertain
-  mixed cluster does not, and confident-wrong examples behave like members of the predicted stable region. Do
-  not launch the checkpoint sweep until this endpoint agrees qualitatively with the existing figures.
-- [x] **S2 — Lock protocol and generate checkpoints.** Freeze the evaluation examples, perturbation directions,
-  radius grid, metric definitions, confidence bins, and clustering choices. Train the primary seed and save at
-  steps `0, 10, 30, 100, 300, 1k, 3k, 10k, 20k, 30k, 50k, 75k, 100k`; add event-aligned checkpoints around
-  the first near-zero training error or any sharp change in confidence/robustness. Then run two confirmation
-  seeds with the same schedule. Save lightweight state dicts and a manifest; do not commit bulky redundant
-  artifacts.
-- [x] **S3 — Measure plateau emergence.** At every checkpoint compute response curves for all held-out examples,
-  the matched-random control, and absolute confidence/correctness groups: confident-correct, uncertain-correct,
-  confident-wrong, and uncertain-wrong. Save raw per-example/per-radius summaries and plot (a) representative
-  early/middle/late response curves and (b) plateau contrast versus optimization step with seed uncertainty.
-  Overlay loss, accuracy, mean confidence, and adversarial accuracy only if it is already available cheaply.
-- [x] **S4 — Count and track stable regions.** Cluster last-hidden activations independently at each checkpoint;
-  validate every candidate cluster with its prediction purity and plateau contrast. Plot validated region count,
-  cluster confidence, and prediction composition through training. Because the same examples are reused, align
-  adjacent checkpoints by maximum membership overlap and produce a compact transition heatmap/table marking
-  births, deaths, splits, and merges. Any claimed extra region must survive bootstrap/distance-metric checks and
-  appear in at least two adjacent checkpoints.
-- [x] **S5 — Verdict, cleanup, and stop.** Compare the trajectories with the preregistered expected result and
-  surprise criteria. `REPORT.md` must distinguish plateau/stable regions from the paper's spline/linear regions:
-  similar timing is evidence of association, not identity. Keep only current-best figures in `RESULTS.md` and
-  `REPORT.md`, move iteration history to `CHANGELOG.md`, document limitations, and write empty `STOP`.
+- [ ] **S1 — Match the post at the final checkpoint.** Read `../BUDGET.md` and `../CLAUDE.md`. Read
+  `interpolate_digits.py` end to end and use its `slerp_path` and relative-distance convention as the starting
+  point. Extend/test it for norm-rescaled SLERP at hidden layer 1, downstream recording,
+  and relative endpoint distance. At the 100,000-step checkpoint, reproduce plateau and non-plateau examples
+  with 50 interpolation points and predicted class along the path. Verify that `alpha=0/1` exactly reproduce the
+  two unpatched endpoint outputs.
+- [ ] **S2 — Lock pairs, schema, and checkpoints.** Freeze the 55 image pairs, checkpoint schedule, plot axes,
+  and saved-record schema. Write a manifest test that checks every file contains endpoints, 50 interpolation
+  points, all downstream layers, logits, per-point predictions, and metadata.
+- [ ] **S3 — Run and record the primary training movie.** Train the primary seed, save the scheduled state dicts
+  and training metrics, then evaluate the exact same `interpolate_digits.py`-based protocol at every checkpoint.
+  Evaluation may run online or offline, but it must use the checkpointed weights and fixed pair IDs. Do not save
+  figures without the underlying numeric arrays. Do not substitute radial perturbations for this stage.
+- [ ] **S4 — Render the animation and static summary.** Produce a main MP4/GIF with training step visible in every
+  frame, fixed axes, logit `d(alpha)` curves for the fixed ten-pair subset, and a compact accuracy/confidence
+  inset. Produce one static training-step-by-interpolation heatmap for representative pairs and one layerwise
+  early/middle/late plot. Avoid a wall of checkpoint figures in `REPORT.md`.
+- [ ] **S5 — Resolve timing and confirm.** Inspect adjacent animation frames to identify the transition interval.
+  If 500-step resolution is insufficient, rerun densely at 50-step spacing inside that interval. Repeat the
+  frozen main protocol for two additional seeds and compare whether the emergence time and qualitative movie
+  are stable.
+- [ ] **S6 — Verdict and stop.** State whether plateaus appear gradually or abruptly, whether different digit
+  pairs synchronize, and whether sharpening continues after test accuracy stabilizes. Keep only the main
+  animation, minimal static figures, and required tables in REPORT/RESULTS; move development history to
+  CHANGELOG; write empty `STOP`.
 
-## Required figures
+## Required deliverables
 
-1. `plots/training_dynamics.*` — loss, accuracy, confidence, and optional adversarial accuracy versus log step,
-   with key checkpoint events marked.
-2. `plots/plateau_curves_by_stage.*` — matched early/middle/late response curves for confidence/correctness
-   groups plus matched-random controls.
-3. `plots/plateau_contrast_and_region_count.*` — plateau contrast and validated stable-region count versus step,
-   with three-seed uncertainty.
-4. `plots/region_composition_and_lineage.*` — predicted-label/confidence composition and the minimal split/merge
-   view needed to support the verdict.
-
-Each figure must be generated by a named script, saved to `plots/`, cited from `REPORT.md`, and defined in the
-Methods/caption. Avoid grids of dozens of unreadable checkpoint panels.
-
-## Interpretation guardrails
-
-- The paper's spline/linear regions tile input space according to ReLU activation patterns. Our stable regions
-  are empirical basins defined by downstream insensitivity plus cluster coherence. Do not call them the same
-  object.
-- A cluster is not automatically a plateau, and a plateau is not automatically a disconnected manifold
-  component.
-- Do not condition the primary analysis on correct classification; doing so would hide the key confident-wrong
-  result.
-- Do not compare absolute hidden-space distances across checkpoints without normalization; activation scales
-  change during training.
-- Do not infer births/splits/merges from changing cluster IDs. Align the same examples by membership overlap.
-- Report sample counts for every confidence/correctness group. If a group is too small, mark it underpowered
-  instead of smoothing it away.
+- `results/checkpoint_manifest.*`
+- `results/plateau_records/seed_<n>/step_<step>.*`
+- `plots/plateau_evolution.mp4` or `.gif`
+- `plots/plateau_training_heatmap.*`
+- `plots/layerwise_selected_steps.*`
+- `plots/training_context.*`
+- `REPORT.md` with a short Methods section and direct verdict
 
 ## Out of scope (do NOT)
 
-- Scaling to a larger ResNet.
-- Testing the small GPT/transformer from the grokking paper.
-- Input-noise sweeps or the error-correction hypothesis.
-- Activation steering interventions.
-- Testing whether stable regions are disconnected activation-manifold components.
-- Reimplementing SplineCam or the paper's full local-complexity analysis from scratch. If a compatible metric is
-  already available, log it as a secondary timing reference only.
-- Architecture, width, depth, optimizer, dataset-size, or weight-decay sweeps.
-- Turning an expected result into a broad mechanistic claim about LLMs.
+- Using matched-random activations to label individual points as "plateau-positive."
+- Treating random-direction perturbation response as the definition of a plateau.
+- Claiming that the animation alone proves exactly ten connected stable regions.
+- Interpolating raw pixels as part of the primary experiment.
+- Varying intervention layer, architecture, width, optimizer, or dataset size.
+- Larger ResNet or small-GPT experiments.
+- Manifold-connectivity, steering, Jacobian, spline, or clustering analyses.
+
+The saved activation records should make later region-counting or mechanism analyses possible without retraining,
+but those analyses must not delay completion of this training-evolution experiment.
 
 ## On-track check (required every iteration)
 
 End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
-If the result matches the expected monotonic picture, the correct next action is to finish `REPORT.md` and
-`STOP`, not to add experiments.
-
 ## Current status
 
-**COMPLETE (Iter 3). All 5 stages done; operator feedback `human_feedback_07161227.txt` addressed
-(ε value stated, "positive entries" defined+motivated, inline symbols converted to rendered `$…$`
-math, Methods rewritten as motivated narrative — docs-only, no numbers changed); STOP re-written.** Trained d4/w200 MNIST MLP for seeds 0/1/2 with
-13 log-spaced checkpoints; ran the frozen plateau protocol at each. Result replicates: plateau contrast
-rises 0.42→0.80 while test accuracy declines after its step-~300 peak (plateau lags generalization);
-validated stable-region count converges to 10 by step ~300 in every seed; confident-wrong plateaus
-strongly (confidence, not correctness). The step-10k dip is seed-0-only → seed noise, not a real
-transient. Required figure #4 added: membership-overlap lineage (seed 0) confirms monotonic
-evolution — regions born one digit at a time, no digit ever hosts ≥2 validated regions, adjacent
-overlap matrices are clean near-permutations (0 splits/0 merges among validated regions; raw silhouette
-k oscillates 10–12 as a transient non-validated sub-cluster, never persisting). Verdict: **expected
-monotonic emergence, replicated**. RESULTS.md/REPORT.md are current-best with all 4 required figures
-embedded. Deliverable complete.
-
-For reference, the existing final checkpoint already showed the main endpoint behavior:
-
-- the 4-layer width-200 ReLU MLP trained on 1,000 MNIST samples exhibits plateaus when first-hidden-layer
-  natural activations are perturbed and last-hidden-layer displacement is measured;
-- norm-and-sparsity-matched random activations do not show the same plateau;
-- agglomerative clustering finds ten class-dominant clusters plus an uncertain mixed cluster rather than a
-  convincing eleventh stable region;
-- the mixed cluster lacks a plateau;
-- confident-wrong examples show a plateau, supporting confidence rather than correctness as the key correlate;
-- within-proposed-region perturbations move downstream much less than cross-region perturbations.
-
-What is missing is the checkpoint trajectory that establishes when these properties arise and whether region
-membership evolves monotonically.
+The branch already contains `interpolate_digits.py`, which implements the relevant endpoint-activation SLERP,
+relative-distance `d(t)` curve, and predicted-class trajectory at the final trained model. What is missing is an
+extension of that exact experiment across fixed training checkpoints, with raw activations saved for animation.
 
 ## Next step
 
-None — direction complete and `STOP` written. If re-entered with new operator feedback, delete `STOP`,
-address the feedback, then re-write `STOP` when clean.
+Read `../BUDGET.md`, `../CLAUDE.md`, Matthew's post, and `interpolate_digits.py`. Run that script unchanged on its
+existing final-checkpoint example first. Then make the smallest extension needed to emit one checkpoint record
+containing endpoint activations, 50 SLERP points, downstream activations, logits, `d(alpha)`, and predicted class
+along the path. Confirm exact endpoint reproduction before locking the pair bank and launching checkpointed
+training.
