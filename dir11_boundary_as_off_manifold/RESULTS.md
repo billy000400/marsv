@@ -90,6 +90,33 @@ interpolation position `t`, y = `d(t)`) confirm the filter selects genuine flat�
 
 ![Three representative verified d(t) curves, all plateau-jump-plateau.](plots/population_dt.png)
 
+### Why `G` divides by `max(s_i, s_j)` — and what the alternatives show
+
+A journey from region `i` to region `j` travels through both, so hops up to `max(s_i, s_j)` occur on
+its within-region legs regardless of the boundary — the sparser region demands them internally. A
+smaller denominator (`min`, `mean`, global) flags a pair as "separated" merely because its regions
+differ in density. Sensitivity check on the identical frozen paths (the `max` row reproduced the
+published numbers exactly):
+
+| denominator | between median `G` (95% CI) | counterexamples | digit-9 sub `G` |
+|--|--|--:|--:|
+| **`max(s_i,s_j)` — frozen** | **0.996** (0.97–1.03) | **25/45** | 1.00 |
+| `min(s_i,s_j)` | 1.274 (1.21–1.34) | 2/45 | 1.26 |
+| `mean(s_i,s_j)` | 1.117 (1.06–1.17) | 5/45 | 1.12 |
+| global `s` (= 2.46) | 1.093 (1.06–1.11) | 7/45 | 1.21 |
+
+The shifts under the alternatives are density-mismatch arithmetic, not a boundary gap: per pair,
+`B / max(s_i,s_j)` has quartiles 0.945–1.059 — the bottleneck almost exactly *equals* the sparser
+region's internal scale — so `B/min` etc. exceed 1 exactly when the regions' densities differ.
+`min`-normalized `G` correlates 0.68 with the pair's scale-asymmetry ratio (frozen `max`-`G`: −0.09),
+and its 14 elevated pairs all involve the three densest regions (digits 1, 8, 0). Decisively: the
+biggest forced hop is a genuine boundary crossing (edge joining two different digits' points) on only
+**27%** of the 663 verified between-plateau journeys — 73% of the time it lies inside one digit's
+cloud (controls: 4%). Verdicts unchanged; even under the harshest `min` denominator two counterexample
+pairs remain (4–5, 4–7).
+
+![Panel (a): between-plateau median G under four denominators; only the frozen max sits on the within baseline, and all shifts stay below the within-plateau p95. Panel (b): min-normalized per-pair G grows with scale asymmetry while the frozen max-G stays flat at 1.](plots/normalization_check.png)
+
 ## Investigation 2 — the direct path crosses a region real activations avoid
 
 Same frozen population: 46 region pairs × 20 endpoint pairs (seed 0); 676 of 920 paths pass the `d(t)`

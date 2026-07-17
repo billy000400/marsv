@@ -243,3 +243,33 @@ paths/seed as `direct_path_offmanifold.py`; seed-0 regression check reproduced t
   `results/wrong_class_corridor.json`.
 - Verified: GitHub API 5/5 display-math, 0 pre-math, 0 inline hazards; 0 bare plot paths; 10 embedded
   figures per deliverable. All prior numbers/verdicts unchanged.
+
+## 2026-07-17 — operator feedback: why normalize G by max(s_i, s_j)? (iter 11)
+
+Addressed `human_feedback_2.txt` (renamed `.addressed.md`): "I need your motivation of why including
+a max(si, sj), why max? is it a true reflection at the boundary…". Two-part answer — written
+motivation plus an empirical stress test (`experiments/normalization_check.py`, base model, identical
+frozen seed-0 sampling stream; the max variant reproduced the published numbers exactly: between-G
+median 0.996, 25/45 counterexamples, digit-9 sub 1.00).
+
+- **Motivation (new Methods paragraph):** a journey between regions i and j traverses both, so hops up
+  to max(s_i, s_j) occur on its within-region legs regardless of the boundary; any smaller denominator
+  (min/mean/global) flags a pair as separated merely because its regions differ in density. G > 1
+  under max isolates a hop AT the boundary bigger than either plateau's interior requires.
+- **Sensitivity (new Results subsection + figure):** under min/mean/global the between-plateau median
+  G shifts to 1.274 / 1.117 / 1.093 (CIs above 1) and counterexamples drop to 2/45, 5/45, 7/45 —
+  reported plainly. The shift is density-mismatch arithmetic, not a boundary gap: per pair
+  B/max(s_i,s_j) has quartiles 0.945–1.059 (the bottleneck ≈ the sparser region's internal scale), so
+  B over any smaller denominator exceeds 1 exactly when densities differ; min-normalized G correlates
+  0.68 with the pair's scale-asymmetry ratio (frozen max-G: −0.09) and its 14 elevated pairs all
+  involve the three densest regions (digits 1, 8, 0).
+- **Boundary diagnostic (new, normalization-free):** locating each verified path's actual bottleneck
+  edge, only 27% of 663 between-plateau journeys have their biggest forced hop at a genuine class
+  boundary (edge joining two different digits' points); 73% have it inside one digit's cloud
+  (within controls: 4%). The bottleneck is usually not a boundary property at all.
+- **Verdicts UNCHANGED** (universal REFUTED, typical NOT SUPPORTED), now with the normalization
+  sensitivity stated in both deliverables; even under the harshest min denominator two counterexample
+  pairs remain (4–5, 4–7, G = 0.99–1.00). Limitations note updated to point to the stress test.
+- New artifacts: `plots/normalization_check.png` (embedded in both deliverables),
+  `results/normalization_check.json`. Verified: GitHub API 5/5 display-math, 0 pre-math, 0 inline
+  hazards; 0 bare plot paths; 11 embedded figures per deliverable.

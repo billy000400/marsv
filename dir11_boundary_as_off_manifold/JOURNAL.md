@@ -383,3 +383,49 @@ question (decision: corridor = wrong-image home, yes/no → NO) and live in one 
 
 On track? yes — plan complete (100%), operator feedback addressed with a clear negative answer,
 deliverables curated + re-verified; STOP written.
+
+---
+
+## 2026-07-17 — iter 11: operator feedback — why max(s_i, s_j)? → STOP
+
+**Did.** FEEDBACK FIRST: found unaddressed `human_feedback_2.txt` (no STOP on disk — cleared by the
+wrapper relaunch as usual): "motivation of why including a max(si, sj), why max? is it a true
+reflection at the boundary?" Wrote `experiments/normalization_check.py`: replicates the frozen
+seed-0 sampling stream of `population_manifold.analyze` byte-for-byte (same rng call order: within
+scales for regions 0–9, then the 45 cross-digit pairs, then 9A/9B sub-scales and pair) while
+recording each pair's RAW bottleneck B and — new — the identity of the actual bottleneck EDGE via an
+edge-tracking DFS over the MST. Recomputed all verdict quantities under four denominators
+(max/min/mean/global) and added a normalization-free boundary diagnostic (is the biggest forced hop a
+cross-class edge?). Regression check passed exactly (max variant: 0.996, 25/45, digit-9 1.00). Added a
+"Why max?" Methods paragraph + a "Is max the right yardstick?" Results subsection + figure
+(`plots/normalization_check.png`) to REPORT.md, a compact mirror subsection to RESULTS.md, updated the
+Limitations pointer, renamed the feedback file `.addressed.md`, appended CHANGELOG. Re-verified
+rendering (5/5 display math, 0 pre-math, 0 inline hazards, 0 bare paths, 11 embedded figures/file).
+
+**Learned.** The operator's question hits a genuine sensitivity, and answering it honestly made the
+verdict stronger, not weaker. (a) Under min/mean/global the between-plateau median G rises to
+1.274/1.117/1.093 with CIs above 1 — so the typical-association direction DOES flip under alternative
+normalizations; hiding that would have been spin. (b) But the movement is fully explained by one
+normalization-free fact: per pair, B/max(s_i,s_j) has quartiles 0.945–1.059 — the between-pair
+bottleneck almost exactly EQUALS the sparser region's internal scale, so dividing by anything smaller
+mechanically exceeds 1 whenever densities differ. min-G correlates 0.68 with scale asymmetry (max-G:
+−0.09) and its 14 elevated pairs all involve the three densest digit clouds (1, 8, 0) — it scores
+density mismatch, not the boundary. (c) Best new evidence: the bottleneck edge is a genuine boundary
+crossing on only 27% of 663 verified journeys (73% inside one digit's cloud; controls 4%) — "is it a
+true reflection at the boundary?" answers itself: the hardest hop usually isn't at the boundary, which
+is exactly why no denominator choice can conjure a wall. Assumption logged: kept the frozen max as
+primary (it implements the PLAN's "no larger gap than is normally required inside a plateau" and was
+frozen before between results; rejected switching to mean/global post hoc — that would be tuning the
+threshold after seeing results, explicitly forbidden by the PLAN's verdict rules; rejected reporting
+max only — the sensitivity is real and is now stated in both deliverables).
+
+**Next.** Feedback fully addressed (file renamed); plan complete; zero unaddressed feedback files →
+writing STOP.
+
+Metric check: I added NO new reported score — the subsection re-reports the SAME G under alternative
+denominators plus one diagnostic fraction (bottleneck-edge-at-boundary %). It exists solely to answer
+the operator's question (decision: does the verdict depend on the max choice? — no, and the frozen
+choice is now motivated); G with max(s_i,s_j) remains the sole primary metric.
+
+On track? yes — plan complete (100%), operator feedback addressed with motivation + stress test,
+verdicts unchanged and now normalization-audited; STOP written.

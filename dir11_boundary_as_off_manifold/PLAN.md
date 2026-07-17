@@ -201,15 +201,19 @@ Also answer:
 
 ## Current status
 
-**COMPLETE (iter 10) — all feedback addressed, STOP written.** Iter 10 addressed operator feedback
-(`human_feedback_1.txt` → `.addressed.md`): does the low-density corridor correspond to the
-wrongly-classified images (the natural cloud uses only correct ones)? Answer **NO**, three ways
-(`experiments/wrong_class_corridor.py`, base model, identical frozen paths, seed-0 regression check
-passed): (A) the 295 wrong-image activations sit at the correct cloud's edge (median 74th pctile,
-10% > p95), not in the corridor (95.4, 53%); (B) augmenting the cloud with them leaves E unchanged
-(95.4 → 95.2); (C) corridor points are at the 92nd pctile of the wrong cloud's own baseline (controls
-90th) — no image, right or wrong, lives in the corridor. New figure/subsection in both deliverables.
-Iter 9 addressed readability feedback
+**COMPLETE (iter 11) — all feedback addressed, STOP written.** Iter 11 addressed operator feedback
+(`human_feedback_2.txt` → `.addressed.md`): why does `G` normalize by `max(s_i, s_j)`, and is that a
+true reflection at the boundary? Answered with a Methods motivation paragraph + an empirical stress
+test (`experiments/normalization_check.py`, identical frozen seed-0 stream, max-variant regression
+check exact): under min/mean/global the between-median shifts to 1.27/1.12/1.09 (stated plainly), but
+the shift is density-mismatch arithmetic — per pair B/max has quartiles 0.945–1.059 (bottleneck ≈
+sparser region's internal scale), min-G correlates 0.68 with scale asymmetry (max-G −0.09), and the
+bottleneck edge is a genuine class-boundary crossing on only 27% of 663 verified journeys (73% inside
+one digit's cloud; controls 4%). Verdicts UNCHANGED; new subsection + figure in both deliverables.
+Iter 10 addressed operator feedback (`human_feedback_1.txt`): does the low-density corridor correspond
+to the wrongly-classified images? **NO**, three ways (`experiments/wrong_class_corridor.py`): wrong
+activations sit at the correct cloud's edge (74th pctile), augmenting leaves E 95.4 → 95.2, corridor
+points at the 92nd pctile of the wrong cloud's own baseline. Iter 9 addressed readability feedback
 (`human_feedback_07161625.txt` → `.addressed.md`): plain-words MST explanation + toy schematic
 (`plots/mst_explainer.png`), Summary shortened to motivation + three findings + verdict, core
 vocabulary reduced to d(t)/G/E with a "How to read the plots" box, captions shortened, repetition
@@ -242,8 +246,9 @@ under-powered (only 1 pair passes the `d(t)` sharpness filter) and is down-weigh
 
 ## Next step
 
-None — direction complete and all feedback addressed (zero unaddressed feedback files; iter 10
-handled the 2026-07-17 wrong-images question, iter 9 the readability review). Every verdict-rule
+None — direction complete and all feedback addressed (zero unaddressed feedback files; iter 11
+handled the max(s_i,s_j) normalization question, iter 10 the wrong-images question, iter 9 the
+readability review). Every verdict-rule
 clause is explicitly satisfied: counterexamples are
 stable under **resampling** (iter 7: endpoint seeds 0/1/2 → 21 pairs incl. digit-9 have G ≤ 1 in every
 draw; seed-0 regression check reproduced published numbers exactly) AND under model replication (second

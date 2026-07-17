@@ -125,6 +125,21 @@ G \;=\; \frac{B(u,v)}{\max(s_i,\, s_j)}
 reading in the box above, and it fixes the counterexample threshold at `G = 1` before any
 between-plateau data is seen.
 
+**Why `max(s_i, s_j)` and not the smaller scale?** (The choice was frozen in the plan before any
+between-plateau result; an operator asked for its motivation and whether it truly reflects the
+boundary — the sensitivity check is in Results.) The claim under test is that the *boundary* between
+two plateaus forces an abnormally large hop — larger than within-plateau travel already forces. A
+journey from region `i` to region `j` travels through both regions, so hops up to `max(s_i, s_j)`
+occur on its within-region legs whether or not the boundary adds anything: the sparser of the two
+regions demands them internally. Any smaller denominator (`min`, `mean`, a global scale) flags a pair
+as "separated" merely because its two regions differ in density, even if crossing the boundary itself
+is free. `G > 1` under `max` therefore isolates exactly what the components question asks: a hop *at
+the boundary* bigger than either plateau's own interior requires. The cost is that `max` is the
+strictest definition of separation (the largest denominator, hence the smallest `G`), so Results
+stress-tests it two ways: every verdict quantity is recomputed under the three alternative
+denominators, and two normalization-free diagnostics check the raw bottleneck against the sparser
+region's scale and locate *where on the journey* the biggest hop actually occurs.
+
 **`E` — the off-manifold excursion (Investigation 2's score).** `G` asks whether the *data* is
 connected. It says nothing about what the *straight path* passes through. For that we score local data
 density at every path point by the distance to the 10th-nearest natural activation:
@@ -208,6 +223,48 @@ curves (x-axis: interpolation position `t`; y-axis: `d(t)`): the largest-`G` pai
 sub-plateau, and the smallest-`G` pair. All are genuinely flat → jump → flat.
 
 ![Three representative verified d(t) curves; all show the plateau-jump-plateau shape.](plots/population_dt.png)
+
+### Is `max(s_i, s_j)` the right yardstick? — normalization sensitivity
+
+An operator asked why `G` divides by `max(s_i, s_j)` and whether that truly reflects the boundary
+(motivation in Methods). We re-ran the frozen seed-0 analysis recording each pair's raw bottleneck `B`
+and recomputed every verdict quantity under four denominators. The `max` row reproduced the published
+numbers exactly (regression check). For `min`/`mean` the within-plateau baseline is unchanged because
+a within-region pair has `s_i = s_j`.
+
+| denominator | between-plateau median `G` (95% CI) | counterexamples | digit-9 sub `G` | within med / p95 |
+|--|--|--:|--:|--|
+| **`max(s_i,s_j)` — frozen** | **0.996** (0.97–1.03) | **25/45** | 1.00 | 1.00 / 1.39 |
+| `min(s_i,s_j)` | 1.274 (1.21–1.34) | 2/45 | 1.26 | 1.00 / 1.39 |
+| `mean(s_i,s_j)` | 1.117 (1.06–1.17) | 5/45 | 1.12 | 1.00 / 1.39 |
+| global `s` (= 2.46) | 1.093 (1.06–1.11) | 7/45 | 1.21 | 1.00 / 1.37 |
+
+The numbers do move under the alternatives, and three facts explain the movement:
+
+- **The between-pair bottleneck almost exactly equals the sparser region's internal scale.** Per pair,
+  `B / max(s_i, s_j)` has quartiles 0.945–1.059 (median 0.996). The boundary never demands a hop
+  bigger than the sparser plateau's own interior already demands — there is no extra gap. Every shift
+  in the table is the arithmetic consequence of this one fact: if `B ≈ s_sparser`, then `B/min`,
+  `B/mean`, `B/global` all exceed 1 exactly when the two regions differ in density.
+- **`min`-normalized `G` measures density mismatch, not the boundary.** Across pairs it correlates
+  **0.68** with the scale-asymmetry ratio `max(s)/min(s)`; the frozen `max`-`G` correlates −0.09
+  (flat). The 14 pairs `min` pushes above the within-plateau p95 all involve one of the three densest
+  regions (digit 1: `s` = 1.58, digit 8: 1.78, digit 0: 1.89, vs global 2.46) — panel (b) below.
+- **The biggest hop usually is not at the boundary at all.** Locating the actual bottleneck edge: on
+  only **27%** of the 663 verified between-plateau journeys does the biggest forced hop connect two
+  different digits' points (a genuine boundary crossing). 73% of the time it lies *inside* one digit's
+  cloud (within-plateau controls: 4%). For most plateau pairs the hardest step of the journey is
+  ordinary interior sparsity, not the wall between classes.
+
+**Verdicts unchanged, sensitivity stated.** Under `min`/`mean`/`global` the between-plateau median
+sits 9–27% above the within baseline. That is a real statement — a between-journey's worst hop is set
+by the *sparser* member of the pair, so it exceeds what the denser member's or the average interior
+needs — and it stays inside the within-plateau spread (p95 = 1.39). But it is not evidence of a
+boundary gap: the frozen `max` denominator, the one that isolates the boundary's own contribution,
+finds none (0.996), and the bottleneck usually is not even located at the boundary. Even under the
+harshest `min` denominator, two counterexample pairs remain (4–5 and 4–7, `G` = 0.99–1.00).
+
+![Panel (a): between-plateau median G (red, 95% CI) under the four denominators; only the frozen max sits on the within baseline (green squares), and the min/mean/global shifts stay below the within-plateau p95 (open triangles). Counterexample counts annotated per variant. Panel (b): per-pair median G under min (red triangles) grows with the pair's scale-asymmetry ratio, while the frozen max-G (blue circles) stays flat around 1 — the min score tracks density mismatch.](plots/normalization_check.png)
 
 ### Investigation 2 — the straight path crosses a low-density corridor
 
@@ -353,6 +410,9 @@ move activations along straight lines.
 prove true topological disconnection; `G` measures connectivity at the sampled scale, nothing
 stronger. (2) All models share the same 1000-image MNIST training subset. (3) The mild `G > 1` pairs
 (digit 1) reflect an elongated cloud's small internal scale, not a genuine void — which is why the
-verdict rests on the `G` distribution against the control band, not on any single pair. (4) `E` uses
+verdict rests on the `G` distribution against the control band, not on any single pair; the
+normalization itself is motivated and stress-tested in Results ("Is max the right yardstick?") —
+alternative denominators shift `G` by the two regions' density mismatch, not by any boundary gap.
+(4) `E` uses
 `k = 10` neighbors; the between-vs-control contrast compares like with like under the same `k`, so it
 is not an artifact of that choice.
