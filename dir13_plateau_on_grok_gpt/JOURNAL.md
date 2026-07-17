@@ -199,3 +199,32 @@ verdicts + joint timeline exist.
 
 On track? yes — S3–S5 running in background, ~55% of reopened plan; blocker: awaiting background
 training/eval completion (queued, no action needed until they finish).
+
+## 2026-07-17 (6) — Killed overfitting BPE run to unblock the Fig-9 gate eval (S4/S5)
+
+**Did.** Feedback check first: only the two `.addressed.md` files — nothing unaddressed. Found the
+S3–S5 pipeline still mid-flight: fresh char training at step ~24k/30k (PID 74887), early char fig9
+eval running (PID 84700) with `chain_char_late.sh` (PID 84882) queued to resume-merge late steps,
+and BPE training at step ~10.3k/30k. **Decision:** killed BPE training (76638/76636) and the old
+`chain_bpe_fig9.sh` (82594). Rationale: BPE val loss bottomed at step ~750 (4.77) and has risen
+*monotonically* to 10.6 by step 10k — pure memorisation, no grokking possible — yet the old chain
+blocked the entire BPE Figure-9 gate eval on the *full* 30k run (~87 more min of GPU for zero
+scientific value), when every checkpoint the gate needs (0..10000) already exists on disk.
+- **Rejected alternative:** let BPE train to 30k. Rejected — it would consume the whole remaining
+  window, and the gate only needs per-checkpoint LC/PGD, computable now from saved checkpoints.
+- Wrote `/tmp/chain_finalize_gates.sh` (PID 85559): waits for char training + all char fig9 activity
+  to settle, then runs BPE fig9 over 0..10000 (adds late 7819/10000 vs the old chain's ≤4994 for
+  second-descent coverage), writes both gate verdicts via `fig9_verdict.py`, and plots both curves
+  via `plot_fig9.py` (`plots/grokking_fresh_char.png`, `plots/grokking_fresh_bpe.png`).
+
+**Learned (in progress).** Both fresh runs are memorising, not grokking (char val bottomed ~3750 then
+rose; BPE bottomed ~750 then rose) — strong prior both gates FAIL/NOT-ESTABLISHED within budget, which
+would push the joint verdict toward PLAN case 5 (primary relationship not testable via a grokking BPE
+model). The verdict scripts are the actual test; awaiting the finalize chain.
+
+**Next step.** When finalize chain writes DONE: read both verdict JSONs, curate RESULTS.md + REPORT.md
+with the fresh char (S4) and BPE (S5) gate verdicts, embed both new curve PNGs in BOTH files, append
+CHANGELOG. Then S6/S7 (Matthew sweep at frozen phases + joint timeline) next iteration.
+
+On track? yes — S4/S5 gate evals unblocked & running; ~60% of reopened plan; blocker: awaiting the
+finalize chain (autonomous, no action needed until DONE).

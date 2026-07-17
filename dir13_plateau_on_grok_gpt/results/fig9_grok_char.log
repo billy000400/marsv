@@ -5,3 +5,6 @@ step     15 clean 0.148 adv 0.063 LC tr 487 te 491 rnd 640 [148s]
 step     56 clean 0.270 adv 0.001 LC tr 765 te 769 rnd 947 [148s]
 step    217 clean 0.307 adv 0.021 LC tr 448 te 451 rnd 488 [148s]
 step    831 clean 0.472 adv 0.132 LC tr 121 te 120 rnd 166 [148s]
+step   2038 clean 0.545 adv 0.322 LC tr 48 te 48 rnd 75 [148s]
+step   4994 clean 0.568 adv 0.495 LC tr 21 te 21 rnd 36 [120s]
+DONE
