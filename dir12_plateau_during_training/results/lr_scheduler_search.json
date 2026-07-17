@@ -1,0 +1,52 @@
+{
+ "constant LR 1e-3": {
+  "suffix": "",
+  "spike_max": 583230.9375,
+  "spike_frac": 0.9263643801577762,
+  "tail_range": 1133752.625,
+  "final_train_loss": 3.9986747246700816e-09,
+  "final_lr": 0.001,
+  "pf_100k": 0.5555555555555556,
+  "final_test_acc": 0.8475
+ },
+ "ReduceLROnPlateau f=0.5 p=10": {
+  "suffix": "_sched",
+  "spike_max": 1.0381684303283691,
+  "spike_frac": 0.0,
+  "tail_range": 1.0106902122497559,
+  "final_train_loss": 2.9296741104190005e-06,
+  "final_lr": 1.525878978725359e-08,
+  "pf_100k": 0.36844444444444446,
+  "final_test_acc": 0.8795
+ },
+ "ReduceLROnPlateau f=0.5 p=100": {
+  "suffix": "_pl_f0.5_p100",
+  "spike_max": 1.952886700630188,
+  "spike_frac": 0.0,
+  "tail_range": 1.0060145854949951,
+  "final_train_loss": 8.350847124916072e-09,
+  "final_lr": 1.525878978725359e-08,
+  "pf_100k": 0.36533333333333334,
+  "final_test_acc": 0.8815
+ },
+ "ReduceLROnPlateau f=0.9 p=50": {
+  "suffix": "_pl_f0.9_p50",
+  "spike_max": 1.88496732711792,
+  "spike_frac": 0.0,
+  "tail_range": 1.0417426824569702,
+  "final_train_loss": 7.2334387368755415e-09,
+  "final_lr": 9.404610779029099e-08,
+  "pf_100k": 0.3648888888888889,
+  "final_test_acc": 0.8815
+ },
+ "cosine anneal 1e-3 -> 1e-6": {
+  "suffix": "_cos",
+  "spike_max": 154992.734375,
+  "spike_frac": 0.8424157331744124,
+  "tail_range": 2.288569927215576,
+  "final_train_loss": 2.601825525860857e-11,
+  "final_lr": 9.999999974752427e-07,
+  "pf_100k": 0.392,
+  "final_test_acc": 0.8685
+ }
+}

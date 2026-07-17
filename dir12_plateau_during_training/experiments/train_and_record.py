@@ -53,7 +53,13 @@ def main():
     p.add_argument('--loss', default='mse', choices=['mse', 'ce'])
     # feedback 07161721: 'plateau' = ReduceLROnPlateau stepped EVERY optimization
     # step on the full-train-set loss (patience 10 steps, factor 0.5)
-    p.add_argument('--sched', default='const', choices=['const', 'plateau'])
+    # feedback 07161834: scheduler search for a SMOOTHLY converging run —
+    # 'cosine' = CosineAnnealingLR over all steps; --factor/--patience retune
+    # 'plateau' (non-default values get their own output suffix).
+    p.add_argument('--sched', default='const', choices=['const', 'plateau', 'cosine'])
+    p.add_argument('--factor', type=float, default=0.5)
+    p.add_argument('--patience', type=int, default=10)
+    p.add_argument('--eta-min', type=float, default=1e-6)
     args = p.parse_args()
     schedule = FULL_SCHEDULE if args.schedule == 'full' else FALLBACK_SCHEDULE
     anchors = set(ANCHOR_STEPS) if args.schedule == 'full' else {0, 100000}
@@ -85,8 +91,15 @@ def main():
     else:                                       # branch default: MSE on one-hot
         mse_fn = torch.nn.MSELoss()
         loss_of = lambda logits, y: mse_fn(logits, one_hots[y])
-    sfx = ('' if args.loss == 'mse' else '_ce') + \
-          ('' if args.sched == 'const' else '_sched')
+    if args.sched == 'const':
+        sched_sfx = ''
+    elif args.sched == 'cosine':
+        sched_sfx = '_cos'
+    elif (args.factor, args.patience) == (0.5, 10):
+        sched_sfx = '_sched'                     # the original 07161721 run
+    else:
+        sched_sfx = f'_pl_f{args.factor:g}_p{args.patience}'
+    sfx = ('' if args.loss == 'mse' else '_ce') + sched_sfx
 
     sched = None
     if args.sched == 'plateau':
@@ -94,8 +107,13 @@ def main():
         # (deterministic; the per-batch loss is far too noisy for patience=10).
         # No RNG is consumed -> identical init/subset/batch order as the const run.
         sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            opt, mode='min', factor=0.5, patience=10,
+            opt, mode='min', factor=args.factor, patience=args.patience,
             threshold=1e-4, threshold_mode='rel', min_lr=1e-8)
+    elif args.sched == 'cosine':
+        # no RNG consumed either; stepped after every optimization step
+        n_total = max(FULL_SCHEDULE if args.schedule == 'full' else FALLBACK_SCHEDULE)
+        sched = torch.optim.lr_scheduler.CosineAnnealingLR(
+            opt, T_max=n_total, eta_min=args.eta_min)
 
     ck_dir = os.path.join(HERE, 'results', 'ckpts_movie', f'seed{args.seed}{sfx}')
     rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{args.seed}{sfx}')
@@ -155,7 +173,10 @@ def main():
         opt.zero_grad(); loss.backward(); opt.step()
         if sched is not None:
             mon = full_train_loss()
-            sched.step(mon)
+            if args.sched == 'plateau':
+                sched.step(mon)
+            else:
+                sched.step()
             trace_loss[step] = mon
             trace_lr[step] = opt.param_groups[0]['lr']
         if step in ck_set:
@@ -175,10 +196,13 @@ def main():
                            'weight_decay': 0.01,
                            'loss': 'MSE-on-one-hot' if args.loss == 'mse'
                                    else 'CE-on-labels',
-                           'lr_schedule': 'constant' if args.sched == 'const'
-                                   else ('ReduceLROnPlateau(factor=0.5, patience=10, '
-                                         'threshold=1e-4 rel, min_lr=1e-8) stepped every '
-                                         'step on the full-train-set loss'),
+                           'lr_schedule': ('constant' if args.sched == 'const' else
+                                   f'CosineAnnealingLR(T_max=steps, eta_min={args.eta_min:g}) '
+                                   'stepped every step' if args.sched == 'cosine' else
+                                   f'ReduceLROnPlateau(factor={args.factor:g}, '
+                                   f'patience={args.patience}, threshold=1e-4 rel, '
+                                   'min_lr=1e-8) stepped every step on the '
+                                   'full-train-set loss'),
                            'opt': 'AdamW', 'steps': max(schedule)}}
     with open(os.path.join(rec_dir, 'manifest.json'), 'w') as f:
         json.dump(manifest, f, indent=1)

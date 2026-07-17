@@ -17,12 +17,13 @@ import numpy as np
 
 from plateau_protocol import HERE, N_POINTS
 
+SFX = sys.argv[1] if len(sys.argv) > 1 else ''   # e.g. _pl_f0.5_p100
 t = np.linspace(0, 1, N_POINTS)
 SEL = [0, 100, 1000, 20000, 100000]
 
 
 def load(seed):
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{seed}')
+    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{seed}{SFX}')
     man = json.load(open(os.path.join(rec_dir, 'manifest.json')))
     steps = np.array(man['ckpt_steps'])
     D = np.stack([np.load(os.path.join(rec_dir, f'step_{s}.npz'))['d_logit']
@@ -38,7 +39,7 @@ for seed, col in zip([0, 1, 2], ['C0', 'C1', 'C2']):
     steps, D = load(seed)
     frac = ((D[:, :45, :] < 0.1) | (D[:, :45, :] > 0.9)).mean(axis=(1, 2))
     axL.plot(np.maximum(steps, 0.5), frac, color=col, lw=1.5,
-             label=f'seed {seed}' + (' (205 ckpts)' if seed == 0 else ' (56 ckpts)'))
+             label=f'seed {seed} ({len(steps)} ckpts)')
     for r, s in enumerate(SEL):
         f = int(np.argmin(np.abs(steps - s)))
         ax = fig.add_subplot(gs[seed, r + 1])
@@ -61,7 +62,7 @@ axL.set_title('Plateau fraction: mean fraction of path points\n'
 fig.suptitle('Plateau emergence is consistent across seeds — gradual sharpening, '
              'no sudden transition (right: all 45 cross-pair $d(\\alpha)$ curves '
              'overlaid)', y=1.0)
-plt.savefig(os.path.join(HERE, 'plots', 'seed_comparison.png'), dpi=130,
+plt.savefig(os.path.join(HERE, 'plots', f'seed_comparison{SFX}.png'), dpi=130,
             bbox_inches='tight')
 plt.close(fig)
 

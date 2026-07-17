@@ -73,6 +73,7 @@ def logits_of(model, x, device, batch=2000):
 
 
 def main():
+    sched_sfx = sys.argv[1] if len(sys.argv) > 1 else ''   # e.g. _pl_f0.5_p100
     if torch.cuda.is_available():
         torch.cuda.set_per_process_memory_fraction(0.225)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -80,14 +81,15 @@ def main():
     test_x, test_y = test_x[:N_TEST_POOL], test_y[:N_TEST_POOL].numpy()
 
     model = load_state_model(os.path.join(HERE, 'results', 'ckpts_movie',
-                                          'seed0', f'step{STEP}.pt'), device)
+                                          f'seed0{sched_sfx}',
+                                          f'step{STEP}.pt'), device)
     L = logits_of(model, test_x, device)
     pred = L.argmax(1)
 
-    rec = np.load(os.path.join(HERE, 'results', 'plateau_records', 'seed_0',
-                               f'step_{STEP}.npz'))
+    rec = np.load(os.path.join(HERE, 'results', 'plateau_records',
+                               f'seed_0{sched_sfx}', f'step_{STEP}.npz'))
     man = json.load(open(os.path.join(HERE, 'results', 'plateau_records',
-                                      'seed_0', 'manifest.json')))
+                                      f'seed_0{sched_sfx}', 'manifest.json')))
 
     rows = []
     auc_mat = np.full((10, 10), np.nan)
@@ -120,8 +122,8 @@ def main():
            'spearman_auc_vs_thirdfrac': float(rho_third)}
 
     # CE model, if trained
-    ce_path = os.path.join(HERE, 'results', 'ckpts_movie', 'seed0_ce',
-                           f'step{STEP}.pt')
+    ce_path = os.path.join(HERE, 'results', 'ckpts_movie',
+                           f'seed0_ce{sched_sfx}', f'step{STEP}.pt')
     if os.path.exists(ce_path):
         Lce = logits_of(load_state_model(ce_path, device), test_x, device)
         ce_rows = {}
@@ -135,7 +137,7 @@ def main():
               f"{min(ce_rows.values()):.4f})")
 
     os.makedirs(os.path.join(HERE, 'results'), exist_ok=True)
-    with open(os.path.join(HERE, 'results', 'pairwise_auc.json'), 'w') as f:
+    with open(os.path.join(HERE, 'results', f'pairwise_auc{sched_sfx}.json'), 'w') as f:
         json.dump(out, f, indent=1)
 
     print(f"3v5: AUROC={r35['auroc']:.4f}, confusion={r35['confusion_rate']:.4f}, "
@@ -198,21 +200,32 @@ def main():
     ax.scatter(t, np.full(N_POINTS, -0.07), s=14, c=pr, cmap='tab10',
                vmin=0, vmax=9, marker='s')
     ax.set_ylim(-0.13, 1.05); ax.set_xlabel(r'$\alpha$'); ax.set_ylabel(r'$d(\alpha)$')
-    segs = [(pr[0], 0.02, 'left plateau:\npredicted %d' % pr[0]),
-            (9, 0.36, 'mid shelf:\npredicted 9\n(a 3rd-class plateau)'),
-            (5, 0.8, 'right plateau:\npredicted 5')]
-    for _, x0, txt in segs:
-        ax.annotate(txt, (x0, float(d[int(x0 * (N_POINTS - 1))]) + 0.06),
-                    fontsize=8, ha='left')
-    ax.set_title('Pair 3→5 at step 100k: a 3-step staircase, not a smeared '
-                 'boundary\n(endpoint "3" is misclassified as 2)', fontsize=10)
+    # data-driven segment labels: contiguous runs of one predicted class
+    segs, s0 = [], 0
+    for k in range(1, N_POINTS + 1):
+        if k == N_POINTS or pr[k] != pr[s0]:
+            segs.append((s0, k - 1, int(pr[s0]))); s0 = k
+    n_seg = len(segs)
+    for s0, s1, cls in segs:
+        if s1 - s0 < 4:                       # skip tiny transition segments
+            continue
+        xm = 0.5 * (s0 + s1) / (N_POINTS - 1)
+        ax.annotate(f'predicted {cls}', (xm, float(d[(s0 + s1) // 2]) + 0.07),
+                    fontsize=8, ha='center')
+    ep_note = ('endpoint "3" misclassified as %d' % pr[0]) if pr[0] != 3 else \
+              'both endpoints correctly classified'
+    ax.set_title(f'Pair 3→5 at step 100k: {n_seg} predicted-class segments\n'
+                 f'({ep_note})', fontsize=10)
     ax.grid(alpha=0.3)
 
     fig.suptitle('Is 3-vs-5 harder? Pairwise discriminability vs interpolation-curve '
-                 'shape (MSE seed 0, step 100,000, first 2,000 test images)', y=0.98)
-    plt.savefig(os.path.join(PLOTS, 'pairwise_auc.png'), dpi=130, bbox_inches='tight')
+                 'shape (MSE seed 0'
+                 + (', ReduceLROnPlateau f=0.5 p=100' if sched_sfx else '')
+                 + ', step 100,000, first 2,000 test images)', y=0.98)
+    plt.savefig(os.path.join(PLOTS, f'pairwise_auc{sched_sfx}.png'), dpi=130,
+                bbox_inches='tight')
     plt.close(fig)
-    print('saved plots/pairwise_auc.png')
+    print(f'saved plots/pairwise_auc{sched_sfx}.png')
 
 
 if __name__ == '__main__':

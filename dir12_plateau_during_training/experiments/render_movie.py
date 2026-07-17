@@ -52,7 +52,8 @@ def main():
     args = ap.parse_args()
     seed, sfx = args.seed, args.suffix
     tag = (' — CE loss' if '_ce' in sfx else '') + \
-          (' — LR scheduler' if '_sched' in sfx else '')
+          (' — LR scheduler' if ('_sched' in sfx or '_pl_' in sfx or
+                                 '_cos' in sfx) else '')
 
     man, steps, D, D3, D2, PRED, test_acc = load_records(seed, sfx)
     # confidence: max raw output for MSE runs; max softmax prob for CE runs

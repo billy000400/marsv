@@ -1,0 +1,5 @@
+CE 3v5 AUROC: 0.9697 (worst CE pair: 3v5 0.9697)
+3v5: AUROC=0.9772, confusion=0.0596, mid_frac=0.84, rank 1/45 from worst
+5 worst pairs: [('3v5', 0.9772), ('7v9', 0.9784), ('4v9', 0.9786), ('5v8', 0.9855), ('3v8', 0.9866)]
+Spearman(AUROC, mid_frac) = -0.297; Spearman(AUROC, third_frac) = -0.557
+saved plots/pairwise_auc_pl_f0.5_p100.png

@@ -1,0 +1,7 @@
+seed 0: plateau fraction first >= 0.25 at step 30; final = 0.365
+seed 0: plateau fraction first >= 0.5 at step None; final = 0.365
+seed 1: plateau fraction first >= 0.25 at step 10; final = 0.365
+seed 1: plateau fraction first >= 0.5 at step None; final = 0.365
+seed 2: plateau fraction first >= 0.25 at step 10; final = 0.351
+seed 2: plateau fraction first >= 0.5 at step None; final = 0.351
+saved seed_comparison.png

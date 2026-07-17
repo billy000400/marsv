@@ -12,42 +12,46 @@ perturbations, including imperfect steering vectors, do nothing. And boundaries 
 the change: a tiny nudge across one flips the output. We ask *when during training* this
 discreteness appears.
 
-**What we did.** We trained a small ReLU MLP on MNIST for 100,000 steps and saved hundreds of
-checkpoints. At every checkpoint we ran the identical activation-interpolation experiment on
-fixed image pairs and rendered the result as one frame of a movie. We then repeated the entire
-run with cross-entropy in place of the default MSE loss, measured how well the network
-separates each digit pair (pairwise AUROC), and repeated both runs once more with a
-loss-plateau-triggered learning-rate schedule (ReduceLROnPlateau) so that training actually
-converges instead of fluctuating forever.
+**What we did.** We trained a small ReLU MLP on MNIST for 100,000 steps under a learning-rate
+schedule chosen — by an explicit scheduler search — so that the training loss **decreases
+smoothly and genuinely converges** (per operator feedback 07161834, only smoothly converged
+runs are shown in this report). We saved hundreds of checkpoints, ran the identical
+activation-interpolation experiment on fixed image pairs at every checkpoint, and rendered the
+result as a movie. We repeated the run on two more seeds, repeated it with cross-entropy in
+place of the default MSE loss, and measured how well the network separates each digit pair
+(pairwise AUROC).
 
 **Findings.**
 
 1. **No plateaus at initialization.** The interpolation curve of the random network is a
    featureless diagonal.
-2. **Plateaus form gradually, and pairs do not synchronize.** Soft structure appears in the same
-   few hundred steps in which accuracy rises; genuinely flat plateaus with sharp boundaries take
-   tens of thousands of further steps to mature. There is no sudden global transition.
-3. **The structure keeps changing long after test accuracy stabilizes.** Plateaus keep
-   sharpening, and even past step 80,000 their boundaries relocate in fast ~150-step events.
-4. **The training loss decides *where* the plateaus live, not *whether* they exist.** Under the
-   default MSE-on-one-hot loss they appear in logit space. Under cross-entropy the logits morph
-   almost linearly along the path, but the *softmax probabilities* develop plateaus that are
-   sharper and earlier than the MSE run's. Decision regions (the predicted class along the path)
-   are piecewise-constant under both losses.
-5. **The one pair whose curve looks least like two plateaus, 3 vs 5, really is the hardest pair
-   to classify** — worst pairwise AUROC of all 45 digit pairs, under both losses.
-6. **The late-training "chaos" is the engine of the late sharpening, not a nuisance.** With a
-   ReduceLROnPlateau schedule (halve the learning rate after 10 steps without training-loss
-   improvement) training converges cleanly — the loss plateaus, the curves freeze, and the late
-   boundary flips vanish — but plateau sharpening stops at whatever level it had reached when
-   the learning rate collapsed (MSE plateau fraction 0.37 instead of 0.55). Bonus: the scheduled
-   MSE run generalizes better (final test accuracy 0.880 vs 0.848), because the slow late
-   test-accuracy decline is itself a constant-learning-rate effect.
+2. **All the structure forms in the first few hundred steps, then converged training freezes
+   it.** The plateau fraction (PF, share of path points near an endpoint's output; diagonal
+   floor ≈ 0.20) rises from 0.19 at step 0 to ~0.34 by step 100 and ~0.37 by step 300 — the
+   same window in which accuracy rises — and then stays at 0.35–0.37 for the remaining 99,700
+   steps, across all three seeds. Once the loss converges, the curves stop moving to about six
+   decimal places per 500 steps.
+3. **The training loss decides *where* the plateaus live, not *whether* they exist.** Under the
+   default MSE-on-one-hot loss the (soft) plateaus appear in logit space. Under cross-entropy
+   the logits morph almost linearly along the path, but the *softmax probabilities* develop
+   genuinely sharp plateau→boundary→plateau curves (PF 0.86 at 100k, formed by step ~10k).
+   Decision regions (the predicted class along the path) are piecewise-constant under both
+   losses.
+4. **The pair whose curve looks least like two plateaus, 3 vs 5, really is the hardest pair to
+   classify** — worst pairwise AUROC of all 45 digit pairs, under both losses.
+5. **Sharpening logit-space plateaus beyond PF ≈ 0.37 seems to require non-converged
+   training.** In our scheduler search, every schedule whose loss converges freezes PF at the
+   value it had when the learning rate collapsed; the constant-LR run reaches PF 0.556 at 100k
+   but its loss fluctuates over orders of magnitude and never converges (numbers in Results;
+   those runs' plots are omitted from this report per operator preference). The converged runs
+   also generalize better under MSE (test accuracy 0.8815 vs 0.8475 on seed 0).
 
-**Verdict: plateaus emerge gradually, do not synchronize across pairs, and keep developing long
-after test accuracy has stopped improving; the choice of loss relocates them between logit and
-probability space without removing them; and the late development is driven by continued
-finite-learning-rate optimization — anneal the learning rate and the plateau geometry freezes.**
+**Verdict: activation plateaus are entirely learned and form early — soft logit-space structure
+under MSE, sharp probability-space plateaus under CE — during the same few hundred steps in
+which the network fits the data. Under a properly converged training run the plateau geometry
+then freezes: no late sharpening, no late boundary motion. The loss function chooses the output
+coordinates in which the discreteness is visible, and further logit-space sharpening beyond the
+converged level is a property of non-converged, constant-learning-rate training.**
 
 ## Methods
 
@@ -61,52 +65,67 @@ the **first 2,000 of the 10,000 test images** (per operator feedback 07161151).
 **Model & training.** 4-layer ReLU MLP, 784→200→200→200→10, with a ReLU after every linear
 layer except the last. "Hidden layer $L$" means the post-ReLU output of the $L$-th linear layer,
 so $h_1, h_2, h_3$ are 200-dimensional and $h_3$ is the last hidden layer. Optimizer: AdamW
-(learning rate $10^{-3}$, weight decay 0.01). Loss: mean squared error (MSE) to one-hot targets.
-Batch 200, 100,000 steps. This reproduces the training setup of *Deep Networks Always Grok*
-(arXiv:2402.15555) used throughout this branch.
+(initial learning rate $10^{-3}$, weight decay 0.01). Loss: mean squared error (MSE) to one-hot
+targets. Batch 200, 100,000 steps. Model, data, and optimizer reproduce the training setup of
+*Deep Networks Always Grok* (arXiv:2402.15555) used throughout this branch; the learning-rate
+schedule is described next.
 
-**The cross-entropy (CE) variant.** To test whether the results depend on the unusual MSE
-objective, we retrained seed 0 with the standard classification loss — cross-entropy, which is
-the maximum-likelihood (MLE) loss for a softmax classifier — keeping *everything* else
-identical: same initialization, same 1,000-image subset, same batch sequence (the loss function
-consumes no randomness, so the two runs share their entire RNG stream), same 205-checkpoint
-schedule and interpolation protocol.
-
-```math
-\mathcal{L}_{\mathrm{CE}}(t) = -\frac{1}{N}\sum_{n=1}^{N}
-\log\,\mathrm{softmax}\bigl(f(x_n;\theta_t)\bigr)_{y_n}
-```
-
-**The learning-rate-scheduler variant.** At a constant learning rate this training never
-converges: late in training the full-train loss fluctuates over orders of magnitude from step to
-step, and the plateau boundaries keep jumping (operator feedback 07161721 asked for a scheduler
-under which the training loss visibly plateaus, with the learning rate shrinking whenever the
-loss stops improving for ~10 steps). We therefore reran seed 0 — once with MSE, once with CE —
-with PyTorch's `ReduceLROnPlateau`: after every optimization step $s$ we recompute the loss on
-the full 1,000-image training subset (the per-batch loss is far too noisy to monitor with a
-10-step patience) and halve the learning rate whenever it has not improved for 10 consecutive
-steps. With $\mathcal{L}_s$ the full-train loss after step $s$ and
+**The learning-rate schedule (all primary runs).** At a constant learning rate this training
+never converges: from step ~2,000 the full-train loss fluctuates over 3–4 orders of magnitude
+from step to step, forever. Operator feedback 07161834 asked for results from smoothly converged
+training only, so we ran an explicit scheduler search (Results, first subsection) and selected
+PyTorch's `ReduceLROnPlateau` with **factor 0.5 and patience 100**: after every optimization
+step $s$ we recompute the loss on the full 1,000-image training subset (the per-batch loss is
+far too noisy to monitor) and halve the learning rate whenever it has not improved for 100
+consecutive steps. With $\mathcal{L}_s$ the full-train loss after step $s$ and
 $\mathcal{L}^{\ast}_s = \min_{u \le s} \mathcal{L}_u$ the best loss so far:
 
 ```math
 \eta_{s+1} =
 \begin{cases}
 \max\bigl(\tfrac{1}{2}\,\eta_s,\ 10^{-8}\bigr) &
-\text{if } \mathcal{L}_u > (1 - 10^{-4})\,\mathcal{L}^{\ast}_u \text{ for the last 10 steps } u\\[2pt]
+\text{if } \mathcal{L}_u > (1 - 10^{-4})\,\mathcal{L}^{\ast}_u \text{ for the last 100 steps } u\\[2pt]
 \eta_s & \text{otherwise.}
 \end{cases}
 ```
 
-Everything else is unchanged, and the scheduler consumes no randomness, so all four runs (MSE,
-CE) × (constant, scheduled) share the same initialization, data subset, and batch sequence; the
-scheduled runs use the full 205-checkpoint schedule and the identical interpolation protocol.
+The scheduler consumes no randomness, so every run in this report (three MSE seeds, the CE
+variant, and every search candidate) shares its initialization, data subset, and batch sequence
+with its counterparts of the same seed. Under this schedule the seed-0 MSE learning rate halves
+16 times between steps 1,375 and 25,824 (from $10^{-3}$ down to $1.5\times10^{-8}$), and the
+full-train loss decreases smoothly to $8.4\times10^{-9}$ — essentially the constant-LR run's
+final loss, but reached as a converged flat line instead of the noisy floor of a fluctuating
+process.
 
-**Curve motion $M$ — testing "converged" on the plateau curves.** "The training converged" must
-mean more than a flat loss: the plateau *curves* have to stop changing. The plateau fraction
-alone cannot show this — PF is invariant when a boundary relocates without changing sharpness,
-which is exactly what the late flips do. So we measure how much the whole set of curves moves
-between adjacent checkpoints $t_i, t_{i+1}$ (500 steps apart), as the mean absolute change of
-$d$ over the 45 cross-class pairs and 50 path points:
+**Smoothness and convergence metrics (for the scheduler search).** "Smooth" and "converged"
+need numbers to compare schedules. We use the per-step full-train-loss trace. The **spike
+ratio** at step $s$ compares the loss to the best loss so far — a perfectly monotone trace has
+ratio 1, and a loss that jumps four orders of magnitude above its own record has ratio $10^4$:
+
+```math
+r_s = \frac{\mathcal{L}_s}{\min_{u \le s} \mathcal{L}_u}, \qquad
+\mathrm{spike}_{\max} = \max_{s > 1000} r_s
+```
+
+(we also report the fraction of steps with $r_s > 2$). The **tail range** measures convergence:
+the ratio of the largest to the smallest loss over the final 5,000 steps — a converged run has
+tail range ≈ 1. Both are consumed by the scheduler-search table in Results.
+
+**The cross-entropy (CE) variant.** To test whether the results depend on the unusual MSE
+objective, we retrained seed 0 with the standard classification loss — cross-entropy, which is
+the maximum-likelihood (MLE) loss for a softmax classifier — keeping *everything* else
+identical, including the schedule (its LR cascade lands at steps 15,941–17,650):
+
+```math
+\mathcal{L}_{\mathrm{CE}}(t) = -\frac{1}{N}\sum_{n=1}^{N}
+\log\,\mathrm{softmax}\bigl(f(x_n;\theta_t)\bigr)_{y_n}
+```
+
+**Curve motion $M$ — testing "converged" on the plateau curves.** A flat loss alone does not
+prove the plateau geometry stopped changing — a boundary can relocate without changing the loss
+or the plateau fraction. So we measure how much the whole set of curves moves between adjacent
+checkpoints $t_i, t_{i+1}$ (500 steps apart), as the mean absolute change of $d$ (defined below)
+over the 45 cross-class pairs and 50 path points:
 
 ```math
 M(t_i) = \frac{1}{45\cdot 50}\sum_{p=1}^{45}\sum_{k=1}^{50}
@@ -114,13 +133,11 @@ M(t_i) = \frac{1}{45\cdot 50}\sum_{p=1}^{45}\sum_{k=1}^{50}
 ```
 
 Read it as: $M \approx 10^{-2}$ means curves visibly jitter from frame to frame; $M \lesssim
-10^{-5}$ means the movie has stopped. $M$ is evaluated on logit-space $d$ for the MSE runs and
-probability-space $d$ for the CE runs (each loss in the space where its plateaus live), and is
-consumed by the scheduler-comparison figure.
+10^{-5}$ means the movie has stopped. It is quoted in the Results text (late-training values).
 
-**Accuracy, confidence, and loss.** These curves appear in the training-context figure and in
-the animation insets. Let $f(x;\theta_t)\in\mathbb{R}^{10}$ be the logits at checkpoint $t$
-and $y_n$ the true label of image $x_n$. Accuracy is the fraction of correct argmax predictions:
+**Accuracy, confidence, and loss.** These curves appear in Figures 1–2 and in the animation
+insets. Let $f(x;\theta_t)\in\mathbb{R}^{10}$ be the logits at checkpoint $t$ and $y_n$ the true
+label of image $x_n$. Accuracy is the fraction of correct argmax predictions:
 
 ```math
 \mathrm{acc}(t) = \frac{1}{N}\sum_{n=1}^{N}\mathbf{1}\Bigl[\arg\max_i f_i(x_n;\theta_t) = y_n\Bigr],
@@ -145,9 +162,9 @@ the **maximum raw output**, averaged over images:
 ```
 
 Read it as: near 1 = the model puts a full-strength one-hot answer on some class; near 0 = no
-class is asserted. CE training does the opposite — it grows logits without bound (raw logit
-values drift to the hundreds), while the softmax probability is the quantity it saturates — so
-for the CE run confidence is the standard **mean maximum softmax probability**:
+class is asserted. CE training does the opposite — it grows logits without bound while
+saturating the softmax probability — so for the CE run confidence is the standard **mean maximum
+softmax probability**:
 
 ```math
 \mathrm{conf}_{\mathrm{CE}}(t) = \frac{1}{N}\sum_{n=1}^{N}\max_i\,
@@ -155,17 +172,17 @@ for the CE run confidence is the standard **mean maximum softmax probability**:
 ```
 
 **Checkpoints.** Seed 0 is the primary run. It saves checkpoints at steps 0, 10, 30, 100, 300,
-then every 500 up to 100,000 — 205 in total. Seeds 1 and 2 are confirmation runs with 56
-checkpoints each (same early steps, then every 2,000); the CE and scheduler variants use the
-full seed-0 schedule. Every checkpoint stores the model weights (CE/scheduler runs: at 16
-anchor steps) and a
-self-contained record of the protocol below: the distance curves, per-point logits, predictions
-and softmax probabilities, and the endpoint activations at every hidden layer.
-`experiments/manifest_check.py` verifies every expected file and field; all 317 records pass.
-Training is deterministic given the seed, and a from-scratch rerun reproduced the movie's
-records **bit-exactly**. We exploit that determinism twice, rerunning with extra recording
-density where the movie is too coarse: every 50 steps inside 82,000–82,500 (the largest late
-change) and every 5 steps from 0 to 1,000 (the early phase, on a linear time axis).
+then every 500 up to 100,000 — 205 in total. Seeds 1 and 2 are confirmation runs with 55
+checkpoints each (same early steps, then every 2,000); the CE variant uses the full seed-0
+schedule. Every checkpoint stores a self-contained record of the protocol below — the distance
+curves, per-point logits, predictions and softmax probabilities, and the endpoint activations at
+every hidden layer — plus model weights at 16 anchor steps.
+`experiments/manifest_check.py` verifies every expected file and field; all 520 records of the
+four primary runs pass. Training is deterministic given the seed. The **early-phase zoom**
+(every 5 steps from 0 to 1,000, on a linear time axis; Figures 5–6) was recorded from a
+deterministic rerun and is **bit-exact** for the primary run: the schedule's first LR reduction
+happens at step 1,375, after the zoom window ends, and we verified the records match the
+scheduled run's checkpoints exactly through step 1,000.
 
 ### The frozen interpolation protocol
 
@@ -200,7 +217,7 @@ through the rest of the network, recording $h_2$, $h_3$, and the logits.
 
 **Relative endpoint distance $d(\alpha)$ — the primary metric.** It answers: is the output stuck
 to one endpoint, or morphing smoothly? Raw distances are not comparable across checkpoints
-(activation scales grow during training), so, following the post, we measure where the
+(activation scales change during training), so, following the post, we measure where the
 propagated activation $x(\alpha)$ sits *between* the two endpoint outputs $x(0), x(1)$:
 
 ```math
@@ -223,7 +240,7 @@ interpolation matches the reference `slerp_path` to 9.5e-7.
 logits, shown as colored squares under each animation curve. This reveals *staircase* structure:
 paths that pass through a third class's region on the way from $A$ to $B$.
 
-**Plateau fraction — the one summary number.** Comparing emergence timing across seeds and
+**Plateau fraction PF — the one summary number.** Comparing emergence timing across seeds and
 losses needs one number per checkpoint; the raw curves stay the primary evidence and no
 per-curve "is it a plateau" threshold is imposed on them. We use the fraction of path points
 sitting near either endpoint's output, averaged over the 45 cross-class pairs:
@@ -236,7 +253,7 @@ sitting near either endpoint's output, averaged over the 45 cross-class pairs:
 Reading it: the diagonal (no plateau) scores ≈ 0.20 — that is the floor, not zero, because the
 diagonal itself spends its first and last tenth within 0.1 of an endpoint. A perfect two-plateau
 step function scores 1. PF can be evaluated on $d$ in logit space or in probability space; both
-appear in the loss-comparison figure.
+appear in the loss-comparison figure (Figure 10).
 
 ### Pair-difficulty metrics (for the 3-vs-5 question)
 
@@ -267,8 +284,7 @@ the share of the 50 path points with $0.1 < d(\alpha) < 0.9$, i.e. the complemen
 plateau fraction, measuring how much of the path is spent away from the two endpoint plateaus —
 and (ii) the **third-class fraction** — the share of path points whose predicted class is
 neither $a$ nor $b$, measuring staircase detours through other digits' regions. Both are
-correlated against AUROC across the 45 pairs (Spearman rank correlation) in the pairwise-AUROC
-figure.
+correlated against AUROC across the 45 pairs (Spearman rank correlation) in Figure 13.
 
 ### Baselines
 
@@ -283,11 +299,6 @@ dotted in every curve figure. Its plateau fraction (≈ 0.20) is the floor for P
 should stay inside one region and cross no boundary. They calibrate what "no structure" looks
 like under the identical protocol.
 
-**Matched-random activations** (secondary control only) — in the radial-perturbation experiment,
-each natural $h_1$ is compared to a random vector with the same L2 norm and the same number of
-positive entries (post-ReLU sparsity). Flatness beyond what scale and sparsity mechanically
-produce is then attributable to learned structure.
-
 ### How to read the plots
 
 > **All curve figures share one format.** X-axis: interpolation position $\alpha$ from 0 (image
@@ -301,232 +312,218 @@ produce is then attributable to learned structure.
 >
 > **Primary metric:** $d(\alpha)$ at the logits. **Summary number:** plateau fraction PF.
 > **Loss/pair-difficulty metrics** (their own Results subsections): probability-space $d$/PF,
-> pairwise AUROC, mid fraction, third-class fraction. **Secondary only** (final Results
-> subsection): plateau contrast and stable-region count from the radial-perturbation control.
+> pairwise AUROC, mid fraction, third-class fraction. **Convergence metrics** (scheduler
+> subsection): spike ratio, tail range, curve motion $M$.
 
 ## Results
 
-**Training context.** Train accuracy hits 1.0 at step 145 — the 1,000-image subset is memorized.
-Test accuracy (first 2,000 test images) reaches its ~0.88 plateau by step ~70–120, peaks at
-0.885, then drifts slowly down to 0.85–0.87 by 100k with visible late oscillations. Train loss
-keeps decaying toward zero long after that; test loss is flat at ~0.02 from step ~200 onward.
-Confidence keeps climbing after accuracy saturates. So almost all plateau development below
-happens in the *post-generalization* phase.
+### Choosing a schedule that converges smoothly (the scheduler search)
 
-![Training context (seed 0): train accuracy (blue), test accuracy (red), and confidence = mean max raw output (purple) vs training step (log-scale x).](plots/training_context.png)
+Per operator feedback, all results shown below come from training runs whose loss decreases
+smoothly and converges. Finding such a run required a search: five candidate schedules, all on
+seed 0 with identical initialization, data, and batch order, scored on the metrics defined in
+Methods (per-step full-train loss; PF at the final checkpoint; final test accuracy):
 
-**The movie: plateaus grow out of a featureless diagonal.** One frame per checkpoint, ten fixed
-pairs, with the training step in the title. The insets track accuracy/confidence (top) and
-train/test loss (bottom) with the current step marked.
+| schedule | spike max | steps with $r_s>2$ | tail range | final train loss | PF (logit) at 100k | test acc |
+|---|---:|---:|---:|---:|---:|---:|
+| constant LR $10^{-3}$ | $5.8\times10^{5}$ | 92.6% | $1.1\times10^{6}$ | $4.0\times10^{-9}$ | 0.556 | 0.8475 |
+| cosine anneal → $10^{-6}$ | $1.5\times10^{5}$ | 84.2% | 2.29 | $2.6\times10^{-11}$ | 0.392 | 0.8685 |
+| ReduceLROnPlateau f=0.5 p=10 | 1.04 | 0% | 1.011 | $2.9\times10^{-6}$ | 0.368 | 0.8795 |
+| ReduceLROnPlateau f=0.9 p=50 | 1.88 | 0% | 1.042 | $7.2\times10^{-9}$ | 0.365 | 0.8815 |
+| **ReduceLROnPlateau f=0.5 p=100 (chosen)** | **1.95** | **0%** | **1.006** | $8.4\times10^{-9}$ | **0.365** | **0.8815** |
 
-![Main animation (seed 0, 205 frames): logit-space d(alpha) vs alpha for the ten preregistered pairs; squares: predicted class along the path. Insets: accuracy and confidence (top), train/test loss (bottom, log y), both vs step (log x).](plots/plateau_evolution.gif)
+Only the loss-adaptive `ReduceLROnPlateau` schedules are smooth: their loss never exceeds twice
+its own running minimum. Constant LR and even a full-length cosine anneal spike over many orders
+of magnitude for most of training (their plots are deliberately not shown here, per operator
+preference; they remain on disk under `plots/`). Among the smooth candidates, **factor 0.5 /
+patience 100** wins: it is as smooth as the patience-10 variant but reaches a ~350× lower final
+loss ($8.4\times10^{-9}$, matching the constant-LR run's $4.0\times10^{-9}$ floor) and the best
+test accuracy of any run (0.8815). It is the schedule of every run below. Note the pattern in
+the PF column — it anticipates the last subsection: every converged schedule lands at PF ≈
+0.37, and only the never-converging constant-LR run goes beyond.
 
-Static frames for reading without playback:
+Figure 1 documents the chosen schedule across all four primary runs. The per-step loss traces
+are smooth and flat at the end (left); the LR cascades from $10^{-3}$ to $1.5\times10^{-8}$ in
+16 halvings (middle; the MSE seeds start the cascade at steps 1,175–1,415 and finish by ~26k–31k,
+the CE run compresses it into steps 15,941–17,650 because CE loss keeps improving longer); test
+accuracy is flat from step ~300 on (right).
 
-![Selected frames of the main animation (rows: steps 0, 100, 1,000, 20,000, 100,000): logit-space d(alpha) vs alpha for the ten pairs. The diagonal at step 0 becomes soft sigmoids by a few hundred steps and sharp staircases by tens of thousands.](plots/frames_selected_steps.png)
+![Figure 1. Converged training, all four primary runs (x: training step, log scale). Left: full-train loss at every step (log y) — all traces smooth, no spikes. Middle: learning rate (log y) cascading 1e-3 to 1.5e-8. Right: test accuracy on the first 2,000 test images. Solid: MSE seeds 0-2; dashed red: CE seed 0.](plots/smooth_convergence.png)
 
-**The early phase on a linear time axis.** The main movie's schedule (every 500 steps) is
-dominated by late training and compresses the beginning. To watch training start, we reran seed
-0 deterministically and recorded **every 5 steps from 0 to 1,000** — 201 frames on a linear time
-axis, covering the entire rise of accuracy and several hundred steps of flat accuracy after it
-(bit-exact match to the main records at all 7 overlapping steps). The movie shows the diagonal
-deforming within the first tens of steps; curves wobble rapidly while the loss falls fastest
-(roughly the first 150–200 steps), then settle into stable soft sigmoids. The plateau fraction
-tells the same story: 0.19 at step 0, 0.34 by step 100, then nearly frozen at ~0.37 through step
-1,000 — far below its final 0.54–0.61. The early phase creates the soft structure and the
-class layout of the path; the actual flattening into plateaus happens over the following tens of
-thousands of steps.
+**Training context (seed 0).** Train accuracy reaches 1.0 by its step-300 checkpoint (the
+5-step-resolution early zoom locates it at step 145); the 1,000-image subset is memorized. Test
+accuracy reaches its ~0.88 plateau by step ~70–120 and then stays pinned at 0.881 to the end —
+converged training shows none of the slow late test-accuracy decline of a constant-LR run.
+Confidence (mean max raw output) saturates at ~0.82 alongside. So the entire visible history of
+these runs after a few hundred steps is: nothing changes — which is exactly the point.
 
-![Early-phase animation (seed 0, steps 0–1,000, one frame per 5 steps, linear time): logit-space d(alpha) vs alpha for the ten pairs; insets as in the main animation but with a linear step axis.](plots/plateau_evolution_early.gif)
+![Figure 2. Training context (seed 0): train accuracy (blue), test accuracy (red), and confidence = mean max raw output (purple) vs training step (log-scale x).](plots/training_context_pl_f0.5_p100.png)
 
-![Early-phase heatmap: logit-space d(alpha) (color, blue 0 to red 1) vs alpha (x) and training step (y, linear, one row per 5 steps, 0–1,000) for the ten pairs and two within-class controls. Rapid flicker below ~200 steps, then stable soft structure.](plots/plateau_early_heatmap.png)
+### The movie: structure grows out of a featureless diagonal, then freezes
 
-**Gradual consolidation, wandering boundaries.** The full-run heatmap shows both effects:
-plateaus (saturated blue/red) expand gradually over tens of thousands of steps, and the white
-boundary stripe keeps shifting position throughout training, including large late relocations.
-Within-class pairs (rightmost panels) never develop a comparable two-plateau structure.
+One frame per checkpoint (205 frames), ten fixed pairs, training step in the title; insets track
+accuracy/confidence (top) and train/test loss (bottom, both smooth) with the current step
+marked. At step 0 every curve is the diagonal. Within the first tens of steps the curves bow
+into soft sigmoids; by step ~300 the plateau fraction has essentially reached its final value
+(0.19 → 0.34 at step 100 → 0.37 at step 300); after the LR cascade (steps ~1,400–26,000) the
+movie is a still image. The mean curve motion per 500-step gap over the last 50,000 steps is
+$M = 5.6\times10^{-7}$ — frozen to six decimal places (constant-LR reference: $2.4\times10^{-2}$,
+with boundaries still relocating past step 80,000).
 
-![Full-run heatmap: logit-space d(alpha) (color) vs alpha (x) and checkpoint (y; rows 0,10,30,100,300 then every 500 steps) for the ten pairs and two within-class controls.](plots/plateau_training_heatmap.png)
+![Figure 3. Main animation (seed 0, 205 frames): logit-space d(alpha) vs alpha for the ten preregistered pairs; squares: predicted class along the path. Insets: accuracy and confidence (top), train/test loss (bottom, log y), both vs step (log x).](plots/plateau_evolution_pl_f0.5_p100.gif)
 
-**Successive layers sharpen the same transition.** At a fixed checkpoint the transition gets
-sharper the deeper you measure: $d$ at $h_2$ is smoothest, at $h_3$ sharper, at the logits
-sharpest. Early in training all layers are near-diagonal; late in training the deep layers have
-hard plateaus while $h_2$ still changes smoothly. The discreteness is built up depth-wise, not
-inherited from layer 1. This is the only figure where $d$ is shown at hidden layers.
+Static frames for reading without playback — note rows 1,000 / 20,000 / 100,000 are nearly
+identical:
 
-![Layerwise d(alpha) vs alpha at h2 (green), h3 (orange), and logits (blue), for pair 0-1 (solid) and the mean over all 45 cross pairs (dashed), at steps 100, 5,000, 100,000.](plots/layerwise_selected_steps.png)
+![Figure 4. Selected frames of the main animation (rows: steps 0, 100, 1,000, 20,000, 100,000): logit-space d(alpha) vs alpha for the ten pairs; squares: predicted class. The diagonal at step 0 becomes soft sigmoids by a few hundred steps and then stops changing.](plots/frames_selected_steps_pl_f0.5_p100.png)
 
-**Consistent across seeds, with no synchronized transition.** Plateau fraction rises from the
-~0.20 floor through ~0.34 (step 100) and ~0.4 (step 10k) to 0.54–0.61 (step 100k) in all three
-seeds — the same gradual shape with no common jump time. The late per-checkpoint fluctuations
-are boundary relocations, not protocol noise (the records are exact). At 100k, 22–29 of the 45
-cross-class pairs show a textbook plateau→boundary→plateau curve, many as multi-step staircases
-through third-class regions. Per-seed numbers are tabulated in RESULTS.md.
+### The early phase on a linear time axis — where everything happens
 
-![Seed comparison. Left: plateau fraction (y) vs training step (x, log) for seeds 0-2. Right: all 45 cross-pair logit-space d(alpha) curves overlaid at steps 0, 100, 1,000, 20,000, 100,000 (columns) for each seed (rows).](plots/seed_comparison.png)
+The main movie's schedule compresses the beginning. To watch training start, we recorded a
+deterministic rerun **every 5 steps from 0 to 1,000** — 201 frames on a linear time axis. This
+zoom is bit-exact for the primary run (the schedule's first LR cut comes later, at step 1,375;
+verified). The diagonal deforms within the first tens of steps; curves wobble rapidly while the
+loss falls fastest (roughly the first 150–200 steps), then settle into the stable soft sigmoids
+that the rest of training preserves. PF: 0.19 (step 0) → 0.27 (25) → 0.34 (100) → ~0.37
+(200–1,000, already final).
 
-**Late boundary flips are fast but not instantaneous.** The largest adjacent-frame change in the
-movie (pair 5→6, between steps 82,000 and 82,500, seed 0) was rerun deterministically with
-records every 50 steps. The boundary sits near $\alpha\approx0.95$ until step ~82,300, then
-sweeps to $\alpha\approx0.1$ by step ~82,450 — a ~150-step relocation, at a point where the
-model has held train accuracy 1.0 for ~82,000 steps.
+![Figure 5. Early-phase animation (seed 0, steps 0–1,000, one frame per 5 steps, linear time): logit-space d(alpha) vs alpha for the ten pairs; insets as in Figure 3 but with a linear step axis.](plots/plateau_evolution_early.gif)
 
-![Dense zoom: logit-space d(alpha) vs alpha for pair 5-6 at every 50 steps from 82,000 (dark) to 82,500 (yellow), seed 0.](plots/dense_zoom.png)
+![Figure 6. Early-phase heatmap: logit-space d(alpha) (color, blue 0 to red 1) vs alpha (x) and training step (y, linear, one row per 5 steps, 0–1,000) for the ten pairs and two within-class controls. Rapid flicker below ~200 steps, then stable structure.](plots/plateau_early_heatmap.png)
 
-**Endpoint and control checks.** At step 100k, 9 of the 90 cross-pair endpoints are
-misclassified — consistent with 0.85 test accuracy (endpoints were fixed in advance, never
-filtered). Within-class controls behave as predicted: 8/10 keep a single predicted class along
-the whole path, and the two exceptions (2→2, 7→7) each contain one endpoint the model genuinely
-misclassifies, so those paths really do cross a decision boundary.
+The full-run heatmap (Figure 7) shows the same at full scale: the color pattern of every pair is
+laid down in the first few hundred steps (bottom sliver of each panel) and the boundary — the
+white stripe — then runs perfectly vertically for 100,000 steps. Within-class pairs (rightmost
+panels) never develop a comparable two-plateau structure.
+
+![Figure 7. Full-run heatmap: logit-space d(alpha) (color) vs alpha (x) and checkpoint (y; rows 0,10,30,100,300 then every 500 steps) for the ten pairs and two within-class controls. Vertical stripes = frozen boundaries.](plots/plateau_training_heatmap_pl_f0.5_p100.png)
+
+### Depth sharpens the transition; seeds agree
+
+At a fixed checkpoint the transition gets sharper the deeper you measure: $d$ at $h_2$ is
+smoothest, at $h_3$ sharper, at the logits sharpest. Early in training all layers are
+near-diagonal. The discreteness is built up depth-wise, not inherited from layer 1. This is the
+only figure where $d$ is shown at hidden layers.
+
+![Figure 8. Layerwise d(alpha) vs alpha at h2 (green), h3 (orange), and logits (blue), for pair 0-1 (solid) and the mean over all 45 cross pairs (dashed), at steps 100, 5,000, 100,000.](plots/layerwise_selected_steps_pl_f0.5_p100.png)
+
+All three seeds tell the same story: PF rises from the ~0.20 floor to 0.35–0.37 within ~300
+steps and stays there (final values 0.365 / 0.365 / 0.351); the 45-pair curve fans are visually
+indistinguishable across the three final columns. Emergence is gradual — there is no sudden
+global transition anywhere. Final test accuracies: 0.8815 / 0.893 / 0.885. Per-seed numbers are
+tabulated in RESULTS.md.
+
+![Figure 9. Seed comparison. Left: plateau fraction (y) vs training step (x, log) for seeds 0-2. Right: all 45 cross-pair logit-space d(alpha) curves overlaid at steps 0, 100, 1,000, 20,000, 100,000 (columns) for each seed (rows).](plots/seed_comparison_pl_f0.5_p100.png)
+
+**Endpoint and control checks.** At step 100k, 3 of the 90 cross-pair endpoints are
+misclassified on seed 0 (7 and 6 on seeds 1–2) — endpoints were fixed in advance, never
+filtered. Within-class controls behave as predicted: 9/10, 9/10, and 8/10 paths keep a single
+predicted class along the whole path, and every exception contains one endpoint the model
+genuinely misclassifies, so those paths really do cross a decision boundary.
 
 ### Why the loss keeps falling at constant accuracy — and the cross-entropy version
 
-**The explanation is generic, not an MSE artifact.** Accuracy only checks the *argmax* of the
-10 outputs; the loss measures how far the whole output vector is from its target. Once every
-training image is argmax-correct (step ~145), accuracy is pinned at 1.0, but the outputs are
-still far from the exact targets, so gradient descent keeps shrinking that residual: under MSE
-the outputs converge toward the exact one-hot vectors; under CE the true-class logit margin —
-and hence the softmax probability — keeps growing, and the loss approaches 0 only
-asymptotically. The CE rerun (identical init, data, and batch order; only the loss changed)
-reproduces the picture exactly: train accuracy is 1.0 from its step-300 checkpoint onward
-(between checkpoints 100 and 300; the MSE run's finer early rerun locates it at step 145) while
-CE train loss keeps falling for the remaining ~99,700 steps, reaching $1.7\times10^{-8}$
-(MSE run: $4.0\times10^{-9}$). This continued optimization at fixed accuracy is precisely the
-regime in which the plateaus keep sharpening. Two side observations: CE generalizes slightly
-better here (final test accuracy 0.881 vs 0.848) and its test loss *rises* late (mild overfit in
-likelihood while test accuracy is stable) — neither changes the plateau story.
+**The explanation is generic, not an MSE artifact.** Accuracy only checks the *argmax* of the 10
+outputs; the loss measures how far the whole output vector is from its target. Once every
+training image is argmax-correct, accuracy is pinned at 1.0, but the outputs are still far from
+the exact targets, so gradient descent keeps shrinking that residual — under MSE toward the
+exact one-hot vectors, under CE by growing the true-class probability toward 1. The CE rerun
+(identical init, data, batch order, and schedule; only the loss changed) reproduces the picture
+exactly: train accuracy is 1.0 from its step-300 checkpoint onward while CE train loss keeps
+falling smoothly until the LR collapses, converging at $1.2\times10^{-8}$. Two side
+observations: CE's test loss drifts up late (mild overfit in likelihood at stable accuracy), and
+under the converged schedule MSE generalizes slightly better (0.8815 vs 0.859) — neither changes
+the plateau story.
 
-![MSE vs CE (seed 0, identical init/data/batches; log-scale x). Top: train/test loss (log y) with the first train-acc-1.0 checkpoint marked — under both losses train loss falls for the rest of training. Bottom left: train/test accuracy for both runs and CE confidence (mean max softmax probability). Bottom right: plateau fraction PF in logit space and probability space for both runs.](plots/mse_vs_ce_training.png)
+![Figure 10. MSE vs CE (seed 0, identical init/data/batches/schedule; log-scale x). Top: train/test loss (log y) with the first train-acc-1.0 checkpoint marked — under both losses train loss falls smoothly long after accuracy saturates. Bottom left: train/test accuracy for both runs and CE confidence (mean max softmax probability). Bottom right: plateau fraction PF in logit space and probability space for both runs.](plots/mse_vs_ce_training_pl_f0.5_p100.png)
 
-**CE relocates the plateaus from logit space to probability space.** In logit space the CE run
-never leaves the diagonal: its PF creeps from 0.19 to only ~0.26 and back to 0.22 by 100k
-(diagonal floor ≈ 0.20; mean deviation from the diagonal 0.023 at 100k vs 0.16 for MSE). But
-this is not "no structure" — it is the wrong space. CE training grows logit *norms*
-continuously along the path, which linearizes logit-space distances. Measure the same paths in
-probability space (softmax of the same logits) and the CE run has the **sharpest plateaus of
-any run in this report**: PF 0.89 at 100k vs 0.55 for MSE (where logit and probability space
-agree, 0.556 vs 0.550, because MSE outputs are already near the one-hot simplex). The
-probability-space plateaus also form much *earlier* under CE — most of the rise is complete by
-step ~1,000–10,000. And the decision regions along the path (colored squares) are
-piecewise-constant with 1–3 sharp switches under both losses. So the loss determines in which
-output coordinates the discreteness is visible; the underlying region structure is common.
+**CE relocates the plateaus from logit space to probability space — and they are sharp.** In
+logit space the CE run never leaves the diagonal: its PF stays at 0.24–0.26 throughout training
+(floor ≈ 0.20) — CE growing the logit norms continuously along the path linearizes logit-space
+distances. But measure the same paths in probability space (softmax of the same logits) and the
+CE run has the only genuinely sharp plateau→boundary→plateau curves of this report: PF$_{\rm
+prob}$ = 0.19 (step 0) → 0.58 (100) → 0.79 (1,000) → 0.85 (10,000) → **0.863 (100,000)**,
+essentially all formed before the CE LR cascade at ~16k and preserved by it (late curve motion
+in probability space $9\times10^{-5}$). The MSE run agrees across spaces (PF 0.365 logit / 0.357
+prob — its outputs already sit near the one-hot simplex). And the decision regions along the
+path (colored squares) are piecewise-constant with 1–3 sharp switches under both losses. So the
+loss determines in which output coordinates the discreteness is visible; the underlying
+decision-region structure is common.
 
-![CE-loss run (seed 0), selected steps (rows: 0, 100, 1,000, 20,000, 100,000) for the ten pairs: d(alpha) computed in logit space (blue) stays near the diagonal, while the same paths in probability space (red) develop plateau-boundary-plateau curves sharper than the MSE run's; squares: predicted class.](plots/frames_selected_steps_ce_prob.png)
+![Figure 11. CE run (seed 0), selected steps (rows: 0, 100, 1,000, 20,000, 100,000) for the ten pairs: d(alpha) computed in logit space (blue) stays near the diagonal, while the same paths in probability space (red) develop sharp plateau-boundary-plateau curves; squares: predicted class.](plots/frames_selected_steps_ce_prob_pl_f0.5_p100.png)
 
-The full CE animation (same format as the main movie, logit-space $d$, with the CE run's
-accuracy/confidence and loss insets) shows the diagonal persisting through all 205 checkpoints
-while the predicted-class squares still snap between discrete regions:
+The full CE animation (same format as Figure 3, logit-space $d$, CE insets) shows the
+near-diagonal logit curves persisting through all 205 checkpoints while the predicted-class
+squares still snap between discrete regions:
 
-![CE-loss animation (seed 0, 205 frames): logit-space d(alpha) for the ten pairs stays near the diagonal throughout training; squares: predicted class. Insets: accuracy and confidence = mean max softmax probability (top), train/test CE loss (bottom, log y).](plots/plateau_evolution_ce.gif)
+![Figure 12. CE animation (seed 0, 205 frames): logit-space d(alpha) for the ten pairs stays near the diagonal throughout training; squares: predicted class. Insets: accuracy and confidence = mean max softmax probability (top), train/test CE loss (bottom, log y).](plots/plateau_evolution_ce_pl_f0.5_p100.gif)
 
-### Making training converge: the ReduceLROnPlateau reruns
+### What converged training does NOT show: the constant-LR comparison (numbers only)
 
-**The constant-LR runs really are chaotic at the end — and the scheduler fixes that completely.**
-Traced at every single step, the constant-LR full-train loss stops decreasing smoothly around
-step ~2,000 (MSE) and instead spikes up and down over 3–4 orders of magnitude for the rest of
-training (top-left panel below); CE shows the same behavior after step ~10,000. Under the
-scheduler the picture is exactly what the feedback asked for: the training loss levels off into
-a genuine plateau and the learning rate cascades down. The MSE run halves its LR 16 times
-between steps 767 and 1,949 (from $10^{-3}$ to $1.5\times10^{-8}$); the CE run does the same
-between steps 4,350 and 11,298. From that point on the loss trace is a flat line — no spikes —
-at $2.9\times10^{-6}$ (MSE) / $2.4\times10^{-7}$ (CE). The constant-LR runs eventually reach
-*lower* loss values ($4.0\times10^{-9}$ / $1.7\times10^{-8}$) but only as the noisy envelope of
-a fluctuating process, never as a converged value.
-
-**Convergence of the loss is convergence of the plateau curves.** After the LR collapse the
-curve motion $M$ drops from $2.4\times10^{-2}$ (constant MSE, mean over checkpoint gaps ≥ 50k)
-to $3.2\times10^{-6}$ — the curves are frozen to about four decimal places per 500 steps, and
-the late boundary flips (the ~150-step relocation at step 82k of the constant run) are gone
-entirely. The CE scheduled run freezes likewise ($8.8\times10^{-3} \to 1.3\times10^{-4}$ in
-probability space).
-
-**But freezing the training freezes the sharpening — the "chaos" was the engine.** The scheduled
-MSE run's plateau fraction stops at **0.37** — precisely the value the constant run had around
-step ~2,000, where the LR collapsed — and never reaches the constant run's 0.55. All the
-sharpening and boundary relocation that the constant-LR movie shows between step 2k and 100k
-is driven by continued finite-LR optimization; remove the drive and the geometry freezes
-mid-development. CE is the control that confirms the reading: its probability-space plateaus
-form *early* (most of the rise is done by step ~10k), so its scheduled run — whose LR survives
-until step ~11k — keeps nearly all of them (PF 0.856 vs 0.892).
-
-**Side effect: the scheduler generalizes better under MSE.** The constant MSE run's test
-accuracy drifts from 0.885 down to 0.848 over the last ~90k steps; the scheduled run pins test
-accuracy at 0.880 from step ~1,000 to the end. So the slow late test-accuracy decline of the
-main run is not "overfitting with time" but an effect of continued constant-LR churn. (Under CE
-the sign flips: constant 0.881 vs scheduled 0.860 — CE's late optimization was mildly helping.)
-
-![Constant LR vs ReduceLROnPlateau (seed 0, identical init/data/batches; log-scale x). Top left/middle: full-train loss at every step (log y) for MSE and CE — constant LR (blue) fluctuates over orders of magnitude late, scheduled (red) converges to a flat plateau. Top right: the scheduled runs' learning rate (log y) collapsing from 1e-3 to 1.5e-8. Bottom left: test accuracy on the first 2,000 test images for all four runs. Bottom middle: plateau fraction PF, each loss in its plateau space (MSE: logit d; CE: probability d); dotted line = diagonal floor 0.20. Bottom right: curve motion M (log y) — how much the d(alpha) curves change per checkpoint gap.](plots/lr_scheduler_comparison.png)
+The same seed trained at a constant LR of $10^{-3}$ — the branch's original configuration —
+reaches a *higher* logit-space PF at 100k: 0.556 vs 0.365 (and 0.54 / 0.61 on seeds 1–2). But it
+does so without ever converging: its full-train loss fluctuates over 3–4 orders of magnitude
+from step ~2,000 onward (spike max $5.8\times10^{5}$), its curves keep moving late
+($M = 2.4\times10^{-2}$ per 500 steps, including complete boundary relocations within ~150 steps
+past step 80,000), and its test accuracy decays from 0.885 to 0.8475. The cosine-annealed run
+interpolates: spiky for most of training, PF 0.392, tail range 2.3. The pattern across all five
+schedules is clean — **logit-space PF beyond the ~0.37 reached at LR collapse occurs only while
+training is *not* converged**; every schedule that converges freezes PF at its collapse-time
+value, and the CE run keeps its high probability-space PF only because those plateaus form
+before its LR cascade. Per operator preference, the plots of these non-converged runs are
+omitted from this report (they remain on disk: `plots/plateau_evolution.gif`,
+`plots/lr_scheduler_search.png`, and related files; numeric summaries in
+`results/lr_scheduler_search.json`).
 
 ### Is 3 vs 5 actually harder? Pairwise AUROC and the shape of the 3→5 curve
 
-**Yes — 3 vs 5 is the hardest digit pair for this model.** Its AUROC over the first 2,000 test
-images is **0.9306, the worst of all 45 pairs** (next worst: 5v8 at 0.9512, 7v9 at 0.9558;
-median pair 0.987; best 0v1 at 1.0000). Its pairwise confusion rate is 5.2% — one in nineteen
-3s/5s is predicted as the other digit (207 threes, 179 fives in the pool). The same holds under
-CE: AUROC(3,5) = 0.9755, again rank 1 of 45 from the worst. The reviewer's read of the movie
-panel was therefore correct in substance: the pair whose interpolation curve looks least like
-two plateaus is genuinely the hardest to separate.
+**Yes — 3 vs 5 is the hardest digit pair for this model.** On the converged seed-0 model at step
+100k, its AUROC over the first 2,000 test images is **0.9772, the worst of all 45 pairs** (next
+worst: 7v9 at 0.9784, 4v9 at 0.9786; best pairs sit at 1.0000). Its pairwise confusion rate is
+6.0%. The same holds under CE: AUROC(3,5) = 0.9697, again rank 1 of 45 from the worst. The
+reviewer's read of the movie panel was therefore correct in substance: the pair whose
+interpolation curve looks least like two plateaus is genuinely the hardest to separate.
 
-**But the odd 3→5 curve is a staircase, not a smeared boundary.** At step 100k the 3→5 path
-starts in a region predicted **2** (the fixed "3" endpoint is genuinely misclassified as 2 —
-one of the 9 misclassified endpoints), crosses into a region predicted **9** where it sits on a
-flat mid-level shelf at $d\approx0.45$ for ~11 consecutive points, then jumps to the **5**
-plateau. The "plateau in the middle" is a real activation plateau belonging to a *third* class,
-exactly the staircase phenomenon seen in other pairs — its unusual look comes from the
-misclassified endpoint plus the detour, not from a failure of plateau formation. Across all 45
+**The 3→5 curve's shape comes from a misclassified endpoint plus a detour.** At step 100k the
+3→5 path has three predicted-class segments: it starts in a region predicted **2** (the fixed
+"3" endpoint is genuinely misclassified as 2), crosses into a **3** region with a soft mid-level
+shelf at $d\approx0.5$, then rises to the **5** side (Figure 13, bottom right). Its mid fraction
+is 0.84 — the path spends almost all its length between the endpoint plateaus. Across all 45
 pairs, curve shape is only a weak proxy for pair difficulty: Spearman correlation of AUROC with
-the mid fraction is $-0.21$, and with the third-class fraction $-0.48$ — one fixed image pair
+the mid fraction is $-0.30$, and with the third-class fraction $-0.56$ — one fixed image pair
 per digit pair is a noisy readout, which is why we answer the difficulty question with AUROC
 over ~400 images per pair rather than with the curve.
 
-![Pairwise discriminability vs curve shape (MSE seed 0, step 100k, first 2,000 test images). Top left: 10x10 pairwise AUROC matrix (color + printed values; 3v5 darkest). Top right: pairs ranked by 1 - AUROC (log y), 3v5 in red at rank 1/45. Bottom left: 1 - AUROC (log y) vs mid fraction of each pair's curve, 3v5 highlighted. Bottom right: the 3->5 curve at 100k with its predicted classes (squares) annotated - a 2/9/5 staircase with a misclassified "3" endpoint.](plots/pairwise_auc.png)
-
-**Perturbation control (secondary).** An earlier study in this direction probed the same
-checkpoints from a different angle. It perturbed natural $h_1$ activations radially and compared
-the output response to matched-random activations (13 log-spaced checkpoints, 3 seeds). Its
-**plateau contrast** — flatness of natural activations relative to the matched-random control; 0
-= no learned flatness, →1 = perfectly flat — rises from 0.42 at step 100 to 0.80 at step 100k,
-while test accuracy declines. Its validated **stable-region count** converges to 10, one region
-per predicted digit, by step ~300. Flatness tracks confidence, not correctness: at 100k the
-contrast is 0.73 for confident-wrong points vs 0.85 for confident-correct vs 0.49 for uncertain.
-Full definitions live in `experiments/analyze_sweep.py`; these two quantities appear nowhere
-else in this report. The timing agrees with the interpolation movie: local robustness also lags
-generalization.
-
-![Perturbation control: plateau contrast (left, y) and validated stable-region count (right, y) vs training step (x, log; mean of 3 seeds, band = seed min-max).](plots/plateau_contrast_and_region_count.png)
+![Figure 13. Pairwise discriminability vs curve shape (converged MSE seed 0, step 100k, first 2,000 test images). Top left: 10x10 pairwise AUROC matrix (color + printed values; 3v5 darkest). Top right: pairs ranked by 1 - AUROC (log y), 3v5 in red at rank 1/45. Bottom left: 1 - AUROC (log y) vs mid fraction of each pair's curve, 3v5 highlighted. Bottom right: the 3->5 curve at 100k with predicted classes (squares) annotated - segments predicted 2, 3, then 5, with a misclassified "3" endpoint.](plots/pairwise_auc_pl_f0.5_p100.png)
 
 ## Conclusion
 
-Activation plateaus in this MLP are entirely learned, and learned slowly. They are absent at
-initialization, take soft form during the few hundred steps in which the network fits the data,
-and only become genuinely flat regions with sharp, staircase boundaries over tens of thousands
-of post-generalization steps — while boundaries continue to relocate in fast ~150-step events
-even past step 80,000. The engine of that late development is ordinary loss minimization at
-saturated accuracy: accuracy only constrains the argmax, so both MSE and CE keep shrinking the
-residual for the remaining ~99,700 steps, and that continued optimization is what sharpens the
-plateaus. The ReduceLROnPlateau reruns make this causal rather than correlational: anneal the
-learning rate until the training loss genuinely converges and the entire late development
-switches off — curves frozen to $M\approx10^{-6}$ per 500 steps, no boundary flips, plateau
-fraction stuck at its LR-collapse value (0.37 for MSE instead of 0.55). The late-training
-"chaos" of the constant-LR runs is not measurement noise or a defect of the setup; it *is* the
-mechanism that keeps carving the plateaus (and, under MSE, the cause of the slow late
-test-accuracy decline). The loss chooses the coordinates: MSE carves plateaus directly into the logits, CE
-into the softmax probabilities (even more sharply, and earlier), with the same discrete
-decision-region structure underneath. The pair whose curve looks least plateau-like, 3 vs 5, is
-genuinely the model's hardest pair (worst AUROC under both losses), but its odd curve is itself
-made of plateaus — a staircase through a third class's region from a misclassified endpoint.
-The within-class controls, the layerwise sharpening, and the matched-random perturbation
-control corroborate the same picture: training first solves the task, then keeps carving the
-representation into increasingly discrete, confidently-held regions — including around
-confidently *wrong* predictions.
+Activation plateaus in this MLP are entirely learned, and they are learned **early**. They are
+absent at initialization, and the whole structure the converged network will ever have — soft
+logit-space sigmoids under MSE (plateau fraction ~0.37 over a 0.20 floor), sharp
+probability-space plateaus under CE (0.86) — forms during the same few hundred steps in which
+the network fits the data, consistently across three seeds. Once the learning rate anneals and
+the training loss genuinely converges, the geometry freezes: curve motion drops to
+$10^{-7}$–$10^{-4}$ per 500 steps and boundaries stop moving entirely. The loss chooses the
+coordinates: MSE carves its (soft) plateaus directly into the logits, CE carves sharp ones into
+the softmax probabilities while leaving logit-space near-diagonal, with the same
+piecewise-constant decision regions underneath. The pair whose curve looks least plateau-like, 3
+vs 5, is genuinely the model's hardest pair (worst AUROC under both losses), but its odd curve
+traces to a misclassified endpoint and a detour through the 3-region, not to a failure of region
+structure. Sharpening the MSE logit-space plateaus beyond the converged level appears to
+require continued non-converged optimization: in our scheduler search, every schedule that
+converges freezes PF at its LR-collapse value, while the never-converging constant-LR run keeps
+sharpening to 0.556 — at the cost of a loss that fluctuates over orders of magnitude and a test
+accuracy that decays. For a safety reader the summary is: in this model, output discreteness is
+a product of early fitting, it is stable under properly converged training, and its sharpness
+in any given output coordinate depends on which loss saturates that coordinate.
 
 **Limitations.** One architecture (depth-4, width-200 MLP), one dataset (1,000-image MNIST
-subset), three MSE seeds; the CE and scheduler variants are seed 0 only, and the scheduler was
-run at one hyperparameter setting (factor 0.5, patience 10, monitored on the full-train loss) —
-a gentler schedule that collapses the LR later would presumably freeze the plateau fraction at a
-higher value, which we did not test. Confirmation seeds use 2,000-step checkpoint spacing rather
-than 500. The plateau fraction depends on its 0.1/0.9 margins (used only as a cross-run timing
-summary; all raw curves are saved and shown). Endpoints come from test images the model may
-misclassify — deliberate, but a few "cross-class" paths therefore connect regions of the same
-predicted class. Pairwise AUROC is reported at the final checkpoint of seed 0. The dense zooms
-(early phase, one late flip) cover seed 0 only.
+subset), three MSE seeds; the CE variant is seed 0 only. The scheduler search covered five
+schedules on one seed; the chosen schedule was then applied to all primary runs. The plateau
+fraction depends on its 0.1/0.9 margins (used only as a cross-run timing summary; all raw
+curves are saved and shown). Endpoints come from test images the model may misclassify —
+deliberate, but a few "cross-class" paths therefore connect regions of the same predicted
+class. Pairwise AUROC is reported at the final checkpoint of seed 0. The early-phase zoom
+covers seed 0 only. Whether a schedule exists that converges smoothly AND sharpens logit-space
+plateaus past ~0.37 is open; none of our smooth candidates did.

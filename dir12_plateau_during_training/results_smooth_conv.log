@@ -1,0 +1,51 @@
+{
+ "MSE seed 0": {
+  "spike_max": 1.952886700630188,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.0060145854949951,
+  "final_train_loss": 8.350847124916072e-09,
+  "final_lr": 1.525878978725359e-08,
+  "lr_cascade": [
+   1375,
+   25824
+  ],
+  "final_test_acc": 0.8815
+ },
+ "MSE seed 1": {
+  "spike_max": 3.191666841506958,
+  "spike_frac_gt2": 0.00033332996636397614,
+  "tail_range_last5k": 1.009261131286621,
+  "final_train_loss": 2.745297988937523e-09,
+  "final_lr": 1.525878978725359e-08,
+  "lr_cascade": [
+   1415,
+   29030
+  ],
+  "final_test_acc": 0.893
+ },
+ "MSE seed 2": {
+  "spike_max": 2.6694326400756836,
+  "spike_frac_gt2": 9.090817264472076e-05,
+  "tail_range_last5k": 1.0078630447387695,
+  "final_train_loss": 3.7886898063277386e-09,
+  "final_lr": 1.525878978725359e-08,
+  "lr_cascade": [
+   1175,
+   31465
+  ],
+  "final_test_acc": 0.885
+ },
+ "CE seed 0": {
+  "spike_max": 1.1575757265090942,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.1100000143051147,
+  "final_train_loss": 1.192092824453539e-08,
+  "final_lr": 1.525878978725359e-08,
+  "lr_cascade": [
+   15941,
+   17650
+  ],
+  "final_test_acc": 0.859
+ }
+}
+saved plots/smooth_convergence.png

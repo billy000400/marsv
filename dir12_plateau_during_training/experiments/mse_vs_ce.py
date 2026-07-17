@@ -49,8 +49,10 @@ def load(sfx):
 
 
 def main():
-    h_mse, st_mse, pf_mse, pfp_mse = load('')
-    h_ce, st_ce, pf_ce, pfp_ce = load('_ce')
+    # optional scheduler suffix (feedback 07161834: compare the SMOOTH runs)
+    sched_sfx = sys.argv[1] if len(sys.argv) > 1 else ''
+    h_mse, st_mse, pf_mse, pfp_mse = load(sched_sfx)
+    h_ce, st_ce, pf_ce, pfp_ce = load('_ce' + sched_sfx)
 
     def acc1_step(h):
         for s, a in zip(h['step'], h['train_acc']):
@@ -69,7 +71,7 @@ def main():
         'pf_curve_ce': {'steps': st_ce.tolist(), 'pf': pf_ce.tolist(),
                         'pf_prob': pfp_ce.tolist()},
     }
-    with open(os.path.join(HERE, 'results', 'mse_vs_ce.json'), 'w') as f:
+    with open(os.path.join(HERE, 'results', f'mse_vs_ce{sched_sfx}.json'), 'w') as f:
         json.dump(summary, f, indent=1)
     print(json.dumps({k: v for k, v in summary.items() if k != 'pf_curve_ce'}, indent=1))
 
@@ -118,13 +120,14 @@ def main():
 
     for ax in axg.ravel():
         ax.set_xlim(-0.5, 1.2e5)
-    fig.suptitle('MSE-on-one-hot vs cross-entropy (seed 0, identical init/data/batches; '
-                 'x-axes log-scale)', y=0.99)
+    fig.suptitle('MSE-on-one-hot vs cross-entropy (seed 0, identical init/data/batches'
+                 + (', ReduceLROnPlateau f=0.5 p=100' if sched_sfx else '')
+                 + '; x-axes log-scale)', y=0.99)
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, 'mse_vs_ce_training.png'), dpi=130,
+    plt.savefig(os.path.join(PLOTS, f'mse_vs_ce_training{sched_sfx}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
-    print('saved plots/mse_vs_ce_training.png')
+    print(f'saved plots/mse_vs_ce_training{sched_sfx}.png')
 
 
 if __name__ == '__main__':

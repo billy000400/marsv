@@ -266,3 +266,62 @@ runs were killed at iteration boundaries twice (records to 87.5k / log to 43k, n
 **Next step.** None — plan complete, all five feedback files addressed, STOP re-written.
 
 On track? yes — S1–S6 done + feedback 07161721 addressed, 100% complete, no blocker; STOP written (zero unaddressed feedback).
+## 2026-07-17 — Iter 8: feedback 07161834 (figure indices + only smoothly-converged results; scheduler optimized)
+
+**Feedback check:** found `human_feedback_07161834.txt` unaddressed (operator had removed STOP).
+Two asks: (1) figure indices; (2) only show smoothly-converged training — optimize the LR
+scheduler if no smooth run exists. Addressing it WAS the iteration.
+
+**Did.**
+- Extended `train_and_record.py` (`--sched cosine`, `--factor`, `--patience`, `--eta-min`) and
+  ran a 5-candidate scheduler search on seed 0 MSE (new `sched_search.py` + metrics: spike ratio
+  vs running-min, tail range). Constant LR and cosine→1e-6 are NOT smooth (spike max 5.8e5 /
+  1.5e5, >80% of steps 2× above the running min); all ReduceLROnPlateau variants are smooth.
+  Chose **f=0.5 / patience=100**: as smooth as p10 but final loss 8.4e-9 (≈ constant's floor,
+  350× below p10) and best test acc 0.8815.
+- Retrained everything with the winner: MSE seeds 0/1/2 + CE seed 0 (full/fallback schedules,
+  520 records, manifest-verified). Re-rendered all main figures with suffix `_pl_f0.5_p100`
+  (movie, frames, heatmap, layerwise, context, seed comparison, mse-vs-ce, CE frames/movie,
+  pairwise AUC — scripts parameterized with a suffix arg; pairwise_auc 3→5 annotations made
+  data-driven). New Figure 1 = smooth_convergence.png (per-step loss/LR/acc of the 4 runs).
+- Verified the early zoom needs NO rerun: the winner's first LR cut is step 1,375, and its
+  records are bit-identical (0.00e+00) to the constant run's through step 1,000 — the existing
+  every-5-steps movie IS the scheduled run's early phase.
+- Rebuilt REPORT.md + RESULTS.md around the converged runs with "Figure N." indices (1–13) in
+  both files; constant-LR results kept as a numbers-only subsection (plots deliberately not
+  embedded, per the operator's dislike of oscillating-loss plots; files stay in plots/).
+  Removed from deliverables: const-LR movie figures, dense zoom, lr_scheduler_comparison, and
+  the radial-perturbation control section (documents the non-converged regime). Fixed an old
+  transcription error (CE prob-PF 0.35/0.51/0.77 → true 0.58/0.79/0.85). Render checks: 12/12
+  display math, 0 degraded, hazard grep clean, all plots embedded.
+
+**Learned.**
+- The tension the operator's asks exposed is itself the cleanest finding: EVERY schedule whose
+  loss converges freezes logit-space PF at its LR-collapse value (~0.37); even cosine — spiky
+  for 80% of training — only reaches 0.392. The constant run's 0.556 exists only as a property
+  of never-converged training. Meanwhile CE's probability-space plateaus (0.86) form before any
+  LR collapse and survive convergence — so "converged networks have sharp plateaus" is true,
+  but only in the coordinates the loss saturates.
+- Patience matters more than factor for ReduceLROnPlateau quality here: p10 quits at 2.9e-6
+  train loss; p100 rides each LR level ~100 steps longer and lands at 8.4e-9 with the same
+  zero-spike trace — and generalizes best (0.8815/0.893/0.885 across seeds).
+- The converged model classifies better AND the 3→5 staircase simplifies (2/9/5 → 2/3/5,
+  AUROC 0.9306 → 0.9772) — but 3v5 stays rank 1/45 hardest under both losses.
+
+**Assumptions logged (loop mode, no human to ask).**
+- "Only show the result that is smoothly converged" read as: all embedded figures must come from
+  smoothly-converged runs and no plot may show an oscillating loss trace; non-converged results
+  may be summarized as numbers in prose (with their plots left on disk). Alternative — deleting
+  every reference to the constant-LR runs — rejected: the PF-freezing comparison is the report's
+  key causal finding and the operator asked for a *better scheduler*, implying the comparison
+  matters. Alternative — embedding the search figure with the spiky candidates — rejected as
+  directly contradicting the feedback.
+- "Optimize your LR scheduler" satisfied via a 5-candidate search with preregistered smoothness
+  metrics rather than a bigger sweep; budget-conscious and sufficient to separate the classes of
+  schedules cleanly.
+- Figure indices implemented as "Figure N." leading each caption, numbering shared between
+  REPORT.md and RESULTS.md so "which figure we are talking about" is unambiguous across files.
+
+**Next step.** None — plan complete, all six feedback files addressed, STOP re-written.
+
+On track? yes — S1–S6 done + feedback 07161834 addressed, 100% complete, no blocker; STOP written (zero unaddressed feedback).

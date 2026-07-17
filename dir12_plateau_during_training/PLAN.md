@@ -235,29 +235,27 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocke
 
 ## Current status
 
-COMPLETE (2026-07-17, iter 7). All six stages done. Seed 0: 205-checkpoint movie (steps 0,10,30,100,300 then
-every 500 to 100k), 55-pair frozen SLERP protocol at every checkpoint, all records + state dicts saved and
-manifest-verified; seeds 1–2 confirm with 56 checkpoints each; CE-loss rerun of seed 0 (identical
-init/data/batches, full schedule) per feedback 07161650; ReduceLROnPlateau reruns of seed 0 (MSE + CE, full
-schedule, factor 0.5 / patience 10 on per-step full-train loss) per feedback 07161721. Deliverables:
-plots/plateau_evolution.gif (205 frames, with accuracy/confidence + train/test-loss insets),
-plateau_evolution_early.gif + plateau_early_heatmap.png (feedback 07161530: deterministic seed-0 rerun every
-5 steps 0–1,000, LINEAR time axis, bit-exact vs movie records), frames_selected_steps.png,
-plateau_training_heatmap.png, layerwise_selected_steps.png, seed_comparison.png, dense_zoom.png (50-step zoom
-into the largest late boundary flip, 82,000→82,500, bit-exact), training_context.png, mse_vs_ce_training.png,
-frames_selected_steps_ce_prob.png, plateau_evolution_ce.gif, pairwise_auc.png, lr_scheduler_comparison.png;
-results/checkpoint_manifest.json, results/mse_vs_ce.json, results/pairwise_auc.json,
-results/lr_scheduler.json. Verdict in REPORT.md: plateaus emerge gradually out of a diagonal (none at init),
-pairs do not synchronize, sharpening and outright boundary relocation continue long after test accuracy
-stabilizes; early phase = fast soft-structure formation (diagonal deforms in tens of steps, PF frozen ~0.37
-from step 200), sharpening comes tens of thousands of steps later; the loss decides WHERE plateaus live
-(MSE → logits, PF 0.55; CE → softmax probabilities, PF 0.89, logit-space stays diagonal), not whether they
-exist; 3v5 is the genuinely hardest pair (worst AUROC of 45 under both losses) and its odd curve is a
-third-class staircase from a misclassified endpoint; ReduceLROnPlateau makes training genuinely converge
-(loss plateaus, LR 1e-3→1.5e-8, curves freeze, late flips vanish) but freezes PF at its LR-collapse value
-(MSE 0.37 vs 0.556 const) — the late constant-LR "chaos" IS the engine of late sharpening; scheduled MSE
-also generalizes better (test acc 0.8795 vs 0.8475). Feedback 07161151, 07161530, 07161650, and 07161721
-all addressed in REPORT/RESULTS. STOP written.
+COMPLETE (2026-07-17, iter 8). All six stages done; primary runs REBUILT per feedback 07161834 ("only show
+smoothly converged results; optimize the LR scheduler"). Scheduler search on seed 0 MSE (constant, cosine,
+RLROP f0.5/p10, f0.9/p50, f0.5/p100; new smoothness metrics spike-ratio + tail-range) picked
+**ReduceLROnPlateau factor 0.5 / patience 100** (smooth: loss never >2× running min; converged: tail range
+1.006; final loss 8.4e-9 ≈ constant floor; best test acc 0.8815). All primary runs use it: MSE seeds 0/1/2
+(205/55/55 ckpts) + CE seed 0 (205), 520 records manifest-verified; early zoom (every 5 steps 0–1,000)
+bit-exact for these runs (first LR cut at 1,375). Deliverables carry "Figure N." indices 1–13, identical in
+REPORT.md and RESULTS.md: smooth_convergence.png, training_context_pl_f0.5_p100.png,
+plateau_evolution_pl_f0.5_p100.gif, frames_selected_steps_pl_f0.5_p100.png, plateau_evolution_early.gif,
+plateau_early_heatmap.png, plateau_training_heatmap_pl_f0.5_p100.png,
+layerwise_selected_steps_pl_f0.5_p100.png, seed_comparison_pl_f0.5_p100.png,
+mse_vs_ce_training_pl_f0.5_p100.png, frames_selected_steps_ce_prob_pl_f0.5_p100.png,
+plateau_evolution_ce_pl_f0.5_p100.gif, pairwise_auc_pl_f0.5_p100.png; results/lr_scheduler_search.json,
+smooth_convergence.json, mse_vs_ce_pl_f0.5_p100.json, pairwise_auc_pl_f0.5_p100.json. Constant-LR results
+are numbers-only context (their plots deliberately not embedded, kept on disk). Verdict: plateau structure
+is entirely learned and forms in the first few hundred steps (PF 0.19→0.34@100→0.37@300, frozen thereafter,
+3 seeds); converged training freezes the geometry (M 5.6e-7 vs 2.4e-2 const; no late flips); the loss picks
+the space (MSE: soft logit plateaus PF 0.37; CE: sharp probability plateaus PF 0.863, logit near-diagonal);
+logit-PF beyond ~0.37 (const reaches 0.556) occurs only in never-converged training; 3v5 hardest pair under
+both losses (AUROC 0.9772 / 0.9697, rank 1/45 from worst); converged MSE generalizes best
+(0.8815/0.893/0.885). Feedback 07161151, 07161530, 07161650, 07161721, 07161834 all addressed. STOP written.
 
 ## Next step
 

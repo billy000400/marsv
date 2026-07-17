@@ -217,3 +217,53 @@ iteration wiped the partial outputs and reran everything to completion.)
   no bare plot refs. No prior result numbers changed.
 - Renamed `human_feedback_07161721.txt` → `.addressed.md`; STOP re-written (plan complete, zero
   unaddressed feedback).
+## 2026-07-17 — Iter 8: operator feedback 07161834 — figure indices + smooth-converged runs only (new primary runs)
+
+Feedback: (1) add figure indices; (2) only show smoothly converged results — "optimize your LR
+scheduler to find a better one" if needed. Both addressed; the deliverables were rebuilt around
+NEW primary runs.
+
+- **NEW experiment: LR-scheduler search** (`experiments/sched_search.py`,
+  `results/lr_scheduler_search.json`, `plots/lr_scheduler_search.png` — search figure kept on
+  disk, not embedded, since it contains the rejected spiky traces). Candidates on seed 0 MSE,
+  identical init/data/batches: constant LR, cosine anneal (1e-3→1e-6), ReduceLROnPlateau
+  {f0.5/p10 (the 07161721 run), f0.9/p50, f0.5/p100}. New smoothness/convergence metrics (spike
+  ratio, tail range, defined in Methods). Constant AND cosine are non-smooth (spike max 5.8e5 /
+  1.5e5); all three RLROP settings smooth. **Winner f=0.5/p=100**: tail range 1.006, final
+  train loss 8.4e-9 (350× below p10's 2.9e-6, ≈ the constant run's 4.0e-9 floor), best test acc
+  0.8815.
+- **NEW primary runs** with the winning schedule (`train_and_record.py` gained
+  `--sched cosine` + `--factor/--patience/--eta-min`): MSE seeds 0/1/2 (205/55/55 ckpts) + CE
+  seed 0 (205 ckpts); all manifest-verified (520 records). Constant-LR runs demoted to
+  numbers-only context. **Superseded headline numbers:** PF at 100k 0.556/0.54/0.61 (const,
+  non-converged) → **0.365/0.365/0.351 (converged)**; final test acc 0.848/0.869/0.858 →
+  **0.8815/0.893/0.885**; CE prob-space PF 0.892 → **0.863** (converged); AUROC(3,5) 0.9306 →
+  **0.9772** (still worst of 45; CE 0.9755 → 0.9697, still worst); late curve motion M 2.4e-2 →
+  5.6e-7 (MSE), 8.8e-3 → 9.1e-5 (CE prob). Early-phase zoom unchanged and now BIT-EXACT for the
+  primary run (first LR cut at step 1,375 > zoom end 1,000; verified 0.00e+00 through step
+  1,000). 3→5 curve on the converged model: segments 2/3/5 (was 2/9/5), mid fraction 0.84,
+  endpoint "3" still misclassified as 2.
+- **Corrected transcription error** in old RESULTS.md: CE prob-space PF at steps 100/1k/10k was
+  stated as 0.35/0.51/0.77; the stored records and results/mse_vs_ce.json give 0.58/0.79/0.85
+  (final 0.89 was correct). New table uses the recomputed values (0.58/0.79/0.85 → 0.863 for
+  the converged CE run).
+- **Deliverables rebuilt** (REPORT.md + RESULTS.md): every figure now carries an explicit
+  "Figure N." index (1–13), identical numbering in both files. New Figure 1
+  (plots/smooth_convergence.png — per-step loss/LR/test-acc of the four converged runs; new
+  script `experiments/smooth_convergence.py`). Figures 2–4, 7–13 re-rendered from the converged
+  runs (suffix `_pl_f0.5_p100`); Figures 5–6 (early zoom) unchanged. New Methods subsections
+  (scheduler rule w/ equation; spike ratio + tail range w/ equations); new Results subsections
+  "Choosing a schedule that converges smoothly" (search table) and "What converged training
+  does NOT show" (constant-LR comparison, numbers only, plots deliberately omitted per operator
+  preference). Verdict rewritten: structure forms in the first few hundred steps; converged
+  training freezes it; loss picks the space (MSE soft logit plateaus 0.37; CE sharp prob
+  plateaus 0.86); logit-PF beyond ~0.37 occurs only in non-converged training.
+- **Removed from deliverables** (figures/plots remain on disk; history here): the constant-LR
+  movie/frames/heatmaps (plateau_evolution.gif etc.), dense_zoom.png (the 82k boundary flip is
+  a constant-LR phenomenon), lr_scheduler_comparison.png (contains spiky traces), and the
+  radial-perturbation control section (plateau_contrast_and_region_count.png) — its
+  contrast-keeps-rising-late result documents the non-converged constant-LR regime and no
+  longer matches the smooth-run narrative the operator asked to present.
+- Render checks: REPORT 12/12 js-display-math, 0 pre-lang-math, inline hazard grep clean, all
+  plot refs embedded as images in both files. Renamed feedback → `.addressed.md`; STOP
+  re-written (plan complete, zero unaddressed feedback).

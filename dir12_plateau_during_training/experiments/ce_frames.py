@@ -28,7 +28,9 @@ def rel_dist_np(x, eps=1e-10):
 
 
 def main():
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records', 'seed_0_ce')
+    sched_sfx = sys.argv[1] if len(sys.argv) > 1 else ''   # e.g. _pl_f0.5_p100
+    rec_dir = os.path.join(HERE, 'results', 'plateau_records',
+                           f'seed_0_ce{sched_sfx}')
     man = json.load(open(os.path.join(rec_dir, 'manifest.json')))
     idx = []
     for a, b in ANIM_PAIRS:
@@ -65,10 +67,10 @@ def main():
                  'the diagonal, while probability space (red) develops sharp plateaus '
                  '(squares: predicted class along the path)', y=1.02, x=0.42)
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, 'frames_selected_steps_ce_prob.png'), dpi=130,
-                bbox_inches='tight')
+    plt.savefig(os.path.join(PLOTS, f'frames_selected_steps_ce_prob{sched_sfx}.png'),
+                dpi=130, bbox_inches='tight')
     plt.close(fig)
-    print('saved plots/frames_selected_steps_ce_prob.png')
+    print(f'saved plots/frames_selected_steps_ce_prob{sched_sfx}.png')
 
 
 if __name__ == '__main__':
