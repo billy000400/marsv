@@ -18,10 +18,15 @@ character-level Shakespeare GPT** from *Deep Networks Always Grok and Here is Wh
 Matthew-style plateaus? The paper's GPT code and checkpoint are not public, so we trained a faithful
 reconstruction (next-char accuracy 0.56 ≈ 37× chance) and ran the two-natural-endpoint interpolation
 assay with everything frozen before any curve was inspected. One scope note up front: the grok
-paper's own headline phenomenon is **grokking** — adversarial robustness emerging long after training
-accuracy saturates. We did **not** test or replicate that phenomenon: it would require training far
-past our reconstruction's budget (ours stops at ordinary convergence). The paper's role here is only
-to specify the model under test; the phenomenon under test is Matthew's activation plateaus.
+paper's own headline phenomenon is **grokking** — `ε=0.03`-PGD adversarial robustness emerging long
+after training accuracy saturates, alongside a **second local-complexity descent**. We treat this as
+an explicit **validity gate** (Methods §Figure-9 gate, Results §Figure-9 gate): the existing
+3,500-step pilot **FAILs** it within its horizon (a first local-complexity descent and emerging
+robustness appear, but no *second* descent), so the plateau result below is **not** yet joined to a
+Grokking claim. Two matched fresh runs (character + BPE) are training to test the gate at a longer
+horizon; their verdicts and the joint timeline follow in later iterations. Until a fresh run passes,
+the paper's role here is only to specify the model under test; the phenomenon under test is Matthew's
+activation plateaus.
 
 **Result: plateaus are present.** 14 of 40 frozen minimal pairs show plateau–boundary–plateau
 structure in raw individual final-logit curves under a strict preregistered rule (transition width
@@ -152,6 +157,46 @@ $t = 0.5$) must be detected as a narrow transition and a synthetic linear path m
 measured $w = 0.089$ (detected) vs $w = 0.800$ (rejected). This shows the pipeline *can* find a
 plateau if one exists and does not hallucinate one from a line.
 
+### Figure-9 grokking gate (validity gate for any joint claim)
+
+PLAN forbids joining the plateau result to a Grokking claim unless the model qualitatively reproduces
+*Deep Networks Always Grok* Fig. 9. We measure Fig. 9's three quantities on log-spaced checkpoints with
+a pipeline **source-locked** to the official repo (`experiments/fig9.py`; our forward reimplementation
+matches the repo's to 0.0 logit error). **Data/model/layer:** the same reconstruction GPT, evaluated at
+its saved checkpoints; local complexity is read from the 12 GeLU pre-activations.
+
+**Local complexity (LC)** — *how many piecewise-linear regions does the network fold near the data?* For
+each of the 12 GeLU layers we count, along short random line segments through the input, how many times
+that layer's pre-activations change sign (a proxy for region boundaries crossed), and sum over layers.
+With $N_{seg}$ segments of radius $r$ around a base point and $z_{\ell}(u)$ the layer-$\ell$
+pre-activation at point $u$:
+
+```math
+\mathrm{LC} = \sum_{\ell=1}^{12} \mathbb{E}\big[\,\#\{\text{sign changes of } z_{\ell} \text{ along the segment}\}\,\big].
+```
+
+We report LC on 1,024 **train**, 1,024 **test**, and 1,024 **random** base points (`r=0.005`, `P=25`
+samples per segment, 99% CIs) — the paper's defaults. Fig. 9's signature is a **second LC descent** that
+begins before test accuracy peaks.
+
+**Adversarial accuracy** — *does the model resist small input perturbations?* Next-token accuracy under an
+`ε=0.03` `ℓ∞`-PGD attack in token-embedding space:
+
+```math
+\mathrm{adv\_acc} = \Pr\nolimits_{(x,y)}\Big[\ \arg\max \, f\big(x + \delta^\star\big) = y\ \Big],
+\qquad \delta^\star = \arg\max_{\lVert\delta\rVert_\infty \le 0.03} \mathcal{L}\big(f(x+\delta), y\big).
+```
+
+Grokking = this rising **long after** clean accuracy saturates ("delayed robustness").
+
+**Preregistered verdict rule** (`experiments/fig9_verdict.py`, applied identically to every run). Let the
+LC-range tolerance be $\mathrm{tol} = 0.05\thinspace(\mathrm{LC}_{\max}-\mathrm{LC}_{\min})$. **PASS** iff test-LC
+has an interior minimum then a rise above tol then a fall below tol (a genuine *second* descent) **and**
+final adv accuracy $\ge 0.05$ **and** that descent's onset precedes the clean-accuracy peak. **NOT
+ESTABLISHED** iff robustness never emerges *and* LC is still in its first monotone descent (or accuracy
+still climbing) at the last checkpoint — the horizon was too short to decide. **FAIL** otherwise: valid
+measurements at the planned horizon, but the Fig. 9 ordering is absent. This is the gate the pilot fails.
+
 ### Implementation checks (all passed before the full run)
 
 - **Endpoint fidelity:** patched $t{=}0$ / $t{=}1$ forwards reproduce the direct unpatched forwards
@@ -167,6 +212,19 @@ plateau if one exists and does not hallucinate one from a line.
 **Training.** Val loss 1.494 / accuracy 0.560 — a clearly trained network, not a random one.
 
 ![Figure 1 — Training curves: cross-entropy loss in nats (y, left panel) for train and validation falls to ~1.49; validation next-char accuracy (y, right panel) rises to 0.56; x = training step.](plots/training_curves.png)
+
+**Figure-9 gate — pilot FAILs within its 3,500-step horizon.** Across 13 log-spaced checkpoints the
+pilot's clean next-char accuracy climbs to 0.564 (peak at the last checkpoint) and `ε=0.03` PGD
+adversarial accuracy rises to 0.327 — so *delayed robustness does emerge* — but test LC falls
+monotonically from 1940 to its minimum (68) **at the final checkpoint**: there is **no second LC
+descent**. Under the preregistered rule this is a **FAIL** (valid measurements, Fig. 9 ordering absent
+within the tested horizon), not "not established", because robustness rose rather than staying flat.
+The honest reading: the 3,500-step horizon ends inside the *first* LC descent, so the pilot cannot
+support a joint Grokking↔plateau claim. Two matched fresh runs (character + BPE, ~30k-step schedule,
+budget-capped below the paper's ~1e5) are training now to test the gate properly; their Figure-9
+verdicts (S4/S5) and the joint timeline (S7) follow next iteration.
+
+![Figure 1b — Pilot char GPT Figure-9 curves. Left y-axis: local complexity (sign-crossing units summed over the 12 GeLU layers) for train (blue), test (orange), random (green) base points, 99% CI bands. Right y-axis: next-token accuracy — black solid = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale; step 0 drawn at 1). LC descends monotonically to the horizon (no second descent) while adversarial accuracy reaches 0.33 — verdict FAIL.](plots/grokking_pilot_char.png)
 
 **Primary result: 14/40 frozen pairs are plateaus; almost all curves are sigmoid.** With
 interpolation after block 0 and recording at final logits, 14 of 40 pairs meet the strict frozen rule

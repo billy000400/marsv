@@ -1,0 +1,4 @@
+8 checkpoints, 0 already done
+step      0 clean 0.025 adv 0.000 LC tr 1935 te 1940 rnd 2099 [148s]
+step      4 clean 0.148 adv 0.000 LC tr 1535 te 1544 rnd 1797 [148s]
+step     15 clean 0.148 adv 0.063 LC tr 487 te 491 rnd 640 [148s]

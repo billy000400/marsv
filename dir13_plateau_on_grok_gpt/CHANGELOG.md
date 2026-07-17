@@ -156,3 +156,27 @@ contained no requirement differing from the executed plan, so it was treated as 
   its truncated preamble left as dropped).
 - Verdict unchanged: Matthew-style plateaus present (qualified reconstruction), go. `STOP` re-created
   after verifying zero unaddressed feedback files.
+
+## 2026-07-17 (5) — S3 Figure-9 validity gate added to deliverables (pilot = FAIL)
+
+Context: PLAN was reopened to the full Grokking-replication scope (S3–S7). Prior iterations set up the
+source-locked Fig. 9 pipeline and started fresh char+BPE trainings; this iteration lands the first
+Grokking-side result into the deliverables.
+
+- **New result — pilot Figure-9 gate.** Ran `experiments/fig9.py` on all 13 log-spaced checkpoints of
+  the existing 3,500-step char pilot (`results/fig9_pilot_char.json`), then the preregistered
+  `experiments/fig9_verdict.py`. Verdict = **FAIL** within the 3,500-step horizon: clean acc → 0.564
+  (peak at last ckpt), `ε=0.03` PGD adv acc → 0.327 (delayed robustness *did* emerge), but test LC
+  falls monotonically 1940 → 68 with its minimum **at the final checkpoint** — **no second LC descent**.
+  Saved `results/fig9_pilot_char_verdict.json`; plot `plots/grokking_pilot_char.png`.
+- **RESULTS.md:** added a "Figure-9 grokking gate (validity gate — S3 pilot)" section (metric prose,
+  verdict table, embedded plot); rewrote the top-verdict scope note from "grokking not tested here" →
+  "grokking now measured as a gate; pilot FAILs within horizon; fresh runs training; plateau result not
+  yet joined to a Grokking claim."
+- **REPORT.md:** Summary scope note updated identically; new Methods §"Figure-9 grokking gate" defining
+  **local complexity** and **`ε=0.03` PGD adversarial accuracy** with rendered equations plus the
+  preregistered PASS/NOT-ESTABLISHED/FAIL rule; new Results paragraph + embedded Figure 1b.
+- Render checks: **6/6** REPORT.md display equations render as `js-display-math` via the GitHub markdown
+  API, 0 `<pre lang="math">`, 0 inline-math hazards (fixed one `\,`→`\thinspace`), 0 unembedded plots.
+- Plateau numbers unchanged (still current-best). No STOP (plan incomplete: S4/S5/S6/S7 pending; fresh
+  char/BPE trainings + their fig9 evals running in background).

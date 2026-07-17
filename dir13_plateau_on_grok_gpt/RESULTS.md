@@ -20,10 +20,13 @@ uniformly with no plateaus (transition width 0.8): recording the curve at succes
 layers moves it monotonically away from the diagonal** (the boundary sharpens with depth), while
 moving the **interpolation point later** (fewer layers left downstream to build the plateau)
 **collapses it back onto the diagonal**. "Qualified" because we tested a reconstruction, not the
-paper's exact checkpoint. Note the grok paper's own phenomenon — grokking, i.e. adversarial
-robustness emerging long after training accuracy saturates — is **not tested or replicated here**:
-our reconstruction trains only to ordinary convergence, and the paper's role is solely to specify the
-model under test.
+paper's exact checkpoint. The grok paper's own phenomenon — **grokking**, i.e. `ε=0.03`-PGD
+adversarial robustness emerging long after training accuracy saturates, together with a **second
+local-complexity descent** — is now being measured as an explicit **validity gate** (next section):
+the 3,500-step pilot **FAILs** that gate within its horizon (first LC descent + emerging robustness,
+but no second descent), and two matched fresh runs are training to test it properly. Until a fresh run
+**passes** the gate, the plateau result below stands on its own and is **not** yet joined to a
+Grokking claim.
 
 ## Model actually tested
 
@@ -33,6 +36,34 @@ provenance (corpus SHA-256, seeds, config) in `results/train_meta.json`; confirm
 fields in `MODEL_SPEC.md`.
 
 ![Training curves: cross-entropy loss falls to ~1.49 on validation (left); next-char accuracy rises to 0.56 (right); x = training step.](plots/training_curves.png)
+
+## Figure-9 grokking gate (validity gate — S3 pilot; S4/S5 fresh runs in progress)
+
+PLAN makes a **validity gate** mandatory before any *joint* Grokking↔plateau claim: the model must
+qualitatively reproduce *Deep Networks Always Grok* Fig. 9 — a **second local-complexity (LC) descent**
+that begins before the test-accuracy peak, together with **delayed adversarial robustness** (`ε=0.03`
+`ℓ∞`-PGD accuracy rising while that second descent continues). LC is the paper's sign-crossing count
+summed over the 12 GeLU layers on 1,024 train/test/random points (`r=0.005`, `P=25`, 99% CIs); the
+pipeline is source-locked to the official repo (`experiments/fig9.py`, 0.0 logit-reimplementation
+error). The preregistered PASS/FAIL/NOT-ESTABLISHED rule is in `experiments/fig9_verdict.py`.
+
+**Pilot (existing 3,500-step char GPT, 13 log-spaced checkpoints): verdict = FAIL within its horizon.**
+
+| Figure-9 quantity (pilot) | value |
+|---|---|
+| clean next-char accuracy (final / peak) | 0.564 / 0.564 (peak at last ckpt, step 3500) |
+| `ε=0.03` PGD adversarial accuracy (final / max) | **0.327 / 0.327** — delayed robustness *did* emerge |
+| test LC (first ckpt → minimum) | 1940 → 68 at step 3500 (minimum at the **last** checkpoint) |
+| second LC descent present? | **No** — LC is still in its first monotone descent at the horizon |
+| **Preregistered verdict** | **FAIL** (valid measurements, Figure-9 ordering absent within 3,500 steps) |
+
+Read this honestly: the pilot shows the *first* LC descent and emerging robustness, but the horizon
+ends before any *second* descent could appear, so it cannot support a joint claim. This is why PLAN
+requires fresh, longer runs. The two matched fresh runs (char + BPE, 30k-step schedule, budget-capped)
+are **training now**; their Figure-9 evaluations are queued and will receive their own gate verdicts
+(S4/S5) next iteration.
+
+![Pilot char GPT Figure-9 curves. Left y-axis: local complexity (sign-crossing units summed over 12 GeLU layers) for train (C0), test (C1), random (C2) points with 99% CI bands. Right y-axis: next-token accuracy — black = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale, step 0 drawn at 1). LC descends monotonically to the 3,500-step horizon (no second descent) while adversarial accuracy climbs to 0.33; verdict FAIL.](plots/grokking_pilot_char.png)
 
 ## Assay (frozen before any curve was inspected)
 
