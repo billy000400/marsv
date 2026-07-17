@@ -1,130 +1,177 @@
-# PLAN - Direction: Does the 12-layer Shakespeare GPT show activation plateaus?
+# PLAN - Direction: Does the 12-layer Shakespeare GPT show Matthew-style activation plateaus?
 
 > Working folder: `dir12_small_gpt_plateau_sanity`. Agent REWRITES "Current status"/"Next step" + ticks stages each iteration. Disk (`PLAN.md`/`JOURNAL.md`/`RESULTS.md`/`REPORT.md`/`CHANGELOG.md` + `../BUDGET.md` + `../CLAUDE.md`) is the only memory.
 
-## Research question and decision
+## Research question
 
-Before attempting to map or interpret plateaus in the paper's small GPT, answer the cheaper gating question:
+Before trying to map or interpret plateaus in the paper's small GPT, answer the gating question using the phenomenon defined in Matthew Shinkle and StefanHex's post:
 
-> Does the trained 12-layer, 12-head character-level GPT from *Deep Networks Always Grok and Here is Why* exhibit reproducible activation plateaus under the same perturbation-style assay used for the MNIST model?
+> When we interpolate between the last-position activations of two sequences that are identical except for their final input character, does the downstream representation remain close to endpoint A, rapidly cross a boundary, and then remain close to endpoint B?
 
-This is a go/no-go sanity check. A positive result justifies a follow-up study of what the plateaus correspond to. A calibrated negative result is equally complete and means we should not spend time clustering or interpreting regions in this model.
+This direction must reproduce the **two-natural-endpoint interpolation experiment** from Matthew's post. A random ray `h + alpha*u` tests local perturbation robustness and does **not** answer this question.
 
-Important source distinction: Figure 8 of the paper is a separate modular-addition Transformer. The 12-layer GPT of interest is Figure 9: a 12-layer, 12-head GPT trained for next-character prediction on Shakespeare text, with GeLU MLPs. Do not conflate the two experiments.
+Important source distinction: Figure 8 of *Deep Networks Always Grok and Here is Why* is a separate modular-addition Transformer. The model of interest is Figure 9: a 12-layer, 12-head GPT trained for next-character prediction on Shakespeare text.
+
+## Authoritative plateau definition
+
+Read Matthew's post and its linked code before changing the assay:
+
+- Post: https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge
+- Code: https://github.com/MShinkle/activation_plateau_mechanisms
+
+For two input sequences `A` and `B` that are identical except for the final character:
+
+1. Run both sequences and collect their final-position activations `h_A` and `h_B` at interpolation layer `L`.
+2. Spherically interpolate from `h_A` to `h_B`. As in Matthew's post, slerp the directions and linearly interpolate the vector norms.
+3. Patch each interpolated activation `h(t)` into the final sequence position at layer `L`; leave every earlier position unchanged.
+4. Record downstream activation or logit vector `x(t)` at recording point `R`.
+5. Compute Matthew's relative distance to the two endpoint outputs:
+
+   \[
+   d(t)=\frac{\|x(t)-x_A\|_2}{\|x(t)-x_A\|_2+\|x(t)-x_B\|_2}.
+   \]
+
+A Matthew-style plateau curve stays near `d=0`, changes rapidly over a narrow interval, and then stays near `d=1`. A roughly diagonal curve is not a plateau.
 
 ## Success criterion (definition of "done")
 
-`RESULTS.md` and `REPORT.md` give one of the following evidence-backed verdicts for the late-trained 12-layer GPT:
+`RESULTS.md` and `REPORT.md` give a clear verdict for the trained 12-layer GPT:
 
-1. **Plateaus detected:** in-distribution final-position activations have a delayed-then-steep downstream response that is reproducible across held-out contexts and perturbation seeds, stronger than the matched off-distribution control, and present at two or more consecutive intervention blocks; or
-2. **No plateaus detected under the calibrated assay:** after checking all plausible intervention depths and a perturbation range large enough to change downstream predictions, the response is smooth/approximately linear or is no more plateau-like than the matched control; or
-3. **Model-faithfulness blocker:** only if the paper's model cannot be faithfully reconstructed, the exact missing information is documented, a clearly labeled best-effort reconstruction has been tested, and the report separates conclusions about that reconstruction from conclusions about the paper's model.
+1. **Plateaus detected:** multiple preregistered prompt pairs show plateau-boundary-plateau curves in final logits, the curves are visible individually rather than created by averaging, and the boundary becomes at least as clear when more downstream layers are included; or
+2. **No Matthew-style plateaus detected:** after testing a sufficiently varied frozen set of minimal pairs with interpolation early enough to leave most of the network downstream, no individual curves show the plateau-boundary-plateau structure; or
+3. **Qualified reconstruction result:** the exact paper checkpoint is unavailable, so the report states that the verdict applies to the trained reconstruction, not necessarily the authors' exact GPT.
 
 Required artifacts:
 
-- `MODEL_SPEC.md`: every architecture, data, optimizer, and checkpoint detail, each labeled **confirmed from source** or **reconstruction choice**.
-- Reproducible training or checkpoint-loading code and a checkpoint/config/data hash.
-- A saved tidy result table with one row per context x direction x radius x intervention block x basepoint type.
-- `plots/training_curves.*`.
-- `plots/response_by_layer.*`: raw downstream-distance curves for natural and matched-control basepoints, with bootstrap uncertainty.
-- `plots/plateau_score_by_layer.*`: control-calibrated plateau score/effect size by intervention block.
-- `plots/individual_curves.*`: representative individual rays so an average cannot manufacture an apparent plateau.
-- `REPORT.md` with Methods, calibration checks, the verdict, limitations, and exact figure references.
+- `MODEL_SPEC.md` with confirmed paper details and reconstruction choices.
+- `prompt_pairs.json` containing the frozen sequences, shared prefix, endpoint characters, selection source, and split.
+- A tidy result table with one row per pair x interpolation layer x recording point x interpolation step.
+- `plots/pair_curves_logits.*`: individual Matthew `d(t)` curves in final-logit space. Do not show only an average.
+- `plots/layerwise_emergence.*`: for fixed early interpolation, show `d(t)` at successive downstream layers for representative fixed pair IDs.
+- `plots/interpolation_layer_comparison.*`: final-output curves while varying the interpolation layer, if the primary result is positive or ambiguous.
+- `REPORT.md` with the exact interpolation, patching, endpoint-fidelity checks, pair-selection procedure, figures, and verdict.
 
-Null/negative results are COMPLETE if the assay passed the calibration checks below. When complete, write an empty `STOP` file.
+The previous random-direction result is not evidence for or against this success criterion. Archive it in `CHANGELOG.md` or a clearly labeled previous-results folder; do not use it as the current verdict.
+
+Null/negative results are COMPLETE if the endpoint and pair-coverage checks below pass. When complete, write an empty `STOP` file.
 
 ## Fallback (if time runs short)
 
-Finish a defensible gate rather than starting plateau interpretation:
+Run the direct test that answers the question:
 
-- Use one faithful late-training checkpoint, 64 held-out contexts, 8 fixed random directions per context, at least four intervention depths spanning early to late blocks, and both natural and matched-control basepoints.
-- Produce the training/checkpoint provenance, response curves, plateau-score comparison, and a qualified yes/no verdict.
-- Do not spend fallback time on clustering, character-level interpretation, local-complexity replication, or training-depth sweeps.
+- At least 20 frozen minimal pairs.
+- Interpolate at `resid_post` of block 0, leaving 11 blocks downstream.
+- Use at least 101 evenly spaced `t` values.
+- Record final logits and compute Matthew's `d(t)`.
+- Save every individual curve and report how many clearly show plateau-boundary-plateau behavior.
+
+Do not spend fallback time on random directions, matched-random activations, clustering, local complexity, or new summary metrics.
 
 The wrapper reserves the final 20 minutes for `RESULTS.md`, `REPORT.md`, `CHANGELOG.md`, figure checks, and `STOP`.
 
-## Setup (fixed unless source audit proves otherwise)
+## Setup (fixed)
 
 ### Model and data
 
-- Target: the paper's 12-block, 12-head causal GPT with GeLU MLPs, trained on next-character prediction on the Shakespeare Text Dataset.
-- First preference: authors' exact released code, config, and checkpoint.
-- The current public paper repository may not contain the GPT training code/checkpoint. Spend at most 30 minutes auditing the paper, supplement, linked repository history/branches/releases, and configs. Record findings in `MODEL_SPEC.md`.
-- If exact artifacts remain unavailable, implement a minimal faithful reconstruction. Do **not** silently assume GPT-2-small defaults. Dataset split, context length, embedding width, dropout, optimizer, learning-rate schedule, weight decay, batch size, and number of updates must be explicitly marked confirmed or inferred.
-- Save log-spaced checkpoints during training, including initialization/early/late states when affordable, so a later training-evolution study will not require retraining. This direction analyzes only the late checkpoint.
-- Primary evaluation examples are held-out Shakespeare contexts on which the model's next character is correct. Pre-register a high-confidence subset (top confidence quartile) and a lower-confidence comparison subset before looking at plateau results.
+- Reuse the existing trained 12-block, 12-head GeLU character-level Shakespeare GPT reconstruction and its checkpoint/config provenance.
+- The paper's GPT code/checkpoint were not found in the public repository. Keep the conclusion explicitly qualified unless exact artifacts become available.
+- Use held-out Shakespeare text to construct shared prefixes. Do not train or tune the model further for this sanity check.
 
-### Activation intervention
+### Constructing natural minimal pairs
 
-- Unit of intervention: the residual-stream vector at the **final sequence position** after a transformer block. Keep all other sequence positions unchanged.
-- Primary downstream measurement point: final-position residual stream immediately before the language-model head.
-- Primary response metric:
+- Each pair must have equal-length sequences and differ at exactly the final input character: `prefix + char_A` versus `prefix + char_B`.
+- Freeze all pair IDs before inspecting interpolation curves.
+- Prefer endpoint characters that are both plausible after the shared prefix. Build candidates without looking at path shape, using either:
+  1. two characters observed after the same prefix in held-out text, when available; or
+  2. two high-probability endpoint characters under the model given the shared prefix.
+- Include diverse endpoint-character combinations and shared-prefix contexts. Deduplicate prefixes.
+- Record endpoint predictions and endpoint logit distance, but do not select or discard pairs based on whether their interpolation later looks plateau-like.
+- Degenerate pairs for which `x_A` and `x_B` are numerically indistinguishable may be excluded only by a frozen numerical threshold documented before the full run.
+
+### Spherical interpolation
+
+For `t` in `[0,1]`, slerp the unit directions and linearly interpolate the norms:
+
+\[
+\hat h(t)=\frac{\sin((1-t)\theta)}{\sin\theta}\frac{h_A}{\|h_A\|}
++\frac{\sin(t\theta)}{\sin\theta}\frac{h_B}{\|h_B\|},
+\]
+
+\[
+h(t)=\big[(1-t)\|h_A\|+t\|h_B\|\big]\hat h(t),
+\qquad
+\theta=\arccos\left(\frac{h_A^\top h_B}{\|h_A\|\|h_B\|}\right).
+\]
+
+- Clamp the cosine for numerical safety and implement a documented near-collinear fallback.
+- Use the same interpolation grid for all pairs. Primary grid: 101 evenly spaced steps including both endpoints.
+- Do not replace slerp with random perturbations, a line from one endpoint, or a path normalized by an arbitrary maximum radius.
+
+### Interpolation and recording layers
+
+- Primary test: interpolate the final-position `resid_post` activation after block 0 and record final logits. This leaves the largest practical number of downstream transformer blocks to form a plateau.
+- Layerwise-emergence test: keep interpolation fixed after block 0 and record final-position `resid_post` after every later block, followed by final logits. This directly tests Matthew's observation that plateaus sharpen through successive layers.
+- Complementary test, only after the primary run: record final logits while moving the interpolation point across blocks `{0, 2, 4, 6, 8, 10}`. Later interpolation should generally weaken a real plateau because fewer layers remain downstream.
+- Keep all sequence positions except the final one unchanged. Because the two sequences share their entire prefix and the model is causal, earlier-position activations should be identical.
+
+### Minimal, boundary-position-invariant summary
+
+- The primary evidence is the raw individual `d(t)` curve.
+- Plot the diagonal `d=t` only as a visual non-plateau reference.
+- Use one optional scalar summary: transition width
 
   \[
-  d_{\mathrm{hidden}}(\alpha)=\frac{\|z(h+\alpha u)-z(h)\|_2}{\sqrt{d_{\mathrm{model}}}}.
+  w_{10\rightarrow90}=t(d=0.9)-t(d=0.1).
   \]
 
-- Secondary functional metric: Jensen-Shannon divergence between the baseline and perturbed next-character distributions. Also record top-1 character flips and confidence.
-- Primary directions: fixed random unit directions. Use the same direction/radius schedule for the natural basepoint and its matched control.
-- Candidate intervention blocks must span the network. Pilot blocks `{0, 3, 6, 9, 10}`; if any signal is found or the result is ambiguous, sweep every block `0..10`. Block 11 is measurement-adjacent and may be retained only as an expected weak/negative control.
+  Compute crossings from an isotonic copy only for this scalar; always plot the raw curve.
+- A candidate plateau has a narrow transition (`w_10->90 <= 0.25`) and at least 10% of the path visibly remaining near each endpoint before and after the transition. Report the count `n/N`; do not hide heterogeneity behind a mean curve.
+- Non-monotone curves are reported separately and are not forced into the transition-width statistic.
+- Do not use the previous `PI`, which confounds boundary location with plateau sharpness. Do not introduce additional scores unless the raw curves reveal a concrete unresolved ambiguity.
 
-### Perturbation scale and plateau statistic
+### Required implementation checks
 
-- At each layer define the natural scale `s_l` as the median L2 distance between randomly paired held-out final-position activations. Parameterize perturbations as `alpha = rho * s_l` so radii are comparable across layers.
-- Pilot a monotone grid of at least 41 `rho` values starting at zero. Adapt `rho_max` using only pilot data until at least 80% of rays either flip the top-1 next-character prediction or clearly enter a large-response regime. Cap and report the search range; freeze it before the confirmatory run.
-- Plot raw, unsmoothed curves. Smoothing/isotonic regression may be used only to compute a summary score and must never replace raw plots.
-- For a curve normalized to `x = rho/rho_max` and `y = d(rho)/d(rho_max)`, define the preregistered plateau index
+- `t=0` exactly reproduces endpoint A at the patched layer and downstream recording point within numerical tolerance.
+- `t=1` exactly reproduces endpoint B within numerical tolerance.
+- Direct unpatched forwards for A and B agree with their corresponding patched endpoints.
+- Sequences differ only in the final character, and all earlier-position activations match within numerical tolerance.
+- Batched interpolation agrees with a single-example reference implementation.
+- The relative-distance implementation returns `d(0)=0` and `d(1)=1` for every non-degenerate pair.
+- A synthetic step-like path is recognized as narrow-transition and a synthetic linear path is not.
 
-  \[
-  PI=\int_0^1 [x-y(x)]\,dx.
-  \]
+### Reproducibility and reporting rules
 
-  Positive `PI` means the response is delayed relative to a straight-line response. Report `PI` together with boundary sharpness (maximum finite-difference slope divided by mean slope); neither metric alone is sufficient.
-- Primary comparison is `Delta PI = median(PI_natural) - median(PI_control)` with a hierarchical bootstrap over contexts, then directions. Report a 95% interval and Cliff's delta. Treat tiny but statistically significant differences as inconclusive.
-
-### Matched controls and implementation checks
-
-- Matched off-distribution basepoint: sample from the empirical per-layer diagonal Gaussian, then rescale to match the paired natural activation's norm. Keep the surrounding sequence activations fixed. Document any alternative if the model implementation makes this invalid.
-- Required checks before interpreting a negative result:
-  - `alpha=0` reproduces the unmodified forward pass within numerical tolerance.
-  - Batched interventions agree with a single-example reference implementation.
-  - Radius zero gives zero distance; the largest radius produces a substantial response and top-1 flips for at least 80% of rays.
-  - Results are not an artifact of averaging: inspect individual curves and per-context scores.
-  - Hidden-state and output-distribution metrics lead to compatible qualitative conclusions.
-  - The same code can detect a synthetic delayed-response curve in a unit test.
-
-### Reproducibility and operating rules
-
-- Fix and record model seed, data seed, context IDs/offsets, direction seeds, package versions, device, precision, and git commit.
-- Cache clean activations; stream perturbation batches to avoid storing full sequence activations for every radius.
-- Keep raw results separate from plotting code. All figures must be exactly regenerable from saved result tables.
+- Fix and record pair-generation seed, pair IDs, interpolation grid, model checkpoint, package versions, precision, device, and git commit.
+- Save endpoint vectors or stable references sufficient to reproduce each curve.
+- Keep raw results separate from plotting code; every figure must regenerate from the saved table.
 - Read shared limits in `../BUDGET.md` and operator rules in `../CLAUDE.md` every iteration.
 - `RESULTS.md`/`REPORT.md` contain current-best results only; `CHANGELOG.md` contains history.
 - Do not `pip install` torch, torchvision, transformer_lens, cupbearer, jax, or flax; preserve the existing CUDA environment.
 
 ## Stages (checklist)
 
-- [x] **S1 - Source and model audit.** Read the paper/supplement and official repository; create `MODEL_SPEC.md`; identify exact code/checkpoint if available. If details remain missing after 30 minutes, freeze and justify a reconstruction config rather than repeatedly searching.
-- [x] **S2 - Reproduce/load the model.** Train or load the 12-layer GPT; verify next-character loss/accuracy and checkpoint provenance; save `plots/training_curves.*`. Do not start plateau interpretation until the model is demonstrably trained.
-- [x] **S3 - Implement and validate the assay.** Add final-position residual hooks, perturbation batching, matched controls, raw tidy output, and unit/smoke tests. Pass all zero-radius and batching checks.
-- [x] **S4 - Pilot and freeze calibration.** Run a small layer/radius pilot, choose `rho_max` without using confirmatory examples, and write the frozen context-selection, radius, and scoring config to disk.
-- [x] **S5 - Confirmatory plateau test.** Run the frozen assay on held-out contexts and seeds; generate response, score, and individual-curve figures with bootstrap intervals. If positive/ambiguous, sweep every candidate block. If clearly negative and calibrated, stop rather than adding unrelated probes.
-- [x] **S6 - Verdict and handoff.** Write `RESULTS.md`, `REPORT.md`, and `CHANGELOG.md`. State exactly which of the success-criterion verdicts is supported, what model was actually tested, and whether a plateau-mapping follow-up is warranted. Create `STOP`.
+- [x] **S1 - Source/model audit.** The paper model was identified and the absence of released GPT code/checkpoint documented in `MODEL_SPEC.md`.
+- [x] **S2 - Model reconstruction.** The 12L/12H GeLU character GPT reconstruction was trained and validated. Retain its provenance; do not treat the previous random-ray assay as this direction's result.
+- [x] **S3 - Freeze prompt pairs.** Read Matthew's post/code, generate natural minimal pairs without inspecting interpolation paths, validate exact one-character differences, and save `prompt_pairs.json`.
+- [x] **S4 - Implement Matthew's assay.** Implement norm-preserving slerp, last-position patching, two-endpoint relative distance, tidy saving, and all endpoint/synthetic tests.
+- [x] **S5 - Primary and layerwise runs.** Run block-0-to-logits curves for every frozen pair, then record layerwise emergence. Inspect and plot individual curves before computing any aggregate.
+- [x] **S6 - Depth comparison if needed.** If plateaus appear or the primary result is ambiguous, vary the interpolation layer while keeping final logits as the recording point.
+- [x] **S7 - Rewrite verdict.** Replace the previous random-ray conclusion in `RESULTS.md` and `REPORT.md` with the Matthew-style result; retain the old assay only as labeled history. State the qualified scope and create `STOP`.
 
-## Decision rule for follow-up
+## Decision rule
 
-- **Go:** natural activations show a visually clear delayed-then-steep response, `Delta PI > 0` with a non-trivial effect size and 95% interval excluding zero, and the result appears at two or more consecutive intervention blocks in both downstream metrics.
-- **No-go for this model:** calibrated curves are approximately linear/smooth, plateau scores are indistinguishable from matched controls, or any apparent signal occurs only in a single layer/seed or only after averaging.
-- **Qualified result:** the reconstruction rather than the paper's exact checkpoint was tested. A positive result can motivate follow-up; a negative result cannot establish that the paper's exact model lacks plateaus.
+- **Plateaus present:** multiple frozen pairs show two endpoint plateaus separated by a narrow boundary in raw final-logit `d(t)` curves, and the same pairs show coherent sharpening across downstream recording layers. Report the exact count and pair IDs; one cherry-picked curve is insufficient.
+- **No evidence in this reconstruction:** no frozen pairs show the structure despite valid, non-degenerate endpoints, exact endpoint reproduction, early interpolation, and enough downstream layers. Report `0/N` and the tested layer coverage.
+- **Mixed:** only a small subset shows plateaus or curves are strongly non-monotone. Report the heterogeneity directly; do not force a binary conclusion or average it away.
 
 ## Out of scope (do NOT)
 
-- Do not map, count, cluster, or assign semantics to plateaus yet.
-- Do not study how plateaus evolve across training checkpoints yet; only save checkpoints for that later direction.
-- Do not reproduce the paper's local-complexity or adversarial-grokking results except for a minimal training sanity check.
-- Do not switch to the separate modular-addition Transformer, MNIST model, larger ResNet, or pretrained GPT-2.
-- Do not launch width/depth/noise sweeps or steering experiments.
-- Do not redefine a plateau after seeing the confirmatory curves.
+- Do not use random-direction rays as the primary plateau assay.
+- Do not use matched Gaussian/random activations, `Delta PI`, Cliff's delta, or JSD to decide whether Matthew-style plateaus exist.
+- Do not average curves before determining whether individual pairs have plateaus.
+- Do not cluster, count, or assign semantics to plateau regions yet.
+- Do not study checkpoint-to-checkpoint evolution, noise sweeps, steering, or local complexity.
+- Do not switch to modular addition, MNIST, a ResNet, or pretrained GPT-2.
 
 ## On-track check (required every iteration)
 
@@ -132,27 +179,26 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**COMPLETE — verdict: NO plateaus detected (qualified reconstruction). Operator feedback #1
-(2026-07-17) addressed: `\operatorname` removed from REPORT.md and the report tightened per updated
-CLAUDE.md; feedback file renamed `.addressed.md`; `STOP` re-created and verified on disk. All render
-checks pass (6/6 display equations, 0 code-block degradations, no inline hazards).**
+**COMPLETE — Matthew-style plateaus ARE present (decision rule: plateaus present, qualified reconstruction).**
 
-Source audit (S1) found the paper's GPT code/checkpoint are unreleased (repo has only MNIST-MLP +
-CIFAR-ResNet), so a faithful 12L/12H GeLU char-GPT reconstruction was trained (val acc 0.560) and
-probed. Across all 11 intervention blocks the natural final-position activations show a
-**saturating/concave** downstream response (median PI −0.15…−0.30), not the flat-then-steep plateau
-shape. ΔPI(nat−ctrl) is positive & significant everywhere (peak +0.096, Cliff's δ +0.91, JSD agrees)
-but is a difference between two non-plateau shapes. All calibration checks passed (unit test, alpha=0
-fidelity, ≥81% flips at max radius, individual rays, hidden↔JSD agreement). This is success-criterion
-(2), qualified by (3). No-go for a plateau-mapping follow-up on this model.
+The full two-endpoint assay was run 2026-07-17: 40 frozen minimal pairs (seed 20260717, 0 degenerate,
+`results/prompt_pairs.json`), slerp at block-0 `resid_post`, 101-step grid, all implementation checks
+passed (endpoint fidelity <1e-3, prefix invariance <1e-4, batched=single <1e-5, synthetic step
+detected w=0.089 / line rejected w=0.800). Result: **14/40 pairs pass the frozen plateau rule** in raw
+individual final-logit curves (median w=0.309 vs diagonal 0.8; 0 non-monotone); layerwise emergence is
+strictly monotone (median w 0.777 at block 1 → 0.445 at block 11 → 0.309 at logits); depth comparison
+shows the predicted weakening (median w 0.309 → 0.802 as interpolation moves from block 0 to 10).
+`RESULTS.md`/`REPORT.md` rewritten around this verdict; old random-ray assay retained only in
+CHANGELOG history. `STOP` written.
 
 ## Next step
 
-None — direction complete and `STOP` written. If ever revisited: probe a much longer-trained
-(grokking-scale) checkpoint and/or learned directions, but that overlaps the "during training"
-direction and is out of this gate's scope.
+None — direction complete. If revisited: map plateau boundaries semantically or track their emergence
+over training checkpoints (overlaps the "during training" direction).
 
 ## Primary references
 
+- Matthew Shinkle and StefanHex, *Activation Plateaus: Where and How They Emerge*: https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge
+- Matthew's experiment code: https://github.com/MShinkle/activation_plateau_mechanisms
 - Humayun, Balestriero, and Baraniuk, *Deep Networks Always Grok and Here is Why*: https://arxiv.org/abs/2402.15555
-- Official project repository: https://github.com/AhmedImtiazPrio/grok-adversarial
+- Official grokking-paper repository: https://github.com/AhmedImtiazPrio/grok-adversarial

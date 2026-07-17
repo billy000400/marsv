@@ -68,3 +68,42 @@ No experiments re-run; all numbers and the verdict unchanged.
   concise — feedback's "it" read as REPORT.md).
 - Verdict unchanged: NO plateaus (qualified reconstruction), no-go. `STOP` re-created after feedback
   was addressed.
+
+## 2026-07-17 — REOPENED plan executed: Matthew-style two-endpoint assay REVERSES the verdict
+
+PLAN.md was rewritten by the operator to reopen the direction: the previous random-ray result
+(2026-07-15, "no plateaus") answered a different question — one-sided perturbation response along
+random directions — and is NOT evidence about Matthew-style two-natural-endpoint plateaus. That old
+assay (PI/sharpness/JSD, `plots/response_by_layer.png`, `plots/plateau_score_by_layer.png`,
+`plots/individual_curves.png`, `results/confirm_*.json`, `results/tidy_results.csv`) is now history
+recorded here only; it was removed from RESULTS.md/REPORT.md per PLAN S7.
+
+New experiment (S3–S6, all run this iteration):
+- **S3:** froze 40 natural minimal pairs (`experiments/make_pairs.py`, seed 20260717) from held-out
+  val text: prefix len 127 + endpoint char; A = observed next char, B = model top-1 (top-2 if ==A);
+  0 excluded by the frozen degeneracy threshold (endpoint logit dist < 1e-3); dists 8.7–64.4.
+  Saved `results/prompt_pairs.json` before inspecting any curve.
+- **S4:** `experiments/matthew_assay.py` — norm-interpolating slerp (clamped cos, documented
+  near-collinear fallback), final-position patching via exact partial forward, Matthew relative
+  distance d(t), PAVA-isotonic transition width w_10→90, frozen plateau rule (w≤0.25, t_lo≥0.10,
+  t_hi≤0.90, iso-dev≤0.10). Self-tests: synthetic step w=0.089 detected, line w=0.800 rejected;
+  d(0)=0, d(1)=1; slerp endpoint/norm identities.
+- **S5/S6:** `experiments/run_matthew.py` — checks passed on real pairs (endpoint logit err <1e-3,
+  prefix activation match <1e-4, batched=single-example <1e-5), then primary (block 0 → logits,
+  101 t), layerwise (resid_post blocks 1–11), depth comparison (interp blocks {0,2,4,6,8,10}).
+  Saved `results/matthew_tidy.csv`, `results/matthew_summary.json`.
+
+**Verdict SUPERSEDED: "NO plateaus (random-ray)" → "YES, Matthew-style plateaus present (qualified
+reconstruction)".** Numbers: 14/40 pairs pass the frozen rule in raw individual final-logit curves
+(0 non-monotone; median w 0.309, range [0.110, 0.773]; 24/40 at w≤0.35; 2 near-diagonal); layerwise
+median w falls monotonically 0.777 (block 1) → 0.445 (block 11) → 0.309 (logits), strict rule passes
+only at logits; depth comparison rises 0.309 → 0.802 ≈ diagonal 0.8 at block 10 — both predicted
+plateau signatures. Go for the plateau-mapping follow-up.
+
+- RESULTS.md and REPORT.md rewritten from scratch around the new assay; new figures embedded:
+  `pair_curves_logits.png` (all 40 raw curves), `layerwise_emergence.png` (pairs 0–3, frozen choice),
+  `interpolation_layer_comparison.png`; `training_curves.png` retained for provenance.
+- Render checks: 4/4 display equations js-display-math via GitHub markdown API, 0 pre-lang-math,
+  no inline-math hazards, no unembedded plot paths.
+- PLAN.md S3–S7 ticked, status COMPLETE (plateaus present); `STOP` written after verifying zero
+  unaddressed feedback files.

@@ -81,3 +81,31 @@ prefer `\mathrm{…}` for upright operator names in this project.
 **Next step.** None — plan complete, zero unaddressed feedback, STOP re-created and verified.
 
 On track? yes — S6 done, 100%, no blocker (feedback addressed; calibrated negative stands).
+
+## 2026-07-17 (2) — Reopened plan executed end-to-end; verdict reversed: plateaus PRESENT
+
+**Did.** Feedback check first: only `human_feedback_1.txt.addressed.md` (addressed), no `*REVIEW*`,
+no STOP on disk; PLAN.md was rewritten by the operator to REOPEN with the Matthew-style
+two-natural-endpoint slerp assay (S3–S7 unchecked). Corpus was missing from /tmp (pod reset) —
+re-downloaded, SHA-256 matches training provenance exactly. Then ran the whole reopened plan:
+1. S3 `make_pairs.py`: froze 40 minimal pairs from val text (seed 20260717; A=observed char,
+   B=model top-1; 0 degenerate; endpoint logit dist 8.7–64.4) → `results/prompt_pairs.json`.
+2. S4 `matthew_assay.py`: slerp (norm-linear, clamped, collinear fallback), last-position patch via
+   exact partial forward, d(t), PAVA w_10→90, frozen plateau rule. Self-tests pass (step w=0.089
+   detected, line w=0.800 rejected).
+3. S5/S6 `run_matthew.py`: implementation checks on real pairs all pass (endpoints <1e-3, prefix
+   <1e-4, batch=single <1e-5), then primary + layerwise + depth runs (~3 min total on GPU).
+
+**Learned.** **14/40 frozen pairs show individual plateau–boundary–plateau curves at final logits**
+(median w 0.309 vs diagonal 0.8; 0 non-monotone; only #10 and #19 near-diagonal). Layerwise: median w
+falls strictly monotonically with recording depth (0.777 → 0.445 → 0.309), strict rule passes only at
+logits — the plateau is formed by the downstream stack. Depth control: interpolating later weakens it
+monotonically to the diagonal (w 0.309 → 0.802 at block 10). So the earlier random-ray "no plateaus"
+was assay-dependent: plateaus live along natural activation-to-activation directions, not random
+ones. Deliverables rewritten (old assay → CHANGELOG history only); all math/embed render checks pass.
+
+**Next step.** None — S3–S7 complete, PLAN decision rule "plateaus present" satisfied (multiple pairs,
+individually visible, coherent layerwise sharpening), qualified-reconstruction scope stated. STOP
+written after re-verifying zero unaddressed feedback.
+
+On track? yes — S7 done, 100%, no blocker (plateaus present; STOP verified on disk).
