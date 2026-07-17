@@ -15,8 +15,10 @@ discreteness appears.
 **What we did.** We trained a small ReLU MLP on MNIST for 100,000 steps and saved hundreds of
 checkpoints. At every checkpoint we ran the identical activation-interpolation experiment on
 fixed image pairs and rendered the result as one frame of a movie. We then repeated the entire
-run with cross-entropy in place of the default MSE loss, and measured how well the network
-separates each digit pair (pairwise AUROC).
+run with cross-entropy in place of the default MSE loss, measured how well the network
+separates each digit pair (pairwise AUROC), and repeated both runs once more with a
+loss-plateau-triggered learning-rate schedule (ReduceLROnPlateau) so that training actually
+converges instead of fluctuating forever.
 
 **Findings.**
 
@@ -34,10 +36,18 @@ separates each digit pair (pairwise AUROC).
    are piecewise-constant under both losses.
 5. **The one pair whose curve looks least like two plateaus, 3 vs 5, really is the hardest pair
    to classify** — worst pairwise AUROC of all 45 digit pairs, under both losses.
+6. **The late-training "chaos" is the engine of the late sharpening, not a nuisance.** With a
+   ReduceLROnPlateau schedule (halve the learning rate after 10 steps without training-loss
+   improvement) training converges cleanly — the loss plateaus, the curves freeze, and the late
+   boundary flips vanish — but plateau sharpening stops at whatever level it had reached when
+   the learning rate collapsed (MSE plateau fraction 0.37 instead of 0.55). Bonus: the scheduled
+   MSE run generalizes better (final test accuracy 0.880 vs 0.848), because the slow late
+   test-accuracy decline is itself a constant-learning-rate effect.
 
 **Verdict: plateaus emerge gradually, do not synchronize across pairs, and keep developing long
 after test accuracy has stopped improving; the choice of loss relocates them between logit and
-probability space without removing them.**
+probability space without removing them; and the late development is driven by continued
+finite-learning-rate optimization — anneal the learning rate and the plateau geometry freezes.**
 
 ## Methods
 
@@ -66,6 +76,47 @@ schedule and interpolation protocol.
 \mathcal{L}_{\mathrm{CE}}(t) = -\frac{1}{N}\sum_{n=1}^{N}
 \log\,\mathrm{softmax}\bigl(f(x_n;\theta_t)\bigr)_{y_n}
 ```
+
+**The learning-rate-scheduler variant.** At a constant learning rate this training never
+converges: late in training the full-train loss fluctuates over orders of magnitude from step to
+step, and the plateau boundaries keep jumping (operator feedback 07161721 asked for a scheduler
+under which the training loss visibly plateaus, with the learning rate shrinking whenever the
+loss stops improving for ~10 steps). We therefore reran seed 0 — once with MSE, once with CE —
+with PyTorch's `ReduceLROnPlateau`: after every optimization step $s$ we recompute the loss on
+the full 1,000-image training subset (the per-batch loss is far too noisy to monitor with a
+10-step patience) and halve the learning rate whenever it has not improved for 10 consecutive
+steps. With $\mathcal{L}_s$ the full-train loss after step $s$ and
+$\mathcal{L}^{\ast}_s = \min_{u \le s} \mathcal{L}_u$ the best loss so far:
+
+```math
+\eta_{s+1} =
+\begin{cases}
+\max\bigl(\tfrac{1}{2}\,\eta_s,\ 10^{-8}\bigr) &
+\text{if } \mathcal{L}_u > (1 - 10^{-4})\,\mathcal{L}^{\ast}_u \text{ for the last 10 steps } u\\[2pt]
+\eta_s & \text{otherwise.}
+\end{cases}
+```
+
+Everything else is unchanged, and the scheduler consumes no randomness, so all four runs (MSE,
+CE) × (constant, scheduled) share the same initialization, data subset, and batch sequence; the
+scheduled runs use the full 205-checkpoint schedule and the identical interpolation protocol.
+
+**Curve motion $M$ — testing "converged" on the plateau curves.** "The training converged" must
+mean more than a flat loss: the plateau *curves* have to stop changing. The plateau fraction
+alone cannot show this — PF is invariant when a boundary relocates without changing sharpness,
+which is exactly what the late flips do. So we measure how much the whole set of curves moves
+between adjacent checkpoints $t_i, t_{i+1}$ (500 steps apart), as the mean absolute change of
+$d$ over the 45 cross-class pairs and 50 path points:
+
+```math
+M(t_i) = \frac{1}{45\cdot 50}\sum_{p=1}^{45}\sum_{k=1}^{50}
+\bigl|\, d_{t_{i+1},p}(\alpha_k) - d_{t_i,p}(\alpha_k) \,\bigr|
+```
+
+Read it as: $M \approx 10^{-2}$ means curves visibly jitter from frame to frame; $M \lesssim
+10^{-5}$ means the movie has stopped. $M$ is evaluated on logit-space $d$ for the MSE runs and
+probability-space $d$ for the CE runs (each loss in the space where its plateaus live), and is
+consumed by the scheduler-comparison figure.
 
 **Accuracy, confidence, and loss.** These curves appear in the training-context figure and in
 the animation insets. Let $f(x;\theta_t)\in\mathbb{R}^{10}$ be the logits at checkpoint $t$
@@ -105,8 +156,9 @@ for the CE run confidence is the standard **mean maximum softmax probability**:
 
 **Checkpoints.** Seed 0 is the primary run. It saves checkpoints at steps 0, 10, 30, 100, 300,
 then every 500 up to 100,000 — 205 in total. Seeds 1 and 2 are confirmation runs with 56
-checkpoints each (same early steps, then every 2,000); the CE variant uses the full seed-0
-schedule. Every checkpoint stores the model weights (CE run: at 16 anchor steps) and a
+checkpoints each (same early steps, then every 2,000); the CE and scheduler variants use the
+full seed-0 schedule. Every checkpoint stores the model weights (CE/scheduler runs: at 16
+anchor steps) and a
 self-contained record of the protocol below: the distance curves, per-point logits, predictions
 and softmax probabilities, and the endpoint activations at every hidden layer.
 `experiments/manifest_check.py` verifies every expected file and field; all 317 records pass.
@@ -367,6 +419,44 @@ while the predicted-class squares still snap between discrete regions:
 
 ![CE-loss animation (seed 0, 205 frames): logit-space d(alpha) for the ten pairs stays near the diagonal throughout training; squares: predicted class. Insets: accuracy and confidence = mean max softmax probability (top), train/test CE loss (bottom, log y).](plots/plateau_evolution_ce.gif)
 
+### Making training converge: the ReduceLROnPlateau reruns
+
+**The constant-LR runs really are chaotic at the end — and the scheduler fixes that completely.**
+Traced at every single step, the constant-LR full-train loss stops decreasing smoothly around
+step ~2,000 (MSE) and instead spikes up and down over 3–4 orders of magnitude for the rest of
+training (top-left panel below); CE shows the same behavior after step ~10,000. Under the
+scheduler the picture is exactly what the feedback asked for: the training loss levels off into
+a genuine plateau and the learning rate cascades down. The MSE run halves its LR 16 times
+between steps 767 and 1,949 (from $10^{-3}$ to $1.5\times10^{-8}$); the CE run does the same
+between steps 4,350 and 11,298. From that point on the loss trace is a flat line — no spikes —
+at $2.9\times10^{-6}$ (MSE) / $2.4\times10^{-7}$ (CE). The constant-LR runs eventually reach
+*lower* loss values ($4.0\times10^{-9}$ / $1.7\times10^{-8}$) but only as the noisy envelope of
+a fluctuating process, never as a converged value.
+
+**Convergence of the loss is convergence of the plateau curves.** After the LR collapse the
+curve motion $M$ drops from $2.4\times10^{-2}$ (constant MSE, mean over checkpoint gaps ≥ 50k)
+to $3.2\times10^{-6}$ — the curves are frozen to about four decimal places per 500 steps, and
+the late boundary flips (the ~150-step relocation at step 82k of the constant run) are gone
+entirely. The CE scheduled run freezes likewise ($8.8\times10^{-3} \to 1.3\times10^{-4}$ in
+probability space).
+
+**But freezing the training freezes the sharpening — the "chaos" was the engine.** The scheduled
+MSE run's plateau fraction stops at **0.37** — precisely the value the constant run had around
+step ~2,000, where the LR collapsed — and never reaches the constant run's 0.55. All the
+sharpening and boundary relocation that the constant-LR movie shows between step 2k and 100k
+is driven by continued finite-LR optimization; remove the drive and the geometry freezes
+mid-development. CE is the control that confirms the reading: its probability-space plateaus
+form *early* (most of the rise is done by step ~10k), so its scheduled run — whose LR survives
+until step ~11k — keeps nearly all of them (PF 0.856 vs 0.892).
+
+**Side effect: the scheduler generalizes better under MSE.** The constant MSE run's test
+accuracy drifts from 0.885 down to 0.848 over the last ~90k steps; the scheduled run pins test
+accuracy at 0.880 from step ~1,000 to the end. So the slow late test-accuracy decline of the
+main run is not "overfitting with time" but an effect of continued constant-LR churn. (Under CE
+the sign flips: constant 0.881 vs scheduled 0.860 — CE's late optimization was mildly helping.)
+
+![Constant LR vs ReduceLROnPlateau (seed 0, identical init/data/batches; log-scale x). Top left/middle: full-train loss at every step (log y) for MSE and CE — constant LR (blue) fluctuates over orders of magnitude late, scheduled (red) converges to a flat plateau. Top right: the scheduled runs' learning rate (log y) collapsing from 1e-3 to 1.5e-8. Bottom left: test accuracy on the first 2,000 test images for all four runs. Bottom middle: plateau fraction PF, each loss in its plateau space (MSE: logit d; CE: probability d); dotted line = diagonal floor 0.20. Bottom right: curve motion M (log y) — how much the d(alpha) curves change per checkpoint gap.](plots/lr_scheduler_comparison.png)
+
 ### Is 3 vs 5 actually harder? Pairwise AUROC and the shape of the 3→5 curve
 
 **Yes — 3 vs 5 is the hardest digit pair for this model.** Its AUROC over the first 2,000 test
@@ -414,7 +504,13 @@ of post-generalization steps — while boundaries continue to relocate in fast ~
 even past step 80,000. The engine of that late development is ordinary loss minimization at
 saturated accuracy: accuracy only constrains the argmax, so both MSE and CE keep shrinking the
 residual for the remaining ~99,700 steps, and that continued optimization is what sharpens the
-plateaus. The loss chooses the coordinates: MSE carves plateaus directly into the logits, CE
+plateaus. The ReduceLROnPlateau reruns make this causal rather than correlational: anneal the
+learning rate until the training loss genuinely converges and the entire late development
+switches off — curves frozen to $M\approx10^{-6}$ per 500 steps, no boundary flips, plateau
+fraction stuck at its LR-collapse value (0.37 for MSE instead of 0.55). The late-training
+"chaos" of the constant-LR runs is not measurement noise or a defect of the setup; it *is* the
+mechanism that keeps carving the plateaus (and, under MSE, the cause of the slow late
+test-accuracy decline). The loss chooses the coordinates: MSE carves plateaus directly into the logits, CE
 into the softmax probabilities (even more sharply, and earlier), with the same discrete
 decision-region structure underneath. The pair whose curve looks least plateau-like, 3 vs 5, is
 genuinely the model's hardest pair (worst AUROC under both losses), but its odd curve is itself
@@ -425,9 +521,12 @@ representation into increasingly discrete, confidently-held regions — includin
 confidently *wrong* predictions.
 
 **Limitations.** One architecture (depth-4, width-200 MLP), one dataset (1,000-image MNIST
-subset), three MSE seeds; the CE variant is seed 0 only. Confirmation seeds use 2,000-step
-checkpoint spacing rather than 500. The plateau fraction depends on its 0.1/0.9 margins (used
-only as a cross-run timing summary; all raw curves are saved and shown). Endpoints come from
-test images the model may misclassify — deliberate, but a few "cross-class" paths therefore
-connect regions of the same predicted class. Pairwise AUROC is reported at the final checkpoint
-of seed 0. The dense zooms (early phase, one late flip) cover seed 0 only.
+subset), three MSE seeds; the CE and scheduler variants are seed 0 only, and the scheduler was
+run at one hyperparameter setting (factor 0.5, patience 10, monitored on the full-train loss) —
+a gentler schedule that collapses the LR later would presumably freeze the plateau fraction at a
+higher value, which we did not test. Confirmation seeds use 2,000-step checkpoint spacing rather
+than 500. The plateau fraction depends on its 0.1/0.9 margins (used only as a cross-run timing
+summary; all raw curves are saved and shown). Endpoints come from test images the model may
+misclassify — deliberate, but a few "cross-class" paths therefore connect regions of the same
+predicted class. Pairwise AUROC is reported at the final checkpoint of seed 0. The dense zooms
+(early phase, one late flip) cover seed 0 only.

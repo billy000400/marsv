@@ -112,10 +112,17 @@ def main():
                                  f'seed0{sfx}', 'sched_trace.npz'))
         traces[key] = (z['full_train_loss'], z['lr'])
     for key, loss_name in [('mse', 'mse'), ('ce', 'ce')]:
-        print(f'retracing baseline {loss_name} per-step full-train loss ...', flush=True)
-        tr = retrace_baseline(loss_name, device)
+        cache = os.path.join(HERE, 'results', 'ckpts_movie',
+                             'seed0' + ('' if loss_name == 'mse' else '_ce'),
+                             'base_trace.npz')
+        if os.path.exists(cache):
+            tr = np.load(cache)['full_train_loss']
+        else:
+            print(f'retracing baseline {loss_name} per-step full-train loss ...', flush=True)
+            tr = retrace_baseline(loss_name, device)
+            np.savez_compressed(cache, full_train_loss=tr)
         stored = runs[key][0]['train_loss'][-1]
-        print(f'  retrace final={tr[-1]:.3e}  stored history final={stored:.3e}')
+        print(f'  {loss_name} retrace final={tr[-1]:.3e}  stored history final={stored:.3e}')
         traces[key] = (tr, None)
 
     # ---- summary numbers ----
@@ -195,6 +202,7 @@ def main():
                 lw=1.3, label=lab)
     ax.axhline(0.20, color='gray', ls=':', lw=1, label='diagonal floor ≈ 0.20')
     ax.set_xscale('symlog', linthresh=10)
+    ax.set_xlim(0, 100_000)
     ax.set_ylim(0, 1.0); ax.set_ylabel('plateau fraction PF')
     ax.set_xlabel('training step'); ax.legend(fontsize=7); ax.grid(alpha=0.3)
     ax.set_title('Plateau fraction (each loss in its plateau space)')

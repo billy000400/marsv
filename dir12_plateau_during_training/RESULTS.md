@@ -13,7 +13,10 @@
 > every 500 to 100k) plus two deterministic dense reruns (every 5 steps 0–1,000; every 50
 > steps 82,000–82,500), both bit-exact vs the movie records; seeds 1–2: 56 checkpoints
 > (every 2,000); CE seed 0: full 205-checkpoint schedule. All 317 MSE movie records verified
-> complete by `experiments/manifest_check.py`.
+> complete by `experiments/manifest_check.py`. Additionally (feedback 07161721): seed-0 MSE and
+> CE reruns with ReduceLROnPlateau (halve LR after 10 steps without full-train-loss improvement,
+> relative threshold $10^{-4}$, min LR $10^{-8}$), full 205-checkpoint schedule, identical
+> init/data/batches to their constant-LR twins.
 
 ## Headline
 
@@ -50,6 +53,20 @@ training (PF 0.22 at 100k ≈ the 0.20 floor), but the same paths in **probabili
 across spaces: 0.556 logit / 0.550 prob). Decision regions along the path are
 piecewise-constant under both losses. MSE carves plateaus into the logits; CE carves them —
 earlier and harder — into the probabilities.
+
+**LR scheduler — training converges, plateau sharpening stops (feedback 07161721):** at a
+constant LR the full-train loss never converges — from step ~2,000 (MSE) / ~10,000 (CE) it
+spikes over 3–4 orders of magnitude to the end. With ReduceLROnPlateau the loss levels into a
+genuine plateau: the LR halves 16 times (MSE: steps 767→1,949; CE: 4,350→11,298), landing at
+$1.5\times10^{-8}$, and the loss trace goes flat ($2.9\times10^{-6}$ MSE / $2.4\times10^{-7}$
+CE, spike-free). The plateau curves converge with it: late curve motion (mean $|\Delta d|$ per
+500-step gap, checkpoints ≥ 50k) drops $2.4\times10^{-2} \to 3.2\times10^{-6}$ (MSE, logit
+space) and $8.8\times10^{-3} \to 1.3\times10^{-4}$ (CE, probability space); no late boundary
+flips remain. But the sharpening stops with the chaos: scheduled-MSE PF freezes at **0.37** —
+the constant run's value at LR collapse (~step 2k) — vs 0.556 at constant LR; scheduled-CE
+keeps its early-formed probability plateaus (PF 0.856 vs 0.892). Side effect: scheduled MSE
+generalizes better (final test acc 0.8795, pinned from step ~1,000, vs 0.8475 constant — the
+late test-acc decline is a constant-LR effect; CE: 0.8595 scheduled vs 0.881 constant).
 
 **Is 3 vs 5 harder? (feedback 07161650):** yes — AUROC(3,5) = **0.9306 over the first 2,000
 test images, the worst of all 45 digit pairs** (next: 5v8 0.9512, 7v9 0.9558; median 0.987;
@@ -112,6 +129,10 @@ predicted class.
 ![CE run, selected steps (rows 0, 100, 1,000, 20,000, 100,000): d(alpha) in logit space (blue) stays near the diagonal while probability space (red) develops sharp plateau-boundary-plateau curves; squares: predicted class.](plots/frames_selected_steps_ce_prob.png)
 
 ![CE-loss animation (seed 0, 205 frames): logit-space d(alpha) stays near-diagonal throughout training while predicted classes (squares) still switch between discrete regions; insets: accuracy + confidence (max softmax prob) and CE loss.](plots/plateau_evolution_ce.gif)
+
+## Constant LR vs ReduceLROnPlateau (seed 0, MSE + CE)
+
+![Constant LR vs ReduceLROnPlateau (log-x). Top: per-step full-train loss for MSE and CE (constant LR spikes over orders of magnitude late, scheduled converges flat) and the scheduled runs' LR cascade (1e-3 to 1.5e-8). Bottom: test accuracy (all four runs), plateau fraction PF (MSE in logit space, CE in probability space; dotted = 0.20 diagonal floor), and curve motion M = mean per-gap |change in d| (log y) — the scheduled runs freeze, and their PF stops at the LR-collapse value.](plots/lr_scheduler_comparison.png)
 
 ## Pairwise AUROC: 3 vs 5 (seed 0, step 100k)
 

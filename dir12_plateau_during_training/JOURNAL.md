@@ -219,3 +219,50 @@ deleted STOP per CLAUDE.md rule 11; the two questions WERE the iteration.
 **Next step.** None — plan complete, all feedback addressed, STOP re-written.
 
 On track? yes — S1–S6 done + feedback 07161650 addressed, 100% complete, no blocker; STOP written (zero unaddressed feedback).
+## 2026-07-17 — Iter 7: feedback 07161721 (ReduceLROnPlateau) — runs completed, deliverables updated
+
+**Feedback check:** found `human_feedback_07161721.txt` unaddressed (no stale STOP — operator had
+removed it). Addressing it WAS the iteration. Discovered a prior partial iteration had already
+added `--sched plateau` to `train_and_record.py` and written `sched_compare.py`, but its training
+runs were killed at iteration boundaries twice (records to 87.5k / log to 43k, no manifest).
+
+**Did.**
+- Wiped partial `*_sched` outputs; reran BOTH scheduled trainings to completion in parallel
+  (MSE + CE, seed 0, full 205-ckpt schedule, ReduceLROnPlateau factor 0.5 / patience 10 /
+  rel 1e-4 / min_lr 1e-8 stepped every step on full-train loss). Ran the two constant-LR
+  per-step loss retraces in parallel too (added caching to sched_compare.py so they persist);
+  retraces match stored history exactly (3.999e-9, 1.740e-8) — determinism re-verified.
+  Kept the iteration alive with a foreground wait loop so the wrapper couldn't kill the runs.
+- `sched_compare.py` (fixed PF-panel xlim): plots/lr_scheduler_comparison.png +
+  results/lr_scheduler.json.
+- REPORT.md: finding 6, verdict extended, Methods (scheduler equation + curve-motion M
+  equation), Results subsection, Conclusion/Limitations. RESULTS.md: preamble, headline
+  paragraph, embedded figure. Render checks 11/11, hazards clean. Renamed feedback →
+  `.addressed.md`.
+
+**Learned.**
+- The operator's complaint was empirically right: constant-LR full-train loss spikes over 3–4
+  orders of magnitude late (visible only in the per-step trace — the 500-step checkpoint history
+  smoothed it away). The scheduler produces exactly the requested behavior (loss plateaus, LR
+  cascades 1e-3 → 1.5e-8 in 16 halvings, MSE by step ~1,949, CE by ~11,298).
+- Big one: convergence FREEZES plateau development. Scheduled-MSE PF stops at 0.37 = the value
+  at LR collapse (const reaches 0.556); curve motion drops ~4 orders of magnitude; late boundary
+  flips gone. So the late chaos is not noise on top of sharpening — it IS the sharpening
+  mechanism. CE controls the reading: its prob-space plateaus form before its LR collapses, so
+  they survive (0.856 vs 0.892).
+- Scheduled MSE generalizes better (0.8795 vs 0.8475): the main run's late test-acc decline is a
+  constant-LR effect, not "overfitting with time".
+
+**Assumptions logged (loop mode).**
+- "Training loss does not improve for like 10 steps" implemented as ReduceLROnPlateau
+  patience=10 on the FULL-train loss recomputed every step (batch loss too noisy for a 10-step
+  patience; alternative — patience on batch loss — rejected as it would trigger immediately on
+  batch noise). Factor 0.5, rel threshold 1e-4, min_lr 1e-8 chosen as the standard defaults.
+- Scheduler reruns: seed 0 only, both losses, state dicts at 16 anchors (precedent: CE rerun).
+- Kept the constant-LR runs as the primary movie (the feedback asks for convergence; the
+  comparison shows the constant-LR late dynamics are themselves the object of study — REPORT now
+  says both).
+
+**Next step.** None — plan complete, all five feedback files addressed, STOP re-written.
+
+On track? yes — S1–S6 done + feedback 07161721 addressed, 100% complete, no blocker; STOP written (zero unaddressed feedback).

@@ -180,3 +180,40 @@ Operator had deleted-and-readded feedback next to a stale STOP (`human_feedback_
   AUROC at final ckpt); RESULTS gained two sections + 4 embedded figures + CE PF numbers under the
   seed table. Render checks: 9/9 js-display-math, 0 pre-lang-math, hazard grep clean, all plot refs
   embedded. No prior result numbers changed.
+## 2026-07-17 — Iter 7: operator feedback 07161721 — ReduceLROnPlateau reruns (MSE + CE)
+
+Operator dropped `human_feedback_07161721.txt`: "trainings are too chaotic in the end, not
+converging — use a more sophisticated LR scheduler; expect training loss to plateau and LR to
+shrink if training loss does not improve for ~10 steps". (A prior partial iteration had added the
+`--sched plateau` flag and `sched_compare.py` but its runs were killed mid-training; this
+iteration wiped the partial outputs and reran everything to completion.)
+
+- **NEW experiment.** Seed-0 MSE and CE reruns with `ReduceLROnPlateau(factor=0.5, patience=10,
+  threshold=1e-4 rel, min_lr=1e-8)` stepped after EVERY optimization step on the full-train-set
+  loss (per-batch loss too noisy for patience 10); identical init/data/batch order to the
+  constant-LR twins (scheduler consumes no RNG); full 205-checkpoint schedule + frozen protocol.
+  Baseline per-step full-train-loss traces obtained by deterministic retrace (`sched_compare.py`,
+  now cached in `base_trace.npz`; retrace final losses match stored history exactly:
+  3.999e-9 MSE, 1.740e-8 CE). New data: results/plateau_records/seed_0_sched/,
+  seed_0_ce_sched/, results/ckpts_movie/seed0{_sched,_ce_sched}/ (sched_trace.npz = per-step
+  loss+LR), results/lr_scheduler.json.
+- **Feedback confirmed + answered.** Constant-LR full-train loss spikes 3–4 orders of magnitude
+  from step ~2k (MSE) / ~10k (CE) to the end — genuinely "chaotic, not converging". Scheduled:
+  LR halves 16× (MSE steps 767–1,949; CE 4,350–11,298) to 1.5e-8; loss converges flat
+  (2.9e-6 MSE / 2.4e-7 CE, spike-free).
+- **KEY NEW FINDING (Summary finding 6).** Convergence freezes the plateau geometry: late curve
+  motion M (new Methods metric, mean |Δd| per 500-step gap, ckpts ≥50k) drops 2.4e-2 → 3.2e-6
+  (MSE logit) and 8.8e-3 → 1.3e-4 (CE prob); late boundary flips vanish; but PF freezes at the
+  LR-collapse value — MSE 0.37 (vs 0.556 const), CE prob 0.856 (vs 0.892; survives because CE
+  prob plateaus form before ~11k). The late "chaos" IS the engine of late sharpening (causal,
+  not correlational). Side effect: scheduled MSE test acc 0.8795 (pinned from step ~1k) vs
+  0.8475 const — the late test-acc decline is a constant-LR effect; CE flips (0.8595 vs 0.881).
+- **Deliverables.** REPORT.md: Summary finding 6 + extended verdict, new Methods subsections
+  (scheduler rule with equation; curve-motion M with equation), new Results subsection "Making
+  training converge", Conclusion + Limitations updated (scheduler = seed 0, one setting).
+  RESULTS.md: preamble + new headline paragraph + new section. New figure embedded in BOTH:
+  plots/lr_scheduler_comparison.png (6 panels: per-step losses, LR cascade, test acc, PF,
+  curve motion). Render checks: REPORT 11/11 js-display-math, 0 degraded, hazard grep clean,
+  no bare plot refs. No prior result numbers changed.
+- Renamed `human_feedback_07161721.txt` → `.addressed.md`; STOP re-written (plan complete, zero
+  unaddressed feedback).
