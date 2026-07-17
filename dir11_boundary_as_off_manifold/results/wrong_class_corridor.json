@@ -1,0 +1,42 @@
+{
+  "k": 10,
+  "n_correct": 1705,
+  "n_wrong": 295,
+  "n_augmented": 2000,
+  "baselines": {
+    "correct_med": 2.8539641762476404,
+    "correct_p95": 4.232642601164814,
+    "wrong_med": 3.736827729715644,
+    "augmented_med": 2.8922152316052974,
+    "augmented_p95": 4.193527936028292
+  },
+  "A_wrong_vs_correct": {
+    "median_pctile": 74.48680351906158,
+    "frac_above_p95": 0.09830508474576272,
+    "iqr": [
+      56.158357771260995,
+      88.09384164222874
+    ]
+  },
+  "B_augmented_E": {
+    "between_median": 95.225,
+    "between_iqr": [
+      86.2625,
+      98.2
+    ],
+    "within_median": 62.64999999999999,
+    "between_median_correct_only": 95.42521994134897,
+    "within_median_correct_only": 65.2199413489736
+  },
+  "C_corridor_in_wrong": {
+    "between_median_pctile": 92.20338983050847,
+    "between_iqr": [
+      79.66101694915254,
+      96.61016949152543
+    ],
+    "within_median_pctile": 90.33898305084746,
+    "frac_above_wrong_p95": 0.386094674556213
+  },
+  "n_verified_between": 676,
+  "n_within": 200
+}

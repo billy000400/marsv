@@ -120,6 +120,26 @@ never leaves the support (`E` = 52) — a plateau can arise entirely on-manifold
 Typical cross-digit transitions keep `G ≈ 1` while their straight route detours through near-empty
 space.
 
+### Is the corridor where the wrongly classified images live? — No
+
+The natural cloud deliberately uses only **correct** test images (1705 of 2000). Do the **295
+wrong-image activations** live in the corridor? Three tests on the identical frozen paths (base
+model; a seed-0 re-run reproduced `E` = 95.4 / 65.2 exactly):
+
+| test | result |
+|--|--|
+| (A) wrong activations' own support vs the correct cloud | median **74th** pctile (IQR 56–88), 10% beyond p95 — far short of corridor points (95.4, 53%) |
+| (B) `E` recomputed against the augmented cloud (all 2000 activations, own baseline) | between-plateau median **95.4 → 95.2**; controls 65.2 → 62.6 — the corridor does not fill |
+| (C) corridor points' support *among the wrong cloud itself* (its own 295-pt baseline) | median **92nd** pctile — corridor points are strangers to the wrong cloud too (controls' max points: 90th) |
+
+Wrong-image activations sit in the moderately-thin *edge* of the correct cloud — as expected for
+borderline examples — but not in the corridor: they are real images, and the corridor is not populated
+by any image, right or wrong. The along-path distance to the wrong cloud shows **no mid-path dip**
+(a dip would mean wrong activations congregate where the output jumps); it stays flat at ~1.25× the
+wrong cloud's own median support while the distance to the correct cloud bulges to ~1.45×.
+
+![Panel A: wrong-image activations (purple) spread over mid percentiles, median 74; corridor excursions (red) pile up at 90-100. Panel B: along verified between-plateau paths, r10 to the wrong cloud (purple) stays flat with no mid-path dip while r10 to the correct cloud (red) bulges. Panel C: E histograms vs correct-only and augmented clouds coincide (median 95 both).](plots/wrong_class_corridor.png)
+
 ## Resampling stability — the verdict does not depend on the endpoint draw
 
 Two fresh endpoint-sampling seeds, everything else frozen (seed 0 re-run reproduced the published
@@ -173,7 +193,9 @@ are all counterexamples (`G ≤ 1`, median 0.76–0.98), consistent with the oth
 - **Typical-association claim NOT SUPPORTED:** between-plateau median `G` (0.93–1.00) sits on the
   within-plateau baseline in all four well-powered models; CIs overlap; no consistent direction.
 - **The low-density corridor is REAL:** median verified direct path reaches `E` = 95.4 (controls:
-  65.2); 53% exceed the natural p95 (controls: 12%); the bulge sits exactly mid-path.
+  65.2); 53% exceed the natural p95 (controls: 12%); the bulge sits exactly mid-path. It is **not**
+  where the wrongly-classified images live: adding their 295 activations leaves `E` at 95.2, and
+  corridor points sit at the 92nd pctile of the wrong cloud's own support.
 
 The plateau reflects the model's **decision geometry**, not a hole in the data manifold.
 **Limitation:** finite samples can support or undermine *empirical* component separation but cannot

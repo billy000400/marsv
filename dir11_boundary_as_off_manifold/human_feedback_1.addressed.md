@@ -1,0 +1,2 @@
+I realized your natural activation cloud is only activations of correctly classified test images. I'm wondering if the low density corrider corresponds to the wrongly classified images.
+Also, there is no definition of investigation 1 and 2 in the REPORT.md

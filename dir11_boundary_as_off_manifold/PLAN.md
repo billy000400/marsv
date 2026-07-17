@@ -201,7 +201,15 @@ Also answer:
 
 ## Current status
 
-**COMPLETE (iter 9) — all feedback addressed, STOP written.** Iter 9 addressed readability feedback
+**COMPLETE (iter 10) — all feedback addressed, STOP written.** Iter 10 addressed operator feedback
+(`human_feedback_1.txt` → `.addressed.md`): does the low-density corridor correspond to the
+wrongly-classified images (the natural cloud uses only correct ones)? Answer **NO**, three ways
+(`experiments/wrong_class_corridor.py`, base model, identical frozen paths, seed-0 regression check
+passed): (A) the 295 wrong-image activations sit at the correct cloud's edge (median 74th pctile,
+10% > p95), not in the corridor (95.4, 53%); (B) augmenting the cloud with them leaves E unchanged
+(95.4 → 95.2); (C) corridor points are at the 92nd pctile of the wrong cloud's own baseline (controls
+90th) — no image, right or wrong, lives in the corridor. New figure/subsection in both deliverables.
+Iter 9 addressed readability feedback
 (`human_feedback_07161625.txt` → `.addressed.md`): plain-words MST explanation + toy schematic
 (`plots/mst_explainer.png`), Summary shortened to motivation + three findings + verdict, core
 vocabulary reduced to d(t)/G/E with a "How to read the plots" box, captions shortened, repetition
@@ -234,8 +242,9 @@ under-powered (only 1 pair passes the `d(t)` sharpness filter) and is down-weigh
 
 ## Next step
 
-None — direction complete and all feedback addressed (zero unaddressed feedback files; iter 9 handled
-the 2026-07-16 readability review). Every verdict-rule clause is explicitly satisfied: counterexamples are
+None — direction complete and all feedback addressed (zero unaddressed feedback files; iter 10
+handled the 2026-07-17 wrong-images question, iter 9 the readability review). Every verdict-rule
+clause is explicitly satisfied: counterexamples are
 stable under **resampling** (iter 7: endpoint seeds 0/1/2 → 21 pairs incl. digit-9 have G ≤ 1 in every
 draw; seed-0 regression check reproduced published numbers exactly) AND under model replication (second
 seed + two architectures); shallow-net power resolved as structural (iter 6, d3w200 excluded as an

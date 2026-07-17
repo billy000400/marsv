@@ -339,3 +339,47 @@ it reports no numbers and changes no verdict.
 
 On track? yes — plan complete (100%), readability feedback addressed, deliverables re-verified;
 STOP written.
+
+---
+
+## 2026-07-17 — iter 10: operator feedback — corridor vs wrongly-classified images → STOP
+
+**Did.** FEEDBACK FIRST: found unaddressed `human_feedback_1.txt` (and no STOP on disk — cleared by
+the wrapper relaunch again): "the natural activation cloud is only correctly classified test images —
+does the low-density corridor correspond to the wrongly classified images?" Wrote
+`experiments/wrong_class_corridor.py` (imports the frozen slerp/MARGIN/N_PAIRS/PLATEAU_FRAC from
+`population_manifold.py`, replicates `direct_path_offmanifold.py`'s exact seed-0 sampling so the
+paths are identical; seed-0 regression check reproduced E = 95.4/65.2 to the digit). Three tests on
+the base model: (A) the 295 wrong-image L1 activations' own r_10 support vs the correct cloud; (B)
+per-path excursion E recomputed against the augmented 2000-pt cloud with its own baseline; (C) each
+verified path's corridor point (argmax r_10 vs correct cloud) scored against the wrong cloud's own
+295-pt self-baseline. New figure `plots/wrong_class_corridor.png` + `results/wrong_class_corridor.json`;
+new subsection in both deliverables + Methods paragraph (reference clouds/baselines); renamed the
+feedback file `.addressed.md`; CHANGELOG appended; rendering re-verified (5/5 display math, 0
+pre-math, 0 hazards, 0 bare paths, 10 embedded figures per file).
+
+**Learned.** Clean NO on all three axes: wrong activations sit at the moderately-thin EDGE of the
+correct cloud (median 74th pctile, 10% > p95 — sensible for borderline examples) but nowhere near
+corridor territory (95.4, 53%); adding them to the cloud leaves the corridor untouched (E 95.4→95.2
+between, 65.2→62.6 within); and corridor points are strangers to the wrong cloud too (92nd pctile of
+its own baseline, vs 90th for control paths' worst points — no differential proximity). The along-path
+distance-to-wrong-cloud profile is flat (~1.25x its median) with NO mid-path dip, while
+distance-to-correct bulges to ~1.45x. Interpretation: wrong images are still real images, so their
+activations hug the data manifold; the corridor is populated by no image at all. First figure draft
+titled panel B "the bulge is there for both clouds" — corrected after looking at it: the wrong-cloud
+profile is flat, not bulging; the decisive feature is the ABSENCE of a dip. Assumption logged: scored
+proximity-to-wrong-cloud against the wrong cloud's own self-baseline (fair despite ~6x sparsity;
+rejected raw distances, which would conflate sparsity with distance; rejected pooling wrong+correct
+percentiles, which hides the question). Kept it base-model-only — the corridor result being probed is
+itself a base-model population result; replication of a negative control across checkpoints would be
+scope creep.
+
+**Next.** Feedback fully addressed (file renamed); plan complete; zero unaddressed feedback files →
+writing STOP.
+
+Metric check: I added NO new reported metric — tests A–C reuse the existing r_10/E percentile
+machinery against three reference clouds; the three numbers exist solely to answer the operator's
+question (decision: corridor = wrong-image home, yes/no → NO) and live in one subsection.
+
+On track? yes — plan complete (100%), operator feedback addressed with a clear negative answer,
+deliverables curated + re-verified; STOP written.

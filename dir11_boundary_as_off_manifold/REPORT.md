@@ -24,7 +24,8 @@ classifier — not one hand-picked case. Three principal findings:
    not supported.
 3. **The straight interpolation path does cross a low-density corridor.** The path's midpoint —
    exactly where the output jumps — sits in territory real activations essentially never visit. The
-   corridor is real; it belongs to the straight-line route, not to the manifold.
+   corridor is real; it belongs to the straight-line route, not to the manifold. It is not the home
+   of the wrongly-classified images either — no image, right or wrong, activates there.
 
 **Verdict: a plateau marks the model's decision geometry, not a hole in the data manifold.** The
 plateaus are connected; the straight path between them is not where the data lives. All supporting
@@ -140,6 +141,16 @@ excursion is its worst support along the way, as a percentile of that baseline:
 E \;=\; \mathrm{pctile}_{\mathrm{natural}}\!\left( \max_t\, r_k(x_t) \right)
 ```
 
+**Wrong-image comparison (Investigation 2 follow-up).** The natural cloud deliberately contains only
+*correct* test images, so we must check the corridor is not simply where the **wrongly-classified**
+images' activations live. No new metric is needed — we reuse `r_10` and the percentile calibration
+above with three reference sets: the frozen **correct cloud** (1705 points, baseline as above), the
+**wrong cloud** (the 295 misclassified test images' L1 activations, calibrated against its own
+self-excluded `r_10` baseline, median 3.74), and the **augmented cloud** (all 2000 test activations,
+its own baseline). A path's *corridor point* is its worst-supported point vs the correct cloud
+(`argmax_t r_10`). Comparing a query against each cloud's *own* baseline keeps the percentiles fair
+even though the wrong cloud is ~6× sparser.
+
 ### Baselines
 
 **Within-plateau control.** The reference for both investigations is the set of **within-region**
@@ -231,6 +242,35 @@ on-manifold, purely from decision geometry. Typical cross-digit transitions keep
 straight route detours through near-empty space (median `E` = 95.4). The corridor belongs to the
 straight-line route, not to the manifold's connectivity.
 
+### The corridor is not where the wrongly-classified images live
+
+An operator asked: since the natural cloud uses only correct test images, could the corridor be the
+home of the 295 *wrongly-classified* images' activations? Three tests say no (base model, identical
+frozen paths; the seed-0 re-run reproduced `E` = 95.4 / 65.2 exactly):
+
+**(A) Wrong activations sit inside the correct cloud, not in the corridor.** Their support vs the
+correct cloud has median percentile **74** (IQR 56–88), with only 10% beyond the natural p95. That is
+the moderately-thin *edge* of the cloud — plausible for borderline, hard-to-classify examples — but
+far short of corridor points (median 95.4, 53% beyond p95).
+
+**(B) Adding them does not fill the corridor.** Recomputing every path's excursion against the
+augmented cloud (all 2000 test activations, calibrated to its own baseline) leaves the between-plateau
+median `E` at **95.2** (was 95.4); controls move 65.2 → 62.6. If the corridor were populated by wrong
+images, `E` would have collapsed toward the control level.
+
+**(C) Corridor points are strangers to the wrong cloud too.** Each verified path's corridor point sits
+at the **92nd** percentile of the wrong cloud's *own* support baseline — barely different from
+within-plateau control paths' worst points (90th). The corridor is no closer to wrong activations than
+ordinary travel is.
+
+The along-path profile makes the same point visually: distance to the wrong cloud shows **no mid-path
+dip** (a dip below its baseline would mean wrong activations congregate where the output jumps); it
+stays flat at ~1.25× the wrong cloud's own median while distance to the correct cloud bulges to
+~1.45×. Wrong images are still real images — their activations hug the data manifold. The corridor is
+populated by no image at all, right or wrong.
+
+![Panel A: histogram of support percentile vs the correct-cloud baseline — wrong-image activations (purple) spread over mid percentiles with median 74, while corridor excursions E (red) pile up at 90-100; dashed line = natural p95. Panel B: median r10 along verified between-plateau paths, each normalized by its own cloud's median baseline — the wrong-cloud curve (purple) stays flat with no mid-path dip while the correct-cloud curve (red) bulges mid-path; bands are IQRs. Panel C: histograms of E vs the correct-only cloud (red, filled) and vs the augmented 2000-point cloud (blue outline) coincide, median 95 both.](plots/wrong_class_corridor.png)
+
 ### Resampling stability
 
 A counterexample produced by one lucky draw of endpoint pairs would refute nothing. We re-ran the
@@ -295,7 +335,10 @@ Both Investigation 1 claims fail, and Investigation 2's corridor is real (full n
 - **Typical-association claim NOT SUPPORTED** — the between- and within-plateau `G` distributions
   overlap almost completely, in every well-powered model.
 - **The low-density corridor is REAL** — verified straight paths reach the edge of natural support at
-  mid-path, exactly where the output jumps; controls do not.
+  mid-path, exactly where the output jumps; controls do not. And it is **not explained by the
+  wrongly-classified images**: their activations sit inside the correct cloud (median 74th pctile),
+  adding them leaves `E` unchanged (95.4 → 95.2), and corridor points remain unsupported even against
+  the wrong cloud's own baseline (92nd pctile).
 
 **What this means.** A sharp plateau marks a place where the model's decision geometry changes
 abruptly. The straight interpolation genuinely leaves the populated part of activation space — but the

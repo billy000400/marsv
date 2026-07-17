@@ -218,3 +218,28 @@ this is a presentation rewrite of both deliverables; every result, table, and ve
   here regardless.
 - Verified: GitHub API 5/5 display-math in REPORT.md, 0 pre-math, 0 inline hazards; 0 bare plot
   paths; 9 embedded figures per deliverable (8 prior + `mst_explainer.png`).
+
+## 2026-07-17 — operator feedback: is the corridor the wrongly-classified images' home? (iter 10)
+
+Addressed `human_feedback_1.txt` (renamed `.addressed.md`): the operator noted the natural cloud uses
+only correctly-classified test images and asked whether the low-density corridor corresponds to the
+wrongly-classified images. Added `experiments/wrong_class_corridor.py` (base model, identical frozen
+paths/seed as `direct_path_offmanifold.py`; seed-0 regression check reproduced the published E =
+95.4 / 65.2 exactly). Three tests, all answering **no**:
+
+- **(A) Where do the 295 wrong activations sit?** Median support percentile **74** (IQR 56–88) vs the
+  correct cloud, 10% beyond p95 — the thin edge of the cloud (borderline examples), far short of
+  corridor points (95.4, 53%).
+- **(B) Does adding them fill the corridor?** E recomputed against the augmented 2000-point cloud
+  (own baseline): between-plateau median **95.4 → 95.2**, controls 65.2 → 62.6 — no fill.
+- **(C) Are corridor points at home among wrong activations?** Corridor points (per-path argmax r_10)
+  sit at the **92nd** percentile of the wrong cloud's own self-support baseline (control paths' worst
+  points: 90th) — no closer to wrong activations than ordinary travel; the along-path distance to the
+  wrong cloud is flat (~1.25×), no mid-path dip.
+- RESULTS.md + REPORT.md gain a "corridor is not the wrong images' home" subsection under
+  Investigation 2 (plus a Methods paragraph on the three reference clouds/baselines; no new metric —
+  reuses r_10/E percentile machinery); corridor bullets in Headline/Summary/Conclusion note the
+  result. New artifacts: `plots/wrong_class_corridor.png` (embedded in both deliverables),
+  `results/wrong_class_corridor.json`.
+- Verified: GitHub API 5/5 display-math, 0 pre-math, 0 inline hazards; 0 bare plot paths; 10 embedded
+  figures per deliverable. All prior numbers/verdicts unchanged.
