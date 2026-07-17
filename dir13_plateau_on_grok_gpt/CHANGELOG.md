@@ -200,3 +200,31 @@ Grokking-side result into the deliverables.
   embedded plot images; RESULTS.md 6 embedded images, 0 bare-path refs, 0 hazards.
 - Plateau numbers and pilot gate verdict unchanged (still current-best). No STOP (S4/S5/S6/S7 pending;
   fresh trainings + fig9 evals running in background).
+
+## 2026-07-17 (iter) — Fresh char + BPE Figure-9 gate verdicts (S4/S5), joint timeline + bounded verdict (S7)
+
+- **Fresh char (30k) Figure-9 gate = FAIL.** Full 14-checkpoint LC/PGD curve (0→30000) via the
+  resume-merged `results/fig9_grok_char.json` + `fig9_verdict.py`. clean acc peak 0.568@4994 → 0.554
+  final; `ε=0.03` PGD adv acc → **0.528** (delayed robustness clearly emerged); test LC monotone
+  1940 → **8.1** with the minimum at the *last* checkpoint → **no second descent** → FAIL.
+- **Fresh BPE (10k) Figure-9 gate = FAIL.** Re-ran BPE fig9 (the finalize chain's run had OOM'd at
+  `vram_frac 0.06`; re-ran at `vram_frac 0.2, pgd_bs 16, lc_bs 4`). 10 checkpoints 0→10000: clean acc
+  peak 0.299@831 → 0.274; adv acc → 0.187; test LC 2182 → **95** monotone (min at last ckpt) → no
+  second descent → FAIL. `results/fig9_grok_bpe.json`, `results/fig9_grok_bpe_verdict.json`.
+- **Bounded relationship verdict = PLAN case 5 ("primary relationship not testable").** All three
+  models (pilot char, fresh char, fresh BPE) FAIL the gate; the BPE bridge to Matthew's exact tokens
+  does not reproduce Figure 9, so plateaus cannot be tied to a grokking second-descent/robustness
+  window. Plateau result (char reconstruction, 14/40 pairs) is now framed as standalone, not joined
+  to grokking.
+- **New figures:** `plots/grokking_fresh_char.png`, `plots/grokking_fresh_bpe.png`,
+  `plots/joint_timeline.png` (new `experiments/plot_joint_timeline.py`). Embedded as rendered images in
+  BOTH RESULTS.md and REPORT.md.
+- **Deliverables curated:** replaced the "fresh runs in progress" training-dynamics paragraph/figure
+  with the completed 3-model gate table + curve figures + joint timeline + case-5 verdict in both
+  RESULTS.md and REPORT.md; updated the top verdict paragraphs and REPORT Summary/Conclusion/Limitations.
+- Render checks: REPORT.md 6/6 `js-display-math`, 0 `<pre lang="math">`, 0 inline-math hazards; all 8
+  embedded plot paths are `![...]` images and exist on disk.
+- Note: fresh char training reached step 30000 (all checkpoints saved); its post-training metadata/plot
+  save crashed on an int64-not-JSON-serializable error — harmless, checkpoints intact.
+- No STOP: S6 (per-checkpoint Matthew sweep / char controls) + S8 headline rework remain; case 5 makes
+  S6 non-decisive but PLAN still lists it.

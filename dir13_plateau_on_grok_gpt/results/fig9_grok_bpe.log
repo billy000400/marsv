@@ -1,0 +1,12 @@
+10 checkpoints, 0 already done
+step      0 clean 0.000 adv 0.000 LC tr 2202 te 2182 rnd 2346 [48s]
+step      4 clean 0.124 adv 0.000 LC tr 1690 te 1678 rnd 1930 [48s]
+step     15 clean 0.124 adv 0.019 LC tr 495 te 493 rnd 638 [48s]
+step     56 clean 0.158 adv 0.000 LC tr 455 te 460 rnd 484 [48s]
+step    217 clean 0.220 adv 0.053 LC tr 491 te 489 rnd 460 [48s]
+step    831 clean 0.299 adv 0.053 LC tr 273 te 271 rnd 379 [48s]
+step   2038 clean 0.285 adv 0.106 LC tr 166 te 171 rnd 244 [49s]
+step   4994 clean 0.274 adv 0.164 LC tr 104 te 119 rnd 182 [48s]
+step   7819 clean 0.272 adv 0.179 LC tr 86 te 105 rnd 161 [48s]
+step  10000 clean 0.274 adv 0.187 LC tr 79 te 95 rnd 150 [48s]
+DONE

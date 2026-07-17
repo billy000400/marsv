@@ -160,12 +160,12 @@ Null results are complete when the validity gates pass. When complete, write an 
 
 - [x] **S1 - Existing reconstruction and exploratory plateau assay.** The 3,500-step character model and 40-letter exploratory result exist, but they do not answer the joint question.
 - [x] **S2 - Source-lock both assays.** Port the Figure 9 measurements and Matthew's released config/code; validate endpoint fidelity and tokenization.
-- [ ] **S3 - Evaluate the existing checkpoint.** Give it a Figure 9 `pass`, `fail`, or `not established` verdict.
-- [ ] **S4 - Fresh character replication.** Train/checkpoint through the Grokking horizon and evaluate Figure 9.
-- [ ] **S5 - Fresh BPE replication.** Train the matched BPE model and evaluate Figure 9.
-- [ ] **S6 - Checkpoint-aligned plateau assays.** Run BPE exact examples and the two character controls at frozen training phases.
-- [ ] **S7 - Joint analysis.** Produce the shared timeline and bounded relationship verdict.
-- [ ] **S8 - Rewrite the report.** Remove the 40-letter count from the headline, retain it only as exploratory history, and create `STOP`.
+- [x] **S3 - Evaluate the existing checkpoint.** Pilot char Figure-9 verdict = **FAIL** (first LC descent + emerging robustness, no second descent within 3,500 steps).
+- [x] **S4 - Fresh character replication.** Trained 30k steps; 14-checkpoint Figure-9 curve; verdict = **FAIL** (LC monotone to 8.1, adv→0.528, no second descent).
+- [x] **S5 - Fresh BPE replication.** Trained; 10-checkpoint Figure-9 curve; verdict = **FAIL** (LC monotone to 95, adv→0.187, no second descent).
+- [ ] **S6 - Checkpoint-aligned plateau assays.** Non-decisive under case 5 (no grokking model); still to run `b/i`,`b/l` char controls across frozen phases as *secondary* per-checkpoint plateau evidence.
+- [x] **S7 - Joint analysis.** `plots/joint_timeline.png` + bounded relationship verdict = **PLAN case 5 (primary relationship not testable)**.
+- [ ] **S8 - Rewrite the report.** De-emphasise the 40-pair reconstruction dataset in the headline; keep it as clearly-labelled standalone plateau evidence; then create `STOP`.
 
 ## Fallback
 
@@ -188,37 +188,30 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**IN PROGRESS (2026-07-17): S2 done; S3/S4/S5 running.**
+**IN PROGRESS (2026-07-17): S3/S4/S5/S7 DONE; S6/S8 remain. Bounded verdict = case 5.**
 
-- Tokenization gate PASSED: " big"(1263), " in"(287), " large"(1588) are single GPT-2 BPE tokens
-  after "The house was"; train-split counts 11 / 1959 / 10 — big and large are RARE (reported
-  prominently). `tokenization_check.txt`.
-- Figure 9 pipeline ported and source-locked to the official repo's `local_complexity.py` /
-  `attacks.py` / `configs.py` (`experiments/fig9.py`); forward reimplementations verified exact
-  (0.0 logit error). GPT adaptation choices recorded in MODEL_SPEC.md addendum.
-- Existing 3,500-step pilot: 13 checkpoints being evaluated (`results/fig9_pilot_char.json`).
-  Expected verdict "not established" (horizon/schedule designed for 3,500 steps) — fresh runs
-  started without waiting.
-- Fresh runs TRAINING NOW: `train_grok.py --tok char` and `--tok bpe`, 30,000 steps (budget-limited
-  vs the plan's ~1e5 — deviation recorded), Adam wd=0, log-spaced+2500-linear checkpoints.
-- Matthew checkpoint-sweep driver ready and smoke-tested (`experiments/run_matthew_ckpts.py`),
-  configs frozen in configs/*.yaml.
-- Fresh-run training dynamics plotted (`plots/fresh_training_dynamics.png`): both runs OVERFIT (val
-  loss bottoms early — char 1.47@~3750, BPE 4.77@~750 — then rises; val acc plateaus 0.56 / 0.27).
-  Strong prior the fresh gate also FAILs within the 30k budget horizon; decisive per-ckpt LC/PGD eval
-  still running. Figure embedded in RESULTS.md + REPORT.md (in-progress, labelled).
-- Early char fig9 eval covered only steps <=4994; a LATE-checkpoint char eval is queued (pre-existing
-  `/tmp/chain_char_late.sh`, dynamic late+final steps) that resume-merges into
-  `results/fig9_grok_char.json` so a *second* LC descent can be detected. Waits for training + early
-  eval to free the shared file/GPU. (A duplicate I briefly started was killed to avoid two writers.)
+- **All three Figure-9 gates = FAIL** (pilot char, fresh char 30k, fresh BPE 10k). Each shows a first
+  LC descent + emerging `ε=0.03`-PGD robustness but **no second LC descent** within budget. Fresh char
+  is the crispest null: adv acc 0.528 (> pilot's 0.327) yet LC monotone to 8.1 (min at last ckpt).
+  Verdicts in `results/fig9_{pilot_char,grok_char,grok_bpe}_verdict.json`; curves
+  `plots/grokking_{pilot_char,fresh_char,fresh_bpe}.png`.
+- **Joint timeline (S7):** `plots/joint_timeline.png` (`experiments/plot_joint_timeline.py`) overlays
+  LC + adv vs step for all three runs + verdict/plateau text panel. **Bounded relationship verdict =
+  PLAN case 5 (primary relationship not testable):** no run reproduces Figure 9, so plateaus cannot be
+  tied to a grokking transition. Plateau result (char reconstruction, 14/40 pairs) stands alone.
+- RESULTS.md + REPORT.md curated to this current-best state (3-model gate table, three curve figures,
+  joint timeline, case-5 verdict). Render checks pass (6/6 display-math, all figures embedded).
+- Note: fresh char training reached step 30000 (checkpoints intact); its post-run metadata save crashed
+  on an int64 JSON error — harmless. Matthew checkpoint-sweep driver ready (`run_matthew_ckpts.py`).
 
 ## Next step
 
-When char training + both fig9 evals finish: run `fig9_verdict.py` on the merged (early+late)
-`fig9_grok_char.json` -> fresh char gate verdict + `plot_fig9.py` curve (S4); same for BPE (S5); freeze
-6 checkpoint phases; run `run_matthew_ckpts.py` (BPE exact + char controls) at those phases (S6); joint
-timeline + bounded relationship verdict (S7); rewrite deliverables + STOP (S8). Do NOT STOP until fresh
-verdicts + joint timeline exist.
+S6 (secondary, non-decisive under case 5): run the `b/i`,`b/l` character controls with
+`run_matthew_ckpts.py` across the frozen training phases to show per-checkpoint plateau evolution as
+*secondary* evidence (big/in,big/large BPE sweep is non-decisive since BPE fails the gate). S8:
+de-emphasise the 40-pair reconstruction dataset in the RESULTS/REPORT headline per PLAN out-of-scope,
+keep it as clearly-labelled standalone plateau evidence, then create `STOP`. Do NOT STOP until S6/S8
+are done. No unaddressed feedback files remain.
 
 ## Primary references
 

@@ -22,11 +22,13 @@ moving the **interpolation point later** (fewer layers left downstream to build 
 **collapses it back onto the diagonal**. "Qualified" because we tested a reconstruction, not the
 paper's exact checkpoint. The grok paper's own phenomenon — **grokking**, i.e. `ε=0.03`-PGD
 adversarial robustness emerging long after training accuracy saturates, together with a **second
-local-complexity descent** — is now being measured as an explicit **validity gate** (next section):
-the 3,500-step pilot **FAILs** that gate within its horizon (first LC descent + emerging robustness,
-but no second descent), and two matched fresh runs are training to test it properly. Until a fresh run
-**passes** the gate, the plateau result below stands on its own and is **not** yet joined to a
-Grokking claim.
+local-complexity descent** — is enforced as an explicit **validity gate** (next section). **All three
+models we trained FAIL that gate** (the 3,500-step pilot, a fresh 30k-step character run, and a fresh
+30k-step BPE run): each shows a first LC descent and emerging robustness, but **no second descent**.
+So the **bounded joint verdict is "primary relationship not testable" (PLAN case 5)** — no run
+reproduces Figure 9 (in particular the BPE run needed for Matthew's exact tokens), so plateaus cannot
+be tied to a grokking transition. The plateau result below therefore **stands on its own** and is
+**not** joined to a Grokking claim.
 
 ## Model actually tested
 
@@ -37,7 +39,7 @@ fields in `MODEL_SPEC.md`.
 
 ![Training curves: cross-entropy loss falls to ~1.49 on validation (left); next-char accuracy rises to 0.56 (right); x = training step.](plots/training_curves.png)
 
-## Figure-9 grokking gate (validity gate — S3 pilot; S4/S5 fresh runs in progress)
+## Figure-9 grokking gate (validity gate — S3 pilot + S4/S5 fresh runs: all FAIL)
 
 PLAN makes a **validity gate** mandatory before any *joint* Grokking↔plateau claim: the model must
 qualitatively reproduce *Deep Networks Always Grok* Fig. 9 — a **second local-complexity (LC) descent**
@@ -58,23 +60,40 @@ error). The preregistered PASS/FAIL/NOT-ESTABLISHED rule is in `experiments/fig9
 | **Preregistered verdict** | **FAIL** (valid measurements, Figure-9 ordering absent within 3,500 steps) |
 
 Read this honestly: the pilot shows the *first* LC descent and emerging robustness, but the horizon
-ends before any *second* descent could appear, so it cannot support a joint claim. This is why PLAN
-requires fresh, longer runs. The two matched fresh runs (char + BPE, 30k-step schedule, budget-capped)
-are **training now**; their Figure-9 LC/PGD evaluations are queued (early checkpoints done; a
-late-checkpoint eval, steps 5k–30k, is running to test for a *second* LC descent) and will receive
-their own gate verdicts (S4/S5) next iteration.
+ends before any *second* descent could appear, so it cannot support a joint claim.
 
-**Fresh-run training dynamics so far (IN PROGRESS).** Both fresh runs are **overfitting**, not
-grokking: validation loss reaches its minimum very early (char: val 1.47 at step ~3,750; BPE: val 4.77
-at step ~750) and then **rises** monotonically while train loss keeps falling — the opposite of the
-delayed val-loss recovery that defines grokking. Val next-token accuracy plateaus (char ≈ 0.56, BPE
-≈ 0.27). This foreshadows (but does not yet decide) the gate: like the pilot, these runs likely lack
-the delayed generalization / second-descent ordering within the budgeted horizon. The LC/PGD gate
-evaluation across checkpoints is the actual test and is not yet complete.
+**Fresh 30k-step char + BPE runs — both also FAIL (S4, S5).** We trained two matched fresh runs and
+ran the identical LC/PGD pipeline across log-spaced checkpoints. Both reproduce the pilot's pattern:
 
-![Fresh Grokking-horizon runs, training dynamics (in progress). Two panels: left = 12-layer char GPT (vocab 65), right = 12-layer BPE GPT (vocab 50257). x-axis: training step. Left y-axis: cross-entropy loss in nats — blue = train loss, red = val loss. Right y-axis (green, dashed): val next-token accuracy. In both panels val loss bottoms early then climbs while train loss keeps dropping, i.e. memorisation without grokking within the budgeted horizon.](plots/fresh_training_dynamics.png)
+| Figure-9 quantity | Pilot char (3.5k) | **Fresh char (30k)** | **Fresh BPE (10k)** |
+|---|---|---|---|
+| checkpoints evaluated | 13 | 14 | 10 |
+| clean acc (peak / final) | 0.564 / 0.564 | 0.568@4994 / 0.554 | 0.299@831 / 0.274 |
+| `ε=0.03` PGD adv acc (final) | 0.327 | **0.528** | **0.187** |
+| test LC (first → min → final) | 1940 → 68 → 68 | 1940 → **8.1** → 8.1 | 2182 → **95** → 95 |
+| second LC descent? | No | No | No |
+| delayed robustness emerged? | Yes | Yes | Yes |
+| **preregistered verdict** | **FAIL** | **FAIL** | **FAIL** |
 
-![Pilot char GPT Figure-9 curves. Left y-axis: local complexity (sign-crossing units summed over 12 GeLU layers) for train (C0), test (C1), random (C2) points with 99% CI bands. Right y-axis: next-token accuracy — black = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale, step 0 drawn at 1). LC descends monotonically to the 3,500-step horizon (no second descent) while adversarial accuracy climbs to 0.33; verdict FAIL.](plots/grokking_pilot_char.png)
+The fresh char run reaches *higher* adversarial accuracy than the pilot (0.53 vs 0.33), so robustness
+clearly emerges — but test LC descends **monotonically** to its minimum (8.1) at the last checkpoint,
+never rising to produce a second descent. Both fresh runs **overfit** (val loss bottoms early — char
+≈step 3,750, BPE ≈step 750 — then rises while train loss falls), the opposite of grokking's delayed
+val-loss recovery. Robustness here is a property of the first fold-collapse of a memorising network,
+not the grokking second-descent event.
+
+![Pilot char (3.5k) Figure-9 curves. Left y-axis: local complexity (sign-crossings summed over 12 GeLU layers) for train (blue), test (orange), random (green), 99% CI bands. Right y-axis: next-token accuracy — black = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale, step 0 at 1). LC monotone to the 3,500-step horizon (no second descent); adv accuracy climbs to 0.33; verdict FAIL.](plots/grokking_pilot_char.png)
+![Fresh char (30k) Figure-9 gate. Same axes as the pilot panel. LC monotone to 8.1 while adversarial accuracy climbs to 0.53; no second descent → FAIL.](plots/grokking_fresh_char.png)
+![Fresh BPE (10k) Figure-9 gate. Same axes. LC monotone to 95 while adversarial accuracy climbs to 0.19; no second descent → FAIL.](plots/grokking_fresh_bpe.png)
+
+**Joint timeline & bounded relationship verdict (S7) = "primary relationship not testable" (PLAN case
+5).** On one training-step axis the Grokking side is uniform across runs — LC falls monotonically and
+PGD robustness rises, with no second descent anywhere. Because the BPE bridge to Matthew's exact tokens
+does not reproduce Figure 9 (nor does either character run), we cannot test whether the plateau assay
+sharpens during a second-descent/robustness window: that window never opens. The plateau phenomenon is
+present in the char reconstruction (below) and stands alone; it is not tied to grokking here.
+
+![Joint checkpoint timeline. Left: test local complexity (y) vs training step (x, log) for pilot char (gray), fresh char (blue), fresh BPE (red); legend gives each run's Figure-9 verdict. Middle: ε=0.03 PGD adversarial accuracy (y) vs step (x, log), same colors; dashed = 0.05 robustness threshold. Right: text summary of the three FAIL verdicts, the plateau reference from the reconstruction, and the bounded relationship verdict. No second LC descent in any run → primary relationship not testable.](plots/joint_timeline.png)
 
 ## Assay (frozen before any curve was inspected)
 

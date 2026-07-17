@@ -228,3 +228,35 @@ CHANGELOG. Then S6/S7 (Matthew sweep at frozen phases + joint timeline) next ite
 
 On track? yes — S4/S5 gate evals unblocked & running; ~60% of reopened plan; blocker: awaiting the
 finalize chain (autonomous, no action needed until DONE).
+
+## 2026-07-17 (7) — Fresh gate verdicts done (S4/S5), joint timeline + bounded case-5 verdict (S7)
+
+**Did.** Feedback check first: only the two `.addressed.md` files — nothing unaddressed. Found the
+finalize chain (85559) had run but **BPE fig9 OOM'd** at `vram_frac 0.06` (vocab-50257 head needs
+>1.88 GiB) — so no BPE verdict/curve, and the char side had completed cleanly.
+1. Char training reached step 30000 (all ckpts saved); its post-run metadata/plot save crashed on an
+   int64 JSON error — harmless, checkpoints intact. Char-late fig9 finished the full 14-ckpt curve
+   (0→30000): LC monotone 1940→8.1 (min at last ckpt), adv→0.528. `fig9_verdict.py` → **FAIL**.
+2. Re-ran BPE fig9 with adequate memory (`vram_frac 0.2, pgd_bs 16, lc_bs 4`); 10 ckpts 0→10000:
+   LC 2182→95 monotone, adv→0.187, clean peak 0.299@831. `fig9_verdict.py` → **FAIL**.
+3. Wrote `experiments/plot_joint_timeline.py`; generated `plots/joint_timeline.png` (LC + adv vs step
+   for all 3 runs + verdict/plateau text panel). Also generated `grokking_fresh_char.png`,
+   `grokking_fresh_bpe.png`.
+4. Curated RESULTS.md + REPORT.md: replaced the "in progress" fresh-dynamics paragraph with the
+   completed 3-model gate table, three curve figures, joint timeline, and the **bounded relationship
+   verdict = PLAN case 5 ("primary relationship not testable")**. Updated Summary/Conclusion/Limitations.
+   Verified 6/6 display-math render, 0 broken, all 8 figures embedded as `![...]` images and on disk.
+
+**Learned.** The fresh char run makes the null crisp: adversarial robustness climbs *higher* than the
+pilot (0.53 vs 0.33) yet test LC never stops descending — so "delayed robustness" alone is NOT
+grokking; the defining *second LC descent* is absent because the model memorises (val loss bottoms
+early then rises) rather than groks. With no run passing the gate — and the BPE bridge to Matthew's
+exact tokens failing — the joint question is not testable (case 5); plateaus stand alone.
+
+**Next step.** Remaining plan work: S6 (Matthew `b/i`,`b/l` char controls across frozen checkpoints as
+*secondary* per-checkpoint plateau evidence; big/in,big/large BPE sweep is non-decisive under case 5)
+and S8 (de-emphasise the 40-pair reconstruction dataset in the headline per PLAN out-of-scope, keep it
+as clearly-labelled standalone evidence). Then STOP. Do NOT STOP yet — S6/S8 pending.
+
+On track? yes — S4/S5/S7 complete with FAIL/FAIL/FAIL gates and a bounded case-5 verdict; ~75% of the
+reopened plan; blocker: none (S6/S8 are straightforward next-iteration work).

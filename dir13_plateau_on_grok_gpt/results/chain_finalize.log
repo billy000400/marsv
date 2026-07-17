@@ -1,1 +1,40 @@
 [finalize] start Fri Jul 17 06:08:31 UTC 2026
+[finalize] char training done Fri Jul 17 06:13:31 UTC 2026
+[finalize] char fig9 (early+late) done Fri Jul 17 06:18:31 UTC 2026
+10 checkpoints, 0 already done
+Traceback (most recent call last):
+  File "/workspace/marsv_agent_haoyang/dir13_plateau_on_grok_gpt/experiments/fig9.py", line 207, in <module>
+    main()
+  File "/workspace/marsv_agent_haoyang/dir13_plateau_on_grok_gpt/experiments/fig9.py", line 181, in main
+    accs.append(pgd_adv_accuracy(model, xb, yb, args.eps, args.eps / 4, args.pgd_steps, gp))
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/marsv_agent_haoyang/dir13_plateau_on_grok_gpt/experiments/fig9.py", line 82, in pgd_adv_accuracy
+    logits = logits_from_emb(model, adv)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/marsv_agent_haoyang/dir13_plateau_on_grok_gpt/experiments/fig9.py", line 38, in logits_from_emb
+    return model.head(model.ln_f(x))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1751, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/module.py", line 1762, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/torch/nn/modules/linear.py", line 125, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 786.00 MiB. GPU 0 has a total capacity of 31.37 GiB of which 29.86 GiB is free. Including non-PyTorch memory, this process has 1.50 GiB memory in use. 1.88 GiB allowed; Of the allocated memory 1.16 GiB is allocated by PyTorch, and 42.84 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)
+[finalize] bpe fig9 done Fri Jul 17 06:18:35 UTC 2026
+Traceback (most recent call last):
+  File "/workspace/marsv_agent_haoyang/dir13_plateau_on_grok_gpt/experiments/fig9_verdict.py", line 22, in <module>
+    recs = sorted(json.load(open(sys.argv[1])), key=lambda r: r["step"])
+                            ^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'results/fig9_grok_bpe.json'
+[finalize] verdicts written Fri Jul 17 06:18:35 UTC 2026
+saved plots/grokking_fresh_char.png
+Traceback (most recent call last):
+  File "/workspace/marsv_agent_haoyang/dir13_plateau_on_grok_gpt/experiments/plot_fig9.py", line 11, in <module>
+    recs = json.load(open(sys.argv[1]))
+                     ^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'results/fig9_grok_bpe.json'
+[finalize] DONE Fri Jul 17 06:18:37 UTC 2026

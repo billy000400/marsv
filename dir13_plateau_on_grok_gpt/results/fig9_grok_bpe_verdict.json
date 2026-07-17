@@ -1,0 +1,21 @@
+{
+ "verdict": "FAIL",
+ "n_ckpts": 10,
+ "step_range": [
+  0,
+  10000
+ ],
+ "final_clean_acc": 0.2742,
+ "peak_clean_acc": 0.2993,
+ "clean_acc_peak_step": 831,
+ "final_adv_acc": 0.1869,
+ "max_adv_acc": 0.1869,
+ "lc_first_step": 2181.5,
+ "lc_min_step": 10000,
+ "lc_min_value": 95.2,
+ "lc_final_value": 95.2,
+ "second_lc_descent": false,
+ "delayed_robustness": true,
+ "lc_still_descending_to_end": true,
+ "clean_acc_still_climbing": false
+}

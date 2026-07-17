@@ -111,3 +111,33 @@
 [grok_char] step  27250 lr 1.19e-04 train 0.540 val 2.310 acc 0.552 [70.3m]
 [grok_char] step  27500 lr 1.15e-04 train 0.543 val 2.307 acc 0.555 [70.5m]
 [grok_char] step  27750 lr 1.13e-04 train 0.535 val 2.316 acc 0.553 [70.6m]
+[grok_char] step  28000 lr 1.10e-04 train 0.542 val 2.337 acc 0.552 [70.8m]
+[grok_char] step  28250 lr 1.08e-04 train 0.543 val 2.314 acc 0.552 [71.0m]
+[grok_char] step  28500 lr 1.06e-04 train 0.538 val 2.332 acc 0.554 [71.2m]
+[grok_char] step  28750 lr 1.04e-04 train 0.522 val 2.326 acc 0.552 [71.4m]
+[grok_char] step  29000 lr 1.02e-04 train 0.511 val 2.311 acc 0.555 [71.6m]
+[grok_char] step  29250 lr 1.01e-04 train 0.528 val 2.299 acc 0.556 [71.8m]
+[grok_char] step  29500 lr 1.01e-04 train 0.517 val 2.335 acc 0.553 [71.9m]
+[grok_char] step  29750 lr 1.00e-04 train 0.505 val 2.358 acc 0.551 [72.1m]
+[grok_char] step  30000 lr 1.00e-04 train 0.520 val 2.359 acc 0.550 [72.3m]
+Traceback (most recent call last):
+  File "/workspace/marsv_agent_haoyang/dir13_plateau_on_grok_gpt/experiments/train_grok.py", line 176, in <module>
+    ax[1].set_xscale("symlog", linthresh=100)
+    ^^^^^^
+  File "/workspace/marsv_agent_haoyang/dir13_plateau_on_grok_gpt/experiments/train_grok.py", line 159, in main
+    "raw_chars_per_token": len(text) / len(data),
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/json/__init__.py", line 179, in dump
+    for chunk in iterable:
+  File "/usr/lib/python3.11/json/encoder.py", line 432, in _iterencode
+    yield from _iterencode_dict(o, _current_indent_level)
+  File "/usr/lib/python3.11/json/encoder.py", line 406, in _iterencode_dict
+    yield from chunks
+  File "/usr/lib/python3.11/json/encoder.py", line 326, in _iterencode_list
+    yield from chunks
+  File "/usr/lib/python3.11/json/encoder.py", line 439, in _iterencode
+    o = _default(o)
+        ^^^^^^^^^^^
+  File "/usr/lib/python3.11/json/encoder.py", line 180, in default
+    raise TypeError(f'Object of type {o.__class__.__name__} '
+TypeError: Object of type int64 is not JSON serializable

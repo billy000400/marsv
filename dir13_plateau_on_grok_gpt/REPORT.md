@@ -20,13 +20,16 @@ reconstruction (next-char accuracy 0.56 ≈ 37× chance) and ran the two-natural
 assay with everything frozen before any curve was inspected. One scope note up front: the grok
 paper's own headline phenomenon is **grokking** — `ε=0.03`-PGD adversarial robustness emerging long
 after training accuracy saturates, alongside a **second local-complexity descent**. We treat this as
-an explicit **validity gate** (Methods §Figure-9 gate, Results §Figure-9 gate): the existing
-3,500-step pilot **FAILs** it within its horizon (a first local-complexity descent and emerging
-robustness appear, but no *second* descent), so the plateau result below is **not** yet joined to a
-Grokking claim. Two matched fresh runs (character + BPE) are training to test the gate at a longer
-horizon; their verdicts and the joint timeline follow in later iterations. Until a fresh run passes,
-the paper's role here is only to specify the model under test; the phenomenon under test is Matthew's
-activation plateaus.
+an explicit **validity gate** (Methods §Figure-9 gate, Results §Figure-9 gate). **All three models we
+trained FAIL this gate** within budget: the existing 3,500-step pilot, a fresh 30k-step character run,
+and a fresh 30k-step BPE run each show a *first* local-complexity descent and emerging `ε=0.03`-PGD
+robustness, but **no second descent** — the ordering that defines grokking. The consequence is the
+**bounded relationship verdict = "primary relationship not testable"** (PLAN case 5): because no run —
+in particular the BPE run needed for Matthew's exact `big/in`, `big/large` tokens — reproduces
+Figure 9, we cannot test a Matthew-exact Grokking↔plateau relationship on a grokking model. The plateau
+phenomenon itself is nonetheless **present** in the character reconstruction and stands on its own
+(below), not as evidence about grokking. The paper's role here is only to specify the model under
+test; the phenomenon under test is Matthew's activation plateaus.
 
 **Result: plateaus are present.** 14 of 40 frozen minimal pairs show plateau–boundary–plateau
 structure in raw individual final-logit curves under a strict preregistered rule (transition width
@@ -220,22 +223,47 @@ monotonically from 1940 to its minimum (68) **at the final checkpoint**: there i
 descent**. Under the preregistered rule this is a **FAIL** (valid measurements, Fig. 9 ordering absent
 within the tested horizon), not "not established", because robustness rose rather than staying flat.
 The honest reading: the 3,500-step horizon ends inside the *first* LC descent, so the pilot cannot
-support a joint Grokking↔plateau claim. Two matched fresh runs (character + BPE, ~30k-step schedule,
-budget-capped below the paper's ~1e5) are training now to test the gate properly; their Figure-9
-verdicts (S4/S5) and the joint timeline (S7) follow next iteration.
+support a joint Grokking↔plateau claim.
 
-**Fresh-run training dynamics so far (in progress).** Both fresh runs are **overfitting**, not
-grokking. Validation loss reaches its minimum very early — character at step ≈3,750 (val 1.47), BPE at
-step ≈750 (val 4.77) — and then rises monotonically while train loss keeps falling; val next-token
-accuracy plateaus (character ≈0.56, BPE ≈0.27). Grokking is the opposite pattern: val loss dropping
-long *after* train loss saturates. So, like the pilot, these runs likely lack the delayed-generalization
-ordering within the budgeted horizon — but the decisive test is the per-checkpoint LC/PGD gate
-evaluation, which is still running (early checkpoints done; a late-checkpoint eval over steps 5k–30k is
-queued to test for a *second* LC descent). Figure 1c shows the training curves.
+**Figure-9 gate — both fresh 30k-step runs also FAIL (S4, S5).** We trained two matched fresh runs
+(character + BPE, 30k-step schedule, budget-capped below the paper's ~1e5) and ran the identical
+LC/PGD pipeline across log-spaced checkpoints. Both reproduce the pilot's pattern — emerging
+robustness but no second LC descent:
 
-![Figure 1c — Fresh Grokking-horizon runs, training dynamics (in progress). Two panels: left = 12-layer character GPT (vocab 65), right = 12-layer BPE GPT (vocab 50257). x-axis: training step. Left y-axis: cross-entropy loss in nats — blue = train loss, red = val loss. Right y-axis (green dashed): val next-token accuracy. In both panels val loss bottoms early then climbs while train loss keeps dropping — memorisation without grokking within the budgeted horizon.](plots/fresh_training_dynamics.png)
+| Figure-9 quantity | Pilot char (3.5k) | **Fresh char (30k)** | **Fresh BPE (10k)** |
+|---|---|---|---|
+| checkpoints evaluated | 13 | 14 | 10 |
+| clean acc (peak / final) | 0.564 / 0.564 | 0.568 @ 4994 / 0.554 | 0.299 @ 831 / 0.274 |
+| `ε=0.03` PGD adv acc (final) | 0.327 | **0.528** | **0.187** |
+| test LC (first → min → final) | 1940 → 68 → 68 | 1940 → **8.1** → 8.1 | 2182 → **95** → 95 |
+| LC minimum at… | last ckpt (3500) | last ckpt (30000) | last ckpt (10000) |
+| second LC descent? | No | No | No |
+| delayed robustness emerged? | Yes | Yes | Yes |
+| **preregistered verdict** | **FAIL** | **FAIL** | **FAIL** |
 
-![Figure 1b — Pilot char GPT Figure-9 curves. Left y-axis: local complexity (sign-crossing units summed over the 12 GeLU layers) for train (blue), test (orange), random (green) base points, 99% CI bands. Right y-axis: next-token accuracy — black solid = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale; step 0 drawn at 1). LC descends monotonically to the horizon (no second descent) while adversarial accuracy reaches 0.33 — verdict FAIL.](plots/grokking_pilot_char.png)
+The fresh character run is instructive: adversarial accuracy climbs *higher* than the pilot (0.53 vs
+0.33), so "delayed robustness" is unambiguously present — yet test LC descends **monotonically** to its
+minimum at the final checkpoint (8.1), never rising to produce a second descent. Robustness here tracks
+the *first* fold-collapse of a memorising network, not the second-descent generalization event of
+grokking. The BPE run behaves the same at a shorter horizon (LC still descending at 10k). Both fresh
+runs **overfit**: validation loss bottoms early (character ≈step 3,750, BPE ≈step 750) then rises while
+train loss keeps falling — the opposite of grokking's delayed val-loss recovery.
+
+![Figure 1b — Pilot char (3.5k) Figure-9 curves. Left y-axis = local complexity (sign-crossing units summed over the 12 GeLU layers) for train (blue), test (orange), random (green) base points with 99% CI bands; right y-axis = next-token accuracy, black solid = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy; x-axis = training step (log scale, step 0 drawn at 1). LC descends monotonically to the horizon (no second descent) while adversarial accuracy rises to 0.33 — verdict FAIL.](plots/grokking_pilot_char.png)
+![Fresh char (30k) Figure-9 gate — LC monotone to 8.1, adversarial accuracy to 0.53, no second descent → FAIL.](plots/grokking_fresh_char.png)
+![Fresh BPE (10k) Figure-9 gate — LC monotone to 95, adversarial accuracy to 0.19, no second descent → FAIL.](plots/grokking_fresh_bpe.png)
+
+**Joint checkpoint timeline and bounded relationship verdict (S7).** Putting all three runs on one
+training-step axis (below), the Grokking side is uniform: LC falls monotonically and PGD robustness
+rises, with **no second descent in any run**. Because the primary bridge to Matthew — a BPE model that
+reproduces Figure 9 — does **not** pass the gate (and neither character run does either), the bounded
+relationship verdict is **PLAN case 5: "primary relationship not testable."** We cannot claim the
+plateau assay sharpens *during* a second-descent/robustness window, because no run exhibits that window.
+What we *can* say standalone: the character reconstruction **does** show Matthew-style plateaus (next
+sections), and both fresh runs develop adversarial robustness — but robustness and plateaus here are
+properties of trained/memorising networks, not evidence of the specific grokking ordering.
+
+![Figure 1d — Joint checkpoint timeline. Left panel: test local complexity (y) vs training step (x, log scale) for pilot char (gray), fresh char (blue), fresh BPE (red); each legend entry gives the run's Figure-9 gate verdict. Middle panel: ε=0.03 PGD adversarial accuracy (y) vs training step (x, log), same colors; dashed line = the 0.05 robustness threshold in the verdict rule. Right panel: text summary of the three gate verdicts (all FAIL), the plateau-assay reference from the reconstruction, and the bounded relationship verdict. No run shows a second LC descent, so the joint verdict is "primary relationship not testable."](plots/joint_timeline.png)
 
 **Primary result: 14/40 frozen pairs are plateaus; almost all curves are sigmoid.** With
 interpolation after block 0 and recording at final logits, 14 of 40 pairs meet the strict frozen rule
@@ -275,8 +303,20 @@ plateaus**. Under a fully frozen assay, 14/40 natural minimal pairs produce indi
 plateau–boundary–plateau curves in final-logit space; the typical pair is a clear sigmoid three times
 sharper than the no-plateau diagonal; and both predicted structural signatures hold — monotone
 sharpening across the 11 downstream blocks and monotone weakening as the interpolation point moves
-later. The gate is **go**: mapping and interpreting these plateau basins (where boundaries lie, what
-they correspond to linguistically, how they evolve over training) is warranted on this model.
+later. The plateau gate is **go**: mapping and interpreting these plateau basins (where boundaries lie,
+what they correspond to linguistically, how they evolve over training) is warranted on this model.
+
+**Joint Grokking↔plateau verdict: primary relationship not testable (PLAN case 5).** The mandatory
+validity gate — reproducing *Deep Networks Always Grok* Figure 9 — is **FAILed by all three models we
+trained** (pilot char, fresh 30k char, fresh 30k BPE): each develops adversarial robustness but none
+shows the defining *second* local-complexity descent within budget (the fresh runs overfit instead).
+Because the BPE model required for Matthew's exact `big/in`, `big/large` tokens does not reproduce
+Figure 9, we **cannot** test whether plateaus sharpen during a second-descent/robustness window — that
+window never opens. This is a bounded, honest null on the *relationship*, not on plateaus: the plateau
+phenomenon itself is clearly present in the character reconstruction and stands independently. Closing
+the relationship question would require a training setup that actually groks (far longer horizon, weight
+decay tuned for delayed generalization, or the paper's exact recipe) — outside this run's compute
+budget (~30k vs the paper's ~1e5 steps).
 
 **Interpretation.** The interpolated block-0 activation itself carries a nearly linear image of the
 input mixture; the downstream stack then collapses it toward one of the two endpoint computations,
@@ -296,3 +336,8 @@ natural activation-to-activation directions.
 3. **Scope.** One model size, one training length (accuracy 0.56, not grokking-scale), final-position
    interpolation only, and endpoint pairs differing in exactly one character. Plateaus between more
    distant natural inputs are untested here.
+4. **No grokking model, so no per-checkpoint Matthew sweep in the headline.** Because every trained
+   run FAILs the Figure-9 gate, a checkpoint-aligned Matthew `big/in`, `big/large` sweep on a *grokking*
+   BPE model (PLAN S6) is not decisive and was not run within budget; the standalone plateau result
+   above (reconstruction, final checkpoint) is the current evidence. The joint verdict is therefore the
+   bounded null of PLAN case 5, not a temporal-association claim.

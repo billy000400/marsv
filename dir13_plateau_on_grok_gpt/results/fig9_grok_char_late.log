@@ -1,0 +1,10 @@
+[chain-char-late] MAX=30000 steps=0,4,15,56,217,831,2038,4994,7819,12500,17500,22500,25000,30000 Fri Jul 17 06:13:29 UTC 2026
+14 checkpoints, 8 already done
+step   7819 clean 0.567 adv 0.523 LC tr 14 te 14 rnd 28 [48s]
+step  12500 clean 0.562 adv 0.530 LC tr 11 te 11 rnd 21 [48s]
+step  17500 clean 0.556 adv 0.528 LC tr 10 te 10 rnd 17 [48s]
+step  22500 clean 0.556 adv 0.529 LC tr 9 te 9 rnd 16 [48s]
+step  25000 clean 0.555 adv 0.528 LC tr 9 te 9 rnd 16 [48s]
+step  30000 clean 0.554 adv 0.528 LC tr 8 te 8 rnd 15 [48s]
+DONE
+[chain-char-late] done Fri Jul 17 06:18:22 UTC 2026
