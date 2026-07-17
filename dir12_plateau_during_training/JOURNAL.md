@@ -373,3 +373,53 @@ stale STOP on disk (operator removed it when reopening the plan with S7–S10).
 **Next step.** None — S7–S10 complete, all feedback addressed, STOP written.
 
 On track? yes — S7–S10 done in one iteration (runs fast on this GPU), 100% complete, no blocker; STOP written (zero unaddressed feedback).
+
+## 2026-07-17 — Iter 10: operator feedback human_feedback_1 — smooth 60k scheduler + refocus report on 60k
+
+**Feedback check:** `human_feedback_1.txt` was unaddressed (no `.addressed.md`). Addressing it
+IS this iteration. Three asks: smoother LR scheduler for the 60k run; rerun every 1k-only
+experiment on 60k; report should focus on 60k with only a small training-set-size section.
+
+**Did.**
+- Scheduler search on the 60k run (`sched_search_60k.py`): the previous cosine schedule is noisy
+  on 60k (spike 101×, tail range 3.2); `ReduceLROnPlateau(0.5, 100)` is smooth (spike 1.56, tail
+  1.07) — the same schedule the 1k phase chose, so the size comparison keeps the scheduler fixed.
+- Reran ALL experiments on 60k with that schedule (already-supported `--sched plateau`): MSE
+  seeds 0/1/2 + CE seed 0 (258 records, manifest-verified) + early-phase zoom (201 records).
+  `render_all_60k.sh` regenerated every figure (smooth-convergence, movie/frames/heatmap/
+  layerwise/context, early zoom, seed comparison, MSE-vs-CE, CE frames, pairwise AUROC,
+  full-vs-1k). New `collect_60k_numbers.py` aggregates the reported numbers. Fixed a crash in
+  `mse_vs_ce.py` (60k MSE never reaches train acc exactly 1.0 → guarded the axvline).
+- Rewrote REPORT.md + RESULTS.md around the 60k runs (Figures 1–14 all 60k); the 1k comparison is
+  one "effect of training-set size" section (Figures 15–18). Render checks clean (14/14 display
+  math, 0 degraded, hazards clean, all 19 plots embedded in both files).
+
+**Learned.**
+- The smooth 60k run confirms and strengthens the previous iteration's headline: plateaus keep
+  sharpening for thousands of steps of *smoothly converging* training (PF 0.19 → 0.674), so the
+  1k "convergence freezes PF at 0.37" was purely a small-data effect. Under a genuinely smooth
+  schedule the 60k PF is 0.674/0.663/0.668 (vs the previous cosine run's 0.64) and late curve
+  motion is 7.6e-4.
+- **Correction the operator's "focus on 60k" surfaced:** 3v5 is NOT the hardest pair for the
+  60k model. It was rank 1/45 (AUROC 0.977) on 1k but rank 4/45 (0.9993) on 60k — the worst 60k
+  pair is 4v9 (0.9975), and every pair is >0.997. Full data removes the difficulty. I rewrote
+  finding 4, the AUROC section, and the conclusion to say this plainly rather than carry the
+  now-false "3v5 is genuinely hardest" claim into the 60k-focused report.
+- CE on 60k reproduces the loss-picks-the-coordinates story: logit PF stays at the 0.25 floor,
+  probability PF climbs to 0.90 — sharper than any MSE run.
+
+**Assumptions logged (loop mode, no human to ask).**
+- "Rerun every 1k-only experiment on 60k" scoped to the experiments that have a 60k analogue:
+  scheduler search, main/early movies, heatmaps, layerwise, seed comparison, MSE-vs-CE, CE
+  frames, pairwise AUROC. The radial-perturbation control (already demoted in iter 8) was not
+  ported — it documents the non-converged constant-LR regime and PLAN marks it optional/secondary.
+- Scheduler search limited to cosine vs RLROP f0.5 p100/p300 (constant LR already known badly
+  non-smooth from the 1k phase; not rerun) — sufficient to separate smooth from non-smooth.
+- Kept the 1k runs only in the size section per ask (3); did not delete them (the size comparison
+  is the report's explanation of why data budget matters).
+- Old cosine 60k dirs (`seed_0/1/2`, `*_search`) left on disk for provenance; the report cites
+  only the `_pl_f0.5_p100` runs.
+
+**Next step.** None — feedback addressed, deliverables refocused on 60k, STOP re-written.
+
+On track? yes — feedback human_feedback_1 fully addressed, report refocused on 60k, 100% complete, no blocker; STOP written (zero unaddressed feedback).

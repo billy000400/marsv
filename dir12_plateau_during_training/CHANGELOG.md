@@ -312,3 +312,47 @@ four stages completed this iteration; STOP written.
 - Render checks: 15/15 js-display-math, 0 pre-lang-math, inline hazard grep clean, all plot
   refs embedded as images in both files. PLAN S7–S10 ticked; STOP written (zero unaddressed
   feedback).
+
+## 2026-07-17 — Iter 10: operator feedback human_feedback_1 — smooth-scheduler 60k reruns; report refocused on 60k
+
+Feedback (`human_feedback_1.txt`): (1) the 60k training loss is noisy — use a more
+sophisticated LR scheduler to make it smooth; (2) rerun every 1k-only experiment on 60k data
+("more data = more reliable"); (3) make REPORT/RESULTS focus on the 60k results, keeping only a
+small section on the effect of training-set size. All three addressed; deliverables rebuilt
+around the 60k runs. Renamed `human_feedback_1.txt` → `.addressed.md`.
+
+- **NEW scheduler search on the 60k run** (`experiments/sched_search_60k.py`,
+  `results/lr_scheduler_search_60k.json`, `plots/lr_scheduler_search_60k.png`): cosine (previous)
+  vs `ReduceLROnPlateau` f=0.5 p=100 / p=300, seed 0, identical init/data/batch order, scored on
+  the same smoothness metrics as the 1k search. The prior cosine schedule is NOT smooth on 60k
+  (spike max 101×, 12.5% of steps >2× the running min, tail range 3.23). **Winner f=0.5 p=100**:
+  spike max 1.56, 0% spikes, tail range 1.07, PF 0.674, test acc 0.9775 — the same schedule the
+  1k phase chose, so the size comparison holds the scheduler fixed.
+- **NEW primary 60k runs** with the winning schedule (`train_full60k.py --sched plateau`, already
+  supported): MSE seeds 0/1/2 (104/25/25 ckpts) + CE seed 0 (104 ckpts); all 258 records +
+  201 early-zoom records manifest-verified. Every 1k-only experiment re-run on 60k via
+  `render_all_60k.sh` (parameterized scripts): smooth-convergence, main movie + frames + heatmap
+  + layerwise + context, early-phase linear-time zoom, seed comparison, MSE-vs-CE, CE frames,
+  pairwise AUROC, and the full-vs-1k comparison. New `experiments/collect_60k_numbers.py`
+  (`results/numbers_60k_p100.json`) aggregates every reported number. Fixed `mse_vs_ce.py` to
+  guard the train-acc=1.0 axvline (the 60k MSE run never hits exactly 1.0 — 0.9999).
+- **REPORT.md + RESULTS.md rewritten to focus on 60k.** The 60k runs are now the primary result
+  (Figures 1–14 all 60k); the 1,000-image comparison is one dedicated "effect of training-set
+  size" section (Figures 15–18). Superseded framing: the report previously led with the 1k
+  reference (PF frozen 0.37) and treated 60k as an extension; now the small-data ceiling is
+  presented as the *size effect* and the 60k sharpening (PF → 0.674) is the headline.
+- **KEY CORRECTION (finding 4).** On the 1k model 3v5 was the single hardest pair (worst AUROC
+  0.977, rank 1/45). On the 60k model 3v5 is near-perfectly separated — **AUROC 0.9993, rank
+  4/45** (worst pair now 4v9 at 0.9975; confusion 6% → 0.8%). Finding 4 rewritten from "3v5 is
+  genuinely the hardest pair" to "full data resolves the 3v5 difficulty — it was a small-data
+  effect." Conclusion + AUROC section updated accordingly.
+- **Headline numbers (60k, current-best).** PF logit: 0.19 (0) → 0.35 (100) → 0.43 (300) → 0.62
+  (1,500) → 0.674 (30k), peak 0.674 @ ~27k, across seeds 0.674/0.663/0.668; late curve motion
+  7.6e-4. Test acc 0.9775/0.9795/0.9785. CE: logit PF ~0.25 (floor), prob PF 0.18→0.55(100)→
+  0.90(30k). 0/90 cross-pair endpoints misclassified; 9/10 within-class controls single-class.
+  3→5 bank: 49/50 endpoints correct at 30k (vs 36/50 for 1k); orig 3→5 = 3|5 in all 3 seeds; seg
+  mean 1.98; 0% detours; no repeated-class RLE at any 60k checkpoint.
+- Render checks: REPORT 14/14 js-display-math, 0 pre-lang-math; RESULTS 0 pre-lang-math; inline
+  hazard grep clean; all 19 figures embedded as `![…](…)` images in both files and present on
+  disk. Feedback renamed to `.addressed.md`; STOP re-written (plan complete, zero unaddressed
+  feedback).

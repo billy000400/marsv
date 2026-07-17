@@ -1,0 +1,694 @@
+{
+ "seed": 1,
+ "schedule": "fallback",
+ "ckpt_steps": [
+  0,
+  10,
+  30,
+  100,
+  300,
+  1500,
+  3000,
+  4500,
+  6000,
+  7500,
+  9000,
+  10500,
+  12000,
+  13500,
+  15000,
+  16500,
+  18000,
+  19500,
+  21000,
+  22500,
+  24000,
+  25500,
+  27000,
+  28500,
+  30000
+ ],
+ "anchor_steps": [
+  0,
+  10,
+  30,
+  100,
+  300,
+  1500,
+  3000,
+  6000,
+  15000,
+  30000
+ ],
+ "n_points": 50,
+ "n_test_pool": 2000,
+ "pairs": [
+  {
+   "class_a": 0,
+   "class_b": 1,
+   "idx_a": 10,
+   "idx_b": 2
+  },
+  {
+   "class_a": 0,
+   "class_b": 2,
+   "idx_a": 13,
+   "idx_b": 1
+  },
+  {
+   "class_a": 0,
+   "class_b": 3,
+   "idx_a": 25,
+   "idx_b": 18
+  },
+  {
+   "class_a": 0,
+   "class_b": 4,
+   "idx_a": 28,
+   "idx_b": 4
+  },
+  {
+   "class_a": 0,
+   "class_b": 5,
+   "idx_a": 55,
+   "idx_b": 8
+  },
+  {
+   "class_a": 0,
+   "class_b": 6,
+   "idx_a": 69,
+   "idx_b": 11
+  },
+  {
+   "class_a": 0,
+   "class_b": 7,
+   "idx_a": 71,
+   "idx_b": 0
+  },
+  {
+   "class_a": 0,
+   "class_b": 8,
+   "idx_a": 101,
+   "idx_b": 61
+  },
+  {
+   "class_a": 0,
+   "class_b": 9,
+   "idx_a": 126,
+   "idx_b": 7
+  },
+  {
+   "class_a": 1,
+   "class_b": 2,
+   "idx_a": 14,
+   "idx_b": 35
+  },
+  {
+   "class_a": 1,
+   "class_b": 3,
+   "idx_a": 29,
+   "idx_b": 30
+  },
+  {
+   "class_a": 1,
+   "class_b": 4,
+   "idx_a": 31,
+   "idx_b": 6
+  },
+  {
+   "class_a": 1,
+   "class_b": 5,
+   "idx_a": 37,
+   "idx_b": 15
+  },
+  {
+   "class_a": 1,
+   "class_b": 6,
+   "idx_a": 39,
+   "idx_b": 21
+  },
+  {
+   "class_a": 1,
+   "class_b": 7,
+   "idx_a": 40,
+   "idx_b": 17
+  },
+  {
+   "class_a": 1,
+   "class_b": 8,
+   "idx_a": 46,
+   "idx_b": 84
+  },
+  {
+   "class_a": 1,
+   "class_b": 9,
+   "idx_a": 57,
+   "idx_b": 9
+  },
+  {
+   "class_a": 2,
+   "class_b": 3,
+   "idx_a": 43,
+   "idx_b": 32
+  },
+  {
+   "class_a": 2,
+   "class_b": 4,
+   "idx_a": 47,
+   "idx_b": 19
+  },
+  {
+   "class_a": 2,
+   "class_b": 5,
+   "idx_a": 72,
+   "idx_b": 23
+  },
+  {
+   "class_a": 2,
+   "class_b": 6,
+   "idx_a": 77,
+   "idx_b": 22
+  },
+  {
+   "class_a": 2,
+   "class_b": 7,
+   "idx_a": 82,
+   "idx_b": 26
+  },
+  {
+   "class_a": 2,
+   "class_b": 8,
+   "idx_a": 106,
+   "idx_b": 110
+  },
+  {
+   "class_a": 2,
+   "class_b": 9,
+   "idx_a": 119,
+   "idx_b": 12
+  },
+  {
+   "class_a": 3,
+   "class_b": 4,
+   "idx_a": 51,
+   "idx_b": 24
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 63,
+   "idx_b": 45
+  },
+  {
+   "class_a": 3,
+   "class_b": 6,
+   "idx_a": 68,
+   "idx_b": 50
+  },
+  {
+   "class_a": 3,
+   "class_b": 7,
+   "idx_a": 76,
+   "idx_b": 34
+  },
+  {
+   "class_a": 3,
+   "class_b": 8,
+   "idx_a": 87,
+   "idx_b": 128
+  },
+  {
+   "class_a": 3,
+   "class_b": 9,
+   "idx_a": 90,
+   "idx_b": 16
+  },
+  {
+   "class_a": 4,
+   "class_b": 5,
+   "idx_a": 33,
+   "idx_b": 52
+  },
+  {
+   "class_a": 4,
+   "class_b": 6,
+   "idx_a": 42,
+   "idx_b": 54
+  },
+  {
+   "class_a": 4,
+   "class_b": 7,
+   "idx_a": 48,
+   "idx_b": 36
+  },
+  {
+   "class_a": 4,
+   "class_b": 8,
+   "idx_a": 49,
+   "idx_b": 134
+  },
+  {
+   "class_a": 4,
+   "class_b": 9,
+   "idx_a": 56,
+   "idx_b": 20
+  },
+  {
+   "class_a": 5,
+   "class_b": 6,
+   "idx_a": 59,
+   "idx_b": 66
+  },
+  {
+   "class_a": 5,
+   "class_b": 7,
+   "idx_a": 102,
+   "idx_b": 41
+  },
+  {
+   "class_a": 5,
+   "class_b": 8,
+   "idx_a": 120,
+   "idx_b": 146
+  },
+  {
+   "class_a": 5,
+   "class_b": 9,
+   "idx_a": 127,
+   "idx_b": 58
+  },
+  {
+   "class_a": 6,
+   "class_b": 7,
+   "idx_a": 88,
+   "idx_b": 60
+  },
+  {
+   "class_a": 6,
+   "class_b": 8,
+   "idx_a": 91,
+   "idx_b": 177
+  },
+  {
+   "class_a": 6,
+   "class_b": 9,
+   "idx_a": 98,
+   "idx_b": 62
+  },
+  {
+   "class_a": 7,
+   "class_b": 8,
+   "idx_a": 70,
+   "idx_b": 179
+  },
+  {
+   "class_a": 7,
+   "class_b": 9,
+   "idx_a": 75,
+   "idx_b": 73
+  },
+  {
+   "class_a": 8,
+   "class_b": 9,
+   "idx_a": 184,
+   "idx_b": 78
+  },
+  {
+   "class_a": 0,
+   "class_b": 0,
+   "idx_a": 136,
+   "idx_b": 148
+  },
+  {
+   "class_a": 1,
+   "class_b": 1,
+   "idx_a": 74,
+   "idx_b": 89
+  },
+  {
+   "class_a": 2,
+   "class_b": 2,
+   "idx_a": 147,
+   "idx_b": 149
+  },
+  {
+   "class_a": 3,
+   "class_b": 3,
+   "idx_a": 93,
+   "idx_b": 112
+  },
+  {
+   "class_a": 4,
+   "class_b": 4,
+   "idx_a": 65,
+   "idx_b": 67
+  },
+  {
+   "class_a": 5,
+   "class_b": 5,
+   "idx_a": 129,
+   "idx_b": 132
+  },
+  {
+   "class_a": 6,
+   "class_b": 6,
+   "idx_a": 100,
+   "idx_b": 123
+  },
+  {
+   "class_a": 7,
+   "class_b": 7,
+   "idx_a": 79,
+   "idx_b": 80
+  },
+  {
+   "class_a": 8,
+   "class_b": 8,
+   "idx_a": 226,
+   "idx_b": 232
+  },
+  {
+   "class_a": 9,
+   "class_b": 9,
+   "idx_a": 99,
+   "idx_b": 104
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 18,
+   "idx_b": 8
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 30,
+   "idx_b": 15
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 32,
+   "idx_b": 23
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 44,
+   "idx_b": 45
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 51,
+   "idx_b": 52
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 63,
+   "idx_b": 53
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 68,
+   "idx_b": 59
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 76,
+   "idx_b": 102
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 87,
+   "idx_b": 120
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 90,
+   "idx_b": 127
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 93,
+   "idx_b": 129
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 112,
+   "idx_b": 132
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 142,
+   "idx_b": 152
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 158,
+   "idx_b": 153
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 173,
+   "idx_b": 155
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 195,
+   "idx_b": 162
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 200,
+   "idx_b": 165
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 205,
+   "idx_b": 167
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 213,
+   "idx_b": 182
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 216,
+   "idx_b": 187
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 230,
+   "idx_b": 207
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 231,
+   "idx_b": 211
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 245,
+   "idx_b": 218
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 270,
+   "idx_b": 219
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 309,
+   "idx_b": 240
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 310,
+   "idx_b": 253
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 313,
+   "idx_b": 261
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 323,
+   "idx_b": 283
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 334,
+   "idx_b": 289
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 335,
+   "idx_b": 317
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 343,
+   "idx_b": 319
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 349,
+   "idx_b": 333
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 369,
+   "idx_b": 340
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 381,
+   "idx_b": 347
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 382,
+   "idx_b": 351
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 402,
+   "idx_b": 352
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 408,
+   "idx_b": 356
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 437,
+   "idx_b": 364
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 442,
+   "idx_b": 367
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 449,
+   "idx_b": 375
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 450,
+   "idx_b": 395
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 451,
+   "idx_b": 397
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 453,
+   "idx_b": 406
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 464,
+   "idx_b": 412
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 493,
+   "idx_b": 433
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 500,
+   "idx_b": 460
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 505,
+   "idx_b": 469
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 507,
+   "idx_b": 478
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 515,
+   "idx_b": 483
+  },
+  {
+   "class_a": 3,
+   "class_b": 5,
+   "idx_a": 524,
+   "idx_b": 491
+  }
+ ],
+ "n_original_pairs": 55,
+ "n_3v5_pairs": 50,
+ "init_from": "/workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/ckpts_movie/seed1_pl_f0.5_p100/step0.pt",
+ "config": {
+  "depth": 4,
+  "width": 200,
+  "activation": "relu",
+  "train_points": 60000,
+  "batch": 200,
+  "shuffle": "without replacement each epoch (300 steps/epoch)",
+  "lr": 0.001,
+  "weight_decay": 0.01,
+  "loss": "MSE-on-one-hot",
+  "lr_schedule": "ReduceLROnPlateau(factor=0.5, patience=100, threshold=1e-4 rel, min_lr=1e-8) stepped every step on the full-train (60k) loss",
+  "opt": "AdamW",
+  "steps": 30000
+ }
+}

@@ -1,0 +1,371 @@
++ SFX=_pl_f0.5_p100
+++ dirname experiments/render_all_60k.sh
++ cd experiments/..
++ python3 experiments/smooth_convergence.py --dir60k _pl_f0.5_p100
+{
+ "MSE seed 0": {
+  "spike_max": 1.5570690631866455,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.0721272230148315,
+  "final_train_loss": 2.6072430046042427e-05,
+  "final_lr": 3.906250185536919e-06,
+  "lr_cascade": [
+   1402,
+   20844
+  ],
+  "final_test_acc": 0.9775
+ },
+ "MSE seed 1": {
+  "spike_max": 1.4290977716445923,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.1799341440200806,
+  "final_train_loss": 2.2432521291193552e-05,
+  "final_lr": 7.812500371073838e-06,
+  "lr_cascade": [
+   1728,
+   15965
+  ],
+  "final_test_acc": 0.9795
+ },
+ "MSE seed 2": {
+  "spike_max": 1.480490803718567,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.0252246856689453,
+  "final_train_loss": 2.6113631975022145e-05,
+  "final_lr": 1.525878978725359e-08,
+  "lr_cascade": [
+   2006,
+   28610
+  ],
+  "final_test_acc": 0.9785
+ },
+ "CE seed 0": {
+  "spike_max": 1.786450743675232,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.0791765451431274,
+  "final_train_loss": 0.00017321443010587245,
+  "final_lr": 9.765625463842298e-07,
+  "lr_cascade": [
+   1332,
+   23216
+  ],
+  "final_test_acc": 0.9735
+ }
+}
+saved plots/smooth_convergence_60k.png
++ python3 experiments/render_movie.py --seed 0 --suffix _pl_f0.5_p100 --dir60k --out-suffix _60k --fps 10
+saved plateau_evolution.gif
+saved frames_selected_steps.png
+saved plateau_training_heatmap.png
+saved layerwise_selected_steps.png
+saved training_context.png
+
+largest adjacent-frame changes (step_from -> step_to: max-pair mean |dd|):
+     900 ->  1,200: 0.193 (pair 3->9)
+   1,200 ->  1,500: 0.166 (pair 1->8)
+     600 ->    900: 0.139 (pair 0->8)
+     300 ->    600: 0.138 (pair 0->9)
+      30 ->    100: 0.129 (pair 3->5)
+      10 ->     30: 0.128 (pair 4->9)
+     100 ->    300: 0.116 (pair 7->9)
+       0 ->     10: 0.103 (pair 0->8)
++ python3 experiments/render_movie.py --seed 0 --suffix _ce_pl_f0.5_p100 --dir60k --out-suffix _60k_ce --fps 10
+saved plateau_evolution.gif
+saved frames_selected_steps.png
+saved plateau_training_heatmap.png
+saved layerwise_selected_steps.png
+saved training_context.png
+
+largest adjacent-frame changes (step_from -> step_to: max-pair mean |dd|):
+       0 ->     10: 0.149 (pair 1->9)
+     100 ->    300: 0.076 (pair 1->2)
+      30 ->    100: 0.065 (pair 1->7)
+      10 ->     30: 0.064 (pair 7->9)
+     300 ->    600: 0.054 (pair 1->9)
+     600 ->    900: 0.039 (pair 5->6)
+   2,100 ->  2,400: 0.039 (pair 3->5)
+     900 ->  1,200: 0.034 (pair 4->5)
++ python3 experiments/seed_comparison.py _pl_f0.5_p100 --dir60k
+seed 0: plateau fraction first >= 0.25 at step 10; final = 0.674
+seed 0: plateau fraction first >= 0.5 at step 600; final = 0.674
+seed 1: plateau fraction first >= 0.25 at step 30; final = 0.663
+seed 1: plateau fraction first >= 0.5 at step 1500; final = 0.663
+seed 2: plateau fraction first >= 0.25 at step 10; final = 0.668
+seed 2: plateau fraction first >= 0.5 at step 1500; final = 0.668
+saved seed_comparison.png
++ python3 experiments/mse_vs_ce.py _pl_f0.5_p100 --dir60k
+{
+ "train_acc_first_1.0": {
+  "mse": null,
+  "ce": 9900
+ },
+ "final_train_loss": {
+  "mse": 2.6072429985409448e-05,
+  "ce": 0.00017321443253119165
+ },
+ "final_test_acc": {
+  "mse": 0.9775,
+  "ce": 0.9735
+ },
+ "final_test_prob": {
+  "mse": 0.22873330688476562,
+  "ce": 0.9937791748046875
+ },
+ "pf_100k": {
+  "mse": 0.6737777777777778,
+  "ce": 0.25155555555555553
+ },
+ "pf_prob_100k": {
+  "mse": 0.6742222222222222,
+  "ce": 0.8986666666666666
+ }
+}
+Traceback (most recent call last):
+  File "/workspace/marsv_agent_haoyang/dir12_plateau_during_training/experiments/mse_vs_ce.py", line 145, in <module>
+    main()
+  File "/workspace/marsv_agent_haoyang/dir12_plateau_during_training/experiments/mse_vs_ce.py", line 93, in main
+    ax.axvline(summary['train_acc_first_1.0']['mse'], color='gray', ls='--', lw=1,
+  File "/usr/local/lib/python3.11/dist-packages/matplotlib/axes/_axes.py", line 903, in axvline
+    scalex = (xx < xmin) or (xx > xmax)
+              ^^^^^^^^^
+TypeError: '>' not supported between instances of 'float' and 'NoneType'
++ python3 experiments/ce_frames.py _pl_f0.5_p100 --dir60k
+saved plots/frames_selected_steps_ce_prob_60k.png
++ python3 experiments/pairwise_auc.py _pl_f0.5_p100 --dir60k
+CE 3v5 AUROC: 0.9998 (worst CE pair: 2v7 0.9988)
+3v5: AUROC=0.9993, confusion=0.0078, mid_frac=0.36, rank 4/45 from worst
+5 worst pairs: [('4v9', 0.9975), ('2v7', 0.9986), ('7v8', 0.9992), ('3v5', 0.9993), ('7v9', 0.9993)]
+Spearman(AUROC, mid_frac) = 0.348; Spearman(AUROC, third_frac) = -0.032
+saved plots/pairwise_auc_60k.png
++ python3 experiments/render_early_60k.py
+step 0: max|early - main 60k record| = 0.00e+00
+step 10: max|early - main 60k record| = 0.00e+00
+step 30: max|early - main 60k record| = 0.00e+00
+step 100: max|early - main 60k record| = 0.00e+00
+step 300: max|early - main 60k record| = 0.00e+00
+step 600: max|early - main 60k record| = 0.00e+00
+step 900: max|early - main 60k record| = 0.00e+00
+saved plateau_evolution_early_60k.gif
+saved plateau_early_heatmap_60k.png
++ python3 experiments/render_full60k.py _pl_f0.5_p100
+saved full_vs_1k_evolution.gif
+saved full_vs_1k_frames.png
+saved full_mnist_3v5_training.gif
+saved full_mnist_3v5_summary.png
+saved full_mnist_training_context.png
+
+=== summary numbers ===
+endpoints-correct at step 0: 60k 0/50, 1k-ref 0/50
+final (step 30k): 60k seg mean 1.98, detour frac 0.00, endpoints-correct 49/50
+1k-ref at 30k:   seg mean 1.90, detour frac 0.02, endpoints-correct 36/50
+1k-ref at 100k:  seg mean 1.90, detour frac 0.02, endpoints-correct 36/50
+original 3->5 RLE: 1k@30k [2, 3, 5], 1k@100k [2, 3, 5], 60k@30k [3, 5]
+60k seed 1 final: seg mean 1.98, detour frac 0.00, endpoints-correct 49/50, orig 3->5 RLE [3, 5]
+60k seed 2 final: seg mean 1.98, detour frac 0.00, endpoints-correct 49/50, orig 3->5 RLE [3, 5]
++ python3 experiments/collect_60k_numbers.py
+{
+ "seed_0_pl_f0.5_p100": {
+  "steps": 104,
+  "pf_logit": {
+   "0": 0.19111111111111112,
+   "10": 0.2511111111111111,
+   "30": 0.2751111111111111,
+   "100": 0.3462222222222222,
+   "300": 0.43022222222222223,
+   "1500": 0.624,
+   "3000": 0.6617777777777778,
+   "6000": 0.6675555555555556,
+   "9000": 0.6711111111111111,
+   "15000": 0.6688888888888889,
+   "30000": 0.6737777777777778
+  },
+  "pf_logit_peak": [
+   0.6742222222222222,
+   27300
+  ],
+  "final_test_acc": 0.9775,
+  "final_test_conf": 0.9817809448242187,
+  "final_train_loss_hist": 2.6072429985409448e-05,
+  "late_motion_M_last10gaps": 0.0007548487046733499,
+  "cross_endpoints_misclassified_of_90": 0,
+  "within_class_single_pred_of_10": 9,
+  "bank3v5": {
+   "endpoints_correct_final_of_50": 49,
+   "endpoints_correct_step0_of_50": 0,
+   "seg_mean_final": 1.98,
+   "detour_frac_final": 0.0,
+   "repeated_class_rle_final": 0,
+   "repeated_class_rle_max_any_ckpt": 0
+  },
+  "orig_3v5_rle_final": [
+   3,
+   5
+  ],
+  "n_lr_cuts": 8,
+  "first_lr_cut": 1402,
+  "last_lr_cut": 20844,
+  "final_lr": 3.906250185536919e-06,
+  "final_full_train_loss": 2.6072430046042427e-05,
+  "spike_max": 1.557069086628823,
+  "spike_frac_gt2": 0.0,
+  "tail_range": 1.0721271959965033
+ },
+ "seed_1_pl_f0.5_p100": {
+  "steps": 25,
+  "pf_logit": {
+   "0": 0.20577777777777778,
+   "10": 0.24888888888888888,
+   "30": 0.2697777777777778,
+   "100": 0.3408888888888889,
+   "300": 0.43377777777777776,
+   "1500": 0.5973333333333334,
+   "3000": 0.6333333333333333,
+   "6000": 0.6622222222222223,
+   "9000": 0.6582222222222223,
+   "15000": 0.6635555555555556,
+   "30000": 0.6631111111111111
+  },
+  "pf_logit_peak": [
+   0.664,
+   24000
+  ],
+  "final_test_acc": 0.9795,
+  "final_test_conf": 0.9782037353515625,
+  "final_train_loss_hist": 2.2432522291637726e-05,
+  "late_motion_M_last10gaps": 0.0013426330406218767,
+  "cross_endpoints_misclassified_of_90": 0,
+  "within_class_single_pred_of_10": 9,
+  "bank3v5": {
+   "endpoints_correct_final_of_50": 49,
+   "endpoints_correct_step0_of_50": 0,
+   "seg_mean_final": 1.98,
+   "detour_frac_final": 0.0,
+   "repeated_class_rle_final": 0,
+   "repeated_class_rle_max_any_ckpt": 0
+  },
+  "orig_3v5_rle_final": [
+   3,
+   5
+  ],
+  "n_lr_cuts": 7,
+  "first_lr_cut": 1728,
+  "last_lr_cut": 15965,
+  "final_lr": 7.812500371073838e-06,
+  "final_full_train_loss": 2.2432521291193552e-05,
+  "spike_max": 1.42909775019885,
+  "spike_frac_gt2": 0.0,
+  "tail_range": 1.1799341747872607
+ },
+ "seed_2_pl_f0.5_p100": {
+  "steps": 25,
+  "pf_logit": {
+   "0": 0.196,
+   "10": 0.25066666666666665,
+   "30": 0.2702222222222222,
+   "100": 0.34844444444444445,
+   "300": 0.4493333333333333,
+   "1500": 0.6297777777777778,
+   "3000": 0.6626666666666666,
+   "6000": 0.6684444444444444,
+   "9000": 0.6662222222222223,
+   "15000": 0.6657777777777778,
+   "30000": 0.6684444444444444
+  },
+  "pf_logit_peak": [
+   0.6684444444444444,
+   30000
+  ],
+  "final_test_acc": 0.9785,
+  "final_test_conf": 0.9807100830078125,
+  "final_train_loss_hist": 2.6113630595621848e-05,
+  "late_motion_M_last10gaps": 0.0012782624689862132,
+  "cross_endpoints_misclassified_of_90": 0,
+  "within_class_single_pred_of_10": 9,
+  "bank3v5": {
+   "endpoints_correct_final_of_50": 49,
+   "endpoints_correct_step0_of_50": 0,
+   "seg_mean_final": 1.98,
+   "detour_frac_final": 0.0,
+   "repeated_class_rle_final": 0,
+   "repeated_class_rle_max_any_ckpt": 0
+  },
+  "orig_3v5_rle_final": [
+   3,
+   5
+  ],
+  "n_lr_cuts": 16,
+  "first_lr_cut": 2006,
+  "last_lr_cut": 28610,
+  "final_lr": 1.525878978725359e-08,
+  "final_full_train_loss": 2.6113631975022145e-05,
+  "spike_max": 1.4804908406983008,
+  "spike_frac_gt2": 0.0,
+  "tail_range": 1.0252247107697128
+ },
+ "seed_0_ce_pl_f0.5_p100": {
+  "steps": 104,
+  "pf_logit": {
+   "0": 0.19111111111111112,
+   "10": 0.2528888888888889,
+   "30": 0.248,
+   "100": 0.25377777777777777,
+   "300": 0.25733333333333336,
+   "1500": 0.26355555555555554,
+   "3000": 0.25955555555555554,
+   "6000": 0.25555555555555554,
+   "9000": 0.25377777777777777,
+   "15000": 0.252,
+   "30000": 0.25155555555555553
+  },
+  "pf_logit_peak": [
+   0.2644444444444444,
+   600
+  ],
+  "final_test_acc": 0.9735,
+  "final_test_conf": 22.07290625,
+  "final_train_loss_hist": 0.00017321443253119165,
+  "pf_prob": {
+   "0": 0.18133333333333335,
+   "10": 0.2613333333333333,
+   "30": 0.42933333333333334,
+   "100": 0.5511111111111111,
+   "300": 0.6737777777777778,
+   "1500": 0.8,
+   "3000": 0.8444444444444444,
+   "6000": 0.8697777777777778,
+   "9000": 0.8813333333333333,
+   "15000": 0.8928888888888888,
+   "30000": 0.8986666666666666
+  },
+  "pf_prob_peak": [
+   0.8991111111111111,
+   27300
+  ],
+  "late_motion_M_last10gaps": 0.00021177502640057355,
+  "cross_endpoints_misclassified_of_90": 0,
+  "within_class_single_pred_of_10": 8,
+  "bank3v5": {
+   "endpoints_correct_final_of_50": 49,
+   "endpoints_correct_step0_of_50": 0,
+   "seg_mean_final": 2.02,
+   "detour_frac_final": 0.04,
+   "repeated_class_rle_final": 0,
+   "repeated_class_rle_max_any_ckpt": 0
+  },
+  "orig_3v5_rle_final": [
+   3,
+   5
+  ],
+  "n_lr_cuts": 10,
+  "first_lr_cut": 1332,
+  "last_lr_cut": 23216,
+  "final_lr": 9.765625463842298e-07,
+  "final_full_train_loss": 0.00017321443010587245,
+  "spike_max": 1.7864507913159462,
+  "spike_frac_gt2": 0.0,
+  "tail_range": 1.0791764907014538
+ }
+}
+-> /workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/numbers_60k_p100.json
++ echo RENDER BATCH DONE
+RENDER BATCH DONE

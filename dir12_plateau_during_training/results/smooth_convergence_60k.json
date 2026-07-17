@@ -1,0 +1,50 @@
+{
+ "MSE seed 0": {
+  "spike_max": 1.5570690631866455,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.0721272230148315,
+  "final_train_loss": 2.6072430046042427e-05,
+  "final_lr": 3.906250185536919e-06,
+  "lr_cascade": [
+   1402,
+   20844
+  ],
+  "final_test_acc": 0.9775
+ },
+ "MSE seed 1": {
+  "spike_max": 1.4290977716445923,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.1799341440200806,
+  "final_train_loss": 2.2432521291193552e-05,
+  "final_lr": 7.812500371073838e-06,
+  "lr_cascade": [
+   1728,
+   15965
+  ],
+  "final_test_acc": 0.9795
+ },
+ "MSE seed 2": {
+  "spike_max": 1.480490803718567,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.0252246856689453,
+  "final_train_loss": 2.6113631975022145e-05,
+  "final_lr": 1.525878978725359e-08,
+  "lr_cascade": [
+   2006,
+   28610
+  ],
+  "final_test_acc": 0.9785
+ },
+ "CE seed 0": {
+  "spike_max": 1.786450743675232,
+  "spike_frac_gt2": 0.0,
+  "tail_range_last5k": 1.0791765451431274,
+  "final_train_loss": 0.00017321443010587245,
+  "final_lr": 9.765625463842298e-07,
+  "lr_cascade": [
+   1332,
+   23216
+  ],
+  "final_test_acc": 0.9735
+ }
+}

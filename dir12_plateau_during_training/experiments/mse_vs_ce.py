@@ -90,8 +90,9 @@ def main():
     ax = axg[0, 0]
     ax.plot(h_mse['step'], h_mse['train_loss'], color='C0', lw=1.6, label='train loss')
     ax.plot(h_mse['step'], h_mse['test_loss'], color='C1', lw=1.6, label='test loss')
-    ax.axvline(summary['train_acc_first_1.0']['mse'], color='gray', ls='--', lw=1,
-               label='train acc reaches 1.0')
+    _acc1 = summary['train_acc_first_1.0']['mse']
+    if _acc1 is not None:                     # 60k MSE never hits exactly 1.0
+        ax.axvline(_acc1, color='gray', ls='--', lw=1, label='train acc reaches 1.0')
     ax.set_xscale('symlog', linthresh=10); ax.set_yscale('log')
     ax.set_title('MSE run: loss keeps falling after train acc = 1.0')
     ax.set_ylabel('MSE loss (log)'); ax.legend(fontsize=8); ax.grid(alpha=0.3)

@@ -10,3 +10,21 @@ step 3000: loss=0.000358 tr_acc=0.9990 te_acc=0.9765 lr=5.00e-04
 step 4500: loss=0.000142 tr_acc=0.9995 te_acc=0.9785 lr=1.25e-04
 step 6000: loss=0.000106 tr_acc=0.9996 te_acc=0.9785 lr=1.25e-04
 step 7500: loss=0.000075 tr_acc=0.9997 te_acc=0.9785 lr=6.25e-05
+step 9000: loss=0.000061 tr_acc=0.9998 te_acc=0.9805 lr=6.25e-05
+step 10500: loss=0.000050 tr_acc=0.9998 te_acc=0.9775 lr=6.25e-05
+step 12000: loss=0.000041 tr_acc=0.9998 te_acc=0.9790 lr=3.13e-05
+step 13500: loss=0.000036 tr_acc=0.9999 te_acc=0.9785 lr=1.56e-05
+step 15000: loss=0.000034 tr_acc=0.9999 te_acc=0.9785 lr=1.56e-05
+step 16500: loss=0.000032 tr_acc=0.9999 te_acc=0.9785 lr=7.81e-06
+step 18000: loss=0.000031 tr_acc=0.9999 te_acc=0.9785 lr=7.81e-06
+step 19500: loss=0.000029 tr_acc=0.9999 te_acc=0.9785 lr=7.81e-06
+step 21000: loss=0.000028 tr_acc=0.9999 te_acc=0.9790 lr=7.81e-06
+step 22500: loss=0.000027 tr_acc=0.9999 te_acc=0.9785 lr=7.81e-06
+step 24000: loss=0.000027 tr_acc=0.9999 te_acc=0.9795 lr=7.81e-06
+step 25500: loss=0.000026 tr_acc=0.9999 te_acc=0.9785 lr=7.81e-06
+step 27000: loss=0.000025 tr_acc=0.9999 te_acc=0.9790 lr=7.81e-06
+step 28500: loss=0.000023 tr_acc=0.9999 te_acc=0.9785 lr=7.81e-06
+step 30000: loss=0.000022 tr_acc=0.9999 te_acc=0.9795 lr=7.81e-06
+done: 25 checkpoints in 1920s -> /workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/full_mnist_from_scratch/seed_1_pl_f0.5_p100
+/workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/full_mnist_from_scratch/seed_1_pl_f0.5_p100: 25/25 records OK, 0 problems
+[verify] manifest complete

@@ -336,16 +336,18 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocke
 
 ## Current status
 
-COMPLETE (2026-07-17, iter 9). S1–S6: on the fixed 1,000-example draw, plateau curves form in the first few
-hundred steps and every smoothly-converged schedule freezes logit PF at ~0.37. S7–S10 (reopened extension):
-fresh from-scratch runs on all 60,000 images (verified untrained step-0 init, without-replacement shuffling,
-cosine 1e-3→1e-6 over 30k steps; seeds 0/1/2; 154 manifest-verified records) show the ceiling was a small-data
-effect — the full-data runs converge smoothly AND sharpen to PF 0.64–0.73 (test acc 0.976–0.979). On the frozen
-50-path 3→5 bank the difference is endpoint correction (49/50 vs 36/50 endpoint-correct at matched step 30k),
-not sub-plateau merging; the original 3→5 path simplifies 2|3|5 → 3|5 in all three seeds (endpoint correction +
-segment disappearance per the operational definitions). Deliverables curated (Figures 14–18 embedded in both
-RESULTS.md and REPORT.md), render checks clean, STOP written.
+COMPLETE (2026-07-17, iter 10). Operator feedback `human_feedback_1` addressed: the 60k run now uses a
+smooth `ReduceLROnPlateau(0.5, 100)` schedule (chosen by a 60k scheduler search — the previous cosine was
+noisy, spike 101×), every 1k-only experiment was rerun on 60k (MSE seeds 0/1/2 + CE seed 0, 258 records +
+201 early-zoom, manifest-verified), and REPORT/RESULTS are refocused on the 60k results with the 1k run
+kept only in a dedicated "effect of training-set size" section. Headline (60k, smooth): plateaus form early
+and keep sharpening to PF 0.674/0.663/0.668 while the loss converges smoothly (test acc 0.9775/0.9795/0.9785,
+late curve motion 7.6e-4); CE logit PF stays at the 0.25 floor while probability PF reaches 0.90. Correction
+surfaced by the refocus: 3v5 is NOT the hardest pair on 60k (AUROC 0.9993, rank 4/45) — it was rank 1/45
+(0.977) only on 1k, so pair difficulty was a small-data effect; finding 4 rewritten. 3→5 verdict unchanged:
+endpoint correction (49/50 vs 36/50), not merging. Render checks clean (14/14 display math, all 19 figures
+embedded in both files); STOP written.
 
 ## Next step
 
-None — plan complete, zero unaddressed feedback, STOP written.
+None — plan complete, feedback human_feedback_1 addressed, zero unaddressed feedback, STOP written.
