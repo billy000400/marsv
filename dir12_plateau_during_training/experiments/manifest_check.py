@@ -19,8 +19,10 @@ BIG = ['h1_interp', 'h2', 'h3']
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--seed', type=int, default=0)
+    ap.add_argument('--suffix', default='', help='e.g. _ce, _sched, _ce_sched')
     args = ap.parse_args()
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{args.seed}')
+    rec_dir = os.path.join(HERE, 'results', 'plateau_records',
+                           f'seed_{args.seed}{args.suffix}')
     man = json.load(open(os.path.join(rec_dir, 'manifest.json')))
     P = len(man['pairs'])
     n_ok, problems = 0, []
@@ -45,11 +47,12 @@ def main():
                 n_ok += 1
         except Exception as e:
             problems.append(f'step {s}: CORRUPT ({e})')
-        # state dict presence
-        ck = os.path.join(HERE, 'results', 'ckpts_movie', f'seed{args.seed}',
-                          f'step{s}.pt')
-        if not os.path.exists(ck):
-            problems.append(f'step {s}: state_dict MISSING')
+        # state dict presence (suffix runs store state_dicts at anchors only)
+        if args.suffix == '' or s in man['anchor_steps']:
+            ck = os.path.join(HERE, 'results', 'ckpts_movie',
+                              f'seed{args.seed}{args.suffix}', f'step{s}.pt')
+            if not os.path.exists(ck):
+                problems.append(f'step {s}: state_dict MISSING')
     print(f'seed {args.seed}: {n_ok}/{len(man["ckpt_steps"])} records OK, '
           f'{len(problems)} problems')
     for p in problems:

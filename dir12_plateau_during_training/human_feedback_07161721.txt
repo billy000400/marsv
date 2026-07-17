@@ -1,0 +1,1 @@
+I feel like the current trainings are too chaotic in the end. they are not converging. Can you use a more sophiticated LR scheduler? I expect to see training loss plateau and the learning rate becomes smaller if training loss does not improve for like 10 steps

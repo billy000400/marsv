@@ -51,6 +51,9 @@ def main():
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--schedule', default='full', choices=['full', 'fallback'])
     p.add_argument('--loss', default='mse', choices=['mse', 'ce'])
+    # feedback 07161721: 'plateau' = ReduceLROnPlateau stepped EVERY optimization
+    # step on the full-train-set loss (patience 10 steps, factor 0.5)
+    p.add_argument('--sched', default='const', choices=['const', 'plateau'])
     args = p.parse_args()
     schedule = FULL_SCHEDULE if args.schedule == 'full' else FALLBACK_SCHEDULE
     anchors = set(ANCHOR_STEPS) if args.schedule == 'full' else {0, 100000}
@@ -82,7 +85,17 @@ def main():
     else:                                       # branch default: MSE on one-hot
         mse_fn = torch.nn.MSELoss()
         loss_of = lambda logits, y: mse_fn(logits, one_hots[y])
-    sfx = '' if args.loss == 'mse' else '_ce'
+    sfx = ('' if args.loss == 'mse' else '_ce') + \
+          ('' if args.sched == 'const' else '_sched')
+
+    sched = None
+    if args.sched == 'plateau':
+        # monitored quantity = full-train-set loss, recomputed after every step
+        # (deterministic; the per-batch loss is far too noisy for patience=10).
+        # No RNG is consumed -> identical init/subset/batch order as the const run.
+        sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            opt, mode='min', factor=0.5, patience=10,
+            threshold=1e-4, threshold_mode='rel', min_lr=1e-8)
 
     ck_dir = os.path.join(HERE, 'results', 'ckpts_movie', f'seed{args.seed}{sfx}')
     rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{args.seed}{sfx}')
@@ -91,12 +104,12 @@ def main():
 
     history = {'step': [], 'train_loss': [], 'train_acc': [], 'test_loss': [],
                'test_acc': [], 'train_conf': [], 'test_conf': [],
-               'train_prob': [], 'test_prob': []}
+               'train_prob': [], 'test_prob': [], 'lr': []}
 
     def checkpoint(step):
-        # CE runs keep state_dicts only at anchor steps (run is deterministic &
-        # regenerable; avoids ~190 MB of extra checkpoints in the shared repo)
-        if args.loss == 'mse' or step in anchors:
+        # CE/scheduled runs keep state_dicts only at anchor steps (run is
+        # deterministic & regenerable; avoids ~190 MB extra in the shared repo)
+        if (args.loss == 'mse' and args.sched == 'const') or step in anchors:
             state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
             torch.save(state, os.path.join(ck_dir, f'step{step}.pt'))
         model.eval()
@@ -107,7 +120,8 @@ def main():
         for k, v in [('step', step), ('train_loss', tr_loss), ('train_acc', tr_acc),
                      ('test_loss', te_loss), ('test_acc', te_acc),
                      ('train_conf', tr_conf), ('test_conf', te_conf),
-                     ('train_prob', tr_prob), ('test_prob', te_prob)]:
+                     ('train_prob', tr_prob), ('test_prob', te_prob),
+                     ('lr', opt.param_groups[0]['lr'])]:
             history[k].append(v)
         arrays = dict(rec, step=np.int64(step), seed=np.int64(args.seed),
                       t=np.linspace(0, 1, N_POINTS).astype(np.float32),
@@ -121,16 +135,34 @@ def main():
         print(f"step {step}: loss={tr_loss:.5f} tr_acc={tr_acc:.3f} "
               f"te_acc={te_acc:.3f} te_conf={te_conf:.3f}", flush=True)
 
+    @torch.no_grad()
+    def full_train_loss():
+        return loss_of(model(train_x), train_y).item()
+
     t0 = time.time()
     ck_set = set(schedule)
+    n_steps = max(schedule)
+    if sched is not None:
+        trace_loss = np.zeros(n_steps + 1, np.float32)
+        trace_lr = np.zeros(n_steps + 1, np.float32)
+        trace_loss[0] = full_train_loss()
+        trace_lr[0] = opt.param_groups[0]['lr']
     checkpoint(0)
-    for step in range(1, max(schedule) + 1):
+    for step in range(1, n_steps + 1):
         idx = torch.randint(0, 1000, (200,), device=device)
         logits = model(train_x[idx])
         loss = loss_of(logits, train_y[idx])
         opt.zero_grad(); loss.backward(); opt.step()
+        if sched is not None:
+            mon = full_train_loss()
+            sched.step(mon)
+            trace_loss[step] = mon
+            trace_lr[step] = opt.param_groups[0]['lr']
         if step in ck_set:
             checkpoint(step)
+    if sched is not None:
+        np.savez_compressed(os.path.join(ck_dir, 'sched_trace.npz'),
+                            full_train_loss=trace_loss, lr=trace_lr)
 
     with open(os.path.join(ck_dir, 'history.json'), 'w') as f:
         json.dump(history, f)
@@ -143,6 +175,10 @@ def main():
                            'weight_decay': 0.01,
                            'loss': 'MSE-on-one-hot' if args.loss == 'mse'
                                    else 'CE-on-labels',
+                           'lr_schedule': 'constant' if args.sched == 'const'
+                                   else ('ReduceLROnPlateau(factor=0.5, patience=10, '
+                                         'threshold=1e-4 rel, min_lr=1e-8) stepped every '
+                                         'step on the full-train-set loss'),
                            'opt': 'AdamW', 'steps': max(schedule)}}
     with open(os.path.join(rec_dir, 'manifest.json'), 'w') as f:
         json.dump(manifest, f, indent=1)

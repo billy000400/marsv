@@ -51,12 +51,13 @@ def main():
     ap.add_argument('--suffix', default='', help="e.g. _ce for the CE-loss run")
     args = ap.parse_args()
     seed, sfx = args.seed, args.suffix
-    tag = ' — CE loss' if sfx == '_ce' else ''
+    tag = (' — CE loss' if '_ce' in sfx else '') + \
+          (' — LR scheduler' if '_sched' in sfx else '')
 
     man, steps, D, D3, D2, PRED, test_acc = load_records(seed, sfx)
     # confidence: max raw output for MSE runs; max softmax prob for CE runs
-    conf_key = 'test_prob' if sfx == '_ce' else 'test_conf'
-    conf_lab = 'test conf (max prob)' if sfx == '_ce' else 'test conf (max raw output)'
+    conf_key = 'test_prob' if '_ce' in sfx else 'test_conf'
+    conf_lab = 'test conf (max prob)' if '_ce' in sfx else 'test conf (max raw output)'
     hist = json.load(open(os.path.join(HERE, 'results', 'ckpts_movie',
                                        f'seed{seed}{sfx}', 'history.json')))
     t = np.linspace(0, 1, N_POINTS)
