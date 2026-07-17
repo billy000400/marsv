@@ -17,16 +17,26 @@ This direction asks the cheap gating question for one specific model: does the *
 character-level Shakespeare GPT** from *Deep Networks Always Grok and Here is Why* (Figure 9) show
 Matthew-style plateaus? The paper's GPT code and checkpoint are not public, so we trained a faithful
 reconstruction (next-char accuracy 0.56 ≈ 37× chance) and ran the two-natural-endpoint interpolation
-assay with everything frozen before any curve was inspected.
+assay with everything frozen before any curve was inspected. One scope note up front: the grok
+paper's own headline phenomenon is **grokking** — adversarial robustness emerging long after training
+accuracy saturates. We did **not** test or replicate that phenomenon: it would require training far
+past our reconstruction's budget (ours stops at ordinary convergence). The paper's role here is only
+to specify the model under test; the phenomenon under test is Matthew's activation plateaus.
 
 **Result: plateaus are present.** 14 of 40 frozen minimal pairs show plateau–boundary–plateau
 structure in raw individual final-logit curves under a strict preregistered rule (transition width
-≤ 0.25 of the path, vs 0.8 for the no-plateau diagonal); most other pairs show the same sigmoid shape
-with a wider boundary. Two independent signatures behave exactly as predicted for real plateaus: the
-boundary **sharpens monotonically through successive downstream layers**, and it **fades toward the
-diagonal when the interpolation point moves later** (leaving fewer layers downstream). **Verdict: go**
-for a plateau-mapping follow-up on this model — qualified, because we tested a reconstruction rather
-than the paper's exact checkpoint.
+≤ 0.25 of the path); most other pairs show the same sigmoid shape with a wider boundary. Each curve plots the output's relative closeness to endpoint B (call it $d$,
+from 0 = "still A's output" to 1 = "B's output"; defined precisely in Methods) against the
+interpolation step $t$. Throughout this report the no-plateau reference is the **diagonal**: the
+straight line $d = t$ that this curve traces when the output just morphs uniformly from A's output to
+B's (its transition width is 0.8 — no flat plateau segments at all). Two independent signatures behave exactly
+as predicted for real plateaus, and both are movements of that same curve relative to the diagonal:
+**(1)** holding the interpolation point fixed early and reading the curve out at successively deeper
+layers moves it monotonically *away* from the diagonal — the boundary sharpens layer by layer; and
+**(2)** moving the interpolation point itself later, so fewer layers remain downstream to build the
+plateau, collapses the curve back *onto* the diagonal. **Verdict: go** for a plateau-mapping
+follow-up on this model — qualified, because we tested a reconstruction rather than the paper's exact
+checkpoint.
 
 ## Methods
 

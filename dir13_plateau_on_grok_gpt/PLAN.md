@@ -189,7 +189,10 @@ individual final-logit curves (median w=0.309 vs diagonal 0.8; 0 non-monotone); 
 strictly monotone (median w 0.777 at block 1 → 0.445 at block 11 → 0.309 at logits); depth comparison
 shows the predicted weakening (median w 0.309 → 0.802 as interpolation moves from block 0 to 10).
 `RESULTS.md`/`REPORT.md` rewritten around this verdict; old random-ray assay retained only in
-CHANGELOG history. `STOP` written.
+CHANGELOG history. Operator feedback #2 (2026-07-17) addressed: the "two signatures" sentence now
+defines the diagonal (d = t, the no-plateau reference of the relative-distance curve) where first
+used, and the Summary states explicitly that the grok paper's own phenomenon (grokking / delayed
+adversarial robustness) is NOT tested — the paper only specifies the model. `STOP` written.
 
 ## Next step
 

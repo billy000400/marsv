@@ -107,3 +107,28 @@ plateau signatures. Go for the plateau-mapping follow-up.
   no inline-math hazards, no unembedded plot paths.
 - PLAN.md S3–S7 ticked, status COMPLETE (plateaus present); `STOP` written after verifying zero
   unaddressed feedback files.
+
+## 2026-07-17 — Operator feedback #2 addressed: "two signatures" sentence clarified; grok-phenomenon scope stated
+
+Feedback file `human_feedback_2.txt` (now `.addressed.md`) raised two points about the Summary:
+(1) the sentence "Two independent signatures behave exactly as predicted … sharpens through layers …
+fades toward the diagonal …" was confusing — it never said where "the diagonal" lives or what it is;
+(2) the Summary never said whether the trained model replicates the phenomenon introduced in the Grok
+paper. No experiments re-run; all numbers and the verdict unchanged.
+
+- **REPORT.md Summary rewritten:** the diagonal is now defined where it is first used — the straight
+  line `d = t` that the relative-distance curve traces when the output morphs uniformly (transition
+  width 0.8, no plateau segments) — and both signatures are phrased as movements of the *same* curve
+  relative to that diagonal: deeper recording moves the curve away from it; later interpolation
+  collapses the curve back onto it. The curve's axes (`d`, `t`) are glossed inline so the Summary is
+  self-contained before Methods.
+- **Grok-phenomenon scope now explicit in the Summary:** the grok paper's own phenomenon (grokking =
+  adversarial robustness emerging long after training accuracy saturates) is NOT tested or replicated
+  — our reconstruction trains only to ordinary convergence; the paper's role is solely to specify the
+  Figure-9 model. This was previously implicit in Limitation 3 only.
+- **RESULTS.md verdict paragraph updated in parallel:** same diagonal definition + signature phrasing,
+  and the same explicit grokking-not-tested note.
+- Re-verified per CLAUDE.md 8a/8b/12: 4/4 REPORT.md display equations render as js-display-math via
+  the GitHub markdown API, 0 `<pre lang="math">`, no inline-math hazards, no unembedded plot paths.
+- Verdict unchanged: Matthew-style plateaus present (qualified reconstruction), go. `STOP` re-created
+  after the feedback was addressed.

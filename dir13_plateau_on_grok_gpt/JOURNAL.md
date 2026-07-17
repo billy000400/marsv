@@ -109,3 +109,33 @@ individually visible, coherent layerwise sharpening), qualified-reconstruction s
 written after re-verifying zero unaddressed feedback.
 
 On track? yes — S7 done, 100%, no blocker (plateaus present; STOP verified on disk).
+
+## 2026-07-17 (3) — Feedback-first iteration: human_feedback_2 addressed
+
+**Did.** Found `human_feedback_2.txt` unaddressed (and STOP absent again — same pattern as feedback #1:
+operator clears STOP when dropping feedback so the loop re-enters; proceeded on that assumption).
+Two asks: (1) the Summary's "two independent signatures" sentence was confusing — layers in the first
+half, an undefined "diagonal" in the second; (2) the Summary never said whether our trained model
+replicates the phenomenon introduced in the Grok paper. Fixes (text-only, no re-runs, numbers
+unchanged):
+1. REPORT.md Summary: defined the diagonal at first use (the line d = t the relative-distance curve
+   traces under a uniform output morph, width 0.8), glossed d and t inline, and rewrote both
+   signatures as movements of the same curve relative to that diagonal (deeper recording → away from
+   it; later interpolation → back onto it).
+2. REPORT.md Summary: added an explicit scope note — the grok paper's phenomenon (grokking = delayed
+   adversarial robustness, defined on first use) is NOT tested/replicated; our reconstruction stops at
+   ordinary convergence and the paper only specifies the model. (Alternative rejected: actually
+   training to grokking scale to test replication — out of scope per PLAN "do not study
+   checkpoint-to-checkpoint evolution" and far beyond remaining budget.)
+3. RESULTS.md verdict paragraph updated in parallel (same definition + note).
+4. Render checks pass: 4/4 js-display-math, 0 pre-lang-math, no inline hazards, no unembedded plots.
+5. `mv human_feedback_2.txt human_feedback_2.txt.addressed.md`; CHANGELOG entry appended; STOP
+   re-created and verified on disk.
+
+**Learned.** Every term a figure or verdict leans on ("the diagonal") must be defined in the same
+paragraph it is first used, not only in Methods; and when a source paper is used only for its model
+spec, say explicitly that its headline phenomenon is not being replicated.
+
+**Next step.** None — plan complete, zero unaddressed feedback, STOP verified.
+
+On track? yes — S7 done, 100%, no blocker (feedback #2 addressed; plateaus-present verdict stands).

@@ -1,0 +1,2 @@
+This sentence is weird: Two independent signatures behave exactly as predicted for real plateaus: the boundary sharpens monotonically through successive downstream layers, and it fades toward the diagonal when the interpolation point moves later (leaving fewer layers downstream).
+First you talk about layers, second you talk about diagonal. Where does the diagonal lives and what is it in the second half of the paragraph? Also in the summary it did not say if the model you trained replicate the phenomenon introduced in the Grok paper.

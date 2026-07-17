@@ -13,11 +13,17 @@ in the 12-layer, 12-head character-level Shakespeare GPT of *Deep Networks Alway
 **Verdict: YES — Matthew-style plateaus are present (qualified).** In a faithful reconstruction of
 the Figure-9 model (the paper's exact GPT code/checkpoint is **not publicly released** — audited
 2026-07-15), **14/40 frozen minimal pairs** show plateau–boundary–plateau structure in raw individual
-final-logit curves under a strict preregistered rule, most remaining pairs show the same sigmoid shape
-with a wider boundary, the boundary **sharpens monotonically with network depth**, and moving the
-interpolation later (fewer downstream layers) **weakens it toward the diagonal** — both signatures
-predicted for real plateaus. "Qualified" because we tested a reconstruction, not the paper's exact
-checkpoint.
+final-logit curves under a strict preregistered rule, and most remaining pairs show the same sigmoid
+shape with a wider boundary. Both predicted plateau signatures hold, judged on the same `d(t)` curve
+against the **diagonal** `d = t` — the straight line the curve traces when the output morphs
+uniformly with no plateaus (transition width 0.8): recording the curve at successively **deeper
+layers moves it monotonically away from the diagonal** (the boundary sharpens with depth), while
+moving the **interpolation point later** (fewer layers left downstream to build the plateau)
+**collapses it back onto the diagonal**. "Qualified" because we tested a reconstruction, not the
+paper's exact checkpoint. Note the grok paper's own phenomenon — grokking, i.e. adversarial
+robustness emerging long after training accuracy saturates — is **not tested or replicated here**:
+our reconstruction trains only to ordinary convergence, and the paper's role is solely to specify the
+model under test.
 
 ## Model actually tested
 
