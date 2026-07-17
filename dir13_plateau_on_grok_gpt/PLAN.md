@@ -1,134 +1,3 @@
-# PLAN - Direction: Does the 12-layer Shakespeare GPT show Matthew-style activation plateaus?
-
-> Working folder: `dir12_small_gpt_plateau_sanity`. Agent REWRITES "Current status"/"Next step" + ticks stages each iteration. Disk (`PLAN.md`/`JOURNAL.md`/`RESULTS.md`/`REPORT.md`/`CHANGELOG.md` + `../BUDGET.md` + `../CLAUDE.md`) is the only memory.
-
-## Research question
-
-Before trying to map or interpret plateaus in the paper's small GPT, answer the gating question using the phenomenon defined in Matthew Shinkle and StefanHex's post:
-
-> When we interpolate between the last-position activations of two sequences that are identical except for their final input character, does the downstream representation remain close to endpoint A, rapidly cross a boundary, and then remain close to endpoint B?
-
-This direction must reproduce the **two-natural-endpoint interpolation experiment** from Matthew's post. A random ray `h + alpha*u` tests local perturbation robustness and does **not** answer this question.
-
-Important source distinction: Figure 8 of *Deep Networks Always Grok and Here is Why* is a separate modular-addition Transformer. The model of interest is Figure 9: a 12-layer, 12-head GPT trained for next-character prediction on Shakespeare text.
-
-## Authoritative plateau definition
-
-Read Matthew's post and its linked code before changing the assay:
-
-- Post: https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge
-- Code: https://github.com/MShinkle/activation_plateau_mechanisms
-
-For two input sequences `A` and `B` that are identical except for the final character:
-
-1. Run both sequences and collect their final-position activations `h_A` and `h_B` at interpolation layer `L`.
-2. Spherically interpolate from `h_A` to `h_B`. As in Matthew's post, slerp the directions and linearly interpolate the vector norms.
-3. Patch each interpolated activation `h(t)` into the final sequence position at layer `L`; leave every earlier position unchanged.
-4. Record downstream activation or logit vector `x(t)` at recording point `R`.
-5. Compute Matthew's relative distance to the two endpoint outputs:
-
-   \[
-   d(t)=\frac{\|x(t)-x_A\|_2}{\|x(t)-x_A\|_2+\|x(t)-x_B\|_2}.
-   \]
-
-A Matthew-style plateau curve stays near `d=0`, changes rapidly over a narrow interval, and then stays near `d=1`. A roughly diagonal curve is not a plateau.
-
-## Success criterion (definition of "done")
-
-`RESULTS.md` and `REPORT.md` give a clear verdict for the trained 12-layer GPT:
-
-1. **Plateaus detected:** multiple preregistered prompt pairs show plateau-boundary-plateau curves in final logits, the curves are visible individually rather than created by averaging, and the boundary becomes at least as clear when more downstream layers are included; or
-2. **No Matthew-style plateaus detected:** after testing a sufficiently varied frozen set of minimal pairs with interpolation early enough to leave most of the network downstream, no individual curves show the plateau-boundary-plateau structure; or
-3. **Qualified reconstruction result:** the exact paper checkpoint is unavailable, so the report states that the verdict applies to the trained reconstruction, not necessarily the authors' exact GPT.
-
-Required artifacts:
-
-- `MODEL_SPEC.md` with confirmed paper details and reconstruction choices.
-- `prompt_pairs.json` containing the frozen sequences, shared prefix, endpoint characters, selection source, and split.
-- A tidy result table with one row per pair x interpolation layer x recording point x interpolation step.
-- `plots/pair_curves_logits.*`: individual Matthew `d(t)` curves in final-logit space. Do not show only an average.
-- `plots/layerwise_emergence.*`: for fixed early interpolation, show `d(t)` at successive downstream layers for representative fixed pair IDs.
-- `plots/interpolation_layer_comparison.*`: final-output curves while varying the interpolation layer, if the primary result is positive or ambiguous.
-- `REPORT.md` with the exact interpolation, patching, endpoint-fidelity checks, pair-selection procedure, figures, and verdict.
-
-The previous random-direction result is not evidence for or against this success criterion. Archive it in `CHANGELOG.md` or a clearly labeled previous-results folder; do not use it as the current verdict.
-
-Null/negative results are COMPLETE if the endpoint and pair-coverage checks below pass. When complete, write an empty `STOP` file.
-
-## Fallback (if time runs short)
-
-Run the direct test that answers the question:
-
-- At least 20 frozen minimal pairs.
-- Interpolate at `resid_post` of block 0, leaving 11 blocks downstream.
-- Use at least 101 evenly spaced `t` values.
-- Record final logits and compute Matthew's `d(t)`.
-- Save every individual curve and report how many clearly show plateau-boundary-plateau behavior.
-
-Do not spend fallback time on random directions, matched-random activations, clustering, local complexity, or new summary metrics.
-
-The wrapper reserves the final 20 minutes for `RESULTS.md`, `REPORT.md`, `CHANGELOG.md`, figure checks, and `STOP`.
-
-## Setup (fixed)
-
-### Model and data
-
-- Reuse the existing trained 12-block, 12-head GeLU character-level Shakespeare GPT reconstruction and its checkpoint/config provenance.
-- The paper's GPT code/checkpoint were not found in the public repository. Keep the conclusion explicitly qualified unless exact artifacts become available.
-- Use held-out Shakespeare text to construct shared prefixes. Do not train or tune the model further for this sanity check.
-
-### Constructing natural minimal pairs
-
-- Each pair must have equal-length sequences and differ at exactly the final input character: `prefix + char_A` versus `prefix + char_B`.
-- Freeze all pair IDs before inspecting interpolation curves.
-- Prefer endpoint characters that are both plausible after the shared prefix. Build candidates without looking at path shape, using either:
-  1. two characters observed after the same prefix in held-out text, when available; or
-  2. two high-probability endpoint characters under the model given the shared prefix.
-- Include diverse endpoint-character combinations and shared-prefix contexts. Deduplicate prefixes.
-- Record endpoint predictions and endpoint logit distance, but do not select or discard pairs based on whether their interpolation later looks plateau-like.
-- Degenerate pairs for which `x_A` and `x_B` are numerically indistinguishable may be excluded only by a frozen numerical threshold documented before the full run.
-
-### Spherical interpolation
-
-For `t` in `[0,1]`, slerp the unit directions and linearly interpolate the norms:
-
-\[
-\hat h(t)=\frac{\sin((1-t)\theta)}{\sin\theta}\frac{h_A}{\|h_A\|}
-+\frac{\sin(t\theta)}{\sin\theta}\frac{h_B}{\|h_B\|},
-\]
-
-\[
-h(t)=\big[(1-t)\|h_A\|+t\|h_B\|\big]\hat h(t),
-\qquad
-\theta=\arccos\left(\frac{h_A^\top h_B}{\|h_A\|\|h_B\|}\right).
-\]
-
-- Clamp the cosine for numerical safety and implement a documented near-collinear fallback.
-- Use the same interpolation grid for all pairs. Primary grid: 101 evenly spaced steps including both endpoints.
-- Do not replace slerp with random perturbations, a line from one endpoint, or a path normalized by an arbitrary maximum radius.
-
-### Interpolation and recording layers
-
-- Primary test: interpolate the final-position `resid_post` activation after block 0 and record final logits. This leaves the largest practical number of downstream transformer blocks to form a plateau.
-- Layerwise-emergence test: keep interpolation fixed after block 0 and record final-position `resid_post` after every later block, followed by final logits. This directly tests Matthew's observation that plateaus sharpen through successive layers.
-- Complementary test, only after the primary run: record final logits while moving the interpolation point across blocks `{0, 2, 4, 6, 8, 10}`. Later interpolation should generally weaken a real plateau because fewer layers remain downstream.
-- Keep all sequence positions except the final one unchanged. Because the two sequences share their entire prefix and the model is causal, earlier-position activations should be identical.
-
-### Minimal, boundary-position-invariant summary
-
-- The primary evidence is the raw individual `d(t)` curve.
-- Plot the diagonal `d=t` only as a visual non-plateau reference.
-- Use one optional scalar summary: transition width
-
-  \[
-  w_{10\rightarrow90}=t(d=0.9)-t(d=0.1).
-  \]
-
-  Compute crossings from an isotonic copy only for this scalar; always plot the raw curve.
-- A candidate plateau has a narrow transition (`w_10->90 <= 0.25`) and at least 10% of the path visibly remaining near each endpoint before and after the transition. Report the count `n/N`; do not hide heterogeneity behind a mean curve.
-- Non-monotone curves are reported separately and are not forced into the transition-width statistic.
-- Do not use the previous `PI`, which confounds boundary location with plateau sharpness. Do not introduce additional scores unless the raw curves reveal a concrete unresolved ambiguity.
-
 ### Required implementation checks
 
 - `t=0` exactly reproduces endpoint A at the patched layer and downstream recording point within numerical tolerance.
@@ -179,20 +48,19 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**COMPLETE — Matthew-style plateaus ARE present (decision rule: plateaus present, qualified reconstruction).**
+**COMPLETE — Matthew-style plateaus ARE present (decision rule: plateaus present, qualified reconstruction). Independently re-verified 2026-07-17.**
 
-The full two-endpoint assay was run 2026-07-17: 40 frozen minimal pairs (seed 20260717, 0 degenerate,
+The full two-endpoint assay was run 2026-07-17 and re-run end-to-end later the same day with a
+bit-exact reproduction of every number: 40 frozen minimal pairs (seed 20260717, 0 degenerate,
 `results/prompt_pairs.json`), slerp at block-0 `resid_post`, 101-step grid, all implementation checks
 passed (endpoint fidelity <1e-3, prefix invariance <1e-4, batched=single <1e-5, synthetic step
 detected w=0.089 / line rejected w=0.800). Result: **14/40 pairs pass the frozen plateau rule** in raw
-individual final-logit curves (median w=0.309 vs diagonal 0.8; 0 non-monotone); layerwise emergence is
-strictly monotone (median w 0.777 at block 1 → 0.445 at block 11 → 0.309 at logits); depth comparison
-shows the predicted weakening (median w 0.309 → 0.802 as interpolation moves from block 0 to 10).
-`RESULTS.md`/`REPORT.md` rewritten around this verdict; old random-ray assay retained only in
-CHANGELOG history. Operator feedback #2 (2026-07-17) addressed: the "two signatures" sentence now
-defines the diagonal (d = t, the no-plateau reference of the relative-distance curve) where first
-used, and the Summary states explicitly that the grok paper's own phenomenon (grokking / delayed
-adversarial robustness) is NOT tested — the paper only specifies the model. `STOP` written.
+individual final-logit curves (IDs 0,4,5,6,7,9,14,20,21,22,28,34,36,37; median w=0.309 vs diagonal
+0.8; 0 non-monotone); layerwise emergence is strictly monotone (median w 0.777 at block 1 → 0.445 at
+block 11 → 0.309 at logits); depth comparison shows the predicted weakening (median w 0.309 → 0.802
+as interpolation moves from block 0 to 10). `RESULTS.md`/`REPORT.md` are rewritten around this
+verdict; the old random-ray assay is retained only in CHANGELOG history. Operator feedback #1 and #2
+addressed (both files `.addressed.md`). `STOP` written.
 
 ## Next step
 

@@ -139,3 +139,32 @@ spec, say explicitly that its headline phenomenon is not being replicated.
 **Next step.** None — plan complete, zero unaddressed feedback, STOP verified.
 
 On track? yes — S7 done, 100%, no blocker (feedback #2 addressed; plateaus-present verdict stands).
+
+## 2026-07-17 (4) — Stale PLAN re-drop handled by full re-verification; verdict reproduced bit-exactly
+
+**Did.** Feedback check first: only the two `.addressed.md` files, no `*REVIEW*`, nothing unaddressed.
+Found STOP cleared and PLAN.md replaced (uncommitted, per git diff vs HEAD 956f54c) with the SAME
+reopen-plan text executed in entry "(2)" — S3–S7 unchecked, status "No Matthew-style minimal-pair
+slerp experiment has yet been run" (false on disk: `results/matthew_summary.json` exists), and the
+file truncated (title/research-question/setup sections missing; starts at "Required implementation
+checks"). **Assumption:** this is a stale/accidental re-drop during the operator's project-wide file
+pass (run.sh + CLAUDE.md modified, new feedback dropped in dir12, none here), not a new ask — no
+requirement in it differs from the plan already executed. **Alternatives rejected:** (a) blindly
+re-tick the boxes without running anything — leaves the claim unverifiable this iteration; (b) redo
+S3–S7 from scratch with fresh pairs — violates the frozen-pairs preregistration and answers nothing
+new. **Chosen middle path:** re-run the entire pipeline end-to-end against the frozen pairs (~3 min
+GPU) and compare. Corpus present, SHA-256 matches provenance. Result: **bit-exact reproduction** —
+summary JSON identical (14/40 plateaus, same pair IDs, median w 0.309, depth medians identical to all
+digits), all self-tests and implementation checks pass, no tracked artifact changed. Deliverables
+untouched (already current-best); render checks re-pass (4/4 js-display-math, 0 pre-lang-math, no
+hazards, no unembedded plots). PLAN.md restored to COMPLETE (edited in place; S3–S7 ticked).
+CHANGELOG entry appended. STOP re-created and verified on disk.
+
+**Learned.** When a plan re-drop contains no new requirement, the cheapest honest response is a full
+re-verification run, not re-ticking from memory — it converts "the journal says it was done" into
+"it reproduces today, bit-exactly". Also: the pipeline is fully deterministic across pod sessions
+(same GPU class, same torch), which strengthens the reproducibility claim in the deliverables' favor.
+
+**Next step.** None — plan complete, zero unaddressed feedback, STOP verified.
+
+On track? yes — S7 done, 100%, no blocker (verdict reproduced bit-exactly; STOP verified on disk).

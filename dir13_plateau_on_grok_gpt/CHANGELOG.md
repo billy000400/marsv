@@ -132,3 +132,27 @@ paper. No experiments re-run; all numbers and the verdict unchanged.
   the GitHub markdown API, 0 `<pre lang="math">`, no inline-math hazards, no unembedded plot paths.
 - Verdict unchanged: Matthew-style plateaus present (qualified reconstruction), go. `STOP` re-created
   after the feedback was addressed.
+
+## 2026-07-17 — PLAN re-dropped in REOPENED state; full assay re-run, bit-exact reproduction; deliverables unchanged
+
+Re-entered to find `STOP` cleared and PLAN.md replaced (uncommitted) with the same reopen-plan text
+already executed earlier today ("(2)" entry above) — S3–S7 unchecked, status claiming no slerp
+experiment had run, contradicted by `results/matthew_summary.json`/`matthew_tidy.csv` on disk. The
+dropped file was also truncated (missing the plan's title/research-question/setup sections) and
+contained no requirement differing from the executed plan, so it was treated as a stale re-drop
+(assumption logged in JOURNAL) and answered by **re-verification rather than blind re-ticking**:
+
+- Re-ran the complete pipeline (`experiments/run_matthew.py`): corpus SHA-256 re-verified against
+  training provenance, self-tests (step w=0.089 detected / line w=0.800 rejected), implementation
+  checks on real pairs (endpoint <1e-3, prefix <1e-4, batch=single <1e-5), then primary + layerwise +
+  depth runs on the 40 frozen pairs.
+- **Reproduction is bit-exact:** summary JSON identical to the frozen one — 14/40 plateau pairs, same
+  IDs (0,4,5,6,7,9,14,20,21,22,28,34,36,37), median w 0.309 [0.110, 0.773], 0 non-monotone, depth
+  medians 0.309→0.802 identical to all digits. No tracked artifact changed.
+- RESULTS.md / REPORT.md: **no content changes** (already current-best; numbers verified, not
+  superseded). Render checks re-pass: 4/4 REPORT.md display equations as js-display-math via the
+  GitHub markdown API, 0 `<pre lang="math">`, no inline hazards, no unembedded plot paths.
+- PLAN.md status/checkboxes restored to COMPLETE (edited in place on the operator's dropped file;
+  its truncated preamble left as dropped).
+- Verdict unchanged: Matthew-style plateaus present (qualified reconstruction), go. `STOP` re-created
+  after verifying zero unaddressed feedback files.
