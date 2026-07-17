@@ -145,3 +145,38 @@ substantive asks). All 8 addressed; no prior result numbers changed.
   clean, all plot refs embedded as images in both files.
 - Renamed `human_feedback_07161530.txt` → `.addressed.md`; STOP re-written (plan complete, zero
   unaddressed feedback).
+## 2026-07-17 — Iter 6: operator feedback 07161650 — CE-loss rerun + pairwise AUROC for 3v5
+
+Operator had deleted-and-readded feedback next to a stale STOP (`human_feedback_07161650.txt`,
+2 questions). STOP deleted, both questions answered with new experiments; renamed the file to
+`.addressed.md`; STOP re-written.
+
+- **Q1 (train acc flat while loss falls — MSE artifact? CE version?).** Answered + NEW experiment:
+  `train_and_record.py` gained a `--loss {mse,ce}` flag (identical RNG stream → same init/subset/
+  batches as MSE seed 0); ran CE seed 0 on the full 205-checkpoint schedule (records in
+  `results/plateau_records/seed_0_ce/`, state dicts at 16 anchor steps only to keep the repo small).
+  Explanation in REPORT (new Results subsection): accuracy checks only the argmax, so ANY loss keeps
+  falling after acc=1.0; CE reproduces it (train acc 1.0 from its step-300 ckpt, CE loss 1.7e-8 at
+  100k). KEY NEW FINDING: under CE the logit-space d(alpha) stays near-diagonal all training (PF 0.22
+  at 100k ~ 0.20 floor) but probability-space d has the sharpest plateaus of any run (PF 0.89 vs MSE
+  0.55), forming earlier (~1k-10k steps); decision regions piecewise-constant under both losses →
+  "the loss decides where plateaus live, not whether they exist" added as Summary finding 4. CE side
+  facts: test acc 0.881 vs MSE 0.848; CE test loss rises late. New scripts `mse_vs_ce.py`,
+  `ce_frames.py`; `render_movie.py` gained `--suffix` (+ softmax-confidence inset for CE). New
+  figures embedded in RESULTS+REPORT: mse_vs_ce_training.png, frames_selected_steps_ce_prob.png,
+  plateau_evolution_ce.gif (also on disk: *_ce variants of heatmap/frames/layerwise/context).
+  New Methods content: CE loss + CE-confidence equations, probability-space d.
+- **Q2 (3->5 "boundary looks like the plateau" — is 3v5 AUC worse?).** NEW experiment
+  `pairwise_auc.py` (results/pairwise_auc.json): pairwise AUROC via rank estimator on logit
+  differences over test[:2000] at step 100k. YES: AUROC(3,5)=0.9306 is the WORST of all 45 pairs
+  (next 5v8 0.9512; median 0.987), pairwise confusion 5.2%; also worst under CE (0.9755). Curve
+  reinterpretation in REPORT: the 3->5 mid-level shelf (d~0.45, 11 points) is a genuine third-class
+  plateau (predicted 9) and the left "3" endpoint is misclassified as 2 — a 2/9/5 staircase, not a
+  smeared boundary. Curve shape only weakly predicts difficulty (Spearman AUROC vs mid-frac -0.21,
+  vs third-class-frac -0.48). New Methods subsection defines AUROC/confusion/mid-frac/third-frac;
+  figure pairwise_auc.png embedded in both deliverables. (PLAN.md forbade AUC "unless required" —
+  operator feedback explicitly requested it; logged as the overriding reason.)
+- Deliverables: Summary gained findings 4-5; Conclusion + Limitations updated (CE = seed 0 only,
+  AUROC at final ckpt); RESULTS gained two sections + 4 embedded figures + CE PF numbers under the
+  seed table. Render checks: 9/9 js-display-math, 0 pre-lang-math, hazard grep clean, all plot refs
+  embedded. No prior result numbers changed.

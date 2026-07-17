@@ -23,8 +23,8 @@ from plateau_protocol import HERE, N_POINTS, ANIM_PAIRS
 PLOTS = os.path.join(HERE, 'plots')
 
 
-def load_records(seed):
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{seed}')
+def load_records(seed, sfx=''):
+    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{seed}{sfx}')
     man = json.load(open(os.path.join(rec_dir, 'manifest.json')))
     steps = man['ckpt_steps']
     d_logit, d_h3, d_h2, pred = [], [], [], []
@@ -48,12 +48,17 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--fps', type=int, default=12)
+    ap.add_argument('--suffix', default='', help="e.g. _ce for the CE-loss run")
     args = ap.parse_args()
-    seed = args.seed
+    seed, sfx = args.seed, args.suffix
+    tag = ' — CE loss' if sfx == '_ce' else ''
 
-    man, steps, D, D3, D2, PRED, test_acc = load_records(seed)
+    man, steps, D, D3, D2, PRED, test_acc = load_records(seed, sfx)
+    # confidence: max raw output for MSE runs; max softmax prob for CE runs
+    conf_key = 'test_prob' if sfx == '_ce' else 'test_conf'
+    conf_lab = 'test conf (max prob)' if sfx == '_ce' else 'test conf (max raw output)'
     hist = json.load(open(os.path.join(HERE, 'results', 'ckpts_movie',
-                                       f'seed{seed}', 'history.json')))
+                                       f'seed{seed}{sfx}', 'history.json')))
     t = np.linspace(0, 1, N_POINTS)
     anim_idx = [pair_index(man, a, b) for a, b in ANIM_PAIRS]
     n_ck = len(steps)
@@ -81,7 +86,7 @@ def main():
     ax_acc.plot(hist['step'], hist['test_acc'], color='C3', lw=1.5, label='test acc')
     ax_acc.plot(hist['step'], hist['train_acc'], color='C3', lw=1, ls='--', alpha=0.6,
                 label='train acc')
-    ax_acc.plot(hist['step'], hist['test_conf'], color='C4', lw=1.5, label='test conf')
+    ax_acc.plot(hist['step'], hist[conf_key], color='C4', lw=1.5, label='test conf')
     ax_acc.set_xscale('symlog', linthresh=10)
     ax_acc.set_ylim(0, 1.05)
     ax_acc.legend(fontsize=6, loc='lower right')
@@ -103,13 +108,13 @@ def main():
             dots[k].set_array(PRED[f, i].astype(float))
         vline.set_xdata([max(steps[f], 1e-3)] * 2)
         vline_l.set_xdata([max(steps[f], 1e-3)] * 2)
-        title.set_text(f'Plateau evolution (seed {seed}) — training step '
+        title.set_text(f'Plateau evolution (seed {seed}{tag}) — training step '
                        f'{steps[f]:,}   |   logit-space $d(\\alpha)$, squares: '
                        f'predicted class along the path')
         return lines
 
     ani = animation.FuncAnimation(fig, draw, frames=n_ck, blit=False)
-    ani.save(os.path.join(PLOTS, 'plateau_evolution.gif'), fps=args.fps,
+    ani.save(os.path.join(PLOTS, f'plateau_evolution{sfx}.gif'), fps=args.fps,
              writer='pillow', dpi=72)
     plt.close(fig)
     print('saved plateau_evolution.gif')
@@ -135,7 +140,7 @@ def main():
     fig.suptitle('Selected animation frames: logit-space $d(\\alpha)$ '
                  '(squares: predicted class along the path)', y=1.0)
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, 'frames_selected_steps.png'), dpi=130,
+    plt.savefig(os.path.join(PLOTS, f'frames_selected_steps{sfx}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
     print('saved frames_selected_steps.png')
@@ -163,7 +168,7 @@ def main():
     fig.suptitle('Plateau formation: relative endpoint distance $d(\\alpha)$ over '
                  'training (each panel: one pair; rows = checkpoints, non-uniform '
                  'early steps then every 500)', y=0.99)
-    plt.savefig(os.path.join(PLOTS, 'plateau_training_heatmap.png'), dpi=130,
+    plt.savefig(os.path.join(PLOTS, f'plateau_training_heatmap{sfx}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
     print('saved plateau_training_heatmap.png')
@@ -188,7 +193,7 @@ def main():
     fig.suptitle('Layerwise sharpening of the plateau (seed %d): relative distance '
                  'at $h_2$, $h_3$ (last hidden), and logits' % seed)
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, 'layerwise_selected_steps.png'), dpi=130,
+    plt.savefig(os.path.join(PLOTS, f'layerwise_selected_steps{sfx}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
     print('saved layerwise_selected_steps.png')
@@ -197,13 +202,13 @@ def main():
     fig, ax = plt.subplots(figsize=(7, 3.6))
     ax.plot(hist['step'], hist['train_acc'], lw=1.5, color='C0', label='train acc (1000 subset)')
     ax.plot(hist['step'], hist['test_acc'], lw=1.5, color='C3', label='test acc (first 2000)')
-    ax.plot(hist['step'], hist['test_conf'], lw=1.5, color='C4', label='test confidence (max raw output)')
+    ax.plot(hist['step'], hist[conf_key], lw=1.5, color='C4', label=conf_lab)
     ax.set_xscale('symlog', linthresh=10)
     ax.set_xlabel('training step'); ax.set_ylabel('accuracy / confidence')
     ax.set_ylim(0, 1.05); ax.grid(alpha=0.3); ax.legend(fontsize=8)
-    ax.set_title(f'Training context (seed {seed})')
+    ax.set_title(f'Training context (seed {seed}{tag})')
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, 'training_context.png'), dpi=130)
+    plt.savefig(os.path.join(PLOTS, f'training_context{sfx}.png'), dpi=130)
     plt.close(fig)
     print('saved training_context.png')
 

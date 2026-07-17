@@ -31,24 +31,26 @@ torch.set_num_threads(2)
 
 
 @torch.no_grad()
-def eval_metrics(model, x, y, one_hots, loss_fn, batch=2000):
+def eval_metrics(model, x, y, loss_of, batch=2000):
     model.eval()
-    correct, conf_sum, loss_sum = 0, 0.0, 0.0
+    correct, conf_sum, prob_sum, loss_sum = 0, 0.0, 0.0, 0.0
     for i in range(0, len(x), batch):
         logits = model(x[i:i + batch])
-        loss_sum += loss_fn(logits, one_hots[y[i:i + batch]]).item() * len(logits)
+        loss_sum += loss_of(logits, y[i:i + batch]).item() * len(logits)
         conf, pred = logits.max(dim=1)          # max raw output = confidence
         correct += (pred == y[i:i + batch]).sum().item()
         conf_sum += conf.sum().item()
+        prob_sum += torch.softmax(logits, 1).max(dim=1).values.sum().item()
     model.train()
     n = len(x)
-    return correct / n, conf_sum / n, loss_sum / n
+    return correct / n, conf_sum / n, prob_sum / n, loss_sum / n
 
 
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--schedule', default='full', choices=['full', 'fallback'])
+    p.add_argument('--loss', default='mse', choices=['mse', 'ce'])
     args = p.parse_args()
     schedule = FULL_SCHEDULE if args.schedule == 'full' else FALLBACK_SCHEDULE
     anchors = set(ANCHOR_STEPS) if args.schedule == 'full' else {0, 100000}
@@ -73,28 +75,39 @@ def main():
 
     model = MLP(depth=4, width=200, activation='relu').to(device)
     opt = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.01)
-    loss_fn = torch.nn.MSELoss()
     one_hots = torch.eye(10, device=device)
+    if args.loss == 'ce':                       # CE on integer labels (MLE loss)
+        ce_fn = torch.nn.CrossEntropyLoss()
+        loss_of = lambda logits, y: ce_fn(logits, y)
+    else:                                       # branch default: MSE on one-hot
+        mse_fn = torch.nn.MSELoss()
+        loss_of = lambda logits, y: mse_fn(logits, one_hots[y])
+    sfx = '' if args.loss == 'mse' else '_ce'
 
-    ck_dir = os.path.join(HERE, 'results', 'ckpts_movie', f'seed{args.seed}')
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{args.seed}')
+    ck_dir = os.path.join(HERE, 'results', 'ckpts_movie', f'seed{args.seed}{sfx}')
+    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{args.seed}{sfx}')
     os.makedirs(ck_dir, exist_ok=True)
     os.makedirs(rec_dir, exist_ok=True)
 
     history = {'step': [], 'train_loss': [], 'train_acc': [], 'test_loss': [],
-               'test_acc': [], 'train_conf': [], 'test_conf': []}
+               'test_acc': [], 'train_conf': [], 'test_conf': [],
+               'train_prob': [], 'test_prob': []}
 
     def checkpoint(step):
-        state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
-        torch.save(state, os.path.join(ck_dir, f'step{step}.pt'))
+        # CE runs keep state_dicts only at anchor steps (run is deterministic &
+        # regenerable; avoids ~190 MB of extra checkpoints in the shared repo)
+        if args.loss == 'mse' or step in anchors:
+            state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+            torch.save(state, os.path.join(ck_dir, f'step{step}.pt'))
         model.eval()
         rec, big = record_checkpoint(model, ex_a, ex_b)
         model.train()
-        tr_acc, tr_conf, tr_loss = eval_metrics(model, train_x, train_y, one_hots, loss_fn)
-        te_acc, te_conf, te_loss = eval_metrics(model, test_x, test_y, one_hots, loss_fn)
+        tr_acc, tr_conf, tr_prob, tr_loss = eval_metrics(model, train_x, train_y, loss_of)
+        te_acc, te_conf, te_prob, te_loss = eval_metrics(model, test_x, test_y, loss_of)
         for k, v in [('step', step), ('train_loss', tr_loss), ('train_acc', tr_acc),
                      ('test_loss', te_loss), ('test_acc', te_acc),
-                     ('train_conf', tr_conf), ('test_conf', te_conf)]:
+                     ('train_conf', tr_conf), ('test_conf', te_conf),
+                     ('train_prob', tr_prob), ('test_prob', te_prob)]:
             history[k].append(v)
         arrays = dict(rec, step=np.int64(step), seed=np.int64(args.seed),
                       t=np.linspace(0, 1, N_POINTS).astype(np.float32),
@@ -114,7 +127,7 @@ def main():
     for step in range(1, max(schedule) + 1):
         idx = torch.randint(0, 1000, (200,), device=device)
         logits = model(train_x[idx])
-        loss = loss_fn(logits, one_hots[train_y[idx]])
+        loss = loss_of(logits, train_y[idx])
         opt.zero_grad(); loss.backward(); opt.step()
         if step in ck_set:
             checkpoint(step)
@@ -127,7 +140,9 @@ def main():
                 'pairs': pairs, 'subset_idx': subset_idx.tolist(),
                 'config': {'depth': 4, 'width': 200, 'activation': 'relu',
                            'train_points': 1000, 'batch': 200, 'lr': 1e-3,
-                           'weight_decay': 0.01, 'loss': 'MSE-on-one-hot',
+                           'weight_decay': 0.01,
+                           'loss': 'MSE-on-one-hot' if args.loss == 'mse'
+                                   else 'CE-on-labels',
                            'opt': 'AdamW', 'steps': max(schedule)}}
     with open(os.path.join(rec_dir, 'manifest.json'), 'w') as f:
         json.dump(manifest, f, indent=1)

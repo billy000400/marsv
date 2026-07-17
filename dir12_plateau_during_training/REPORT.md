@@ -14,7 +14,9 @@ discreteness appears.
 
 **What we did.** We trained a small ReLU MLP on MNIST for 100,000 steps and saved hundreds of
 checkpoints. At every checkpoint we ran the identical activation-interpolation experiment on
-fixed image pairs and rendered the result as one frame of a movie.
+fixed image pairs and rendered the result as one frame of a movie. We then repeated the entire
+run with cross-entropy in place of the default MSE loss, and measured how well the network
+separates each digit pair (pairwise AUROC).
 
 **Findings.**
 
@@ -25,9 +27,17 @@ fixed image pairs and rendered the result as one frame of a movie.
    tens of thousands of further steps to mature. There is no sudden global transition.
 3. **The structure keeps changing long after test accuracy stabilizes.** Plateaus keep
    sharpening, and even past step 80,000 their boundaries relocate in fast ~150-step events.
+4. **The training loss decides *where* the plateaus live, not *whether* they exist.** Under the
+   default MSE-on-one-hot loss they appear in logit space. Under cross-entropy the logits morph
+   almost linearly along the path, but the *softmax probabilities* develop plateaus that are
+   sharper and earlier than the MSE run's. Decision regions (the predicted class along the path)
+   are piecewise-constant under both losses.
+5. **The one pair whose curve looks least like two plateaus, 3 vs 5, really is the hardest pair
+   to classify** — worst pairwise AUROC of all 45 digit pairs, under both losses.
 
 **Verdict: plateaus emerge gradually, do not synchronize across pairs, and keep developing long
-after test accuracy has stopped improving.**
+after test accuracy has stopped improving; the choice of loss relocates them between logit and
+probability space without removing them.**
 
 ## Methods
 
@@ -45,8 +55,20 @@ so $h_1, h_2, h_3$ are 200-dimensional and $h_3$ is the last hidden layer. Optim
 Batch 200, 100,000 steps. This reproduces the training setup of *Deep Networks Always Grok*
 (arXiv:2402.15555) used throughout this branch.
 
-**Accuracy, confidence, and loss.** These three curves appear in the training-context figure and
-in the animation insets. Let $f(x;\theta_t)\in\mathbb{R}^{10}$ be the logits at checkpoint $t$
+**The cross-entropy (CE) variant.** To test whether the results depend on the unusual MSE
+objective, we retrained seed 0 with the standard classification loss — cross-entropy, which is
+the maximum-likelihood (MLE) loss for a softmax classifier — keeping *everything* else
+identical: same initialization, same 1,000-image subset, same batch sequence (the loss function
+consumes no randomness, so the two runs share their entire RNG stream), same 205-checkpoint
+schedule and interpolation protocol.
+
+```math
+\mathcal{L}_{\mathrm{CE}}(t) = -\frac{1}{N}\sum_{n=1}^{N}
+\log\,\mathrm{softmax}\bigl(f(x_n;\theta_t)\bigr)_{y_n}
+```
+
+**Accuracy, confidence, and loss.** These curves appear in the training-context figure and in
+the animation insets. Let $f(x;\theta_t)\in\mathbb{R}^{10}$ be the logits at checkpoint $t$
 and $y_n$ the true label of image $x_n$. Accuracy is the fraction of correct argmax predictions:
 
 ```math
@@ -54,31 +76,39 @@ and $y_n$ the true label of image $x_n$. Accuracy is the fraction of correct arg
 ```
 
 with $N=1{,}000$ (the training subset) for train accuracy and $N=2{,}000$ (the first 2,000 test
-images) for test accuracy. Loss is the training objective itself, the MSE to the one-hot target
-$e_{y_n}$:
+images) for test accuracy. Loss is the training objective itself; for the MSE run it is the MSE
+to the one-hot target $e_{y_n}$:
 
 ```math
 \mathcal{L}(t) = \frac{1}{10\,N}\sum_{n=1}^{N}\bigl\lVert f(x_n;\theta_t) - e_{y_n}\bigr\rVert_2^2
 ```
 
 (the extra factor 10 is because `MSELoss` averages over the 10 output entries as well as over
-images). Confidence needs care here: MSE-to-one-hot training drives the target logit toward 1
-rather than toward $+\infty$, so softmax probabilities saturate near 0.23 for every image and
-carry no information. We therefore define confidence as the **maximum raw output**, averaged
-over images:
+images). Confidence needs care and differs between the losses. MSE-to-one-hot training drives
+the target logit toward 1 rather than toward $+\infty$, so softmax probabilities saturate near
+0.23 for every image and carry no information; for the MSE run we therefore define confidence as
+the **maximum raw output**, averaged over images:
 
 ```math
-\mathrm{conf}(t) = \frac{1}{N}\sum_{n=1}^{N}\max_i f_i(x_n;\theta_t).
+\mathrm{conf}_{\mathrm{MSE}}(t) = \frac{1}{N}\sum_{n=1}^{N}\max_i f_i(x_n;\theta_t).
 ```
 
 Read it as: near 1 = the model puts a full-strength one-hot answer on some class; near 0 = no
-class is asserted.
+class is asserted. CE training does the opposite — it grows logits without bound (raw logit
+values drift to the hundreds), while the softmax probability is the quantity it saturates — so
+for the CE run confidence is the standard **mean maximum softmax probability**:
+
+```math
+\mathrm{conf}_{\mathrm{CE}}(t) = \frac{1}{N}\sum_{n=1}^{N}\max_i\,
+\mathrm{softmax}\bigl(f(x_n;\theta_t)\bigr)_i .
+```
 
 **Checkpoints.** Seed 0 is the primary run. It saves checkpoints at steps 0, 10, 30, 100, 300,
 then every 500 up to 100,000 — 205 in total. Seeds 1 and 2 are confirmation runs with 56
-checkpoints each (same early steps, then every 2,000). Every checkpoint stores the model weights
-and a self-contained record of the protocol below: the distance curves, per-point logits,
-predictions and softmax probabilities, and the endpoint activations at every hidden layer.
+checkpoints each (same early steps, then every 2,000); the CE variant uses the full seed-0
+schedule. Every checkpoint stores the model weights (CE run: at 16 anchor steps) and a
+self-contained record of the protocol below: the distance curves, per-point logits, predictions
+and softmax probabilities, and the endpoint activations at every hidden layer.
 `experiments/manifest_check.py` verifies every expected file and field; all 317 records pass.
 Training is deterministic given the seed, and a from-scratch rerun reproduced the movie's
 records **bit-exactly**. We exploit that determinism twice, rerunning with extra recording
@@ -130,18 +160,21 @@ $d$ runs from 0 (output equals endpoint $A$'s output) to 1 (equals endpoint $B$'
 $10^{-10}$ only guards the $\alpha=0$ division. **Unless a figure says otherwise, $d(\alpha)$ is
 computed on the logits** — the closest analogue of the post's final-layer measurement; the
 layerwise figure additionally shows $d$ at $h_2$ and $h_3$, which is saved at every checkpoint
-too. Sanity checks: the patched $\alpha=0/1$ outputs reproduce the unpatched endpoint outputs
-(max deviation 3.7e-4, float16 storage rounding); the vectorized interpolation matches the
-reference `slerp_path` to 9.5e-7.
+too. For the CE comparison we also evaluate the same formula with
+$x(\alpha) = \mathrm{softmax}$ of the logits — "$d$ in **probability space**" — because CE
+saturates probabilities rather than logits, so logit distances and behavioral distances can
+disagree (they do; see Results). Sanity checks: the patched $\alpha=0/1$ outputs reproduce the
+unpatched endpoint outputs (max deviation 3.7e-4, float16 storage rounding); the vectorized
+interpolation matches the reference `slerp_path` to 9.5e-7.
 
 **Predicted class along the path.** For each of the 50 points we record the argmax of the
 logits, shown as colored squares under each animation curve. This reveals *staircase* structure:
 paths that pass through a third class's region on the way from $A$ to $B$.
 
-**Plateau fraction — the one summary number.** Comparing emergence timing across three seeds
-needs one number per checkpoint; the raw curves stay the primary evidence and no per-curve
-"is it a plateau" threshold is imposed on them. We use the fraction of path points sitting near
-either endpoint's output, averaged over the 45 cross-class pairs:
+**Plateau fraction — the one summary number.** Comparing emergence timing across seeds and
+losses needs one number per checkpoint; the raw curves stay the primary evidence and no
+per-curve "is it a plateau" threshold is imposed on them. We use the fraction of path points
+sitting near either endpoint's output, averaged over the 45 cross-class pairs:
 
 ```math
 \mathrm{PF}(t) = \frac{1}{45 \cdot 50} \sum_{p=1}^{45} \sum_{k=1}^{50}
@@ -150,7 +183,40 @@ either endpoint's output, averaged over the 45 cross-class pairs:
 
 Reading it: the diagonal (no plateau) scores ≈ 0.20 — that is the floor, not zero, because the
 diagonal itself spends its first and last tenth within 0.1 of an endpoint. A perfect two-plateau
-step function scores 1.
+step function scores 1. PF can be evaluated on $d$ in logit space or in probability space; both
+appear in the loss-comparison figure.
+
+### Pair-difficulty metrics (for the 3-vs-5 question)
+
+The pair 3→5 has the least plateau-like curve of the ten animated pairs, which raises the
+question: is the network genuinely worse at telling 3s from 5s, or does one odd curve just
+reflect the two specific images we happened to fix? Test accuracy cannot answer this — it
+aggregates over all ten classes. We need a *per-pair* discriminability score computed over many
+images, and we compare it with two *per-pair* curve-shape scores computed from the single fixed
+interpolation path.
+
+**Pairwise AUROC** — how separable are classes $a$ and $b$ for this model? AUROC (area under the
+receiver operating characteristic curve) is the probability that a random true-$a$ image scores
+higher than a random true-$b$ image; 1.0 = perfectly separable, 0.5 = chance. We score each
+image by its logit difference $s(x) = f_a(x) - f_b(x)$ and use the rank (Mann–Whitney)
+estimator over the first 2,000 test images, restricted to images whose true label is $a$ or $b$
+(roughly 200 of each; ties count one half):
+
+```math
+\mathrm{AUROC}(a,b) = \frac{1}{n_a n_b} \sum_{x \in a} \sum_{x' \in b}
+\Bigl( \mathbf{1}\bigl[s(x) > s(x')\bigr] + \tfrac{1}{2}\,\mathbf{1}\bigl[s(x) = s(x')\bigr] \Bigr)
+```
+
+We also report the **pairwise confusion rate**: among true-$a$ and true-$b$ test images, the
+fraction the model predicts as the *other* class of the pair.
+
+**Curve-shape scores.** For each cross pair at step 100,000 we take (i) the **mid fraction** —
+the share of the 50 path points with $0.1 < d(\alpha) < 0.9$, i.e. the complement of that pair's
+plateau fraction, measuring how much of the path is spent away from the two endpoint plateaus —
+and (ii) the **third-class fraction** — the share of path points whose predicted class is
+neither $a$ nor $b$, measuring staircase detours through other digits' regions. Both are
+correlated against AUROC across the 45 pairs (Spearman rank correlation) in the pairwise-AUROC
+figure.
 
 ### Baselines
 
@@ -174,15 +240,17 @@ produce is then attributable to learned structure.
 
 > **All curve figures share one format.** X-axis: interpolation position $\alpha$ from 0 (image
 > $A$) to 1 (image $B$). Y-axis: relative endpoint distance $d(\alpha)$, from 0 (output = $A$'s
-> output) to 1 (output = $B$'s output), **computed on the logits unless labeled otherwise**. The
-> gray dotted diagonal is the no-structure reference. A plateau → boundary → plateau curve hugs
-> 0, jumps across a narrow $\alpha$ interval, and hugs 1. Colored squares under a curve give the
+> output) to 1 (output = $B$'s output), **computed on the logits unless labeled otherwise** (the
+> CE figures also show $d$ on the softmax probabilities, always labeled). The gray dotted
+> diagonal is the no-structure reference. A plateau → boundary → plateau curve hugs 0, jumps
+> across a narrow $\alpha$ interval, and hugs 1. Colored squares under a curve give the
 > predicted digit at each path point (matplotlib `tab10` colors, digit 0–9). Heatmaps show the
 > same $d(\alpha)$ as color (blue 0 → red 1) with $\alpha$ on x and training step on y.
 >
 > **Primary metric:** $d(\alpha)$ at the logits. **Summary number:** plateau fraction PF.
-> **Secondary only** (final Results subsection): plateau contrast and stable-region count from
-> the radial-perturbation control.
+> **Loss/pair-difficulty metrics** (their own Results subsections): probability-space $d$/PF,
+> pairwise AUROC, mid fraction, third-class fraction. **Secondary only** (final Results
+> subsection): plateau contrast and stable-region count from the radial-perturbation control.
 
 ## Results
 
@@ -232,8 +300,7 @@ Within-class pairs (rightmost panels) never develop a comparable two-plateau str
 sharper the deeper you measure: $d$ at $h_2$ is smoothest, at $h_3$ sharper, at the logits
 sharpest. Early in training all layers are near-diagonal; late in training the deep layers have
 hard plateaus while $h_2$ still changes smoothly. The discreteness is built up depth-wise, not
-inherited from layer 1. This is the only figure where $d$ is shown at layers other than the
-logits.
+inherited from layer 1. This is the only figure where $d$ is shown at hidden layers.
 
 ![Layerwise d(alpha) vs alpha at h2 (green), h3 (orange), and logits (blue), for pair 0-1 (solid) and the mean over all 45 cross pairs (dashed), at steps 100, 5,000, 100,000.](plots/layerwise_selected_steps.png)
 
@@ -260,6 +327,70 @@ filtered). Within-class controls behave as predicted: 8/10 keep a single predict
 the whole path, and the two exceptions (2→2, 7→7) each contain one endpoint the model genuinely
 misclassifies, so those paths really do cross a decision boundary.
 
+### Why the loss keeps falling at constant accuracy — and the cross-entropy version
+
+**The explanation is generic, not an MSE artifact.** Accuracy only checks the *argmax* of the
+10 outputs; the loss measures how far the whole output vector is from its target. Once every
+training image is argmax-correct (step ~145), accuracy is pinned at 1.0, but the outputs are
+still far from the exact targets, so gradient descent keeps shrinking that residual: under MSE
+the outputs converge toward the exact one-hot vectors; under CE the true-class logit margin —
+and hence the softmax probability — keeps growing, and the loss approaches 0 only
+asymptotically. The CE rerun (identical init, data, and batch order; only the loss changed)
+reproduces the picture exactly: train accuracy is 1.0 from its step-300 checkpoint onward
+(between checkpoints 100 and 300; the MSE run's finer early rerun locates it at step 145) while
+CE train loss keeps falling for the remaining ~99,700 steps, reaching $1.7\times10^{-8}$
+(MSE run: $4.0\times10^{-9}$). This continued optimization at fixed accuracy is precisely the
+regime in which the plateaus keep sharpening. Two side observations: CE generalizes slightly
+better here (final test accuracy 0.881 vs 0.848) and its test loss *rises* late (mild overfit in
+likelihood while test accuracy is stable) — neither changes the plateau story.
+
+![MSE vs CE (seed 0, identical init/data/batches; log-scale x). Top: train/test loss (log y) with the first train-acc-1.0 checkpoint marked — under both losses train loss falls for the rest of training. Bottom left: train/test accuracy for both runs and CE confidence (mean max softmax probability). Bottom right: plateau fraction PF in logit space and probability space for both runs.](plots/mse_vs_ce_training.png)
+
+**CE relocates the plateaus from logit space to probability space.** In logit space the CE run
+never leaves the diagonal: its PF creeps from 0.19 to only ~0.26 and back to 0.22 by 100k
+(diagonal floor ≈ 0.20; mean deviation from the diagonal 0.023 at 100k vs 0.16 for MSE). But
+this is not "no structure" — it is the wrong space. CE training grows logit *norms*
+continuously along the path, which linearizes logit-space distances. Measure the same paths in
+probability space (softmax of the same logits) and the CE run has the **sharpest plateaus of
+any run in this report**: PF 0.89 at 100k vs 0.55 for MSE (where logit and probability space
+agree, 0.556 vs 0.550, because MSE outputs are already near the one-hot simplex). The
+probability-space plateaus also form much *earlier* under CE — most of the rise is complete by
+step ~1,000–10,000. And the decision regions along the path (colored squares) are
+piecewise-constant with 1–3 sharp switches under both losses. So the loss determines in which
+output coordinates the discreteness is visible; the underlying region structure is common.
+
+![CE-loss run (seed 0), selected steps (rows: 0, 100, 1,000, 20,000, 100,000) for the ten pairs: d(alpha) computed in logit space (blue) stays near the diagonal, while the same paths in probability space (red) develop plateau-boundary-plateau curves sharper than the MSE run's; squares: predicted class.](plots/frames_selected_steps_ce_prob.png)
+
+The full CE animation (same format as the main movie, logit-space $d$, with the CE run's
+accuracy/confidence and loss insets) shows the diagonal persisting through all 205 checkpoints
+while the predicted-class squares still snap between discrete regions:
+
+![CE-loss animation (seed 0, 205 frames): logit-space d(alpha) for the ten pairs stays near the diagonal throughout training; squares: predicted class. Insets: accuracy and confidence = mean max softmax probability (top), train/test CE loss (bottom, log y).](plots/plateau_evolution_ce.gif)
+
+### Is 3 vs 5 actually harder? Pairwise AUROC and the shape of the 3→5 curve
+
+**Yes — 3 vs 5 is the hardest digit pair for this model.** Its AUROC over the first 2,000 test
+images is **0.9306, the worst of all 45 pairs** (next worst: 5v8 at 0.9512, 7v9 at 0.9558;
+median pair 0.987; best 0v1 at 1.0000). Its pairwise confusion rate is 5.2% — one in nineteen
+3s/5s is predicted as the other digit (207 threes, 179 fives in the pool). The same holds under
+CE: AUROC(3,5) = 0.9755, again rank 1 of 45 from the worst. The reviewer's read of the movie
+panel was therefore correct in substance: the pair whose interpolation curve looks least like
+two plateaus is genuinely the hardest to separate.
+
+**But the odd 3→5 curve is a staircase, not a smeared boundary.** At step 100k the 3→5 path
+starts in a region predicted **2** (the fixed "3" endpoint is genuinely misclassified as 2 —
+one of the 9 misclassified endpoints), crosses into a region predicted **9** where it sits on a
+flat mid-level shelf at $d\approx0.45$ for ~11 consecutive points, then jumps to the **5**
+plateau. The "plateau in the middle" is a real activation plateau belonging to a *third* class,
+exactly the staircase phenomenon seen in other pairs — its unusual look comes from the
+misclassified endpoint plus the detour, not from a failure of plateau formation. Across all 45
+pairs, curve shape is only a weak proxy for pair difficulty: Spearman correlation of AUROC with
+the mid fraction is $-0.21$, and with the third-class fraction $-0.48$ — one fixed image pair
+per digit pair is a noisy readout, which is why we answer the difficulty question with AUROC
+over ~400 images per pair rather than with the curve.
+
+![Pairwise discriminability vs curve shape (MSE seed 0, step 100k, first 2,000 test images). Top left: 10x10 pairwise AUROC matrix (color + printed values; 3v5 darkest). Top right: pairs ranked by 1 - AUROC (log y), 3v5 in red at rank 1/45. Bottom left: 1 - AUROC (log y) vs mid fraction of each pair's curve, 3v5 highlighted. Bottom right: the 3->5 curve at 100k with its predicted classes (squares) annotated - a 2/9/5 staircase with a misclassified "3" endpoint.](plots/pairwise_auc.png)
+
 **Perturbation control (secondary).** An earlier study in this direction probed the same
 checkpoints from a different angle. It perturbed natural $h_1$ activations radially and compared
 the output response to matched-random activations (13 log-spaced checkpoints, 3 seeds). Its
@@ -280,14 +411,23 @@ Activation plateaus in this MLP are entirely learned, and learned slowly. They a
 initialization, take soft form during the few hundred steps in which the network fits the data,
 and only become genuinely flat regions with sharp, staircase boundaries over tens of thousands
 of post-generalization steps — while boundaries continue to relocate in fast ~150-step events
-even past step 80,000. The within-class controls, the layerwise sharpening, and the
-matched-random perturbation control corroborate the same picture: training first solves the
-task, then keeps carving the representation into increasingly discrete, confidently-held regions
-— including around confidently *wrong* predictions.
+even past step 80,000. The engine of that late development is ordinary loss minimization at
+saturated accuracy: accuracy only constrains the argmax, so both MSE and CE keep shrinking the
+residual for the remaining ~99,700 steps, and that continued optimization is what sharpens the
+plateaus. The loss chooses the coordinates: MSE carves plateaus directly into the logits, CE
+into the softmax probabilities (even more sharply, and earlier), with the same discrete
+decision-region structure underneath. The pair whose curve looks least plateau-like, 3 vs 5, is
+genuinely the model's hardest pair (worst AUROC under both losses), but its odd curve is itself
+made of plateaus — a staircase through a third class's region from a misclassified endpoint.
+The within-class controls, the layerwise sharpening, and the matched-random perturbation
+control corroborate the same picture: training first solves the task, then keeps carving the
+representation into increasingly discrete, confidently-held regions — including around
+confidently *wrong* predictions.
 
 **Limitations.** One architecture (depth-4, width-200 MLP), one dataset (1,000-image MNIST
-subset, MSE-on-one-hot training), three seeds. Confirmation seeds use 2,000-step checkpoint
-spacing rather than 500. The plateau fraction depends on its 0.1/0.9 margins (used only as a
-cross-seed timing summary; all raw curves are saved and shown). Endpoints come from test images
-the model may misclassify — deliberate, but a few "cross-class" paths therefore connect regions
-of the same predicted class. The dense zooms (early phase, one late flip) cover seed 0 only.
+subset), three MSE seeds; the CE variant is seed 0 only. Confirmation seeds use 2,000-step
+checkpoint spacing rather than 500. The plateau fraction depends on its 0.1/0.9 margins (used
+only as a cross-run timing summary; all raw curves are saved and shown). Endpoints come from
+test images the model may misclassify — deliberate, but a few "cross-class" paths therefore
+connect regions of the same predicted class. Pairwise AUROC is reported at the final checkpoint
+of seed 0. The dense zooms (early phase, one late flip) cover seed 0 only.

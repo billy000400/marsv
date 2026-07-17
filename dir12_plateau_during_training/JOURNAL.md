@@ -177,3 +177,45 @@ formation, then slow tens-of-thousands-of-steps sharpening) that the log-schedul
 **Next step.** None — plan complete, all feedback addressed, STOP re-written.
 
 On track? yes — S1–S6 done + feedback 07161530 addressed, 100% complete, no blocker; STOP written (zero unaddressed feedback).
+## 2026-07-17 — Iter 6: feedback 07161650 (CE-loss version + 3v5 pairwise AUROC)
+
+**Feedback check:** found `human_feedback_07161650.txt` unaddressed next to a stale STOP →
+deleted STOP per CLAUDE.md rule 11; the two questions WERE the iteration.
+
+**Did.**
+- Q1: added `--loss {mse,ce}` to `train_and_record.py` (loss consumes no RNG → CE run shares
+  init/subset/batch order with MSE seed 0 exactly); trained CE seed 0, full 205-ckpt schedule
+  (136 s); `mse_vs_ce.py` (4-panel comparison + PF in logit AND probability space),
+  `ce_frames.py` (logit-vs-prob d grid), `render_movie.py --suffix _ce` (CE gif; softmax
+  confidence in the inset since CE max-raw-logit is ~-220 and meaningless).
+- Q2: `pairwise_auc.py` — rank-estimator AUROC on logit differences for all 45 digit pairs over
+  test[:2000] at step 100k (MSE + CE models), pairwise confusion, per-pair curve mid-fraction and
+  third-class fraction, Spearman correlations, annotated 3->5 curve panel.
+- Rewrote REPORT.md (2 new Results subsections, new Methods for CE/conf_CE/prob-space d/AUROC/
+  curve-shape scores, findings 4-5, updated Conclusion+Limitations) and RESULTS.md (2 new
+  sections, CE PF numbers, 4 new embedded figures). Render checks 9/9 display math, 0 degraded,
+  hazard grep clean, all plots embedded. Renamed feedback -> .addressed.md.
+
+**Learned.**
+- The flat-acc/falling-loss combo is generic (acc is argmax-only) — CE reproduces it exactly.
+  Feedback said "MLE loss"; our default was MSE, and CE *is* the MLE loss — stated in REPORT.
+- Big surprise: CE never forms logit-space plateaus (PF 0.22 ≈ floor at 100k; CE grows logit
+  norms, linearizing logit distances) but has the sharpest probability-space plateaus of any run
+  (PF 0.89 vs MSE 0.55), forming earlier. MSE agrees across spaces (~0.55 both). So the loss
+  picks the coordinates where output discreteness is visible; argmax regions are common to both.
+- 3v5 is genuinely the hardest pair: worst AUROC of 45 under BOTH losses (0.9306 MSE / 0.9755
+  CE); yet the "plateau-looking boundary" of 3->5 is a real third-class (9) plateau plus a
+  misclassified endpoint (3 predicted as 2) — a staircase. Curve shape from ONE image pair is a
+  weak difficulty proxy (Spearman -0.21/-0.48).
+
+**Assumptions logged (loop mode).**
+- "MLE loss" interpreted as the existing MSE objective (CE requested as the alternative and run).
+- CE run: seed 0 only, state dicts at 16 anchor steps only (deterministic + regenerable; saving
+  205 would add ~190 MB to the shared repo). Alternatives (3 CE seeds / full state saving)
+  rejected for repo size and because the comparison is within-seed controlled.
+- AUROC despite PLAN's "no AUC variants" clause: operator feedback explicitly asked; scoped to
+  one figure + one Methods subsection.
+
+**Next step.** None — plan complete, all feedback addressed, STOP re-written.
+
+On track? yes — S1–S6 done + feedback 07161650 addressed, 100% complete, no blocker; STOP written (zero unaddressed feedback).

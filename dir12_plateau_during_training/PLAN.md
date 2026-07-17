@@ -235,20 +235,25 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocke
 
 ## Current status
 
-COMPLETE (2026-07-16, iter 5). All six stages done. Seed 0: 205-checkpoint movie (steps 0,10,30,100,300 then
+COMPLETE (2026-07-17, iter 6). All six stages done. Seed 0: 205-checkpoint movie (steps 0,10,30,100,300 then
 every 500 to 100k), 55-pair frozen SLERP protocol at every checkpoint, all records + state dicts saved and
-manifest-verified; seeds 1–2 confirm with 56 checkpoints each. Deliverables: plots/plateau_evolution.gif (205
+manifest-verified; seeds 1–2 confirm with 56 checkpoints each; CE-loss rerun of seed 0 (identical
+init/data/batches, full schedule) per feedback 07161650. Deliverables: plots/plateau_evolution.gif (205
 frames, with accuracy/confidence + train/test-loss insets), plateau_evolution_early.gif +
 plateau_early_heatmap.png (feedback 07161530: deterministic seed-0 rerun every 5 steps 0–1,000, LINEAR time
 axis, bit-exact vs movie records), frames_selected_steps.png, plateau_training_heatmap.png,
 layerwise_selected_steps.png, seed_comparison.png, dense_zoom.png (50-step zoom into the largest late boundary
-flip, 82,000→82,500, bit-exact), training_context.png; results/checkpoint_manifest.json. Verdict in REPORT.md:
+flip, 82,000→82,500, bit-exact), training_context.png, mse_vs_ce_training.png,
+frames_selected_steps_ce_prob.png, plateau_evolution_ce.gif, pairwise_auc.png;
+results/checkpoint_manifest.json, results/mse_vs_ce.json, results/pairwise_auc.json. Verdict in REPORT.md:
 plateaus emerge gradually out of a diagonal (none at init), pairs do not synchronize, sharpening and outright
 boundary relocation continue long after test accuracy stabilizes; early phase = fast soft-structure formation
 (diagonal deforms in tens of steps, PF frozen ~0.37 from step 200), sharpening comes tens of thousands of steps
-later. Feedback 07161151 (first 2,000 test images) baked into the protocol; feedback 07161530 (8 points:
-early-focus linear-time animation, loss in animation, acc/conf definitions, layer labels, readability) fully
-addressed in REPORT/RESULTS. STOP written.
+later; the loss decides WHERE plateaus live (MSE → logits, PF 0.55; CE → softmax probabilities, PF 0.89,
+logit-space stays diagonal), not whether they exist; 3v5 is the genuinely hardest pair (worst AUROC of 45
+under both losses) and its odd curve is a third-class staircase from a misclassified endpoint. Feedback
+07161151, 07161530, and 07161650 (why loss falls at flat accuracy + CE version; 3v5 AUC) all addressed in
+REPORT/RESULTS. STOP written.
 
 ## Next step
 

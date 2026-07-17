@@ -1,0 +1,15 @@
+saved plateau_evolution.gif
+saved frames_selected_steps.png
+saved plateau_training_heatmap.png
+saved layerwise_selected_steps.png
+saved training_context.png
+
+largest adjacent-frame changes (step_from -> step_to: max-pair mean |dd|):
+  33,500 -> 34,000: 0.380 (pair 4->8)
+  50,500 -> 51,000: 0.371 (pair 5->6)
+  41,000 -> 41,500: 0.328 (pair 6->8)
+  51,000 -> 51,500: 0.295 (pair 5->8)
+  41,500 -> 42,000: 0.279 (pair 3->4)
+  51,500 -> 52,000: 0.279 (pair 3->7)
+  33,000 -> 33,500: 0.237 (pair 6->8)
+  61,500 -> 62,000: 0.205 (pair 3->7)
