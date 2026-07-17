@@ -1,0 +1,10 @@
+# Matthew's exact assay, BPE primary (PLAN Exp 3) — source: MShinkle/activation_plateau_mechanisms
+model_name: grok_bpe reconstruction (12L/12H GeLU GPT, GPT-2 BPE)  # adapter changed, code path preserved
+shared_context: "The house was"
+token_pairs: [[big, in], [big, large]]     # each completion 1 BPE token (tokenization_check.txt)
+n_steps: 50                                 # exactly 50 evenly spaced t incl. endpoints
+interpolation: slerp_rescale (spherical direction, linear L2 norm), final position only
+interp_layers: resid_post blocks 0..11 (all available)
+record_hooks: [attn_out, resid_mid, mlp_post, mlp_out, resid_post, logits]
+metric: d(t) = ||x(t)-x_A|| / (||x(t)-x_A|| + ||x(t)-x_B||)
+checkpoints: 6 phases frozen from Figure-9 curves BEFORE inspecting plateau curves

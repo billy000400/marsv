@@ -1,0 +1,12 @@
+# Fresh character control (PLAN Exp 1.3) — paper-faithful Figure-9 reconstruction
+model: {n_layer: 12, n_head: 12, n_embd: 240, block_size: 128, dropout: 0.2, vocab_size: 65}
+tokenizer: char (65 symbols, Tiny Shakespeare)
+corpus: /tmp/tinyshakespeare.txt sha256=86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed
+split: first 90% train / last 10% val
+optimizer: Adam lr=1e-3 betas=[0.9,0.99] weight_decay=0.0   # paper default: Adam, zero wd
+schedule: 100-step linear warmup, cosine 1e-3 -> 1e-4 over full horizon (reconstruction choice)
+batch: 48 x 128 tokens
+steps: 30000            # budget-limited; PLAN asks ~1e5 subject to BUDGET.md (deviation recorded)
+checkpoints: log-spaced (24 pts) + every 2500
+seeds: {model: 1337, data: 42}
+grad_clip: 1.0

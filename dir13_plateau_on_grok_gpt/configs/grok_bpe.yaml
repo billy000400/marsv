@@ -1,0 +1,12 @@
+# Fresh BPE model (PLAN Exp 2) — same frozen setup as grok_char except tokenizer
+model: {n_layer: 12, n_head: 12, n_embd: 240, block_size: 128, dropout: 0.2, vocab_size: 50257}
+tokenizer: GPT-2 byte-level BPE (transformers GPT2TokenizerFast "gpt2")
+corpus: /tmp/tinyshakespeare.txt sha256=86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed
+split: first 90% train / last 10% val (in BPE tokens)
+optimizer: Adam lr=1e-3 betas=[0.9,0.99] weight_decay=0.0
+schedule: 100-step linear warmup, cosine 1e-3 -> 1e-4 over full horizon
+batch: 48 x 128 tokens (4 micro-batches of 12, gradient accumulation — OOM workaround; token exposure matched)
+steps: 30000            # budget-limited (may stop at wall-clock cap; actual final step in train_meta_grok_bpe.json)
+checkpoints: log-spaced (24 pts) + every 2500
+seeds: {model: 1337, data: 42}
+grad_clip: 1.0

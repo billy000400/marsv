@@ -1,0 +1,13 @@
+corpus sha256=86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed chars=1115394 gpt2_bpe_tokens=338025 train_tokens=304222
+shared_context='The house was'
+
+context token ids=[464, 2156, 373] decoded=['The', ' house', ' was']
+completion ' big': ids=[1263] decoded=[' big'] single_token=True train_count=11 corpus_count=13
+completion ' in': ids=[287] decoded=[' in'] single_token=True train_count=1959 corpus_count=2140
+completion ' large': ids=[1588] decoded=[' large'] single_token=True train_count=10 corpus_count=11
+
+char control 'b': id=40 train_count=10236
+char control 'i': id=47 train_count=40984
+char control 'l': id=50 train_count=30239
+
+GATE (each completion is one BPE token after context): PASS

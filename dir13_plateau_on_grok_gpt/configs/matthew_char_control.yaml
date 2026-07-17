@@ -1,0 +1,9 @@
+# Tokenizer control (NOT a replication of Matthew's examples) — char model
+shared_context: "The house was"
+token_pairs: [[b, i], [b, l]]              # two pairwise single-char tests
+n_steps: 50
+interpolation: slerp_rescale, final position only
+interp_layers: resid_post blocks 0..11
+record_hooks: [attn_out, resid_mid, mlp_post, mlp_out, resid_post, logits]
+metric: d(t) as in matthew_bpe.yaml
+checkpoints: same frozen phases as the BPE assay

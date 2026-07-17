@@ -1,0 +1,7 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[grok_bpe] params=20.42M vocab=50257 corpus_tokens=338025 train_tokens=304222 epoch_every=50 steps
+[grok_bpe] step      0 lr 0.00e+00 train 10.873 val 10.853 acc 0.000 [0.1m]
+[grok_bpe] step    250 lr 1.00e-03 train 4.774 val 5.107 acc 0.226 [1.7m]
+[grok_bpe] step    500 lr 1.00e-03 train 4.130 val 4.813 acc 0.273 [2.8m]
+[grok_bpe] step    750 lr 9.99e-04 train 3.579 val 4.766 acc 0.299 [3.9m]
+[grok_bpe] step   1000 lr 9.98e-04 train 3.173 val 4.923 acc 0.297 [5.2m]
