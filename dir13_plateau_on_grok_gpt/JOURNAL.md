@@ -168,3 +168,34 @@ re-verification run, not re-ticking from memory — it converts "the journal say
 **Next step.** None — plan complete, zero unaddressed feedback, STOP verified.
 
 On track? yes — S7 done, 100%, no blocker (verdict reproduced bit-exactly; STOP verified on disk).
+
+## 2026-07-17 (5) — Fresh-run dynamics figure + queued late-checkpoint char gate eval
+
+**Did.** Feedback check first: only the two `.addressed.md` files, nothing unaddressed. Found the
+reopened S3–S5 pipeline mid-flight in background: fresh char training (step ~21k/30k, PID 74887) and
+BPE training (step ~9.5k, PID 76638) both running under budget caps; an early-checkpoint char fig9
+eval (steps 0–4994, PID 84700) running; a chained BPE fig9 waiting on GPU. Inspected `fig9.py` — it
+**resume-merges** into `--out` (reads existing records, skips done steps, appends). Two gaps: (1) both
+queued evals only cover checkpoints ≤4994 while training reaches 20k+, so a *second* LC descent (the
+whole gate) couldn't be detected; (2) no new deliverable figure this iteration.
+1. Started to queue a late-checkpoint char eval, but discovered a prior iteration had ALREADY queued
+   `/tmp/chain_char_late.sh` (PID 84882) doing exactly this — waits for training + early eval, then
+   dynamically resume-merges late steps (incl. `MAX` and final) into `results/fig9_grok_char.json`.
+   My duplicate would have been a second concurrent writer to the shared JSON, so I **killed it**
+   (85258) and kept the pre-existing chain. Net: late-checkpoint char gate coverage is queued.
+2. Wrote `experiments/plot_fresh_training.py`; generated `plots/fresh_training_dynamics.png` from the
+   live logs. Embedded it in RESULTS.md and REPORT.md (Fig 1c) as clearly-labelled in-progress context.
+
+**Learned.** Both fresh runs **overfit**: val loss bottoms very early (char 1.47@~3750; BPE 4.77@~750)
+then climbs while train loss keeps falling; val acc plateaus (char ≈0.56, BPE ≈0.27). That is the
+opposite of grokking's delayed val recovery — strong prior that the fresh gate will also FAIL within
+the budgeted 30k horizon, but the per-checkpoint LC/PGD eval is the actual test and isn't done yet.
+
+**Next step.** When char training + both fig9 evals finish: run `fig9_verdict.py` on the merged
+`fig9_grok_char.json` (now with late checkpoints) → fresh char gate verdict (S4); plot its full LC/PGD
+curve (`plot_fig9.py`); same for BPE (S5); then freeze 6 checkpoint phases and run the Matthew
+checkpoint sweep (S6) → joint timeline (S7) → rewrite report + STOP (S8). Do NOT STOP until fresh
+verdicts + joint timeline exist.
+
+On track? yes — S3–S5 running in background, ~55% of reopened plan; blocker: awaiting background
+training/eval completion (queued, no action needed until they finish).

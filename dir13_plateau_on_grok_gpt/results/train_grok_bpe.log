@@ -36,3 +36,8 @@ Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF
 [grok_bpe] step   8250 lr 8.45e-04 train 0.361 val 9.906 acc 0.275 [47.2m]
 [grok_bpe] step   8500 lr 8.36e-04 train 0.399 val 9.949 acc 0.273 [48.3m]
 [grok_bpe] step   8750 lr 8.27e-04 train 0.353 val 10.263 acc 0.269 [49.4m]
+[grok_bpe] step   9000 lr 8.17e-04 train 0.377 val 9.993 acc 0.278 [50.6m]
+[grok_bpe] step   9250 lr 8.08e-04 train 0.367 val 10.310 acc 0.271 [51.7m]
+[grok_bpe] step   9500 lr 7.98e-04 train 0.325 val 10.283 acc 0.272 [52.8m]
+[grok_bpe] step   9750 lr 7.88e-04 train 0.329 val 10.394 acc 0.271 [53.9m]
+[grok_bpe] step  10000 lr 7.78e-04 train 0.332 val 10.352 acc 0.273 [55.1m]

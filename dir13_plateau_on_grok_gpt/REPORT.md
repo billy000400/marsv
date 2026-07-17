@@ -224,6 +224,17 @@ support a joint Grokking↔plateau claim. Two matched fresh runs (character + BP
 budget-capped below the paper's ~1e5) are training now to test the gate properly; their Figure-9
 verdicts (S4/S5) and the joint timeline (S7) follow next iteration.
 
+**Fresh-run training dynamics so far (in progress).** Both fresh runs are **overfitting**, not
+grokking. Validation loss reaches its minimum very early — character at step ≈3,750 (val 1.47), BPE at
+step ≈750 (val 4.77) — and then rises monotonically while train loss keeps falling; val next-token
+accuracy plateaus (character ≈0.56, BPE ≈0.27). Grokking is the opposite pattern: val loss dropping
+long *after* train loss saturates. So, like the pilot, these runs likely lack the delayed-generalization
+ordering within the budgeted horizon — but the decisive test is the per-checkpoint LC/PGD gate
+evaluation, which is still running (early checkpoints done; a late-checkpoint eval over steps 5k–30k is
+queued to test for a *second* LC descent). Figure 1c shows the training curves.
+
+![Figure 1c — Fresh Grokking-horizon runs, training dynamics (in progress). Two panels: left = 12-layer character GPT (vocab 65), right = 12-layer BPE GPT (vocab 50257). x-axis: training step. Left y-axis: cross-entropy loss in nats — blue = train loss, red = val loss. Right y-axis (green dashed): val next-token accuracy. In both panels val loss bottoms early then climbs while train loss keeps dropping — memorisation without grokking within the budgeted horizon.](plots/fresh_training_dynamics.png)
+
 ![Figure 1b — Pilot char GPT Figure-9 curves. Left y-axis: local complexity (sign-crossing units summed over the 12 GeLU layers) for train (blue), test (orange), random (green) base points, 99% CI bands. Right y-axis: next-token accuracy — black solid = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale; step 0 drawn at 1). LC descends monotonically to the horizon (no second descent) while adversarial accuracy reaches 0.33 — verdict FAIL.](plots/grokking_pilot_char.png)
 
 **Primary result: 14/40 frozen pairs are plateaus; almost all curves are sigmoid.** With

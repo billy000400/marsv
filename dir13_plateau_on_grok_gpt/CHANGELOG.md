@@ -180,3 +180,23 @@ Grokking-side result into the deliverables.
   API, 0 `<pre lang="math">`, 0 inline-math hazards (fixed one `\,`→`\thinspace`), 0 unembedded plots.
 - Plateau numbers unchanged (still current-best). No STOP (plan incomplete: S4/S5/S6/S7 pending; fresh
   char/BPE trainings + their fig9 evals running in background).
+
+## 2026-07-17 (5) — Fresh-run training-dynamics figure; queued late-checkpoint char gate eval
+
+- **New figure `plots/fresh_training_dynamics.png`** (`experiments/plot_fresh_training.py`, parses the
+  live training logs): fresh char + BPE runs' train/val loss and val next-token accuracy vs step. Both
+  runs **overfit** — val loss bottoms early (char 1.47 @ step ~3,750; BPE 4.77 @ step ~750) then rises
+  while train loss keeps falling; val acc plateaus (char ≈0.56, BPE ≈0.27). Opposite of grokking's
+  delayed val-loss recovery, foreshadowing (not yet deciding) a likely gate FAIL.
+- **RESULTS.md + REPORT.md:** added an "in progress" fresh-run training-dynamics paragraph and embedded
+  the new figure (RESULTS.md; REPORT.md as Figure 1c). Clearly marked that the decisive per-checkpoint
+  LC/PGD gate eval is not yet complete.
+- **Late-checkpoint char fig9 eval confirmed queued.** A prior iteration already launched
+  `/tmp/chain_char_late.sh` (waits for char training + early eval, then resume-merges late steps incl.
+  the final checkpoint into `results/fig9_grok_char.json`) so a *second* LC descent can be detected. I
+  killed a duplicate chain I had briefly started (would have been a second concurrent writer to the
+  shared JSON) and kept the pre-existing one.
+- Render checks: REPORT.md 6/6 `js-display-math`, 0 `<pre lang="math">`, 0 inline-math hazards, 6
+  embedded plot images; RESULTS.md 6 embedded images, 0 bare-path refs, 0 hazards.
+- Plateau numbers and pilot gate verdict unchanged (still current-best). No STOP (S4/S5/S6/S7 pending;
+  fresh trainings + fig9 evals running in background).

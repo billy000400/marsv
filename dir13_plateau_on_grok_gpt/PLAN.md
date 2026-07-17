@@ -203,12 +203,22 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
   vs the plan's ~1e5 — deviation recorded), Adam wd=0, log-spaced+2500-linear checkpoints.
 - Matthew checkpoint-sweep driver ready and smoke-tested (`experiments/run_matthew_ckpts.py`),
   configs frozen in configs/*.yaml.
+- Fresh-run training dynamics plotted (`plots/fresh_training_dynamics.png`): both runs OVERFIT (val
+  loss bottoms early — char 1.47@~3750, BPE 4.77@~750 — then rises; val acc plateaus 0.56 / 0.27).
+  Strong prior the fresh gate also FAILs within the 30k budget horizon; decisive per-ckpt LC/PGD eval
+  still running. Figure embedded in RESULTS.md + REPORT.md (in-progress, labelled).
+- Early char fig9 eval covered only steps <=4994; a LATE-checkpoint char eval is queued (pre-existing
+  `/tmp/chain_char_late.sh`, dynamic late+final steps) that resume-merges into
+  `results/fig9_grok_char.json` so a *second* LC descent can be detected. Waits for training + early
+  eval to free the shared file/GPU. (A duplicate I briefly started was killed to avoid two writers.)
 
 ## Next step
 
-When trainings finish: run `fig9.py` on both fresh checkpoint sets -> gate verdicts (S4/S5); freeze
-6 checkpoint phases from the Figure-9 curves; run `run_matthew_ckpts.py` (BPE exact + char controls)
-at those phases (S6); joint timeline + bounded relationship verdict (S7); rewrite deliverables (S8).
+When char training + both fig9 evals finish: run `fig9_verdict.py` on the merged (early+late)
+`fig9_grok_char.json` -> fresh char gate verdict + `plot_fig9.py` curve (S4); same for BPE (S5); freeze
+6 checkpoint phases; run `run_matthew_ckpts.py` (BPE exact + char controls) at those phases (S6); joint
+timeline + bounded relationship verdict (S7); rewrite deliverables + STOP (S8). Do NOT STOP until fresh
+verdicts + joint timeline exist.
 
 ## Primary references
 

@@ -60,8 +60,19 @@ error). The preregistered PASS/FAIL/NOT-ESTABLISHED rule is in `experiments/fig9
 Read this honestly: the pilot shows the *first* LC descent and emerging robustness, but the horizon
 ends before any *second* descent could appear, so it cannot support a joint claim. This is why PLAN
 requires fresh, longer runs. The two matched fresh runs (char + BPE, 30k-step schedule, budget-capped)
-are **training now**; their Figure-9 evaluations are queued and will receive their own gate verdicts
-(S4/S5) next iteration.
+are **training now**; their Figure-9 LC/PGD evaluations are queued (early checkpoints done; a
+late-checkpoint eval, steps 5k–30k, is running to test for a *second* LC descent) and will receive
+their own gate verdicts (S4/S5) next iteration.
+
+**Fresh-run training dynamics so far (IN PROGRESS).** Both fresh runs are **overfitting**, not
+grokking: validation loss reaches its minimum very early (char: val 1.47 at step ~3,750; BPE: val 4.77
+at step ~750) and then **rises** monotonically while train loss keeps falling — the opposite of the
+delayed val-loss recovery that defines grokking. Val next-token accuracy plateaus (char ≈ 0.56, BPE
+≈ 0.27). This foreshadows (but does not yet decide) the gate: like the pilot, these runs likely lack
+the delayed generalization / second-descent ordering within the budgeted horizon. The LC/PGD gate
+evaluation across checkpoints is the actual test and is not yet complete.
+
+![Fresh Grokking-horizon runs, training dynamics (in progress). Two panels: left = 12-layer char GPT (vocab 65), right = 12-layer BPE GPT (vocab 50257). x-axis: training step. Left y-axis: cross-entropy loss in nats — blue = train loss, red = val loss. Right y-axis (green, dashed): val next-token accuracy. In both panels val loss bottoms early then climbs while train loss keeps dropping, i.e. memorisation without grokking within the budgeted horizon.](plots/fresh_training_dynamics.png)
 
 ![Pilot char GPT Figure-9 curves. Left y-axis: local complexity (sign-crossing units summed over 12 GeLU layers) for train (C0), test (C1), random (C2) points with 99% CI bands. Right y-axis: next-token accuracy — black = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale, step 0 drawn at 1). LC descends monotonically to the 3,500-step horizon (no second descent) while adversarial accuracy climbs to 0.33; verdict FAIL.](plots/grokking_pilot_char.png)
 
