@@ -260,3 +260,33 @@ as clearly-labelled standalone evidence). Then STOP. Do NOT STOP yet — S6/S8 p
 
 On track? yes — S4/S5/S7 complete with FAIL/FAIL/FAIL gates and a bounded case-5 verdict; ~75% of the
 reopened plan; blocker: none (S6/S8 are straightforward next-iteration work).
+
+## 2026-07-17 (8) — S6 char-control per-checkpoint plateau assay + S8 rewrite; plan complete, STOP
+
+**Did.** Feedback check first: only the two `.addressed.md` files — nothing unaddressed. Both remaining
+stages closed this iteration.
+1. **S6.** Generated frozen phases from the fresh-char Figure-9 curve (`freeze_phases.py` →
+   `results/frozen_phases_char.json` = steps 0,56,831,7819,17500,30000; LC monotone so log-spaced
+   fallback). Ran `run_matthew_ckpts.py --tok char --steps 0,56,831,7819,17500,30000 --out_tag char_ctrl
+   --vram_frac 0.2` — Matthew's exact code path (context "The house was", 50-step slerp, full interp-layer
+   sweep, single-position patch) on the `b↔i`,`b↔l` single-token controls. Clean run, DONE. Plotted with
+   `plot_matthew_ckpts.py` → `plots/matthew_char_ctrl_by_checkpoint.png` + `plots/joint_timeline_char_ctrl.png`.
+2. **Key finding.** Block-0 final-logit width: 0.80 (init, diagonal) → 0.35 (step 831) → 0.33 (step 30k).
+   The plateau **emerges during the first LC descent / initial accuracy rise and is fully formed before
+   ε=0.03 robustness saturates** (steps ~10³–10⁴). Depth control holds too (0.33@L0 → 0.80@L11 at 30k).
+3. **S8.** Rewrote RESULTS.md + REPORT.md: the char-control per-checkpoint assay is now the **primary**
+   plateau evidence; the 40-pair natural-minimal-pair sweep is demoted to a clearly-labelled
+   **exploratory** section (PLAN out-of-scope forbids it in the headline). Retitled both to the joint
+   question. Updated Summary/Conclusion/Limitation-4 with the secondary temporal observation. Render
+   checks pass (REPORT 6/6 display-math, 0 broken, 0 stray plot paths, 0 inline hazards; all figures on disk).
+
+**Learned.** Even in a model that never groks, the plateau is a real, timeable phenomenon — but it tracks
+*initial fit* (first LC descent), not a second-descent/robustness window. This tightens the case-5 null:
+not just "untestable" but "no visible temporal coupling," because the plateau is already saturated before
+any grokking-like event could occur. So the bounded relationship verdict is case 5, refined toward
+"no temporal relationship" for the secondary char-control evidence.
+
+**Next step.** None — all stages S1–S8 complete, every success criterion met, `STOP` written. If new
+`human_feedback*.md`/`*REVIEW*` arrives, delete STOP, address it, re-STOP when clean.
+
+On track? yes — plan COMPLETE (100%); S6+S8 done, bounded case-5 verdict with S6 secondary evidence, STOP written; blocker: none.

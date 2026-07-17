@@ -1,0 +1,19 @@
+{
+ "phases": [
+  0,
+  56,
+  831,
+  7819,
+  17500,
+  30000
+ ],
+ "note": "degenerate LC curve (peak at boundary); log-spaced fallback",
+ "labels": [
+  "P1 init",
+  "P2 pre-LC-peak",
+  "P3 LC peak",
+  "P4 2nd descent start",
+  "P5 robustness onset",
+  "P6 final"
+ ]
+}

@@ -163,9 +163,9 @@ Null results are complete when the validity gates pass. When complete, write an 
 - [x] **S3 - Evaluate the existing checkpoint.** Pilot char Figure-9 verdict = **FAIL** (first LC descent + emerging robustness, no second descent within 3,500 steps).
 - [x] **S4 - Fresh character replication.** Trained 30k steps; 14-checkpoint Figure-9 curve; verdict = **FAIL** (LC monotone to 8.1, adv→0.528, no second descent).
 - [x] **S5 - Fresh BPE replication.** Trained; 10-checkpoint Figure-9 curve; verdict = **FAIL** (LC monotone to 95, adv→0.187, no second descent).
-- [ ] **S6 - Checkpoint-aligned plateau assays.** Non-decisive under case 5 (no grokking model); still to run `b/i`,`b/l` char controls across frozen phases as *secondary* per-checkpoint plateau evidence.
-- [x] **S7 - Joint analysis.** `plots/joint_timeline.png` + bounded relationship verdict = **PLAN case 5 (primary relationship not testable)**.
-- [ ] **S8 - Rewrite the report.** De-emphasise the 40-pair reconstruction dataset in the headline; keep it as clearly-labelled standalone plateau evidence; then create `STOP`.
+- [x] **S6 - Checkpoint-aligned plateau assays.** Ran Matthew's exact code path with `b/i`,`b/l` char controls across the 6 frozen phases (steps 0,56,831,7819,17500,30000). Plateau **emerges during the first LC descent**: block-0 final-logit width 0.80 (init) → 0.33 (step 831), flat to 30k; formed *before* robustness saturates. `plots/matthew_char_ctrl_by_checkpoint.png`, `plots/joint_timeline_char_ctrl.png`; raw `results/matthew_char_ctrl_{raw.npz,summary.json}`.
+- [x] **S7 - Joint analysis.** `plots/joint_timeline.png` + bounded relationship verdict = **PLAN case 5 (primary relationship not testable)**, refined by the S6 secondary temporal observation (no coupling to grokking).
+- [x] **S8 - Rewrite the report.** De-emphasised the 40-pair reconstruction dataset (now clearly-labelled *exploratory*); S6 char controls are the primary plateau evidence. STOP written.
 
 ## Fallback
 
@@ -188,7 +188,7 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**IN PROGRESS (2026-07-17): S3/S4/S5/S7 DONE; S6/S8 remain. Bounded verdict = case 5.**
+**COMPLETE (2026-07-17): all stages S1–S8 done. Bounded verdict = case 5 + S6 secondary. STOP written.**
 
 - **All three Figure-9 gates = FAIL** (pilot char, fresh char 30k, fresh BPE 10k). Each shows a first
   LC descent + emerging `ε=0.03`-PGD robustness but **no second LC descent** within budget. Fresh char
@@ -206,12 +206,11 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Next step
 
-S6 (secondary, non-decisive under case 5): run the `b/i`,`b/l` character controls with
-`run_matthew_ckpts.py` across the frozen training phases to show per-checkpoint plateau evolution as
-*secondary* evidence (big/in,big/large BPE sweep is non-decisive since BPE fails the gate). S8:
-de-emphasise the 40-pair reconstruction dataset in the RESULTS/REPORT headline per PLAN out-of-scope,
-keep it as clearly-labelled standalone plateau evidence, then create `STOP`. Do NOT STOP until S6/S8
-are done. No unaddressed feedback files remain.
+None — plan complete, `STOP` written. All success criteria met: three Figure-9 gate verdicts (all
+FAIL), a checkpoint-aligned figure showing both Grokking metrics and plateau width on one axis, the
+two `b/i`/`b/l` char controls as primary plateau evidence, the 40-pair set demoted to a labelled
+exploratory appendix, and the bounded case-5 relationship verdict. If new `human_feedback*.md` /
+`*REVIEW*` arrives, delete `STOP`, address it, and re-STOP when clean.
 
 ## Primary references
 

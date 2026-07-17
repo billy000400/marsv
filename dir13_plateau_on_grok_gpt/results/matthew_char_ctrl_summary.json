@@ -1,0 +1,716 @@
+[
+ {
+  "step": 0,
+  "pairs": {
+   "b/i": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 7.152557373046875e-07,
+     "t1_logit_err": 5.811452865600586e-07
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.8016,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.8018,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.8012,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.8014,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.8002,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.8001,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.7998,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.7996,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.7991,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.799,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.7999,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.7998,
+      "iso_dev": 0.0
+     }
+    }
+   },
+   "b/l": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 7.152557373046875e-07,
+     "t1_logit_err": 7.748603820800781e-07
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.8019,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.8046,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.8028,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.8029,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.8017,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.8007,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.7999,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.8006,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.8009,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.8008,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.8014,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8009,
+      "iso_dev": 0.0
+     }
+    }
+   }
+  }
+ },
+ {
+  "step": 56,
+  "pairs": {
+   "b/i": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 1.1920928955078125e-06,
+     "t1_logit_err": 1.9073486328125e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.771,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.792,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.8021,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.8112,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.8194,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.8237,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.8271,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.8289,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.8305,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.8326,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.834,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8342,
+      "iso_dev": 0.0
+     }
+    }
+   },
+   "b/l": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 1.1920928955078125e-06,
+     "t1_logit_err": 1.6689300537109375e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.8142,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.8184,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.8202,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.8217,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.8233,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.8246,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.8258,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.8277,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.8292,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.8308,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.8319,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8328,
+      "iso_dev": 0.0
+     }
+    }
+   }
+  }
+ },
+ {
+  "step": 831,
+  "pairs": {
+   "b/i": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 2.86102294921875e-06,
+     "t1_logit_err": 2.6226043701171875e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.3484,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.4302,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.4756,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.5067,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.5419,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.5608,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.5949,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.6258,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.6777,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.7646,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.8107,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8524,
+      "iso_dev": 0.0
+     }
+    }
+   },
+   "b/l": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 2.86102294921875e-06,
+     "t1_logit_err": 3.337860107421875e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.6745,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.7717,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.7937,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.8142,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.8227,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.8038,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.8072,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.8167,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.8184,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.825,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.8397,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8501,
+      "iso_dev": 0.0
+     }
+    }
+   }
+  }
+ },
+ {
+  "step": 7819,
+  "pairs": {
+   "b/i": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 5.7220458984375e-06,
+     "t1_logit_err": 4.76837158203125e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.3641,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.5129,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.6438,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.6806,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.7303,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.7535,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.757,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.7622,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.7712,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.7845,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.7974,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8095,
+      "iso_dev": 0.0
+     }
+    }
+   },
+   "b/l": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 5.7220458984375e-06,
+     "t1_logit_err": 4.76837158203125e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.3257,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.4655,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.6157,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.6827,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.7451,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.7639,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.7561,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.7661,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.7912,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.7949,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.8026,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8166,
+      "iso_dev": 0.0
+     }
+    }
+   }
+  }
+ },
+ {
+  "step": 17500,
+  "pairs": {
+   "b/i": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 8.58306884765625e-06,
+     "t1_logit_err": 4.76837158203125e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.3364,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.5437,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.6814,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.7396,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.788,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.7845,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.782,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.7921,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.7954,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.7954,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.8008,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8009,
+      "iso_dev": 0.0
+     }
+    }
+   },
+   "b/l": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 8.58306884765625e-06,
+     "t1_logit_err": 7.62939453125e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.3382,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.5419,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.6856,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.7178,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.7699,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.7811,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.7921,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.7965,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.7928,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.793,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.7867,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8055,
+      "iso_dev": 0.0
+     }
+    }
+   }
+  }
+ },
+ {
+  "step": 30000,
+  "pairs": {
+   "b/i": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 7.62939453125e-06,
+     "t1_logit_err": 7.62939453125e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.3311,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.5126,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.6646,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.719,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.7838,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.7837,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.7809,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.8002,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.8011,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.7987,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.8019,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.7988,
+      "iso_dev": 0.0
+     }
+    }
+   },
+   "b/l": {
+    "checks": {
+     "prefix_err": 0.0,
+     "t0_logit_err": 7.62939453125e-06,
+     "t1_logit_err": 7.62939453125e-06
+    },
+    "interp": {
+     "0": {
+      "w_logits": 0.3297,
+      "iso_dev": 0.0
+     },
+     "1": {
+      "w_logits": 0.529,
+      "iso_dev": 0.0
+     },
+     "2": {
+      "w_logits": 0.6575,
+      "iso_dev": 0.0
+     },
+     "3": {
+      "w_logits": 0.6931,
+      "iso_dev": 0.0
+     },
+     "4": {
+      "w_logits": 0.752,
+      "iso_dev": 0.0
+     },
+     "5": {
+      "w_logits": 0.7638,
+      "iso_dev": 0.0
+     },
+     "6": {
+      "w_logits": 0.7832,
+      "iso_dev": 0.0
+     },
+     "7": {
+      "w_logits": 0.7897,
+      "iso_dev": 0.0
+     },
+     "8": {
+      "w_logits": 0.7789,
+      "iso_dev": 0.0
+     },
+     "9": {
+      "w_logits": 0.7908,
+      "iso_dev": 0.0
+     },
+     "10": {
+      "w_logits": 0.7927,
+      "iso_dev": 0.0
+     },
+     "11": {
+      "w_logits": 0.8029,
+      "iso_dev": 0.0
+     }
+    }
+   }
+  }
+ }
+]

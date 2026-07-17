@@ -1,4 +1,4 @@
-# REPORT — Does the 12-layer Shakespeare GPT show Matthew-style activation plateaus?
+# REPORT — Do Grokking and Matthew-style activation plateaus emerge together?
 
 > Final, presentable, current-best only (history in CHANGELOG.md).
 
@@ -31,20 +31,22 @@ phenomenon itself is nonetheless **present** in the character reconstruction and
 (below), not as evidence about grokking. The paper's role here is only to specify the model under
 test; the phenomenon under test is Matthew's activation plateaus.
 
-**Result: plateaus are present.** 14 of 40 frozen minimal pairs show plateau–boundary–plateau
-structure in raw individual final-logit curves under a strict preregistered rule (transition width
-≤ 0.25 of the path); most other pairs show the same sigmoid shape with a wider boundary. Each curve plots the output's relative closeness to endpoint B (call it $d$,
-from 0 = "still A's output" to 1 = "B's output"; defined precisely in Methods) against the
-interpolation step $t$. Throughout this report the no-plateau reference is the **diagonal**: the
-straight line $d = t$ that this curve traces when the output just morphs uniformly from A's output to
-B's (its transition width is 0.8 — no flat plateau segments at all). Two independent signatures behave exactly
-as predicted for real plateaus, and both are movements of that same curve relative to the diagonal:
-**(1)** holding the interpolation point fixed early and reading the curve out at successively deeper
-layers moves it monotonically *away* from the diagonal — the boundary sharpens layer by layer; and
-**(2)** moving the interpolation point itself later, so fewer layers remain downstream to build the
-plateau, collapses the curve back *onto* the diagonal. **Verdict: go** for a plateau-mapping
-follow-up on this model — qualified, because we tested a reconstruction rather than the paper's exact
-checkpoint.
+**Result: plateaus are present, and we can time their emergence.** Each interpolation curve plots the
+output's relative closeness to endpoint B (call it $d$, from 0 = "still A's output" to 1 = "B's
+output"; defined precisely in Methods) against the interpolation step $t$; the no-plateau reference is
+the **diagonal** $d = t$ (transition width 0.8 — no flat plateau segments). Our **primary plateau
+evidence** runs Matthew's own code path with his exact context and two preregistered single-token
+character controls (`b↔i`, `b↔l`) across six frozen training checkpoints. The plateau is **absent at
+initialization** (curve is the diagonal, width ≈ 0.80) and **emerges during training**: by step ~831
+it is a sharp plateau–boundary–plateau sigmoid (width ≈ 0.33) and stays there to step 30k. Crucially
+that emergence happens during the model's **first** local-complexity descent and initial accuracy
+rise, and is **fully formed before** adversarial robustness saturates — so in this (non-grokking)
+model the plateau tracks *initial fit*, not the (absent) grokking transition. A larger **exploratory**
+40-pair natural-minimal-pair sweep (labelled as such, out of the headline per PLAN scope) corroborates
+the two structural signatures: **(1)** reading the curve at successively deeper layers moves it
+monotonically *away* from the diagonal (the boundary sharpens layer by layer), and **(2)** moving the
+interpolation point later collapses it back *onto* the diagonal. **Verdict: plateaus are real in this
+model** — qualified, because we tested a reconstruction rather than the paper's exact checkpoint.
 
 ## Methods
 
@@ -88,6 +90,22 @@ looks at interpolation curves (that would bias the frozen set toward or away fro
 - **Degeneracy exclusion (frozen threshold):** a pair would be dropped only if its two endpoint logit
   vectors were numerically indistinguishable (L2 distance < 1e-3). None were: endpoint distances span
   8.7–64.4 (median 24.7). All pair metadata is in `results/prompt_pairs.json`.
+
+### Matthew-faithful character-token controls across training (primary plateau assay)
+
+The **primary** plateau evidence follows Matthew's released config/code path
+(`experiments/run_matthew_ckpts.py`, `configs/matthew_char_control.yaml`) so it transfers his assay
+with only the model adapter changed: shared context `"The house was"`, **exactly 50** evenly spaced
+interpolation values including both endpoints, `slerp_rescale` (spherical direction + linear norm;
+same equations below), patch **only the final sequence position**, and sweep **every** interpolation
+layer (`resid_post` blocks 0–11), recording Matthew's downstream hooks (`attn_out`, `resid_mid`,
+`mlp_post`, `mlp_out`, `resid_post`) plus final logits. Because the character model cannot represent
+Matthew's `big/in/large` as single tokens, we use his two preregistered single-**character** controls
+`b↔i` and `b↔l` (labelled tokenizer controls, *not* replications of his word examples). We run them at
+**6 checkpoint phases frozen before any plateau curve was inspected** (`experiments/freeze_phases.py`
+→ `results/frozen_phases_char.json`; the Figure-9 LC curve is monotone so the rule falls back to
+log-spaced picks): steps **0, 56, 831, 7819, 17500, 30000**. This lets us plot plateau width *against*
+the Grokking metrics on one training-step axis (Results §Primary plateau evidence).
 
 ### Spherical interpolation and patching
 
@@ -265,14 +283,43 @@ properties of trained/memorising networks, not evidence of the specific grokking
 
 ![Figure 1d — Joint checkpoint timeline. Left panel: test local complexity (y) vs training step (x, log scale) for pilot char (gray), fresh char (blue), fresh BPE (red); each legend entry gives the run's Figure-9 gate verdict. Middle panel: ε=0.03 PGD adversarial accuracy (y) vs training step (x, log), same colors; dashed line = the 0.05 robustness threshold in the verdict rule. Right panel: text summary of the three gate verdicts (all FAIL), the plateau-assay reference from the reconstruction, and the bounded relationship verdict. No run shows a second LC descent, so the joint verdict is "primary relationship not testable."](plots/joint_timeline.png)
 
-**Primary result: 14/40 frozen pairs are plateaus; almost all curves are sigmoid.** With
-interpolation after block 0 and recording at final logits, 14 of 40 pairs meet the strict frozen rule
+**Primary plateau evidence: the Matthew-faithful char controls show the plateau emerging during
+training (S6).** Running Matthew's code path (context `"The house was"`, 50-step slerp grid, full
+interpolation-layer sweep) with the two frozen single-token controls `b↔i` and `b↔l` at the six frozen
+checkpoint phases, the final-logit transition width at interpolation block 0 evolves as:
+
+| training step | `b↔i` width | `b↔l` width | plateau? |
+|---:|---:|---:|---|
+| 0 (init) | 0.802 | 0.802 | no — diagonal |
+| 56 | 0.771 | 0.814 | no — diagonal |
+| 831 | 0.348 | 0.674 | forming |
+| 7,819 | 0.364 | 0.326 | **yes** |
+| 17,500 | 0.336 | 0.338 | **yes** |
+| 30,000 | 0.331 | 0.330 | **yes** |
+
+At init and step 56 the curve is the diagonal (width ≈ 0.80, no plateau); it collapses to a sharp
+sigmoid (≈ 0.33) by step ~831 and holds flat to 30k. That collapse happens **during the first LC
+descent and the initial clean-accuracy rise, and is fully formed before `ε=0.03` robustness saturates**
+(steps ~10³–10⁴). So even though this model never groks, the plateau still appears — but tied to
+*initial fit*, with no temporal coupling to a second-descent/robustness window (which never opens).
+The depth control holds here too: at step 30000, `b↔i` widens 0.33 (block 0) → 0.72 (block 3) → 0.80
+(block 11) as fewer downstream layers remain.
+
+![Figure 2a — Matthew-faithful char-control d(t) (y), interpolation block 0, final logits, one panel per frozen checkpoint (steps 0→30000, x = t within each panel); blue = b↔i, orange = b↔l, gray dashed = diagonal d=t. Diagonal at init/step 56; sharp plateau–boundary–plateau sigmoid by step 831, stable thereafter.](plots/matthew_char_ctrl_by_checkpoint.png)
+
+![Figure 2b — Grokking metrics vs plateau width on one timeline (fresh char run). Top: left y = local complexity for LC train (blue)/test (orange)/random (green), 99% CI; right y = next-token accuracy, black = clean, red dashed = ε=0.03 PGD adv; x = training step (log). Bottom: transition width w_10→90 (y) for b↔i (blue) and b↔l (orange) vs step (log); gray dashed = diagonal 0.8, red dotted = plateau bar 0.25. Width hits its floor by step ~831 — during the first LC descent, before robustness rises.](plots/joint_timeline_char_ctrl.png)
+
+**Exploratory corroboration: 14/40 natural minimal pairs are plateaus; almost all curves are sigmoid.**
+*(Labelled exploratory and kept out of the headline — PLAN scope forbids a new 40-pair dataset in the
+primary analysis. Retained because its layerwise and depth controls corroborate the above at larger
+`n`.)* With interpolation after block 0 and recording at final logits, 14 of 40 pairs meet the strict
+frozen rule
 (IDs 0, 4, 5, 6, 7, 9, 14, 20, 21, 22, 28, 34, 36, 37); 24/40 have $w \le 0.35$; only 2/40 are
 near-diagonal (#10, #19, $w \ge 0.6$); 0/40 are non-monotone. Median width is 0.309 (range
 [0.110, 0.773]) against the diagonal's 0.8. The structure is visible pair by pair — no averaging is
 involved:
 
-![Figure 2 — Raw relative distance d(t) (y) vs interpolation step t (x) in final-logit space, one panel per frozen pair; panel titles give pair ID, the two endpoint characters, and the transition width w. Gray dashed = diagonal d = t. Most curves hug d≈0, cross rapidly, then hug d≈1; two (#10, #19) track the diagonal.](plots/pair_curves_logits.png)
+![Figure 3 (exploratory) — Raw relative distance d(t) (y) vs interpolation step t (x) in final-logit space, one panel per frozen pair; panel titles give pair ID, the two endpoint characters, and the transition width w. Gray dashed = diagonal d = t. Most curves hug d≈0, cross rapidly, then hug d≈1; two (#10, #19) track the diagonal.](plots/pair_curves_logits.png)
 
 This is heterogeneity worth stating plainly: the strict 0.25 bar splits a continuum — the model's
 typical curve is strongly sigmoid (three times sharper than the diagonal) rather than every pair
@@ -285,14 +332,14 @@ strictly monotonically from 0.777 (block 1) to 0.445 (block 11) and 0.309 at the
 rule is passed only at the logits (14 pairs), never at intermediate residuals. The plateau is
 *formed* by the downstream stack, not present in the interpolated activation itself:
 
-![Figure 3 — Layerwise emergence for four fixed representative pairs (IDs 0–3, frozen before inspection): d(t) (y) vs t (x). Line color = recording block from 1 (dark) to 11 (light), per colorbar; red = final logits; gray dashed = diagonal. Early-block curves are near-diagonal and progressively sharpen into plateau–boundary–plateau by the output.](plots/layerwise_emergence.png)
+![Figure 4 (exploratory) — Layerwise emergence for four fixed representative pairs (IDs 0–3, frozen before inspection): d(t) (y) vs t (x). Line color = recording block from 1 (dark) to 11 (light), per colorbar; red = final logits; gray dashed = diagonal. Early-block curves are near-diagonal and progressively sharpen into plateau–boundary–plateau by the output.](plots/layerwise_emergence.png)
 
 **Later interpolation kills the plateau — the predicted control.** If downstream layers create the
 plateau, interpolating later (fewer layers left) must weaken it. It does, monotonically: median
 $w_{10\to 90}$ = 0.309, 0.564, 0.647, 0.733, 0.757, 0.802 for interpolation blocks 0, 2, 4, 6, 8, 10
 — reaching the diagonal reference 0.8 when only one block remains:
 
-![Figure 4 — Left: median final-logit d(t) (y) vs t (x) per interpolation block (line color dark→light = block 0→10); the block-0 curve is strongly sigmoid and later blocks collapse onto the gray dashed diagonal. Right: median transition width w_10→90 (y; bars = interquartile range across the 40 pairs) vs interpolation block (x); red dashed = plateau bar 0.25; gray dashed = diagonal reference 0.8.](plots/interpolation_layer_comparison.png)
+![Figure 5 (exploratory) — Left: median final-logit d(t) (y) vs t (x) per interpolation block (line color dark→light = block 0→10); the block-0 curve is strongly sigmoid and later blocks collapse onto the gray dashed diagonal. Right: median transition width w_10→90 (y; bars = interquartile range across the 40 pairs) vs interpolation block (x); red dashed = plateau bar 0.25; gray dashed = diagonal reference 0.8.](plots/interpolation_layer_comparison.png)
 
 Tidy per-curve data: `results/matthew_tidy.csv`; per-pair summary: `results/matthew_summary.json`.
 
@@ -312,8 +359,14 @@ trained** (pilot char, fresh 30k char, fresh 30k BPE): each develops adversarial
 shows the defining *second* local-complexity descent within budget (the fresh runs overfit instead).
 Because the BPE model required for Matthew's exact `big/in`, `big/large` tokens does not reproduce
 Figure 9, we **cannot** test whether plateaus sharpen during a second-descent/robustness window — that
-window never opens. This is a bounded, honest null on the *relationship*, not on plateaus: the plateau
-phenomenon itself is clearly present in the character reconstruction and stands independently. Closing
+window never opens. This is a bounded, honest null on the *relationship*, not on plateaus. **Secondary
+temporal observation:** running Matthew's exact assay with the `b↔i`/`b↔l` character controls across
+six frozen checkpoints, the plateau **emerges early** — absent at init (width ≈ 0.80), sharp by step
+~831 (width ≈ 0.33), then flat to 30k — during the *first* LC descent and initial fit, and fully
+formed **before** adversarial robustness saturates. So in this model the plateau shows **no visible
+temporal coupling** to the grokking signature; it is a property of the trained downstream stack that
+appears with initial fit. The plateau phenomenon itself is clearly present and stands independently.
+Closing
 the relationship question would require a training setup that actually groks (far longer horizon, weight
 decay tuned for delayed generalization, or the paper's exact recipe) — outside this run's compute
 budget (~30k vs the paper's ~1e5 steps).
@@ -336,8 +389,10 @@ natural activation-to-activation directions.
 3. **Scope.** One model size, one training length (accuracy 0.56, not grokking-scale), final-position
    interpolation only, and endpoint pairs differing in exactly one character. Plateaus between more
    distant natural inputs are untested here.
-4. **No grokking model, so no per-checkpoint Matthew sweep in the headline.** Because every trained
-   run FAILs the Figure-9 gate, a checkpoint-aligned Matthew `big/in`, `big/large` sweep on a *grokking*
-   BPE model (PLAN S6) is not decisive and was not run within budget; the standalone plateau result
-   above (reconstruction, final checkpoint) is the current evidence. The joint verdict is therefore the
-   bounded null of PLAN case 5, not a temporal-association claim.
+4. **No grokking model, so the per-checkpoint Matthew sweep is secondary, not a joint result.**
+   Because every trained run FAILs the Figure-9 gate, the checkpoint-aligned Matthew sweep on a
+   *grokking BPE* model (Matthew's exact `big/in`, `big/large` tokens) is not decisive. We instead ran
+   Matthew's exact assay with the `b↔i`/`b↔l` character controls across six frozen checkpoints (S6) as
+   *secondary* per-checkpoint plateau evidence: it shows the plateau emerging with initial fit, not
+   with grokking — but this is temporal association in a non-grokking model, not the intended joint
+   result, and not a causal claim. The joint verdict remains the bounded null of PLAN case 5.

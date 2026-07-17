@@ -228,3 +228,26 @@ Grokking-side result into the deliverables.
   save crashed on an int64-not-JSON-serializable error — harmless, checkpoints intact.
 - No STOP: S6 (per-checkpoint Matthew sweep / char controls) + S8 headline rework remain; case 5 makes
   S6 non-decisive but PLAN still lists it.
+
+## 2026-07-17 (S6+S8 complete; plan finished, STOP)
+
+- **S6 — Matthew-faithful char-token controls across training.** Ran `experiments/run_matthew_ckpts.py
+  --tok char` (Matthew's exact code path: context "The house was", 50-step slerp grid, full interp-layer
+  sweep, single-position patch) with the frozen controls `b↔i`,`b↔l` at the 6 frozen phases
+  (`results/frozen_phases_char.json` = steps 0,56,831,7819,17500,30000). New result: **plateau emerges
+  during the first LC descent** — block-0 final-logit width `w_10→90` goes 0.80 (init) → 0.35 (step 831)
+  → 0.33 (step 30k), fully formed *before* ε=0.03 robustness saturates. Depth control holds
+  (step 30000 b↔i: 0.33@L0 → 0.80@L11). Raw `results/matthew_char_ctrl_{raw.npz,summary.json}`; new
+  figures `plots/matthew_char_ctrl_by_checkpoint.png`, `plots/joint_timeline_char_ctrl.png`.
+- **S8 — de-emphasised the 40-pair reconstruction dataset.** RESULTS.md + REPORT.md rewritten so the
+  Matthew-faithful `b↔i`/`b↔l` per-checkpoint assay is the **primary** plateau evidence and the 40-pair
+  natural-minimal-pair sweep is a clearly-labelled **exploratory** corroboration (per PLAN out-of-scope).
+  40-pair figures relabelled "Figure 3/4/5 (exploratory)". Headline/Summary/Conclusion/Limitation-4
+  updated: bounded verdict unchanged (**PLAN case 5, primary relationship not testable**) but now refined
+  with the S6 secondary observation — **no visible temporal coupling** between the plateau (emerges with
+  initial fit) and the grokking signature (never occurs).
+- **Deliverable framing:** both files retitled "Do Grokking and Matthew-style activation plateaus emerge
+  together?". Render checks pass: REPORT.md 6/6 display-math, 0 broken, 0 un-rendered plot paths, 0
+  inline-math hazards, all figures on disk; RESULTS.md same (no display math by design).
+- **Plan complete:** all stages S1–S8 done; every success criterion met. `STOP` written (no unaddressed
+  feedback files remain).
