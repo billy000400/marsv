@@ -23,8 +23,9 @@ from plateau_protocol import HERE, N_POINTS, ANIM_PAIRS
 PLOTS = os.path.join(HERE, 'plots')
 
 
-def load_records(seed, sfx=''):
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{seed}{sfx}')
+def load_records(seed, sfx='', dir60k=False):
+    base = ('full_mnist_from_scratch' if dir60k else 'plateau_records')
+    rec_dir = os.path.join(HERE, 'results', base, f'seed_{seed}{sfx}')
     man = json.load(open(os.path.join(rec_dir, 'manifest.json')))
     steps = man['ckpt_steps']
     d_logit, d_h3, d_h2, pred = [], [], [], []
@@ -49,18 +50,35 @@ def main():
     ap.add_argument('--seed', type=int, default=0)
     ap.add_argument('--fps', type=int, default=12)
     ap.add_argument('--suffix', default='', help="e.g. _ce for the CE-loss run")
+    ap.add_argument('--dir60k', action='store_true',
+                    help='render a full-60k run (results/full_mnist_from_scratch)')
+    ap.add_argument('--out-suffix', default=None,
+                    help='figure filename suffix (default: --suffix, +_60k if --dir60k)')
     args = ap.parse_args()
     seed, sfx = args.seed, args.suffix
     tag = (' — CE loss' if '_ce' in sfx else '') + \
+          (' — full 60k' if args.dir60k else '') + \
           (' — LR scheduler' if ('_sched' in sfx or '_pl_' in sfx or
                                  '_cos' in sfx) else '')
 
-    man, steps, D, D3, D2, PRED, test_acc = load_records(seed, sfx)
+    man, steps, D, D3, D2, PRED, test_acc = load_records(seed, sfx, args.dir60k)
     # confidence: max raw output for MSE runs; max softmax prob for CE runs
     conf_key = 'test_prob' if '_ce' in sfx else 'test_conf'
     conf_lab = 'test conf (max prob)' if '_ce' in sfx else 'test conf (max raw output)'
-    hist = json.load(open(os.path.join(HERE, 'results', 'ckpts_movie',
-                                       f'seed{seed}{sfx}', 'history.json')))
+    if args.dir60k:
+        hist = json.load(open(os.path.join(HERE, 'results', 'full_mnist_from_scratch',
+                                           f'seed_{seed}{sfx}', 'history.json')))
+    else:
+        hist = json.load(open(os.path.join(HERE, 'results', 'ckpts_movie',
+                                           f'seed{seed}{sfx}', 'history.json')))
+    out = args.out_suffix if args.out_suffix is not None else \
+        (('_60k' + sfx) if args.dir60k else sfx)
+    SEL5 = [0, 100, 1500, 10500, 30000] if args.dir60k else \
+        [0, 100, 1000, 20000, 100000]
+    TICKS = [0, 100, 1000, 10000, 30000] if args.dir60k else \
+        [0, 100, 1000, 10000, 100000]
+    SEL3 = [100, 3000, 30000] if args.dir60k else [100, 5000, 100000]
+    tr_lab = 'train acc (60k)' if args.dir60k else 'train acc (1000 subset)'
     t = np.linspace(0, 1, N_POINTS)
     anim_idx = [pair_index(man, a, b) for a, b in ANIM_PAIRS]
     n_ck = len(steps)
@@ -116,13 +134,13 @@ def main():
         return lines
 
     ani = animation.FuncAnimation(fig, draw, frames=n_ck, blit=False)
-    ani.save(os.path.join(PLOTS, f'plateau_evolution{sfx}.gif'), fps=args.fps,
+    ani.save(os.path.join(PLOTS, f'plateau_evolution{out}.gif'), fps=args.fps,
              writer='pillow', dpi=72)
     plt.close(fig)
     print('saved plateau_evolution.gif')
 
     # ---------------- static frames (early / middle / late) ----------------
-    sel = [int(np.argmin(np.abs(steps - s))) for s in [0, 100, 1000, 20000, 100000]]
+    sel = [int(np.argmin(np.abs(steps - s))) for s in SEL5]
     fig, axg = plt.subplots(len(sel), 10, figsize=(16, 2.0 * len(sel)),
                             sharex=True, sharey=True)
     for r, f in enumerate(sel):
@@ -142,7 +160,7 @@ def main():
     fig.suptitle('Selected animation frames: logit-space $d(\\alpha)$ '
                  '(squares: predicted class along the path)', y=1.0)
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, f'frames_selected_steps{sfx}.png'), dpi=130,
+    plt.savefig(os.path.join(PLOTS, f'frames_selected_steps{out}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
     print('saved frames_selected_steps.png')
@@ -150,7 +168,7 @@ def main():
     # ---------------- heatmap: step x alpha per pair ----------------
     show_pairs = ANIM_PAIRS + [(0, 0), (7, 7)]
     fig, axg = plt.subplots(2, 6, figsize=(16, 5.4), sharex=True, sharey=True)
-    tick_steps = [0, 100, 1000, 10000, 100000]
+    tick_steps = TICKS
     tick_rows = [int(np.argmin(np.abs(steps - s))) for s in tick_steps]
     for k, (a, b) in enumerate(show_pairs):
         ax = axg[k // 6, k % 6]
@@ -169,14 +187,14 @@ def main():
     cb.set_label(r'$d(\alpha)$ (logits)', fontsize=9)
     fig.suptitle('Plateau formation: relative endpoint distance $d(\\alpha)$ over '
                  'training (each panel: one pair; rows = checkpoints, non-uniform '
-                 'early steps then every 500)', y=0.99)
-    plt.savefig(os.path.join(PLOTS, f'plateau_training_heatmap{sfx}.png'), dpi=130,
+                 'early steps)', y=0.99)
+    plt.savefig(os.path.join(PLOTS, f'plateau_training_heatmap{out}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
     print('saved plateau_training_heatmap.png')
 
     # ---------------- layerwise early / middle / late ----------------
-    sel3 = [int(np.argmin(np.abs(steps - s))) for s in [100, 5000, 100000]]
+    sel3 = [int(np.argmin(np.abs(steps - s))) for s in SEL3]
     fig, axg = plt.subplots(1, 3, figsize=(13, 3.8), sharey=True)
     i01 = pair_index(man, 0, 1)
     cross = np.arange(45)
@@ -195,14 +213,14 @@ def main():
     fig.suptitle('Layerwise sharpening of the plateau (seed %d): relative distance '
                  'at $h_2$, $h_3$ (last hidden), and logits' % seed)
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, f'layerwise_selected_steps{sfx}.png'), dpi=130,
+    plt.savefig(os.path.join(PLOTS, f'layerwise_selected_steps{out}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
     print('saved layerwise_selected_steps.png')
 
     # ---------------- training context ----------------
     fig, ax = plt.subplots(figsize=(7, 3.6))
-    ax.plot(hist['step'], hist['train_acc'], lw=1.5, color='C0', label='train acc (1000 subset)')
+    ax.plot(hist['step'], hist['train_acc'], lw=1.5, color='C0', label=tr_lab)
     ax.plot(hist['step'], hist['test_acc'], lw=1.5, color='C3', label='test acc (first 2000)')
     ax.plot(hist['step'], hist[conf_key], lw=1.5, color='C4', label=conf_lab)
     ax.set_xscale('symlog', linthresh=10)
@@ -210,7 +228,7 @@ def main():
     ax.set_ylim(0, 1.05); ax.grid(alpha=0.3); ax.legend(fontsize=8)
     ax.set_title(f'Training context (seed {seed}{tag})')
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, f'training_context{sfx}.png'), dpi=130)
+    plt.savefig(os.path.join(PLOTS, f'training_context{out}.png'), dpi=130)
     plt.close(fig)
     print('saved training_context.png')
 

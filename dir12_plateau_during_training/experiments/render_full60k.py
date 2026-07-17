@@ -24,6 +24,9 @@ from plateau_protocol import HERE, N_POINTS, ANIM_PAIRS
 PLOTS = os.path.join(HERE, 'plots')
 FM = os.path.join(HERE, 'results', 'full_mnist_from_scratch')
 REF_SFX = '_pl_f0.5_p100'          # converged primary 1k run
+# suffix of the 60k runs to compare (feedback human_feedback_1: the smooth
+# ReduceLROnPlateau runs are now the primary 60k runs)
+SFX60 = sys.argv[1] if len(sys.argv) > 1 else ''
 t = np.linspace(0, 1, N_POINTS)
 
 
@@ -55,11 +58,11 @@ def detour(pred_rows):
 
 
 # ---------------- load everything ----------------
-man60, steps60, r60 = load_dir(os.path.join(FM, 'seed_0'))
+man60, steps60, r60 = load_dir(os.path.join(FM, f'seed_0{SFX60}'))
 man1k, steps1k, r1k = load_dir(os.path.join(HERE, 'results', 'plateau_records',
                                             f'seed_0{REF_SFX}'))
 manR, stepsR, rR = load_dir(os.path.join(FM, 'ref1k_seed_0'))   # 105 pairs, anchors
-hist60 = json.load(open(os.path.join(FM, 'seed_0', 'history.json')))
+hist60 = json.load(open(os.path.join(FM, f'seed_0{SFX60}', 'history.json')))
 hist1k = json.load(open(os.path.join(HERE, 'results', 'ckpts_movie',
                                      f'seed0{REF_SFX}', 'history.json')))
 D60, P60 = r60['d_logit'], r60['pred']
@@ -286,7 +289,7 @@ print('saved full_mnist_3v5_summary.png')
 fig, axs = plt.subplots(1, 2, figsize=(12.5, 3.8))
 ax = axs[0]
 for s, col in [(0, 'C2'), (1, 'C8'), (2, 'C9')]:
-    h = json.load(open(os.path.join(FM, f'seed_{s}', 'history.json')))
+    h = json.load(open(os.path.join(FM, f'seed_{s}{SFX60}', 'history.json')))
     ax.plot(h['step'], h['test_acc'], lw=1.5, color=col, label=f'60k seed {s} test acc')
 ax.plot(hist1k['step'], hist1k['test_acc'], lw=1.5, color='C0', label='1k seed 0 test acc')
 ax.plot(hist60['step'], hist60['test_conf'], lw=1.2, color='C4', ls='--',
@@ -332,7 +335,7 @@ print(f'original 3->5 RLE: 1k@30k {rle(PR[jR30, i35_60])}, '
       f'1k@100k {rle(PR[jR100, i35_60])}, 60k@30k {rle(P60[-1, i35_60])}')
 # seeds 1/2 replication at final step
 for s in (1, 2):
-    m, st, r = load_dir(os.path.join(FM, f'seed_{s}'))
+    m, st, r = load_dir(os.path.join(FM, f'seed_{s}{SFX60}'))
     p = r['pred']; sc = r['seg_count'][:, rows35].astype(float)
     dt = detour(p[-1, rows35]); eo = (p[-1, rows35, 0] == 3) & (p[-1, rows35, -1] == 5)
     print(f'60k seed {s} final: seg mean {sc[-1].mean():.2f}, detour frac '

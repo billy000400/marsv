@@ -18,7 +18,8 @@ import numpy as np
 from plateau_protocol import HERE, N_POINTS, ANIM_PAIRS
 
 PLOTS = os.path.join(HERE, 'plots')
-SEL_STEPS = [0, 100, 1000, 20000, 100000]
+DIR60K = '--dir60k' in sys.argv                  # full-60k runs (feedback 1)
+SEL_STEPS = [0, 100, 1500, 10500, 30000] if DIR60K else [0, 100, 1000, 20000, 100000]
 
 
 def rel_dist_np(x, eps=1e-10):
@@ -28,9 +29,11 @@ def rel_dist_np(x, eps=1e-10):
 
 
 def main():
-    sched_sfx = sys.argv[1] if len(sys.argv) > 1 else ''   # e.g. _pl_f0.5_p100
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records',
-                           f'seed_0_ce{sched_sfx}')
+    argv = [a for a in sys.argv[1:] if a != '--dir60k']
+    sched_sfx = argv[0] if argv else ''   # e.g. _pl_f0.5_p100
+    out = '_60k' if DIR60K else sched_sfx
+    base = 'full_mnist_from_scratch' if DIR60K else 'plateau_records'
+    rec_dir = os.path.join(HERE, 'results', base, f'seed_0_ce{sched_sfx}')
     man = json.load(open(os.path.join(rec_dir, 'manifest.json')))
     idx = []
     for a, b in ANIM_PAIRS:
@@ -67,10 +70,10 @@ def main():
                  'the diagonal, while probability space (red) develops sharp plateaus '
                  '(squares: predicted class along the path)', y=1.02, x=0.42)
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, f'frames_selected_steps_ce_prob{sched_sfx}.png'),
+    plt.savefig(os.path.join(PLOTS, f'frames_selected_steps_ce_prob{out}.png'),
                 dpi=130, bbox_inches='tight')
     plt.close(fig)
-    print(f'saved plots/frames_selected_steps_ce_prob{sched_sfx}.png')
+    print(f'saved plots/frames_selected_steps_ce_prob{out}.png')
 
 
 if __name__ == '__main__':

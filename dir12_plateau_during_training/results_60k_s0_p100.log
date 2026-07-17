@@ -1,0 +1,34 @@
+[verify] step0 checkpoint == fresh seed-0 init == const-run step0 (bit-exact, all tensors) -> untrained confirmed
+step 0: loss=0.108581 tr_acc=0.0986 te_acc=0.0890 lr=1.00e-03
+step 10: loss=0.070915 tr_acc=0.6556 te_acc=0.6310 lr=1.00e-03
+step 30: loss=0.034812 tr_acc=0.8471 te_acc=0.8210 lr=1.00e-03
+step 100: loss=0.014154 tr_acc=0.9392 te_acc=0.9170 lr=1.00e-03
+[verify] first epoch used all 60,000 training indices exactly once (no replacement)
+step 300: loss=0.006248 tr_acc=0.9730 te_acc=0.9595 lr=1.00e-03
+step 600: loss=0.003918 tr_acc=0.9841 te_acc=0.9715 lr=1.00e-03
+step 900: loss=0.002461 tr_acc=0.9896 te_acc=0.9725 lr=1.00e-03
+step 1200: loss=0.001891 tr_acc=0.9921 te_acc=0.9730 lr=1.00e-03
+step 1500: loss=0.001051 tr_acc=0.9958 te_acc=0.9775 lr=5.00e-04
+step 1800: loss=0.000717 tr_acc=0.9975 te_acc=0.9790 lr=5.00e-04
+step 2100: loss=0.000553 tr_acc=0.9981 te_acc=0.9780 lr=2.50e-04
+step 2400: loss=0.000443 tr_acc=0.9986 te_acc=0.9775 lr=2.50e-04
+step 2700: loss=0.000376 tr_acc=0.9988 te_acc=0.9805 lr=2.50e-04
+step 3000: loss=0.000321 tr_acc=0.9990 te_acc=0.9795 lr=1.25e-04
+step 3300: loss=0.000289 tr_acc=0.9991 te_acc=0.9810 lr=1.25e-04
+step 3600: loss=0.000272 tr_acc=0.9991 te_acc=0.9800 lr=1.25e-04
+step 3900: loss=0.000250 tr_acc=0.9992 te_acc=0.9805 lr=1.25e-04
+step 4200: loss=0.000231 tr_acc=0.9992 te_acc=0.9800 lr=1.25e-04
+step 4500: loss=0.000213 tr_acc=0.9993 te_acc=0.9810 lr=1.25e-04
+step 4800: loss=0.000199 tr_acc=0.9994 te_acc=0.9800 lr=1.25e-04
+step 5100: loss=0.000183 tr_acc=0.9994 te_acc=0.9795 lr=1.25e-04
+step 5400: loss=0.000166 tr_acc=0.9995 te_acc=0.9795 lr=6.25e-05
+step 5700: loss=0.000156 tr_acc=0.9995 te_acc=0.9795 lr=6.25e-05
+step 6000: loss=0.000149 tr_acc=0.9995 te_acc=0.9785 lr=6.25e-05
+step 6300: loss=0.000144 tr_acc=0.9996 te_acc=0.9780 lr=6.25e-05
+step 6600: loss=0.000137 tr_acc=0.9996 te_acc=0.9790 lr=6.25e-05
+step 6900: loss=0.000130 tr_acc=0.9996 te_acc=0.9790 lr=6.25e-05
+step 7200: loss=0.000124 tr_acc=0.9996 te_acc=0.9790 lr=6.25e-05
+step 7500: loss=0.000119 tr_acc=0.9996 te_acc=0.9790 lr=6.25e-05
+step 7800: loss=0.000114 tr_acc=0.9997 te_acc=0.9795 lr=6.25e-05
+step 8100: loss=0.000110 tr_acc=0.9996 te_acc=0.9780 lr=6.25e-05
+step 8400: loss=0.000103 tr_acc=0.9997 te_acc=0.9795 lr=6.25e-05

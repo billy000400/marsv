@@ -1,0 +1,32 @@
+{
+ "cosine 1e-3 -> 1e-6 (previous)": {
+  "dir": "seed_0_search",
+  "spike_max": 101.38821411132812,
+  "spike_frac": 0.12492672666459777,
+  "tail_range": 3.2345597743988037,
+  "final_train_loss": 2.271116841257026e-07,
+  "final_lr": 9.999999974752427e-07,
+  "pf_final": 0.6435555555555555,
+  "final_test_acc": 0.979
+ },
+ "ReduceLROnPlateau f=0.5 p=100": {
+  "dir": "seed_0_pl_f0.5_p100_search",
+  "spike_max": 1.5570690631866455,
+  "spike_frac": 0.0,
+  "tail_range": 1.0721272230148315,
+  "final_train_loss": 2.6072430046042427e-05,
+  "final_lr": 3.906250185536919e-06,
+  "pf_final": 0.6737777777777778,
+  "final_test_acc": 0.9775
+ },
+ "ReduceLROnPlateau f=0.5 p=300": {
+  "dir": "seed_0_pl_f0.5_p300_search",
+  "spike_max": 6.455718040466309,
+  "spike_frac": 0.00937898693148512,
+  "tail_range": 2.9375805854797363,
+  "final_train_loss": 2.3751132971483457e-07,
+  "final_lr": 1.5625000742147677e-05,
+  "pf_final": 0.6786666666666666,
+  "final_test_acc": 0.9775
+ }
+}

@@ -17,13 +17,17 @@ import numpy as np
 
 from plateau_protocol import HERE, N_POINTS
 
-SFX = sys.argv[1] if len(sys.argv) > 1 else ''   # e.g. _pl_f0.5_p100
+DIR60K = '--dir60k' in sys.argv                  # full-60k runs (feedback 1)
+argv = [a for a in sys.argv[1:] if a != '--dir60k']
+SFX = argv[0] if argv else ''                    # e.g. _pl_f0.5_p100
+OUT = '_60k' if DIR60K else SFX
 t = np.linspace(0, 1, N_POINTS)
-SEL = [0, 100, 1000, 20000, 100000]
+SEL = [0, 100, 1000, 10000, 30000] if DIR60K else [0, 100, 1000, 20000, 100000]
 
 
 def load(seed):
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_{seed}{SFX}')
+    base = 'full_mnist_from_scratch' if DIR60K else 'plateau_records'
+    rec_dir = os.path.join(HERE, 'results', base, f'seed_{seed}{SFX}')
     man = json.load(open(os.path.join(rec_dir, 'manifest.json')))
     steps = np.array(man['ckpt_steps'])
     D = np.stack([np.load(os.path.join(rec_dir, f'step_{s}.npz'))['d_logit']
@@ -62,7 +66,7 @@ axL.set_title('Plateau fraction: mean fraction of path points\n'
 fig.suptitle('Plateau emergence is consistent across seeds — gradual sharpening, '
              'no sudden transition (right: all 45 cross-pair $d(\\alpha)$ curves '
              'overlaid)', y=1.0)
-plt.savefig(os.path.join(HERE, 'plots', f'seed_comparison{SFX}.png'), dpi=130,
+plt.savefig(os.path.join(HERE, 'plots', f'seed_comparison{OUT}.png'), dpi=130,
             bbox_inches='tight')
 plt.close(fig)
 

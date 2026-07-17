@@ -29,10 +29,18 @@ def rel_dist_np(x, eps=1e-10):
     return d_a / (d_a + d_b + eps)
 
 
+DIR60K = '--dir60k' in sys.argv                  # full-60k runs (feedback 1)
+
+
 def load(sfx):
-    hist = json.load(open(os.path.join(HERE, 'results', 'ckpts_movie',
-                                       f'seed0{sfx}', 'history.json')))
-    rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_0{sfx}')
+    if DIR60K:
+        rec_dir = os.path.join(HERE, 'results', 'full_mnist_from_scratch',
+                               f'seed_0{sfx}')
+        hist = json.load(open(os.path.join(rec_dir, 'history.json')))
+    else:
+        hist = json.load(open(os.path.join(HERE, 'results', 'ckpts_movie',
+                                           f'seed0{sfx}', 'history.json')))
+        rec_dir = os.path.join(HERE, 'results', 'plateau_records', f'seed_0{sfx}')
     man = json.load(open(os.path.join(rec_dir, 'manifest.json')))
     steps, pf, pf_prob = [], [], []
     for s in man['ckpt_steps']:
@@ -50,7 +58,9 @@ def load(sfx):
 
 def main():
     # optional scheduler suffix (feedback 07161834: compare the SMOOTH runs)
-    sched_sfx = sys.argv[1] if len(sys.argv) > 1 else ''
+    argv = [a for a in sys.argv[1:] if a != '--dir60k']
+    sched_sfx = argv[0] if argv else ''
+    out = '_60k' if DIR60K else sched_sfx
     h_mse, st_mse, pf_mse, pfp_mse = load(sched_sfx)
     h_ce, st_ce, pf_ce, pfp_ce = load('_ce' + sched_sfx)
 
@@ -71,7 +81,7 @@ def main():
         'pf_curve_ce': {'steps': st_ce.tolist(), 'pf': pf_ce.tolist(),
                         'pf_prob': pfp_ce.tolist()},
     }
-    with open(os.path.join(HERE, 'results', f'mse_vs_ce{sched_sfx}.json'), 'w') as f:
+    with open(os.path.join(HERE, 'results', f'mse_vs_ce{out}.json'), 'w') as f:
         json.dump(summary, f, indent=1)
     print(json.dumps({k: v for k, v in summary.items() if k != 'pf_curve_ce'}, indent=1))
 
@@ -119,15 +129,16 @@ def main():
     ax.set_title('Plateau fraction: logit space vs probability space')
 
     for ax in axg.ravel():
-        ax.set_xlim(-0.5, 1.2e5)
+        ax.set_xlim(-0.5, 3.5e4 if DIR60K else 1.2e5)
     fig.suptitle('MSE-on-one-hot vs cross-entropy (seed 0, identical init/data/batches'
-                 + (', ReduceLROnPlateau f=0.5 p=100' if sched_sfx else '')
+                 + (', full 60k images' if DIR60K else '')
+                 + (', ReduceLROnPlateau' if sched_sfx else '')
                  + '; x-axes log-scale)', y=0.99)
     plt.tight_layout()
-    plt.savefig(os.path.join(PLOTS, f'mse_vs_ce_training{sched_sfx}.png'), dpi=130,
+    plt.savefig(os.path.join(PLOTS, f'mse_vs_ce_training{out}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
-    print(f'saved plots/mse_vs_ce_training{sched_sfx}.png')
+    print(f'saved plots/mse_vs_ce_training{out}.png')
 
 
 if __name__ == '__main__':

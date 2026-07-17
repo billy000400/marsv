@@ -1,0 +1,2 @@
+I saw your 60K training shows a noisy triaing loss curve. YOu also need to use more sophisticated LR scheduler to make it smooth, and then interpret results. Actually, for every experiment that you only did with the 1K images, rerun the experiment with 60K images because more training data means more reliable results.
+In the report, focus on the results of experiments of 60K images. Only include a small section explaining the effect of training set size

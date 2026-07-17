@@ -17,20 +17,33 @@ import numpy as np
 from plateau_protocol import HERE
 
 PLOTS = os.path.join(HERE, 'plots')
-RUNS = [  # (ckpt dir, label, color, ls)
-    ('seed0_pl_f0.5_p100',    'MSE seed 0', 'C0', '-'),
-    ('seed1_pl_f0.5_p100',    'MSE seed 1', 'C2', '-'),
-    ('seed2_pl_f0.5_p100',    'MSE seed 2', 'C1', '-'),
-    ('seed0_ce_pl_f0.5_p100', 'CE seed 0',  'C3', '--'),
-]
+DIR60K = '--dir60k' in sys.argv                  # full-60k runs (feedback 1)
+argv = [a for a in sys.argv[1:] if a != '--dir60k']
+SFX = argv[0] if argv else '_pl_f0.5_p100'       # scheduler suffix of the runs
+OUT = '_60k' if DIR60K else ''
+if DIR60K:
+    RUNS = [  # (record dir under full_mnist_from_scratch, label, color, ls)
+        (f'seed_0{SFX}',    'MSE seed 0', 'C0', '-'),
+        (f'seed_1{SFX}',    'MSE seed 1', 'C2', '-'),
+        (f'seed_2{SFX}',    'MSE seed 2', 'C1', '-'),
+        (f'seed_0_ce{SFX}', 'CE seed 0',  'C3', '--'),
+    ]
+    BASE = os.path.join(HERE, 'results', 'full_mnist_from_scratch')
+else:
+    RUNS = [  # (ckpt dir, label, color, ls)
+        ('seed0_pl_f0.5_p100',    'MSE seed 0', 'C0', '-'),
+        ('seed1_pl_f0.5_p100',    'MSE seed 1', 'C2', '-'),
+        ('seed2_pl_f0.5_p100',    'MSE seed 2', 'C1', '-'),
+        ('seed0_ce_pl_f0.5_p100', 'CE seed 0',  'C3', '--'),
+    ]
+    BASE = os.path.join(HERE, 'results', 'ckpts_movie')
 
 summary = {}
 fig, axg = plt.subplots(1, 3, figsize=(16, 4.2))
 for ck, label, col, ls in RUNS:
-    z = np.load(os.path.join(HERE, 'results', 'ckpts_movie', ck, 'sched_trace.npz'))
+    z = np.load(os.path.join(BASE, ck, 'sched_trace.npz'))
     tr, lr = z['full_train_loss'], z['lr']
-    hist = json.load(open(os.path.join(HERE, 'results', 'ckpts_movie', ck,
-                                       'history.json')))
+    hist = json.load(open(os.path.join(BASE, ck, 'history.json')))
     cmin = np.minimum.accumulate(tr)
     ratio = tr[1000:] / np.maximum(cmin[1000:], 1e-30)
     red = np.where(lr[1:] < lr[:-1])[0] + 1
@@ -56,14 +69,16 @@ for ax, title, ylab in [
     ax.legend(fontsize=8)
 axg[0].set_yscale('log'); axg[1].set_yscale('log')
 axg[2].set_ylim(0, 1.0)
-fig.suptitle('Converged training: ReduceLROnPlateau (factor 0.5, patience 100 steps '
-             'on the full-train loss) — the primary runs of this report', y=1.0)
+fig.suptitle('Converged training'
+             + (' on all 60,000 MNIST images' if DIR60K else '')
+             + ': ReduceLROnPlateau on the per-step full-train loss — '
+             'the primary runs of this report', y=1.0)
 plt.tight_layout()
-plt.savefig(os.path.join(PLOTS, 'smooth_convergence.png'), dpi=130,
+plt.savefig(os.path.join(PLOTS, f'smooth_convergence{OUT}.png'), dpi=130,
             bbox_inches='tight')
 plt.close(fig)
 
-with open(os.path.join(HERE, 'results', 'smooth_convergence.json'), 'w') as f:
+with open(os.path.join(HERE, 'results', f'smooth_convergence{OUT}.json'), 'w') as f:
     json.dump(summary, f, indent=1)
 print(json.dumps(summary, indent=1))
-print('saved plots/smooth_convergence.png')
+print(f'saved plots/smooth_convergence{OUT}.png')

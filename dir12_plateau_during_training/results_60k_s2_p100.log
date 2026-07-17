@@ -1,0 +1,12 @@
+[verify] step0 checkpoint == fresh seed-2 init == const-run step0 (bit-exact, all tensors) -> untrained confirmed
+step 0: loss=0.099801 tr_acc=0.0989 te_acc=0.1090 lr=1.00e-03
+step 10: loss=0.066308 tr_acc=0.6241 te_acc=0.5735 lr=1.00e-03
+step 30: loss=0.034203 tr_acc=0.8444 te_acc=0.8045 lr=1.00e-03
+step 100: loss=0.014383 tr_acc=0.9342 te_acc=0.9105 lr=1.00e-03
+[verify] first epoch used all 60,000 training indices exactly once (no replacement)
+step 300: loss=0.006436 tr_acc=0.9705 te_acc=0.9580 lr=1.00e-03
+step 1500: loss=0.001401 tr_acc=0.9942 te_acc=0.9695 lr=1.00e-03
+step 3000: loss=0.000278 tr_acc=0.9991 te_acc=0.9765 lr=5.00e-04
+step 4500: loss=0.000144 tr_acc=0.9995 te_acc=0.9760 lr=2.50e-04
+step 6000: loss=0.000104 tr_acc=0.9996 te_acc=0.9770 lr=1.25e-04
+step 7500: loss=0.000071 tr_acc=0.9997 te_acc=0.9760 lr=6.25e-05

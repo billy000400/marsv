@@ -33,7 +33,9 @@ from plateau_protocol import HERE, DATA, N_TEST_POOL, N_POINTS, load_state_model
 from src.mnist import load_mnist
 
 torch.set_num_threads(2)
-STEP = 100_000
+DIR60K = '--dir60k' in sys.argv                  # full-60k runs (feedback 1)
+STEP = 30_000 if DIR60K else 100_000
+FM = os.path.join(HERE, 'results', 'full_mnist_from_scratch')
 PLOTS = os.path.join(HERE, 'plots')
 
 
@@ -73,23 +75,29 @@ def logits_of(model, x, device, batch=2000):
 
 
 def main():
-    sched_sfx = sys.argv[1] if len(sys.argv) > 1 else ''   # e.g. _pl_f0.5_p100
+    argv = [a for a in sys.argv[1:] if a != '--dir60k']
+    sched_sfx = argv[0] if argv else ''   # e.g. _pl_f0.5_p100
+    out_sfx = '_60k' if DIR60K else sched_sfx
     if torch.cuda.is_available():
         torch.cuda.set_per_process_memory_fraction(0.225)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     _, _, test_x, test_y = load_mnist(DATA)
     test_x, test_y = test_x[:N_TEST_POOL], test_y[:N_TEST_POOL].numpy()
 
-    model = load_state_model(os.path.join(HERE, 'results', 'ckpts_movie',
-                                          f'seed0{sched_sfx}',
-                                          f'step{STEP}.pt'), device)
+    if DIR60K:
+        model = load_state_model(os.path.join(FM, f'seed_0{sched_sfx}', 'ckpts',
+                                              f'step{STEP}.pt'), device)
+    else:
+        model = load_state_model(os.path.join(HERE, 'results', 'ckpts_movie',
+                                              f'seed0{sched_sfx}',
+                                              f'step{STEP}.pt'), device)
     L = logits_of(model, test_x, device)
     pred = L.argmax(1)
 
-    rec = np.load(os.path.join(HERE, 'results', 'plateau_records',
-                               f'seed_0{sched_sfx}', f'step_{STEP}.npz'))
-    man = json.load(open(os.path.join(HERE, 'results', 'plateau_records',
-                                      f'seed_0{sched_sfx}', 'manifest.json')))
+    rec_base = os.path.join(FM, f'seed_0{sched_sfx}') if DIR60K else \
+        os.path.join(HERE, 'results', 'plateau_records', f'seed_0{sched_sfx}')
+    rec = np.load(os.path.join(rec_base, f'step_{STEP}.npz'))
+    man = json.load(open(os.path.join(rec_base, 'manifest.json')))
 
     rows = []
     auc_mat = np.full((10, 10), np.nan)
@@ -117,13 +125,16 @@ def main():
     rho_mid = spearman(aucs, mids)
     rho_third = spearman(aucs, np.array([r['third_class_frac'] for r in rows]))
 
-    out = {'step': STEP, 'seed': 0, 'loss': 'mse', 'pairs': rows,
+    out = {'step': STEP, 'seed': 0, 'loss': 'mse', 'data': ('60k' if DIR60K else '1k'),
+           'pairs': rows,
            'rank_3v5_from_worst': rank35, 'spearman_auc_vs_midfrac': float(rho_mid),
            'spearman_auc_vs_thirdfrac': float(rho_third)}
 
     # CE model, if trained
-    ce_path = os.path.join(HERE, 'results', 'ckpts_movie',
-                           f'seed0_ce{sched_sfx}', f'step{STEP}.pt')
+    ce_path = (os.path.join(FM, f'seed_0_ce{sched_sfx}', 'ckpts', f'step{STEP}.pt')
+               if DIR60K else
+               os.path.join(HERE, 'results', 'ckpts_movie',
+                            f'seed0_ce{sched_sfx}', f'step{STEP}.pt'))
     if os.path.exists(ce_path):
         Lce = logits_of(load_state_model(ce_path, device), test_x, device)
         ce_rows = {}
@@ -137,7 +148,7 @@ def main():
               f"{min(ce_rows.values()):.4f})")
 
     os.makedirs(os.path.join(HERE, 'results'), exist_ok=True)
-    with open(os.path.join(HERE, 'results', f'pairwise_auc{sched_sfx}.json'), 'w') as f:
+    with open(os.path.join(HERE, 'results', f'pairwise_auc{out_sfx}.json'), 'w') as f:
         json.dump(out, f, indent=1)
 
     print(f"3v5: AUROC={r35['auroc']:.4f}, confusion={r35['confusion_rate']:.4f}, "
@@ -185,7 +196,7 @@ def main():
                         fontsize=7, xytext=(3, 3), textcoords='offset points')
     ax.set_yscale('log')
     ax.set_xlabel('mid fraction of the interpolation curve '
-                  r'($0.1 < d(\alpha) < 0.9$), step 100k')
+                  r'($0.1 < d(\alpha) < 0.9$), final step')
     ax.set_ylabel('1 − AUROC (log scale)')
     ax.set_title(f'Curve shape vs pair difficulty (Spearman ρ = {rho_mid:.2f})')
     ax.legend(); ax.grid(alpha=0.3)
@@ -214,18 +225,19 @@ def main():
                     fontsize=8, ha='center')
     ep_note = ('endpoint "3" misclassified as %d' % pr[0]) if pr[0] != 3 else \
               'both endpoints correctly classified'
-    ax.set_title(f'Pair 3→5 at step 100k: {n_seg} predicted-class segments\n'
+    ax.set_title(f'Pair 3→5 at step {STEP:,}: {n_seg} predicted-class segments\n'
                  f'({ep_note})', fontsize=10)
     ax.grid(alpha=0.3)
 
     fig.suptitle('Is 3-vs-5 harder? Pairwise discriminability vs interpolation-curve '
                  'shape (MSE seed 0'
-                 + (', ReduceLROnPlateau f=0.5 p=100' if sched_sfx else '')
-                 + ', step 100,000, first 2,000 test images)', y=0.98)
-    plt.savefig(os.path.join(PLOTS, f'pairwise_auc{sched_sfx}.png'), dpi=130,
+                 + (', full 60k images' if DIR60K else '')
+                 + (', ReduceLROnPlateau' if sched_sfx else '')
+                 + f', step {STEP:,}, first 2,000 test images)', y=0.98)
+    plt.savefig(os.path.join(PLOTS, f'pairwise_auc{out_sfx}.png'), dpi=130,
                 bbox_inches='tight')
     plt.close(fig)
-    print(f'saved plots/pairwise_auc{sched_sfx}.png')
+    print(f'saved plots/pairwise_auc{out_sfx}.png')
 
 
 if __name__ == '__main__':

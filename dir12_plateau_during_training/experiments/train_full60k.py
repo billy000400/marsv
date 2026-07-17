@@ -21,6 +21,13 @@ the full schema (also standalone: --check).
 
 Usage: python experiments/train_full60k.py --seed 0 [--schedule fallback]
                                            [--max-step N] [--check]
+
+Feedback human_feedback_1 (2026-07-17): the cosine run's loss curve is noisy —
+added --sched plateau (ReduceLROnPlateau on the per-step full-train loss, as in
+the 1k reference runs), --loss ce, and --early (record every 5 steps, 0-1000)
+so every 1k-only experiment can be rerun on the full 60k data. Every scheduled
+run now saves a per-step full-train-loss + LR trace (sched_trace.npz) so
+smoothness can be scored exactly as in the 1k scheduler search.
 """
 import argparse, json, os, sys, time
 sys.path.insert(0, os.path.dirname(__file__))
@@ -128,21 +135,40 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--schedule', default='full', choices=['full', 'fallback'])
+    p.add_argument('--loss', default='mse', choices=['mse', 'ce'])
+    p.add_argument('--sched', default='cosine', choices=['cosine', 'plateau'])
+    p.add_argument('--factor', type=float, default=0.5)
+    p.add_argument('--patience', type=int, default=100)
+    p.add_argument('--early', action='store_true',
+                   help='record every 5 steps from 0 to 1,000 (early zoom)')
+    p.add_argument('--tag', default='',
+                   help='extra output-dir suffix (e.g. _search)')
     p.add_argument('--max-step', type=int, default=None,
                    help='truncate the run (smoke test); writes to *_smoke')
     p.add_argument('--check', action='store_true',
                    help='only run the manifest check on an existing dir')
     args = p.parse_args()
 
+    # suffix scheme: '' = the original cosine MSE run; scheduled runs get
+    # _pl_f<factor>_p<patience>; CE runs _ce; early zooms _early.
+    sfx = (('_ce' if args.loss == 'ce' else '')
+           + ('' if args.sched == 'cosine'
+              else f'_pl_f{args.factor:g}_p{args.patience}')
+           + ('_early' if args.early else '') + args.tag)
     smoke = args.max_step is not None
     rec_dir = os.path.join(HERE, 'results', 'full_mnist_from_scratch',
-                           f'seed_{args.seed}' + ('_smoke' if smoke else ''))
+                           f'seed_{args.seed}{sfx}' + ('_smoke' if smoke else ''))
     if args.check:
         sys.exit(0 if check_manifest(rec_dir) else 1)
 
-    schedule = FULL60K_SCHEDULE if args.schedule == 'full' else FULL60K_FALLBACK
-    anchors = set(FULL60K_ANCHORS)
-    n_steps = N_STEPS
+    if args.early:
+        schedule = list(range(0, 1001, 5))
+        anchors = {0, 1000}
+        n_steps = 1000
+    else:
+        schedule = FULL60K_SCHEDULE if args.schedule == 'full' else FULL60K_FALLBACK
+        anchors = set(FULL60K_ANCHORS)
+        n_steps = N_STEPS
     if smoke:
         schedule = [s for s in schedule if s <= args.max_step]
         anchors = {s for s in anchors if s <= args.max_step}
@@ -171,11 +197,31 @@ def main():
     model = MLP(depth=4, width=200, activation='relu').to(device)
     model.load_state_dict({k: v.to(device) for k, v in state.items()})
     opt = torch.optim.AdamW(model.parameters(), lr=1e-3, weight_decay=0.01)
-    sched = torch.optim.lr_scheduler.CosineAnnealingLR(
-        opt, T_max=N_STEPS, eta_min=1e-6)
+    if args.sched == 'cosine':
+        sched = torch.optim.lr_scheduler.CosineAnnealingLR(
+            opt, T_max=N_STEPS, eta_min=1e-6)
+    else:
+        # monitored quantity = full-train-set (60k) loss recomputed after every
+        # step, exactly as in the 1k reference runs (train_and_record.py);
+        # neither scheduler consumes RNG -> identical batch order across runs.
+        sched = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            opt, mode='min', factor=args.factor, patience=args.patience,
+            threshold=1e-4, threshold_mode='rel', min_lr=1e-8)
     one_hots = torch.eye(10, device=device)
-    mse_fn = torch.nn.MSELoss()
-    loss_of = lambda logits, y: mse_fn(logits, one_hots[y])
+    if args.loss == 'ce':                        # CE on integer labels
+        ce_fn = torch.nn.CrossEntropyLoss()
+        loss_of = lambda logits, y: ce_fn(logits, y)
+    else:
+        mse_fn = torch.nn.MSELoss()
+        loss_of = lambda logits, y: mse_fn(logits, one_hots[y])
+
+    @torch.no_grad()
+    def full_train_loss():
+        tot = 0.0
+        for i in range(0, N_TRAIN, 10_000):      # chunked: bounds activations
+            xb, yb = train_x[i:i + 10_000], train_y[i:i + 10_000]
+            tot += loss_of(model(xb), yb).item() * len(xb)
+        return tot / N_TRAIN
 
     os.makedirs(os.path.join(rec_dir, 'ckpts'), exist_ok=True)
     history = {'step': [], 'train_loss': [], 'train_acc': [], 'test_loss': [],
@@ -215,7 +261,9 @@ def main():
     t0 = time.time()
     ck_set = set(schedule)
     trace_loss = np.zeros(n_steps + 1, np.float32)  # per-step BATCH loss
+    trace_full = np.zeros(n_steps + 1, np.float32)  # per-step FULL-train loss
     trace_lr = np.zeros(n_steps + 1, np.float32)
+    trace_full[0] = full_train_loss()
     trace_lr[0] = opt.param_groups[0]['lr']
     checkpoint(0)
     perm = None
@@ -229,8 +277,14 @@ def main():
             first_epoch.append(idx.cpu())
         logits = model(train_x[idx])
         loss = loss_of(logits, train_y[idx])
-        opt.zero_grad(); loss.backward(); opt.step(); sched.step()
+        opt.zero_grad(); loss.backward(); opt.step()
+        mon = full_train_loss()
+        if args.sched == 'cosine':
+            sched.step()
+        else:
+            sched.step(mon)
         trace_loss[step] = loss.item()
+        trace_full[step] = mon
         trace_lr[step] = opt.param_groups[0]['lr']
         if step == STEPS_PER_EPOCH:
             seen = torch.cat(first_epoch)
@@ -243,6 +297,8 @@ def main():
 
     np.savez_compressed(os.path.join(rec_dir, 'trace.npz'),
                         batch_loss=trace_loss, lr=trace_lr)
+    np.savez_compressed(os.path.join(rec_dir, 'sched_trace.npz'),
+                        full_train_loss=trace_full, lr=trace_lr)
     with open(os.path.join(rec_dir, 'history.json'), 'w') as f:
         json.dump(history, f)
     manifest = {'seed': args.seed, 'schedule': args.schedule,
@@ -256,9 +312,16 @@ def main():
                            'shuffle': 'without replacement each epoch '
                                       f'({STEPS_PER_EPOCH} steps/epoch)',
                            'lr': 1e-3, 'weight_decay': 0.01,
-                           'loss': 'MSE-on-one-hot',
-                           'lr_schedule': 'CosineAnnealingLR(T_max=30000, '
-                                          'eta_min=1e-6) stepped every step',
+                           'loss': 'MSE-on-one-hot' if args.loss == 'mse'
+                                   else 'CE-on-labels',
+                           'lr_schedule': ('CosineAnnealingLR(T_max=30000, '
+                                           'eta_min=1e-6) stepped every step'
+                                           if args.sched == 'cosine' else
+                                           f'ReduceLROnPlateau(factor='
+                                           f'{args.factor:g}, patience='
+                                           f'{args.patience}, threshold=1e-4 '
+                                           'rel, min_lr=1e-8) stepped every '
+                                           'step on the full-train (60k) loss'),
                            'opt': 'AdamW', 'steps': n_steps}}
     with open(os.path.join(rec_dir, 'manifest.json'), 'w') as f:
         json.dump(manifest, f, indent=1)
