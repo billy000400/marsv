@@ -48,3 +48,23 @@ the operator relaunched with updated CLAUDE.md rules. No experiments re-run; res
   0 `<pre lang="math">`, no inline-math hazards, no unrendered plot paths.
 - Verdict unchanged: NO plateaus (qualified reconstruction), no-go. `STOP` written (this time verified
   on disk).
+
+## 2026-07-17 — Operator feedback #1 addressed: banned macro removed, REPORT.md tightened
+
+Feedback file `human_feedback_1.txt` (now `.addressed.md`) asked: (1) the `\operatorname` macro is
+not allowed in REPORT.md; (2) per the updated CLAUDE.md, make REPORT.md more readable and concise.
+No experiments re-run; all numbers and the verdict unchanged.
+
+- **ΔPI equation fixed:** `\operatorname{median}(…)` → `\mathrm{median}(…)` (and `\text{…}`
+  subscripts → `\mathrm{…}`) in the Group-comparison display equation. Zero `operatorname` hits
+  remain in REPORT.md/RESULTS.md.
+- **REPORT.md rewritten more concise/readable** (215 → 197 lines, shorter sentences, redundancy cut)
+  while keeping every CLAUDE.md rule-8/9 requirement: narrative Methods with per-metric motivation
+  and consuming figure, all 6 display equations, baselines, calibration list, jargon defined on
+  first use (grokking, residual stream, JSD, Cliff's delta), and axis/legend descriptions added to
+  every figure caption (Figs 1–4).
+- Re-verified: 6/6 display equations render via the GitHub markdown API, 0 `<pre lang="math">`,
+  no inline-math hazards, no unrendered plot paths. RESULTS.md untouched (no banned macros; already
+  concise — feedback's "it" read as REPORT.md).
+- Verdict unchanged: NO plateaus (qualified reconstruction), no-go. `STOP` re-created after feedback
+  was addressed.

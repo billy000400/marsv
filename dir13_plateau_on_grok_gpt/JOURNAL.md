@@ -56,3 +56,28 @@ learned wall. Also: always verify STOP exists on disk after writing it.
 **Next step.** None — direction complete; STOP re-created and verified.
 
 On track? yes — S6 done, 100%, no blocker (calibrated negative; STOP verified on disk).
+
+## 2026-07-17 — Feedback-first iteration: human_feedback_1 addressed
+
+**Did.** Found `human_feedback_1.txt` unaddressed (and `STOP` absent from disk again — assumption:
+the wrapper/operator cleared it when dropping feedback, since a STOP'd direction would ignore the
+file; alternative rejected: another persist failure — either way the correct move is identical).
+Feedback asks: (1) remove the disallowed `\operatorname` macro from REPORT.md; (2) CLAUDE.md was
+updated — make it more readable and concise. Actions:
+1. Replaced `\operatorname{median}` with `\mathrm{median}` in the ΔPI display equation (only
+   occurrence in any deliverable).
+2. Rewrote REPORT.md tighter (215 → 197 lines): shorter sentences, redundancy cut, jargon still
+   defined on first use, per-metric motivation kept, figure captions now name axes and legend
+   entries explicitly. Interpreted "make it more readable" as referring to REPORT.md (the file the
+   feedback names); RESULTS.md has no banned macros and is already table-driven and short, so left
+   unchanged (logged as the rejected alternative).
+3. Verified via the GitHub markdown API: 6/6 js-display-math, 0 pre-lang-math, no inline hazards,
+   all plots embedded as `![]()`.
+4. `mv human_feedback_1.txt human_feedback_1.txt.addressed.md` (contents untouched).
+
+**Learned.** The operator's renderer rejects `\operatorname` even though vanilla KaTeX supports it —
+prefer `\mathrm{…}` for upright operator names in this project.
+
+**Next step.** None — plan complete, zero unaddressed feedback, STOP re-created and verified.
+
+On track? yes — S6 done, 100%, no blocker (feedback addressed; calibrated negative stands).
