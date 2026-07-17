@@ -15,3 +15,4 @@ Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF
 [grok_bpe] step   3000 lr 9.79e-04 train 1.116 val 6.963 acc 0.280 [17.9m]
 [grok_bpe] step   3250 lr 9.76e-04 train 0.990 val 7.250 acc 0.275 [19.5m]
 [grok_bpe] step   3500 lr 9.72e-04 train 0.962 val 7.485 acc 0.273 [21.1m]
+[grok_bpe] step   3750 lr 9.67e-04 train 0.836 val 7.842 acc 0.270 [22.7m]

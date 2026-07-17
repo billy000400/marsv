@@ -41,3 +41,6 @@
 [grok_char] step   9750 lr 7.88e-04 train 0.938 val 1.650 acc 0.565 [27.9m]
 [grok_char] step  10000 lr 7.78e-04 train 0.926 val 1.677 acc 0.565 [28.7m]
 [grok_char] step  10250 lr 7.67e-04 train 0.921 val 1.688 acc 0.565 [29.6m]
+[grok_char] step  10500 lr 7.57e-04 train 0.924 val 1.707 acc 0.562 [30.5m]
+[grok_char] step  10750 lr 7.46e-04 train 0.857 val 1.699 acc 0.564 [31.3m]
+[grok_char] step  11000 lr 7.36e-04 train 0.876 val 1.731 acc 0.562 [32.2m]
