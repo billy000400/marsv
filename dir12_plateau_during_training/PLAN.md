@@ -7,6 +7,11 @@
 
 How do activation plateaus emerge and sharpen as the 4-layer ReLU MNIST MLP is trained?
 
+**Reopened extension.** If the same MLP is trained from random initialization on the full 60,000-image MNIST
+training set, do its sub-plateau structures form, disappear, or merge differently from the existing run trained
+on a fixed 1,000-example draw, especially on 3-to-5 interpolation paths? The full-data experiment starts fresh;
+it does not fine-tune or continue from the 1,000-example-trained model.
+
 The central experiment is longitudinal: at many fixed training checkpoints, run exactly the same early-layer
 activation interpolation, save the resulting downstream activations, and render the plateau curve as one frame
 of an animation. The movie should show whether plateau -> boundary -> plateau structure appears gradually,
@@ -40,7 +45,11 @@ not the definition of a plateau in this direction.
 - a static heatmap or selected frames that remain understandable without playing the animation;
 - train/test accuracy and confidence shown alongside the plateau evolution;
 - confirmation on two additional seeds after the primary animation works;
-- a concise verdict on when plateaus emerge and whether the evolution is consistent across pairs and seeds.
+- a concise verdict on when plateaus emerge and whether the evolution is consistent across pairs and seeds;
+- a new run trained from an untrained step-0 initialization on all 60,000 MNIST training images, shuffled
+  without replacement each epoch;
+- a side-by-side animation and fixed-path comparison against the existing 1,000-example run that answer whether
+  3-to-5 sub-plateau evolution differs under full-data training.
 
 Expected, null, and non-monotonic results are all COMPLETE. When the question is answered, write an empty
 `STOP` file.
@@ -66,6 +75,59 @@ allows:
 
 The primary animation uses logit-space `d(alpha)`, which is the closest analogue to the post. Layerwise curves
 are saved and shown at selected checkpoints to reveal how the plateau is sharpened by successive MLP layers.
+
+## What "sub-plateau merge" means in the extension
+
+The raw Matthew-style `d(alpha)` curve remains the definition of plateau phenomenology. Predicted-class runs
+are a behavioral annotation of that curve, not a replacement plateau definition.
+
+For one fixed interpolation path, run-length encode the 50 predicted classes into maximal contiguous segments.
+For example, `2,2,3,...,3,5,...,5` becomes `2 | 3 | 5`.
+
+- A **segment disappearance/simplification** occurs when an intervening predicted-class segment vanishes and
+  the run-length-encoded path becomes shorter.
+- A **merge** is the narrower case in which two non-adjacent segments with the same predicted class become one
+  contiguous segment because the segment between them disappears.
+- An **endpoint correction** occurs when training changes the prediction of one of the two endpoint images.
+  This must be reported separately from a merge.
+
+The current seed-0 3-to-5 path is `2 | 3 | 5` because the fixed 3 endpoint is misclassified as 2. If the fresh
+full-data run produces `3 | 5`, call that endpoint correction plus removal of a third-class detour, not a
+merge of the global 3 and 5 regions. A one-dimensional path cannot establish global connected-component
+topology, so the report must say "segments along the measured paths merge/disappear," not "the class regions
+globally merge."
+
+## Full-MNIST from-scratch experiment (new primary task)
+
+For each seed, start from the saved **step-0 untrained weights**, not the step-100,000 weights. Loading the old
+run's step-0 checkpoint preserves the exact random initialization for comparison while still training the
+full-data model entirely from scratch. Verify the step-0 weights have not received an optimizer update.
+
+Train on all 60,000 MNIST training images, shuffled without replacement every epoch. One epoch is 300 steps at
+batch size 200. Assert that all 60,000 training indices are seen exactly once before the first reshuffle. Use
+AdamW with learning rate `1e-3`, weight decay `0.01`, and a fixed cosine schedule to `1e-6` over 30,000 steps
+(100 full-data epochs). If this schedule is numerically unstable, lower the learning rate using loss traces
+only, record the decision in `JOURNAL.md`, and restart the full-data run from step 0. Do not choose a schedule by
+looking at plateau curves.
+
+Use seed 0 for the full-resolution animation, then repeat the frozen experiment for seeds 1 and 2. Keep MSE,
+the architecture, intervention layer, test pool, and all original pair IDs fixed. The completed 1,000-example
+run is the reference trajectory; do not resume or fine-tune it.
+
+### Evaluation paths
+
+- Preserve the original 55-pair bank so the new frames are directly comparable with the existing report.
+- Add 50 deterministic 3-to-5 test-image pairs selected before viewing full-data results. Do not filter them
+  for correct endpoint predictions. Save endpoint correctness at training step 0 and every checkpoint, and
+  report all paths plus the subset whose endpoints were already correct at step 0.
+- Use the exact same endpoint image IDs, SLERP coefficients, axes, and colors in the full-data and existing
+  1,000-example animations.
+
+For every path and checkpoint, save the raw `d(alpha)` curves, logits, probabilities, predicted classes,
+run-length-encoded class sequence, endpoint predictions, and endpoint confidence. The primary evidence is a
+side-by-side animation of the existing 1,000-example run and the fresh full-60k run. The compact summary is the
+per-path evolution of segment count and third-class detour presence. Do not infer a merge from a change seen in
+only one hand-picked path.
 
 ## Intervention layer
 
@@ -107,6 +169,11 @@ After the primary-seed movie is rendered, identify any adjacent 500-step frames 
 abruptly. If the timing cannot be resolved, rerun that seed deterministically and save every 50 steps only within
 the relevant interval. Do not globally increase checkpoint density unless the transition genuinely requires it.
 
+For the reopened full-data run, define step 0 as the untrained initialization. Save steps `0, 10, 30, 100`, then
+every 300 steps through `30,000`. This yields early frames plus one frame per full-MNIST epoch. For comparison
+with the existing 1,000-example animation, align frames by optimizer step and also show train/test accuracy so
+differences in fitting time are visible rather than hidden.
+
 ## What to save at every checkpoint
 
 For every fixed pair, save one self-contained record containing:
@@ -146,6 +213,10 @@ and their animation. Report only:
 2. the raw relative-distance curves `d(alpha)`;
 3. predicted class along the interpolation path.
 
+For the reopened extension, also report the run-length-encoded predicted-class sequence and the paired change
+in segment count / third-class detour presence. These quantities answer the new merge question directly; they
+must remain annotations beside the raw curves rather than a thresholded definition of plateau.
+
 Do not impose a scalar threshold that decides whether a curve "is a plateau" in the primary analysis. First show
 the curves and animation using the post's phenomenology. If the visual transition is too ambiguous to describe,
 add at most one transparent curve-derived summary and explain why it is necessary.
@@ -160,13 +231,20 @@ cross-class pairs and the ten within-class controls, save all downstream activat
 logit-relative-distance animation plus a static early/middle/late comparison. State clearly that seed and pair
 coverage are limited. The wrapper reserves the last 20 minutes to finalize + STOP.
 
+For the reopened extension, the minimum acceptable deliverable is one fresh seed-0 full-MNIST run, all 50
+3-to-5 paths, and steps `0, 10, 30, 100, 300, 1,500, 3,000, 6,000, 15,000, 30,000`, with a comparison against
+the existing 1,000-example animation and a verdict that distinguishes endpoint correction, detour disappearance,
+and a true same-class segment merge. A null result is complete.
+
 ## Setup (fixed)
 
 - Build on the existing `image-models` branch and reuse its model and training configuration.
 - Model: 4-layer ReLU MLP, hidden width 200.
-- Data: the same fixed 1,000-example MNIST training subset and train/test split used in the existing experiment.
-- Training: batch size 200 for 100,000 optimization steps. Recover and record the exact optimizer, learning rate,
-  weight decay, initialization, preprocessing, and data-order conventions from the branch.
+- Data for the completed reference: the same fixed 1,000-example MNIST draw and train/test split used in the
+  existing experiment. Data for the reopened run: the full 60,000-image MNIST training set, shuffled without
+  replacement.
+- Training: initialize from the saved untrained step-0 weights and train the full-data model from scratch for
+  30,000 steps with batch size 200 and the fixed schedule above. Never load the step-100,000 trained weights.
 - Seeds: one primary seed and two confirmation seeds.
 - Primary intervention: first hidden-layer post-ReLU activation.
 - Interpolation: 50-point norm-rescaled SLERP from `alpha=0` to `alpha=1`.
@@ -205,6 +283,22 @@ coverage are limited. The wrapper reserves the last 20 minutes to finalize + STO
   pairs synchronize, and whether sharpening continues after test accuracy stabilizes. Keep only the main
   animation, minimal static figures, and required tables in REPORT/RESULTS; move development history to
   CHANGELOG; write empty `STOP`.
+- [x] **S7 — Implement and verify fresh full-data training.** Remove the stale `STOP` if present. Add the smallest
+  training script that loads each original step-0 untrained MSE checkpoint and trains a new model on all 60,000
+  MNIST training images. Test that no trained checkpoint is loaded, all 60,000 indices appear exactly once in
+  the first epoch, and the checkpoint manifest is complete before launching long runs.
+- [x] **S8 — Record full-resolution seed 0.** Train seed 0 from step 0 and evaluate the unchanged Matthew-style
+  protocol at every scheduled checkpoint. Preserve the original pair bank and add the frozen 50-path 3-to-5
+  bank. Save numeric arrays before rendering figures.
+- [x] **S9 — Render, compare, and replicate.** Produce a synchronized comparison of the existing 1,000-example
+  animation and the fresh full-60k animation, plus a static 3-to-5 panel showing the original path and the
+  distribution over 50 paths. Repeat the full-data run for seeds 1 and 2 at fallback checkpoint density. Do not
+  call endpoint correction a merge.
+- [x] **S10 — Rewrite the verdict and stop.** Curate `REPORT.md` and `RESULTS.md` to answer whether plateau and
+  sub-plateau evolution differs when a fresh model is trained on full MNIST. Include the full-60k sampling
+  method, from-scratch initialization, operational merge definition, raw-curve animation, segment summary,
+  endpoint-correction audit, and limitations. Append history to `CHANGELOG.md`/`JOURNAL.md`, verify artifacts,
+  then write an empty `STOP`.
 
 ## Required deliverables
 
@@ -214,6 +308,10 @@ coverage are limited. The wrapper reserves the last 20 minutes to finalize + STO
 - `plots/plateau_training_heatmap.*`
 - `plots/layerwise_selected_steps.*`
 - `plots/training_context.*`
+- `results/full_mnist_from_scratch/seed_<n>/manifest.*`
+- `results/full_mnist_from_scratch/seed_<n>/step_<step>.*`
+- `plots/full_mnist_3v5_training.gif`
+- `plots/full_mnist_3v5_summary.*`
 - `REPORT.md` with a short Methods section and direct verdict
 
 ## Out of scope (do NOT)
@@ -222,9 +320,12 @@ coverage are limited. The wrapper reserves the last 20 minutes to finalize + STO
 - Treating random-direction perturbation response as the definition of a plateau.
 - Claiming that the animation alone proves exactly ten connected stable regions.
 - Interpolating raw pixels as part of the primary experiment.
-- Varying intervention layer, architecture, width, optimizer, or dataset size.
+- Varying intervention layer, architecture, width, loss, or optimizer family.
+- Additional dataset-size sweeps or curricula beyond the existing 1k reference versus fresh full-60k run.
 - Larger ResNet or small-GPT experiments.
 - Manifold-connectivity, steering, Jacobian, spline, or clustering analyses.
+- Claiming global region topology, connectedness, or class-region merging from one-dimensional interpolation
+  paths.
 
 The saved activation records should make later region-counting or mechanism analyses possible without retraining,
 but those analyses must not delay completion of this training-evolution experiment.
@@ -235,28 +336,16 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocke
 
 ## Current status
 
-COMPLETE (2026-07-17, iter 8). All six stages done; primary runs REBUILT per feedback 07161834 ("only show
-smoothly converged results; optimize the LR scheduler"). Scheduler search on seed 0 MSE (constant, cosine,
-RLROP f0.5/p10, f0.9/p50, f0.5/p100; new smoothness metrics spike-ratio + tail-range) picked
-**ReduceLROnPlateau factor 0.5 / patience 100** (smooth: loss never >2× running min; converged: tail range
-1.006; final loss 8.4e-9 ≈ constant floor; best test acc 0.8815). All primary runs use it: MSE seeds 0/1/2
-(205/55/55 ckpts) + CE seed 0 (205), 520 records manifest-verified; early zoom (every 5 steps 0–1,000)
-bit-exact for these runs (first LR cut at 1,375). Deliverables carry "Figure N." indices 1–13, identical in
-REPORT.md and RESULTS.md: smooth_convergence.png, training_context_pl_f0.5_p100.png,
-plateau_evolution_pl_f0.5_p100.gif, frames_selected_steps_pl_f0.5_p100.png, plateau_evolution_early.gif,
-plateau_early_heatmap.png, plateau_training_heatmap_pl_f0.5_p100.png,
-layerwise_selected_steps_pl_f0.5_p100.png, seed_comparison_pl_f0.5_p100.png,
-mse_vs_ce_training_pl_f0.5_p100.png, frames_selected_steps_ce_prob_pl_f0.5_p100.png,
-plateau_evolution_ce_pl_f0.5_p100.gif, pairwise_auc_pl_f0.5_p100.png; results/lr_scheduler_search.json,
-smooth_convergence.json, mse_vs_ce_pl_f0.5_p100.json, pairwise_auc_pl_f0.5_p100.json. Constant-LR results
-are numbers-only context (their plots deliberately not embedded, kept on disk). Verdict: plateau structure
-is entirely learned and forms in the first few hundred steps (PF 0.19→0.34@100→0.37@300, frozen thereafter,
-3 seeds); converged training freezes the geometry (M 5.6e-7 vs 2.4e-2 const; no late flips); the loss picks
-the space (MSE: soft logit plateaus PF 0.37; CE: sharp probability plateaus PF 0.863, logit near-diagonal);
-logit-PF beyond ~0.37 (const reaches 0.556) occurs only in never-converged training; 3v5 hardest pair under
-both losses (AUROC 0.9772 / 0.9697, rank 1/45 from worst); converged MSE generalizes best
-(0.8815/0.893/0.885). Feedback 07161151, 07161530, 07161650, 07161721, 07161834 all addressed. STOP written.
+COMPLETE (2026-07-17, iter 9). S1–S6: on the fixed 1,000-example draw, plateau curves form in the first few
+hundred steps and every smoothly-converged schedule freezes logit PF at ~0.37. S7–S10 (reopened extension):
+fresh from-scratch runs on all 60,000 images (verified untrained step-0 init, without-replacement shuffling,
+cosine 1e-3→1e-6 over 30k steps; seeds 0/1/2; 154 manifest-verified records) show the ceiling was a small-data
+effect — the full-data runs converge smoothly AND sharpen to PF 0.64–0.73 (test acc 0.976–0.979). On the frozen
+50-path 3→5 bank the difference is endpoint correction (49/50 vs 36/50 endpoint-correct at matched step 30k),
+not sub-plateau merging; the original 3→5 path simplifies 2|3|5 → 3|5 in all three seeds (endpoint correction +
+segment disappearance per the operational definitions). Deliverables curated (Figures 14–18 embedded in both
+RESULTS.md and REPORT.md), render checks clean, STOP written.
 
 ## Next step
 
-None — direction complete; STOP file present (zero unaddressed feedback files).
+None — plan complete, zero unaddressed feedback, STOP written.

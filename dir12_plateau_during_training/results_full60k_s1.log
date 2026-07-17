@@ -1,0 +1,30 @@
+[verify] step0 checkpoint == fresh seed-1 init == const-run step0 (bit-exact, all tensors) -> untrained confirmed
+step 0: loss=0.102002 tr_acc=0.0995 te_acc=0.0970 lr=1.00e-03
+step 10: loss=0.068342 tr_acc=0.6469 te_acc=0.6195 lr=1.00e-03
+step 30: loss=0.033792 tr_acc=0.8717 te_acc=0.8475 lr=1.00e-03
+step 100: loss=0.014529 tr_acc=0.9372 te_acc=0.9155 lr=1.00e-03
+[verify] first epoch used all 60,000 training indices exactly once (no replacement)
+step 300: loss=0.006594 tr_acc=0.9706 te_acc=0.9575 lr=1.00e-03
+step 1500: loss=0.001336 tr_acc=0.9946 te_acc=0.9730 lr=9.94e-04
+step 3000: loss=0.000679 tr_acc=0.9979 te_acc=0.9730 lr=9.76e-04
+step 4500: loss=0.000647 tr_acc=0.9975 te_acc=0.9735 lr=9.46e-04
+step 6000: loss=0.000406 tr_acc=0.9985 te_acc=0.9760 lr=9.05e-04
+step 7500: loss=0.000096 tr_acc=0.9998 te_acc=0.9780 lr=8.54e-04
+step 9000: loss=0.000061 tr_acc=0.9998 te_acc=0.9770 lr=7.94e-04
+step 10500: loss=0.000027 tr_acc=1.0000 te_acc=0.9785 lr=7.27e-04
+step 12000: loss=0.000111 tr_acc=0.9998 te_acc=0.9780 lr=6.55e-04
+step 13500: loss=0.000010 tr_acc=1.0000 te_acc=0.9810 lr=5.79e-04
+step 15000: loss=0.000006 tr_acc=1.0000 te_acc=0.9795 lr=5.00e-04
+step 16500: loss=0.000029 tr_acc=1.0000 te_acc=0.9775 lr=4.22e-04
+step 18000: loss=0.000002 tr_acc=1.0000 te_acc=0.9775 lr=3.46e-04
+step 19500: loss=0.000001 tr_acc=1.0000 te_acc=0.9770 lr=2.74e-04
+step 21000: loss=0.000001 tr_acc=1.0000 te_acc=0.9760 lr=2.07e-04
+step 22500: loss=0.000002 tr_acc=1.0000 te_acc=0.9775 lr=1.47e-04
+step 24000: loss=0.000000 tr_acc=1.0000 te_acc=0.9755 lr=9.64e-05
+step 25500: loss=0.000000 tr_acc=1.0000 te_acc=0.9760 lr=5.54e-05
+step 27000: loss=0.000000 tr_acc=1.0000 te_acc=0.9755 lr=2.54e-05
+step 28500: loss=0.000000 tr_acc=1.0000 te_acc=0.9755 lr=7.15e-06
+step 30000: loss=0.000000 tr_acc=1.0000 te_acc=0.9755 lr=1.00e-06
+done: 25 checkpoints in 49s -> /workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/full_mnist_from_scratch/seed_1
+/workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/full_mnist_from_scratch/seed_1: 25/25 records OK, 0 problems
+[verify] manifest complete

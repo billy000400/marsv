@@ -325,3 +325,51 @@ scheduler if no smooth run exists. Addressing it WAS the iteration.
 **Next step.** None — plan complete, all six feedback files addressed, STOP re-written.
 
 On track? yes — S1–S6 done + feedback 07161834 addressed, 100% complete, no blocker; STOP written (zero unaddressed feedback).
+## 2026-07-17 — Iter 9: reopened S7–S10 — full-60k from-scratch runs, comparison, verdict, STOP
+
+**Feedback check:** all six human_feedback files end in .addressed.md; none unaddressed. No
+stale STOP on disk (operator removed it when reopening the plan with S7–S10).
+
+**Did.**
+- `train_full60k.py` (S7): loads reference step-0 weights; startup asserts bit-equality with a
+  fresh re-derivation of the seed init (exact original RNG call order) and with the const-run
+  step0.pt; first-epoch exact-coverage assert; built-in manifest check. Smoke run (300 steps)
+  passed all three verifications; then seed 0 full (104 ckpts, 52 s) and seeds 1–2 fallback
+  (25 ckpts each) — all manifest-verified (154 records). `eval_3v5_ref1k.py`: 1k converged
+  model re-evaluated on the 105-pair bank (55 original + frozen 50-path 3v5) at 16 anchors.
+- `render_full60k.py`: Figures 14–18 (context, synchronized side-by-side GIF aligned by
+  optimizer step, aligned static frames, 3v5-bank GIF, 3v5 summary panel). Curated RESULTS.md
+  and REPORT.md (new Methods subsections w/ equations, new Results subsection, findings 2/5
+  re-scoped, new finding 6, verdict + limitations rewritten). Render checks 15/15 clean.
+
+**Learned.**
+- The project's central "convergence freezes PF at 0.37" result is a SMALL-DATA effect: the
+  same initializations trained on all 60k images converge smoothly under the plan's cosine
+  schedule AND keep sharpening for thousands of steps (PF peak 0.73 @ ~8.4k, final 0.64–0.69;
+  test acc 0.979 vs 0.881). Data size — not convergence — set the ceiling.
+- 3->5 sub-plateau answer: full-data training mainly CORRECTS ENDPOINTS (49/50 vs 36/50 at
+  matched step 30k; both 0/50 at step 0, so the preregistered step-0-correct subset is empty).
+  Original 3->5 path: 2|3|5 -> 3|5 in all three seeds = endpoint correction + segment
+  disappearance, NOT a merge; repeated-class RLEs are transient (2/50) and absent at final
+  checkpoints in both regimes.
+- PF of the 60k run is non-monotonic late (0.73 peak -> 0.64 at 30k) — reported as-is.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Kept PLAN's prescribed cosine schedule: smoothness judged on full-train loss at checkpoints
+  (per-step full-train loss over 30k steps x 60k images would be a ~300x slowdown; per-batch
+  loss is noisy by construction). Transients <=17x running min, none after ~21k, tail range
+  1.32 -> "no numerical instability", so no schedule change. Alternative (ReduceLROnPlateau as
+  in the 1k runs) rejected: PLAN prescribes cosine for this run and reserves changes for
+  instability only.
+- 50-path 3v5 bank chosen as rank-i-3 with rank-i-5 (i<50, test order, first 2000): simplest
+  deterministic pairing, frozen before any full-data result was viewed, unfiltered per PLAN.
+- State dicts at 10 anchor steps only (runs deterministic + regenerable; precedent iters 6–8);
+  every checkpoint stores the full record schema, anchors add raw h1/h2/h3 arrays.
+- "Report the subset whose endpoints were already correct at step 0": subset is empty (an
+  untrained net classifies nothing) — stated plainly in REPORT/RESULTS instead of inventing a
+  different subset.
+- Seeds 1–2 fallback density (25 ckpts) per PLAN S9 "fallback checkpoint density".
+
+**Next step.** None — S7–S10 complete, all feedback addressed, STOP written.
+
+On track? yes — S7–S10 done in one iteration (runs fast on this GPU), 100% complete, no blocker; STOP written (zero unaddressed feedback).

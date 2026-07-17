@@ -267,3 +267,48 @@ NEW primary runs.
 - Render checks: REPORT 12/12 js-display-math, 0 pre-lang-math, inline hazard grep clean, all
   plot refs embedded as images in both files. Renamed feedback → `.addressed.md`; STOP
   re-written (plan complete, zero unaddressed feedback).
+## 2026-07-17 — Iter 9: reopened extension S7–S10 — fresh full-60k-MNIST runs, comparison vs 1k reference, verdict
+
+Plan reopened by operator (S7–S10): train the SAME step-0 initializations from scratch on all
+60,000 MNIST images and compare plateau/sub-plateau evolution against the 1k reference. All
+four stages completed this iteration; STOP written.
+
+- **NEW training script** `experiments/train_full60k.py` (S7): loads the original step-0
+  untrained MSE checkpoint (asserted bit-identical to a fresh re-derivation of the seed init
+  AND to the const-run step0.pt -> provably untrained), trains on all 60k images shuffled
+  without replacement each epoch (300 steps/epoch, batch 200; first-epoch exact-coverage
+  asserted), AdamW 1e-3/wd 0.01, MSE, fixed cosine LR 1e-3->1e-6 over 30,000 steps (PLAN's
+  prescribed schedule; kept — no numerical instability: full-train loss at checkpoints decays
+  1e-1 -> 2.3e-7 with transients <=17x running min, none after ~21k, tail range 1.32).
+  Built-in manifest check. Smoke test (300 steps) passed all three S7 verifications before the
+  long runs.
+- **NEW runs** (S8+S9): seed 0 full schedule (104 ckpts: 0,10,30,100 then every 300 to 30k),
+  seeds 1–2 fallback (25 ckpts); pair bank = original 55 pairs + NEW frozen 50-path 3->5 bank
+  (rank-i test 3 with rank-i test 5, i<50, unfiltered, selected before viewing results). All
+  154 records manifest-verified. Also NEW `experiments/eval_3v5_ref1k.py`: 1k converged model
+  re-evaluated on the identical 105-pair bank at its 16 anchors (paired baseline).
+- **NEW figures** (`experiments/render_full60k.py`): Figure 14 full_mnist_training_context.png,
+  Figure 15 full_vs_1k_evolution.gif (synchronized side-by-side, 25 step-aligned frames),
+  Figure 16 full_vs_1k_frames.png, Figure 17 full_mnist_3v5_training.gif (104 frames),
+  Figure 18 full_mnist_3v5_summary.png. All embedded in BOTH RESULTS.md and REPORT.md.
+- **HEADLINE RESULT (new):** the converged-PF ceiling was a small-data effect. Full-60k runs
+  converge smoothly AND keep sharpening: PF 0.43 (step 300) -> 0.61 (1.5k) -> peak 0.73
+  (~8.4k) -> 0.64/0.69/0.65 final across seeds (1k converged reference: frozen at 0.37); test
+  acc 0.979/0.976/0.977 vs 0.881; late curve motion 3e-4; 0/90 cross-pair endpoints
+  misclassified (1k: 3/90). REPORT finding 5 REVISED from "sharpening beyond 0.37 requires
+  non-converged training" to "…on the 1k subset; with 60k data converged training reaches
+  0.64–0.73". Finding 2 + constant-LR subsection + verdict + conclusion re-scoped accordingly.
+- **3->5 verdict (new finding 6):** endpoint correction, not merging. 49/50 paths
+  endpoint-correct at 30k under 60k-training vs 36/50 under 1k (both 0/50 at step 0 — the
+  preregistered "correct at step 0" subset is empty, stated in REPORT). Original 3->5 path:
+  2|3|5 -> 3|5 in ALL three 60k seeds (endpoint correction + segment disappearance per the
+  plan's definitions). Detours 4% vs 2%; seg mean 2.04 vs 1.90; repeated-class RLEs (only
+  merge-capable patterns): 2/50 transient (60k), 1/50 (1k), 0 at final checkpoints. No global
+  topology claims.
+- **Methods added:** full-60k subsection (init verification, shuffle, cosine equation,
+  checkpoint/alignment scheme, frozen 3v5 bank) + segment metrics (RLE segment count, detour
+  indicator, endpoint correctness — equations + merge/endpoint-correction/disappearance
+  distinctions). RESULTS.md preamble/headline/table rebuilt around both regimes.
+- Render checks: 15/15 js-display-math, 0 pre-lang-math, inline hazard grep clean, all plot
+  refs embedded as images in both files. PLAN S7–S10 ticked; STOP written (zero unaddressed
+  feedback).
