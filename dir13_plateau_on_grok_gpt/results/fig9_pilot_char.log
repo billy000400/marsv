@@ -2,3 +2,4 @@
 step      0 clean 0.025 adv 0.000 LC tr 1935 te 1940 rnd 2099 [198s]
 step      1 clean 0.034 adv 0.000 LC tr 1939 te 1945 rnd 2103 [181s]
 step      2 clean 0.097 adv 0.000 LC tr 1893 te 1899 rnd 2077 [155s]
+step      3 clean 0.148 adv 0.000 LC tr 1753 te 1763 rnd 1977 [215s]
