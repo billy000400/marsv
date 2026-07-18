@@ -336,7 +336,17 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocke
 
 ## Current status
 
-COMPLETE (2026-07-17, iter 10). Operator feedback `human_feedback_1` addressed: the 60k run now uses a
+COMPLETE (2026-07-18, iter 11). Operator feedback `human_feedback_2` addressed: added an averaged
+plateau-evolution view — for each of the ten preregistered transitions, the MEAN logit d(alpha) over
+**100** image pairs with a ±1 std shadow band, at every full-60k seed-0 checkpoint (Figures 4b/4c,
+`avg_transition_curves.{gif,png}`, arrays in `results/avg_transition_curves.npz`). Confirms the
+gradual-then-frozen sharpening is representative (not one lucky example); the std band widens with
+training (0.048→0.137, boundary location gets more example-specific) and the mean-curve PF saturates
+lower (0.52) than the per-example 0.674 because averaging blurs the boundary alpha. Verdict unchanged.
+Renamed `human_feedback_2.txt`→`.addressed.md`; render checks clean (15/15 display math, 0 code-block
+math, 0 inline hazards, all figures embedded). Zero unaddressed feedback → STOP re-written.
+
+Prior (iter 10): Operator feedback `human_feedback_1` addressed: the 60k run now uses a
 smooth `ReduceLROnPlateau(0.5, 100)` schedule (chosen by a 60k scheduler search — the previous cosine was
 noisy, spike 101×), every 1k-only experiment was rerun on 60k (MSE seeds 0/1/2 + CE seed 0, 258 records +
 201 early-zoom, manifest-verified), and REPORT/RESULTS are refocused on the 60k results with the 1k run
@@ -350,4 +360,5 @@ embedded in both files); STOP written.
 
 ## Next step
 
-None — plan complete, feedback human_feedback_1 addressed, zero unaddressed feedback, STOP written.
+None — plan complete, feedback human_feedback_1 and human_feedback_2 addressed, zero unaddressed
+feedback, STOP written.

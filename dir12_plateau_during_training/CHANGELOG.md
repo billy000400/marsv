@@ -356,3 +356,27 @@ around the 60k runs. Renamed `human_feedback_1.txt` → `.addressed.md`.
   hazard grep clean; all 19 figures embedded as `![…](…)` images in both files and present on
   disk. Feedback renamed to `.addressed.md`; STOP re-written (plan complete, zero unaddressed
   feedback).
+
+## 2026-07-18 — Operator feedback human_feedback_2: averaged transition curves (100 pairs, std band)
+
+Feedback: the plateau-evolution animation only tracked ONE example per transition; plot the average
+curve of 100 examples per transition with a shadow band indicating the standard deviation.
+
+- **New experiment.** `experiments/avg_transition_curves.py` evaluates 100 image pairs per transition
+  for each of the ten preregistered cross-class digit pairs (rank-i class-a paired with rank-i class-b,
+  i=0..99, all in the frozen first-2,000 test pool), at all 10 full-60k seed-0 weight checkpoints
+  (steps 0,10,30,100,300,1500,3000,6000,15000,30000). Same SLERP-at-h1 logit-space protocol; per
+  transition we summarize the 100 curves by pointwise mean and std. Numeric arrays saved to
+  `results/avg_transition_curves.npz` (+ `_summary.json`).
+- **Deliverables.** Added Figure 4b (animated mean d(alpha) with ±1 std band, one frame/checkpoint,
+  `plots/avg_transition_curves.gif`) and Figure 4c (static selected-step version,
+  `plots/avg_transition_curves_frames.png`) to RESULTS.md and REPORT.md, plus a Methods paragraph
+  defining mean/std of d(alpha) with a rendered equation, and interpretive prose.
+- **New numbers.** Mean-curve PF (share of mean-curve points with d<0.1 or d>0.9): 0.18 (step 0) →
+  0.36 (300) → 0.54 (3,000) → 0.52 (30,000); lower than the per-example headline 0.674 because
+  averaging blurs the boundary location. Band width (mean std over alpha) grows monotonically 0.048 →
+  0.071 → 0.127 → 0.137 at steps 0/300/3,000/30,000 — the transition location becomes more
+  example-specific as plateaus sharpen. Verdict unchanged: gradual-then-frozen sharpening is
+  representative, not a cherry-picked example.
+- Render checks: 15/15 display-math elements render, 0 code-block math, 0 inline-math punctuation
+  hazards, 0 un-embedded plot paths. Renamed `human_feedback_2.txt` → `.addressed.md`.

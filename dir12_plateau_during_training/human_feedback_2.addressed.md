@@ -1,0 +1,1 @@
+In the report, you showed animation of how the plateau changed with time. However, you are only checking one example, can you plot the average curve of 100 examples per transition with shadow indicating the standard deviation?

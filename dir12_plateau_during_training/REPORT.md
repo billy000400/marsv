@@ -347,6 +347,25 @@ plateaus — and (ii) the **third-class fraction** — the share of path points 
 class is neither $a$ nor $b$, measuring staircase detours through other digits' regions. Both
 are correlated against AUROC across the 45 pairs (Spearman rank correlation) in Figure 13.
 
+**Averaged transition curves — mean $d(\alpha)$ with a std band (operator feedback human_feedback_2).**
+The main animation tracks one image pair per transition; a single pair cannot show whether its shape
+is typical. To test representativeness, for each of the ten preregistered transitions $(a,b)$ we take
+$N=100$ image pairs — pairing the rank-$i$ class-$a$ test image with the rank-$i$ class-$b$ test image
+for $i=0\dots99$, all inside the first 2,000 test images — run the identical SLERP-at-$h_1$ protocol on
+each, and summarize the 100 logit-space curves by their pointwise mean and standard deviation. For a
+transition with per-pair curves $d_j(\alpha)$, $j=1\dots N$:
+
+```math
+\bar d(\alpha) = \frac{1}{N}\sum_{j=1}^{N} d_j(\alpha), \qquad
+\sigma(\alpha) = \sqrt{\frac{1}{N}\sum_{j=1}^{N}\bigl(d_j(\alpha)-\bar d(\alpha)\bigr)^2}
+```
+
+We plot $\bar d(\alpha)$ as a line with a shaded $[\bar d-\sigma,\ \bar d+\sigma]$ band per checkpoint
+(Figures 4b–4c). The band width $\overline{\sigma}$ (its mean over $\alpha$) measures how much the
+boundary location varies across pairs; because pairs cross at different $\alpha$, the **mean** curve's
+plateau fraction is a lower bound on the per-pair PF. This metric consumes the same $d(\alpha)$ as the
+primary metric; it is a per-transition aggregate, not a new plateau definition.
+
 ### Baselines
 
 **Initialization (step 0)** — the built-in baseline of the movie: whatever the curves show at
@@ -438,6 +457,34 @@ Static frames for reading without playback — the step-10,500 and step-30,000 r
 identical:
 
 ![Figure 4. Selected frames of the main animation (rows: steps 0, 100, 1,500, 10,500, 30,000): logit-space d(alpha) vs alpha for the ten pairs; squares: predicted class. The diagonal at step 0 sharpens into plateau-boundary-plateau staircases over the first few thousand steps and then stops changing.](plots/frames_selected_steps_60k.png)
+
+### Averaging 100 image pairs per transition (operator feedback human_feedback_2)
+
+Figures 3–4 track **one** image pair per digit transition, so a reader cannot tell whether the
+plateau shape they show is representative or a lucky example. To answer that, for each of the ten
+preregistered transitions $(a,b)$ we evaluated **100** image pairs — the rank-$i$ class-$a$ test
+image paired with the rank-$i$ class-$b$ test image, $i=0\dots99$, all inside the frozen first
+2,000 test images — and plotted the **mean $d(\alpha)$ curve with a $\pm1$ standard-deviation shadow
+band** at every full-60k seed-0 weight checkpoint (Methods, "Averaged transition curves"). The digit
+pair per transition is fixed exactly as before; only the number of example image pairs rises from 1
+to 100.
+
+The averaged curves tell the same story as the single-example movie, and add two things a single
+example hides. (1) **The gradual-then-frozen evolution is representative, not cherry-picked:** the
+mean curve is the featureless diagonal at step 0 and, transition by transition, deforms into a
+plateau–boundary–plateau staircase over the first few thousand steps, then stops (Figure 4b). (2)
+**The transition location becomes more example-specific as plateaus sharpen:** the mean std width of
+the band grows monotonically 0.048 (step 0) → 0.071 (300) → 0.127 (3,000) → 0.137 (30,000). Because
+different image pairs cross their boundary at different $\alpha$, averaging blurs the step, so the
+**mean** curve's plateau fraction (share of mean-curve points with $d<0.1$ or $d>0.9$) saturates
+lower than the per-example headline — 0.18 (step 0) → 0.36 (300) → 0.54 (3,000) → ~0.52 (30,000)
+vs the per-example 0.674 — precisely because the sharpening is real but not aligned across pairs.
+Some transitions (e.g. $6\to7$) keep a visible sub-plateau shelf near $\alpha\approx0.4$ even in
+the mean, showing multi-region paths survive averaging.
+
+![Figure 4b. Animated mean d(alpha) over 100 image pairs per transition (full-60k seed 0, one frame per checkpoint, step in title): solid green = mean logit-space d(alpha); shaded band = ±1 std across the 100 pairs; dotted = the featureless diagonal reference. x: interpolation alpha (0 = image A, 1 = image B); y: mean logit-space relative endpoint distance.](plots/avg_transition_curves.gif)
+
+![Figure 4c. Selected-step static version of Figure 4b (rows: steps 0, 100, 300, 3,000, 30,000; columns: the ten transitions): mean d(alpha) (green) with ±1 std shadow over 100 pairs. The diagonal at step 0 sharpens into staircases whose boundary location scatters more across pairs as training proceeds (widening band).](plots/avg_transition_curves_frames.png)
 
 ### The early phase on a linear time axis — where the structure is laid down
 

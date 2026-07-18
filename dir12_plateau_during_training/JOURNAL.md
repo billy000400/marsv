@@ -423,3 +423,40 @@ experiment on 60k; report should focus on 60k with only a small training-set-siz
 **Next step.** None — feedback addressed, deliverables refocused on 60k, STOP re-written.
 
 On track? yes — feedback human_feedback_1 fully addressed, report refocused on 60k, 100% complete, no blocker; STOP written (zero unaddressed feedback).
+
+## 2026-07-18 — iter 11: address human_feedback_2 (average 100 pairs/transition + std band)
+
+FEEDBACK FIRST: found unaddressed `human_feedback_2.txt` — "you are only checking one example, can
+you plot the average curve of 100 examples per transition with shadow indicating the standard
+deviation?" That was this iteration's work.
+
+Did:
+- Wrote `experiments/avg_transition_curves.py`. Interpreted "transition" = one of the ten fixed
+  preregistered cross-class digit pairs (ANIM_PAIRS) already shown in the main animation; "100
+  examples" = 100 image pairs of that transition (rank-i class-a with rank-i class-b, i<100, all in
+  test[:2000], deterministic, frozen before viewing). Reused plateau_protocol.record_checkpoint
+  unchanged (same SLERP-at-h1 logit d(alpha)). Ran all 1000 pairs through each of the 10 full-60k
+  seed-0 weight checkpoints under the shared GPU limits (mem frac 0.225, 2 threads).
+- Saved mean/std d(alpha) [10 steps, 10 transitions, 50 alpha] to results/avg_transition_curves.npz
+  and a summary json. Made an animated GIF (mean line + ±1 std band, one frame/checkpoint) and a
+  static selected-step PNG. Embedded both as Figures 4b/4c in RESULTS.md + REPORT.md with a Methods
+  paragraph (mean/std equation in a math fence) and interpretation.
+
+Learned:
+- The gradual-then-frozen sharpening survives averaging over 100 pairs — it is representative, not a
+  lucky single example. Good confirmation of the headline.
+- Two things a single example hid: (1) the std BAND WIDENS with training (0.048→0.137), i.e. the
+  boundary location becomes more example-specific as plateaus sharpen; (2) the MEAN curve's PF
+  saturates lower (0.52) than the per-example 0.674 because different pairs cross the boundary at
+  different alpha, so averaging blurs the step. Both are honest, informative caveats.
+
+Assumption logged (loop mode, no human to ask): "per transition" = per digit-pair identity (kept the
+ten preregistered pairs), not a per-pair resample of all 45; "100 examples" = 100 image pairs per
+transition. Rejected alternative: averaging over all 45 cross-class transitions collapses distinct
+digit pairs and would hide heterogeneity the PLAN explicitly wants shown — rejected.
+
+Next step: none required — feedback addressed, plan already COMPLETE, deliverables current-best,
+render checks clean. Will re-write STOP (was removed implicitly by new feedback; now zero unaddressed
+feedback files remain).
+
+On track? yes — S1-S10 complete + human_feedback_2 addressed, 100% done, no blocker.

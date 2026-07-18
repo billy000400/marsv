@@ -87,6 +87,21 @@ numbers match REPORT.md.
 
 ![Figure 4. Selected main-animation frames (rows: steps 0, 100, 1,500, 10,500, 30,000): diagonal at init, sharp plateau-boundary-plateau staircases by a few thousand steps, then frozen — the last two rows are nearly identical.](plots/frames_selected_steps_60k.png)
 
+**Averaged over 100 pairs per transition (feedback human_feedback_2).** Figures 3–4 show one image
+pair per transition. To confirm that shape is representative, for each of the ten transitions we
+average the logit $d(\alpha)$ over **100** image pairs (rank-$i$ class-$a$ with rank-$i$ class-$b$,
+$i<100$, in the first 2,000 test images) and draw a $\pm1$ std shadow band, at every 60k seed-0
+checkpoint. The gradual-then-frozen sharpening is representative — the mean curve deforms from the
+step-0 diagonal into plateau–boundary–plateau staircases and freezes — and the band **widens** as
+plateaus sharpen (mean std 0.048 → 0.071 → 0.127 → 0.137 at steps 0/300/3,000/30,000), showing the
+boundary location becomes more example-specific. Averaging blurs the step, so the *mean* curve's PF
+saturates lower than the per-example 0.674 (0.18 → 0.36 → 0.54 → 0.52 at 0/300/3,000/30,000); some
+transitions (e.g. 6→7) keep a visible sub-plateau shelf even in the mean.
+
+![Figure 4b. Animated mean logit d(alpha) over 100 image pairs per transition (60k seed 0, one frame per checkpoint): green = mean; shaded band = ±1 std across the 100 pairs; dotted = diagonal. x: alpha (0=A, 1=B); y: mean logit d(alpha).](plots/avg_transition_curves.gif)
+
+![Figure 4c. Static selected-step version of Figure 4b (rows: steps 0, 100, 300, 3,000, 30,000; columns: the ten transitions): mean logit d(alpha) with ±1 std shadow over 100 pairs. Band widens with training as boundary locations scatter across pairs.](plots/avg_transition_curves_frames.png)
+
 ![Figure 5. Early-phase animation (60k seed 0, steps 0-1,000, one frame per 5 steps, LINEAR time): the diagonal deforms within tens of steps, flickers while loss falls fastest, then keeps sharpening (PF still climbing at step 1,000, unlike the 1k regime). Bit-exact for the scheduled run (first LR cut at step 1,402).](plots/plateau_evolution_early_60k.gif)
 
 ![Figure 6. Early-phase heatmap (60k seed 0): d(alpha) (color, blue=0 red=1) vs alpha (x) and step (y, linear, one row per 5 steps, 0-1,000) for the ten pairs + two within-class controls.](plots/plateau_early_heatmap_60k.png)
