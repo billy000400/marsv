@@ -188,7 +188,19 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**COMPLETE (2026-07-17): all stages S1–S8 done. Bounded verdict = case 5 + S6 secondary. STOP written.**
+**COMPLETE (2026-07-25): all stages S1–S8 done + operator feedback #3 addressed. Bounded verdict =
+case 5 + S6 secondary (unchanged). STOP re-written.**
+
+- **Feedback #3 (`human_feedback_3.txt.addressed.md`) — comma vs every other character.** New
+  `experiments/comma_sweep.py`: endpoint A fixed at `"The house was ,"`, endpoint B = same context +
+  each of the 64 other characters; same 50-step slerp / final-position patch / final-logit `d(t)`
+  path as the S6 controls. Result: **no pair is linear** (median transition width **0.340** vs 0.80
+  for a straight line, 0/64 near-linear, 64/64 monotone) but only **1/64** meets the strict ≤0.25
+  plateau rule; sharpness tracks the model's next-character probability (Spearman **ρ = −0.74**,
+  n = 64) more than endpoint separation (ρ = −0.48). Depth and across-training controls replicate at
+  n = 64; the `b↔i`/`b↔l` controls sit at the sweep's median. Four new figures
+  (`plots/comma_{all_chars_curves,width_by_char,width_vs_endpoints,depth_and_training}.png`) embedded
+  in RESULTS.md + REPORT.md with a discussion section in each. Grokking verdict unchanged (case 5).
 
 - **All three Figure-9 gates = FAIL** (pilot char, fresh char 30k, fresh BPE 10k). Each shows a first
   LC descent + emerging `ε=0.03`-PGD robustness but **no second LC descent** within budget. Fresh char
@@ -206,7 +218,7 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Next step
 
-None — plan complete, `STOP` written. All success criteria met: three Figure-9 gate verdicts (all
+None — plan complete and feedback #3 addressed, `STOP` re-written. All success criteria met: three Figure-9 gate verdicts (all
 FAIL), a checkpoint-aligned figure showing both Grokking metrics and plateau width on one axis, the
 two `b/i`/`b/l` char controls as primary plateau evidence, the 40-pair set demoted to a labelled
 exploratory appendix, and the bounded case-5 relationship verdict. If new `human_feedback*.md` /

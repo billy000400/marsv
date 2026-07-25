@@ -251,3 +251,37 @@ Grokking-side result into the deliverables.
   inline-math hazards, all figures on disk; RESULTS.md same (no display math by design).
 - **Plan complete:** all stages S1–S8 done; every success criterion met. `STOP` written (no unaddressed
   feedback files remain).
+
+## 2026-07-25 (operator feedback #3 — comma vs every other character)
+
+- **Addressed `human_feedback_3.txt`** ("interpolate from comma to all other characters and see if
+  there is a plateau; add a section to discuss the results; do not invent jargon") → renamed
+  `human_feedback_3.txt.addressed.md`.
+- **New experiment** `experiments/comma_sweep.py` + `experiments/plot_comma_sweep.py`: endpoint A
+  fixed at `"The house was ,"`, endpoint B = the same context + each of the **64 other characters**;
+  otherwise identical to the Matthew-faithful char-control path (50 interpolation steps,
+  `slerp_rescale`, final-position patch, final-logit `d(t)`, transition width `w_10→90`, frozen
+  plateau rule). Run at interpolation block 0 for the 6 frozen checkpoints and at every interpolation
+  block 0–11 at step 30,000. Raw curves `results/comma_sweep_raw.npz`; widths + endpoint statistics
+  `results/comma_sweep_summary.json`.
+- **New numbers (nothing superseded — this is a new experiment).** Final checkpoint, block 0, final
+  logits: median width **0.340** (IQR 0.305–0.409), min 0.245 (`c`), max 0.665 (`3`), straight-line
+  reference 0.80; **1/64** pairs meet the strict plateau rule (`w ≤ 0.25` + rests near both
+  endpoints), 33/64 at ≤0.35, 52/64 at ≤0.45, **0/64** near-linear, 64/64 monotone. Median transition
+  start/end t = 0.252 / 0.603. Class medians: lower-case 0.313 (n=26), upper-case 0.355 (n=26),
+  space/newline 0.336 (n=2), punctuation-or-digit 0.564 (n=10). Width vs the model's next-character
+  probability: Spearman **ρ = −0.74** (p = 2.7e-12, n = 64); vs endpoint logit separation ρ = −0.48
+  (p = 5.6e-5). Depth: 0.34 (block 0) → 0.51 → 0.65 → 0.72 → 0.77 → 0.79 → ≈0.80 (blocks 6–11).
+  Training: 0.799 (init) → 0.751 (56) → 0.524 (831) → 0.328 (7,819) → 0.367 (17,500) → 0.340 (30k).
+  Context check: the preregistered `b↔i` (0.331) / `b↔l` (0.330) controls sit at this sweep's median.
+- **New figures (embedded as rendered images in BOTH RESULTS.md and REPORT.md):**
+  `plots/comma_all_chars_curves.png`, `plots/comma_width_by_char.png`,
+  `plots/comma_width_vs_endpoints.png`, `plots/comma_depth_and_training.png`.
+- **Deliverables curated:** RESULTS.md gains a "Comma vs every other character — 64 pairs from one
+  endpoint" section with a 6-point discussion, plus a 4th verdict bullet and an extended headline;
+  REPORT.md gains a Methods subsection (sweep design, next-character probability, endpoint separation,
+  Spearman ρ — each with a rendered equation) and a Results section with the four figures and the
+  discussion, plus updated Summary, Conclusion and Limitation 2. **Bounded relationship verdict is
+  unchanged (PLAN case 5)** — the sweep runs on the same non-grokking checkpoints.
+- Render checks: REPORT.md 9/9 `js-display-math`, 0 `<pre lang="math">`, 0 KaTeX errors, 0 inline-math
+  hazards; all embedded plot paths are `![...]` images and exist on disk (both files).

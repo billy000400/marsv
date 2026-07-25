@@ -1,0 +1,1 @@
+Can you do a set of experiments that interpolate from comma to all other characters and see if there is a plateau? Add a section to discuss the results in this experiments. Do not invent jargons

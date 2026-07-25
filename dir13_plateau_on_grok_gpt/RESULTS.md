@@ -37,6 +37,12 @@ temporal observation.**
    stack that appears early, so there is **no visible temporal coupling to the grokking signature**
    (which never occurs). This is evidence about temporal association only, not causation.
 
+4. **The plateau shape is general, but graded.** Holding one endpoint fixed at the **comma** and
+   interpolating to **all 64 other characters**, every pair bends away from the straight line — none
+   is linear — yet only 1/64 meets the strict frozen plateau rule (transition width ≤ 0.25; median
+   width 0.340 against 0.80 for a straight line). How sharp the switch is tracks how likely the model
+   thinks the other character is in that context (Spearman rank correlation ρ = −0.74, n = 64).
+
 ## Models actually tested
 
 | Model | Tokenizer | Params | Trained to | Role |
@@ -136,6 +142,92 @@ by the downstream stack, matching Matthew's layerwise prediction. Raw `d(t)` for
 interp-layer, hook) in `results/matthew_char_ctrl_raw.npz`; widths in
 `results/matthew_char_ctrl_summary.json`.
 
+## Comma vs every other character — 64 pairs from one endpoint
+
+An operator asked whether the plateau survives when we hold one endpoint fixed at the **comma** and
+interpolate to **every other character in the vocabulary**. Same code path and same settings as the
+`b↔i`/`b↔l` controls above (context `"The house was "`, 50 interpolation steps, `slerp_rescale`,
+final-position patch, final-logit `d(t)`): endpoint A is always `"The house was ,"`, endpoint B is
+`"The house was "` + one of the other **64** characters. Script `experiments/comma_sweep.py`; raw
+curves in `results/comma_sweep_raw.npz`, widths in `results/comma_sweep_summary.json`.
+
+**Answer: yes, but the sharpness is graded, and only 1 of 64 pairs meets the strict bar.** At the
+final checkpoint (step 30,000, interpolation block 0):
+
+| quantity (64 comma→character pairs) | value |
+|---|---|
+| median transition width | **0.340** (inter-quartile range 0.305–0.409) |
+| narrowest / widest | 0.245 (`c`) / 0.665 (`3`) |
+| straight-line reference (no plateau) | 0.80 |
+| pairs meeting the strict rule (width ≤ 0.25 + rests near both endpoints) | **1 / 64** |
+| pairs with width ≤ 0.35 / ≤ 0.45 | 33 / 64 and 52 / 64 |
+| pairs that are near the straight line (width ≥ 0.7) | **0 / 64** |
+| pairs whose curve rises without wiggling (isotonic deviation = 0) | 64 / 64 |
+| median start / end of the transition | t = 0.252 / t = 0.603 |
+
+Every one of the 64 curves is S-shaped: it stays near the comma prompt's output for roughly the first
+quarter of the path, rises steeply, then stays near the other character's output for the last ~40%.
+None is a straight line. But most transitions occupy about a third of the path rather than the ≤ 25%
+demanded by the strict frozen rule, so "is there a plateau?" is a question of degree here, not a
+yes/no. The two preregistered controls `b↔i` (0.331) and `b↔l` (0.330) sit right at this sweep's
+median — they were typical pairs, not lucky ones.
+
+![All 64 comma→character curves at step 30,000. Left: relative distance d(t) (y, 0 = output still looks like the comma prompt, 1 = looks like the other-character prompt) vs interpolation step t (x); one line per pair, colour = that pair's transition width (colour bar); thick black = median over the 64 pairs; gray dashed = the straight line d = t expected with no plateau. Right: histogram of transition width (x) vs number of pairs (y); red dotted = strict plateau rule 0.25, gray dashed = straight-line value 0.80, black = median 0.34.](plots/comma_all_chars_curves.png)
+
+**Which character sits at the other end matters a lot.** Sorting the 64 pairs by width splits them by
+character type: lower-case letters give the sharpest transitions (median 0.313, n = 26), upper-case
+letters next (0.355, n = 26), space and newline in between (0.336, n = 2), and punctuation or the
+digit `3` are clearly the flattest (0.564, n = 10).
+
+![Transition width (y) for each comma→character pair (x, one bar per character, sorted from sharpest to flattest; ␣ = space, \n = newline), final checkpoint, interpolation block 0, final logits. Bar colour = character type (lower-case letter, upper-case letter, space/newline, punctuation or digit). Red dotted = strict plateau rule 0.25; gray dashed = straight-line value 0.80.](plots/comma_width_by_char.png)
+
+**What predicts the width.** The single best predictor we found is how likely the model thinks that
+character is in this context: transition width falls as the model's probability for the character
+after `"The house was "` rises (Spearman rank correlation **ρ = −0.74**, p = 2.7e-12, n = 64). How
+far apart the two endpoint outputs are explains less (ρ = −0.48, p = 5.6e-5) — and in the direction
+that rules out a trivial artifact: *wider*-separated endpoints give *sharper*, not flatter,
+transitions. Note the comma itself is an unlikely continuation here (model probability 1.0e-7), so
+the sharp cases are not "both endpoints are common inputs" — what varies is the other character.
+
+![Left: transition width (y) vs the model's probability of the other character after "The house was " (x, log scale), one point per pair, colour = character type; Spearman ρ = −0.74. Right: transition width (y) vs the L2 distance between the two endpoints' final-logit vectors (x); Spearman ρ = −0.48. Red dotted = strict plateau rule 0.25; gray dashed = straight-line value 0.80.](plots/comma_width_vs_endpoints.png)
+
+**Both structural controls replicate at n = 64.** Moving the interpolation point deeper (fewer layers
+left to act) flattens the curve back to the straight line — median width 0.34 (block 0), 0.51, 0.65,
+0.72, 0.77, 0.79, then ≈0.80 for blocks 6–11. Across training the transition narrows early and then
+stops changing: median width 0.799 (init) → 0.751 (step 56) → 0.524 (831) → 0.328 (7,819) → 0.367
+(17,500) → 0.340 (30,000). Both match the `b↔i`/`b↔l` result with 32× more pairs.
+
+![Left: median transition width over the 64 pairs (y) vs interpolation block (x, 0–11: the residual stream after this block is replaced); shaded = inter-quartile range; gray dashed = straight line 0.80; red dotted = strict plateau rule 0.25. Right: median transition width (y) vs training step (x, log scale, step 0 drawn at 1) at interpolation block 0; shaded = inter-quartile range; same reference lines.](plots/comma_depth_and_training.png)
+
+### Discussion of the comma sweep
+
+1. **A plateau-shaped response is the rule, not the exception.** Fixing one endpoint and sweeping all
+   64 alternatives, no pair behaves like a straight line. The downstream stack always resists the
+   interpolation for a while, then switches. That the effect survives an exhaustive sweep — rather
+   than only for hand-picked pairs — is the main thing this experiment adds.
+2. **But sharpness is a continuum, and the strict bar is close to the edge of it.** Only 1/64 pairs
+   passes width ≤ 0.25, while 33/64 pass at ≤ 0.35. Any headline count of "how many plateaus" in this
+   model is therefore mostly a statement about the threshold. We report the whole distribution for
+   that reason.
+3. **The transition is sharpest for characters the model actually expects.** The rank correlation
+   with the model's own next-character probability (ρ = −0.74) is strong for n = 64. A plain reading:
+   when the second endpoint is a continuation the model has a confident, well-practised output for,
+   the downstream layers snap between two familiar outputs; when it is a character the model
+   essentially never predicts there (`3`, `&`, `!`, `:`, `z`), the output drifts more gradually. This
+   is a correlation across 64 characters in one context, not a causal test.
+4. **It is not an artifact of endpoint geometry.** If wide transitions were just "endpoints too close
+   to separate", width would grow with smaller endpoint separation *and* that would be the dominant
+   effect. Separation correlates only −0.48, and the sign says well-separated endpoints transition
+   *faster*.
+5. **It does not change the grokking verdict.** These 64 pairs are measured on the same non-grokking
+   character run, at the same frozen checkpoints. They confirm the plateau appears with initial fit
+   (already at its floor by step ~7,800) and stays flat, so the bounded relationship verdict stays
+   PLAN case 5.
+6. **Caveats.** One shared context, one model, one interpolation position (final token), and single
+   characters as endpoints. Widths near 0.33 are "sharper than linear" but not step-like; and the
+   comma endpoint is itself an implausible input, which may make every one of these pairs harder than
+   a pair of two natural continuations.
+
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
 > **Clearly labelled as exploratory and out of the headline** (PLAN out-of-scope forbids a new
@@ -175,3 +267,6 @@ controls (`b↔i`, `b↔l`) let us time the plateau: it is **absent at initializ
 the first LC descent** (width 0.80 → 0.33 by step ~831), and is **fully formed before** adversarial
 robustness saturates — so, in this non-grokking model, the plateau is an early property of the trained
 downstream stack with **no visible temporal coupling** to the grokking signature (which never occurs).
+Sweeping the comma against all 64 other characters shows the same shape everywhere (no pair is
+linear, median width 0.340) while making clear that sharpness is graded: only 1/64 clears the strict
+≤ 0.25 bar, and the sharpest switches go to the characters the model actually expects next.

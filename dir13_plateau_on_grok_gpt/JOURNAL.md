@@ -290,3 +290,48 @@ any grokking-like event could occur. So the bounded relationship verdict is case
 `human_feedback*.md`/`*REVIEW*` arrives, delete STOP, address it, re-STOP when clean.
 
 On track? yes — plan COMPLETE (100%); S6+S8 done, bounded case-5 verdict with S6 secondary evidence, STOP written; blocker: none.
+
+## 2026-07-25 (9) — operator feedback #3: comma → all other characters
+
+**Did.** Feedback check first: `human_feedback_3.txt` was unaddressed, so that was this iteration.
+Ask: "interpolate from comma to all other characters and see if there is a plateau; add a section to
+discuss the results; do not invent jargon."
+1. Wrote `experiments/comma_sweep.py` reusing the existing assay functions (`run_pair`,
+   `transition_width`, `is_plateau`) with no new machinery: endpoint A = `"The house was ,"`,
+   endpoint B = the same context + each of the 64 other characters; 50 steps, `slerp_rescale`,
+   final-position patch, final-logit `d(t)`. Ran at interpolation block 0 for the 6 frozen
+   checkpoints and at every block 0–11 at step 30,000.
+2. Added two extra measurements at the final checkpoint so the discussion is evidence-based rather
+   than speculative: the model's next-character probability for each target character after the
+   context, and the L2 distance between the two endpoints' logit vectors.
+3. Wrote `experiments/plot_comma_sweep.py` → 4 figures (all 64 curves + width histogram; width per
+   character coloured by character type; width vs probability / vs endpoint separation; depth and
+   training panels). Embedded all four in RESULTS.md and REPORT.md with axis-describing captions.
+4. Curated both deliverables (new section + discussion in each, Methods subsection with rendered
+   equations for the two new quantities and Spearman ρ, Summary/Conclusion/Limitation updates),
+   appended CHANGELOG, renamed the feedback file to `.addressed.md`.
+
+**Assumptions logged (loop mode, could not ask).** (a) The corpus file `/tmp/tinyshakespeare.txt` is
+gone from this pod, so the character vocabulary was restored from the pilot checkpoint's saved `stoi`
+(both runs built it as `sorted(set(text))`, both are the canonical 65-character Tiny Shakespeare
+vocab) — rejected alternative: re-downloading the corpus (no network guarantee, and the checkpoint
+copy is exact). (b) Kept the *same* shared context as the existing controls (`"The house was "`)
+rather than inventing a comma-friendly context, so widths are directly comparable to `b↔i`/`b↔l`;
+rejected alternative: a context where a comma is natural (would have made the sweep incomparable).
+(c) Reported the full width distribution instead of a single yes/no plateau count, since the strict
+0.25 bar splits a continuum.
+
+**Learned.** The plateau *shape* is universal in this model but its *sharpness* is graded: none of the
+64 pairs is linear (median width 0.340 vs 0.80 for a straight line), yet only 1/64 clears the strict
+≤0.25 bar. The strongest predictor of sharpness is how likely the model thinks the second character
+is in that context (Spearman ρ = −0.74, n = 64) — letters switch sharply, punctuation and the digit
+`3` drift. Endpoint separation is the weaker predictor (ρ = −0.48) and with the sign that rules out a
+"the two outputs are too similar" artifact. Also reassuring: the preregistered `b↔i`/`b↔l` controls
+(0.331/0.330) sit exactly at the 64-pair median, so the primary result was not a lucky pair. Both
+structural controls (depth, emergence across training) replicate at n = 64.
+
+**Next step.** None outstanding: plan stages S1–S8 complete and feedback #3 addressed, so `STOP` is
+re-written. If new `human_feedback*.md`/`*REVIEW*` arrives, delete `STOP`, address it, re-STOP clean.
+
+On track? yes — plan COMPLETE (100%) plus operator feedback #3 fully addressed with a new experiment,
+4 new figures and a discussion section in both deliverables; blocker: none.
