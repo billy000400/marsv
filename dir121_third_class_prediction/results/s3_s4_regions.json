@@ -1,0 +1,654 @@
+{
+ "meta": {
+  "ckpt": "/workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/full_mnist_from_scratch/seed_0/ckpts/step30000.pt",
+  "ckpt_sha256": "8c4dd48468b97dc728145de2e556ddb1f0cc0d633237220986bf005ed25209de",
+  "n_ref_train_per_digit": 2000,
+  "n_heldout_test_per_digit": 700,
+  "std_floor": 0.01,
+  "q95": [
+   1.867,
+   1.448,
+   1.571,
+   1.649,
+   1.512,
+   1.564,
+   1.783,
+   1.695,
+   1.745,
+   1.708
+  ]
+ },
+ "controls": {
+  "C1_heldout_argmin_correct": 0.96,
+  "C1_heldout_inside_own_region": 0.95,
+  "C1_heldout_both": 0.936,
+  "C3_within_digit": {
+   "0": {
+    "frac_points_inside_own_region": 0.93,
+    "frac_points_argmin_own": 0.962,
+    "frac_points_predicted_own": 1.0,
+    "mean_ratio_own": 0.548
+   },
+   "1": {
+    "frac_points_inside_own_region": 0.958,
+    "frac_points_argmin_own": 0.988,
+    "frac_points_predicted_own": 0.99,
+    "mean_ratio_own": 0.54
+   },
+   "2": {
+    "frac_points_inside_own_region": 0.948,
+    "frac_points_argmin_own": 0.984,
+    "frac_points_predicted_own": 0.995,
+    "mean_ratio_own": 0.538
+   },
+   "3": {
+    "frac_points_inside_own_region": 0.96,
+    "frac_points_argmin_own": 0.988,
+    "frac_points_predicted_own": 0.999,
+    "mean_ratio_own": 0.535
+   },
+   "4": {
+    "frac_points_inside_own_region": 0.944,
+    "frac_points_argmin_own": 0.977,
+    "frac_points_predicted_own": 0.993,
+    "mean_ratio_own": 0.571
+   },
+   "5": {
+    "frac_points_inside_own_region": 0.965,
+    "frac_points_argmin_own": 0.979,
+    "frac_points_predicted_own": 0.985,
+    "mean_ratio_own": 0.572
+   },
+   "6": {
+    "frac_points_inside_own_region": 0.918,
+    "frac_points_argmin_own": 0.955,
+    "frac_points_predicted_own": 0.994,
+    "mean_ratio_own": 0.57
+   },
+   "7": {
+    "frac_points_inside_own_region": 0.94,
+    "frac_points_argmin_own": 0.968,
+    "frac_points_predicted_own": 0.991,
+    "mean_ratio_own": 0.55
+   },
+   "8": {
+    "frac_points_inside_own_region": 0.939,
+    "frac_points_argmin_own": 0.874,
+    "frac_points_predicted_own": 0.992,
+    "mean_ratio_own": 0.556
+   },
+   "9": {
+    "frac_points_inside_own_region": 0.959,
+    "frac_points_argmin_own": 0.946,
+    "frac_points_predicted_own": 0.987,
+    "mean_ratio_own": 0.501
+   }
+  },
+  "C4_reversal_max_rel_dev": 1.691265083536564e-07
+ },
+ "transitions": [
+  {
+   "transition": "0->1",
+   "a": 0,
+   "b": 1,
+   "z": 7,
+   "prevalence_z": 0.94,
+   "n_paths_with_segment": 94,
+   "n_segment_points": 1417,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 3.293,
+   "median_min_ratio_on_segment": 1.915,
+   "segment_argmin_digit_hist": {
+    "2": 269,
+    "3": 20,
+    "5": 1023,
+    "6": 8,
+    "8": 97
+   },
+   "control_endpoint_portion_in_region": [
+    0.075,
+    0.091
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.195,
+    0.274
+   ]
+  },
+  {
+   "transition": "0->3",
+   "a": 0,
+   "b": 3,
+   "z": 7,
+   "prevalence_z": 0.73,
+   "n_paths_with_segment": 73,
+   "n_segment_points": 731,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.679,
+   "median_min_ratio_on_segment": 1.399,
+   "segment_argmin_digit_hist": {
+    "0": 8,
+    "2": 66,
+    "3": 115,
+    "5": 497,
+    "7": 31,
+    "9": 14
+   },
+   "control_endpoint_portion_in_region": [
+    0.441,
+    0.527
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.805,
+    0.935
+   ]
+  },
+  {
+   "transition": "0->4",
+   "a": 0,
+   "b": 4,
+   "z": 7,
+   "prevalence_z": 0.74,
+   "n_paths_with_segment": 74,
+   "n_segment_points": 910,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.151,
+   "median_min_ratio_on_segment": 1.6,
+   "segment_argmin_digit_hist": {
+    "0": 12,
+    "2": 88,
+    "4": 11,
+    "5": 506,
+    "6": 12,
+    "7": 127,
+    "8": 11,
+    "9": 143
+   },
+   "control_endpoint_portion_in_region": [
+    0.286,
+    0.25
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.617,
+    0.667
+   ]
+  },
+  {
+   "transition": "0->9",
+   "a": 0,
+   "b": 9,
+   "z": 7,
+   "prevalence_z": 0.67,
+   "n_paths_with_segment": 67,
+   "n_segment_points": 653,
+   "point_frac_in_z_region": 0.017,
+   "path_frac_majority_in_z_region": 0.015,
+   "median_ratio_to_z_on_segment": 1.742,
+   "median_min_ratio_on_segment": 1.401,
+   "segment_argmin_digit_hist": {
+    "0": 10,
+    "2": 1,
+    "3": 29,
+    "4": 16,
+    "5": 324,
+    "7": 164,
+    "8": 7,
+    "9": 102
+   },
+   "control_endpoint_portion_in_region": [
+    0.23,
+    0.531
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.473,
+    0.913
+   ]
+  },
+  {
+   "transition": "1->2",
+   "a": 1,
+   "b": 2,
+   "z": 7,
+   "prevalence_z": 0.56,
+   "n_paths_with_segment": 56,
+   "n_segment_points": 500,
+   "point_frac_in_z_region": 0.014,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.849,
+   "median_min_ratio_on_segment": 1.677,
+   "segment_argmin_digit_hist": {
+    "1": 108,
+    "2": 209,
+    "3": 19,
+    "5": 76,
+    "6": 5,
+    "7": 11,
+    "8": 72
+   },
+   "control_endpoint_portion_in_region": [
+    0.469,
+    0.515
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.816,
+    0.937
+   ]
+  },
+  {
+   "transition": "1->4",
+   "a": 1,
+   "b": 4,
+   "z": 7,
+   "prevalence_z": 0.65,
+   "n_paths_with_segment": 65,
+   "n_segment_points": 586,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.91,
+   "median_min_ratio_on_segment": 2.086,
+   "segment_argmin_digit_hist": {
+    "2": 77,
+    "4": 14,
+    "5": 354,
+    "7": 28,
+    "8": 113
+   },
+   "control_endpoint_portion_in_region": [
+    0.171,
+    0.226
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.493,
+    0.832
+   ]
+  },
+  {
+   "transition": "1->5",
+   "a": 1,
+   "b": 5,
+   "z": 7,
+   "prevalence_z": 0.53,
+   "n_paths_with_segment": 53,
+   "n_segment_points": 362,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 3.71,
+   "median_min_ratio_on_segment": 1.829,
+   "segment_argmin_digit_hist": {
+    "1": 1,
+    "3": 6,
+    "4": 5,
+    "5": 210,
+    "7": 7,
+    "8": 133
+   },
+   "control_endpoint_portion_in_region": [
+    0.239,
+    0.458
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.68,
+    0.99
+   ]
+  },
+  {
+   "transition": "1->6",
+   "a": 1,
+   "b": 6,
+   "z": 8,
+   "prevalence_z": 0.74,
+   "n_paths_with_segment": 74,
+   "n_segment_points": 639,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.244,
+   "median_min_ratio_on_segment": 1.915,
+   "segment_argmin_digit_hist": {
+    "1": 1,
+    "2": 183,
+    "3": 2,
+    "5": 320,
+    "6": 16,
+    "8": 117
+   },
+   "control_endpoint_portion_in_region": [
+    0.155,
+    0.282
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.441,
+    0.779
+   ]
+  },
+  {
+   "transition": "1->9",
+   "a": 1,
+   "b": 9,
+   "z": 7,
+   "prevalence_z": 0.85,
+   "n_paths_with_segment": 85,
+   "n_segment_points": 1016,
+   "point_frac_in_z_region": 0.001,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.488,
+   "median_min_ratio_on_segment": 1.954,
+   "segment_argmin_digit_hist": {
+    "1": 18,
+    "2": 96,
+    "3": 36,
+    "4": 8,
+    "5": 447,
+    "7": 126,
+    "8": 210,
+    "9": 75
+   },
+   "control_endpoint_portion_in_region": [
+    0.23,
+    0.407
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.581,
+    0.883
+   ]
+  },
+  {
+   "transition": "2->4",
+   "a": 2,
+   "b": 4,
+   "z": 7,
+   "prevalence_z": 0.76,
+   "n_paths_with_segment": 76,
+   "n_segment_points": 860,
+   "point_frac_in_z_region": 0.033,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 1.872,
+   "median_min_ratio_on_segment": 1.455,
+   "segment_argmin_digit_hist": {
+    "2": 291,
+    "3": 103,
+    "4": 21,
+    "5": 35,
+    "7": 335,
+    "8": 65,
+    "9": 10
+   },
+   "control_endpoint_portion_in_region": [
+    0.579,
+    0.291
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.922,
+    0.654
+   ]
+  },
+  {
+   "transition": "2->5",
+   "a": 2,
+   "b": 5,
+   "z": 8,
+   "prevalence_z": 0.68,
+   "n_paths_with_segment": 68,
+   "n_segment_points": 564,
+   "point_frac_in_z_region": 0.05,
+   "path_frac_majority_in_z_region": 0.015,
+   "median_ratio_to_z_on_segment": 1.781,
+   "median_min_ratio_on_segment": 1.232,
+   "segment_argmin_digit_hist": {
+    "2": 25,
+    "3": 272,
+    "5": 157,
+    "6": 1,
+    "7": 46,
+    "8": 63
+   },
+   "control_endpoint_portion_in_region": [
+    0.396,
+    0.543
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.883,
+    0.995
+   ]
+  },
+  {
+   "transition": "2->9",
+   "a": 2,
+   "b": 9,
+   "z": 7,
+   "prevalence_z": 0.84,
+   "n_paths_with_segment": 84,
+   "n_segment_points": 1192,
+   "point_frac_in_z_region": 0.185,
+   "path_frac_majority_in_z_region": 0.143,
+   "median_ratio_to_z_on_segment": 1.505,
+   "median_min_ratio_on_segment": 1.319,
+   "segment_argmin_digit_hist": {
+    "2": 217,
+    "3": 261,
+    "4": 15,
+    "5": 24,
+    "7": 631,
+    "8": 44
+   },
+   "control_endpoint_portion_in_region": [
+    0.542,
+    0.287
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.886,
+    0.545
+   ]
+  },
+  {
+   "transition": "3->4",
+   "a": 3,
+   "b": 4,
+   "z": 7,
+   "prevalence_z": 0.9,
+   "n_paths_with_segment": 90,
+   "n_segment_points": 1037,
+   "point_frac_in_z_region": 0.013,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.076,
+   "median_min_ratio_on_segment": 1.538,
+   "segment_argmin_digit_hist": {
+    "2": 167,
+    "3": 168,
+    "4": 8,
+    "5": 383,
+    "7": 220,
+    "8": 51,
+    "9": 40
+   },
+   "control_endpoint_portion_in_region": [
+    0.527,
+    0.305
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.929,
+    0.682
+   ]
+  },
+  {
+   "transition": "3->6",
+   "a": 3,
+   "b": 6,
+   "z": 8,
+   "prevalence_z": 0.83,
+   "n_paths_with_segment": 83,
+   "n_segment_points": 874,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.081,
+   "median_min_ratio_on_segment": 1.449,
+   "segment_argmin_digit_hist": {
+    "0": 3,
+    "2": 223,
+    "3": 73,
+    "4": 13,
+    "5": 510,
+    "6": 6,
+    "7": 5,
+    "8": 41
+   },
+   "control_endpoint_portion_in_region": [
+    0.516,
+    0.293
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.936,
+    0.59
+   ]
+  },
+  {
+   "transition": "3->9",
+   "a": 3,
+   "b": 9,
+   "z": 7,
+   "prevalence_z": 0.62,
+   "n_paths_with_segment": 62,
+   "n_segment_points": 547,
+   "point_frac_in_z_region": 0.108,
+   "path_frac_majority_in_z_region": 0.081,
+   "median_ratio_to_z_on_segment": 1.752,
+   "median_min_ratio_on_segment": 1.373,
+   "segment_argmin_digit_hist": {
+    "2": 9,
+    "3": 249,
+    "4": 1,
+    "5": 101,
+    "7": 165,
+    "8": 7,
+    "9": 15
+   },
+   "control_endpoint_portion_in_region": [
+    0.642,
+    0.42
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.945,
+    0.831
+   ]
+  },
+  {
+   "transition": "4->5",
+   "a": 4,
+   "b": 5,
+   "z": 7,
+   "prevalence_z": 0.57,
+   "n_paths_with_segment": 57,
+   "n_segment_points": 450,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 3.466,
+   "median_min_ratio_on_segment": 1.461,
+   "segment_argmin_digit_hist": {
+    "4": 17,
+    "5": 255,
+    "7": 37,
+    "8": 10,
+    "9": 131
+   },
+   "control_endpoint_portion_in_region": [
+    0.338,
+    0.678
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.742,
+    1.0
+   ]
+  },
+  {
+   "transition": "4->6",
+   "a": 4,
+   "b": 6,
+   "z": 8,
+   "prevalence_z": 0.63,
+   "n_paths_with_segment": 63,
+   "n_segment_points": 559,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.0,
+   "median_min_ratio_on_segment": 1.305,
+   "segment_argmin_digit_hist": {
+    "2": 8,
+    "4": 324,
+    "5": 175,
+    "6": 25,
+    "8": 26,
+    "9": 1
+   },
+   "control_endpoint_portion_in_region": [
+    0.644,
+    0.492
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.916,
+    0.847
+   ]
+  },
+  {
+   "transition": "6->7",
+   "a": 6,
+   "b": 7,
+   "z": 8,
+   "prevalence_z": 0.59,
+   "n_paths_with_segment": 59,
+   "n_segment_points": 367,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.145,
+   "median_min_ratio_on_segment": 1.59,
+   "segment_argmin_digit_hist": {
+    "0": 4,
+    "2": 66,
+    "3": 42,
+    "4": 40,
+    "5": 160,
+    "6": 2,
+    "7": 12,
+    "8": 41
+   },
+   "control_endpoint_portion_in_region": [
+    0.29,
+    0.238
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.689,
+    0.768
+   ]
+  },
+  {
+   "transition": "6->9",
+   "a": 6,
+   "b": 9,
+   "z": 8,
+   "prevalence_z": 0.93,
+   "n_paths_with_segment": 93,
+   "n_segment_points": 1436,
+   "point_frac_in_z_region": 0.0,
+   "path_frac_majority_in_z_region": 0.0,
+   "median_ratio_to_z_on_segment": 2.139,
+   "median_min_ratio_on_segment": 1.369,
+   "segment_argmin_digit_hist": {
+    "2": 78,
+    "3": 9,
+    "4": 630,
+    "5": 551,
+    "7": 39,
+    "8": 72,
+    "9": 57
+   },
+   "control_endpoint_portion_in_region": [
+    0.254,
+    0.538
+   ],
+   "control_endpoint_plateau_in_region": [
+    0.527,
+    0.908
+   ]
+  }
+ ]
+}

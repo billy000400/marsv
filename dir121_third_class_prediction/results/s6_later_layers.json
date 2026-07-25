@@ -1,0 +1,699 @@
+{
+ "meta": {
+  "ckpt": "/workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/full_mnist_from_scratch/seed_0/ckpts/step30000.pt",
+  "ckpt_sha256": "8c4dd48468b97dc728145de2e556ddb1f0cc0d633237220986bf005ed25209de",
+  "n_ref_train_per_digit": 2000,
+  "n_heldout_test_per_digit": 700,
+  "std_floor": 0.01,
+  "note": "same rules as s3_s4_regions.py, only the hook point changes"
+ },
+ "layers": {
+  "h1": {
+   "width": 200,
+   "C1_heldout_both": 0.936,
+   "C3_within_digit_inside": [
+    0.93,
+    0.958,
+    0.948,
+    0.96,
+    0.944,
+    0.965,
+    0.918,
+    0.94,
+    0.939,
+    0.959
+   ],
+   "pooled_point_frac_in_z_region": 0.025,
+   "pooled_segment_points": 14700,
+   "transitions": [
+    {
+     "transition": "0->1",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 3.293,
+     "median_min_ratio_on_segment": 1.915
+    },
+    {
+     "transition": "0->3",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.042,
+     "mean_n_regions_containing_point": 0.04,
+     "median_ratio_to_z_on_segment": 2.679,
+     "median_min_ratio_on_segment": 1.399
+    },
+    {
+     "transition": "0->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.14,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 2.151,
+     "median_min_ratio_on_segment": 1.6
+    },
+    {
+     "transition": "0->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.017,
+     "path_frac_majority_in_z_region": 0.015,
+     "point_frac_ratio_to_z_below_1": 0.023,
+     "point_frac_z_is_nearest": 0.251,
+     "mean_n_regions_containing_point": 0.07,
+     "median_ratio_to_z_on_segment": 1.742,
+     "median_min_ratio_on_segment": 1.401
+    },
+    {
+     "transition": "1->2",
+     "z": 7,
+     "point_frac_in_z_region": 0.014,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.014,
+     "point_frac_z_is_nearest": 0.022,
+     "mean_n_regions_containing_point": 0.08,
+     "median_ratio_to_z_on_segment": 2.849,
+     "median_min_ratio_on_segment": 1.677
+    },
+    {
+     "transition": "1->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.048,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 2.91,
+     "median_min_ratio_on_segment": 2.086
+    },
+    {
+     "transition": "1->5",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.019,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 3.71,
+     "median_min_ratio_on_segment": 1.829
+    },
+    {
+     "transition": "1->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.183,
+     "mean_n_regions_containing_point": 0.03,
+     "median_ratio_to_z_on_segment": 2.244,
+     "median_min_ratio_on_segment": 1.915
+    },
+    {
+     "transition": "1->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.001,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.001,
+     "point_frac_z_is_nearest": 0.124,
+     "mean_n_regions_containing_point": 0.01,
+     "median_ratio_to_z_on_segment": 2.488,
+     "median_min_ratio_on_segment": 1.954
+    },
+    {
+     "transition": "2->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.033,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.033,
+     "point_frac_z_is_nearest": 0.39,
+     "mean_n_regions_containing_point": 0.08,
+     "median_ratio_to_z_on_segment": 1.872,
+     "median_min_ratio_on_segment": 1.455
+    },
+    {
+     "transition": "2->5",
+     "z": 8,
+     "point_frac_in_z_region": 0.05,
+     "path_frac_majority_in_z_region": 0.015,
+     "point_frac_ratio_to_z_below_1": 0.06,
+     "point_frac_z_is_nearest": 0.112,
+     "mean_n_regions_containing_point": 0.25,
+     "median_ratio_to_z_on_segment": 1.781,
+     "median_min_ratio_on_segment": 1.232
+    },
+    {
+     "transition": "2->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.185,
+     "path_frac_majority_in_z_region": 0.143,
+     "point_frac_ratio_to_z_below_1": 0.186,
+     "point_frac_z_is_nearest": 0.529,
+     "mean_n_regions_containing_point": 0.23,
+     "median_ratio_to_z_on_segment": 1.505,
+     "median_min_ratio_on_segment": 1.319
+    },
+    {
+     "transition": "3->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.013,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.013,
+     "point_frac_z_is_nearest": 0.212,
+     "mean_n_regions_containing_point": 0.02,
+     "median_ratio_to_z_on_segment": 2.076,
+     "median_min_ratio_on_segment": 1.538
+    },
+    {
+     "transition": "3->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.047,
+     "mean_n_regions_containing_point": 0.08,
+     "median_ratio_to_z_on_segment": 2.081,
+     "median_min_ratio_on_segment": 1.449
+    },
+    {
+     "transition": "3->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.108,
+     "path_frac_majority_in_z_region": 0.081,
+     "point_frac_ratio_to_z_below_1": 0.11,
+     "point_frac_z_is_nearest": 0.302,
+     "mean_n_regions_containing_point": 0.16,
+     "median_ratio_to_z_on_segment": 1.752,
+     "median_min_ratio_on_segment": 1.373
+    },
+    {
+     "transition": "4->5",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.082,
+     "mean_n_regions_containing_point": 0.04,
+     "median_ratio_to_z_on_segment": 3.466,
+     "median_min_ratio_on_segment": 1.461
+    },
+    {
+     "transition": "4->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.047,
+     "mean_n_regions_containing_point": 0.23,
+     "median_ratio_to_z_on_segment": 2.0,
+     "median_min_ratio_on_segment": 1.305
+    },
+    {
+     "transition": "6->7",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.112,
+     "mean_n_regions_containing_point": 0.04,
+     "median_ratio_to_z_on_segment": 2.145,
+     "median_min_ratio_on_segment": 1.59
+    },
+    {
+     "transition": "6->9",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.007,
+     "point_frac_z_is_nearest": 0.05,
+     "mean_n_regions_containing_point": 0.13,
+     "median_ratio_to_z_on_segment": 2.139,
+     "median_min_ratio_on_segment": 1.369
+    }
+   ]
+  },
+  "h2": {
+   "width": 200,
+   "C1_heldout_both": 0.949,
+   "C3_within_digit_inside": [
+    0.99,
+    0.98,
+    0.986,
+    0.991,
+    0.988,
+    0.989,
+    0.98,
+    0.974,
+    0.979,
+    0.987
+   ],
+   "pooled_point_frac_in_z_region": 0.1056,
+   "pooled_segment_points": 14700,
+   "transitions": [
+    {
+     "transition": "0->1",
+     "z": 7,
+     "point_frac_in_z_region": 0.027,
+     "path_frac_majority_in_z_region": 0.011,
+     "point_frac_ratio_to_z_below_1": 0.85,
+     "point_frac_z_is_nearest": 0.027,
+     "mean_n_regions_containing_point": 6.8,
+     "median_ratio_to_z_on_segment": 0.295,
+     "median_min_ratio_on_segment": 0.23
+    },
+    {
+     "transition": "0->3",
+     "z": 7,
+     "point_frac_in_z_region": 0.001,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.796,
+     "point_frac_z_is_nearest": 0.001,
+     "mean_n_regions_containing_point": 7.61,
+     "median_ratio_to_z_on_segment": 0.305,
+     "median_min_ratio_on_segment": 0.256
+    },
+    {
+     "transition": "0->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.016,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.84,
+     "point_frac_z_is_nearest": 0.016,
+     "mean_n_regions_containing_point": 7.04,
+     "median_ratio_to_z_on_segment": 0.328,
+     "median_min_ratio_on_segment": 0.194
+    },
+    {
+     "transition": "0->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.005,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.887,
+     "point_frac_z_is_nearest": 0.005,
+     "mean_n_regions_containing_point": 4.93,
+     "median_ratio_to_z_on_segment": 0.354,
+     "median_min_ratio_on_segment": 0.236
+    },
+    {
+     "transition": "1->2",
+     "z": 7,
+     "point_frac_in_z_region": 0.368,
+     "path_frac_majority_in_z_region": 0.25,
+     "point_frac_ratio_to_z_below_1": 0.668,
+     "point_frac_z_is_nearest": 0.372,
+     "mean_n_regions_containing_point": 3.13,
+     "median_ratio_to_z_on_segment": 0.708,
+     "median_min_ratio_on_segment": 0.346
+    },
+    {
+     "transition": "1->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.067,
+     "path_frac_majority_in_z_region": 0.031,
+     "point_frac_ratio_to_z_below_1": 0.718,
+     "point_frac_z_is_nearest": 0.068,
+     "mean_n_regions_containing_point": 3.65,
+     "median_ratio_to_z_on_segment": 0.592,
+     "median_min_ratio_on_segment": 0.208
+    },
+    {
+     "transition": "1->5",
+     "z": 7,
+     "point_frac_in_z_region": 0.075,
+     "path_frac_majority_in_z_region": 0.038,
+     "point_frac_ratio_to_z_below_1": 0.682,
+     "point_frac_z_is_nearest": 0.083,
+     "mean_n_regions_containing_point": 5.78,
+     "median_ratio_to_z_on_segment": 0.751,
+     "median_min_ratio_on_segment": 0.297
+    },
+    {
+     "transition": "1->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.138,
+     "path_frac_majority_in_z_region": 0.054,
+     "point_frac_ratio_to_z_below_1": 0.182,
+     "point_frac_z_is_nearest": 0.144,
+     "mean_n_regions_containing_point": 1.53,
+     "median_ratio_to_z_on_segment": 4.331,
+     "median_min_ratio_on_segment": 0.682
+    },
+    {
+     "transition": "1->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.135,
+     "path_frac_majority_in_z_region": 0.106,
+     "point_frac_ratio_to_z_below_1": 0.714,
+     "point_frac_z_is_nearest": 0.14,
+     "mean_n_regions_containing_point": 4.76,
+     "median_ratio_to_z_on_segment": 0.337,
+     "median_min_ratio_on_segment": 0.256
+    },
+    {
+     "transition": "2->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.095,
+     "path_frac_majority_in_z_region": 0.039,
+     "point_frac_ratio_to_z_below_1": 0.883,
+     "point_frac_z_is_nearest": 0.097,
+     "mean_n_regions_containing_point": 6.26,
+     "median_ratio_to_z_on_segment": 0.329,
+     "median_min_ratio_on_segment": 0.197
+    },
+    {
+     "transition": "2->5",
+     "z": 8,
+     "point_frac_in_z_region": 0.351,
+     "path_frac_majority_in_z_region": 0.279,
+     "point_frac_ratio_to_z_below_1": 0.984,
+     "point_frac_z_is_nearest": 0.355,
+     "mean_n_regions_containing_point": 7.8,
+     "median_ratio_to_z_on_segment": 0.254,
+     "median_min_ratio_on_segment": 0.25
+    },
+    {
+     "transition": "2->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.154,
+     "path_frac_majority_in_z_region": 0.095,
+     "point_frac_ratio_to_z_below_1": 0.929,
+     "point_frac_z_is_nearest": 0.158,
+     "mean_n_regions_containing_point": 6.04,
+     "median_ratio_to_z_on_segment": 0.284,
+     "median_min_ratio_on_segment": 0.233
+    },
+    {
+     "transition": "3->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.001,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.847,
+     "point_frac_z_is_nearest": 0.001,
+     "mean_n_regions_containing_point": 7.22,
+     "median_ratio_to_z_on_segment": 0.332,
+     "median_min_ratio_on_segment": 0.216
+    },
+    {
+     "transition": "3->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.19,
+     "path_frac_majority_in_z_region": 0.12,
+     "point_frac_ratio_to_z_below_1": 0.907,
+     "point_frac_z_is_nearest": 0.204,
+     "mean_n_regions_containing_point": 7.37,
+     "median_ratio_to_z_on_segment": 0.272,
+     "median_min_ratio_on_segment": 0.255
+    },
+    {
+     "transition": "3->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.005,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.784,
+     "point_frac_z_is_nearest": 0.005,
+     "mean_n_regions_containing_point": 4.75,
+     "median_ratio_to_z_on_segment": 0.484,
+     "median_min_ratio_on_segment": 0.248
+    },
+    {
+     "transition": "4->5",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.86,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 7.21,
+     "median_ratio_to_z_on_segment": 0.354,
+     "median_min_ratio_on_segment": 0.203
+    },
+    {
+     "transition": "4->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.097,
+     "path_frac_majority_in_z_region": 0.032,
+     "point_frac_ratio_to_z_below_1": 0.576,
+     "point_frac_z_is_nearest": 0.098,
+     "mean_n_regions_containing_point": 3.71,
+     "median_ratio_to_z_on_segment": 1.178,
+     "median_min_ratio_on_segment": 0.214
+    },
+    {
+     "transition": "6->7",
+     "z": 8,
+     "point_frac_in_z_region": 0.286,
+     "path_frac_majority_in_z_region": 0.136,
+     "point_frac_ratio_to_z_below_1": 0.856,
+     "point_frac_z_is_nearest": 0.286,
+     "mean_n_regions_containing_point": 7.14,
+     "median_ratio_to_z_on_segment": 0.401,
+     "median_min_ratio_on_segment": 0.276
+    },
+    {
+     "transition": "6->9",
+     "z": 8,
+     "point_frac_in_z_region": 0.159,
+     "path_frac_majority_in_z_region": 0.129,
+     "point_frac_ratio_to_z_below_1": 0.929,
+     "point_frac_z_is_nearest": 0.164,
+     "mean_n_regions_containing_point": 7.5,
+     "median_ratio_to_z_on_segment": 0.364,
+     "median_min_ratio_on_segment": 0.238
+    }
+   ]
+  },
+  "h3": {
+   "width": 200,
+   "C1_heldout_both": 0.95,
+   "C3_within_digit_inside": [
+    0.978,
+    0.98,
+    0.975,
+    0.975,
+    0.974,
+    0.963,
+    0.951,
+    0.943,
+    0.955,
+    0.964
+   ],
+   "pooled_point_frac_in_z_region": 0.0021,
+   "pooled_segment_points": 14700,
+   "transitions": [
+    {
+     "transition": "0->1",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 421.443,
+     "median_min_ratio_on_segment": 64.548
+    },
+    {
+     "transition": "0->3",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 471.026,
+     "median_min_ratio_on_segment": 163.381
+    },
+    {
+     "transition": "0->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 431.418,
+     "median_min_ratio_on_segment": 198.44
+    },
+    {
+     "transition": "0->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 434.194,
+     "median_min_ratio_on_segment": 87.339
+    },
+    {
+     "transition": "1->2",
+     "z": 7,
+     "point_frac_in_z_region": 0.01,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.01,
+     "point_frac_z_is_nearest": 0.016,
+     "mean_n_regions_containing_point": 0.01,
+     "median_ratio_to_z_on_segment": 445.833,
+     "median_min_ratio_on_segment": 167.567
+    },
+    {
+     "transition": "1->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 174.817,
+     "median_min_ratio_on_segment": 48.082
+    },
+    {
+     "transition": "1->5",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 375.912,
+     "median_min_ratio_on_segment": 49.626
+    },
+    {
+     "transition": "1->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.011,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.011,
+     "point_frac_z_is_nearest": 0.03,
+     "mean_n_regions_containing_point": 0.01,
+     "median_ratio_to_z_on_segment": 197.81,
+     "median_min_ratio_on_segment": 46.115
+    },
+    {
+     "transition": "1->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 362.273,
+     "median_min_ratio_on_segment": 51.462
+    },
+    {
+     "transition": "2->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.01,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.01,
+     "point_frac_z_is_nearest": 0.015,
+     "mean_n_regions_containing_point": 0.01,
+     "median_ratio_to_z_on_segment": 423.908,
+     "median_min_ratio_on_segment": 191.26
+    },
+    {
+     "transition": "2->5",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.021,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 310.561,
+     "median_min_ratio_on_segment": 144.376
+    },
+    {
+     "transition": "2->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.008,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.008,
+     "point_frac_z_is_nearest": 0.021,
+     "mean_n_regions_containing_point": 0.01,
+     "median_ratio_to_z_on_segment": 439.744,
+     "median_min_ratio_on_segment": 98.859
+    },
+    {
+     "transition": "3->4",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 411.257,
+     "median_min_ratio_on_segment": 188.867
+    },
+    {
+     "transition": "3->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.013,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 308.195,
+     "median_min_ratio_on_segment": 135.903
+    },
+    {
+     "transition": "3->9",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 222.008,
+     "median_min_ratio_on_segment": 45.149
+    },
+    {
+     "transition": "4->5",
+     "z": 7,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 392.904,
+     "median_min_ratio_on_segment": 171.642
+    },
+    {
+     "transition": "4->6",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 282.88,
+     "median_min_ratio_on_segment": 139.177
+    },
+    {
+     "transition": "6->7",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.0,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 300.099,
+     "median_min_ratio_on_segment": 117.839
+    },
+    {
+     "transition": "6->9",
+     "z": 8,
+     "point_frac_in_z_region": 0.0,
+     "path_frac_majority_in_z_region": 0.0,
+     "point_frac_ratio_to_z_below_1": 0.0,
+     "point_frac_z_is_nearest": 0.001,
+     "mean_n_regions_containing_point": 0.0,
+     "median_ratio_to_z_on_segment": 303.899,
+     "median_min_ratio_on_segment": 118.841
+    }
+   ]
+  }
+ }
+}
