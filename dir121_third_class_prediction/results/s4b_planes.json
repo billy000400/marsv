@@ -1,0 +1,1156 @@
+{
+ "meta": {
+  "ckpt": "/workspace/marsv_agent_haoyang/dir12_plateau_during_training/results/full_mnist_from_scratch/seed_0/ckpts/step30000.pt",
+  "ckpt_sha256": "8c4dd48468b97dc728145de2e556ddb1f0cc0d633237220986bf005ed25209de",
+  "lda_train_per_class": 2000,
+  "lda_ridge": 0.001,
+  "heldout_per_class": 700,
+  "ellipse_sd": 2.0,
+  "gradient_pad_points": 5,
+  "grid": 161,
+  "grid_pad_frac": 0.3,
+  "medoid_rule": "min sum of Euclidean distances between full 50x200 h1 trajectories, among paths with a dominant-z segment"
+ },
+ "transitions": [
+  {
+   "transition": "0->1",
+   "a": 0,
+   "b": 1,
+   "z": 7,
+   "medoid_pair_rank": 96,
+   "medoid_idx_a": 1188,
+   "medoid_idx_b": 783,
+   "medoid_segment_points": [
+    18,
+    27
+   ],
+   "medoid_segment_alpha": [
+    0.367,
+    0.531
+   ],
+   "n_paths_with_segment": 94,
+   "lda_eigenvalues": [
+    39.4389,
+    23.1193
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "0": 0.896,
+    "1": 0.897,
+    "7": 0.891
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.028,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    11.1799,
+    8.3031,
+    0.92,
+    0.6384
+   ],
+   "grad_two_axis_energy": 0.989,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.294,
+    "median_negative_norm_share": 0.104
+   },
+   "grid_frac_predicted_z": 0.337,
+   "grid_heldout_real_visible_frac": {
+    "0": 0.921,
+    "1": 0.991,
+    "7": 0.907
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.118,
+    "real_0": 0.074,
+    "real_1": 0.046,
+    "real_7": 0.033
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "0->3",
+   "a": 0,
+   "b": 3,
+   "z": 7,
+   "medoid_pair_rank": 28,
+   "medoid_idx_a": 327,
+   "medoid_idx_b": 334,
+   "medoid_segment_points": [
+    16,
+    29
+   ],
+   "medoid_segment_alpha": [
+    0.327,
+    0.571
+   ],
+   "n_paths_with_segment": 73,
+   "lda_eigenvalues": [
+    19.7427,
+    15.6771
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "0": 0.887,
+    "3": 0.883,
+    "7": 0.88
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.011,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    8.9066,
+    7.914,
+    1.0315,
+    0.7051
+   ],
+   "grad_two_axis_energy": 0.983,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.329,
+    "median_negative_norm_share": 0.116
+   },
+   "grid_frac_predicted_z": 0.377,
+   "grid_heldout_real_visible_frac": {
+    "0": 1.0,
+    "3": 0.987,
+    "7": 0.906
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.156,
+    "real_0": 0.068,
+    "real_3": 0.063,
+    "real_7": 0.029
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.96,
+    "segment_points": 0.923,
+    "segment_points_predicted_z": 0.923
+   }
+  },
+  {
+   "transition": "0->4",
+   "a": 0,
+   "b": 4,
+   "z": 7,
+   "medoid_pair_rank": 2,
+   "medoid_idx_a": 13,
+   "medoid_idx_b": 19,
+   "medoid_segment_points": [
+    14,
+    30
+   ],
+   "medoid_segment_alpha": [
+    0.286,
+    0.592
+   ],
+   "n_paths_with_segment": 74,
+   "lda_eigenvalues": [
+    22.2966,
+    14.3538
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "0": 0.89,
+    "4": 0.876,
+    "7": 0.886
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.004,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    9.7666,
+    7.6437,
+    0.9581,
+    0.7604
+   ],
+   "grad_two_axis_energy": 0.987,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.326,
+    "median_negative_norm_share": 0.117
+   },
+   "grid_frac_predicted_z": 0.361,
+   "grid_heldout_real_visible_frac": {
+    "0": 0.999,
+    "4": 0.984,
+    "7": 0.913
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.149,
+    "real_0": 0.055,
+    "real_4": 0.068,
+    "real_7": 0.039
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.98,
+    "segment_points": 0.938,
+    "segment_points_predicted_z": 0.938
+   }
+  },
+  {
+   "transition": "0->9",
+   "a": 0,
+   "b": 9,
+   "z": 7,
+   "medoid_pair_rank": 50,
+   "medoid_idx_a": 586,
+   "medoid_idx_b": 481,
+   "medoid_segment_points": [
+    19,
+    26
+   ],
+   "medoid_segment_alpha": [
+    0.388,
+    0.51
+   ],
+   "n_paths_with_segment": 67,
+   "lda_eigenvalues": [
+    23.1638,
+    11.4756
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "0": 0.891,
+    "9": 0.897,
+    "7": 0.884
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.012,
+   "fullspace_point_frac_in_z_region": 0.017,
+   "grad_singular_values": [
+    13.0098,
+    3.2288,
+    1.5528,
+    0.6944
+   ],
+   "grad_two_axis_energy": 0.981,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.333,
+    "median_negative_norm_share": 0.111
+   },
+   "grid_frac_predicted_z": 0.293,
+   "grid_heldout_real_visible_frac": {
+    "0": 0.969,
+    "9": 0.976,
+    "7": 0.969
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.128,
+    "real_0": 0.056,
+    "real_9": 0.051,
+    "real_7": 0.028
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.96,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "1->2",
+   "a": 1,
+   "b": 2,
+   "z": 7,
+   "medoid_pair_rank": 46,
+   "medoid_idx_a": 342,
+   "medoid_idx_b": 418,
+   "medoid_segment_points": [
+    19,
+    28
+   ],
+   "medoid_segment_alpha": [
+    0.388,
+    0.551
+   ],
+   "n_paths_with_segment": 56,
+   "lda_eigenvalues": [
+    30.8014,
+    14.4148
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "1": 0.904,
+    "2": 0.894,
+    "7": 0.884
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.036,
+   "lda_segment_points_in_b_ellipse": 0.0,
+   "fullspace_point_frac_in_z_region": 0.014,
+   "grad_singular_values": [
+    12.1764,
+    11.2321,
+    1.5105,
+    0.6055
+   ],
+   "grad_two_axis_energy": 0.987,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.283,
+    "median_negative_norm_share": 0.097
+   },
+   "grid_frac_predicted_z": 0.31,
+   "grid_heldout_real_visible_frac": {
+    "1": 0.997,
+    "2": 0.893,
+    "7": 0.867
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.095,
+    "real_1": 0.033,
+    "real_2": 0.034,
+    "real_7": 0.024
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "1->4",
+   "a": 1,
+   "b": 4,
+   "z": 7,
+   "medoid_pair_rank": 2,
+   "medoid_idx_a": 14,
+   "medoid_idx_b": 19,
+   "medoid_segment_points": [
+    22,
+    25
+   ],
+   "medoid_segment_alpha": [
+    0.449,
+    0.49
+   ],
+   "n_paths_with_segment": 65,
+   "lda_eigenvalues": [
+    30.8458,
+    15.2924
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "1": 0.899,
+    "4": 0.877,
+    "7": 0.886
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.014,
+   "lda_segment_points_in_b_ellipse": 0.0,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    12.301,
+    9.2868,
+    0.7207,
+    0.6425
+   ],
+   "grad_two_axis_energy": 0.995,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.254,
+    "median_negative_norm_share": 0.098
+   },
+   "grid_frac_predicted_z": 0.319,
+   "grid_heldout_real_visible_frac": {
+    "1": 1.0,
+    "4": 0.971,
+    "7": 0.851
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.117,
+    "real_1": 0.027,
+    "real_4": 0.067,
+    "real_7": 0.053
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "1->5",
+   "a": 1,
+   "b": 5,
+   "z": 7,
+   "medoid_pair_rank": 52,
+   "medoid_idx_a": 377,
+   "medoid_idx_b": 518,
+   "medoid_segment_points": [
+    21,
+    28
+   ],
+   "medoid_segment_alpha": [
+    0.429,
+    0.551
+   ],
+   "n_paths_with_segment": 53,
+   "lda_eigenvalues": [
+    28.5823,
+    20.1031
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "1": 0.886,
+    "5": 0.867,
+    "7": 0.883
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.0,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    8.6796,
+    6.7115,
+    1.0581,
+    0.9093
+   ],
+   "grad_two_axis_energy": 0.975,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.281,
+    "median_negative_norm_share": 0.114
+   },
+   "grid_frac_predicted_z": 0.363,
+   "grid_heldout_real_visible_frac": {
+    "1": 1.0,
+    "5": 0.937,
+    "7": 0.914
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.093,
+    "real_1": 0.042,
+    "real_5": 0.046,
+    "real_7": 0.043
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.96,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "1->6",
+   "a": 1,
+   "b": 6,
+   "z": 8,
+   "medoid_pair_rank": 52,
+   "medoid_idx_a": 377,
+   "medoid_idx_b": 600,
+   "medoid_segment_points": [
+    15,
+    34
+   ],
+   "medoid_segment_alpha": [
+    0.306,
+    0.673
+   ],
+   "n_paths_with_segment": 74,
+   "lda_eigenvalues": [
+    32.1637,
+    15.8764
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "1": 0.91,
+    "6": 0.9,
+    "8": 0.884
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.005,
+   "lda_segment_points_in_b_ellipse": 0.0,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    13.2602,
+    10.1839,
+    1.3898,
+    1.1289
+   ],
+   "grad_two_axis_energy": 0.981,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.295,
+    "median_negative_norm_share": 0.12
+   },
+   "grid_frac_predicted_z": 0.18,
+   "grid_heldout_real_visible_frac": {
+    "1": 0.987,
+    "6": 0.926,
+    "8": 0.95
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.126,
+    "real_1": 0.053,
+    "real_6": 0.062,
+    "real_8": 0.014
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.84,
+    "segment_points": 0.579,
+    "segment_points_predicted_z": 0.579
+   }
+  },
+  {
+   "transition": "1->9",
+   "a": 1,
+   "b": 9,
+   "z": 7,
+   "medoid_pair_rank": 78,
+   "medoid_idx_a": 663,
+   "medoid_idx_b": 773,
+   "medoid_segment_points": [
+    19,
+    26
+   ],
+   "medoid_segment_alpha": [
+    0.388,
+    0.51
+   ],
+   "n_paths_with_segment": 85,
+   "lda_eigenvalues": [
+    36.1668,
+    13.1262
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "1": 0.893,
+    "9": 0.907,
+    "7": 0.891
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.0,
+   "fullspace_point_frac_in_z_region": 0.001,
+   "grad_singular_values": [
+    15.644,
+    12.3511,
+    1.0803,
+    0.7147
+   ],
+   "grad_two_axis_energy": 0.993,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.266,
+    "median_negative_norm_share": 0.082
+   },
+   "grid_frac_predicted_z": 0.317,
+   "grid_heldout_real_visible_frac": {
+    "1": 0.873,
+    "9": 0.917,
+    "7": 0.9
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.087,
+    "real_1": 0.047,
+    "real_9": 0.045,
+    "real_7": 0.024
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "2->4",
+   "a": 2,
+   "b": 4,
+   "z": 7,
+   "medoid_pair_rank": 2,
+   "medoid_idx_a": 38,
+   "medoid_idx_b": 19,
+   "medoid_segment_points": [
+    17,
+    29
+   ],
+   "medoid_segment_alpha": [
+    0.347,
+    0.571
+   ],
+   "n_paths_with_segment": 76,
+   "lda_eigenvalues": [
+    15.1969,
+    11.7511
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "2": 0.871,
+    "4": 0.874,
+    "7": 0.887
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.002,
+   "lda_segment_points_in_b_ellipse": 0.038,
+   "fullspace_point_frac_in_z_region": 0.033,
+   "grad_singular_values": [
+    9.792,
+    7.718,
+    0.9049,
+    0.5731
+   ],
+   "grad_two_axis_energy": 0.988,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.289,
+    "median_negative_norm_share": 0.105
+   },
+   "grid_frac_predicted_z": 0.321,
+   "grid_heldout_real_visible_frac": {
+    "2": 0.906,
+    "4": 0.994,
+    "7": 0.847
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.103,
+    "real_2": 0.041,
+    "real_4": 0.048,
+    "real_7": 0.046
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.98,
+    "segment_points": 0.917,
+    "segment_points_predicted_z": 0.917
+   }
+  },
+  {
+   "transition": "2->5",
+   "a": 2,
+   "b": 5,
+   "z": 8,
+   "medoid_pair_rank": 13,
+   "medoid_idx_a": 174,
+   "medoid_idx_b": 153,
+   "medoid_segment_points": [
+    21,
+    26
+   ],
+   "medoid_segment_alpha": [
+    0.429,
+    0.51
+   ],
+   "n_paths_with_segment": 68,
+   "lda_eigenvalues": [
+    18.662,
+    8.1274
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "2": 0.88,
+    "5": 0.854,
+    "8": 0.877
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.009,
+   "fullspace_point_frac_in_z_region": 0.05,
+   "grad_singular_values": [
+    6.6756,
+    4.4989,
+    1.354,
+    0.5161
+   ],
+   "grad_two_axis_energy": 0.966,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.335,
+    "median_negative_norm_share": 0.117
+   },
+   "grid_frac_predicted_z": 0.017,
+   "grid_heldout_real_visible_frac": {
+    "2": 0.956,
+    "5": 0.953,
+    "8": 0.993
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.108,
+    "real_2": 0.038,
+    "real_5": 0.045,
+    "real_8": 0.018
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "2->9",
+   "a": 2,
+   "b": 9,
+   "z": 7,
+   "medoid_pair_rank": 95,
+   "medoid_idx_a": 868,
+   "medoid_idx_b": 1005,
+   "medoid_segment_points": [
+    24,
+    36
+   ],
+   "medoid_segment_alpha": [
+    0.49,
+    0.714
+   ],
+   "n_paths_with_segment": 84,
+   "lda_eigenvalues": [
+    16.0733,
+    9.8848
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "2": 0.876,
+    "9": 0.877,
+    "7": 0.876
+   },
+   "lda_segment_points_in_z_ellipse": 0.003,
+   "lda_segment_points_in_a_ellipse": 0.002,
+   "lda_segment_points_in_b_ellipse": 0.091,
+   "fullspace_point_frac_in_z_region": 0.185,
+   "grad_singular_values": [
+    12.2556,
+    3.112,
+    1.4067,
+    0.8653
+   ],
+   "grad_two_axis_energy": 0.98,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.313,
+    "median_negative_norm_share": 0.109
+   },
+   "grid_frac_predicted_z": 0.343,
+   "grid_heldout_real_visible_frac": {
+    "2": 0.901,
+    "9": 0.984,
+    "7": 0.929
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.097,
+    "real_2": 0.068,
+    "real_9": 0.042,
+    "real_7": 0.023
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "3->4",
+   "a": 3,
+   "b": 4,
+   "z": 7,
+   "medoid_pair_rank": 25,
+   "medoid_idx_a": 310,
+   "medoid_idx_b": 169,
+   "medoid_segment_points": [
+    15,
+    28
+   ],
+   "medoid_segment_alpha": [
+    0.306,
+    0.551
+   ],
+   "n_paths_with_segment": 90,
+   "lda_eigenvalues": [
+    18.0654,
+    12.2415
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "3": 0.877,
+    "4": 0.863,
+    "7": 0.894
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.001,
+   "lda_segment_points_in_b_ellipse": 0.008,
+   "fullspace_point_frac_in_z_region": 0.013,
+   "grad_singular_values": [
+    9.7539,
+    7.0163,
+    1.5151,
+    0.8973
+   ],
+   "grad_two_axis_energy": 0.972,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.306,
+    "median_negative_norm_share": 0.122
+   },
+   "grid_frac_predicted_z": 0.343,
+   "grid_heldout_real_visible_frac": {
+    "3": 0.969,
+    "4": 0.999,
+    "7": 0.919
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.179,
+    "real_3": 0.076,
+    "real_4": 0.06,
+    "real_7": 0.064
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.96,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "3->6",
+   "a": 3,
+   "b": 6,
+   "z": 8,
+   "medoid_pair_rank": 6,
+   "medoid_idx_a": 68,
+   "medoid_idx_b": 81,
+   "medoid_segment_points": [
+    29,
+    37
+   ],
+   "medoid_segment_alpha": [
+    0.592,
+    0.735
+   ],
+   "n_paths_with_segment": 83,
+   "lda_eigenvalues": [
+    21.243,
+    9.6382
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "3": 0.877,
+    "6": 0.871,
+    "8": 0.871
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.023,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    9.9803,
+    2.1763,
+    1.5315,
+    1.0592
+   ],
+   "grad_two_axis_energy": 0.962,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.349,
+    "median_negative_norm_share": 0.131
+   },
+   "grid_frac_predicted_z": 0.043,
+   "grid_heldout_real_visible_frac": {
+    "3": 0.94,
+    "6": 0.889,
+    "8": 0.997
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.156,
+    "real_3": 0.083,
+    "real_6": 0.034,
+    "real_8": 0.016
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.5,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "3->9",
+   "a": 3,
+   "b": 9,
+   "z": 7,
+   "medoid_pair_rank": 99,
+   "medoid_idx_a": 933,
+   "medoid_idx_b": 1058,
+   "medoid_segment_points": [
+    31,
+    37
+   ],
+   "medoid_segment_alpha": [
+    0.633,
+    0.735
+   ],
+   "n_paths_with_segment": 62,
+   "lda_eigenvalues": [
+    14.3762,
+    10.4882
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "3": 0.896,
+    "9": 0.899,
+    "7": 0.89
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.011,
+   "lda_segment_points_in_b_ellipse": 0.027,
+   "fullspace_point_frac_in_z_region": 0.108,
+   "grad_singular_values": [
+    14.7575,
+    5.8734,
+    1.2693,
+    0.7023
+   ],
+   "grad_two_axis_energy": 0.988,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.317,
+    "median_negative_norm_share": 0.109
+   },
+   "grid_frac_predicted_z": 0.322,
+   "grid_heldout_real_visible_frac": {
+    "3": 0.941,
+    "9": 0.969,
+    "7": 0.903
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.1,
+    "real_3": 0.042,
+    "real_9": 0.04,
+    "real_7": 0.034
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 0.98,
+    "segment_points": 0.833,
+    "segment_points_predicted_z": 0.833
+   }
+  },
+  {
+   "transition": "4->5",
+   "a": 4,
+   "b": 5,
+   "z": 7,
+   "medoid_pair_rank": 2,
+   "medoid_idx_a": 19,
+   "medoid_idx_b": 23,
+   "medoid_segment_points": [
+    23,
+    27
+   ],
+   "medoid_segment_alpha": [
+    0.469,
+    0.531
+   ],
+   "n_paths_with_segment": 57,
+   "lda_eigenvalues": [
+    20.0024,
+    12.7716
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "4": 0.873,
+    "5": 0.851,
+    "7": 0.889
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.02,
+   "lda_segment_points_in_b_ellipse": 0.0,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    8.9878,
+    7.9266,
+    0.8175,
+    0.6136
+   ],
+   "grad_two_axis_energy": 0.99,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.295,
+    "median_negative_norm_share": 0.134
+   },
+   "grid_frac_predicted_z": 0.332,
+   "grid_heldout_real_visible_frac": {
+    "4": 0.999,
+    "5": 0.943,
+    "7": 0.899
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.161,
+    "real_4": 0.055,
+    "real_5": 0.054,
+    "real_7": 0.072
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "4->6",
+   "a": 4,
+   "b": 6,
+   "z": 8,
+   "medoid_pair_rank": 33,
+   "medoid_idx_a": 250,
+   "medoid_idx_b": 392,
+   "medoid_segment_points": [
+    26,
+    36
+   ],
+   "medoid_segment_alpha": [
+    0.531,
+    0.714
+   ],
+   "n_paths_with_segment": 63,
+   "lda_eigenvalues": [
+    19.4051,
+    13.6514
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "4": 0.876,
+    "6": 0.884,
+    "8": 0.877
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.021,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    12.1335,
+    9.7547,
+    1.0614,
+    0.8133
+   ],
+   "grad_two_axis_energy": 0.988,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.347,
+    "median_negative_norm_share": 0.103
+   },
+   "grid_frac_predicted_z": 0.28,
+   "grid_heldout_real_visible_frac": {
+    "4": 0.994,
+    "6": 0.976,
+    "8": 0.963
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.132,
+    "real_4": 0.049,
+    "real_6": 0.043,
+    "real_8": 0.021
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "6->7",
+   "a": 6,
+   "b": 7,
+   "z": 8,
+   "medoid_pair_rank": 95,
+   "medoid_idx_a": 1108,
+   "medoid_idx_b": 946,
+   "medoid_segment_points": [
+    15,
+    17
+   ],
+   "medoid_segment_alpha": [
+    0.306,
+    0.327
+   ],
+   "n_paths_with_segment": 59,
+   "lda_eigenvalues": [
+    27.0515,
+    13.751
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "6": 0.889,
+    "7": 0.879,
+    "8": 0.884
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.0,
+   "lda_segment_points_in_b_ellipse": 0.0,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    10.3259,
+    1.6172,
+    0.9645,
+    0.6156
+   ],
+   "grad_two_axis_energy": 0.985,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.284,
+    "median_negative_norm_share": 0.108
+   },
+   "grid_frac_predicted_z": 0.203,
+   "grid_heldout_real_visible_frac": {
+    "6": 1.0,
+    "7": 0.943,
+    "8": 0.993
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.132,
+    "real_6": 0.013,
+    "real_7": 0.057,
+    "real_8": 0.038
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  },
+  {
+   "transition": "6->9",
+   "a": 6,
+   "b": 9,
+   "z": 8,
+   "medoid_pair_rank": 15,
+   "medoid_idx_a": 140,
+   "medoid_idx_b": 118,
+   "medoid_segment_points": [
+    20,
+    30
+   ],
+   "medoid_segment_alpha": [
+    0.408,
+    0.592
+   ],
+   "n_paths_with_segment": 93,
+   "lda_eigenvalues": [
+    23.9391,
+    11.8449
+   ],
+   "lda_heldout_own_ellipse_frac": {
+    "6": 0.891,
+    "9": 0.896,
+    "8": 0.87
+   },
+   "lda_segment_points_in_z_ellipse": 0.0,
+   "lda_segment_points_in_a_ellipse": 0.006,
+   "lda_segment_points_in_b_ellipse": 0.001,
+   "fullspace_point_frac_in_z_region": 0.0,
+   "grad_singular_values": [
+    16.5722,
+    12.8734,
+    1.2147,
+    0.7951
+   ],
+   "grad_two_axis_energy": 0.993,
+   "grid_off_relu_support": {
+    "frac_cells_any_negative": 1.0,
+    "mean_frac_coords_negative": 0.305,
+    "median_negative_norm_share": 0.122
+   },
+   "grid_frac_predicted_z": 0.038,
+   "grid_heldout_real_visible_frac": {
+    "6": 0.963,
+    "9": 0.913,
+    "8": 0.996
+   },
+   "median_in_plane_energy_share": {
+    "medoid_path": 0.126,
+    "real_6": 0.046,
+    "real_9": 0.075,
+    "real_8": 0.029
+   },
+   "projected_path_prediction_fidelity": {
+    "all_points": 1.0,
+    "segment_points": 1.0,
+    "segment_points_predicted_z": 1.0
+   }
+  }
+ ]
+}

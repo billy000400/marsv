@@ -166,16 +166,67 @@ For a segment predicted as z, call it close to the real-z activation region only
 segment, its normalized distance to z is below 1 and lower than its distance to every other digit. Report the
 exact fraction of points and paths satisfying both conditions.
 
+## Two complementary two-dimensional visualizations
+
+Principal component analysis is not used for the main two-dimensional visualization. It finds directions of
+largest overall variance, which need not be the directions that separate the three relevant classes or control
+the model's decision near the interpolation path. Use both views below because they answer different questions.
+
+### View A — real-class LDA plane
+
+For each endpoint transition `a→b` with stable middle prediction `c`, fit three-class linear discriminant
+analysis (LDA) to balanced real training-image `h1` activations from classes a, b, and c. LDA supplies at most
+two discriminant axes for three classes. Fit the axes using real training activations only; then project held-out
+real a/b/c activations and all interpolation paths without refitting.
+
+Show faint held-out real points, class means, spread ellipses, and interpolation paths colored and marked by
+their predicted class. State explicitly that LDA is supervised by the real class labels: it shows whether the
+path approaches the directions that best separate real a, b, and c activations, but it does not necessarily
+recover the model's local decision directions.
+
+### View B — path-local margin-gradient/SVD plane
+
+For a path whose middle segment predicts c, let `l_k(h)` be the downstream logit for digit k after patching
+the first-hidden-layer activation h. At every interpolation point in the third-class segment, and enough adjacent
+points on both sides to include the entry and exit boundaries, compute both gradients with respect to h:
+
+- the a-versus-c margin gradient, `grad_h(l_a - l_c)`;
+- the b-versus-c margin gradient, `grad_h(l_b - l_c)`.
+
+Stack these gradient row vectors over the selected path points. Centering is not needed because these are
+directions, not observations. Compute singular value decomposition and use the top two right-singular vectors as
+orthonormal axes in `h1` space. Save the singular values and the fraction of squared gradient norm captured by
+the two axes; a low captured fraction must be reported as a limitation of the plane.
+
+Anchor the plane at the mean `h1` activation of the path's third-class segment. Project held-out real a/b/c
+activations and the full interpolation path onto it. On a fixed two-dimensional grid in this plane, reconstruct
+the corresponding `h1` activation, run it through the remaining network, and color each cell by predicted class.
+Overlay the zero contours `l_a-l_c=0` and `l_b-l_c=0`, label the a/c and b/c boundaries, mark the path's entry
+and exit from the c-decision region, and show the real a/b/c activations on the same axes.
+
+The grid is a counterfactual slice through post-ReLU `h1` space. Report how much of the plotted grid has any
+negative `h1` coordinate, because those points cannot be direct post-ReLU activations. Do not clamp grid points:
+clamping would bend the plane and change the requested slice. Distinguish clearly between (1) entering a
+c-decision region in this plane and (2) overlapping the distribution of real class-c activations. The former is
+about the classifier; the latter is about activation-region similarity.
+
+For aggregate findings, first show the 100-pair class composition and full-space distance results. Generate the
+two planes for a frozen representative path: use the medoid path by `h1` distance among paths containing the
+dominant stable c segment, not a hand-picked visually clean path. At minimum include every seed-0 stable
+transition in an appendix/contact sheet and emphasize the cross-seed-stable `6→9→8` case in the main report.
+
 ## Required activation-region figures
 
 For each analyzed stable transition:
 
 1. **Prediction along interpolation.** Mean `d(alpha)` with its 100-pair spread, plus the predicted-class
    composition at every alpha. Show representative individual paths only after the aggregate.
-2. **Two-dimensional activation-region view.** Fit principal component analysis using only real activations of
-   the two endpoint digits and observed third digit(s). Show faint real points, digit means, spread ellipses,
-   and interpolation paths colored by prediction. State that this is visualization only.
-3. **Full-space distance view.** Across alpha, show the held-out-95th-percentile-normalized distance to both
+2. **Real-class LDA view.** Show the held-out real a/b/c activation regions and the interpolation path on the two
+   supervised discriminant axes, with the LDA fit restricted to real training activations.
+3. **Margin-gradient/SVD decision slice.** Show the evaluated class-colored grid, projected real a/b/c
+   activations, interpolation path, and explicitly labeled `a/c` and `b/c` zero-margin boundaries. Report the
+   two-axis gradient-energy coverage and the fraction of off-ReLU-support grid points.
+4. **Full-space distance view.** Across alpha, show the held-out-95th-percentile-normalized distance to both
    endpoint digits and each stable third digit, with a horizontal line at 1 and the third-class segments marked.
 
 The scientific conclusion comes from the full `h1` coordinates and the 100-pair aggregates, not from a chosen
@@ -191,13 +242,16 @@ two-dimensional projection.
   or pair selection.
 - [x] **S3 — Collect real activations.** Save balanced training-reference and held-out-test `h1` activations for
   all ten digits and validate the distance calculation on held-out real images.
-- [x] **S4 — Analyze stable third-class transitions.** Run the 2D visualization and full-space comparison for
-  every stable case, retaining all 100 paths. If there are too many for the budget, rank cases by the frozen
-  Stage-1 prevalence and analyze a preregistered top subset while reporting the full census.
+- [x] **S4b — Replace PCA with LDA and decision-aware planes.** Preserve the completed full-space comparison.
+  For each seed-0 stable transition, select the representative path by the frozen medoid rule, generate both the
+  real-class LDA plane and path-local margin-gradient/SVD decision slice, and report the required diagnostics.
+  Put the complete set in an appendix/contact sheet and feature `6→9→8` in the main text.
 - [x] **S5 — Controls and synthesis.** Check endpoint-predicted portions against endpoint activation regions and
   run fixed within-digit controls such as 6→6. Produce the three-way verdict for each analyzed transition.
 - [x] **S6 — Finalize.** Curate `RESULTS.md` and `REPORT.md`, update `CHANGELOG.md`, verify manifests and figures,
   and write `STOP`.
+- [x] **S7 — Finalize visualization revision.** Replace the old PCA figure and discussion with the verified LDA
+  and margin-gradient/SVD outputs, update `RESULTS.md`, `REPORT.md`, and `CHANGELOG.md`, then restore `STOP`.
 
 ## Controls
 
@@ -220,13 +274,16 @@ activations appears only after later layers. Do not run it before the `h1` resul
 Use “activation region,” “third-class segment,” “stable third-class prediction,” and “sub-plateau” as defined
 above. Do not use “manifold,” “submanifold,” “off-manifold,” “topology,” “phase transition,” or “circuit switch”
 in the report. Do not infer an activation region from output predictions, an averaged curve, or a 2D plot alone.
-Do not introduce clustering, density estimates, Jacobians, or unrelated plateau metrics.
+Do not introduce clustering, density estimates, full Jacobian analyses, or unrelated plateau metrics. The only
+new gradient analysis allowed here is the requested pair of path-local logit-margin gradients used to construct
+the SVD visualization plane.
 
 ## Fallback if time runs short
 
-Complete S1 for all 45 transitions at seed 0. Do not replace the full census with a single 6→7 example. Save
-the 100-pair mean curves, prediction composition, raw prevalence counts, transition matrix, and reproducibility
-manifest. State clearly that cross-seed confirmation and activation-region testing remain incomplete.
+Preserve the completed census and full-space results. At minimum, produce both LDA and margin-gradient/SVD views
+for the cross-seed-stable `6→9→8` case using the frozen medoid path, including gradient-energy coverage,
+off-ReLU-support grid fraction, real-class projections, and both zero-margin boundaries. State clearly that the
+remaining seed-0 stable transitions have not yet received the revised visualization.
 
 ## Out of scope
 
@@ -245,7 +302,9 @@ End every `JOURNAL.md` entry with:
 
 ## Current status
 
-**Complete.** All six stages (S1–S6) are done and the deliverables are final.
+**Complete (S1–S7).** All stages are done, including the reopened visualization revision. The PCA view has
+been removed and replaced by the two required planes, run on all 19 seed-0 stable transitions rather than a
+subset. `STOP` is written and verified on disk; zero unaddressed feedback files exist.
 
 - **S1/S2 census.** All 45 digit transitions × 100 fixed test-image pairs × 50 interpolation points at
   direction 12's seed-0/1/2 step-30000 checkpoints (4,500 paths per seed). Seed 0: **19 of 45**
@@ -262,28 +321,36 @@ End every `JOURNAL.md` entry with:
   inside-region fraction is 2.5% (`h1`), 10.6% (`h2`), 0.2% (`h3`). The `h2` rise is not a match — a
   segment point is inside 5.8 of the 10 regions there, and the predicted digit is the *nearest* region
   for only 11.7% of points (chance is 12.5%).
+- **S4b two 2-D views (replacing PCA).** Real-class LDA plane and path-local margin-gradient/SVD
+  decision slice, on the frozen medoid path of **all 19** stable transitions. The supervised plane is
+  *stricter* than the full-space test — **0.02%** of the 14,700 segment points inside the 2 s.d.
+  real-*z* ellipse versus 2.5% in 200-d — so the null is not a dimensionality artifact. The slice
+  shows a genuine third-digit *decision* region straddling the path (1.7%–37.7% of the window,
+  two-axis gradient energy 96.2%–99.5%), while 100% of grid cells sit off the post-ReLU support.
 
-Code: `experiments/s1_census.py`, `s1_analyze.py`, `s3_s4_regions.py`, `s6_later_layers.py`,
-`cvd_style.py` (shared colour-vision-deficiency-safe figure palette).
+Code: `experiments/s1_census.py`, `s1_analyze.py`, `s3_s4_regions.py`, `s4b_planes.py`,
+`s6_later_layers.py`, `cvd_style.py` (shared colour-vision-deficiency-safe figure palette).
 Numbers: `results/s1_census.npz`, `s1_classification.{json,csv}`, `s3_s4_regions.json`,
-`s6_later_layers.json`. Ten figures in `plots/`, all embedded as rendered images in both RESULTS.md
-and REPORT.md; REPORT.md verified through the GitHub markdown API (9/9 display equations render).
+`s4b_planes.json`, `s6_later_layers.json`. Thirteen figures in `plots/`, all embedded as rendered
+images in both RESULTS.md and REPORT.md; REPORT.md verified through the GitHub markdown API (16/16
+display equations render, 0 KaTeX errors).
 
-- **Figure accessibility (CLAUDE.md rule 13).** All ten figures were rebuilt green-free with a second
+- **Figure accessibility (CLAUDE.md rule 13).** All figures are green-free with a second
   identity channel (hatch / linestyle / marker) on every series, and all captions and prose in both
   deliverables now name that channel instead of a colour. The three analysis scripts were re-run and
   every result JSON is identical to before, so no number changed.
 
-Every item of the success criterion above is present in the deliverables. No model was retrained and
-no file in direction 12 was modified. `STOP` written and verified present on disk (zero unaddressed
-feedback files — the direction root was re-listed immediately before writing it).
+The new visualizations corroborated the numerical activation-region verdict rather than contradicting it, so no
+number changed. No model was retrained and no file in direction 12 was modified.
 
 ## Next step
 
-None required — the direction is complete and `STOP` is written. If new operator feedback arrives,
-CLAUDE.md rule 11 applies: delete `STOP`, address the feedback, and only re-write `STOP` when clean.
+None required — the plan is complete and `STOP` is on disk. If new feedback arrives, CLAUDE.md rule 11 applies:
+delete `STOP`, address the feedback, re-write `STOP` only when clean.
 
-Two threads deliberately left out of scope, should anyone resume: (a) why each seed picks its own
-third digit, which is a question about the between-cluster region of `h1` rather than about the
-prediction; (b) a region summary that stays separable at `h2`, which would sharpen the later-layer
-result from "no evidence of a match" to a positive test.
+Threads deliberately left out of scope, should anyone resume: (a) why each seed picks its own third digit, which
+is a question about the between-cluster region of `h1` rather than about the prediction; (b) a region summary that
+stays separable at `h2`, which would sharpen the later-layer result from "no evidence of a match" to a positive
+test; (c) new, suggested by the S4b slices — each class's *decision* region in the between-cluster part of `h1` is
+large (the third digit's covers a median 31.9% of the plotted window) while its *data* region is nowhere near, so
+"does decision-region size predict which digit a seed defaults to?" is now well-posed.

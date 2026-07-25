@@ -30,7 +30,11 @@ points per path, at three independently trained networks. Three findings:
    digit's mean activation than 95% of real held-out images of it, and **1.2× to 2.1×** farther than
    the 95th percentile of the *nearest* of all ten digits. These points are outside every digit's
    usual activation spread. The verdict for all 19 transitions is **"prediction only"**, not
-   "activation-region match".
+   "activation-region match". Projecting the same points into a plane built specifically to separate
+   the three digits involved does not soften this: **0.02%** of them land inside the third digit's
+   two-standard-deviation ellipse there. What the segments *do* sit inside is a decision region — a
+   slice through the model's own margins shows the third digit owning a substantial piece of the
+   neighbourhood the path crosses, far from where real images of it live.
 3. **The identity of the third digit is a property of the trained network, not of the digits.** Seed 0
    almost always answers **7 or 8**; seed 1 almost always answers **1**; seed 2 answers **2 or 8**.
    Only one transition — **6→9 with third digit 8** — is labelled stable at all three seeds *and*
@@ -72,8 +76,8 @@ and 2 are used only to check whether the seed-0 labels replicate.
 
 **Hook point.** The interpolation always happens at **`h1`**, the 200-dimensional post-ReLU output of
 the *first* hidden layer. We read `h1` out, build a path between two images' `h1` vectors, write the
-path back in at `h1`, and let the remaining three layers run forward to the logits. Results 1–7
-compare activations at `h1`; Result 8 repeats the comparison at `h2` and `h3` (the second and third
+path back in at `h1`, and let the remaining three layers run forward to the logits. Results 1–8
+compare activations at `h1`; Result 9 repeats the comparison at `h2` and `h3` (the second and third
 post-ReLU hidden layers, also 200-dimensional) for the same paths.
 
 **Interpolation path.** For two images with first-layer activations `h_A` and `h_B` we use direction
@@ -104,7 +108,7 @@ in at least 94% of the 100 pairs for every transition (overall endpoint accuracy
 97.9% at seed 1, 98.0% at seed 2), and every classification below is reported both on all 100 pairs
 and on the correctly-classified-endpoint subset.
 
-**Activation reference sets (used only in Results 4).** For each digit c we summarize what real
+**Activation reference sets (used in Results 4 and 5).** For each digit c we summarize what real
 class-c activations look like at `h1` using **2,000 real training images** of digit c (mean and
 coordinate-wise standard deviation). We then calibrate "how far is normal" on **700 real held-out test
 images** of digit c drawn from `test[2000:]` — deliberately disjoint from the endpoint pool
@@ -238,7 +242,122 @@ to some other digit, which would not support the claim that the network is "seei
 fraction of segment **points** meeting both conditions, and the fraction of **paths** whose segment
 has a majority (>50%) of its points meeting both. A transition is called an **activation-region
 match** only if most segment points and most paths qualify; **prediction only** if essentially none
-do; **mixed** in between. Results 4 and 5 consume these.
+do; **mixed** in between. Results 4 and 6 consume these.
+
+---
+
+**Two two-dimensional views — what does the geometry actually look like?** The metrics above are
+scalars, and a reader is entitled to see the arrangement they summarize. The obvious projection,
+principal component analysis (PCA — the directions of largest overall variance), is the wrong tool
+here and we do not use it: the directions along which real activations vary most need not be the
+directions that separate the three digits involved, nor the directions in which the model's decision
+changes. We therefore build two different planes, which answer two different questions, and we report
+the diagnostics that say how much each plane can be trusted.
+
+Both views are drawn for one **representative path** per transition, chosen by a rule frozen before
+any of this was run so that no path is picked for looking clean. Let `P_p` be the full trajectory of
+path *p* — its 50 interpolation points in `h1`, stacked into one 50×200 = 10,000-dimensional vector —
+and let `S` be the set of paths that contain a segment of the dominant third digit z. The
+representative path is the **medoid** of that set:
+
+```math
+p^{\star} \;=\; \arg\min_{p \in S} \; \sum_{q \in S} \lVert P_p - P_q \rVert_2
+```
+
+Reading it: the medoid is the path that is most typical of the qualifying paths — the one closest to
+all the others — as opposed to the longest or the most visually striking segment.
+
+**View A — the real-class LDA plane (does the path approach real z?).** Linear discriminant analysis
+(LDA) finds the directions that best separate *labelled real classes*: it maximizes between-class
+scatter relative to within-class scatter. With three classes it supplies at most two axes, which is
+exactly a plane. We fit it on **real training activations only** — 2,000 images each of the endpoint
+digits a, b and the third digit z, the same reference sets used for the region metric. Writing `mu_c`
+for class c's mean, `mu` for the overall mean and `n_c = 2000`:
+
+```math
+S_W \;=\; \frac{1}{N}\sum_{c \in \lbrace a,b,z \rbrace} \sum_{i \in c} (u_i - \mu_c)(u_i - \mu_c)^{\top},
+\qquad
+S_B \;=\; \frac{1}{N}\sum_{c \in \lbrace a,b,z \rbrace} n_c (\mu_c - \mu)(\mu_c - \mu)^{\top}
+```
+
+The two axes are the leading generalized eigenvectors of `S_B w = lambda S_W w`, rescaled to unit
+length. Post-ReLU `h1` has near-dead coordinates, so `S_W` is ill-conditioned and gets a ridge of
+`10^-3 * tr(S_W)/200` before inversion. Held-out real test activations and all 100 interpolation paths
+are then projected **without refitting**. LDA is supervised by the real class labels: this view shows
+whether the path approaches the directions that best separate real a, b and z activations. It does
+*not* claim to recover the model's own decision directions — that is View B's job.
+
+Each class gets a **spread ellipse** at 2 standard deviations, computed from its projected held-out
+real points with mean `m_c` and 2×2 covariance `C_c`. A projected point `v` counts as inside class c's
+ellipse when its Mahalanobis distance is at most 2:
+
+```math
+(v - m_c)^{\top} C_c^{-1} (v - m_c) \;\le\; 4
+```
+
+For a two-dimensional Gaussian this should contain 86.5% of real points, and we report the measured
+fraction per class as a calibration check. The headline number from this view is the fraction of *all*
+third-class segment points (over all 100 paths, the same points scored in Result 4) that land inside
+the real-z ellipse — the two-dimensional analogue of the full-space inside-region test, and a direct
+check on whether a supervised projection makes the null look different.
+
+**View B — the path-local margin-gradient/SVD decision slice (what does the model do here?).** This
+plane is built from the model, not from the labels. For an activation `h` patched at `h1`, let
+`l_k(h)` be the downstream logit for digit k. The two quantities that decide whether the network says
+z rather than an endpoint digit are the **margins** `l_a - l_z` and `l_b - l_z`; where a margin is
+zero, the prediction flips between those two digits. We take their gradients with respect to `h` at
+every point of the representative path's z-segment plus 5 points either side (so both boundary
+crossings are included), stack the resulting row vectors into a matrix `G`, and take its singular value
+decomposition:
+
+```math
+G \;=\; \begin{bmatrix} \nabla_h (l_a - l_z) \\ \nabla_h (l_b - l_z) \end{bmatrix}_{\text{path points}}
+\;=\; U \Sigma V^{\top}
+```
+
+The plane's axes are the top two right-singular vectors `v_1, v_2` (orthonormal by construction), and
+it is anchored at the mean `h1` activation of the segment. The plane is only a fair picture of the
+local decision geometry if those two axes carry most of the gradient directions, so we report the
+**two-axis gradient energy**:
+
+```math
+E_2 \;=\; \frac{\sigma_1^2 + \sigma_2^2}{\sum_k \sigma_k^2}
+```
+
+with `sigma_k` the singular values. `E_2` near 1 means the margin gradients essentially live in a
+plane and the slice is faithful; a low `E_2` would be a limitation, and we would have to say so.
+
+On a 161×161 grid in this plane we reconstruct the corresponding `h1` activation
+`h = anchor + u v_1 + w v_2`, run it through the remaining layers, and colour the cell by predicted
+digit; we also draw the zero contours of the two margins. Grid points are **never clamped** to be
+non-negative, because clamping would bend the plane and no longer show the requested slice. That has a
+consequence we must quantify: a grid cell can have negative `h1` coordinates, which no real post-ReLU
+activation can. We report the fraction of cells with any negative coordinate, and — because in 200
+dimensions that number saturates at 1 and stops being informative — two graded companions: the mean
+fraction of the 200 coordinates that are negative, and the median share of the vector's length carried
+by its negative part, `|| min(h,0) || / ||h||`.
+
+Finally, a projection places a 200-dimensional point at two coordinates and silently drops the rest.
+To keep that honest we report the **in-plane energy share**, the median over points of
+
+```math
+\frac{\lVert V_2^{\top}(u - \text{anchor}) \rVert^2}{\lVert u - \text{anchor} \rVert^2}
+```
+
+for the projected path and for the projected real held-out activations, where `V_2 = [v_1, v_2]`.
+A small share means a plotted point is far out of the plane, so the decision region drawn at its
+plotted location does not describe what the model predicts for that actual point. For the path we can
+test that directly rather than assume it — the **projected-path fidelity** is the fraction of path
+points whose predicted digit is unchanged when the point is collapsed into the plane:
+
+```math
+\text{fidelity} \;=\; \frac{1}{T}\sum_{t} \mathbb{1}\big[\arg\max_k l_k(u_t) = \arg\max_k l_k(\text{anchor} + V_2 V_2^{\top}(u_t - \text{anchor}))\big]
+```
+
+reported over all 50 points and over the segment alone. High fidelity means the drawn path really is
+where the picture puts it. This is what makes
+"the path enters a z-decision region in this plane" and "the path overlaps real z activations" two
+separate claims, only the first of which View B can support.
 
 ---
 
@@ -253,7 +372,7 @@ N(u) \;=\; \big|\lbrace c : R_c(u) < 1 \rbrace\big|
 ```
 
 Reading it: `N = 1` is the ideal (the point is inside exactly one digit's region); `N = 0` means it is
-outside all ten; `N` near 10 means the test is vacuous at that layer. Result 8 uses this to interpret
+outside all ten; `N` near 10 means the test is vacuous at that layer. Result 9 uses this to interpret
 the later-layer numbers, and it is the reason a higher "inside" fraction at `h2` is *not* evidence of
 a match.
 
@@ -273,7 +392,7 @@ recomputed by the same code path so the three layers are strictly comparable.
 
 There is no external baseline method to beat here — the question is whether one measurement (the
 prediction) is corroborated by another (the activation region). What the study needs instead is proof
-that the region measurement itself works. Four preregistered controls, all reported in Result 6:
+that the region measurement itself works. Four preregistered controls, all reported in Result 7:
 
 **C1 — real held-out images land in their own region.** Take the 700 held-out real test images per
 digit (never used to build the means) and score them with the same `R_c`. A working measure puts them
@@ -430,14 +549,86 @@ path. The network's distance to a real 7 barely changes as you slide from a 0 to
 real 7s at every alpha — and yet its output says "7" through the middle. The third digit's curve is
 never the lowest of the three in the region where the third-class prediction occurs.
 
-![Two-dimensional principal-component view of the three highest-prevalence stable transitions at seed 0 (0 to 1 with z=7, 6 to 9 with z=8, 3 to 4 with z=7). Both axes are the first two principal components of real h1 activations, fitted only on real images of the two endpoint digits and the third digit; units are arbitrary. Faint small markers are individual real training images, one marker shape per digit — circles for endpoint digit a, squares for endpoint digit b, triangles for the third digit z, as named in each panel's legend. Large stars are the per-digit means, thin faint lines are twelve individual interpolation paths, and cross ("x") markers mark the interpolation points whose prediction is the third digit z.](plots/s4_pca_view.png)
+### Result 5 — seen in two dimensions: the path never approaches real z, but it does cross into a z-decision region
 
-This projection is **visualization only** — the conclusion above comes from the full 200 coordinates.
-But it makes the geometry legible: the paths run in a narrow corridor directly between the two
-endpoint clouds, and the crosses (points predicted as the third digit) sit in the empty middle
-of that corridor, visibly far from the third digit's own cloud and its mean star.
+Result 4 is a set of scalars. To make the arrangement visible we build the two planes defined in
+Methods for the medoid path of every stable transition. They are deliberately complementary: View A is
+supervised by the *real class labels* and asks whether the path approaches real z activations; View B
+is supervised by the *model's own margins* and asks what its local decision geometry looks like. We
+feature 6→9 (third digit 8), the one transition that is stable with the same third digit at all three
+seeds. Its medoid path is pair rank 15 of the frozen bank (test images 140 and 118); its z-segment
+runs over alpha 0.408–0.592, and 93 of its 100 pairs carry a segment at all.
 
-### Result 5 — the verdict for each analyzed transition
+![Two 2-D views of the 6→9 transition, third digit 8, on the medoid path. Left, View A: the two axes are the discriminant axes of a three-class LDA fitted on real training h1 activations of digits 6, 9 and 8 (arbitrary units). Faint small markers are held-out real test activations, one marker shape and linestyle per digit — circles/solid for endpoint digit 6, squares/dashed for endpoint digit 9, triangles/dash-dot for the third digit 8; the matching ellipse is that digit's 2-standard-deviation spread and the star is its mean. Thin grey lines are 24 of the 100 interpolation paths, "x" markers are interpolation points predicted as 8, the thick black line is the medoid path and the two open black circles on it are where its 8-segment starts and ends. Right, View B: the two axes are the top two right-singular vectors of the stacked margin gradients along that segment, anchored at the segment mean. Background shading gives the predicted digit at each grid cell on a light-to-dark ramp with the digit printed inside every region and thin outlines between regions; the region predicted 8 is additionally hatched "//". The solid black contour is the a/z zero-margin boundary l6 - l8 = 0 and the dashed black contour is the b/z boundary l9 - l8 = 0. Coloured markers are held-out real activations of digits 6, 9 and 8 projected onto the same plane, the thick black line is the medoid path and the open circles are again its segment entry and exit.](plots/s4b_feature_6to9.png)
+
+Read the left panel first. The three real digit clouds separate cleanly on the discriminant axes — as
+they must, since these axes were fitted to separate them — and the real-8 ellipse sits well away from
+the line joining real 6 to real 9. The interpolation paths run in a tight corridor directly between the
+6 and 9 clouds, and every point the network calls "8" (the "x" markers) lies in that corridor. The
+corridor does not bend toward the real-8 ellipse at any stage. **Zero** of the 6→9 segment points fall
+inside the 2-standard-deviation real-8 ellipse.
+
+The right panel shows what is actually happening: the medoid path crosses the `l6 - l8 = 0` boundary,
+spends its segment in a wedge of the plane where the model's argmax is 8, and then crosses
+`l9 - l8 = 0` on the way out. Both boundary crossings sit at the marked segment entry and exit — and
+for this transition the check below is exact: collapsing every path point into the plane changes none
+of the 50 predictions, so the drawn path is where the model really is. So the prediction is not noise — there is a genuine
+8-decision region here — but that region is a property of the *classifier's* partition of the space,
+and it is nowhere near where real 8s live. The two panels together are the whole result of this
+direction in one picture.
+
+Two diagnostics say how much to trust the right panel. The two axes hold **99.3%** of the squared
+margin-gradient norm for 6→9 (96.2–99.5% across the 19 transitions, median 98.7%), so the margin
+geometry really is close to two-dimensional and the slice is faithful. Against that, **every** grid
+cell in **every** transition has at least one negative `h1` coordinate — on average 25.4–34.9% of the
+200 coordinates are negative, carrying 8.2–13.4% of the vector's length. The grid is therefore an
+honest counterfactual slice, not a tour of reachable post-ReLU states, and we do not clamp it to
+pretend otherwise.
+
+The same pair of views for all 19 transitions shows this is not a peculiarity of 6→9:
+
+![Contact sheet of View A, the real-class LDA plane, for all 19 seed-0 stable third-class transitions. Every panel uses the axes, markers, ellipses and path styling described for the featured figure, with the panel's own endpoint digits a and b and third digit z; the legend in the first panel applies throughout and each panel title names the transition, its z, the fraction of that transition's third-class segment points inside the 2-standard-deviation real-z ellipse, and the corresponding full-200-dimensional fraction from Result 4.](plots/s4b_lda_contact.png)
+
+Every panel has the same shape: two endpoint ellipses with a corridor of paths between them, the
+third-digit ellipse off to one side, and the third-class points strung along the corridor. Pooled over
+all 19 transitions and all 14,700 segment points, **0.02%** lie inside the real-z ellipse — one
+transition (2→9) accounts for every such point, at 0.3% of its own segment. The supervised
+two-dimensional view is if anything *stricter* than the full-space test (2.5%), so the null of Result 4
+is not an artifact of measuring distance in 200 dimensions. The segments are not sitting in some other
+digit's territory either: only 0.4% and 1.8% of segment points fall inside the endpoint digits' own
+ellipses. The ellipses themselves are well calibrated — 85.1% to 91.0% of held-out real images land
+inside their own class ellipse across all transitions and classes, against the 86.5% a two-dimensional
+Gaussian predicts.
+
+![Contact sheet of View B, the path-local margin-gradient/SVD decision slice, for all 19 transitions. Every panel uses the grid shading, printed digits, region outlines, hatched third-digit region, solid a/z and dashed b/z zero-margin contours, projected real activations and medoid path described for the featured figure; the legend in the first panel applies throughout and each panel title names the transition, its z, the two-axis gradient energy and the mean fraction of h1 coordinates that are negative on that grid.](plots/s4b_margin_contact.png)
+
+The hatched region — the cells where the model predicts the third digit — is present in all 19 slices,
+occupying between 1.7% and 37.7% of the plotted window (median 31.9%). So "the third digit owns a real
+piece of this neighbourhood" is the rule, not the exception.
+
+Because a plane discards everything perpendicular to it, "the drawn path enters the hatched region" is
+a claim about the drawing until it is checked, so we check it: collapse each path point into the plane
+(keep only its in-plane component), re-run the network on the result, and compare with the prediction
+at the true 200-dimensional point. On the segment the two agree exactly for 14 of the 19 transitions
+and for at least 83% of segment points in 18 of them; the one weak case is 1→6 at 57.9%. In every
+transition some part of the drawn segment is genuinely inside the drawn z-region, so the picture is
+not an artifact. **This check applies to the path, not to the real activations.** Those keep a median
+of only **4.5%** of their squared distance from the anchor in the plane (1.3–8.3%, against 12.6% for
+the path). A real image plotted inside the hatched region is therefore a shadow, not a classification —
+which is exactly why the conclusion rests on the full-space distances of Result 4 and not on this
+picture.
+
+Finally, the numbers behind both views, per transition:
+
+![Two-panel diagnostic summary over the 19 stable third-class transitions. Top panel: x = transition and its third digit z, y = fraction of that transition's third-class segment points inside the real-z region, with "//"-hatched bars for the 2-standard-deviation ellipse in the 2-D LDA plane and "\\"-hatched bars for the full 200-dimensional region test of Result 4; note the y-axis stops at 0.25. Bottom panel: same x-axis, y = fraction from 0 to 1; "//"-hatched bars are the two-axis share of the squared margin-gradient norm, "xx"-hatched bars are the mean fraction of the 200 h1 coordinates that are negative across the plotted grid (every cell has at least one), and the solid line with diamond markers is the fraction of plotted grid cells whose predicted digit is z.](plots/s4b_plane_diagnostics.png)
+
+The top panel is nearly empty, which is the point: in the supervised plane built specifically to
+separate a, b and z, essentially no third-class segment point lands inside real z. The bottom panel
+says the View B planes are uniformly faithful to the margin geometry (all bars above 0.96) while
+uniformly off the post-ReLU support (about a third of coordinates negative), and that the third digit's
+decision region is substantial in almost every case.
+
+### Result 6 — the verdict for each analyzed transition
 
 Applying the preregistered three-way verdict:
 
@@ -451,7 +642,7 @@ No transition comes close to the "match" bar; the best (2→9) is at 18.5% of po
 null result for the hypothesis that a stable third-class prediction indicates arrival in the third
 digit's activation region at `h1`.
 
-### Result 6 — all four controls pass, so the null result is not a broken ruler
+### Result 7 — all four controls pass, so the null result is not a broken ruler
 
 ![Three control panels for the activation-region measure at h1. Left (C1): histogram over 7,000 held-out real test images of the normalized distance ratio to their own digit's region; x-axis is the ratio, y-axis is the number of images, dashed line at ratio 1. Middle (C3): bar chart with digit c on the x-axis and, on the y-axis, the fraction of within-digit interpolation points whose ratio to digit c is below 1. Right (C2): histogram of the fraction of endpoint-predicted interpolation points that are inside that endpoint digit's region, with one entry per endpoint per transition (2 x 19 = 38 values); the "//"-hatched bars count only the endpoint plateau (alpha at most 0.1 or at least 0.9) and the "\\"-hatched bars count all endpoint-predicted points, as labelled in the panel legend.](plots/s5_controls.png)
 
@@ -478,7 +669,7 @@ The weakest control is C2 at 0→1, where only 19.5%/27.4% of endpoint-plateau p
 endpoint region — 0 and 1 have the tightest and most distinctive activation clusters, and the SLERP
 path leaves them quickly. We report it rather than dropping it.
 
-### Result 7 — the third digit's identity is a property of the seed, not of the digit pair
+### Result 8 — the third digit's identity is a property of the seed, not of the digit pair
 
 Repeating the frozen Stage-1 evaluation at seeds 1 and 2 — same image pairs, same thresholds, nothing
 retuned — gives 12 and 18 stable third-class transitions respectively, against 19 at seed 0. So the
@@ -506,7 +697,7 @@ initialization and data order rather than on any visual similarity among 6, 9 an
 consistent with Result 4: if the third digit were being chosen because the activations genuinely
 resemble that digit, the choice should be reproducible across networks trained on the same data.
 
-### Result 8 — the match does not appear at `h2` or `h3` either
+### Result 9 — the match does not appear at `h2` or `h3` either
 
 Because the `h1` result is a clean null, the preregistered later-layer follow-up applies. Same frozen
 segments, same rules, only the hook point changes:
@@ -554,6 +745,11 @@ activation-region match: pooled over 14,700 segment points, 2.5% are inside the 
 of the digit they are predicted to be, and the median point is farther from *every* digit's region
 than 95% of real held-out images are from their own. The verdict is "prediction only" in all 19 cases,
 and it does not change at the second or third hidden layer: the similarity never appears downstream.
+Nor does it appear in a projection chosen to be maximally favourable — in a plane fitted to separate
+exactly the three digits involved, 0.02% of segment points fall inside the third digit's ellipse. What
+a slice through the model's own margins does show is a real third-digit *decision* region straddling
+the path, which is the distinction the whole direction turns on: the network has a region for that
+digit there; the data does not.
 
 Two secondary findings sharpen this. First, the sub-plateau — the flat intermediate shelf in the
 output distance curve that motivated this direction — is much rarer than third-class prediction (6 of
@@ -575,21 +771,27 @@ seeds; nothing here establishes that the same holds for convolutional networks, 
 other datasets. (ii) The activation region is summarized by a per-digit mean and coordinate-wise
 variance — a deliberately simple, preregistered summary. It passes all four controls, but a richer
 summary could place some segment points inside a region that this one puts outside; the effect would
-have to be large, since 15 of 19 transitions are below 5%. (iii) Result 8 shows that at `h2` this
+have to be large, since 15 of 19 transitions are below 5%. (iii) Result 9 shows that at `h2` this
 summary's ten regions overlap so heavily (a segment point is inside 5.8 of them on average) that the
 inside-region test carries little information at that layer; the conclusion there rests on the
 nearest-region half of the criterion, which is at chance. A summary that kept the regions separable at
 `h2` would give a sharper test. (iv) Three
 transitions (0→4, 1→9, 5→7) have sub-plateau labels that fail the preregistered bootstrap-agreement
-bar and should be read as borderline; the third-class labels are unaffected. (v) The bank uses the
+bar and should be read as borderline; the third-class labels are unaffected. (v) The two planes of
+Result 5 are visualizations with stated costs: every cell of the View B grid lies off the post-ReLU
+support (about a third of its coordinates are negative), and the projected real activations keep a
+median of only 4.5% of their squared distance from the anchor in the plane, so a real point plotted
+inside a decision region is not being classified there. Neither plane is evidence on its own; both
+are read against the full-space numbers. (vi) The bank uses the
 first 100 test images of each digit inside a frozen 2,000-image pool, so the 100 pairs are fixed by
 construction rather than randomly sampled; leave-one-out and bootstrap check robustness to individual
 pairs but not to choosing an entirely different pool.
 
 **Reproducibility.** `experiments/s1_census.py` (census), `experiments/s1_analyze.py` (frozen rules,
 Stage-1 figures), `experiments/s3_s4_regions.py` (activation regions, controls, region figures),
+`experiments/s4b_planes.py` (LDA and margin-gradient/SVD planes, Result 5),
 `experiments/s6_later_layers.py` (`h2`/`h3` follow-up), `experiments/cvd_style.py` (shared
 colour-vision-deficiency-safe figure palette). Numeric outputs: `results/s1_census.npz`,
-`results/s1_classification.{json,csv}`, `results/s3_s4_regions.json`,
+`results/s1_classification.{json,csv}`, `results/s3_s4_regions.json`, `results/s4b_planes.json`,
 `results/s6_later_layers.json`. Every result file records the source checkpoint path and its SHA-256.
 No model was trained in this direction and no file in direction 12 was modified.

@@ -213,46 +213,8 @@ def main():
     c4 = float((fwd - rev).abs().max() / fwd.abs().max())
     print(f'C4 reversal max relative deviation: {c4:.2e}')
 
-    # ---- 2D view (visualization only) for the 3 highest-prevalence cases -----
-    top3 = sorted(out, key=lambda o: -o['prevalence_z'])[:3]
-    fig, axes = plt.subplots(1, 3, figsize=(16.5, 5.2))
-    for ax, o in zip(axes, top3):
-        k = [kk for kk, rr in stable if rr['transition'] == o['transition']][0]
-        digits = [o['a'], o['b'], o['z']]
-        Hs = {c: h1_of(model, train_x[ref_idx[c]][:600]) for c in digits}
-        X = torch.cat([Hs[c] for c in digits])
-        Xm = X.mean(0)
-        _u, _s, V = torch.pca_lowrank(X - Xm, q=2)
-        proj = lambda T: ((T - Xm) @ V[:, :2]).cpu().numpy()
-        # role-based encoding (endpoint a / endpoint b / third digit z), each with
-        # its own marker as well as its own colour
-        for i, c in enumerate(digits):
-            p = proj(Hs[c])
-            ax.scatter(p[:, 0], p[:, 1], s=4, alpha=0.16, color=CVD[i],
-                       marker=MARKERS[i])
-            ax.scatter(*proj(mu[c:c + 1])[0], marker='*', s=340, edgecolor='k',
-                       color=CVD[i], zorder=5,
-                       label=f"real digit {c} ({['endpoint a', 'endpoint b', 'third digit z'][i]}"
-                             f", marker {MARKERS[i]}, mean ★)")
-        path = slerp_batch(h1_of(model, test_x[idx_a[k]][:12]),
-                           h1_of(model, test_x[idx_b[k]][:12]), N_POINTS)
-        pp = proj(path.reshape(-1, 200)).reshape(12, N_POINTS, 2)
-        pr = pred_all[k, :12]
-        for i in range(12):
-            ax.plot(pp[i, :, 0], pp[i, :, 1], c='0.35', lw=0.7, alpha=0.8, zorder=3)
-        m = pr == o['z']
-        ax.scatter(pp[m][:, 0], pp[m][:, 1], s=16, color='k', marker='x', zorder=6,
-                   label=f"interpolation point predicted {o['z']}")
-        ax.set_title(f"{o['transition']}  (z={o['z']}, prevalence "
-                     f"{o['prevalence_z']:.0%})", fontsize=11)
-        ax.set_xlabel('PC 1 of real $h_1$ activations'); ax.set_ylabel('PC 2')
-        ax.legend(fontsize=8, loc='best')
-    fig.suptitle('Two-dimensional view only (PCA fitted on real activations of the two '
-                 'endpoint digits and the third digit).\nThe scientific conclusion comes from '
-                 'the full 200-dimensional $h_1$ distances, not this projection.', fontsize=12)
-    fig.tight_layout(rect=[0, 0, 1, 0.9])
-    fig.savefig(os.path.join(PLOTS, 's4_pca_view.png'), dpi=140)
-    plt.close(fig)
+    # (The earlier PCA view was replaced by s4b_planes.py: a real-class LDA plane
+    # and a path-local margin-gradient/SVD decision slice. See PLAN.md S4b.)
 
     res = {'meta': {'ckpt': CKPT, 'ckpt_sha256': str(z1['ckpt_sha256'][0]),
                     'n_ref_train_per_digit': N_REF_TRAIN,

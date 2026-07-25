@@ -209,3 +209,112 @@ deliberately out of scope.
 
 On track? yes — S1–S6 complete (100% of the plan), figures now CVD-compliant, no unaddressed feedback,
 STOP present on disk.
+
+## 2026-07-25 — iter 3 (part A): S4b preregistration (written before running anything)
+
+The direction was reopened: PLAN.md now carries **S4b/S7**, replacing the PCA view with (A) a
+real-class LDA plane and (B) a path-local margin-gradient/SVD decision slice. `STOP` is absent from
+disk, consistent with the reopening. Re-listed the direction root first: no `human_feedback*.md` /
+`*REVIEW*` files exist, addressed or otherwise.
+
+Choices frozen **before** looking at any S4b output, so they cannot be tuned to a nicer picture:
+
+- **Representative path (medoid rule).** Among the paths of the 100-pair bank that contain a segment
+  of the dominant third digit z, represent each path by its full 50x200 `h1` trajectory flattened to
+  a 10,000-vector; the medoid minimises the sum of Euclidean distances to the other qualifying paths.
+  Rejected alternatives: medoid of the segment mean only (throws away the approach and exit, which is
+  exactly what these figures are about) and longest-segment path (that is "hand-picking the clean
+  one" by another name, which PLAN.md forbids).
+- **LDA fit.** Three-class LDA on 2,000 REAL TRAINING images per class for a, b and z — the same
+  reference index sets S3 used, so nothing new is sampled. `S_W` gets a ridge of
+  `1e-3 * tr(S_W)/200` (post-ReLU `h1` has near-dead coordinates, so `S_W` is ill-conditioned);
+  axes = the top two generalised eigenvectors, rescaled to unit L2 norm in `h1` space. Held-out real
+  test activations (700/digit from `test[2000:]`) and all interpolation paths are projected without
+  refitting.
+- **Spread ellipses.** 2 standard deviations of the projected HELD-OUT real points. The fraction of
+  held-out real points inside their own ellipse is reported as a calibration number, so the ellipse
+  is not just decoration.
+- **View B point set.** The medoid path's z-segment plus PAD = 5 alpha points either side (clipped to
+  the path), so both margin boundaries are inside the stacked gradients.
+- **View B plane.** Stack `grad_h(l_a - l_z)` and `grad_h(l_b - l_z)` over those points, SVD, take the
+  top two right-singular vectors; anchor at the mean `h1` of the segment. Report the singular values
+  and the two-axis share of the squared gradient norm.
+- **View B grid.** 161x161 covering the projected medoid path and the projected held-out real class
+  means, padded 30% on each side; grid points are **never clamped** to `h >= 0`, and the fraction of
+  cells with any negative coordinate is reported as required.
+
+One measurement is added on purpose: the fraction of third-class segment points that fall inside the
+2 s.d. real-z LDA ellipse, computed over ALL 100 paths, next to the already-published full-space
+fraction. It is the 2-D analogue of the S4 region test, so it says directly how much a two-dimensional
+supervised projection flatters the result. It does not replace or relabel anything.
+
+On track? yes — S4b 0% done (rules frozen, nothing run yet).
+
+## 2026-07-25 — iter 3 (part B): S4b run on all 19 transitions; plan complete again
+
+**What I did.** Implemented `experiments/s4b_planes.py` to the rules frozen in part A and ran it on all
+19 seed-0 stable transitions (PLAN.md allows a preregistered subset; none was needed — the whole thing
+takes about a minute on the shared GPU). Removed the PCA block from `s3_s4_regions.py` and the
+`s4_pca_view.png` figure, re-ran that script, and confirmed `results/s3_s4_regions.json` is byte-identical
+to the pre-edit copy, so nothing previously reported moved. Then curated both deliverables: new Methods
+block, new Result 5, old Results 5–8 renumbered 6–9 with every cross-reference chased down.
+
+**What I learned.**
+1. The supervised LDA plane is *stricter* than the full-space test, which I did not expect: 0.02% of
+   the 14,700 segment points inside the 2 s.d. real-z ellipse against 2.5% in 200 dimensions. The
+   worry a reviewer would have — "your null is an artifact of measuring distance in 200 dimensions,
+   where everything is far from everything" — is answered by the one projection built specifically to
+   make the three digits as separable as possible. The picture is also unusually clean: in all 19
+   panels the paths form a corridor between the two endpoint ellipses and the third-digit ellipse sits
+   off to the side, untouched.
+2. View B supplies the piece the direction was missing: a *decision* region for z genuinely straddles
+   the path (1.7%–37.7% of the plotted window, entered in all 19), and the medoid path's entry and
+   exit land on the two zero-margin contours. So the prediction is not noise — the network really does
+   own a region for that digit there. "Classifier region" versus "data region" is now shown, not just
+   asserted, which is exactly the distinction PLAN.md asks the report to keep separate.
+3. The margin gradients are nearly two-dimensional (two-axis energy 96.2%–99.5%), so the plane is a
+   fair slice rather than a lossy cartoon. That is a real diagnostic result, not a formality.
+
+**Two things I caught by checking rather than assuming.**
+- The strict off-ReLU-support statistic saturates: *every* grid cell in *every* transition has at
+  least one negative coordinate, which is unsurprising in 200 dimensions and conveys nothing on its
+  own. I added two graded companions (mean fraction of negative coordinates, 25.4%–34.9%; median share
+  of the norm carried by the negative part, 8.2%–13.4%) and report all three. The saturated number
+  stays in — it is the honest headline — but it is now interpretable.
+- I had written "the medoid path enters the z-region in all 19" from looking at the figures. With a
+  median in-plane energy share of only 12.6% for the path, that was a claim about the *drawing*, not
+  about the model. So I measured it: collapse each path point into the plane, re-classify, compare
+  with the true 200-d prediction. Segment predictions are unchanged in 14 of 19 transitions and ≥83%
+  preserved in 18 of 19 (worst 1→6 at 57.9%), and 6→9 is exact on all 50 points. The claim now stands
+  on a number. The same check does *not* license anything about the projected real activations, which
+  keep only 4.5% of their displacement in the plane — the report says so explicitly and calls them
+  shadows.
+
+**Judgement calls (loop mode).**
+- Ran the LDA/SVD views for all 19 transitions rather than the "preregistered representative subset"
+  the fallback allows, because compute was not the constraint. 6→9 is featured in the main text as
+  PLAN.md directs; the other 18 are contact sheets.
+- Deleted `plots/s4_pca_view.png` and its generating code rather than leaving it orphaned. PLAN.md S7
+  says to replace the figure and discussion; a stale PNG that no deliverable embeds is exactly the
+  kind of thing that gets re-embedded by mistake later. Git history keeps it.
+- Renumbered Results 5–8 to 6–9 rather than inserting a "Result 4b". The report is a presentable
+  deliverable, and the aggregate-then-visualize order PLAN.md prescribes puts the planes right after
+  Result 4.
+- For the decision-region colouring I kept the sequential `cividis` ramp (ten classes exceed the
+  five-hue palette) but added drawn outlines between regions and a `//` hatch on the third digit's
+  region, because neighbouring high digits are close in that ramp and the third digit's region is the
+  one thing the figure exists to show. Identity never rests on hue.
+
+**State of the plan.** S4b and S7 are done; S1–S6 were already complete. Every item of the PLAN.md
+success criterion is present, including both required 2-D views with their diagnostics. Re-listed the
+direction root for `human_feedback*.md` / `*REVIEW*` files without `.addressed.md`: none exist, so
+`STOP` is permitted under CLAUDE.md rule 11 and is written.
+
+**Next step if resumed.** Unchanged from before, plus one new thread the planes suggest: the third
+digit's decision region is large in the slice (median 31.9% of the window) while its data region is
+nowhere near it, so "how big is each class's decision region in the between-cluster part of `h1`, and
+does its size predict which digit a seed defaults to?" is now a well-posed question. Still out of the
+current scope.
+
+On track? yes — S1–S7 complete (100% of the plan), 13 figures embedded in both deliverables, 16/16
+equations verified rendering, no unaddressed feedback, STOP written.

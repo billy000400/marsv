@@ -131,3 +131,59 @@ render as `js-display-math`, 0 as `<pre lang="math">`, 10 `<img>` tags; RESULTS.
 no bare `(plots/*.png)` path outside an `![...]()` embed in either file; inline-math
 backslash-punctuation grep clean in both; the only remaining occurrences of "red"/"green" in either
 file are the sentences stating that the figures avoid a red-green contrast.
+
+## 2026-07-25 — iter 3: PCA view replaced by an LDA plane and a margin-gradient/SVD decision slice (S4b/S7)
+
+**Why** — PLAN.md was reopened: the two-dimensional PCA view in Result 4 was judged inadequate.
+Principal components are the directions of largest overall variance, which need not separate the three
+digits involved and need not be the directions in which the model's decision changes, so the figure
+could not support either of the two claims it was standing next to. PLAN.md S4b specifies two
+replacements, one supervised by the real class labels and one built from the model's own margins,
+each with required diagnostics.
+
+**Added (code + numbers)** — `experiments/s4b_planes.py`, writing `results/s4b_planes.json`. Rules
+frozen in JOURNAL.md *before* the first run: representative path = medoid of the full 50×200 `h1`
+trajectories among the paths carrying a dominant-z segment; LDA on 2,000 real training images per
+class with ridge `1e-3·tr(S_W)/200`; 2 s.d. spread ellipses from held-out real points; margin
+gradients over the segment ±5 alpha points; 161×161 grid, never clamped to `h ≥ 0`. Run on **all 19**
+seed-0 stable transitions, not a subset.
+
+**Removed** — the PCA figure `plots/s4_pca_view.png` and its generating block in
+`experiments/s3_s4_regions.py`. That script was re-run afterwards and `results/s3_s4_regions.json`
+`diff`s clean against the pre-edit copy, so **no previously reported number changed**.
+
+**New results now in both deliverables (superseding the PCA paragraph, which made no quantitative
+claim):**
+- View A, pooled over the same 14,700 segment points scored in Result 4: **0.02%** lie inside the
+  2 s.d. real-*z* ellipse, against **2.5%** in the full 200-d space. One transition (2→9) contributes
+  every such point, at 0.3% of its own segment. Only 0.4% / 1.8% fall inside the endpoint digits'
+  ellipses. Ellipse calibration 85.1%–91.0% of held-out real images inside their own ellipse (86.5%
+  expected). The supervised projection is therefore *stricter* than the full-space test, not kinder.
+- View B: two-axis gradient energy **96.2%–99.5%** (median 98.7%), so the slice is faithful to the
+  local margin geometry; the third digit's decision region covers 1.7%–37.7% of the plotted window
+  (median 31.9%); **100%** of grid cells in every transition are off the post-ReLU support (25.4%–34.9%
+  of coordinates negative, 8.2%–13.4% of the norm).
+- Projection honesty: median in-plane share of squared distance from the anchor is 12.6% (path) and
+  4.5% (real activations), so plotted real points are shadows. Added a projected-path fidelity check —
+  collapse each path point into the plane and re-classify: predictions on the segment are unchanged in
+  14 of 19 transitions and ≥83% preserved in 18 of 19 (worst 1→6, 57.9%), which is what licenses the
+  claim that the drawn path really crosses the drawn z-region.
+
+**REPORT.md** — new Methods block defining the medoid rule, LDA (with `S_W`/`S_B` and the generalized
+eigenproblem), the Mahalanobis ellipse test, the margin-gradient SVD plane, two-axis energy, the
+off-support diagnostics, the in-plane energy share and the projected-path fidelity, all as rendered
+equations at column 0. New **Result 5** with four embedded figures; former Results 5–8 renumbered 6–9
+and every cross-reference updated. Summary finding 2 and the Conclusion now state the LDA number and
+the classifier-region-versus-data distinction; a new limitation (v) states the plane's costs.
+**RESULTS.md** — new "Two 2-D views" metric table and the four figures replacing the PCA embed.
+
+**Figures** — `plots/s4b_feature_6to9.png` (both views, cross-seed-stable 6→9),
+`plots/s4b_lda_contact.png` and `plots/s4b_margin_contact.png` (all 19 transitions),
+`plots/s4b_plane_diagnostics.png`. All green-free per rule 13, with a second identity channel on every
+series (linestyle/marker per digit role, `//` hatch on the third digit's decision region, drawn
+outlines between decision regions, digits printed inside them).
+
+**Verification** — REPORT.md through `POST api.github.com/markdown`: **16/16** display equations render
+as `js-display-math`, 0 as `<pre lang="math">`, 0 KaTeX errors, 13 `<img>`; RESULTS.md 13 images, 0
+KaTeX errors; no bare `(plots/*.png)` path outside an embed in either file; inline-math
+backslash-punctuation grep clean in both.
