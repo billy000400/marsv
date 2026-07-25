@@ -82,3 +82,52 @@ later-layer null.
 **Verification** — REPORT.md re-checked through `POST api.github.com/markdown`: 9/9 display equations
 render as `js-display-math`, 0 as `<pre lang="math">`, 10 `<img>` tags; RESULTS.md 10 `<img>` tags.
 Inline-math backslash-punctuation grep clean in both.
+
+## 2026-07-25 — all ten figures rebuilt colour-vision-deficiency-safe (CLAUDE.md rule 13)
+
+**No scientific result changed.** Every number in RESULTS.md and REPORT.md is byte-identical to the
+previous entry: the three analysis scripts were re-run after the plotting edits and
+`results/s1_classification.json`, `results/s3_s4_regions.json` and `results/s6_later_layers.json`
+each `diff` clean against their previous versions. This entry is about figure accessibility and the
+captions that describe the figures.
+
+**Why** — the previous figures violated CLAUDE.md rule 13, which is a hard requirement because the
+operator of this project has red-green colour deficiency. Concretely: the Stage-1 category palette used
+green (`#54A24B`) against orange; the C2 control histogram used matplotlib `C2`/`C3`, i.e. green
+against red, as its only distinguishing channel; the segment-width threshold line was red and the
+box plot's median/mean were the default orange/green; `s4_region_membership` marked its two marker
+series black-vs-red; the later-layer figure encoded `h1`/`h2`/`h3` as `C0`/`C1`/`C2` (blue/orange/
+green); and `tab10` — which contains both a green and a red — encoded digit identity in three figures.
+Several series were also identified by colour alone, with no linestyle, marker or hatch.
+
+**Changed (figures)** — added `experiments/cvd_style.py` holding the mandated green-free palette
+(`#0072B2`, `#D55E00`, `#CC79A7`, `#56B4E9`, `#E69F00`) plus shared category/hatch/marker maps, and
+rewired all four scripts to it. Every series now carries a second, non-colour channel:
+- `s1_transition_matrix.png` — categories drawn as hatched cells (`//` third-class only, `\\`
+  sub-plateau only, `xx` both, unhatched pale = neither); the third-digit label is now dark text with a
+  white stroke so it stays legible over hatching.
+- `s1_mean_curves_grid.png` — category encoded by linestyle *and* band hatch as well as hue.
+- `s1_class_composition.png` and the third-digit panel of `s1_seed_agreement.png` — the ten digits
+  moved from `tab10` to the sequential `cividis` ramp (CVD-designed, monotone in grayscale), with the
+  digit printed inside every band/cell large enough to hold it, so identity never rests on hue.
+- `s1_segment_widths.png` — threshold line now black dashed; median/mean/flier styles set explicitly.
+- `s4_distance_view.png`, `s4_pca_view.png` — the endpoint-a / endpoint-b / third-digit-z series now
+  differ by linestyle and marker shape, and are role-labelled in the legend.
+- `s4_region_membership.png`, `s5_controls.png`, `s6_later_layers.png` — paired bars distinguished by
+  hatch, marker series by shape and linestyle; the red-vs-green C2 histogram and the blue/orange/green
+  layer encoding are gone.
+
+**Changed (deliverables)** — all ten captions in BOTH RESULTS.md and REPORT.md rewritten so that no
+series is identified by its colour, as rule 13 requires: they now name the hatch, linestyle or marker
+("the dashed triangle line", "the `//`-hatched bars"). Body prose that referred to "the black
+diamonds", "the red triangles", "a wedge of a third colour" and "each row is dominated by one or two
+colours" was rewritten the same way. RESULTS.md's figure block additionally gained one motivating
+sentence before each figure (rule 12) instead of ten captions in a row. REPORT.md gained a short
+**Figure conventions** subsection at the end of Methods and lists `cvd_style.py` under
+Reproducibility.
+
+**Verification** — REPORT.md re-checked through `POST api.github.com/markdown`: 9/9 display equations
+render as `js-display-math`, 0 as `<pre lang="math">`, 10 `<img>` tags; RESULTS.md 10 embedded images;
+no bare `(plots/*.png)` path outside an `![...]()` embed in either file; inline-math
+backslash-punctuation grep clean in both; the only remaining occurrences of "red"/"green" in either
+file are the sentences stating that the figures avoid a red-green contrast.

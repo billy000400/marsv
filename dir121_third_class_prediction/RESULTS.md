@@ -130,25 +130,51 @@ third-class labels clear leave-one-out at 100/100.
 
 ## Figures
 
-![Ten-by-ten matrix of all 45 digit transitions at seed 0. Rows are endpoint digit a, columns endpoint digit b; diagonal blank. Cell colour = category (grey neither, blue stable third-class only, orange sub-plateau only — never occurs, green both); white number = dominant third digit z.](plots/s1_transition_matrix.png)
+Figures encode every distinction with a hatch, linestyle or marker as well as a hue, so they stay
+readable in grayscale and under red-green colour deficiency; captions name those channels, never a
+colour.
 
-![All 45 mean d(alpha) curves at seed 0. In each panel x = alpha (0 = first endpoint image, 1 = second), y = logit-space relative endpoint distance d(alpha) in [0,1]; thick line = pointwise mean over 100 image pairs, shaded band = ±1 standard deviation across pairs; dotted diagonal = reference d = alpha; grey horizontal bar = detected sub-plateau shelf. Line colour encodes category as in the matrix.](plots/s1_mean_curves_grid.png)
+**The census in one picture** — which digit pairs show which phenomenon:
 
-![Predicted-class composition for the 19 stable third-class transitions at seed 0. x = alpha from 0 to 1; y = fraction of the 100 image pairs predicting each digit at that alpha, stacked to 1; colours are predicted digits 0-9 per the shared legend.](plots/s1_class_composition.png)
+![Ten-by-ten matrix of all 45 digit transitions at seed 0. Rows are endpoint digit a, columns endpoint digit b; diagonal blank. Cell fill and hatch = category, per the legend below the matrix (unhatched pale = neither, "//" = stable third-class only, "\\" = sub-plateau only — never occurs, "xx" = both); the number printed in a cell = dominant third digit z.](plots/s1_transition_matrix.png)
 
-![Per-pair third-class segment width, 19 stable transitions at seed 0. x = transition and its dominant third digit z; y = longest run of consecutive alpha points predicted z (out of 50; 0 = that path never predicts z). Boxes = interquartile range over the 100 pairs, orange line = median, green triangle = mean, circles = outlying pairs; dashed red line = frozen median-run threshold of 3.](plots/s1_segment_widths.png)
+**The primary evidence for the sub-plateau label** — the 100-pair mean curves themselves:
 
-![Activation-region membership per transition at seed 0. x = the 19 stable third-class transitions with their z. Bars (left axis, fraction 0-1): blue = fraction of segment points inside the real-z region, orange = fraction of paths with a majority of segment points inside. Markers (right axis, normalized distance ratio): black diamonds = median ratio to z on the segment, red triangles = median ratio to the nearest of all ten digits; dotted line at ratio 1.](plots/s4_region_membership.png)
+![All 45 mean d(alpha) curves at seed 0. In each panel x = alpha (0 = first endpoint image, 1 = second), y = logit-space relative endpoint distance d(alpha) in [0,1]; thick line = pointwise mean over 100 image pairs, shaded band = ±1 standard deviation across pairs; dotted diagonal = reference d = alpha; shaded horizontal bar = detected sub-plateau shelf. Linestyle and band hatch encode the category as in the matrix (solid unhatched = neither, solid "//" = stable third-class only, dash-dot "xx" = both); each panel title also names the dominant third digit and its prevalence where the transition is stable.](plots/s1_mean_curves_grid.png)
 
-![Distance from the interpolated h1 activation to each real digit region, 19 stable transitions at seed 0. x = alpha from 0 to 1; y = normalized distance ratio on a log scale, averaged over 100 pairs. Coloured lines = ratio to endpoint digit a, endpoint digit b, and third digit z (labelled in each panel legend). Dashed line = ratio 1 (held-out 95th percentile). Grey band = alpha range where a majority of paths predict z.](plots/s4_distance_view.png)
+**Is the third-class prediction spread over the 100 pairs or driven by outliers?** The composition
+plot shows how many pairs predict what at each alpha; the box plot shows the per-pair segment widths:
 
-![Two-dimensional PCA view of the three highest-prevalence transitions (0→1 z=7, 6→9 z=8, 3→4 z=7). Axes = first two principal components of real h1 activations, fitted only on real images of the two endpoint digits and the third digit (arbitrary units). Faint dots = real training images by digit, stars = per-digit means, thin grey lines = twelve interpolation paths, black crosses = interpolation points predicted as z. Visualization only; the conclusion comes from the full 200 coordinates.](plots/s4_pca_view.png)
+![Predicted-class composition for the 19 stable third-class transitions at seed 0. x = alpha from 0 to 1; y = fraction of the 100 image pairs predicting each digit at that alpha, stacked to 1. Each band is one predicted digit 0-9 on a light-to-dark sequential ramp (digit 0 lightest, digit 9 darkest, per the shared legend); every sufficiently wide band also has its digit printed inside it.](plots/s1_class_composition.png)
 
-![Controls on the h1 activation-region measure. Left (C1): histogram over 7,000 held-out real test images of the normalized distance ratio to their own digit region; x = ratio, y = image count, dashed line at 1. Middle (C3): x = digit c, y = fraction of within-digit (c→c) interpolation points with ratio < 1 to digit c. Right (C2): histogram of the fraction of endpoint-predicted points inside that endpoint digit's region, one entry per endpoint per transition (38 values); green = endpoint plateau only, red = all endpoint-predicted points.](plots/s5_controls.png)
+![Per-pair third-class segment width, 19 stable transitions at seed 0. x = transition and its dominant third digit z; y = longest run of consecutive alpha points predicted z (out of 50; 0 = that path never predicts z). Boxes = interquartile range over the 100 pairs, line inside the box = median, diamond marker = mean, open circles = outlying pairs; dashed horizontal line = frozen median-run threshold of 3.](plots/s1_segment_widths.png)
 
-![Later-layer follow-up over the 19 stable third-class transitions at seed 0, hook points h1 (blue), h2 (orange), h3 (green). Top: x = transition, y = fraction of third-class segment points inside the real-z activation region. Middle: x = transition, y = median normalized distance ratio on the segment (log scale); solid lines with circles = distance to the predicted digit z, dashed with triangles = distance to the nearest of all ten digits; dotted line at 1. Bottom: x = transition, y = mean number of the ten digit regions containing a segment point (1 ideal, 10 vacuous); dotted line at 1.](plots/s6_later_layers.png)
+**The central result** — how much of each third-class segment lies inside the region of the digit it
+is predicted to be, and how far it actually is from that digit and from the nearest one:
 
-![Cross-seed comparison over all 45 transitions. Top: stable third-class label, transitions on x, seeds as rows, black = label true. Middle: same for the stable sub-plateau label. Bottom: dominant third digit z where the transition is stable third-class, digit printed and colour-coded; white = not stable at that seed.](plots/s1_seed_agreement.png)
+![Activation-region membership per transition at seed 0. x = the 19 stable third-class transitions with their z. Bars (left axis, fraction 0-1): "//"-hatched = fraction of segment points inside the real-z region, "\\"-hatched = fraction of paths with a majority of segment points inside. Marker lines (right axis, normalized distance ratio): solid line with diamonds = median ratio to z on the segment, dashed line with triangles = median ratio to the nearest of all ten digits; dotted line at ratio 1.](plots/s4_region_membership.png)
+
+**Where along the path is the network closest to each digit?** This is the full-space (200-coordinate)
+view that the verdict rests on:
+
+![Distance from the interpolated h1 activation to each real digit region, 19 stable transitions at seed 0. x = alpha from 0 to 1; y = normalized distance ratio on a log scale, averaged over 100 pairs. Three lines per panel: ratio to endpoint digit a (solid, circles), to endpoint digit b (dashed, squares), to third digit z (dash-dot, triangles), each labelled with its digit in the panel legend. Dashed horizontal line = ratio 1 (held-out 95th percentile). Shaded vertical band = alpha range where a majority of paths predict z.](plots/s4_distance_view.png)
+
+**A visualization-only sanity check on the geometry** (the conclusion comes from the full space, not
+this projection):
+
+![Two-dimensional PCA view of the three highest-prevalence transitions (0→1 z=7, 6→9 z=8, 3→4 z=7). Axes = first two principal components of real h1 activations, fitted only on real images of the two endpoint digits and the third digit (arbitrary units). Faint markers = real training images, one shape per digit (circles = endpoint a, squares = endpoint b, triangles = third digit z, named in each legend); stars = per-digit means; thin faint lines = twelve interpolation paths; "x" markers = interpolation points predicted as z. Visualization only; the conclusion comes from the full 200 coordinates.](plots/s4_pca_view.png)
+
+**Is the ruler itself trustworthy?** The four controls:
+
+![Controls on the h1 activation-region measure. Left (C1): histogram over 7,000 held-out real test images of the normalized distance ratio to their own digit region; x = ratio, y = image count, dashed line at 1. Middle (C3): x = digit c, y = fraction of within-digit (c→c) interpolation points with ratio < 1 to digit c. Right (C2): histogram of the fraction of endpoint-predicted points inside that endpoint digit's region, one entry per endpoint per transition (38 values); "//"-hatched bars = endpoint plateau only, "\\"-hatched bars = all endpoint-predicted points, as labelled in the panel legend.](plots/s5_controls.png)
+
+**Does the match appear deeper in the network?** The same frozen segments scored at `h1`, `h2`, `h3`:
+
+![Later-layer follow-up over the 19 stable third-class transitions at seed 0, comparing hook points h1, h2 and h3 — distinguished by hatch in the bar panels (h1 "//", h2 "\\", h3 "xx") and by marker in the line panel (h1 circles, h2 squares, h3 triangles), all named in the legends. Top: x = transition, y = fraction of third-class segment points inside the real-z activation region. Middle: x = transition, y = median normalized distance ratio on the segment (log scale); per hook point, solid line = distance to the predicted digit z, dashed line with open markers = distance to the nearest of all ten digits; dotted line at 1. Bottom: x = transition, y = mean number of the ten digit regions containing a segment point (1 ideal, 10 vacuous); dotted line at 1.](plots/s6_later_layers.png)
+
+**Does any of this replicate across independently trained networks?**
+
+![Cross-seed comparison over all 45 transitions. Top: stable third-class label, transitions on x, seeds as rows, filled cell = label true. Middle: same for the stable sub-plateau label. Bottom: dominant third digit z where the transition is stable third-class — the digit is printed in the cell and the shading repeats it on a light-to-dark ramp (digit 0 lightest); blank = not stable at that seed.](plots/s1_seed_agreement.png)
 
 ## Headline
 

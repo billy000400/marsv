@@ -18,7 +18,8 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch
+import matplotlib.patheffects as pe
+from matplotlib.patches import Patch, Rectangle
 
 HERE = '/workspace/marsv_agent_haoyang/dir121_third_class_prediction'
 TAU_FLAT, L_MIN, LEVEL_LO, LEVEL_HI = 0.05, 5, 0.15, 0.85
@@ -185,9 +186,10 @@ def main():
 
 
 # --------------------------------------------------------------------- figures
-CAT_COLORS = {0: '#e8e8e8', 1: '#4C78A8', 2: '#F58518', 3: '#54A24B'}
-CAT_NAMES = {0: 'neither', 1: 'stable third-class only',
-             2: 'stable sub-plateau only', 3: 'both'}
+from cvd_style import (CAT_COLORS, CAT_HATCH, CAT_LS, CAT_NAMES, CVD,
+                       digit_color, digit_text_color, use_cvd)
+
+use_cvd()
 PLOTS = os.path.join(HERE, 'plots')
 
 
@@ -206,23 +208,27 @@ def make_figures(z, table, trans, pred, d, alpha):
         M[r['a'], r['b']] = c
         M[r['b'], r['a']] = c
     fig, ax = plt.subplots(figsize=(7.4, 6.4))
-    rgb = np.ones((10, 10, 3))
-    for i in range(10):
+    ax.imshow(np.ones((10, 10, 3)))
+    for i in range(10):                      # hatch too, so it reads in grayscale
         for j in range(10):
             if not np.isnan(M[i, j]):
-                rgb[i, j] = matplotlib.colors.to_rgb(CAT_COLORS[int(M[i, j])])
-    ax.imshow(rgb)
+                c = int(M[i, j])
+                ax.add_patch(Rectangle((j - 0.5, i - 0.5), 1, 1,
+                                       facecolor=CAT_COLORS[c], hatch=CAT_HATCH[c],
+                                       edgecolor='w', lw=0.6))
     for r in table:
         e = r['seeds'][0]
         if e['stable_third']:
             for (i, j) in ((r['a'], r['b']), (r['b'], r['a'])):
                 ax.text(j, i, str(e['z_dominant']), ha='center', va='center',
-                        fontsize=9, color='w', fontweight='bold')
+                        fontsize=9, color='k', fontweight='bold',
+                        path_effects=[pe.withStroke(linewidth=2.4, foreground='w')])
     ax.set_xticks(range(10)); ax.set_yticks(range(10))
     ax.set_xlabel('endpoint digit b'); ax.set_ylabel('endpoint digit a')
     ax.set_title('Digit-transition census (seed 0, step 30k, 100 pairs each)\n'
                  'cell text = dominant third digit z', fontsize=11)
-    ax.legend(handles=[Patch(facecolor=CAT_COLORS[c], label=CAT_NAMES[c]) for c in range(4)],
+    ax.legend(handles=[Patch(facecolor=CAT_COLORS[c], hatch=CAT_HATCH[c],
+                             edgecolor='0.4', label=CAT_NAMES[c]) for c in range(4)],
               loc='upper center', bbox_to_anchor=(0.5, -0.09), ncol=2, fontsize=9)
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, 's1_transition_matrix.png'), dpi=150,
@@ -235,10 +241,12 @@ def make_figures(z, table, trans, pred, d, alpha):
         ax = axes[k // 9, k % 9]
         e = r['seeds'][0]
         m, sd = d[0, k].mean(0), d[0, k].std(0)
+        cat = category(e)
+        col = CAT_COLORS[cat] if cat else '0.35'
         ax.plot([0, 1], [0, 1], ls=':', c='0.75', lw=1)
-        ax.plot(alpha, m, c=CAT_COLORS[category(e)] if category(e) else '0.35', lw=2)
+        ax.plot(alpha, m, c=col, ls=CAT_LS[cat], lw=2)
         ax.fill_between(alpha, np.clip(m - sd, 0, 1), np.clip(m + sd, 0, 1),
-                        color=CAT_COLORS[category(e)] if category(e) else '0.35', alpha=0.22)
+                        color=col, alpha=0.22, hatch=CAT_HATCH[cat], edgecolor=col, lw=0)
         if e['shelf']:
             ax.axhspan(e['shelf']['level'] - 0.025, e['shelf']['level'] + 0.025,
                        xmin=e['shelf']['alpha_lo'], xmax=e['shelf']['alpha_hi'],
@@ -255,7 +263,8 @@ def make_figures(z, table, trans, pred, d, alpha):
     fig.suptitle('Mean logit-space relative endpoint distance over 100 image pairs, all 45 '
                  'digit transitions (seed 0, step 30k); band = ±1 std across pairs; '
                  'grey bar = detected sub-plateau shelf', fontsize=13)
-    fig.legend(handles=[Patch(facecolor=CAT_COLORS[c], label=CAT_NAMES[c]) for c in range(4)],
+    fig.legend(handles=[Patch(facecolor=CAT_COLORS[c], hatch=CAT_HATCH[c],
+                             edgecolor='0.4', label=CAT_NAMES[c]) for c in range(4)],
                loc='lower center', ncol=4, fontsize=10)
     fig.tight_layout(rect=[0, 0.03, 1, 0.965])
     fig.savefig(os.path.join(PLOTS, 's1_mean_curves_grid.png'), dpi=110)
@@ -275,7 +284,16 @@ def make_figures(z, table, trans, pred, d, alpha):
             ax = axes[n // ncol, n % ncol]
             ax.axis('on')
             comp = np.stack([(pred[0, k] == c).mean(0) for c in range(10)])   # [10,50]
-            ax.stackplot(alpha, comp, colors=[plt.cm.tab10(c) for c in range(10)])
+            ax.stackplot(alpha, comp, colors=[digit_color(c) for c in range(10)])
+            # print the digit inside every band wide enough to hold it, so the
+            # identity of a band never depends on reading its colour
+            lo = np.vstack([np.zeros(n_pts), np.cumsum(comp, 0)[:-1]])
+            for c in range(10):
+                t = int(np.clip(np.argmax(comp[c]), 3, n_pts - 4))   # keep off the frame
+                if comp[c, t] > 0.14:
+                    ax.text(alpha[t], lo[c, t] + comp[c, t] / 2, str(c),
+                            ha='center', va='center', fontsize=8,
+                            color=digit_text_color(c), fontweight='bold')
             ax.set_xlim(0, 1); ax.set_ylim(0, 1)
             ax.set_title(f"{r['transition']}   z={e['z_dominant']}", fontsize=10)
             if n // ncol == nrow - 1:
@@ -284,7 +302,7 @@ def make_figures(z, table, trans, pred, d, alpha):
                 ax.set_ylabel('fraction of 100 paths', fontsize=9)
         fig.suptitle('Predicted-class composition across the interpolation, stable '
                      'third-class transitions (seed 0)', fontsize=12)
-        fig.legend(handles=[Patch(facecolor=plt.cm.tab10(c), label=f'predicted {c}')
+        fig.legend(handles=[Patch(facecolor=digit_color(c), label=f'predicted {c}')
                             for c in range(10)],
                    loc='lower center', ncol=10, fontsize=9)
         fig.tight_layout(rect=[0, 0.045, 1, 0.94])
@@ -298,8 +316,13 @@ def make_figures(z, table, trans, pred, d, alpha):
             zz = e['z_dominant']
             data.append([third_runs(p, r['a'], r['b']).get(zz, 0) for p in pred[0, k]])
             labels.append(f"{r['transition']}\nz={zz}")
-        ax.boxplot(data, tick_labels=labels, showmeans=True)
-        ax.axhline(MED_RUN, ls='--', c='r', lw=1,
+        ax.boxplot(data, tick_labels=labels, showmeans=True,
+                   medianprops=dict(color=CVD[0], lw=1.6),
+                   meanprops=dict(marker='D', markerfacecolor=CVD[1],
+                                  markeredgecolor='k', markersize=5),
+                   flierprops=dict(marker='o', markersize=3, markerfacecolor='none',
+                                   markeredgecolor='0.45'))
+        ax.axhline(MED_RUN, ls='--', c='k', lw=1.2,
                    label=f'frozen median-run threshold = {MED_RUN}')
         ax.set_ylabel('longest run of consecutive $\\alpha$ points predicted $z$\n'
                       '(0 = that path never predicts $z$)')
@@ -333,12 +356,14 @@ def make_figures(z, table, trans, pred, d, alpha):
         for si, s in enumerate((0, 1, 2)):
             if r['seeds'][s]['stable_third']:
                 Z[k, si] = r['seeds'][s]['z_dominant']
-    ax.imshow(np.ma.masked_invalid(Z.T), aspect='auto', cmap='tab10', vmin=-0.5, vmax=9.5)
+    ax.imshow(np.ma.masked_invalid(Z.T), aspect='auto', cmap='cividis',
+              vmin=-0.5, vmax=9.5)
     for k in range(len(table)):
         for si in range(3):
             if not np.isnan(Z[k, si]):
-                ax.text(k, si, str(int(Z[k, si])), ha='center', va='center',
-                        fontsize=7, color='w', fontweight='bold')
+                zz = int(Z[k, si])
+                ax.text(k, si, str(zz), ha='center', va='center',
+                        fontsize=7, color=digit_text_color(zz), fontweight='bold')
     ax.set_yticks(range(3)); ax.set_yticklabels([f'seed {s}' for s in (0, 1, 2)])
     ax.set_xticks(range(len(table)))
     ax.set_xticklabels([r['transition'] for r in table], rotation=90, fontsize=6)

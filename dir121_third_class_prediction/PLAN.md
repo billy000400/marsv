@@ -263,13 +263,20 @@ End every `JOURNAL.md` entry with:
   segment point is inside 5.8 of the 10 regions there, and the predicted digit is the *nearest* region
   for only 11.7% of points (chance is 12.5%).
 
-Code: `experiments/s1_census.py`, `s1_analyze.py`, `s3_s4_regions.py`, `s6_later_layers.py`.
+Code: `experiments/s1_census.py`, `s1_analyze.py`, `s3_s4_regions.py`, `s6_later_layers.py`,
+`cvd_style.py` (shared colour-vision-deficiency-safe figure palette).
 Numbers: `results/s1_census.npz`, `s1_classification.{json,csv}`, `s3_s4_regions.json`,
 `s6_later_layers.json`. Ten figures in `plots/`, all embedded as rendered images in both RESULTS.md
 and REPORT.md; REPORT.md verified through the GitHub markdown API (9/9 display equations render).
 
+- **Figure accessibility (CLAUDE.md rule 13).** All ten figures were rebuilt green-free with a second
+  identity channel (hatch / linestyle / marker) on every series, and all captions and prose in both
+  deliverables now name that channel instead of a colour. The three analysis scripts were re-run and
+  every result JSON is identical to before, so no number changed.
+
 Every item of the success criterion above is present in the deliverables. No model was retrained and
-no file in direction 12 was modified. `STOP` written (zero unaddressed feedback files at that time).
+no file in direction 12 was modified. `STOP` written and verified present on disk (zero unaddressed
+feedback files — the direction root was re-listed immediately before writing it).
 
 ## Next step
 

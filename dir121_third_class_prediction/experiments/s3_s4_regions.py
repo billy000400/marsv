@@ -33,6 +33,9 @@ from plateau_protocol import slerp_batch, load_state_model, N_POINTS, N_TEST_POO
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from s1_analyze import third_runs
+from cvd_style import CVD, MARKERS, use_cvd
+
+use_cvd()
 
 HERE = '/workspace/marsv_agent_haoyang/dir121_third_class_prediction'
 DIR12 = '/workspace/marsv_agent_haoyang/dir12_plateau_during_training'
@@ -221,11 +224,16 @@ def main():
         Xm = X.mean(0)
         _u, _s, V = torch.pca_lowrank(X - Xm, q=2)
         proj = lambda T: ((T - Xm) @ V[:, :2]).cpu().numpy()
-        for c in digits:
+        # role-based encoding (endpoint a / endpoint b / third digit z), each with
+        # its own marker as well as its own colour
+        for i, c in enumerate(digits):
             p = proj(Hs[c])
-            ax.scatter(p[:, 0], p[:, 1], s=3, alpha=0.16, color=plt.cm.tab10(c))
+            ax.scatter(p[:, 0], p[:, 1], s=4, alpha=0.16, color=CVD[i],
+                       marker=MARKERS[i])
             ax.scatter(*proj(mu[c:c + 1])[0], marker='*', s=340, edgecolor='k',
-                       color=plt.cm.tab10(c), zorder=5, label=f'real digit {c} (mean ★)')
+                       color=CVD[i], zorder=5,
+                       label=f"real digit {c} ({['endpoint a', 'endpoint b', 'third digit z'][i]}"
+                             f", marker {MARKERS[i]}, mean ★)")
         path = slerp_batch(h1_of(model, test_x[idx_a[k]][:12]),
                            h1_of(model, test_x[idx_b[k]][:12]), N_POINTS)
         pp = proj(path.reshape(-1, 200)).reshape(12, N_POINTS, 2)
@@ -273,10 +281,11 @@ def figures(curves, out, c3, R_held, held_lab, alpha):
     for n, key in enumerate(keys):
         cv = curves[key]
         ax = axes[n // ncol, n % ncol]; ax.axis('on')
-        for c, style, lab in ((cv['a'], '-', 'endpoint a'), (cv['b'], '-', 'endpoint b'),
-                              (cv['z'], '-', 'third digit z')):
-            ax.plot(alpha, cv['R_mean'][:, c], style, lw=2,
-                    color=plt.cm.tab10(c), label=f'{lab} = {c}')
+        for i, (c, lab) in enumerate(((cv['a'], 'endpoint a'), (cv['b'], 'endpoint b'),
+                                      (cv['z'], 'third digit z'))):
+            ax.plot(alpha, cv['R_mean'][:, c], ls=['-', '--', '-.'][i], lw=2,
+                    color=CVD[i], marker=MARKERS[i], markevery=8, ms=4,
+                    label=f'{lab} = {c}')
         ax.axhline(1.0, ls='--', c='k', lw=1)
         ax.fill_between(alpha, 0, 1, where=cv['z_frac'] > 0.5, color='0.8',
                         alpha=0.5, transform=ax.get_xaxis_transform())
@@ -298,8 +307,10 @@ def figures(curves, out, c3, R_held, held_lab, alpha):
     fig, ax = plt.subplots(figsize=(0.55 * len(keys) + 3.5, 4.6))
     x = np.arange(len(keys))
     ax.bar(x - 0.2, [o['point_frac_in_z_region'] for o in out], 0.4,
+           color=CVD[0], hatch='//', edgecolor='w',
            label='fraction of segment POINTS inside the real-$z$ region')
     ax.bar(x + 0.2, [o['path_frac_majority_in_z_region'] for o in out], 0.4,
+           color=CVD[1], hatch='\\\\', edgecolor='w',
            label='fraction of PATHS with a majority of segment points inside')
     ax.set_xticks(x)
     ax.set_xticklabels([f"{k}\nz={o['z']}" for k, o in zip(keys, out)], fontsize=8)
@@ -309,10 +320,10 @@ def figures(curves, out, c3, R_held, held_lab, alpha):
                  'digit they are predicted to be?\n(inside = ratio < 1 AND closest of all '
                  'ten digits)', fontsize=11)
     ax2 = ax.twinx()
-    ax2.plot(x, [o['median_ratio_to_z_on_segment'] for o in out], 'kD-', ms=5,
-             label='median ratio to $z$ on the segment')
-    ax2.plot(x, [o['median_min_ratio_on_segment'] for o in out], 'rv--', ms=5,
-             label='median ratio to the NEAREST of all ten digits')
+    ax2.plot(x, [o['median_ratio_to_z_on_segment'] for o in out], 'D-', c='k', ms=5,
+             label='median ratio to $z$ on the segment (solid, diamonds)')
+    ax2.plot(x, [o['median_min_ratio_on_segment'] for o in out], '^--', c=CVD[2], ms=5,
+             label='median ratio to the NEAREST of all ten digits (dashed, triangles)')
     ax2.axhline(1, ls=':', c='k', lw=1)
     ax2.set_ylabel('normalized distance ratio (markers, right axis)')
     ax2.set_ylim(0, None)
@@ -327,13 +338,14 @@ def figures(curves, out, c3, R_held, held_lab, alpha):
     fig, axes = plt.subplots(1, 3, figsize=(15, 4.4))
     ax = axes[0]
     own = R_held[np.arange(len(held_lab)), held_lab].cpu().numpy()
-    ax.hist(own, bins=60, color='C0')
+    ax.hist(own, bins=60, color=CVD[0])
     ax.axvline(1, ls='--', c='k')
     ax.set_xlabel('normalized distance ratio to its OWN digit region')
     ax.set_ylabel('held-out real test images')
     ax.set_title('C1 — real held-out images vs their own region', fontsize=10)
     ax = axes[1]
-    ax.bar(range(10), [c3[c]['frac_points_inside_own_region'] for c in range(10)], color='C1')
+    ax.bar(range(10), [c3[c]['frac_points_inside_own_region'] for c in range(10)],
+           color=CVD[0], hatch='//', edgecolor='w')
     ax.set_xticks(range(10)); ax.set_xlabel('digit c (within-digit interpolation c$\\to$c)')
     ax.set_ylabel('fraction of interpolation points\nwith ratio < 1 to digit c')
     ax.set_ylim(0, 1.05)
@@ -341,9 +353,14 @@ def figures(curves, out, c3, R_held, held_lab, alpha):
     ax = axes[2]
     ends = np.array([o['control_endpoint_portion_in_region'] for o in out]).ravel()
     endp = np.array([o['control_endpoint_plateau_in_region'] for o in out]).ravel()
-    ax.hist([endp, ends], bins=10, range=(0, 1), color=['C2', 'C3'],
-            label=[r'endpoint plateau only ($\alpha\leq0.1$ / $\geq0.9$)',
-                   'all endpoint-predicted points'])
+    _n, _b, patches = ax.hist([endp, ends], bins=10, range=(0, 1),
+                              color=[CVD[0], CVD[1]], edgecolor='w',
+                              label=[r'endpoint plateau only ($\alpha\leq0.1$ / $\geq0.9$),'
+                                     ' hatch //',
+                                     'all endpoint-predicted points, hatch \\\\'])
+    for hh, group in zip(('//', '\\\\'), patches):
+        for p in group:
+            p.set_hatch(hh)
     ax.set_xlabel('fraction of endpoint-predicted points inside\nthat endpoint digit\'s region')
     ax.set_ylabel('count (2 endpoints x 19 transitions)')
     ax.set_title('C2 — endpoint-predicted portions vs endpoint region', fontsize=10)

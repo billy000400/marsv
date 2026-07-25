@@ -31,7 +31,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from s3_s4_regions import (HERE, CKPT, DATA, PLOTS, N_REF_TRAIN, N_REF_TEST,
                            N_PER, STD_FLOOR, h1_of, normalized_dist, device)
 from s1_analyze import third_runs
+from cvd_style import CVD, HATCHES, MARKERS, use_cvd
 
+use_cvd()
 LAYERS = [1, 2, 3]                     # post-ReLU hidden layers; 1 == h1
 
 
@@ -180,7 +182,9 @@ def figure(out):
     for i, L in enumerate(LAYERS):
         d = out['layers'][f'h{L}']
         ax.bar(x + (i - 1) * 0.27, [t['point_frac_in_z_region'] for t in d['transitions']],
-               0.27, label=f"$h_{L}$ (pooled {d['pooled_point_frac_in_z_region']:.1%})")
+               0.27, color=CVD[i], hatch=HATCHES[i], edgecolor='w',
+               label=f"$h_{L}$ (hatch {HATCHES[i]}, pooled "
+                     f"{d['pooled_point_frac_in_z_region']:.1%})")
     ax.set_xticks(x); ax.set_xticklabels(keys, fontsize=8)
     ax.set_ylabel('fraction of third-class segment points\ninside the real-$z$ activation region')
     ax.set_xlabel('stable third-class transition (seed 0)')
@@ -190,11 +194,14 @@ def figure(out):
     ax = axes[1]
     for i, L in enumerate(LAYERS):
         d = out['layers'][f'h{L}']
+        # layer -> colour + marker; quantity -> linestyle (solid vs dashed)
         ax.plot(x, [t['median_ratio_to_z_on_segment'] for t in d['transitions']],
-                'o-', color=f'C{i}', label=f'$h_{L}$: distance to predicted digit $z$')
+                ls='-', marker=MARKERS[i], color=CVD[i],
+                label=f'$h_{L}$ (marker {MARKERS[i]}), solid: distance to predicted digit $z$')
         ax.plot(x, [t['median_min_ratio_on_segment'] for t in d['transitions']],
-                'v--', color=f'C{i}', alpha=0.55,
-                label=f'$h_{L}$: distance to the nearest of all ten digits')
+                ls='--', marker=MARKERS[i], mfc='none', color=CVD[i], alpha=0.7,
+                label=f'$h_{L}$ (marker {MARKERS[i]}), dashed: distance to the nearest '
+                      'of all ten digits')
     ax.axhline(1, ls=':', c='k', lw=1.2)
     ax.set_yscale('log')
     ax.set_xticks(x); ax.set_xticklabels(keys, fontsize=8)
@@ -209,7 +216,8 @@ def figure(out):
         d = out['layers'][f'h{L}']
         ax.bar(x + (i - 1) * 0.27,
                [t['mean_n_regions_containing_point'] for t in d['transitions']], 0.27,
-               label=f'$h_{L}$')
+               color=CVD[i], hatch=HATCHES[i], edgecolor='w',
+               label=f'$h_{L}$ (hatch {HATCHES[i]})')
     ax.axhline(1, ls=':', c='k', lw=1.2)
     ax.set_xticks(x); ax.set_xticklabels(keys, fontsize=8)
     ax.set_ylabel('mean number of the ten digit regions\nthat contain the segment point')
