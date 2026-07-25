@@ -335,3 +335,55 @@ re-written. If new `human_feedback*.md`/`*REVIEW*` arrives, delete `STOP`, addre
 
 On track? yes — plan COMPLETE (100%) plus operator feedback #3 fully addressed with a new experiment,
 4 new figures and a discussion section in both deliverables; blocker: none.
+
+## 2026-07-25 (10) — CVD compliance sweep across all figures + context control (576 pairs)
+
+**Did.** Feedback check first: the three `human_feedback_*.txt.addressed.md` files are all addressed;
+nothing unaddressed. `STOP` was absent from disk again (same pattern as previous relaunches). Plan
+stages S1–S8 were already complete, so this iteration did the two highest-value things left.
+
+1. **Hard-rule fix (CLAUDE.md rule 13).** Audited every figure embedded in the deliverables and found
+   real red-green violations: the Figure-9 panels drew local complexity for train/test/**random** in
+   matplotlib's C0/C1/**C2 (green)** against a **red** dashed adversarial-accuracy line; the
+   comma-sweep character classes were encoded **green** (upper-case) vs **red** (punctuation/digit)
+   with colour as the *only* channel; `layerwise_emergence.png` drew the final-logit curve in **red**
+   over a viridis ramp. Wrote `experiments/cvd_style.py` and patched the five plot scripts plus a new
+   `plot_training_curves.py` (so `training_curves.png` could be redrawn from saved history instead of
+   retraining). Every series now also carries a linestyle, marker or hatch; sequential ramps are
+   viridis/cividis. Re-ran everything; `run_matthew.py` reproduced **bit-exactly** (14/40, median w
+   0.309), so no result moved. Rewrote every caption in both deliverables so no series is named by
+   colour, and added a "Figure conventions" Methods subsection.
+2. **Context control (new experiment).** The deliverables' top caveat was that every plateau number
+   came from one shared context (`"The house was "`) whose comma endpoint is implausible there.
+   `experiments/context_sweep.py` repeats the comma→all-64-characters sweep in **8 further
+   64-character contexts** from held-out text, picked to span p(comma) from 5e-20 to 0.997 → 576
+   pairs, same settings, all implementation checks passing.
+
+**Learned.** The shape claim got *stronger* and the correlation claim got *weaker*, which is exactly
+what a control is for. **0 of 576** curves is near-linear and per-context median widths sit in a tight
+band 0.313–0.436, so plateau-shaped response is a property of the model, not of the chosen context.
+But the "sharper for characters the model expects" correlation is −0.74 only in the context we happened
+to report first: across nine contexts it is negative every time (sign test p = 0.004, 7/9 individually
+significant) with median **−0.41**, range −0.05 … −0.74, pooled −0.23. I curated that into both
+deliverables as a range rather than a point estimate, and added Limitation 5 about single-context
+correlations overstating effects. The implausible-endpoint caveat is retired: the context where a
+comma is 99.7% likely gives median width 0.330 vs the reference 0.340, and p(comma) does not predict
+sharpness across contexts (ρ = −0.32, p = 0.41, n = 9).
+
+**Assumptions logged (loop mode, could not ask).** (a) Re-downloaded the Tiny Shakespeare corpus (SHA-256
+matches `train_meta.json`/`train_meta_grok_char.json` exactly) rather than reconstructing the vocabulary
+from a checkpoint, so the new contexts are genuine held-out validation text; (b) `results/train_meta_grok_char.json`
+is truncated by the known post-run save crash, so the corpus SHA was verified against the intact pilot
+metadata (same corpus) — rejected alternative: skipping the SHA check; (c) treated the context control
+as a *control on the operator-requested sweep*, not a new headline dataset, so it does not conflict with
+PLAN's "no new minimal-pair dataset in the primary analysis"; (d) reported the within-context correlation
+distribution plus a sign test rather than a single pooled ρ, because pooling mixes context-level width
+differences and attenuates the estimate (the pooled value is reported alongside, not instead).
+
+**Next step.** None outstanding — plan complete, zero unaddressed feedback, `STOP` re-written and
+verified on disk. If new `human_feedback*.md`/`*REVIEW*` arrives, delete `STOP`, address it, re-STOP
+when clean. Natural follow-ups if the direction is reopened: other interpolation positions (not just
+the final token) and a second model, the two scope limits the context control does not cover.
+
+On track? yes — plan COMPLETE (100%); this iteration fixed a hard CVD rule violation across all 14
+figures and added a 576-pair context control that refines one claim and strengthens another; blocker: none.

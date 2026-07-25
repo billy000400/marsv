@@ -285,3 +285,50 @@ Grokking-side result into the deliverables.
   unchanged (PLAN case 5)** — the sweep runs on the same non-grokking checkpoints.
 - Render checks: REPORT.md 9/9 `js-display-math`, 0 `<pre lang="math">`, 0 KaTeX errors, 0 inline-math
   hazards; all embedded plot paths are `![...]` images and exist on disk (both files).
+
+## 2026-07-25 (2) — CVD-safe figures (CLAUDE.md rule 13) + context control for the comma sweep
+
+- **All 14 deliverable figures regenerated to be readable with red-green colour deficiency.** New
+  `experiments/cvd_style.py` (green-free palette `#0072B2/#D55E00/#CC79A7/#56B4E9/#E69F00`, shared
+  reference-line styles). Patched `plot_fig9.py`, `plot_matthew_ckpts.py`, `plot_joint_timeline.py`,
+  `plot_comma_sweep.py`, `run_matthew.py` plot section, and added `plot_training_curves.py` (redraws
+  `plots/training_curves.png` from `results/train_hist.json` without retraining). Fixed violations:
+  local-complexity train/test/**random** used matplotlib C0/C1/**C2 green** against a **red** dashed
+  adversarial-accuracy line; the comma-sweep character classes used **green** (upper-case) vs **red**
+  (punctuation); the layerwise figure used a **red** final-logit line over a viridis ramp. Now every
+  series carries a linestyle, marker or hatch in addition to colour, and the sequential ramps are
+  viridis/cividis. **No numbers changed** — `run_matthew.py` was re-run end-to-end and reproduced
+  bit-exactly (14/40 plateaus, median w 0.309, identical depth medians).
+- **Captions in RESULTS.md and REPORT.md rewritten** so no series is identified by colour ("train
+  (blue), test (orange), random (green)" → "train (solid), test (dashed), random (dash-dot)", etc.),
+  and a new REPORT.md Methods subsection **"Figure conventions"** states the encoding rules.
+- **Corrected two stale labels:** the joint-timeline legend said "Fresh BPE (30k)" and REPORT.md's
+  Summary/Conclusion said "fresh 30k-step BPE run"; the BPE run was stopped at **10k** steps (as the
+  gate table already stated). Now consistent everywhere.
+- **New experiment — context control (`experiments/context_sweep.py`, `plot_context_sweep.py`).**
+  Repeats the operator-requested comma→every-other-character sweep in **8 further 64-character
+  contexts** drawn from held-out validation text, chosen to span the model's probability of a comma
+  in that slot (5e-20 … 0.997); 9 contexts × 64 pairs = **576 pairs** at step 30,000, interpolation
+  block 0, final logits, all other settings unchanged. Implementation checks pass (prefix_err 0.0,
+  endpoint err 1.3e-5, d(0) ≤ 1.3e-6, d(1) ≥ 0.999999). Raw `results/context_sweep_raw.npz`,
+  summary `results/context_sweep_summary.json`.
+- **New numbers.** 0/576 curves near-linear (w ≥ 0.70); per-context median width 0.313–0.436 (pooled
+  0.381); 11/576 meet the strict w ≤ 0.25 rule, 198/576 at w ≤ 0.35. Within-context Spearman ρ
+  (width vs the model's probability of the target character) is negative in **9/9** contexts (sign
+  test p = 0.004; individually p < 0.05 in 7/9) with median **−0.41**, range −0.05 … −0.74; pooled
+  over all 576 pairs ρ = −0.23. Median width vs p(comma) across contexts: ρ = −0.32, p = 0.41 (n = 9).
+- **Claim refined (old → new).** The comma sweep's "sharpness tracks the model's next-character
+  probability, **ρ = −0.74** (n = 64)" is now reported as a **range**: −0.74 is the strongest of nine
+  contexts; the typical context gives **−0.41** and the pooled value is −0.23. The direction is what
+  replicates. The shape claim is *strengthened* instead: "no pair is linear" goes from 0/64 in one
+  context to **0/576 across nine**. The standing caveat that the fixed comma endpoint is implausible
+  and might make every pair harder is **retired** — the context where a comma is 99.7% likely gives
+  median width 0.330 vs the reference context's 0.340, and p(comma) does not predict sharpness.
+- **New figures embedded in BOTH RESULTS.md and REPORT.md:** `plots/context_widths.png`,
+  `plots/context_rho.png`. RESULTS.md gains a "Does the plateau depend on the context?" section;
+  REPORT.md gains a Methods subsection (context selection + the sign-test equation) and Results
+  Figures 10–11, plus an updated Summary, Conclusion and a new Limitation 5.
+- **Grokking verdict unchanged: PLAN case 5** (all three Figure-9 gates still FAIL; the context
+  control runs on the same non-grokking checkpoint).
+- Render checks: REPORT.md 10/10 `js-display-math`, 0 `<pre lang="math">`, 0 KaTeX errors, 0
+  inline-math hazards; 16 embedded images in each deliverable, all present on disk.

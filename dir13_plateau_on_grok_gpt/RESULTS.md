@@ -37,11 +37,15 @@ temporal observation.**
    stack that appears early, so there is **no visible temporal coupling to the grokking signature**
    (which never occurs). This is evidence about temporal association only, not causation.
 
-4. **The plateau shape is general, but graded.** Holding one endpoint fixed at the **comma** and
-   interpolating to **all 64 other characters**, every pair bends away from the straight line — none
-   is linear — yet only 1/64 meets the strict frozen plateau rule (transition width ≤ 0.25; median
-   width 0.340 against 0.80 for a straight line). How sharp the switch is tracks how likely the model
-   thinks the other character is in that context (Spearman rank correlation ρ = −0.74, n = 64).
+4. **The plateau shape is general, but graded — and it survives a change of context.** Holding one
+   endpoint fixed at the **comma** and interpolating to **all 64 other characters**, every pair bends
+   away from the straight line — none is linear — yet only 1/64 meets the strict frozen plateau rule
+   (transition width ≤ 0.25; median width 0.340 against 0.80 for a straight line). Repeating the whole
+   sweep in **8 further contexts** taken from held-out text (**576 pairs**) replicates this exactly:
+   **0/576** curves are near-linear and per-context median widths stay in a narrow band (0.313–0.436).
+   The claim that sharpness tracks how likely the model thinks the other character is holds in
+   **direction everywhere** (all 9 contexts give a negative rank correlation, sign test p = 0.004) but
+   its **size is context-dependent** (median ρ = −0.41, range −0.05 to −0.74).
 
 ## Models actually tested
 
@@ -55,7 +59,7 @@ All are 12-layer/12-head GeLU GPTs (`d_model=240`, context 128). Provenance, see
 `results/train_meta*.json`; confirmed-vs-reconstructed fields in `MODEL_SPEC.md`. The paper's exact
 GPT code/checkpoint is **not public** (repo audited 2026-07-15), so these are faithful reconstructions.
 
-![Character-model training curves: cross-entropy loss falls to ~1.49 on validation (left); next-char accuracy rises to 0.56 (right); x = training step.](plots/training_curves.png)
+![Pilot character-model training curves. Left: cross-entropy loss in nats (y) vs training step (x) for the train split (solid) and validation split (dashed, squares) — validation bottoms at ≈1.49. Right: validation next-character accuracy (y) vs training step (x), rising to 0.56.](plots/training_curves.png)
 
 ## Figure-9 grokking gate — all three models FAIL
 
@@ -85,16 +89,16 @@ never rising to produce a second descent. Both fresh runs **overfit** (val loss 
 val-loss recovery. Robustness here is a property of the first fold-collapse of a memorising network,
 not the grokking second-descent event.
 
-![Pilot char (3.5k) Figure-9 curves. Left y-axis: local complexity (sign-crossings summed over 12 GeLU layers) for train (blue), test (orange), random (green), 99% CI bands. Right y-axis: next-token accuracy — black = clean test accuracy, red dashed = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale, step 0 at 1). LC monotone to the 3,500-step horizon (no second descent); adv accuracy climbs to 0.33; verdict FAIL.](plots/grokking_pilot_char.png)
-![Fresh char (30k) Figure-9 gate. Same axes as the pilot panel. LC monotone to 8.1 while adversarial accuracy climbs to 0.53; no second descent → FAIL.](plots/grokking_fresh_char.png)
-![Fresh BPE (10k) Figure-9 gate. Same axes. LC monotone to 95 while adversarial accuracy climbs to 0.19; no second descent → FAIL.](plots/grokking_fresh_bpe.png)
+![Pilot char (3.5k) Figure-9 curves. Left y-axis: local complexity (sign-crossings summed over 12 GeLU layers) for the train (solid), test (dashed) and random (dash-dot) base-point sets, with 99% CI bands. Right y-axis: next-token accuracy — black with circle markers = clean test accuracy, black dotted with square markers = ε=0.03 PGD adversarial accuracy. x-axis: training step (log scale, step 0 at 1). LC monotone to the 3,500-step horizon (no second descent); adv accuracy climbs to 0.33; verdict FAIL.](plots/grokking_pilot_char.png)
+![Fresh char (30k) Figure-9 gate. Same axes and line styles as the pilot panel. LC monotone to 8.1 while adversarial accuracy climbs to 0.53; no second descent → FAIL.](plots/grokking_fresh_char.png)
+![Fresh BPE (10k) Figure-9 gate. Same axes and line styles. LC monotone to 95 while adversarial accuracy climbs to 0.19; no second descent → FAIL.](plots/grokking_fresh_bpe.png)
 
 **Joint timeline (S7).** On one training-step axis the Grokking side is uniform across runs — LC falls
 monotonically and PGD robustness rises, no second descent anywhere. Because the BPE bridge to Matthew's
 exact tokens does not reproduce Figure 9 (nor does either character run), the primary Matthew-exact
 relationship is not testable: that window never opens.
 
-![Joint checkpoint timeline. Left: test local complexity (y) vs training step (x, log) for pilot char (gray), fresh char (blue), fresh BPE (red); legend gives each run's Figure-9 verdict. Middle: ε=0.03 PGD adversarial accuracy (y) vs step (x, log), same colors; dashed = 0.05 robustness threshold. Right: text summary of the three FAIL verdicts and the bounded relationship verdict. No second LC descent in any run → primary relationship not testable.](plots/joint_timeline.png)
+![Joint checkpoint timeline. Left: test local complexity (y) vs training step (x, log) for the pilot char run (dotted, triangles), fresh char run (solid, circles) and fresh BPE run (dashed, squares); the legend gives each run's Figure-9 verdict. Middle: ε=0.03 PGD adversarial accuracy (y) vs step (x, log), same three line styles; the horizontal dashed line is the 0.05 robustness threshold. Right: text summary of the three FAIL verdicts and the bounded relationship verdict. No second LC descent in any run → primary relationship not testable.](plots/joint_timeline.png)
 
 ## Primary plateau evidence — Matthew-faithful char-token controls across training (S6)
 
@@ -126,14 +130,14 @@ before** `ε=0.03` robustness saturates (which happens over steps ~10³–10⁴;
 The plateau then holds flat to step 30k. This is the concrete temporal read: in a model that never
 groks, the plateau appears with *initial fit*, not with a second descent.
 
-![Matthew-faithful char-control d(t), interpolation block 0, final logits, one panel per frozen checkpoint (steps 0→30000); blue = b↔i, orange = b↔l, gray dashed = diagonal d=t. Curves are diagonal at init/step 56 and become sharp plateau–boundary–plateau sigmoids by step 831, stable thereafter.](plots/matthew_char_ctrl_by_checkpoint.png)
+![Matthew-faithful char-control d(t) (y) vs interpolation step t (x), interpolation block 0, final logits, one panel per frozen checkpoint (steps 0→30000). The b↔i pair is the solid line with circle markers, b↔l the dashed line with square markers, and the gray dashed straight line is the diagonal d = t. Curves lie on the diagonal at init and step 56 and become sharp plateau–boundary–plateau sigmoids by step 831, stable thereafter.](plots/matthew_char_ctrl_by_checkpoint.png)
 
 **Same timeline, both phenomena overlaid.** Top: Figure-9 grokking metrics (LC train/test/random +
 clean/adv accuracy) for the fresh char run. Bottom: the plateau transition width for both controls.
 The width drops to its floor by step ~831 while LC is still in its *first* descent and robustness has
 not yet risen — no temporal coupling to a (non-existent) second descent.
 
-![Grokking metrics vs plateau width on one timeline (fresh char run). Top: left y = local complexity for LC train (blue) / test (orange) / random (green) with 99% CI; right y = next-token accuracy, black = clean, red dashed = ε=0.03 PGD adv; x = training step (log). Bottom: transition width w_10→90 (y) for b↔i (blue) and b↔l (orange) vs step (log); gray dashed = diagonal 0.8, red dotted = plateau bar 0.25. Width collapses to its floor by step ~831 — during the first LC descent, before robustness rises.](plots/joint_timeline_char_ctrl.png)
+![Grokking metrics vs plateau width on one timeline (fresh char run). Top: left y = local complexity for the train (solid), test (dashed) and random (dash-dot) base-point sets with 99% CI bands; right y = next-token accuracy, black with circles = clean, black dotted with squares = ε=0.03 PGD adversarial; x = training step (log). Bottom: transition width w_10→90 (y) for b↔i (solid, circles) and b↔l (dashed, squares) vs step (log); the gray dashed line is the diagonal 0.8, the black dotted line the plateau bar 0.25. Width collapses to its floor by step ~831 — during the first LC descent, before robustness rises.](plots/joint_timeline_char_ctrl.png)
 
 **Depth control also holds for the Matthew-faithful assay.** Within the final checkpoint, moving the
 interpolation point later (fewer downstream layers) widens the boundary back toward the diagonal — e.g.
@@ -172,14 +176,14 @@ demanded by the strict frozen rule, so "is there a plateau?" is a question of de
 yes/no. The two preregistered controls `b↔i` (0.331) and `b↔l` (0.330) sit right at this sweep's
 median — they were typical pairs, not lucky ones.
 
-![All 64 comma→character curves at step 30,000. Left: relative distance d(t) (y, 0 = output still looks like the comma prompt, 1 = looks like the other-character prompt) vs interpolation step t (x); one line per pair, colour = that pair's transition width (colour bar); thick black = median over the 64 pairs; gray dashed = the straight line d = t expected with no plateau. Right: histogram of transition width (x) vs number of pairs (y); red dotted = strict plateau rule 0.25, gray dashed = straight-line value 0.80, black = median 0.34.](plots/comma_all_chars_curves.png)
+![All 64 comma→character curves at step 30,000. Left: relative distance d(t) (y, 0 = output still looks like the comma prompt, 1 = looks like the other-character prompt) vs interpolation step t (x); one thin line per pair, shaded on the viridis scale by that pair's transition width (colour bar); the thick black line is the median over the 64 pairs and the gray dashed line the straight line d = t expected with no plateau. Right: histogram of transition width (x) vs number of pairs (y); the black dotted vertical line is the strict plateau rule 0.25, the gray dashed line the straight-line value 0.80, the thick black line the median 0.34.](plots/comma_all_chars_curves.png)
 
 **Which character sits at the other end matters a lot.** Sorting the 64 pairs by width splits them by
 character type: lower-case letters give the sharpest transitions (median 0.313, n = 26), upper-case
 letters next (0.355, n = 26), space and newline in between (0.336, n = 2), and punctuation or the
 digit `3` are clearly the flattest (0.564, n = 10).
 
-![Transition width (y) for each comma→character pair (x, one bar per character, sorted from sharpest to flattest; ␣ = space, \n = newline), final checkpoint, interpolation block 0, final logits. Bar colour = character type (lower-case letter, upper-case letter, space/newline, punctuation or digit). Red dotted = strict plateau rule 0.25; gray dashed = straight-line value 0.80.](plots/comma_width_by_char.png)
+![Transition width (y) for each comma→character pair (x, one bar per character, sorted from sharpest to flattest; ␣ = space, \n = newline), final checkpoint, interpolation block 0, final logits. Each character type has its own bar hatch as well as its own colour: lower-case letter (//), upper-case letter (\\), space/newline (xx), punctuation or digit (..). The black dotted horizontal line is the strict plateau rule 0.25; the gray dashed line the straight-line value 0.80.](plots/comma_width_by_char.png)
 
 **What predicts the width.** The single best predictor we found is how likely the model thinks that
 character is in this context: transition width falls as the model's probability for the character
@@ -187,9 +191,11 @@ after `"The house was "` rises (Spearman rank correlation **ρ = −0.74**, p = 
 far apart the two endpoint outputs are explains less (ρ = −0.48, p = 5.6e-5) — and in the direction
 that rules out a trivial artifact: *wider*-separated endpoints give *sharper*, not flatter,
 transitions. Note the comma itself is an unlikely continuation here (model probability 1.0e-7), so
-the sharp cases are not "both endpoints are common inputs" — what varies is the other character.
+the sharp cases are not "both endpoints are common inputs" — what varies is the other character. The
+context control below shows this correlation is the strongest of the nine contexts we measured, so
+−0.74 should be read as the top of a range, not a typical value.
 
-![Left: transition width (y) vs the model's probability of the other character after "The house was " (x, log scale), one point per pair, colour = character type; Spearman ρ = −0.74. Right: transition width (y) vs the L2 distance between the two endpoints' final-logit vectors (x); Spearman ρ = −0.48. Red dotted = strict plateau rule 0.25; gray dashed = straight-line value 0.80.](plots/comma_width_vs_endpoints.png)
+![Left: transition width (y) vs the model's probability of the other character after "The house was " (x, log scale), one point per pair with a distinct marker per character type — circle = lower-case letter, square = upper-case letter, triangle = space/newline, diamond = punctuation or digit; Spearman ρ = −0.74. Right: transition width (y) vs the L2 distance between the two endpoints' final-logit vectors (x), same markers; Spearman ρ = −0.48. The black dotted horizontal line is the strict plateau rule 0.25; the gray dashed line the straight-line value 0.80.](plots/comma_width_vs_endpoints.png)
 
 **Both structural controls replicate at n = 64.** Moving the interpolation point deeper (fewer layers
 left to act) flattens the curve back to the straight line — median width 0.34 (block 0), 0.51, 0.65,
@@ -197,7 +203,7 @@ left to act) flattens the curve back to the straight line — median width 0.34 
 stops changing: median width 0.799 (init) → 0.751 (step 56) → 0.524 (831) → 0.328 (7,819) → 0.367
 (17,500) → 0.340 (30,000). Both match the `b↔i`/`b↔l` result with 32× more pairs.
 
-![Left: median transition width over the 64 pairs (y) vs interpolation block (x, 0–11: the residual stream after this block is replaced); shaded = inter-quartile range; gray dashed = straight line 0.80; red dotted = strict plateau rule 0.25. Right: median transition width (y) vs training step (x, log scale, step 0 drawn at 1) at interpolation block 0; shaded = inter-quartile range; same reference lines.](plots/comma_depth_and_training.png)
+![Left: median transition width over the 64 pairs (y, solid line with circle markers) vs interpolation block (x, 0–11: the residual stream after this block is replaced); the hatched band is the inter-quartile range; the gray dashed line is the straight line 0.80 and the black dotted line the strict plateau rule 0.25. Right: median transition width (y, dashed line with square markers) vs training step (x, log scale, step 0 drawn at 1) at interpolation block 0; hatched band = inter-quartile range; same two reference lines.](plots/comma_depth_and_training.png)
 
 ### Discussion of the comma sweep
 
@@ -223,10 +229,60 @@ stops changing: median width 0.799 (init) → 0.751 (step 56) → 0.524 (831) �
    character run, at the same frozen checkpoints. They confirm the plateau appears with initial fit
    (already at its floor by step ~7,800) and stays flat, so the bounded relationship verdict stays
    PLAN case 5.
-6. **Caveats.** One shared context, one model, one interpolation position (final token), and single
-   characters as endpoints. Widths near 0.33 are "sharper than linear" but not step-like; and the
-   comma endpoint is itself an implausible input, which may make every one of these pairs harder than
-   a pair of two natural continuations.
+6. **Caveats.** One model, one interpolation position (final token), and single characters as
+   endpoints. Widths near 0.33 are "sharper than linear" but not step-like. The two context-related
+   caveats — that all of this came from one shared context, and that the comma endpoint is itself an
+   implausible input — are tested directly in the next section.
+
+## Does the plateau depend on the context? — 8 further contexts, 576 pairs
+
+Every plateau number above comes from the single shared context `"The house was "`, and the fixed
+comma endpoint is an implausible continuation there (model probability 1.0e-7). Either could be
+driving the result. To test both at once we repeat the entire comma sweep in **8 additional
+contexts** of 64 characters each, drawn from held-out validation text and chosen to span the model's
+own probability of a comma in that slot — from 5e-20 ("a comma is impossible here") to 0.997 ("a
+comma is almost certainly next"). Everything else is unchanged (step 30,000, interpolation block 0,
+50 steps, `slerp_rescale`, final-logit `d(t)`), giving 9 contexts × 64 pairs = **576 pairs**. Script
+`experiments/context_sweep.py`; raw curves `results/context_sweep_raw.npz`, summary
+`results/context_sweep_summary.json`.
+
+**Answer: the shape claim replicates everywhere; the "expected characters switch sharper" claim
+replicates in direction but not in size.**
+
+| quantity (576 pairs, 9 contexts) | value |
+|---|---|
+| curves near the straight line (width ≥ 0.70) | **0 / 576** |
+| per-context median width | 0.313 – 0.436 (reference context 0.340) |
+| pooled median width | 0.381 |
+| pairs meeting the strict rule (width ≤ 0.25) | 11 / 576 |
+| pairs with width ≤ 0.35 | 198 / 576 |
+| within-context ρ (width vs the model's probability of the target character) | all 9 negative; median **−0.41**, range −0.05 … −0.74; p < 0.05 in 7/9 |
+| sign test on those 9 correlations | p = 0.004 |
+| median width vs the model's probability of a **comma** in that context | ρ = −0.32, p = 0.41 (n = 9) — no effect |
+
+To show the shape claim does not depend on the chosen context, and that the fixed endpoint's own
+plausibility does not set the sharpness, we plot the width distribution for each context and each
+context's median against its comma probability.
+
+![Left: transition width w_10→90 (y) for the 64 comma→character pairs of each context (x, one box per context ordered by the model's probability of a comma there, printed under each box; "ref" = "The house was ", the context behind every earlier number, drawn with a cross hatch, the held-out contexts with a diagonal hatch). Boxes show the inter-quartile range with the median as a horizontal bar; whiskers 1.5×IQR; dots are outliers. Gray dashed = straight line 0.80, black dotted = strict plateau rule 0.25. Right: median transition width (y) vs the model's probability of a comma in that context (x, log scale); circles = held-out contexts, diamond = the reference context; same two reference lines.](plots/context_widths.png)
+
+Not one of the 576 curves is near-linear, and the per-context medians sit in a narrow band well below
+the straight-line value — the plateau shape is a property of this model, not of the one context we
+started with. The context in which a comma is essentially certain (probability 0.997) gives median
+width 0.330, statistically indistinguishable from the reference context's 0.340, and across the nine
+contexts the comma's plausibility does not predict sharpness at all (ρ = −0.32, p = 0.41). That
+**retires the caveat** that the sweep was made artificially hard by an implausible fixed endpoint.
+
+To check whether the predictor we reported for one context is a general rule, we plot each context's
+rank correlation and pool all 576 pairs.
+
+![Left: Spearman ρ between transition width and the model's probability of the target character (x) for each context (y, ordered by the context's comma probability; the reference context "The house was " has a cross hatch, held-out contexts a diagonal hatch); the dash-dot vertical line is the median over contexts (−0.41). Right: transition width (y) vs the model's probability of the target character in its context (x, log scale) for all 576 pairs; circles = the 8 held-out contexts, diamonds = the reference context; gray dashed = straight line 0.80, black dotted = strict plateau rule 0.25.](plots/context_rho.png)
+
+The correlation is negative in **all nine** contexts (sign test p = 0.004), so "the switch is sharper
+for characters the model expects" is a real, repeatable tendency. But its strength swings from −0.05
+to −0.74, and the context we happened to report first is the strongest one; the median context gives
+−0.41 and the pooled correlation over all 576 pairs is −0.23. The honest summary is a consistent but
+modest effect, not the tight relationship a single context suggested.
 
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
@@ -245,8 +301,8 @@ stops changing: median width 0.799 (init) → 0.751 (step 56) → 0.524 (831) �
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 ![Exploratory 40-pair result: raw d(t) (y) vs interpolation step t (x) in final-logit space, one panel per frozen pair (title = pair ID, endpoint chars, width w). Gray dashed = diagonal. Most curves hug d≈0, cross rapidly near t≈0.5, then hug d≈1.](plots/pair_curves_logits.png)
-![Exploratory 40-pair layerwise emergence for four fixed pairs (IDs 0–3): d(t) (y) vs t (x); line color = recording block (dark early → light late); red = final logits; gray dashed = diagonal. Curves start near-diagonal and sharpen into plateaus by the logits.](plots/layerwise_emergence.png)
-![Exploratory 40-pair depth comparison. Left: median final-logit d(t) (y) vs t (x) per interpolation block (dark=0 → light=10); block-0 sigmoid, later blocks approach the gray dashed diagonal. Right: median width w_10→90 (y, IQR bars) vs interpolation block (x); red dashed = plateau bar 0.25, gray dashed = diagonal 0.8.](plots/interpolation_layer_comparison.png)
+![Exploratory 40-pair layerwise emergence for four fixed pairs (IDs 0–3): d(t) (y) vs interpolation step t (x); thin lines are recording blocks on the cividis scale (dark early → light late); the thick black line is the final logits and the gray dashed line the diagonal. Curves start near-diagonal and sharpen into plateaus by the logits.](plots/layerwise_emergence.png)
+![Exploratory 40-pair depth comparison. Left: median final-logit d(t) (y) vs interpolation step t (x) per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend; the block-0 curve is sigmoid, later blocks approach the gray dashed diagonal. Right: median width w_10→90 (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block (x); the black dotted line is the plateau bar 0.25, the gray dashed line the diagonal 0.8.](plots/interpolation_layer_comparison.png)
 
 ## Implementation checks (all passed)
 
@@ -267,6 +323,8 @@ controls (`b↔i`, `b↔l`) let us time the plateau: it is **absent at initializ
 the first LC descent** (width 0.80 → 0.33 by step ~831), and is **fully formed before** adversarial
 robustness saturates — so, in this non-grokking model, the plateau is an early property of the trained
 downstream stack with **no visible temporal coupling** to the grokking signature (which never occurs).
-Sweeping the comma against all 64 other characters shows the same shape everywhere (no pair is
-linear, median width 0.340) while making clear that sharpness is graded: only 1/64 clears the strict
-≤ 0.25 bar, and the sharpest switches go to the characters the model actually expects next.
+Sweeping the comma against all 64 other characters — and repeating that sweep in 8 further held-out
+contexts, 576 pairs in all — shows the same shape everywhere (**0/576** curves near the straight line,
+per-context median widths 0.313–0.436) while making clear that sharpness is graded: only 11/576 clear
+the strict ≤ 0.25 bar. The sharpest switches do go to the characters the model expects next, in all
+nine contexts, but the strength of that link varies (median ρ = −0.41, range −0.05 … −0.74).

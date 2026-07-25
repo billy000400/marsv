@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.dirname(__file__))
 from model import GPT, GPTConfig
 from matthew_assay import run_pair, slerp_norm, rel_dist, transition_width, is_plateau, self_test
+from cvd_style import CVD, REF_DIAG, REF_RULE
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "results")
@@ -144,8 +145,8 @@ def main():
     for ax, pair in zip(axes.flat, pairs):
         pid = pair["pair_id"]
         s = summary[pid]
-        ax.plot(ts, ts, "--", color="gray", lw=0.8)
-        ax.plot(ts, curves_logit[pid], color="C0", lw=1.5)
+        ax.plot(ts, ts, **REF_DIAG)
+        ax.plot(ts, curves_logit[pid], color=CVD[0], lw=1.8)
         lab = f"#{pid} '{pair['char_A']}'->'{pair['char_B']}'".replace("\n", "\\n")
         ax.set_title(f"{lab}  w={s['w_10_90']}", fontsize=8)
         ax.grid(alpha=0.2)
@@ -162,12 +163,12 @@ def main():
     # 2. layerwise emergence for 4 representative fixed pairs (frozen choice: first 4 pair IDs)
     rep = [0, 1, 2, 3]
     fig, axes = plt.subplots(1, len(rep), figsize=(4.5 * len(rep), 4), sharey=True)
-    cmap = plt.get_cmap("viridis")
+    cmap = plt.get_cmap("cividis")
     for ax, pid in zip(axes, rep):
         for l in sorted(curves_layer[pid]):
             ax.plot(ts, curves_layer[pid][l], color=cmap(l / 11), lw=1.2)
-        ax.plot(ts, curves_logit[pid], color="red", lw=2, label="final logits")
-        ax.plot(ts, ts, "--", color="gray", lw=0.8)
+        ax.plot(ts, curves_logit[pid], color="k", lw=3, label="final logits (thick black)")
+        ax.plot(ts, ts, **REF_DIAG)
         ax.set_title(f"pair #{pid}", fontsize=10)
         ax.set_xlabel("t"); ax.grid(alpha=0.2)
     axes[0].set_ylabel("d(t)")
@@ -185,16 +186,16 @@ def main():
         D = np.stack([depth_curves[(p["pair_id"], blk)] for p in pairs])
         med = np.median(D, axis=0)
         ax[0].plot(ts, med, color=cmap(j / (len(INTERP_BLOCKS_CMP) - 1)), lw=1.8, label=f"block {blk}")
-    ax[0].plot(ts, ts, "--", color="gray", lw=0.8, label="d=t")
+    ax[0].plot(ts, ts, label="d=t (dashed)", **REF_DIAG)
     ax[0].set_xlabel("t"); ax[0].set_ylabel("median d(t) over 40 pairs")
     ax[0].set_title("Final-logit d(t) vs interpolation block"); ax[0].legend(fontsize=8); ax[0].grid(alpha=0.2)
     blks = [b for b in INTERP_BLOCKS_CMP if depth_w[b]]
     ax[1].errorbar([b for b in blks], [np.median(depth_w[b]) for b in blks],
                    yerr=[[np.median(depth_w[b]) - np.percentile(depth_w[b], 25) for b in blks],
                          [np.percentile(depth_w[b], 75) - np.median(depth_w[b]) for b in blks]],
-                   fmt="o-", color="C0", capsize=3)
-    ax[1].axhline(0.25, color="red", ls="--", lw=1, label="plateau bar w=0.25")
-    ax[1].axhline(0.8, color="gray", ls="--", lw=1, label="linear reference w=0.8")
+                   fmt="o-", color=CVD[0], capsize=3, label="median (solid, circles)")
+    ax[1].axhline(0.25, label="plateau bar w=0.25 (dotted)", **REF_RULE)
+    ax[1].axhline(0.8, label="linear reference w=0.8 (dashed)", **REF_DIAG)
     ax[1].set_xlabel("interpolation block"); ax[1].set_ylabel("median w_10-90 (IQR bars)")
     ax[1].set_title("Transition width vs interpolation depth"); ax[1].legend(fontsize=8); ax[1].grid(alpha=0.2)
     fig.tight_layout()

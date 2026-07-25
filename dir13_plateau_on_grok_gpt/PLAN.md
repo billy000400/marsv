@@ -188,8 +188,24 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**COMPLETE (2026-07-25): all stages S1–S8 done + operator feedback #3 addressed. Bounded verdict =
-case 5 + S6 secondary (unchanged). STOP re-written.**
+**COMPLETE (2026-07-25): all stages S1–S8 done + operator feedback #3 addressed + figures made
+colour-vision-deficiency-safe + a 576-pair context control added. Bounded verdict = case 5 + S6
+secondary (unchanged). STOP re-written.**
+
+- **CVD compliance (CLAUDE.md rule 13).** All 14 embedded figures regenerated via new
+  `experiments/cvd_style.py`: the Figure-9 panels' train/test/**random** local-complexity lines were
+  C0/C1/**green** against a **red** adversarial line, and the comma-sweep character classes were
+  **green** vs **red** with colour as the only channel. Now green-free, every series also carrying a
+  linestyle/marker/hatch, sequential ramps viridis/cividis, and every caption in both deliverables
+  rewritten so no series is named by colour. `run_matthew.py` re-run end-to-end: **bit-exact**
+  reproduction (14/40, median w 0.309) — no result changed.
+- **Context control (`experiments/context_sweep.py`).** The comma→all-64-characters sweep repeated in
+  **8 further held-out contexts** spanning p(comma) 5e-20 … 0.997 → **576 pairs**. Shape claim
+  replicates and strengthens: **0/576** near-linear, per-context median widths 0.313–0.436 (pooled
+  0.381), 11/576 strict. Correlation claim refined to a range: negative in **9/9** contexts (sign test
+  p = 0.004) but median **−0.41** (−0.05 … −0.74), so the earlier −0.74 was the strongest context, not
+  a typical one. The "implausible comma endpoint" caveat is retired (p(comma) does not predict
+  sharpness across contexts: ρ = −0.32, p = 0.41). New figures `plots/context_{widths,rho}.png`.
 
 - **Feedback #3 (`human_feedback_3.txt.addressed.md`) — comma vs every other character.** New
   `experiments/comma_sweep.py`: endpoint A fixed at `"The house was ,"`, endpoint B = same context +
@@ -218,11 +234,13 @@ case 5 + S6 secondary (unchanged). STOP re-written.**
 
 ## Next step
 
-None — plan complete and feedback #3 addressed, `STOP` re-written. All success criteria met: three Figure-9 gate verdicts (all
-FAIL), a checkpoint-aligned figure showing both Grokking metrics and plateau width on one axis, the
-two `b/i`/`b/l` char controls as primary plateau evidence, the 40-pair set demoted to a labelled
-exploratory appendix, and the bounded case-5 relationship verdict. If new `human_feedback*.md` /
-`*REVIEW*` arrives, delete `STOP`, address it, and re-STOP when clean.
+None — plan complete, feedback #3 addressed, figures CVD-safe, `STOP` re-written. All success criteria
+met: three Figure-9 gate verdicts (all FAIL), a checkpoint-aligned figure showing both Grokking metrics
+and plateau width on one axis, the two `b/i`/`b/l` char controls as primary plateau evidence, the
+40-pair set demoted to a labelled exploratory appendix, and the bounded case-5 relationship verdict.
+If new `human_feedback*.md` / `*REVIEW*` arrives, delete `STOP`, address it, and re-STOP when clean.
+If the direction is reopened, the two untested scope limits are: interpolation positions other than
+the final token, and a second model.
 
 ## Primary references
 

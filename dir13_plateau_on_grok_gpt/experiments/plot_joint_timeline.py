@@ -11,19 +11,23 @@ checkpoint plateau sweep on the fresh models is separate (S6) and its status is 
 Usage: plot_joint_timeline.py
 Headless (Agg); writes plots/joint_timeline.png.
 """
-import json, os
+import json, os, sys
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+from cvd_style import CVD
+
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def R(p): return os.path.join(HERE, p)
 
+# (name, curves, verdict, colour, linestyle, marker) — colour is never the only channel
 RUNS = [
-    ("Pilot char (3.5k)",  "results/fig9_pilot_char.json",  "results/fig9_pilot_char_verdict.json",  "tab:gray"),
-    ("Fresh char (30k)",   "results/fig9_grok_char.json",   "results/fig9_grok_char_verdict.json",   "tab:blue"),
-    ("Fresh BPE (30k)",    "results/fig9_grok_bpe.json",    "results/fig9_grok_bpe_verdict.json",    "tab:red"),
+    ("Pilot char (3.5k)", "results/fig9_pilot_char.json", "results/fig9_pilot_char_verdict.json", "0.45",  ":",  "^"),
+    ("Fresh char (30k)",  "results/fig9_grok_char.json",  "results/fig9_grok_char_verdict.json",  CVD[0], "-",  "o"),
+    ("Fresh BPE (10k)",   "results/fig9_grok_bpe.json",   "results/fig9_grok_bpe_verdict.json",   CVD[1], "--", "s"),
 ]
 
 def load(path):
@@ -46,14 +50,15 @@ fig, (axL, axR, axT) = plt.subplots(1, 3, figsize=(16, 5),
                                     gridspec_kw={"width_ratios": [1, 1, 0.9]})
 
 lines = []
-for name, jp, vp, c in RUNS:
+for name, jp, vp, c, ls, mk in RUNS:
     d = load(jp)
     if d is None:
         continue
     x = np.clip(d["step"], 1, None)  # log axis; step 0 -> 1
     v = verdict(vp)
-    axL.plot(x, d["lc"], "-o", color=c, ms=4, label=f"{name}: {v}")
-    axR.plot(x, d["adv"], "-o", color=c, ms=4, label=f"{name}: {v}")
+    lab = f"{name} [{ls}, {mk}]: {v}"
+    axL.plot(x, d["lc"], color=c, ls=ls, marker=mk, ms=4, label=lab)
+    axR.plot(x, d["adv"], color=c, ls=ls, marker=mk, ms=4, label=lab)
 
 axL.set_xscale("log"); axL.set_xlabel("training step (log; 0 drawn at 1)")
 axL.set_ylabel("test local complexity (sign crossings, 12 layers)")
