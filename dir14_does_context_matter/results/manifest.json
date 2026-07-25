@@ -1,0 +1,411 @@
+{
+  "model": "gpt2-large",
+  "revision": "main",
+  "seed": 0,
+  "n_steps": 50,
+  "prefix_len": 3,
+  "endpoints": {
+    "big": {
+      "string": " big",
+      "id": 1263,
+      "decoded": " big"
+    },
+    "large": {
+      "string": " large",
+      "id": 1588,
+      "decoded": " large"
+    },
+    "in": {
+      "string": " in",
+      "id": 287,
+      "decoded": " in"
+    }
+  },
+  "exp1": [
+    {
+      "pair": "big->large",
+      "context": "The house was",
+      "ids_A": [
+        464,
+        2156,
+        373,
+        1263
+      ],
+      "ids_B": [
+        464,
+        2156,
+        373,
+        1588
+      ],
+      "prompt_A": "The house was big",
+      "prompt_B": "The house was large"
+    },
+    {
+      "pair": "big->in",
+      "context": "The house was",
+      "ids_A": [
+        464,
+        2156,
+        373,
+        1263
+      ],
+      "ids_B": [
+        464,
+        2156,
+        373,
+        287
+      ],
+      "prompt_A": "The house was big",
+      "prompt_B": "The house was in"
+    }
+  ],
+  "contexts": [
+    {
+      "class": "none",
+      "prefix": "",
+      "prefix_ids": [],
+      "prefix_tokens": [],
+      "cid": "none",
+      "ids_big": [
+        1263
+      ],
+      "ids_large": [
+        1588
+      ]
+    },
+    {
+      "class": "random",
+      "prefix": "kas Cosmic Sell",
+      "prefix_ids": [
+        42749,
+        32011,
+        25688
+      ],
+      "prefix_tokens": [
+        "kas",
+        " Cosmic",
+        " Sell"
+      ],
+      "cid": "random1",
+      "ids_big": [
+        42749,
+        32011,
+        25688,
+        1263
+      ],
+      "ids_large": [
+        42749,
+        32011,
+        25688,
+        1588
+      ]
+    },
+    {
+      "class": "random",
+      "prefix": " SU Johnny University",
+      "prefix_ids": [
+        13558,
+        15470,
+        2059
+      ],
+      "prefix_tokens": [
+        " SU",
+        " Johnny",
+        " University"
+      ],
+      "cid": "random2",
+      "ids_big": [
+        13558,
+        15470,
+        2059,
+        1263
+      ],
+      "ids_large": [
+        13558,
+        15470,
+        2059,
+        1588
+      ]
+    },
+    {
+      "class": "random",
+      "prefix": " analysis000IST",
+      "prefix_ids": [
+        3781,
+        830,
+        8808
+      ],
+      "prefix_tokens": [
+        " analysis",
+        "000",
+        "IST"
+      ],
+      "cid": "random3",
+      "ids_big": [
+        3781,
+        830,
+        8808,
+        1263
+      ],
+      "ids_large": [
+        3781,
+        830,
+        8808,
+        1588
+      ]
+    },
+    {
+      "class": "random",
+      "prefix": "Monster323Likewise",
+      "prefix_ids": [
+        40872,
+        32637,
+        45872
+      ],
+      "prefix_tokens": [
+        "Monster",
+        "323",
+        "Likewise"
+      ],
+      "cid": "random4",
+      "ids_big": [
+        40872,
+        32637,
+        45872,
+        1263
+      ],
+      "ids_large": [
+        40872,
+        32637,
+        45872,
+        1588
+      ]
+    },
+    {
+      "class": "unrelated",
+      "prefix": "She quickly walked",
+      "prefix_ids": [
+        3347,
+        2952,
+        6807
+      ],
+      "prefix_tokens": [
+        "She",
+        " quickly",
+        " walked"
+      ],
+      "cid": "unrelated5",
+      "ids_big": [
+        3347,
+        2952,
+        6807,
+        1263
+      ],
+      "ids_large": [
+        3347,
+        2952,
+        6807,
+        1588
+      ]
+    },
+    {
+      "class": "unrelated",
+      "prefix": "He apologized for",
+      "prefix_ids": [
+        1544,
+        22893,
+        329
+      ],
+      "prefix_tokens": [
+        "He",
+        " apologized",
+        " for"
+      ],
+      "cid": "unrelated6",
+      "ids_big": [
+        1544,
+        22893,
+        329,
+        1263
+      ],
+      "ids_large": [
+        1544,
+        22893,
+        329,
+        1588
+      ]
+    },
+    {
+      "class": "unrelated",
+      "prefix": "Water boils at",
+      "prefix_ids": [
+        19184,
+        40169,
+        379
+      ],
+      "prefix_tokens": [
+        "Water",
+        " boils",
+        " at"
+      ],
+      "cid": "unrelated7",
+      "ids_big": [
+        19184,
+        40169,
+        379,
+        1263
+      ],
+      "ids_large": [
+        19184,
+        40169,
+        379,
+        1588
+      ]
+    },
+    {
+      "class": "unrelated",
+      "prefix": "The meeting began",
+      "prefix_ids": [
+        464,
+        3249,
+        2540
+      ],
+      "prefix_tokens": [
+        "The",
+        " meeting",
+        " began"
+      ],
+      "cid": "unrelated8",
+      "ids_big": [
+        464,
+        3249,
+        2540,
+        1263
+      ],
+      "ids_large": [
+        464,
+        3249,
+        2540,
+        1588
+      ]
+    },
+    {
+      "class": "relevant",
+      "prefix": "The house was",
+      "prefix_ids": [
+        464,
+        2156,
+        373
+      ],
+      "prefix_tokens": [
+        "The",
+        " house",
+        " was"
+      ],
+      "cid": "relevant9",
+      "ids_big": [
+        464,
+        2156,
+        373,
+        1263
+      ],
+      "ids_large": [
+        464,
+        2156,
+        373,
+        1588
+      ]
+    },
+    {
+      "class": "relevant",
+      "prefix": "The room was",
+      "prefix_ids": [
+        464,
+        2119,
+        373
+      ],
+      "prefix_tokens": [
+        "The",
+        " room",
+        " was"
+      ],
+      "cid": "relevant10",
+      "ids_big": [
+        464,
+        2119,
+        373,
+        1263
+      ],
+      "ids_large": [
+        464,
+        2119,
+        373,
+        1588
+      ]
+    },
+    {
+      "class": "relevant",
+      "prefix": "The rock was",
+      "prefix_ids": [
+        464,
+        3881,
+        373
+      ],
+      "prefix_tokens": [
+        "The",
+        " rock",
+        " was"
+      ],
+      "cid": "relevant11",
+      "ids_big": [
+        464,
+        3881,
+        373,
+        1263
+      ],
+      "ids_large": [
+        464,
+        3881,
+        373,
+        1588
+      ]
+    },
+    {
+      "class": "relevant",
+      "prefix": "Her bag was",
+      "prefix_ids": [
+        9360,
+        6131,
+        373
+      ],
+      "prefix_tokens": [
+        "Her",
+        " bag",
+        " was"
+      ],
+      "cid": "relevant12",
+      "ids_big": [
+        9360,
+        6131,
+        373,
+        1263
+      ],
+      "ids_large": [
+        9360,
+        6131,
+        373,
+        1588
+      ]
+    }
+  ],
+  "ref_context_ids": [
+    464,
+    2156,
+    373
+  ],
+  "ref_context_tokens": [
+    "The",
+    " house",
+    " was"
+  ]
+}
