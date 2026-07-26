@@ -7,7 +7,10 @@
   "val_min_step": 14400,
   "val_final_loss": 0.005109613800048828,
   "overfits": true,
-  "seconds": 33.53610420227051
+  "best_test_loss": 0.005780658569335938,
+  "best_test_acc": 0.9637,
+  "best_train_loss": 7.990555167198181e-06,
+  "seconds": 32.87645649909973
  },
  "reg": {
   "test_loss": 0.0011121856066645408,
@@ -17,7 +20,10 @@
   "val_min_step": 29800,
   "val_final_loss": 0.0011180489987743145,
   "overfits": true,
-  "seconds": 32.90253710746765
+  "best_test_loss": 0.0011121031469228317,
+  "best_test_acc": null,
+  "best_train_loss": 0.0009145259935028699,
+  "seconds": 31.94928741455078
  },
  "baselines": {
   "reg_mean_target": 0.029072215780615807,

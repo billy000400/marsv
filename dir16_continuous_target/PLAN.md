@@ -126,14 +126,19 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-**Complete.** S1-S3 all done in one iteration (2026-07-26). Both models trained and verified on 3
-seeds; the frozen 90-pair probe run for both; aggregate paired comparison with bootstrap CIs, the
-hand-selected `d(alpha)` curves, reconstructions along the path, and an early-stopped-classifier
+**Complete, and operator feedback #1 addressed (2026-07-26, iteration 2).** Both models trained and
+verified on 3 seeds; the frozen 90-pair probe run for both; aggregate paired comparison with
+bootstrap CIs, the hand-selected `d(alpha)` curves, reconstructions along the path, and a checkpoint
 control are all in RESULTS.md / REPORT.md with 8 embedded figures.
 
-**Verdict: POSITIVE.** The regressor's representation is 4.4-5.9x closer to a constant-rate
-transition than the classifier's (linearity deviation, all bootstrap CIs exclude 0, 90/90 pairs,
-3 seeds), and the gap survives matching the classifier to its best-generalizing checkpoint.
+Per `human_feedback_1.addressed.md`, **every interpolation is now evaluated at each model's
+best-validation-loss checkpoint** (classifier steps 7,500 / 16,200 / 14,400; regressor 29,800), and
+REPORT.md states the rule explicitly in a Methods subsection "Checkpoint selection". Probing the
+final step-30,000 weights instead is kept as the control (Figure 8).
+
+**Verdict: POSITIVE.** The regressor's representation is 4.3-5.9x closer to a constant-rate
+transition than the classifier's (linearity deviation, all bootstrap CIs exclude 0, 89/90 pairs,
+3 seeds), and the verdict is unchanged at either checkpoint.
 
 Deviation from the setup, logged in JOURNAL.md: under matched training the regressor does not
 overfit (its validation loss flattens rather than rising), so the "slight overfitting" adequacy
@@ -142,5 +147,6 @@ regressor overfitting; reported as Limitation 2 in REPORT.md.
 
 ## Next step
 
-None — success criterion met and no unaddressed operator feedback, so `STOP` is written. If new
-feedback arrives, delete `STOP`, address it, and re-write `STOP` when clean.
+None — success criterion met and no unaddressed operator feedback remains (`human_feedback_1` is
+renamed `.addressed.md`), so `STOP` is written. If new feedback arrives, delete `STOP`, address it,
+and re-write `STOP` when clean.

@@ -22,15 +22,19 @@ order, same optimizer, same number of steps, same MSE loss. One predicts the dig
 reconstructs the clean image, downsampled to 7x7 — a continuous target that varies smoothly with the
 input.
 
+**Every model is probed at its best-validation-loss checkpoint** (see Methods → *Checkpoint
+selection*), so each network is measured at the point where it generalizes best rather than at an
+arbitrary stopping step.
+
 **The answer is a clear yes, and the effect is large.** Under the identical interpolation probe, the
 regressor's activations move along an almost perfectly straight, even path, while the classifier's
 plateau and lurch. Averaged over 90 fixed cross-digit test pairs and 3 seeds, the classifier's
-departure from a straight transition is **4.4x** the regressor's at the last hidden layer
-(0.135 vs 0.030; paired difference 0.104, 95% bootstrap CI [0.092, 0.116]) and **5.9x** at the output
-layer. The regressor is smoother on **90 of 90 pairs at every layer** — there is no subset of digit
-transitions where discreteness fails to matter. A control rules out the obvious confound: an
-early-stopped classifier, matched to its own best-generalizing checkpoint rather than trained to
-memorization, is just as plateaued (0.129 at the last hidden layer).
+departure from a straight transition is **4.3x** the regressor's at the last hidden layer
+(0.130 vs 0.030; paired difference 0.099, 95% bootstrap CI [0.087, 0.111]) and **5.9x** at the output
+layer. The regressor is smoother on **89 of 90 pairs at every layer** — there is essentially no
+subset of digit transitions where discreteness fails to matter. A control shows the verdict does not
+depend on this checkpoint choice: probing the final step-30,000 weights instead changes the numbers
+by at most 6%.
 
 The caveat that keeps this from being the whole story: the two hidden layers we measure are shared
 architecture, and the regressor is *not* perfectly linear either — its deviation is small but nonzero
@@ -69,8 +73,36 @@ so the batch order is identical), cosine learning-rate decay to $10^{-6}$, and m
 loss. Three seeds: 0, 1, 2.
 
 **Splits.** Interpolation endpoints are drawn from the first 2,000 test images (matching dir12).
-The validation split used for the training curves is test images 2,000-9,999, disjoint from the
-endpoint pool. Reported test accuracy / test MSE use all 10,000 test images.
+The validation split used for checkpoint selection and the training curves is test images
+2,000-9,999, disjoint from the endpoint pool. Reported test accuracy / test MSE use all 10,000 test
+images.
+
+### Checkpoint selection
+
+Which weights should the probe measure? Training to a fixed step count and probing the last
+iterate mixes two things we want to keep separate: the effect of the *target type*, and the effect
+of how far past its best-generalizing point each model happens to have run. The classifier here
+drives its training loss to $\sim 10^{-7}$ (full memorization) and its validation loss turns up
+again, while the regressor's validation loss is still flat-to-falling at step 30,000 — so the final
+iterate is a *different kind* of solution for the two models.
+
+**We therefore evaluate every interpolation at each model's best-validation-loss checkpoint.**
+Validation loss (MSE against that model's own target on test images 2,000-9,999, disjoint from the
+interpolation endpoint pool) is evaluated every 100 steps, and the weights at its minimum are saved
+and used for every number and figure in this report:
+
+```math
+\theta^{\star} \;=\; \arg\min_{\theta_t,\; t \in \lbrace 0, 100, 200, \dots, 30000 \rbrace} \; \mathcal{L}_{\text{val}}(\theta_t)
+```
+
+The selected steps are **7,500 / 16,200 / 14,400** for the classifier (seeds 0/1/2) and **29,800**
+for the regressor in all three seeds — i.e. the classifier is caught well before it memorizes, and
+the regressor's best checkpoint is essentially its final one. This also means the comparison is not
+a memorization artifact by construction: at $\theta^{\star}$ the classifier's training MSE is
+$1.1\times10^{-4}$ / $3.6\times10^{-6}$ / $8.0\times10^{-6}$, not $10^{-7}$.
+
+The final step-30,000 weights are kept only for a **checkpoint control** (Figure 8) that re-runs the
+whole comparison on them, to show the verdict does not hinge on this choice.
 
 ### The probe: interpolating activations, not inputs
 
@@ -180,47 +212,48 @@ classifier is trained and evaluated on $\sigma=0.3$ corrupted inputs, so it shou
 below that; we quote accuracy on the same 2,000-image pool for the like-for-like comparison and on
 all 10,000 test images as the headline number.
 
-**early-stopped classifier (control)** — the same classifier retrained with the identical seed, batch
-order and schedule but halted at that seed's validation-loss minimum. At step 30,000 the classifier
-has memorized its training set (train MSE $\sim 10^{-7}$) while the regressor has not, so the
-smoothness gap could in principle be an overtraining artifact rather than a target-type effect. This
-control removes that explanation: it compares the *best-generalizing* classifier against the
-regressor. Consumed by Figure 8.
+**final-checkpoint control** — the identical comparison with both models probed at step 30,000
+instead of at $\theta^{\star}$. This is the sensitivity check on the checkpoint rule above: if
+picking the best-validation-loss weights were doing the work, the two versions would disagree.
+Consumed by Figure 8.
 
 ## Results
 
 ### Both models trained adequately
 
 Before comparing smoothness we have to rule out the boring explanation that one model simply failed
-to learn. Figure 1 shows the loss curves for both models and all three seeds.
+to learn. Figure 1 shows the loss curves for both models and all three seeds, and marks the
+best-validation-loss checkpoint that everything downstream is measured at.
 
-![Train and validation MSE against training step for the classifier and the regressor, plus a rescaled classifier validation-loss panel](plots/training_curves.png)
+![Train and validation MSE against training step for the classifier and the regressor, plus a rescaled validation-loss panel](plots/training_curves.png)
 
-**Figure 1.** Training adequacy for both models, 3 seeds per panel. x: training step (0-30,000).
-y (left, middle): mean-squared error per output unit, log scale — solid = training loss (measured on
-a fixed 10,000-image training subset), dashed = validation loss (test images 2,000-9,999).
-y (right): the classifier's validation loss divided by its own minimum, linear scale, so the
-minimum-then-rise is visible; the triangle marks each seed's minimum. The classifier drives training
-loss to $\sim 1.4\times10^{-7}$ (full memorization) while validation loss bottoms out at step
-7,500-16,200 and then rises 0.8-5.7% — the mild overfitting the plan asks for. The regressor's
-validation loss falls monotonically to a flat floor and never turns up: it converges but does not
-overfit, an asymmetry discussed under Limitations.
+**Figure 1.** Training adequacy and checkpoint selection, 3 seeds per panel. x: training step
+(0-30,000). y (left, middle): mean-squared error per output unit, log scale — solid = training loss
+(measured on a fixed 10,000-image training subset), dashed = validation loss (test images
+2,000-9,999); the down-triangle marks the validation minimum, i.e. the checkpoint the probe uses.
+y (right): each model's validation loss divided by its own minimum, linear scale, so the
+minimum-then-rise is visible; circles = classifier minima, square = regressor minimum. The
+classifier drives training loss to $\sim 1.4\times10^{-7}$ (full memorization) while validation loss
+bottoms out at step 7,500-16,200 and then rises 0.8-5.7% — the mild overfitting the plan asks for.
+The regressor's validation loss falls monotonically to a flat floor (minimum at step 29,800, i.e.
+its best checkpoint is essentially its final one): it converges but does not overfit, an asymmetry
+discussed under Limitations.
 
-Classifier test accuracy is 96.15 / 96.54 / 96.38% (seeds 0/1/2) on the full 10,000-image test set.
-On dir12's 2,000-image pool, the like-for-like comparison, ours scores 94.45 / 94.75 / 94.85% against
-dir12's 97.9-98.1% with clean inputs — a 3.1-3.5 point gap that is the expected cost of the
-$\sigma=0.3$ input corruption, not a training failure. The regressor reaches a test MSE of 0.001117 (mean over seeds),
-which is **26.0x better** than the mean-target predictor (0.02907) and **11.6x better** than pooling
-the corrupted input (0.01292). It is doing real denoising, not memorizing an average and not copying
-pixels. Figure 2 confirms this visually.
+At its selected checkpoint the classifier reaches test accuracy 96.34 / 96.39 / 96.37% (seeds 0/1/2)
+on the full 10,000-image test set. On dir12's 2,000-image pool, the like-for-like comparison, ours
+scores 95.00 / 94.50 / 94.65% against dir12's 97.9-98.1% with clean inputs — a 3.0-3.5 point gap that
+is the expected cost of the $\sigma=0.3$ input corruption, not a training failure. The regressor
+reaches a test MSE of 0.001117 (mean over seeds), which is **26.0x better** than the mean-target
+predictor (0.02907) and **11.6x better** than pooling the corrupted input (0.01292). It is doing real
+denoising, not memorizing an average and not copying pixels. Figure 2 confirms this visually.
 
 ![Three rows of ten digit images: corrupted 28x28 inputs, 7x7 regressor outputs, 7x7 clean targets](plots/reconstructions.png)
 
 **Figure 2.** The regressor solves its task. Columns: the first test image of each digit 0-9. Top
 row: the corrupted 28x28 input the model actually sees ($\sigma=0.3$ Gaussian noise, clipped). Middle
-row: the model's 49-value output reshaped to 7x7. Bottom row: the clean 7x7 target. All panels use
-the same grayscale range $[0,1]$. Outputs are visibly denoised and preserve digit shape, matching the
-targets closely.
+row: the model's 49-value output reshaped to 7x7 (seed 0, best-validation checkpoint). Bottom row:
+the clean 7x7 target. All panels use the same grayscale range $[0,1]$. Outputs are visibly denoised
+and preserve digit shape, matching the targets closely.
 
 ### The qualitative picture: morphing versus snapping
 
@@ -230,15 +263,15 @@ walk the same activation path. Figure 3 does exactly that for the $6 \rightarrow
 ![Two rows of eleven panels along the 6-to-7 path: regressor 7x7 outputs morphing, classifier logit bars snapping between digits](plots/path_reconstructions.png)
 
 **Figure 3.** The same interpolation path, seen through each model's output (seed 0, pair
-$6 \rightarrow 7$, replica 0). Columns are 11 evenly spaced positions on the path; the number above
-each column is $\alpha$. Top row: the regressor's 49-value output as a 7x7 image, grayscale $[0,1]$ —
-the 6 continuously deforms into a 7, with genuinely intermediate shapes in the middle. Bottom row:
-the classifier's 10 raw logits as a bar chart (x: digit class 0-9, y: logit value, fixed range
-$[-0.4, 1.2]$); the digit below each panel is the arg-max prediction. The classifier holds a
-confident "6" through $\alpha \le 0.2$, collapses into a low-confidence smear that reads "9" across
-the middle of the path, and snaps to a confident "7" from $\alpha \ge 0.7$ — three flat regions and
-two jumps, the plateau signature. Note the regressor's outputs stay image-like everywhere on the
-path, whereas the classifier's collapse to near-uniform logits in the middle.
+$6 \rightarrow 7$, replica 0, both at their best-validation checkpoint). Columns are 11 evenly spaced
+positions on the path; the number above each column is $\alpha$. Top row: the regressor's 49-value
+output as a 7x7 image, grayscale $[0,1]$ — the 6 continuously deforms into a 7, with genuinely
+intermediate shapes in the middle. Bottom row: the classifier's 10 raw logits as a bar chart
+(x: digit class 0-9, y: logit value, fixed range $[-0.4, 1.2]$); the digit below each panel is the
+arg-max prediction. The classifier holds a confident "6" through the first part of the path,
+collapses into a low-confidence smear across the middle, and snaps to a confident "7" near the end —
+flat regions separated by jumps, the plateau signature. Note the regressor's outputs stay image-like
+everywhere on the path, whereas the classifier's collapse to near-uniform logits in the middle.
 
 ### Every transition, every layer: the regressor is smoother
 
@@ -284,66 +317,67 @@ interval sits far above 0, and the three seeds cluster tightly — the effect is
 
 | layer | LD classifier | LD regressor | paired diff [95% CI] | ratio | pairs where regressor is smoother |
 |---|---|---|---|---|---|
-| hidden 2 | 0.1253 | 0.0263 | **0.0990** [0.0867, 0.1118] | 4.8x | 90 / 90 |
-| hidden 3 | 0.1345 | 0.0304 | **0.1041** [0.0920, 0.1159] | 4.4x | 90 / 90 |
-| output   | 0.1801 | 0.0304 | **0.1497** [0.1405, 0.1592] | 5.9x | 90 / 90 |
+| hidden 2 | 0.1182 | 0.0263 | **0.0918** [0.0804, 0.1036] | 4.5x | 89 / 90 |
+| hidden 3 | 0.1295 | 0.0304 | **0.0990** [0.0874, 0.1107] | 4.3x | 89 / 90 |
+| output   | 0.1792 | 0.0304 | **0.1487** [0.1395, 0.1580] | 5.9x | 89 / 90 |
 
 | layer | MJ classifier | MJ regressor | paired diff [95% CI] | ratio |
 |---|---|---|---|---|
-| hidden 2 | 2.12 | 1.14 | **0.98** [0.86, 1.10] | 1.9x |
-| hidden 3 | 2.43 | 1.21 | **1.22** [1.09, 1.37] | 2.0x |
-| output   | 6.64 | 1.21 | **5.42** [5.10, 5.75] | 5.5x |
+| hidden 2 | 2.01 | 1.14 | **0.87** [0.77, 0.97] | 1.8x |
+| hidden 3 | 2.31 | 1.21 | **1.11** [0.99, 1.23] | 1.9x |
+| output   | 6.35 | 1.21 | **5.13** [4.82, 5.45] | 5.2x |
 
 Read the max-jump row for the output layer literally: at its steepest point the classifier's output
-covers **6.6x** its fair share of the transition in a single 1/100 step of $\alpha$, while the
+covers **6.3x** its fair share of the transition in a single 1/100 step of $\alpha$, while the
 regressor covers 1.2x — barely more than a constant-rate walk. Under the alternative
-$d^{\text{frac}}$ normalization the verdict is unchanged (hidden 3: 0.0970 vs 0.0238, paired
-difference 0.0732, CI [0.0663, 0.0805]), so nothing here is an artifact of how we normalized the
+$d^{\text{frac}}$ normalization the verdict is unchanged (hidden 3: 0.0923 vs 0.0238, paired
+difference 0.0685, CI [0.0621, 0.0754]), so nothing here is an artifact of how we normalized the
 distance.
 
 An aggregate can hide a bimodal population, so Figure 7 checks whether the gap is a property of every
 transition or an average over a few extreme ones.
 
-![Scatter of per-pair regressor deviation against classifier deviation at three layers, all points below the diagonal](plots/per_pair_scatter.png)
+![Scatter of per-pair regressor deviation against classifier deviation at three layers, nearly all points below the diagonal](plots/per_pair_scatter.png)
 
 **Figure 7.** Per-pair check, one point per digit-pair (90 points, each averaged over the 3 seeds).
 x: classifier linearity deviation; y: regressor linearity deviation, on the same scale. Dashed line
-is $y = x$ (equal smoothness); points below it are pairs where the regressor is smoother. All 90
+is $y = x$ (equal smoothness); points below it are pairs where the regressor is smoother. 89 of 90
 points lie below the diagonal at all three layers, and the regressor's spread is much tighter — the
-effect is universal across digit transitions, not driven by a subset. The hardest classifier pairs
-(rightmost points, deviation $>0.25$) are not the regressor's hardest pairs.
+effect is essentially universal across digit transitions, not driven by a subset. The hardest
+classifier pairs (rightmost points, deviation $>0.25$) are not the regressor's hardest pairs.
 
-### Control: it is not overtraining
+### Control: the verdict does not depend on which checkpoint we probe
 
-The classifier at step 30,000 has memorized its training data while the regressor has not, so a
-skeptic could argue we are comparing a memorizing network to a still-learning one. Figure 8 removes
-that explanation by rerunning the probe on classifiers stopped at their own validation-loss minimum
-(steps 7,500 / 16,200 / 14,400; test accuracy 96.34 / 96.39 / 96.37%, train MSE
-$1.1\times10^{-4}$ to $3.6\times10^{-6}$ instead of $\sim10^{-7}$).
+The result above measures each model where it generalizes best. Would we conclude the same thing
+from the final step-30,000 weights — where the classifier has memorized its training set and the
+regressor has not? Figure 8 re-runs the whole comparison on those weights.
 
-![Mean d(alpha) at three layers comparing final classifier, early-stopped classifier, and regressor](plots/control_earlystop.png)
+![Mean d(alpha) at three layers comparing each model at its best-validation checkpoint and at step 30,000](plots/checkpoint_control.png)
 
-**Figure 8.** The smoothness gap is a target-type effect, not an overtraining effect. x:
-interpolation position $\alpha$; y: mean $d(\alpha)$ over 90 pairs and 3 seeds. Circles/solid =
-classifier at step 30,000; triangles/dash-dot = classifier early-stopped at its validation-loss
-minimum; squares/dashed = regressor at step 30,000; dotted = straight transition. The two classifier
-curves lie almost on top of each other at every layer, and both remain far from the regressor.
-Numerically, early-stopped classifier linearity deviation is 0.118 / 0.129 / 0.179 at hidden 2 /
-hidden 3 / output versus 0.125 / 0.135 / 0.180 for the final classifier — a reduction of at most 6% —
-against the regressor's 0.026 / 0.030 / 0.030. The paired difference (early-stopped classifier $-$
-regressor) is 0.092 [0.081, 0.104] at hidden 2, 0.099 [0.088, 0.111] at hidden 3 and 0.149
-[0.139, 0.158] at the output, with the regressor smoother on 89 of 90 pairs.
+**Figure 8.** Checkpoint sensitivity. x: interpolation position $\alpha$; y: mean $d(\alpha)$ over
+90 pairs and 3 seeds. Circles/solid = classifier at its best-validation checkpoint (the reported
+result); up-triangles/dash-dot = classifier at step 30,000; squares/dashed = regressor at its
+best-validation checkpoint; diamonds/dash-dot-dot = regressor at step 30,000; dotted = straight
+transition. Each model's two curves lie almost on top of each other, and the classifier pair stays
+far from the regressor pair at every layer. Numerically, the classifier's linearity deviation is
+0.118 / 0.129 / 0.179 at hidden 2 / hidden 3 / output at $\theta^{\star}$ versus 0.125 / 0.135 /
+0.180 at step 30,000 — at most 6% higher when overtrained — while the regressor's is 0.0263 / 0.0304 /
+0.0304 either way (its best checkpoint is step 29,800). Probing the final weights instead gives
+paired differences of 0.099 [0.087, 0.112], 0.104 [0.093, 0.116] and 0.150 [0.140, 0.159], the same
+verdict. So the smoothness gap is a target-type effect: neither the checkpoint rule nor the
+classifier's memorization creates it.
 
 ## Conclusion
 
 **Verdict: positive, and large.** Holding architecture, initialization, data, batch order, optimizer,
 step count and loss function fixed, swapping a discrete 10-way label target for a continuous 49-value
 image-reconstruction target makes the network's internal representation change roughly **4-6x more
-smoothly** under the standard activation-interpolation probe. The gap is significant at every layer
-(all bootstrap CIs exclude 0 by a wide margin), consistent across 3 seeds, present on **every one of
-the 90 digit transitions**, robust to the choice of distance normalization, and not explained by the
-classifier being more overtrained. Qualitatively (Figure 3) the regressor morphs a 6 into a 7 while
-the classifier snaps 6 -> 9 -> 7.
+smoothly** under the standard activation-interpolation probe, with each model measured at its
+best-validation-loss checkpoint. The gap is significant at every layer (all bootstrap CIs exclude 0
+by a wide margin), consistent across 3 seeds, present on **89 of the 90 digit transitions**, robust
+to the choice of distance normalization, and unchanged if the final step-30,000 weights are probed
+instead. Qualitatively (Figure 3) the regressor morphs a 6 into a 7 while the classifier snaps
+between confident digits.
 
 For the broader plateau question this is evidence that **plateaus are substantially a property of
 what we ask the network to output, not only of depth and ReLU geometry**. If plateaus were purely
@@ -360,16 +394,16 @@ when choosing which model's internals to trust for interpretability or steering 
    jump is 1.14-1.21 rather than 1.0. Shared architectural compression plausibly contributes a
    residual effect that continuous supervision does not remove.
 2. *Asymmetric training regime.* Matching step count exactly (the more important control) means the
-   classifier ends up memorizing while the regressor is still slowly improving, so the two models are
-   not matched in "how converged" they are. The plan's adequacy criterion of mild overfitting is met
-   by the classifier but not by the regressor, whose validation loss flattens without rising. The
-   early-stopped control (Figure 8) addresses the direction of this confound that could inflate our
-   result; the opposite direction — training the regressor to overfitting — would need many more
-   steps or less data and was not run.
+   two models sit at different points of their own trajectories: the classifier's best-validation
+   checkpoint arrives at step 7,500-16,200, the regressor's at 29,800, and the regressor's validation
+   loss never turns up at all, so the plan's mild-overfitting adequacy criterion is met by the
+   classifier only. Selecting each model's best-validation checkpoint (Methods) is what makes the
+   comparison as fair as it can be under a matched budget; the untested opposite direction — training
+   the regressor until it overfits — would need many more steps or less data.
 3. *Different output dimensionality.* The output-layer comparison puts a 10-d logit vector against a
    49-d pixel vector, which is not a like-for-like space. The hidden-layer-2 and -3 comparisons are
    immune to this (both 200-d, same architecture, same initial weights) and show the same effect at
-   4.4-4.8x, so the conclusion does not rest on the output layer.
+   4.3-4.5x, so the conclusion does not rest on the output layer.
 4. *Off-manifold path.* The endpoints are activations of real test images, but nothing guarantees the
    interpolated points correspond to any real input. This experiment asks whether continuous
    supervision changes behaviour under a fixed probe; it does not establish that every intermediate

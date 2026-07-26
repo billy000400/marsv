@@ -2,6 +2,10 @@
 """
 dir16 S3 — aggregate the probe, bootstrap the paired comparison, make figures.
 
+Every headline number and figure uses each model's BEST-VALIDATION-LOSS
+checkpoint (probe_{kind}_best.npz).  The final step-30,000 checkpoints
+(probe_{kind}.npz) enter only through the training-length control.
+
 Writes results/aggregate.json and every PNG in plots/.
 Usage: python experiments/analyze.py
 """
@@ -30,12 +34,13 @@ HAND = [(6, 7), (3, 5), (0, 1), (4, 9)]     # hand-selected transitions
 NBOOT = 10_000
 
 
-def load():
+def load(tag='_best'):
+    """Probe records; tag '_best' = best-val-loss checkpoint, '' = final step."""
     P = {}
     for s in SEEDS:
         for k, _, _, _, _ in KINDS:
             P[(s, k)] = dict(np.load(os.path.join(RESULTS, f'seed{s}',
-                                                  f'probe_{k}.npz')))
+                                                  f'probe_{k}{tag}.npz')))
     return P
 
 
@@ -59,69 +64,71 @@ def boot_ci(x, rng, n=NBOOT):
 # --------------------------------------------------------------------- figures
 def fig_training():
     fig, axes = plt.subplots(1, 3, figsize=(10.5, 3.1))
-    for k, lbl, c, ls, _ in KINDS:
+    for k, lbl, c, ls, mk in KINDS:
         ax = axes[0] if k == 'clf' else axes[1]
         for i, s in enumerate(SEEDS):
             h = json.load(open(os.path.join(RESULTS, f'seed{s}', f'{k}_history.json')))
             st = np.array(h['step'])
+            vl = np.array(h['val_loss'])
+            j = int(np.argmin(vl[1:])) + 1
             ax.plot(st[1:], h['train_loss'][1:], color=CVD[0], ls='-', lw=1,
                     alpha=.8, label='train loss' if i == 0 else None)
-            ax.plot(st[1:], h['val_loss'][1:], color=CVD[1], ls='--', lw=1,
+            ax.plot(st[1:], vl[1:], color=CVD[1], ls='--', lw=1,
                     alpha=.8, label='val loss' if i == 0 else None)
-            if k == 'clf':
-                vl = np.array(h['val_loss'])
-                j = int(np.argmin(vl[1:])) + 1
-                axes[2].plot(st[1:], vl[1:] / vl[j], color=CVD[1], ls='--', lw=1,
-                             alpha=.85, label='classifier val loss' if i == 0 else None)
-                axes[2].scatter([st[j]], [1.0], color=CVD[0], marker='v', s=30,
-                                zorder=4, label='minimum' if i == 0 else None)
+            ax.scatter([st[j]], [vl[j]], color=CVD[2], marker='v', s=34, zorder=5,
+                       label='best-val checkpoint (probed)' if i == 0 else None)
+            axes[2].plot(st[1:], vl[1:] / vl[j], color=c, ls=ls, lw=1, alpha=.85,
+                         label=f'{lbl}' if i == 0 else None)
+            axes[2].scatter([st[j]], [1.0], color=c, marker=mk, s=26, zorder=4)
         ax.set_yscale('log'); ax.set_xlabel('training step')
         ax.set_ylabel('MSE per output unit')
         ax.set_title(f'{lbl}  (3 seeds)'); ax.legend(fontsize=7)
     axes[2].set_xlabel('training step'); axes[2].set_ylim(0.98, 1.10)
     axes[2].set_ylabel('val loss / its minimum')
-    axes[2].set_title('classifier val loss, rescaled (3 seeds)')
+    axes[2].set_title('validation loss, rescaled (3 seeds)')
     axes[2].legend(fontsize=7)
     fig.tight_layout(); fig.savefig(os.path.join(PLOTS, 'training_curves.png'))
     plt.close(fig)
 
 
-def fig_control(P):
-    """Early-stopped classifier control: does the gap survive matched fitting?"""
-    info = json.load(open(os.path.join(RESULTS, 'control_earlystop.json')))
-    Pe = {s: dict(np.load(os.path.join(RESULTS, f'seed{s}', 'probe_clf_early.npz')))
-          for s in SEEDS}
+def fig_ckpt_control(P, Pf):
+    """Checkpoint control: does the verdict change if we probe the final step
+    instead of each model's best-validation-loss checkpoint?"""
     fig, axes = plt.subplots(1, 3, figsize=(10.5, 3.3), sharey=True)
-    series = [('classifier (final, step 30k)', 'clf', C_CLF, '-', 'o'),
-              ('classifier (early-stopped)', None, CVD[2], '-.', '^'),
-              ('regressor (final, step 30k)', 'reg', C_REG, '--', 's')]
+    series = [('classifier, best-val ckpt', P, 'clf', C_CLF, '-', 'o'),
+              ('classifier, final step 30k', Pf, 'clf', CVD[2], '-.', '^'),
+              ('regressor, best-val ckpt', P, 'reg', C_REG, '--', 's'),
+              ('regressor, final step 30k', Pf, 'reg', CVD[3], (0, (3, 1, 1, 1)), 'D')]
     out = {}
     for c, (key, lname) in enumerate(LAYERS):
         ax = axes[c]
-        vals = []
-        for lbl, k, col, ls, mk in series:
-            cur = (np.stack([P[(s, k)][key] for s in SEEDS]) if k
-                   else np.stack([Pe[s][key] for s in SEEDS]))
-            ax.plot(ALPHA, cur.mean((0, 1)), color=col, ls=ls, lw=1.8, label=lbl,
+        vals = {}
+        for lbl, src, k, col, ls, mk in series:
+            cur = np.stack([src[(s, k)][key] for s in SEEDS])
+            ax.plot(ALPHA, cur.mean((0, 1)), color=col, ls=ls, lw=1.6, label=lbl,
                     marker=mk, markevery=13, ms=4)
-            vals.append(float(np.mean([lin_dev(x) for x in cur])))
+            vals[lbl.replace(', best-val ckpt', '_best')
+                    .replace(', final step 30k', '_final')] = \
+                float(np.mean([lin_dev(x) for x in cur]))
         ax.plot([0, 1], [0, 1], color='0.6', lw=.8, ls=':', label='straight line')
         ax.set_title(lname); ax.set_xlabel(r'interpolation position $\alpha$')
-        out[key] = dict(zip(['clf_final', 'clf_early', 'reg_final'], vals))
+        out[key] = vals
     axes[0].set_ylabel(r'mean $d(\alpha)$ over 90 pairs, 3 seeds')
     axes[0].legend(fontsize=6.5, loc='lower right')
-    fig.tight_layout(); fig.savefig(os.path.join(PLOTS, 'control_earlystop.png'))
+    fig.tight_layout(); fig.savefig(os.path.join(PLOTS, 'checkpoint_control.png'))
     plt.close(fig)
-    # paired CI: early-stopped classifier minus regressor
+    # paired CI with BOTH models at their final step
     rng = np.random.default_rng(1)
     for key, _ in LAYERS:
-        c = np.mean([lin_dev(Pe[s][key]) for s in SEEDS], 0)
-        r = np.mean([lin_dev(P[(s, 'reg')][key]) for s in SEEDS], 0)
+        c = np.mean([lin_dev(Pf[(s, 'clf')][key]) for s in SEEDS], 0)
+        r = np.mean([lin_dev(Pf[(s, 'reg')][key]) for s in SEEDS], 0)
         lo, hi = boot_ci(c - r, rng)
-        out[key].update({'diff_early_minus_reg': float((c - r).mean()),
-                         'ci': [lo, hi],
+        out[key].update({'diff_final_ckpt': float((c - r).mean()), 'ci': [lo, hi],
                          'frac_pairs_reg_lower': float((r < c).mean())})
-    out['stop_info'] = info
+    out['ckpt_steps'] = {
+        str(s): {k: json.load(open(os.path.join(RESULTS, f'seed{s}',
+                                                'summary.json')))[k]['val_min_step']
+                 for k in ['clf', 'reg']} for s in SEEDS}
     return out
 
 
@@ -129,7 +136,7 @@ def fig_recon(device):
     """Regressor task quality: corrupted input, its 7x7 pooling, prediction, target."""
     ds = build_dataset()
     m = MLP(49).to(device)
-    m.load_state_dict(torch.load(os.path.join(RESULTS, 'seed0', 'reg.pt'),
+    m.load_state_dict(torch.load(os.path.join(RESULTS, 'seed0', 'reg_best.pt'),
                                  map_location=device))
     m.eval()
     idx = [int(torch.where(ds['te_lab'] == c)[0][0]) for c in range(10)]
@@ -253,7 +260,7 @@ def fig_path_recon(device):
     fig, axes = plt.subplots(2, 11, figsize=(11, 2.5))
     for row, (kind, n_out) in enumerate([('reg', 49), ('clf', 10)]):
         m = MLP(n_out).to(device)
-        m.load_state_dict(torch.load(os.path.join(RESULTS, 'seed0', f'{kind}.pt'),
+        m.load_state_dict(torch.load(os.path.join(RESULTS, 'seed0', f'{kind}_best.pt'),
                                      map_location=device))
         m.eval()
         with torch.no_grad():
@@ -283,7 +290,8 @@ def fig_path_recon(device):
 def main():
     device = setup()
     os.makedirs(PLOTS, exist_ok=True)
-    P = load()
+    P = load('_best')          # every headline number: best-val-loss checkpoint
+    Pf = load('')              # final step 30,000: control only
     rng = np.random.default_rng(0)
 
     agg = {'per_seed': {}, 'pooled': {}}
@@ -322,10 +330,10 @@ def main():
 
     fig_training(); fig_recon(device); fig_hand(P); fig_mean_curves(P)
     fig_paired(agg); fig_scatter(P); fig_path_recon(device)
-    agg['control_earlystop'] = fig_control(P)
+    agg['ckpt_control'] = fig_ckpt_control(P, Pf)
     json.dump(agg, open(os.path.join(RESULTS, 'aggregate.json'), 'w'), indent=1)
     print(json.dumps(agg['pooled'], indent=1))
-    print(json.dumps(agg['control_earlystop'], indent=1))
+    print(json.dumps(agg['ckpt_control'], indent=1))
     print('figures written to', PLOTS)
 
 

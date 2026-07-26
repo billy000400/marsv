@@ -2,17 +2,17 @@
   clf step 10000: train=0.00004 val=0.00552 acc=0.965125 (11s)
   clf step 15000: train=0.00001 val=0.00505 acc=0.968125 (16s)
   clf step 20000: train=0.00000 val=0.00512 acc=0.96825 (21s)
-  clf step 25000: train=0.00000 val=0.00510 acc=0.9685 (28s)
+  clf step 25000: train=0.00000 val=0.00510 acc=0.9685 (27s)
   clf step 30000: train=0.00000 val=0.00511 acc=0.967625 (33s)
-[clf] test_loss=0.005799 test_acc=0.9638 val_min=0.005029@14400 val_final=0.005110
+[clf] test_loss=0.005799 test_acc=0.9638 val_min=0.005029@14400 val_final=0.005110 best_ckpt: test_loss=0.005781 test_acc=0.9637
 [verify] clf and reg share bit-identical init in layers 1-3
-  reg step 5000: train=0.00129 val=0.00140 acc=None (5s)
-  reg step 10000: train=0.00112 val=0.00126 acc=None (10s)
-  reg step 15000: train=0.00104 val=0.00122 acc=None (15s)
-  reg step 20000: train=0.00097 val=0.00116 acc=None (20s)
-  reg step 25000: train=0.00093 val=0.00113 acc=None (25s)
-  reg step 30000: train=0.00091 val=0.00112 acc=None (33s)
-[reg] test_loss=0.001112 test_acc=None val_min=0.001118@29800 val_final=0.001118
+  reg step 5000: train=0.00129 val=0.00140 acc=None (6s)
+  reg step 10000: train=0.00112 val=0.00126 acc=None (11s)
+  reg step 15000: train=0.00104 val=0.00122 acc=None (16s)
+  reg step 20000: train=0.00097 val=0.00116 acc=None (21s)
+  reg step 25000: train=0.00093 val=0.00113 acc=None (26s)
+  reg step 30000: train=0.00091 val=0.00112 acc=None (32s)
+[reg] test_loss=0.001112 test_acc=None val_min=0.001118@29800 val_final=0.001118 best_ckpt: test_loss=0.001112 test_acc=None
 {
  "clf": {
   "test_loss": 0.005799166259765625,
@@ -22,7 +22,10 @@
   "val_min_step": 14400,
   "val_final_loss": 0.005109613800048828,
   "overfits": true,
-  "seconds": 33.53610420227051
+  "best_test_loss": 0.005780658569335938,
+  "best_test_acc": 0.9637,
+  "best_train_loss": 7.990555167198181e-06,
+  "seconds": 32.87645649909973
  },
  "reg": {
   "test_loss": 0.0011121856066645408,
@@ -32,7 +35,10 @@
   "val_min_step": 29800,
   "val_final_loss": 0.0011180489987743145,
   "overfits": true,
-  "seconds": 32.90253710746765
+  "best_test_loss": 0.0011121031469228317,
+  "best_test_acc": null,
+  "best_train_loss": 0.0009145259935028699,
+  "seconds": 31.94928741455078
  },
  "baselines": {
   "reg_mean_target": 0.029072215780615807,

@@ -8,6 +8,11 @@ cosine LR 1e-3 -> 1e-6, MSE loss.  Only the head differs: 10 one-hot logits
 (classifier) vs 49 pooled pixels (regressor).  Same seed => bit-identical
 initial weights in the three shared layers (asserted) and identical batch order.
 
+Two checkpoints are saved per model: `{kind}_best.pt`, the weights at the
+lowest validation loss over the run (evaluated every 100 steps) — this is the
+checkpoint every interpolation evaluation uses — and `{kind}.pt`, the weights
+at the final step, kept only for the training-length control.
+
 Usage: python experiments/train.py --seed 0 [--steps N]
 """
 import argparse, json, os, sys, time
@@ -99,7 +104,10 @@ def main():
                          ('val_acc', vacc), ('lr', opt.param_groups[0]['lr'])]:
                 hist[k].append(v)
 
+        snap = lambda: {k: v.detach().cpu().clone()
+                        for k, v in model.state_dict().items()}
         record(0)
+        best = {'val': hist['val_loss'][0], 'step': 0, 'sd': snap()}
         for step in range(1, args.steps + 1):
             pos = (step - 1) % STEPS_PER_EPOCH
             if pos == 0:
@@ -109,6 +117,8 @@ def main():
             opt.zero_grad(); loss.backward(); opt.step(); sched.step()
             if step % EVAL_EVERY == 0:
                 record(step)
+                if hist['val_loss'][-1] < best['val']:
+                    best = {'val': hist['val_loss'][-1], 'step': step, 'sd': snap()}
                 if step % 5000 == 0:
                     print(f'  {kind} step {step}: train={hist["train_loss"][-1]:.5f} '
                           f'val={hist["val_loss"][-1]:.5f} '
@@ -121,18 +131,27 @@ def main():
         os.makedirs(d, exist_ok=True)
         torch.save({k: v.cpu() for k, v in model.state_dict().items()},
                    os.path.join(d, f'{kind}.pt'))
+        # best-validation-loss checkpoint: the one every probe evaluates
+        torch.save(best['sd'], os.path.join(d, f'{kind}_best.pt'))
+        model.load_state_dict(best['sd'])
+        bt_loss, bt_acc = evaluate(model, te_in, tgt_te, lab_te)
+        b_train, _ = evaluate(model, tr_in[trs], tgt_tr[trs], None)
         vmin = int(np.argmin(hist['val_loss']))
+        assert hist['step'][vmin] == best['step'], 'best-checkpoint step mismatch'
         out[kind] = {'test_loss': te_loss, 'test_acc': te_acc,
                      'final_train_loss': hist['train_loss'][-1],
                      'val_min_loss': hist['val_loss'][vmin],
                      'val_min_step': hist['step'][vmin],
                      'val_final_loss': hist['val_loss'][-1],
                      'overfits': hist['val_loss'][-1] > hist['val_loss'][vmin],
+                     'best_test_loss': bt_loss, 'best_test_acc': bt_acc,
+                     'best_train_loss': b_train,
                      'seconds': time.time() - t0}
         json.dump(hist, open(os.path.join(d, f'{kind}_history.json'), 'w'))
         print(f'[{kind}] test_loss={te_loss:.6f} test_acc={te_acc} '
               f'val_min={hist["val_loss"][vmin]:.6f}@{hist["step"][vmin]} '
-              f'val_final={hist["val_loss"][-1]:.6f}', flush=True)
+              f'val_final={hist["val_loss"][-1]:.6f} '
+              f'best_ckpt: test_loss={bt_loss:.6f} test_acc={bt_acc}', flush=True)
 
     out['baselines'] = {'reg_mean_target': base_mean, 'reg_pool_corrupted': base_pool}
     out['config'] = {'seed': args.seed, 'steps': args.steps, 'batch': BATCH,

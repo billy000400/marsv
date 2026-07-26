@@ -1,18 +1,18 @@
-  clf step 5000: train=0.00042 val=0.00575 acc=0.964 (6s)
+  clf step 5000: train=0.00042 val=0.00575 acc=0.964 (8s)
   clf step 10000: train=0.00006 val=0.00525 acc=0.966125 (13s)
-  clf step 15000: train=0.00003 val=0.00544 acc=0.96675 (18s)
-  clf step 20000: train=0.00000 val=0.00548 acc=0.966 (23s)
-  clf step 25000: train=0.00000 val=0.00546 acc=0.9655 (28s)
-  clf step 30000: train=0.00000 val=0.00547 acc=0.96575 (33s)
-[clf] test_loss=0.006114 test_acc=0.9615 val_min=0.005169@7500 val_final=0.005466
+  clf step 15000: train=0.00003 val=0.00544 acc=0.96675 (19s)
+  clf step 20000: train=0.00000 val=0.00548 acc=0.966 (26s)
+  clf step 25000: train=0.00000 val=0.00546 acc=0.9655 (31s)
+  clf step 30000: train=0.00000 val=0.00547 acc=0.96575 (36s)
+[clf] test_loss=0.006114 test_acc=0.9615 val_min=0.005169@7500 val_final=0.005466 best_ckpt: test_loss=0.005780 test_acc=0.9634
 [verify] clf and reg share bit-identical init in layers 1-3
   reg step 5000: train=0.00127 val=0.00138 acc=None (5s)
-  reg step 10000: train=0.00111 val=0.00126 acc=None (10s)
-  reg step 15000: train=0.00102 val=0.00120 acc=None (15s)
+  reg step 10000: train=0.00111 val=0.00126 acc=None (11s)
+  reg step 15000: train=0.00102 val=0.00120 acc=None (16s)
   reg step 20000: train=0.00096 val=0.00116 acc=None (21s)
   reg step 25000: train=0.00093 val=0.00114 acc=None (26s)
   reg step 30000: train=0.00092 val=0.00113 acc=None (31s)
-[reg] test_loss=0.001124 test_acc=None val_min=0.001131@29800 val_final=0.001131
+[reg] test_loss=0.001124 test_acc=None val_min=0.001131@29800 val_final=0.001131 best_ckpt: test_loss=0.001124 test_acc=None
 {
  "clf": {
   "test_loss": 0.006113843994140625,
@@ -22,7 +22,10 @@
   "val_min_step": 7500,
   "val_final_loss": 0.005466400527954101,
   "overfits": true,
-  "seconds": 33.29199814796448
+  "best_test_loss": 0.0057799853515625,
+  "best_test_acc": 0.9634,
+  "best_train_loss": 0.00010868717193603515,
+  "seconds": 37.240326166152954
  },
  "reg": {
   "test_loss": 0.0011243253746811225,
@@ -32,7 +35,10 @@
   "val_min_step": 29800,
   "val_final_loss": 0.0011308142214405293,
   "overfits": true,
-  "seconds": 31.42898988723755
+  "best_test_loss": 0.0011240804866868622,
+  "best_test_acc": null,
+  "best_train_loss": 0.0009177096619897959,
+  "seconds": 31.818483352661133
  },
  "baselines": {
   "reg_mean_target": 0.029072215780615807,

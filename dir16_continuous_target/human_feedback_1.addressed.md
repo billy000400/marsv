@@ -1,0 +1,1 @@
+When you evaluate interpolation, can you pick the checkpoint that has the best val_loss. Make that explicit in the REPORT.md.

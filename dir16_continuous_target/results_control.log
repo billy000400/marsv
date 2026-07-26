@@ -1,3 +1,0 @@
-seed0: early-stop @7500 acc=0.9634 train_mse=1.09e-04
-seed1: early-stop @16200 acc=0.9639 train_mse=3.59e-06
-seed2: early-stop @14400 acc=0.9637 train_mse=7.99e-06
