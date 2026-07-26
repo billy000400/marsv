@@ -93,9 +93,9 @@ Use bootstrap confidence intervals over image pairs. Also show the raw `d(alpha)
 
 ## Stages (checklist)
 
-- [ ] **S1 â Train matched models.** Implement the shared corrupted-MNIST dataset, train both MLPs for 3 seeds, verify task quality, and save checkpoints plus training curves.
-- [ ] **S2 â Run the matched interpolation probe.** Reuse the existing slerp and `d(alpha)` code, verify it on the hand-selected transitions, and save side-by-side classifier/regressor plots plus regression reconstructions.
-- [ ] **S3 â Aggregate and report.** Run the fixed 90-pair set, plot layerwise paired differences with confidence intervals, write the verdict and limitations in `REPORT.md`, update `RESULTS.md`, and write `STOP`.
+- [x] **S1 â Train matched models.** Implement the shared corrupted-MNIST dataset, train both MLPs for 3 seeds, verify task quality, and save checkpoints plus training curves.
+- [x] **S2 â Run the matched interpolation probe.** Reuse the existing slerp and `d(alpha)` code, verify it on the hand-selected transitions, and save side-by-side classifier/regressor plots plus regression reconstructions.
+- [x] **S3 â Aggregate and report.** Run the fixed 90-pair set, plot layerwise paired differences with confidence intervals, write the verdict and limitations in `REPORT.md`, update `RESULTS.md`, and write `STOP`.
 
 Every reported metric must be defined in `REPORT.md` and have a corresponding saved figure in `plots/`.
 
@@ -126,8 +126,21 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Fresh direction; no implementation yet.
+**Complete.** S1-S3 all done in one iteration (2026-07-26). Both models trained and verified on 3
+seeds; the frozen 90-pair probe run for both; aggregate paired comparison with bootstrap CIs, the
+hand-selected `d(alpha)` curves, reconstructions along the path, and an early-stopped-classifier
+control are all in RESULTS.md / REPORT.md with 8 embedded figures.
+
+**Verdict: POSITIVE.** The regressor's representation is 4.4-5.9x closer to a constant-rate
+transition than the classifier's (linearity deviation, all bootstrap CIs exclude 0, 90/90 pairs,
+3 seeds), and the gap survives matching the classifier to its best-generalizing checkpoint.
+
+Deviation from the setup, logged in JOURNAL.md: under matched training the regressor does not
+overfit (its validation loss flattens rather than rising), so the "slight overfitting" adequacy
+criterion is met by the classifier only. Matched step count was kept in preference to forcing
+regressor overfitting; reported as Limitation 2 in REPORT.md.
 
 ## Next step
 
-Copy the existing 4-layer MNIST MLP and interpolation code into the new folder, then implement one shared dataset that returns `(corrupted_image, digit_label, clean_7x7_target)`.
+None — success criterion met and no unaddressed operator feedback, so `STOP` is written. If new
+feedback arrives, delete `STOP`, address it, and re-write `STOP` when clean.

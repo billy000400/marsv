@@ -1,0 +1,49 @@
+  clf step 5000: train=0.00028 val=0.00631 acc=0.961625 (7s)
+  clf step 10000: train=0.00004 val=0.00516 acc=0.967625 (13s)
+  clf step 15000: train=0.00001 val=0.00506 acc=0.968625 (18s)
+  clf step 20000: train=0.00000 val=0.00502 acc=0.96775 (23s)
+  clf step 25000: train=0.00000 val=0.00501 acc=0.969125 (28s)
+  clf step 30000: train=0.00000 val=0.00503 acc=0.969875 (33s)
+[clf] test_loss=0.005751 test_acc=0.9654 val_min=0.004992@16200 val_final=0.005033
+[verify] clf and reg share bit-identical init in layers 1-3
+  reg step 5000: train=0.00126 val=0.00138 acc=None (5s)
+  reg step 10000: train=0.00112 val=0.00127 acc=None (10s)
+  reg step 15000: train=0.00104 val=0.00120 acc=None (15s)
+  reg step 20000: train=0.00098 val=0.00116 acc=None (20s)
+  reg step 25000: train=0.00094 val=0.00113 acc=None (26s)
+  reg step 30000: train=0.00093 val=0.00112 acc=None (31s)
+[reg] test_loss=0.001114 test_acc=None val_min=0.001120@29800 val_final=0.001120
+{
+ "clf": {
+  "test_loss": 0.00575127197265625,
+  "test_acc": 0.9654,
+  "final_train_loss": 1.3886372558772564e-07,
+  "val_min_loss": 0.004991811370849609,
+  "val_min_step": 16200,
+  "val_final_loss": 0.005033450317382813,
+  "overfits": true,
+  "seconds": 33.66386008262634
+ },
+ "reg": {
+  "test_loss": 0.0011144549934231506,
+  "test_acc": null,
+  "final_train_loss": 0.0009306818125199299,
+  "val_min_loss": 0.001119550743881537,
+  "val_min_step": 29800,
+  "val_final_loss": 0.0011198257134885205,
+  "overfits": true,
+  "seconds": 30.83964204788208
+ },
+ "baselines": {
+  "reg_mean_target": 0.029072215780615807,
+  "reg_pool_corrupted": 0.01292342133820057
+ },
+ "config": {
+  "seed": 1,
+  "steps": 30000,
+  "batch": 200,
+  "sigma": 0.3,
+  "opt": "AdamW(1e-3, wd=0.01)",
+  "sched": "CosineAnnealingLR(eta_min=1e-6)"
+ }
+}
