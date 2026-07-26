@@ -1,0 +1,9 @@
+{
+ "rerun_paths": 20,
+ "rerun_top1_mismatches": 0,
+ "rerun_max_prob_deviation": 2.682209014892578e-06,
+ "batching_contexts": 32,
+ "batching_max_abs_logit_diff": 4.1961669921875e-05,
+ "batching_top1_changes": 0,
+ "padding": "none (all contexts are 32 tokens)"
+}

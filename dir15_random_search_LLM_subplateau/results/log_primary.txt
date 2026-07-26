@@ -1,0 +1,23 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 8026.99it/s]
+  0/8000 paths  1s  eta 6575s
+  400/8000 paths  46s  eta 880s
+  800/8000 paths  93s  eta 833s
+  1200/8000 paths  139s  eta 788s
+  1600/8000 paths  186s  eta 743s
+  2000/8000 paths  232s  eta 697s
+  2400/8000 paths  279s  eta 651s
+  2800/8000 paths  326s  eta 605s
+  3200/8000 paths  373s  eta 559s
+  3600/8000 paths  419s  eta 513s
+  4000/8000 paths  466s  eta 466s
+  4400/8000 paths  513s  eta 420s
+  4800/8000 paths  560s  eta 373s
+  5200/8000 paths  607s  eta 327s
+  5600/8000 paths  653s  eta 280s
+  6000/8000 paths  700s  eta 233s
+  6400/8000 paths  747s  eta 187s
+  6800/8000 paths  793s  eta 140s
+  7200/8000 paths  840s  eta 93s
+  7600/8000 paths  887s  eta 47s
+screen_primary: 8000 paths, 7611 eligible, 1290 candidates, endpoint fidelity max|dlogit| = 1.53e-05, 934s -> /workspace/marsv_agent_haoyang/dir15_random_search_LLM_subplateau/experiments/../results/screen_primary.pkl

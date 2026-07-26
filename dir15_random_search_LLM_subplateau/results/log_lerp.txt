@@ -1,0 +1,8 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  10%|█         | 45/436 [00:00<00:02, 184.53it/s]Loading weights:  20%|█▉        | 87/436 [00:00<00:01, 255.94it/s]Loading weights:  27%|██▋       | 116/436 [00:00<00:01, 177.00it/s]Loading weights:  36%|███▌      | 156/436 [00:00<00:01, 228.08it/s]Loading weights:  50%|████▉     | 217/436 [00:00<00:00, 319.75it/s]Loading weights:  64%|██████▍   | 281/436 [00:00<00:00, 394.25it/s]Loading weights:  78%|███████▊  | 339/436 [00:01<00:00, 293.71it/s]Loading weights:  92%|█████████▏| 403/436 [00:01<00:00, 344.00it/s]Loading weights: 100%|██████████| 436/436 [00:01<00:00, 314.31it/s]
+  0/2000 paths  1s  eta 1579s
+  400/2000 paths  47s  eta 188s
+  800/2000 paths  93s  eta 140s
+  1200/2000 paths  140s  eta 93s
+  1600/2000 paths  187s  eta 47s
+screen_primary_lerp: 2000 paths, 1904 eligible, 307 candidates, endpoint fidelity max|dlogit| = 1.14e-05, 233s -> /workspace/marsv_agent_haoyang/dir15_random_search_LLM_subplateau/experiments/../results/screen_primary_lerp.pkl
