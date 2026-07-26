@@ -332,3 +332,35 @@ Grokking-side result into the deliverables.
   control runs on the same non-grokking checkpoint).
 - Render checks: REPORT.md 10/10 `js-display-math`, 0 `<pre lang="math">`, 0 KaTeX errors, 0
   inline-math hazards; 16 embedded images in each deliverable, all present on disk.
+
+## 2026-07-26 (operator feedback #4 — REPORT.md math did not render on GitHub)
+
+- **Fixed the broken equation in REPORT.md Methods.** The next-character-probability definition used
+  `\operatorname{softmax}`, which **GitHub's math renderer refuses** — it replaces the whole equation
+  with the red error *"The following macros are not allowed: operatorname"*, so that definition was
+  invisible to any reader on GitHub. Now `\mathrm{softmax}`, which renders. Same paragraph: inline
+  `$x_{ctx}$` → `$x_{\text{ctx}}$` so the context subscript is upright rather than reading as a
+  product of three variables. No numbers, figures or claims changed.
+- **This was a regression of operator feedback #1** (same `\operatorname` complaint, addressed
+  2026-07-17). It reappeared because the feedback-#3 iteration wrote a new Methods paragraph, and the
+  render check in use at the time (GitHub-API `js-display-math` placement + an inline-hazard grep)
+  cannot catch it: the LaTeX is *valid*, so placement passes and KaTeX itself compiles it — only
+  GitHub's macro denylist rejects it. Hence the mechanical guard below rather than another prose fix.
+- **New `experiments/check_render.py` + `experiments/katex_compile.js`** — one command that fails
+  loudly on all four known GitHub-rendering traps: (1) KaTeX-compiles every ` ```math ` fence;
+  (2) KaTeX-compiles every inline `$…$` **after applying GitHub's backslash-before-punctuation
+  stripping**, so CLAUDE.md rule-8b breaks surface as real KaTeX errors instead of silently;
+  (3) flags denylisted macros (`\operatorname`, `\def`/`\newcommand`-family, `\href`/`\html*`);
+  (4) confirms via the GitHub markdown API that each display equation became `js-display-math` and
+  none became `<pre lang="math">`, and that no `(plots/x.png)` path is missing its `![…]` embed.
+  Self-tested against a file containing one of each failure mode (5/5 caught, exit 1).
+- **Both deliverables now pass** it: REPORT.md 10 display equations, 91 inline expressions, 16
+  embedded figures, **0 problems**; RESULTS.md 16 embedded figures, 0 problems.
+- **`../CLAUDE.md` updated** as the feedback requested, surgically: new **8c** (GitHub rejects
+  `\operatorname` and the definition/HTML macro families outright — use `\mathrm`/`\text`; built-in
+  operators need no wrapper) and **8d** (run one script that checks 8a–8c and rule 12; eyeballing has
+  failed every time), with the one-time `npm install --prefix /tmp/katexcheck katex` setup.
+- **Deliverables record the check** for the reader: a "Rendering check" paragraph in REPORT.md
+  §Methods/Figure conventions and a line in RESULTS.md §Implementation checks.
+- Verdicts, gate table, plateau numbers and all 16 figures per deliverable unchanged (case 5 + the S6
+  secondary temporal observation). `human_feedback_4.txt` → `human_feedback_4.addressed.md`.

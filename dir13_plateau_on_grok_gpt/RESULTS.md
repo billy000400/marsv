@@ -313,6 +313,9 @@ modest effect, not the tight relationship a single context suggested.
 - Batched interpolation matches a single-example reference to < 1e-5.
 - Synthetic step path detected (w = 0.089); synthetic linear path rejected (w = 0.800).
 - Slerp endpoints exact; norms interpolate linearly; documented near-collinear fallback.
+- Both deliverables are checked to render on GitHub by `experiments/check_render.py` (KaTeX-compiles
+  every equation, rejects macros GitHub's math renderer blocks such as `\operatorname`, and confirms
+  every figure is an embedded image rather than a bare path).
 
 ## Headline
 

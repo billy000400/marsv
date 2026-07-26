@@ -133,11 +133,11 @@ so the numbers are directly comparable to the `b↔i`/`b↔l` controls.
 
 Two extra quantities are measured at the final checkpoint, only to ask *why* some pairs switch more
 sharply than others. The first asks whether sharpness tracks how ordinary the second character is in
-this context. With $x_{ctx}$ the context `"The house was "` and $f$ the model, the model's
+this context. With $x_{\text{ctx}}$ the context `"The house was "` and $f$ the model, the model's
 **next-character probability** for character $c$ is its softmax score at the final position:
 
 ```math
-p(c)=\operatorname{softmax}\big(f(x_{ctx})\big)_c .
+p(c)=\mathrm{softmax}\big(f(x_{\text{ctx}})\big)_c .
 ```
 
 The second is a control against a trivial explanation — that flat curves merely mean the two
@@ -308,6 +308,13 @@ identified by colour alone** — each also carries a distinct linestyle, marker 
 captions name. Continuous quantities use the `viridis` or `cividis` ramps, which stay monotone in
 lightness and so remain readable in grayscale. Two reference lines recur: the gray dashed
 no-plateau diagonal ($w = 0.8$) and the black dotted strict plateau bar ($w = 0.25$).
+
+**Rendering check.** Every equation and figure in this report is verified to render on GitHub by
+`experiments/check_render.py`: it compiles each display equation and each inline expression with
+KaTeX (applying GitHub's own backslash-stripping to inline math first), rejects macros GitHub's
+renderer refuses (`\mathrm{softmax}` is used rather than `\operatorname{softmax}`, which GitHub
+blocks), and confirms through the GitHub markdown API that all 10 display equations render as math and
+that no figure is referenced by a bare path instead of an embedded image.
 
 ### Implementation checks (all passed before the full run)
 

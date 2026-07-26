@@ -188,9 +188,19 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**COMPLETE (2026-07-25): all stages S1–S8 done + operator feedback #3 addressed + figures made
-colour-vision-deficiency-safe + a 576-pair context control added. Bounded verdict = case 5 + S6
-secondary (unchanged). STOP re-written.**
+**COMPLETE (2026-07-26): all stages S1–S8 done, all four operator feedback files addressed, both
+deliverables verified to render on GitHub. Bounded verdict = case 5 + S6 secondary (unchanged).
+STOP re-written.**
+
+- **Feedback #4 (`human_feedback_4.addressed.md`) — REPORT.md math did not render.** One Methods
+  equation used `\operatorname{softmax}`, which GitHub's math renderer **refuses** ("The following
+  macros are not allowed: operatorname"), so that definition was invisible on GitHub. Fixed to
+  `\mathrm{softmax}` (and `x_{ctx}` → `x_{\text{ctx}}`). This was a **regression of feedback #1**, so
+  the real fix is mechanical: new `experiments/check_render.py` (+ `katex_compile.js`) KaTeX-compiles
+  every display and inline expression — inline ones *after* applying GitHub's backslash-stripping —
+  flags denylisted macros, and confirms display-math placement and figure embeds through the GitHub
+  markdown API. Both deliverables pass with **0 problems**; `../CLAUDE.md` gained rules **8c** (blocked
+  macros) and **8d** (run the one script). No numbers, figures or verdicts changed.
 
 - **CVD compliance (CLAUDE.md rule 13).** All 14 embedded figures regenerated via new
   `experiments/cvd_style.py`: the Figure-9 panels' train/test/**random** local-complexity lines were
@@ -234,7 +244,9 @@ secondary (unchanged). STOP re-written.**
 
 ## Next step
 
-None — plan complete, feedback #3 addressed, figures CVD-safe, `STOP` re-written. All success criteria
+None — plan complete, feedback #1–#4 all addressed, figures CVD-safe, deliverables render-verified
+(`python3 experiments/check_render.py REPORT.md RESULTS.md` → exit 0; run this before finishing any
+future iteration), `STOP` re-written. All success criteria
 met: three Figure-9 gate verdicts (all FAIL), a checkpoint-aligned figure showing both Grokking metrics
 and plateau width on one axis, the two `b/i`/`b/l` char controls as primary plateau evidence, the
 40-pair set demoted to a labelled exploratory appendix, and the bounded case-5 relationship verdict.

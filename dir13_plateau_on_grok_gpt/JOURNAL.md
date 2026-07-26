@@ -387,3 +387,59 @@ the final token) and a second model, the two scope limits the context control do
 
 On track? yes — plan COMPLETE (100%); this iteration fixed a hard CVD rule violation across all 14
 figures and added a 576-pair context control that refines one claim and strengthens another; blocker: none.
+
+## 2026-07-26 (11) — operator feedback #4: REPORT.md math did not render on GitHub
+
+**Did.** Feedback-first per CLAUDE.md Part C. `human_feedback_4.txt` was a screenshot-paste of
+REPORT.md's Methods paragraph ending in *"The following macros are not allowed: operatorname"*, plus
+"if you find something useful, update CLAUDE.md".
+
+1. Diagnosed: `p(c)=\operatorname{softmax}(f(x_{ctx}))_c` at REPORT.md L140. GitHub runs KaTeX with a
+   macro **denylist**; a denied macro nukes the entire equation. Fixed to `\mathrm{softmax}` and made
+   the subscript upright (`x_{\text{ctx}}`). The rest of the pasted garble was just copy artefacts of
+   correctly-rendered inline math (each KaTeX glyph is its own span, so `x_{ctx}` pastes as "x c t x").
+2. **This was a regression of feedback #1** — the identical complaint, marked addressed 2026-07-17. It
+   came back with the new Methods paragraph written for feedback #3. So a prose fix alone is worthless
+   here; the failure needs a machine check.
+3. Wrote `experiments/check_render.py` + `experiments/katex_compile.js`: KaTeX-compiles every display
+   fence; KaTeX-compiles every inline `$…$` **after applying GitHub's backslash-before-punctuation
+   stripping** (so rule-8b breaks become real errors, not silent ones); flags denylisted macros;
+   confirms display-math placement via the GitHub markdown API; checks every plot path is an `![…]`
+   embed. Self-tested on a file with one of each bug: 5/5 caught, exit 1. Both deliverables: 0 problems.
+4. Updated `../CLAUDE.md` surgically with **8c** (never `\operatorname`/`\DeclareMathOperator`, nor the
+   `\def`/`\newcommand` and `\href`/`\html*` families; use `\mathrm`/`\text`; `\max`, `\arg\max`, `\Pr`,
+   `\arccos` are built in) and **8d** (run the one script; eyeballing has failed every time).
+5. Recorded the check in both deliverables (REPORT.md §Figure conventions, RESULTS.md §Implementation
+   checks) so the answer lives in the deliverables, then renamed the feedback file to
+   `human_feedback_4.addressed.md` and logged CHANGELOG.
+
+**Learned.** The two render checks CLAUDE.md already mandated are both *necessary and insufficient*:
+the GitHub-API check only proves the delimiters were recognised (it returns the raw LaTeX inside a
+`js-display-math` element — GitHub compiles client-side, so the API can never tell you the formula is
+broken), and the inline-hazard grep only covers backslash-punctuation. `\operatorname` passes both and
+also passes a plain KaTeX compile, because KaTeX supports it and only *GitHub* forbids it. That is
+exactly the gap that let the same operator complaint recur twice, and it is why the denylist check has
+to be explicit. Confirmed independently: GitHub community discussion #55368 reports `\operatorname`
+not working in GitHub markdown math.
+
+**Assumptions logged (loop mode, could not ask).** (a) The denylist beyond `\operatorname` (definition
+macros, `\href`/`\html*`) is **precautionary** — only `\operatorname` is confirmed by the operator's
+screenshot; I could not verify the rest because GitHub compiles math in the browser and the markdown
+API returns raw LaTeX. Rejected alternative: listing only `\operatorname`, which would let the next
+blocked macro through. (b) Installed `katex` via npm into `/tmp/katexcheck` (not into the repo, and not
+touching the pinned torch/TransformerLens stack per PLAN out-of-scope); the script auto-installs it on
+a fresh pod. (c) Did **not** fix the `\operatorname` hits I found in `dir3_manifold/PLAN.md` and
+`dir4_cold_diffusion_steering/REPORT_3_external_validity.md` — other agents own those directions and
+are editing them concurrently; the shared CLAUDE.md 8c/8d update is the right lever. Also left the
+`\operatorname` occurrences in this direction's CHANGELOG.md/JOURNAL.md alone: those files are
+append-only history and rule 7 forbids rewriting earlier entries. (d) Kept the CLAUDE.md edit additive
+rather than also condensing 8a/8b, because three other agents share that file this run.
+
+**Next step.** None outstanding — plan complete (S1–S8), all four feedback files addressed, both
+deliverables render-verified, `STOP` re-written. If new `human_feedback*`/`*REVIEW*` arrives: delete
+`STOP`, address it, run `python3 experiments/check_render.py REPORT.md RESULTS.md` before finishing,
+re-STOP when clean. Untested scope limits if reopened: interpolation positions other than the final
+token, and a second model.
+
+On track? yes — plan COMPLETE (100%); this iteration fixed a GitHub-rendering regression that hid one
+Methods equation and added a mechanical guard so it cannot recur silently; blocker: none.
