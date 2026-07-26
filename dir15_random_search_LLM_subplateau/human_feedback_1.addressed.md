@@ -1,0 +1,1 @@
+Can you show some examples that sub-plateau shows up? what the sequence? interpolate from where to where? Show plots in Mathew's plateau lesswrong post style.

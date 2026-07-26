@@ -233,19 +233,31 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocke
 
 ## Current status
 
-**Complete (S1-S6, all in the 2026-07-26 iteration).** The protocol was frozen and run: 5,980
+**Complete (S1-S6), plus one operator-feedback iteration.** The protocol was frozen and run: 5,980
 32-token WikiText-103-validation windows, three disjoint banks, GPT-2 Large `resid_post` at blocks
 0/2/4/6, 50-alpha `slerp_rescale` paths, 8,000 primary paths (+2,400 validation, +6,800 control).
 Headline: **16.9% of eligible paths [16.1, 17.8] show a persistent third top-1 token**, replicated at
 17.7% on the disjoint validation bank, 0% on self-pairs, 16.1% under linear interpolation and 11.1%
 on same-prediction pairs. The typical third region is weak (higher entropy than the endpoints,
 generic token, off-manifold, unsupported by natural neighbours); a ~3-4% minority is a genuine crisp
-third state. Verdict, all figures and all controls are in `RESULTS.md` / `REPORT.md`; history in
-`CHANGELOG.md`.
+third state.
+
+`human_feedback_1` (worked examples + Matthew-style plateau plots) was addressed and the file renamed
+`human_feedback_1.addressed.md`. That added the output-geometry view: relative output distance
+`d(α)`, C-window flatness `ρ`, a matched non-candidate control, worked examples with both source
+texts and the full top-1 sequence, and three new figures. Key new number: **only 1.39% of eligible
+paths [1.15, 1.68] hold a true flat sub-plateau (ρ < 0.5)** — median candidate ρ is 2.05, so a
+persistent third token is usually a label event inside the boundary, not a shelf.
+
+An exploratory depth sweep (same pairs, same detector, blocks 12/18/24/30, excluded from the headline)
+then answered the plan's own open question: the depth trend **turns over**. The third-token rate peaks
+between blocks 6 and 12 and falls to 1.7% by block 30; the sub-plateau rate peaks at block 6 (2.87%)
+and is zero from block 18 on. The phenomenon is early-to-mid network. Verdict, all figures and all
+controls are in `RESULTS.md` / `REPORT.md`; history in `CHANGELOG.md`.
 
 ## Next step
 
-None — every success criterion is met and no unaddressed feedback file exists, so `STOP` is written.
-If reopened: (a) extend to later interpolation blocks (the rate climbs 8.2% -> 27.7% from block 0 to
-block 6, and only early blocks were preregistered), and (b) enlarge the natural reference bank beyond
-2,000 contexts so nearest-neighbour distances are not inflated by the small search space.
+None — every success criterion is met and no unaddressed feedback file remains, so `STOP` is written.
+If reopened: (a) give the depth sweep its own disjoint pair bank so it becomes independent evidence
+rather than a reuse of the primary pairs; (b) enlarge the natural reference bank beyond 2,000 contexts
+so nearest-neighbour distances are not inflated by the small search space.
