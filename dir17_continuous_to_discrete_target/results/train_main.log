@@ -1,0 +1,16 @@
+[main] k0.5_s0: val_min=0.02679@ep555 val_final=0.02873 ratio=1.072 train_final/min=1.094
+[main] k1_s0: val_min=0.02820@ep570 val_final=0.03014 ratio=1.069 train_final/min=1.027
+[main] k2_s0: val_min=0.02941@ep345 val_final=0.03133 ratio=1.065 train_final/min=1.090
+[main] k5_s0: val_min=0.04176@ep625 val_final=0.04566 ratio=1.093 train_final/min=1.015
+[main] k10_s0: val_min=0.07416@ep415 val_final=0.08097 ratio=1.092 train_final/min=1.000
+[main] k0.5_s1: val_min=0.03060@ep610 val_final=0.03251 ratio=1.062 train_final/min=1.085
+[main] k1_s1: val_min=0.03114@ep555 val_final=0.03298 ratio=1.059 train_final/min=1.097
+[main] k2_s1: val_min=0.03267@ep890 val_final=0.03449 ratio=1.056 train_final/min=1.105
+[main] k5_s1: val_min=0.04473@ep955 val_final=0.04812 ratio=1.076 train_final/min=1.000
+[main] k10_s1: val_min=0.09049@ep425 val_final=0.09508 ratio=1.051 train_final/min=1.000
+[main] k0.5_s2: val_min=0.02963@ep475 val_final=0.03077 ratio=1.039 train_final/min=1.128
+[main] k1_s2: val_min=0.02966@ep820 val_final=0.03106 ratio=1.047 train_final/min=1.096
+[main] k2_s2: val_min=0.03390@ep515 val_final=0.03547 ratio=1.046 train_final/min=1.067
+[main] k5_s2: val_min=0.04555@ep410 val_final=0.04862 ratio=1.067 train_final/min=1.039
+[main] k10_s2: val_min=0.08502@ep805 val_final=0.08914 ratio=1.048 train_final/min=1.000
+saved results/train_main.json

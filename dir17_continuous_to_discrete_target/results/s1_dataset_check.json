@@ -1,0 +1,21 @@
+{
+  "max_abs_err_norm_minus_b_train": 1.7881393432617188e-07,
+  "max_abs_err_norm_minus_b_val": 1.7881393432617188e-07,
+  "max_abs_err_unit_norm_test": 1.7881393432617188e-07,
+  "mean_abs_brightness_diff_seed0_vs_seed1": 0.20603042840957642,
+  "n_train": 1000,
+  "n_val": 2000,
+  "n_probe_images": 100,
+  "digit_counts_probe": [
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10
+  ]
+}
