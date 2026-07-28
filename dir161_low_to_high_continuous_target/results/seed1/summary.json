@@ -1,0 +1,35 @@
+{
+ "clf": {
+  "final_pool_loss": 0.0059424701690673825,
+  "final_pool_acc": 0.9625,
+  "final_train_loss": 0.0002211672592163086,
+  "val_min_loss": 0.0036494632720947265,
+  "val_min_step": 16800,
+  "val_final_loss": 0.003730622959136963,
+  "overfits": true,
+  "best_pool_loss": 0.005883343124389649,
+  "best_pool_acc": 0.963,
+  "best_train_loss": 0.0004518610382080078,
+  "seconds": 38.605786085128784
+ },
+ "pre": {
+  "final_pool_loss": 0.013764888841278699,
+  "final_pool_acc": null,
+  "final_train_loss": 0.012980908203125,
+  "val_min_loss": 0.012920125221719547,
+  "val_min_step": 29800,
+  "val_final_loss": 0.01292031548947704,
+  "overfits": true,
+  "best_pool_loss": 0.01376456373565051,
+  "best_pool_acc": null,
+  "best_train_loss": 0.012981495137117346,
+  "seconds": 36.24457359313965
+ },
+ "config": {
+  "seed": 1,
+  "steps": 30000,
+  "batch": 200,
+  "opt": "AdamW(1e-3, wd=0.01)",
+  "sched": "CosineAnnealingLR(eta_min=1e-6)"
+ }
+}

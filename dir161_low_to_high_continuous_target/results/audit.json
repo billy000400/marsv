@@ -1,0 +1,17 @@
+{
+ "identity_max_abs_err": {
+  "D_U_z_minus_z": 2.384185791015625e-07,
+  "D_P_y": 1.7881393432617188e-07,
+  "UD_plus_P_minus_I": 5.960464477539063e-08
+ },
+ "per_pixel_mean_square": {
+  "image_y": 0.10254517942667007,
+  "block_mean_UDy": 0.06246205419301987,
+  "removed_detail_Py": 0.04008312150835991
+ },
+ "detail_energy_fraction": 0.3908825527681025,
+ "n_endpoint_pool": 2000,
+ "n_val": 8000,
+ "input_dim": 49,
+ "target_dim": 784
+}

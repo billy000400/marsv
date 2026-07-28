@@ -1,0 +1,50 @@
+  clf step 5000: train=0.00249 val=0.00419 acc=0.9765 (7s)
+  clf step 10000: train=0.00123 val=0.00410 acc=0.9755 (13s)
+  clf step 15000: train=0.00059 val=0.00394 acc=0.97675 (19s)
+  clf step 20000: train=0.00034 val=0.00397 acc=0.975375 (25s)
+  clf step 25000: train=0.00025 val=0.00389 acc=0.976 (31s)
+  clf step 30000: train=0.00022 val=0.00389 acc=0.97625 (37s)
+[clf] pool_loss=0.005674 acc=0.967 val_min=0.003807@14600 best_ckpt: pool_loss=0.005692 acc=0.9675
+[verify] clf and pre share bit-identical init in layers 1-3
+  pre step 5000: train=0.01592 val=0.01571 acc=None (6s)
+  pre step 10000: train=0.01422 val=0.01409 acc=None (12s)
+  pre step 15000: train=0.01352 val=0.01343 acc=None (18s)
+  pre step 20000: train=0.01313 val=0.01306 acc=None (24s)
+  pre step 25000: train=0.01293 val=0.01287 acc=None (30s)
+  pre step 30000: train=0.01287 val=0.01281 acc=None (36s)
+[pre] pool_loss=0.013693 acc=None val_min=0.012811@29900 best_ckpt: pool_loss=0.013693 acc=None
+{
+ "clf": {
+  "final_pool_loss": 0.005673562622070313,
+  "final_pool_acc": 0.967,
+  "final_train_loss": 0.00022472539901733399,
+  "val_min_loss": 0.0038070505142211914,
+  "val_min_step": 14600,
+  "val_final_loss": 0.0038854679107666015,
+  "overfits": true,
+  "best_pool_loss": 0.005692305755615234,
+  "best_pool_acc": 0.9675,
+  "best_train_loss": 0.0005678743362426757,
+  "seconds": 36.769160747528076
+ },
+ "pre": {
+  "final_pool_loss": 0.013693459024234694,
+  "final_pool_acc": null,
+  "final_train_loss": 0.012871825175382653,
+  "val_min_loss": 0.01281103702467315,
+  "val_min_step": 29900,
+  "val_final_loss": 0.012811305454799107,
+  "overfits": true,
+  "best_pool_loss": 0.013693356883769133,
+  "best_pool_acc": null,
+  "best_train_loss": 0.012871782326211735,
+  "seconds": 36.071582555770874
+ },
+ "config": {
+  "seed": 2,
+  "steps": 30000,
+  "batch": 200,
+  "opt": "AdamW(1e-3, wd=0.01)",
+  "sched": "CosineAnnealingLR(eta_min=1e-6)"
+ }
+}
