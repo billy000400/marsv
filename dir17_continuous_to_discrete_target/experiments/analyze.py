@@ -19,6 +19,9 @@ import common as C
 
 PREFIX = os.environ.get("CKPT_PREFIX", "ckpt")
 OUT = os.environ.get("ANALYSIS_OUT", "analysis.json")
+# subset of k values to (re-)analyze; results are merged into an existing OUT
+K_LIST = ([float(x) for x in os.environ["K_LIST"].split(",")]
+          if os.environ.get("K_LIST") else list(C.K_VALUES))
 
 C.setup_torch()
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -42,7 +45,7 @@ def run():
     b = C.brightness_grid()
     res = {}
     for which in CKPT_KEYS:
-        for k in C.K_VALUES:
+        for k in K_LIST:
             for seed in SEEDS:
                 ck = torch.load(os.path.join(C.RESULTS, f"{PREFIX}_k{k:g}_s{seed}.pt"),
                                 map_location='cpu', weights_only=False)
@@ -80,8 +83,11 @@ def run():
 
 
 if __name__ == '__main__':
-    out = {'target': target_scores(), 'models': run(),
+    path = os.path.join(C.RESULTS, OUT)
+    prev = json.load(open(path))['models'] if os.path.exists(path) else {}
+    prev.update(run())                        # merge so added k values reuse old work
+    out = {'target': target_scores(), 'models': prev,
            'grid': C.brightness_grid().tolist(), 'seeds': SEEDS}
-    with open(os.path.join(C.RESULTS, OUT), 'w') as f:
+    with open(path, 'w') as f:
         json.dump(out, f)
     print('saved results/' + OUT)

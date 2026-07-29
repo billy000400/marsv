@@ -75,15 +75,21 @@ def main():
     p.add_argument('--no_cosine', action='store_true')
     p.add_argument('--save_ckpt', action='store_true')
     p.add_argument('--ckpt_prefix', default='ckpt')
+    p.add_argument('--ks', type=float, nargs='+', default=None,
+                   help='subset of k values to train (default: all of C.K_VALUES)')
     a = p.parse_args()
+    ks = a.ks if a.ks else list(C.K_VALUES)
 
     C.setup_torch()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     os.makedirs(C.RESULTS, exist_ok=True)
 
-    out = {}
+    # merge into an existing history file for this tag so that adding k values
+    # does not require retraining the ones already done
+    path = os.path.join(C.RESULTS, f"train_{a.tag}.json")
+    out = json.load(open(path)) if os.path.exists(path) else {}
     for seed in a.seeds:
-        for k in C.K_VALUES:
+        for k in ks:
             model, hist, best = train_one(k, seed, a.epochs, a.eval_every, device,
                                           n_train=a.n_train, cosine=not a.no_cosine)
             ad = adequacy(hist)
@@ -99,7 +105,7 @@ def main():
                             'best_val': best[1], 'best_val_epoch': best[2],
                             'k': k, 'seed': seed, 'epochs': a.epochs, 'n_train': a.n_train},
                            os.path.join(C.RESULTS, f"{a.ckpt_prefix}_{key}.pt"))
-    with open(os.path.join(C.RESULTS, f"train_{a.tag}.json"), 'w') as f:
+    with open(path, 'w') as f:
         json.dump(out, f)
     print(f"saved results/train_{a.tag}.json")
 

@@ -23,10 +23,10 @@ A null result is also informative: it would show that a switch-like continuous t
 
 The direction is complete when:
 
-1. Five target-sharpness settings have been trained with identical inputs and training settings.
+1. Ten target-sharpness settings have been trained with identical inputs and training settings.
 2. Every reported training run satisfies the training-adequacy requirements below.
 3. `REPORT.md` contains:
-   - the five target functions;
+   - the ten target functions;
    - train and validation loss curves;
    - target and prediction curves over brightness;
    - layerwise activation-movement curves;
@@ -39,7 +39,7 @@ A null or non-monotonic result is complete if the experiment is valid and the re
 
 ## Fallback (if time runs short)
 
-Train all five \(k\) values with one seed, evaluate the deepest hidden layer on at least 50 held-out MNIST images, and produce:
+Train all ten \(k\) values with one seed, evaluate the deepest hidden layer on at least 50 held-out MNIST images, and produce:
 
 - target and prediction curves;
 - train and validation loss curves;
@@ -75,7 +75,7 @@ x_b = b\tilde{x}.
 
 Because \(\lVert\tilde{x}\rVert_2 \approx 1\), brightness is controlled by \(b\), while digit identity and writing style are nuisance variation.
 
-Use fixed train, validation, and test splits based on the original MNIST images. Brightness assignments must also be fixed and shared across all five \(k\) settings within each seed. This ensures that the models receive exactly the same inputs.
+Use fixed train, validation, and test splits based on the original MNIST images. Brightness assignments must also be fixed and shared across all ten \(k\) settings within each seed. This ensures that the models receive exactly the same inputs.
 
 Recommended initial split:
 
@@ -104,21 +104,24 @@ y_k(b)
 
 The denominator keeps the endpoint target range approximately fixed at \([-1,1]\) for every \(k\). This prevents target amplitude from becoming a confounding variable.
 
-Use exactly five values:
+Use ten values (extended from five after operator feedback #1, 2026-07-29, which noted that the
+original grid never reached a genuinely discrete target):
 
 \[
-k \in \{0.5,\ 1,\ 2,\ 5,\ 10\}.
+k \in \{0.5,\ 1,\ 2,\ 5,\ 10,\ 20,\ 40,\ 80,\ 160,\ 320\}.
 \]
 
 Interpretation:
 
 - \(k=0.5\): approximately linear continuous target;
-- \(k=1\): weak saturation;
-- \(k=2\): moderate saturation;
+- \(k=1,2\): weak to moderate saturation;
 - \(k=5\): strong saturation;
-- \(k=10\): continuous but close to a binary switch.
+- \(k=10\): sigmoid, but its transition still spans half the brightness range;
+- \(k=20,40\): switch-like;
+- \(k=80,160,320\): a step function at the resolution of the 201-point probe grid
+  (transition width 0.0046 at \(k=320\) vs grid spacing 0.003).
 
-Before training, save a single plot containing all five target curves.
+Before training, save a single plot containing all ten target curves.
 
 ### Model
 
@@ -131,10 +134,10 @@ Record post-ReLU activations from every hidden layer.
 ### Training
 
 - Loss: mean squared error.
-- Optimizer, initialization, batch size, and regularization: identical across all five \(k\) values.
+- Optimizer, initialization, batch size, and regularization: identical across all ten \(k\) values.
 - Train for a fixed maximum number of epochs that is long enough to observe slight validation overfitting.
 - Do not tune learning rate, model size, or regularization separately for individual \(k\) values.
-- If the initial training schedule is inadequate, adjust the global schedule and rerun all five \(k\) values.
+- If the initial training schedule is inadequate, adjust the global schedule and rerun all ten \(k\) values.
 - Save both the final checkpoint and the minimum-validation-loss checkpoint.
 - Use the final converged checkpoint for the primary analysis.
 - Use the minimum-validation-loss checkpoint only as a robustness check if the conclusions differ materially.
@@ -229,17 +232,19 @@ For perfectly uniform movement:
 C_l(k) \approx 0.2.
 \]
 
-Report the normalized concentration score:
+Report the normalized concentration score. NOTE (operator feedback #1): this is written
+\(\Gamma_l(k)\) in the deliverables, not \(R_l(k)\), because \(R_2\) reads as \(R^2\).
 
 \[
-R_l(k)=\frac{C_l(k)}{0.2}.
+\Gamma_l(k)=\frac{C_l(k)}{0.2}.
 \]
 
 Interpretation:
 
-- \(R_l(k)\approx1\): activation movement is approximately uniform;
-- \(R_l(k)>1\): movement is concentrated near the target transition;
-- increasing \(R_l(k)\) with \(k\): evidence that plateau strength increases as the continuous target becomes more discrete-like.
+- \(\Gamma_l(k)\approx1\): activation movement is approximately uniform;
+- \(\Gamma_l(k)>1\): movement is concentrated near the target transition;
+- \(\Gamma_l(k)=5\): the maximum — all movement inside the central window;
+- increasing \(\Gamma_l(k)\) with \(k\): evidence that plateau strength increases as the continuous target becomes more discrete-like.
 
 Compute the same concentration score for the target curve using \(|y_k(b_{i+1})-y_k(b_i)|\). This provides a reference for how target sharpness changes with \(k\).
 
@@ -248,10 +253,10 @@ Compute the same concentration score for the target curve using \(|y_k(b_{i+1})-
 Save at least the following:
 
 1. `plots/target_functions.png`
-   - All five continuous target functions.
+   - All ten continuous target functions.
 
 2. `plots/training_curves.png`
-   - Training and validation loss for all five \(k\) values.
+   - Training and validation loss for all ten \(k\) values.
    - Mark the minimum validation-loss epoch.
 
 3. `plots/prediction_sweeps.png`
@@ -273,14 +278,14 @@ The main presentation figure should combine the target curves, prediction curves
   - Normalize MNIST images.
   - Generate fixed brightness values.
   - Verify numerically that \(\lVert x_b\rVert_2 \approx b\).
-  - Implement the five normalized target functions.
+  - Implement the ten normalized target functions.
   - Save `plots/target_functions.png`.
 
-- [x] **S2 — Train all five target settings**
-  - Train the five models with identical data and hyperparameters.
+- [x] **S2 — Train all ten target settings**
+  - Train the ten models with identical data and hyperparameters.
   - Save checkpoints and complete loss histories.
   - Check both training-adequacy requirements.
-  - If training is inadequate, change only global training settings and rerun all five models.
+  - If training is inadequate, change only global training settings and rerun all ten models.
   - Save `plots/training_curves.png`.
 
 - [x] **S3 — Measure activation plateaus**
@@ -305,7 +310,7 @@ The hypothesis is supported if:
 - target concentration increases with \(k\);
 - activation concentration also increases consistently with \(k\);
 - the effect becomes stronger in deeper layers;
-- the \(k=10\) model shows low activation movement away from \(b_0\) and concentrated movement near \(b_0\).
+- the sharpest (\(k=320\)) model shows low activation movement away from \(b_0\) and concentrated movement near \(b_0\).
 
 The hypothesis is not supported if activation movement remains approximately uniform, is unrelated to \(k\), or does not become more concentrated with depth, despite adequate target fitting and adequate training.
 
@@ -319,7 +324,7 @@ Do not force a monotonic interpretation if the observed result is mixed.
 - Do not compare cross-entropy with MSE.
 - Do not introduce reconstruction targets.
 - Do not interpolate between different digit identities.
-- Do not add additional target families unless the five-\(k\) experiment is complete.
+- Do not add additional target families unless the ten-\(k\) experiment is complete.
 - Do not tune hyperparameters separately for different \(k\) values.
 - Do not claim that this experiment fully explains classification plateaus.
 - Do not describe the activation path as a mathematical manifold unless that property is explicitly demonstrated.
@@ -332,28 +337,35 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-**COMPLETE (2026-07-27).** S1-S4 all done in one iteration; `STOP` written. All five success criteria
-are met: five \(k\) settings trained with identical inputs/hyperparameters, all 15 runs (5 \(k\) x 3 seeds)
-pass both training-adequacy conditions, `REPORT.md` contains every required element, primary results use
-3 seeds with uncertainty across seeds and images, and every metric is defined in Methods with a saved,
-embedded figure.
+**COMPLETE (2026-07-29), operator feedback #1 addressed.** S1-S4 done at the **extended ten-\(k\) scale**
+(\(k\) up to 320, a step function at probe-grid resolution). All five success criteria are met: ten \(k\)
+settings trained with identical inputs/hyperparameters, all 30 primary runs (10 \(k\) x 3 seeds) pass both
+training-adequacy conditions, `REPORT.md` contains every required element, primary results use 3 seeds with
+uncertainty across seeds and images, and every metric is defined in Methods with a saved, embedded figure.
+The 10,000-image robustness grid (another 30 runs) is reported in full.
 
-**Verdict (decision rule applied):** hypothesis **partially supported but the key prediction fails**.
-Target concentration rises with \(k\) (1.01 -> 2.70); activation concentration also rises consistently
-(deepest layer \(R_3\) 1.094 +/- 0.010 -> 1.455 +/- 0.036) and the effect strengthens with depth
-(layer 1 flat at ~1.01). But the \(k=10\) model does **not** show low movement away from \(b_0\):
-flank movement \(F_3\) only falls 0.356 -> 0.265 against the target's 0.397 -> 0.048. So a switch-like
-continuous target is **not sufficient** to produce classification-style plateaus.
+**Verdict (decision rule applied):** hypothesis **partially supported; the key prediction fails, now
+decisively.** Target concentration rises with \(k\) to its ceiling (\(\Gamma\) 1.01 -> 5.00); activation
+concentration rises with \(k\) and strengthens with depth (layer 1 flat at ~1.02, layer 3
+1.094 ± 0.010 -> 1.491 ± 0.068) — but then **saturates**: \(\Gamma_3\) is flat at 1.45-1.49 from \(k=20\)
+to \(k=320\) across a 16x further sharpening, and flank movement \(\Phi_3\) bottoms out at 0.265 and rises
+back to 0.283 against a target \(\Phi\) of exactly 0. The decisive control: on the 10,000-image grid at
+\(k=320\) the model **output** is a genuine switch (\(\Gamma\) 4.13 of a maximum 5.00, \(\Phi\) 0.005,
+sweep \(R^2\) 0.848) while the deepest hidden layer stays at \(\Gamma_3 = 1.659 \pm 0.168\),
+\(\Phi_3 = 0.279\) — output 78% of the way to a perfect plateau, representation 16%. So a switch-like
+continuous target is **not sufficient** to produce classification-style plateaus, and the ceiling is a
+property of the representation rather than a failure to fit.
 
-Deviations from this plan, both logged in JOURNAL.md and CHANGELOG.md: primary training set is 1000
-digit-balanced images rather than "all training images" (the two PLAN requirements conflict — a 1-D
-target on 50k images shows no validation overfitting, failing the adequacy gate), with the 10,000-image
-grid reported in full as a secondary check; and a global cosine LR decay was added to satisfy the
-smooth-convergence condition. One metric was added beyond the plan: the flank movement fraction
-\(F_l(k)\).
+Deviations from this plan, all logged in JOURNAL.md and CHANGELOG.md: primary training set is 1000
+digit-balanced images rather than "all training images" (the two PLAN requirements conflict — a 1-D target
+on 50k images shows no validation overfitting, failing the adequacy gate), with the 10,000-image grid
+reported in full as the control that removes the fitting confound; a global cosine LR decay was added to
+satisfy the smooth-convergence condition; one metric was added beyond the plan, the flank share
+\(\Phi_l(k)\); and the concentration score is written \(\Gamma_l(k)\) rather than \(R_l(k)\) per operator
+feedback #1.
 
 ## Next step
 
-None — the direction is complete and `STOP` is written. If an operator adds a `human_feedback*.md` /
-`*REVIEW*` file later, delete `STOP`, address every point, then re-write `STOP` only when clean
-(CLAUDE.md rules 10-11).
+None — the direction is complete, zero unaddressed feedback files remain, and `STOP` is written. If an
+operator adds a `human_feedback*` / `*REVIEW*` file later, delete `STOP`, address every point, then
+re-write `STOP` only when clean (CLAUDE.md rules 10-11).

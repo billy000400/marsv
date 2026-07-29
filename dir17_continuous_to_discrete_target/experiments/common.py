@@ -6,8 +6,8 @@ Inputs are L2-normalized MNIST images rescaled to a sampled brightness b:
     x_b = b * x / ||x||_2
 The target is a continuous, sharpness-controlled function of b alone:
     y_k(b) = tanh(k (b - b0)) / tanh(0.3 k),   b0 = 0.7
-so k = 0.5 is nearly linear and k = 10 is nearly a binary switch, with the
-endpoint range fixed at [-1, 1] for every k.
+so k = 0.5 is nearly linear and k = 320 is a step function at the resolution
+of the brightness grid, with the endpoint range fixed at [-1, 1] for every k.
 
 Architecture / optimizer follow the project's canonical MNIST plateau MLP
 (784 -> 200 -> 200 -> 200 -> out, ReLU, AdamW lr 1e-3 wd 0.01, batch 200,
@@ -28,7 +28,8 @@ PLOTS = os.path.join(HERE, 'plots')
 
 # ---- fixed experiment constants (PLAN.md) --------------------------------
 B_LO, B_HI, B0 = 0.4, 1.0, 0.7
-K_VALUES = (0.5, 1.0, 2.0, 5.0, 10.0)
+K_VALUES = (0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 40.0, 80.0, 160.0, 320.0)
+K_ORIGINAL = (0.5, 1.0, 2.0, 5.0, 10.0)   # the first five, kept for reference
 N_SWEEP = 201                    # brightness grid points for the probe
 N_PROBE_IMAGES = 100             # digit-balanced held-out test images
 CENTER_LO, CENTER_HI = 0.64, 0.76
@@ -44,6 +45,17 @@ LR, WD = 1e-3, 0.01
 CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00"]
 LINESTYLES = ['-', '--', '-.', ':', (0, (3, 1, 1, 1, 1, 1))]
 MARKERS = ['o', 's', '^', 'D', 'v']
+
+
+def k_style(i, n=len(K_VALUES)):
+    """Style for the i-th k value. k is an ORDERED variable with 10 levels, so
+    the 5-hue categorical palette does not apply (CLAUDE.md rule 13): use the
+    CVD-designed sequential map `cividis` (dark blue -> yellow, monotone in
+    lightness, readable in grayscale) and cycle line styles so colour is never
+    the only identity channel."""
+    import matplotlib.pyplot as _plt
+    return {'color': _plt.cm.cividis(0.03 + 0.94 * i / max(1, n - 1)),
+            'ls': LINESTYLES[i % len(LINESTYLES)]}
 
 
 def setup_torch():

@@ -1,0 +1,3 @@
+I think you got the conclusion that the discreteness of target does not explain the plateau is because the k you used were too small. 3 of them are near linear, can you use maybe another 5 bigger k, the biggest one should look like a step function. do the experiments and rewrite the report
+
+The tables are really confusing. duplicated column names. Also I saw R^2 which is same with the famous linear R^2, can you use a better notation?
