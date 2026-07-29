@@ -1,0 +1,204 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+bank1 (same primary pairs): 1000   bank2 (final-token matched): 1000
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 5158.48it/s]
+  [random_pairs] 0/1000 1s eta 701s
+  [random_pairs] 400/1000 31s eta 47s
+  [random_pairs] 800/1000 62s eta 16s
+  [random_pairs] done 78s
+{
+ "tag": "random_pairs",
+ "n_paths": 1000,
+ "n_eligible": 1000,
+ "n_candidates": 592,
+ "rate": 0.592,
+ "rate_ci": [
+  0.5612430287912437,
+  0.6220528218688605
+ ],
+ "n_clean": 21,
+ "n_strict": 6,
+ "strict_rate": 0.006,
+ "strict_rate_ci": [
+  0.0027526315709082315,
+  0.013028344232445605
+ ],
+ "n_strict_subplateau": 4,
+ "strict_sub_rate": 0.004,
+ "strict_sub_rate_ci": [
+  0.0015565629678934295,
+  0.010239720429805971
+ ],
+ "n_subplateau": 405,
+ "sub_rate": 0.405,
+ "sub_rate_ci": [
+  0.3749938490885732,
+  0.43573326164284115
+ ],
+ "rho_candidate": {
+  "n": 592,
+  "mean": 0.44933857229052115,
+  "median": 0.3605390503292992,
+  "q25": 0.21287153826819527,
+  "q75": 0.5746326923370362
+ },
+ "rho_control": {
+  "n": 408,
+  "mean": 0.6458642297720405,
+  "median": 0.460551255941391,
+  "q25": 0.27248106002807615,
+  "q75": 0.7734369138876598
+ },
+ "frac_rho_lt_1": 0.9341216216216216,
+ "frac_rho_lt_0.5": 0.6841216216216216,
+ "d_mean_candidate": {
+  "n": 592,
+  "mean": 0.3560612009511002,
+  "median": 0.3571074903011322,
+  "q25": 0.28975987434387207,
+  "q75": 0.4289732947945595
+ },
+ "w10_90": {
+  "n": 1000,
+  "mean": 0.8822417144944437,
+  "median": 0.9056271327298283,
+  "q25": 0.8493252509999095,
+  "q75": 0.9446015051086684
+ },
+ "n_runs_total": {
+  "n": 1000,
+  "mean": 7.385,
+  "median": 7.0,
+  "q25": 4.0,
+  "q75": 10.0
+ },
+ "frac_single_step_to_B": 0.908,
+ "frac_B_from_k31": 0.942,
+ "median_k_first_B": 32.0,
+ "min_run_sensitivity": {
+  "2": {
+   "n": 718,
+   "rate": 0.718,
+   "ci": [
+    0.6893170177459294,
+    0.7450144544704043
+   ]
+  },
+  "3": {
+   "n": 592,
+   "rate": 0.592,
+   "ci": [
+    0.5612430287912437,
+    0.6220528218688605
+   ]
+  },
+  "5": {
+   "n": 416,
+   "rate": 0.416,
+   "ci": [
+    0.38582842115494126,
+    0.4468144978075724
+   ]
+  }
+ }
+}
+  [final_token_matched] 0/1000 0s eta 305s
+  [final_token_matched] 400/1000 32s eta 48s
+  [final_token_matched] 800/1000 63s eta 16s
+  [final_token_matched] done 79s
+{
+ "tag": "final_token_matched",
+ "n_paths": 1000,
+ "n_eligible": 1000,
+ "n_candidates": 570,
+ "rate": 0.57,
+ "rate_ci": [
+  0.53910460324665,
+  0.6003596309512553
+ ],
+ "n_clean": 33,
+ "n_strict": 149,
+ "strict_rate": 0.149,
+ "strict_rate_ci": [
+  0.1282740046402946,
+  0.17241247816735156
+ ],
+ "n_strict_subplateau": 79,
+ "strict_sub_rate": 0.079,
+ "strict_sub_rate_ci": [
+  0.06384696504253543,
+  0.0973752835672054
+ ],
+ "n_subplateau": 317,
+ "sub_rate": 0.317,
+ "sub_rate_ci": [
+  0.2889069882932849,
+  0.3464936565893341
+ ],
+ "rho_candidate": {
+  "n": 570,
+  "mean": 0.5936455203774806,
+  "median": 0.451327857264766,
+  "q25": 0.24989753780942975,
+  "q75": 0.7325507572719029
+ },
+ "rho_control": {
+  "n": 430,
+  "mean": 0.8078716281999015,
+  "median": 0.5825884031212848,
+  "q25": 0.3430828094482422,
+  "q75": 0.9779755141999986
+ },
+ "frac_rho_lt_1": 0.8491228070175438,
+ "frac_rho_lt_0.5": 0.5561403508771929,
+ "d_mean_candidate": {
+  "n": 570,
+  "mean": 0.4195950522495989,
+  "median": 0.41724738478660583,
+  "q25": 0.3302547559142113,
+  "q75": 0.5142193734645844
+ },
+ "w10_90": {
+  "n": 1000,
+  "mean": 0.8852457902931089,
+  "median": 0.9030574529161091,
+  "q25": 0.8624199008889457,
+  "q75": 0.925665291590309
+ },
+ "n_runs_total": {
+  "n": 1000,
+  "mean": 7.412,
+  "median": 7.0,
+  "q25": 4.0,
+  "q75": 10.0
+ },
+ "frac_single_step_to_B": 0.0,
+ "frac_B_from_k31": 0.496,
+ "median_k_first_B": 30.0,
+ "min_run_sensitivity": {
+  "2": {
+   "n": 685,
+   "rate": 0.685,
+   "ci": [
+    0.6555474543120954,
+    0.7130365932109404
+   ]
+  },
+  "3": {
+   "n": 570,
+   "rate": 0.57,
+   "ci": [
+    0.53910460324665,
+    0.6003596309512553
+   ]
+  },
+  "5": {
+   "n": 387,
+   "rate": 0.387,
+   "ci": [
+    0.35729863821178737,
+    0.417566240868737
+   ]
+  }
+ }
+}
+saved results/real_text_paths.json + real_text_curves.npz

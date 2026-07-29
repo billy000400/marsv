@@ -120,3 +120,70 @@ Headline updated.
 
 **Code/data added.** `experiments/depth_extension.py`, `experiments/plot_depth.py`,
 `results/depth_extension.json`, `results/depth_extension_rho.npz`.
+
+## 2026-07-29 — operator feedback #2 addressed: does the sub-plateau exist in REAL language data?
+
+**Feedback file.** `human_feedback_2.txt` — *"Can you check if subplateau exsist in real language
+data?"* Renamed to `human_feedback_2.addressed.md` after the work below. (The file is `.txt`, not
+`.md`; treated as feedback anyway, per the rule's intent, and renamed to the required
+`.addressed.md` ending.)
+
+**Why it mattered.** Every path in the report so far was built by *patching a synthetic activation*
+(a slerp of two real activations), and Section 7 had already shown those points sit off the natural
+activation manifold. So the third region could have been an artefact of leaving the manifold. The
+feedback asks the right question, and it was previously unanswered.
+
+**What was run.** `experiments/real_text_paths.py` builds paths in **text** space: step k is context
+B's first k tokens followed by context A's remaining 32−k, so all 33 points are real 32-token
+sequences run through the completely unmodified model (no hooks, no patching). Two frozen banks,
+2,000 paths total, ~2.5 min of GPU: **R1** = the same 1,000 primary pairs (directly comparable), and
+**R2** = 1,000 new pairs (frozen shuffle, seed 15, same 5,980 windows) whose 32nd token is identical,
+so the predicted-from token never changes and the morph is purely contextual. The frozen `A|C|B`
+detector, ρ, d̄_C and w(10→90) were reused unchanged on the 33-point grid, plus one new
+statistic — motion concentration κ, the share of a path's total |Δd| carried by its sharpest 10% of
+steps (0.1 = smooth ramp, 1 = one instantaneous boundary). A **symmetric** rule (A, C and B runs each
+≥3 grid points) was introduced so a "B plateau" that is only the final grid point cannot count, and
+the activation screen was re-scored with it for a like-for-like comparison.
+
+**New numbers (nothing previously reported was superseded; all earlier numbers stand).**
+Sub-plateau rate (symmetric rule + ρ < 0.5): **real text, final-token-matched = 7.9% [6.4, 9.7]**
+versus activation interpolation 1.29% [1.06, 1.57] (blocks 0–6) and 2.61% [1.99, 3.42] (block 6) — a
+six-fold and three-fold difference. Symmetric third-token rate 14.9% [12.8, 17.2] (real text) vs
+16.0% [15.2, 16.9] (activation). Frozen-rule third-token rate on real text 57.0% [53.9, 60.0]
+(matched) and 59.2% [56.1, 62.2] (random). Median C-window flatness flips from ρ = 2.05 (activation)
+to **0.45** (real text, matched control 0.58); candidates with ρ < 0.5 rise from 8.2% to 55.6%.
+Median top-1 runs per path 7 (real text) vs 3 (activation); median w(10→90) 0.90 vs 0.46;
+κ = 0.49 vs 0.51. In the unrestricted random-pair bank B first becomes top-1 only at the final
+step on 90.8% of paths, so its symmetric rate is 0.6% [0.3, 1.3] — a fact about text-space geometry,
+reported rather than hidden, and the reason bank R2 carries the answer.
+
+**Interpretation added.** The sub-plateau is **not** an artefact of leaving the activation manifold —
+it is *more* common in real language. But the real-language picture is a many-step staircase (7
+predictions per path) with sharp boundaries, not a clean three-step `A → C → B`; the clean-`A,C,B`
+share of real-text candidates is 5.8%.
+
+**Figures added (embedded in BOTH deliverables).** `real_text_prevalence.png` (six panels: rates
+under one symmetric rule; w(10→90); ρ; where B first appears; motion concentration κ; number of
+top-1 runs) and `real_text_examples.png` (d(t) for the three highest-scoring real-language paths in
+each bank).
+
+**Deliverable hygiene fixed at the same time (CLAUDE.md rule 12).** All figures in both files carried
+their captions **inside the alt text**, which does not render — 12 figures in each file were
+effectively unlabelled. Every figure now has a visible `**Figure N.**` caption line below the image,
+figures are numbered sequentially in reading order, alt text is one short clause, and every figure is
+cited by number from the prose. `experiments/add_captions.py` does this idempotently;
+`experiments/check_render.py` (copied from dir13) verifies rules 8a–8c and 12 and passes on both
+files.
+
+**Deliverables changed.** REPORT.md: new Methods subsection "Real-language paths: the same question
+with no patching at all" (text-morph path equation, the two banks, the symmetric rule, κ), new
+Results section 10, new bank row in the Methods bank table, new Summary and Conclusion paragraphs,
+new limitation (vi) on splices and on R2 not being a uniform pair sample, and a new safety paragraph
+on context-edit step structure. RESULTS.md: new metrics block "Does the sub-plateau exist in real
+language data?", the clean real-language worked example promoted to the top of the worked-examples
+section, two new figures, and a rewritten Headline.
+
+**Code/data added.** `experiments/real_text_paths.py`, `experiments/plot_real_text.py`,
+`experiments/add_captions.py`, `experiments/check_render.py` + `katex_compile.js` (copied),
+`results/real_text_paths.json`, `results/real_text_curves.npz`, `results/real_text_extra.json`,
+`results/log_real_text.txt`.

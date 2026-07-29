@@ -150,3 +150,61 @@ bank than 2,000 contexts.
 
 On track? yes — S1-S6 complete, feedback addressed, depth extension done, 100% of the plan's success
 criteria met, no blocker.
+
+## 2026-07-29 — iteration 3: operator feedback #2 — sub-plateaus in real language data
+
+**Feedback file.** `human_feedback_2.txt`: *"Can you check if subplateau exsist in real language
+data?"* No `.addressed.md` suffix, so this was the iteration. Renamed after the work.
+
+**Reading of the question (loop mode: recorded, not asked).** The screen already *draws its contexts*
+from real language (WikiText-103), so "real language data" cannot mean the corpus. It must mean the
+**path**: every intermediate point so far is a patched synthetic activation, and iteration 1's
+neighbour analysis had shown those points sit further off the natural manifold than the endpoints.
+So the question I answered is: *does the sub-plateau still appear when every point of the path is a
+real token sequence run through the unmodified model?* Rejected alternatives: (a) sliding a window
+through continuous prose — there is no A/B pair and hence no `A|C|B` question; (b) chaining nearest
+natural activations from A to B — 5,980 windows sample 1280-dim space far too sparsely for the chain
+to be smooth; (c) re-running the existing screen on a second corpus — that answers "does it replicate
+on other text", which is not what was asked.
+
+**Did.** `experiments/real_text_paths.py`: path step k = context B's first k tokens ++ context A's
+remaining 32−k, k = 0..32, all 33 points real GPT-2 inputs, no hooks. Two frozen banks (2,000 paths,
+~2.5 min): R1 = the same 1,000 primary pairs; R2 = 1,000 new pairs sharing their 32nd token (seed 15).
+Reused the frozen detector, ρ, d̄_C, w(10→90); added motion concentration κ. Added a **symmetric**
+rule (A, C and B runs each ≥3 points) and re-scored the activation screen with it so the comparison
+is like-for-like. `experiments/plot_real_text.py` → two figures.
+
+**Learned.**
+- **The answer is yes, and it is stronger in real language.** Sub-plateau rate 7.9% [6.4, 9.7] on
+  real-text paths vs 1.29% [1.06, 1.57] on activation paths under the same symmetric rule. Median
+  C-window flatness flips from ρ = 2.05 to 0.45; the share of candidates with ρ < 0.5 goes 8.2% →
+  55.6%. The matched non-candidate control moves far less (1.09 → 0.58), so this is not "everything
+  is flat on a text path".
+- **This retires the strongest objection to the whole direction.** The off-manifold result (Section 7)
+  had left open that the third region was an artefact of the gap between real activations. It is not:
+  removing the synthetic step makes the shelf *more* common, so activation interpolation understates
+  rather than manufactures the phenomenon.
+- **But the shape is different.** A real-text path visits 7 distinct top-1 predictions (activation: 3)
+  and w(10→90) covers 90% of the path. κ = 0.49 (a smooth ramp would give 0.1) says the boundaries
+  are still sharp — there are just many of them. So real language gives a **many-step staircase**;
+  the sub-plateau is one step of it, and only 5.8% of real-text candidates are a clean `A, C, B`.
+- **Text space is dominated by its final token, and that had to be designed around.** On the
+  unrestricted random-pair bank, context B's prediction first becomes top-1 only at the *last* step on
+  90.8% of paths — the step where the predicted-from token switches — so the symmetric rule fires on
+  0.6% of those paths. Matching the 32nd token (bank R2) removes the discontinuity entirely and is the
+  bank that answers the question. Reported, not hidden; R2's non-uniform sampling is in Limitations.
+- **Deliverable bug found and fixed:** all 24 figure captions in REPORT.md/RESULTS.md lived in the
+  alt text, which GitHub never renders — both files were showing unlabelled images (the same failure
+  CLAUDE.md rule 12 records from dir13). Added `experiments/add_captions.py` (idempotent) and copied
+  dir13's `check_render.py`; both files now have visible numbered captions, short alt text, sequential
+  numbering and a by-number citation from the prose, and pass all of rules 8a–8c and 12.
+
+**Next step.** None required — the plan's success criteria were already met and this feedback is now
+addressed, so `STOP` is written. If reopened: (a) build R2's pairs from a *disjoint* window pool so
+the real-language screen is independent of the primary bank; (b) replace the splice with a
+paraphrase-style morph (or a natural document trajectory with A/B anchors) so intermediate points are
+natural prose, not spliced prose; (c) generate continuations from real-text C shelves, the analogue of
+S4, which was never run for this section.
+
+On track? yes — S1-S6 complete, feedback #1 and #2 both addressed, 100% of the plan's success
+criteria met, no blocker.

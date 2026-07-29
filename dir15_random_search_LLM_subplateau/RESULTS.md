@@ -8,12 +8,14 @@ held-out natural contexts at an early GPT-2 Large block and patch the interpolan
 does the model's next-token prediction pass through a **persistent third token** `C` on the way from
 `A` to `B` — the language-model analogue of the `A → C → B` paths seen earlier in MNIST — and when it
 does, is that third region a real **plateau** (a flat shelf of the model's output) or just a label
-flicker inside the boundary?
+flicker inside the boundary? And does any of it survive when the path is built from **real text**
+instead of synthetic activations?
 
 **Setup in one line.** GPT-2 Large (774M, 36 blocks), 32-token WikiText-103 validation windows,
 `resid_post` at blocks 0/2/4/6, `slerp_rescale` over 50 alphas, 1,000 random primary pairs × 4 blocks
 × 2 conditioning contexts = 8,000 paths; frozen rule (C top-1 for ≥3 consecutive alphas, beating both
-endpoint tokens at every point, with a real distribution change at both boundaries).
+endpoint tokens at every point, with a real distribution change at both boundaries). Plus 2,000
+**real-language** paths that use no patching at all.
 
 ## Metrics
 
@@ -45,6 +47,40 @@ Flatness `ρ` = how far the output distance `d` travels inside the C run ÷ the 
 | median ρ, lowest → highest decile of the frozen score | 2.65 → 0.93 (Spearman −0.34, p ≈ 2e−36) | — |
 | median ρ by interpolation block 0 / 2 / 4 / 6 | 2.52 / 2.58 / 2.38 / 1.54 | — |
 | the 106 sub-plateaus: mean C-run length; share at block 6; share clean | 8.1 of 50 points; 55/106; 16.0% | all candidates: 5.2; 41%; 21.9% |
+
+### Does the sub-plateau exist in **real language data**? (no patching anywhere)
+
+Every point of these paths is a real 32-token sequence run through the unmodified model: step `k`
+is context B's first `k` tokens followed by context A's remaining `32−k`, so `k=0` is context A,
+`k=32` is context B, and all 33 points are ordinary GPT-2 inputs. Because a text path's last run is
+often the single final grid point, all four columns below use one **symmetric** rule — the A, C and
+B runs must *each* last ≥3 grid points — including the two activation columns, which are re-scored
+with it (that costs the activation screen almost nothing: 16.9% → 16.0%).
+
+| | activation interp., blocks 0–6 | activation interp., block 6 | **real text, final-token-matched pairs** | real text, random pairs |
+|---|---|---|---|---|
+| eligible paths | 7,611 | 1,916 | 1,000 | 1,000 |
+| persistent third token (frozen rule) | 16.9% [16.1, 17.8] | 27.7% [25.8, 29.8] | 57.0% [53.9, 60.0] | 59.2% [56.1, 62.2] |
+| **symmetric rule** (A, C, B runs all ≥3) | 16.0% [15.2, 16.9] | 25.3% [23.4, 27.3] | **14.9% [12.8, 17.2]** | 0.6% [0.3, 1.3] |
+| **symmetric + ρ < 0.5 (sub-plateau)** | 1.29% [1.06, 1.57] | 2.61% [1.99, 3.42] | **7.9% [6.4, 9.7]** | 0.4% [0.2, 1.0] |
+| median flatness ρ of the C window | 2.05 | 1.54 | **0.45** | 0.36 |
+| median ρ, matched non-candidate window | 1.09 | — | 0.58 | 0.46 |
+| candidates with ρ < 0.5 | 8.2% | — | 55.6% | 68.4% |
+| median shelf height `d̄_C` | 0.52 | — | 0.42 | 0.36 |
+| median transition width `w(10→90)` | 0.46 (cand.) / 0.30 (ordinary) | — | 0.90 | 0.91 |
+| median number of top-1 runs per path | 3 | — | 7 | 7 |
+| motion concentration κ (share of Σ&#124;Δd&#124; in the sharpest 10% of steps) | 0.51 | — | 0.49 | 0.58 |
+| clean `A,C,B` share of candidates | 21.9% | — | 5.8% | 3.5% |
+| B first becomes top-1 only at the final step | — | — | 0% (by construction) | 90.8% |
+| persistence sensitivity (min run 2 / 3 / 5, frozen rule) | — | — | 68.5 / 57.0 / 38.7% | 71.8 / 59.2 / 41.6% |
+
+**The sub-plateau is six times more common in real language than on interpolated activations**
+(7.9% vs 1.29%), and the median third region flips from steep (ρ = 2.05) to flat (ρ = 0.45). The
+catch: a real-language path is a **many-step** staircase — 7 distinct predictions per path against 3
+— so the shelf is one step of a long climb, not the middle of a clean `A → C → B` triple. The
+random-pair bank is dominated by its final token (B arrives only at the last step on 90.8% of paths,
+because that is where the predicted-from token switches), which is why the final-token-matched bank
+carries the answer.
 
 ### Exploratory depth sweep (same 1,000 pairs, same frozen detector, blocks 12–30; NOT in the headline)
 
@@ -104,7 +140,21 @@ The depth trend inside the preregistered window turns over outside it: the pheno
 
 ## Worked examples — which texts, which sequence, from where to where
 
-The single highest-scoring candidate of 1,290 (block 6, conditioned on context B's tokens):
+**The cleanest example in the whole direction, and it needs no patching at all** (real-language path,
+final-token-matched bank, rank 3 by the frozen score):
+
+| | |
+|---|---|
+| **context A** (32 tokens) | `"…ige to re @-@ evaluate the situation and to issue new orders for the advance towards the Hari and Mivo Rivers . As they waited for the advance"` |
+| **context B** (32 tokens, same final token) | `" Body battalions in place by 14 : 00 , but they did not reach their assembly areas until after 22 : 00 . Oka was also delayed in his advance"` |
+| **path** | replace A's leading tokens with B's, one at a time — 33 real 32-token sequences, no hooks |
+| **endpoints** | A = `','` (step 0), B = `' by'` (step 32) |
+| **top-1 sequence** | `','` (steps 0–15) → **`' of'` (16–28)** → `' by'` (29–32) — a **clean `A, C, B`** |
+| **text at the centre of the shelf** | `" Body battalions in place by 14 : 00 , but they did not reach their assembly areas until after 22 : Mivo Rivers . As they waited for the advance"` |
+| **geometry** | shelf at `d̄_C` = 0.50, ρ = 0.26 (4× flatter than the diagonal) |
+
+The single highest-scoring candidate of the 1,290 **activation** paths (block 6, conditioned on
+context B's tokens):
 
 | | |
 |---|---|
@@ -116,7 +166,8 @@ The single highest-scoring candidate of 1,290 (block 6, conditioned on context B
 | **C-region text** | *"if not all of her crew survived. The USS Bismarck was sunk by a…"* — identical 20 tokens across the whole C run |
 | **geometry** | shelf at `d̄_C` = 0.44, ρ = 0.16 (6× flatter than the diagonal) |
 
-The two flattest sub-plateaus of the whole screen (both block 2, both from the same random pair):
+The two flattest sub-plateaus of the whole activation screen (both block 2, both from the same random
+pair):
 
 | | ρ = 0.04 | ρ = 0.08 |
 |---|---|---|
@@ -127,70 +178,170 @@ The two flattest sub-plateaus of the whole screen (both block 2, both from the s
 
 ## Figures
 
-The screen's headline number and where it comes from — the rate rises monotonically with block depth
-and is identical under either conditioning context, while the self-pair control is exactly zero:
+The screen's headline number and where it comes from — the rate rises with block depth and is
+identical under either conditioning context, while the self-pair control is exactly zero (Figure 1):
 
-![A|C|B rate per eligible path by interpolation block (left; blocks 0/2/4/6 of GPT-2 Large) and by conditioning context and control condition (right). Bars are rates per eligible path, error bars are 95% Wilson intervals.](plots/candidate_prevalence_by_layer.png)
+![A|C|B rate by block and by control condition](plots/candidate_prevalence_by_layer.png)
 
-Candidates are extremely heterogeneous, so a single example would misrepresent them. The top-ranked
-paths show wide, confident third plateaus with two clearly separated distribution changes; randomly
-drawn qualifying paths show narrow, low-probability blips:
+**Figure 1.** `A|C|B` rate under the frozen rule. **Left:** percentage of eligible paths with a
+persistent third top-1 token, per interpolation block of GPT-2 Large (x: block L; y: % of eligible
+paths). **Right:** the same rate split by which context supplied the tokens the patched activation
+runs inside, and for each control condition. Error bars are 95% Wilson intervals; the self-pair bar
+is exactly zero because a constant path has no eligible endpoints.
 
-![Next-token probability of the A, C and B tokens versus the interpolation coefficient alpha for the three top-scoring candidates (upper row) and three randomly drawn candidates (lower row). Grey band = the detected C run; dotted grey line on the right axis = Jensen-Shannon divergence between neighbouring alphas, in bits.](plots/top_candidate_probability_paths.png)
+Candidates are extremely heterogeneous, so a single example would misrepresent them: the top-ranked
+paths show wide, confident third plateaus with two clearly separated distribution changes, while
+randomly drawn qualifying paths show narrow, low-probability blips (Figure 2):
 
-Do those paths look like plateaus when we plot the *output* instead of three token probabilities? Here
-are the same six pre-frozen inspection paths in the plateau-post format — relative output distance
-`d(t)` against the interpolation coefficient, with the no-plateau diagonal for reference:
+![probability of A, C and B along six paths](plots/top_candidate_probability_paths.png)
 
-![Matthew-style plateau curves for the six pre-frozen inspection paths. x-axis: interpolation coefficient t, 0 = context A's activation, 1 = context B's. y-axis: relative output distance d(t) on the final logits, 0 = output looks like endpoint A, 1 = like endpoint B; dashed grey = the no-plateau reference d = t. Hatched grey band = the detected third-token (C) run; thin vertical lines mark every top-1 token change. Top row: 3 highest-scoring candidates; bottom row: 3 random candidates. Titles give block, C-run alpha range and flatness ρ.](plots/matthew_dt_frozen.png)
+**Figure 2.** Next-token probability of the three named tokens along the path. x: interpolation
+coefficient α (0 = context A's activation, 1 = context B's); left y: probability of A (solid,
+circles), C (dashed, squares) and B (dash-dot, triangles); right y: Jensen–Shannon divergence between
+neighbouring α in bits (dotted grey). The shaded band is the detected C run. **Top row:** the three
+highest-scoring candidates. **Bottom row:** three candidates drawn at random from the qualifying set.
 
-The top-scoring paths are staircases (ρ = 0.16 / 0.79 / 0.30); the random ones are not (0.71 / 3.07 /
-3.71). Over all 1,290 candidates the second picture dominates — the C run is usually inside the
-boundary, and only its flat tail is a genuine sub-plateau:
+Do those paths look like plateaus when we plot the *output* instead of three token probabilities?
+Here are the same six pre-frozen inspection paths as relative output distance `d(t)` against the
+interpolation coefficient, with the no-plateau diagonal for reference (Figure 3):
 
-![Left: distribution of the flatness ρ of the C window (range of d ÷ width in t) for the 1,290 candidates (solid) and the same alpha windows on 1,290 matched non-candidate paths (dashed); values above 6 are clipped into the last bin. Dashed vertical line = ρ = 1 (as steep as the diagonal), dotted vertical line = the post-hoc ρ = 0.5 sub-plateau cut. Middle: median ρ (circles) with inter-quartile range (hatched) against the decile of the frozen candidate score, 10 = highest. Right: histogram of the mean output distance d across the C run; vertical rules mark the endpoints d = 0 and d = 1.](plots/subplateau_dwell.png)
+![output-distance curves for the six pre-frozen inspection paths](plots/matthew_dt_frozen.png)
+
+**Figure 3.** The six pre-frozen inspection paths in output geometry. x: interpolation coefficient t
+(0 = context A's activation, 1 = context B's); y: relative output distance d(t) on the final logits,
+0 = the output looks like endpoint A, 1 = like endpoint B. Dashed grey = the no-plateau reference
+d = t; shaded band = the detected C run; thin vertical lines = top-1 token changes. **Top row:** the
+three highest-scoring candidates (staircases, ρ = 0.16 / 0.79 / 0.30). **Bottom row:** three random
+candidates (not staircases, ρ = 0.71 / 3.07 / 3.71).
+
+Over all 1,290 candidates the second picture dominates — the C run is usually inside the boundary,
+and only its flat tail is a genuine sub-plateau (Figure 4):
+
+![flatness of the C window against a matched control and the score](plots/subplateau_dwell.png)
+
+**Figure 4.** Is the third region a shelf? **Left:** distribution of the C-window flatness ρ (x: ρ =
+range of d ÷ width in t, clipped at 6; y: density) for the 1,290 candidates (solid) and for the same
+α windows on 1,290 matched non-candidate paths (dashed); dashed rule at ρ = 1, dotted rule at the
+post-hoc ρ = 0.5 cut. **Middle:** median ρ (circles) with inter-quartile range (hatched) against the
+decile of the frozen candidate score (10 = highest). **Right:** histogram of the mean output distance
+across the C run.
 
 This is what the flat tail looks like — the 106 candidates with ρ < 0.5 are textbook
-plateau–boundary–sub-plateau–boundary–plateau curves:
+plateau–boundary–sub-plateau–boundary–plateau curves (Figure 5):
 
-![The six flattest sub-plateaus of the 1,290 candidates (post-hoc selection: ρ < 0.5, C run ≥ 5 grid points). Axes as in the previous d(t) figure: x = interpolation coefficient t, y = relative output distance d(t) on the final logits; dashed grey = no-plateau diagonal, hatched band = the C run, thin vertical lines = top-1 token changes. Titles give block, C-run alpha range and ρ.](plots/matthew_dt_gallery.png)
+![output-distance curves for the six flattest sub-plateaus](plots/matthew_dt_gallery.png)
+
+**Figure 5.** The six flattest sub-plateaus of the 1,290 candidates (post-hoc selection: ρ < 0.5 and
+C run ≥ 5 grid points). Axes as in Figure 3 — x: interpolation coefficient t; y: relative output
+distance d(t); dashed grey = the no-plateau diagonal; shaded band = the C run; thin vertical lines =
+top-1 token changes. Titles give the block, the C-run α range and ρ.
+
+Every path above is built by patching a **synthetic** activation, and Figure 13 below shows those
+points sit off the natural manifold — so does any of this happen in real language? Rebuilding the path in
+text space, with no patching anywhere, makes the flat third region *more* common, not less
+(Figure 6):
+
+![six-panel comparison of real-text paths with activation paths](plots/real_text_prevalence.png)
+
+**Figure 6.** Real-language paths versus activation interpolation. **(A)** rate per eligible path
+under the symmetric rule (A, C and B runs each ≥ 3 grid points) for a persistent third token (hatched
+`//`) and for a true sub-plateau, ρ < 0.5 (hatched `\\`); error bars are 95% Wilson intervals.
+**(B)** transition width w(10→90) as a fraction of the path. **(C)** flatness ρ of the C window,
+clipped at 6. **(D)** the step k at which context B's prediction first becomes top-1 (0 = A's text,
+32 = B's). **(E)** motion concentration κ, the share of total output motion Σ|Δd| carried by the
+sharpest 10% of steps; 0.1 (dashed rule) would mean a perfectly smooth ramp. **(F)** number of top-1
+runs per path, clipped at 15. In B–F, solid = real text with random pairs, dashed = real text with
+final-token-matched pairs, dash-dot = activation-interpolation paths, dotted = ordinary
+(non-candidate) activation paths.
+
+And this is what a real-language sub-plateau looks like: a flat shelf at an intermediate output
+height, produced entirely by feeding the model real token sequences (Figure 7):
+
+![output-distance curves for six real-language A|C|B paths](plots/real_text_examples.png)
+
+**Figure 7.** Real-language `A|C|B` paths — no patching anywhere; every marker is a real 32-token
+sequence run through the unmodified model. x: path position t = k/32, where k is the number of
+leading tokens already replaced by context B's; y: relative output distance d(t) on the final logits,
+0 = the output looks like context A's prediction, 1 = like context B's. Dashed grey = the no-plateau
+diagonal; shaded band = the detected C run; thin vertical lines = top-1 token changes; the A/C/B
+labels above each panel give the decoded tokens (␣ marks a leading space). **Top row:** the three
+highest-scoring qualifying paths from the random-pair bank. **Bottom row:** the same from the
+final-token-matched bank. The bottom-right panel is the clean `A, C, B` worked example above.
 
 The preregistered blocks stop at 6, where both curves are still rising, so we swept deeper with the
-same pairs and the same detector to see whether the trend continues. It does not — it turns over:
+same pairs and the same detector to see whether the trend continues. It does not — it turns over
+(Figure 8):
 
-![Left: percentage of eligible paths with a persistent third top-1 token (solid, circles) and with a true sub-plateau, flatness ρ < 0.5 (dashed, squares), against the interpolation block L of GPT-2 Large; error bars are 95% Wilson intervals, the hatched region marks the preregistered blocks 0–6. Right: median flatness ρ of the C window against L; preregistered blocks solid with circles, exploratory blocks dashed with squares; dashed horizontal line ρ = 1 (as steep as the no-plateau diagonal), dotted line the ρ = 0.5 sub-plateau cut.](plots/depth_sweep.png)
+![third-token rate and flatness against interpolation block](plots/depth_sweep.png)
 
-Back to the label view. That heterogeneity is the rule, not the exception — most C segments are only
-3–5 of the 50 grid points wide and win by a small margin, and both transitions sit in the middle of
-the path:
+**Figure 8.** Where in the network the effect lives (exploratory: same 1,000 pairs, so not
+independent evidence). **Left:** percentage of eligible paths with a persistent third top-1 token
+(solid, circles) and with a true sub-plateau, ρ < 0.5 (dashed, squares), against the interpolation
+block L (x, 0–30 of 36); error bars are 95% Wilson intervals and the hatched region marks the
+preregistered blocks 0–6. **Right:** median flatness ρ of the C window against L; preregistered
+blocks solid with circles, exploratory blocks dashed with squares; dashed rule at ρ = 1, dotted rule
+at ρ = 0.5.
 
-![Distributions over the 1,290 candidate paths: C-segment width as a fraction of the alpha grid (left), minimum dominance margin of C over both endpoint tokens (middle), and entry versus exit alpha of the C run (right; dashed line is the diagonal).](plots/segment_width_margin_distribution.png)
+Back to the label view. Heterogeneity is the rule, not the exception — most C segments are only 3–5
+of the 50 grid points wide, win by a small margin, and both transitions sit in the middle of the path
+(Figure 9):
+
+![C-segment width, margin and transition locations](plots/segment_width_margin_distribution.png)
+
+**Figure 9.** What a typical activation-path candidate looks like, over all 1,290. **Left:**
+C-segment width as a fraction of the 50-point α grid. **Middle:** minimum dominance margin of C over
+both endpoint tokens (probability units). **Right:** entry α versus exit α of the C run, with the
+dashed diagonal marking zero width.
 
 If the third region were a genuine extra state we would expect it to be at least as confident as the
-endpoints. It is not — it is flatter and less certain:
+endpoints. It is not — it is flatter and less certain (Figure 10):
 
-![Top-1 probability (left) and predictive entropy in bits (right) at the centre of the C region versus the mean of the two path endpoints, over the 1,290 candidate paths. Solid = C-region centre, dashed = endpoints.](plots/c_region_confidence.png)
+![top-1 probability and entropy in the C region vs the endpoints](plots/c_region_confidence.png)
 
-And the C tokens themselves are not distinctive concepts: they are drawn from the same generic
-high-frequency pool as the endpoint predictions:
+**Figure 10.** Is the third region confident? x: top-1 probability (left panel) and predictive
+entropy in bits (right panel); y: number of candidate paths. Solid = the centre of the C region,
+dashed = the mean of the two path endpoints, over all 1,290 candidates.
 
-![Left: the 15 most common intermediate (C) tokens across candidate paths. Right: the 15 most common endpoint (A) tokens across eligible paths. Bars count paths.](plots/intermediate_token_census.png)
+And the C tokens themselves are not distinctive concepts: they come from the same generic
+high-frequency pool as the endpoint predictions (Figure 11):
+
+![commonest intermediate and endpoint tokens](plots/intermediate_token_census.png)
+
+**Figure 11.** Which tokens play the third role. **Left:** the 15 commonest intermediate (C) tokens
+over the 1,290 candidate paths. **Right:** the 15 commonest endpoint (A) tokens over the 7,611
+eligible paths. x: number of paths; y-axis labels are the decoded token strings.
 
 Because the headline rate depends on two frozen thresholds, we show what happens when they move —
-the effect degrades smoothly and never collapses to zero:
+the effect degrades smoothly and never collapses to zero (Figure 12):
 
-![A|C|B rate per eligible path versus the persistence threshold (2, 3 or 5 consecutive alpha points), for three minimum-dominance-margin floors. The dotted vertical line marks the frozen default (persistence 3, margin > 0).](plots/threshold_sensitivity.png)
+![rate against the persistence and margin thresholds](plots/threshold_sensitivity.png)
 
-Finally, two probes of whether a C region behaves like a real model state. Its points sit *further*
-from real activations than the endpoint-region points do, and their natural neighbours rarely predict
-C:
+**Figure 12.** Robustness of the headline rate. x: persistence threshold (2, 3 or 5 consecutive α
+points that C must stay top-1); y: `A|C|B` rate per eligible path. The three line styles are
+minimum-dominance-margin floors of 0, 0.02 and 0.05; the dotted vertical line marks the frozen
+default (persistence 3, margin > 0).
 
-![Left: distribution of cosine distance to the nearest of 2,000 held-out natural activations, for A-region, C-region and B-region interpolation points and for natural contexts themselves. Right: fraction of the 10 nearest natural neighbours whose own unpatched top-1 next token equals the query's top-1 token, with 95% bootstrap intervals.](plots/natural_neighbor_comparison.png)
+Two probes of whether a C region behaves like a real model state. Its points sit *further* from real
+activations than the endpoint-region points do, and their natural neighbours rarely predict C
+(Figure 13):
+
+![nearest-natural-activation distance and neighbour agreement](plots/natural_neighbor_comparison.png)
+
+**Figure 13.** Do C-region activations sit where real activations sit? **Left:** distribution of
+cosine distance to the nearest of 2,000 held-out natural activations (x: cosine distance, lower =
+more natural; y: density) for A-region, C-region and B-region interpolation points and for natural
+contexts used as queries. **Right:** fraction of the 10 nearest natural neighbours whose own
+unpatched top-1 next token equals the query's own top-1 token, with 95% bootstrap intervals.
 
 Yet the text the C region produces is fluent, and in a third of inspected cases it is reproducible
-across the whole C run rather than at a single grid point:
+across the whole C run rather than at a single grid point (Figure 14):
 
-![Number of leading greedy-decoded tokens (out of 20) that are identical across continuations generated at the first, middle and last alpha of the C run, for each of the six inspected candidates. Labels give the C token and the interpolation block; the dotted line at 1 is the trivial floor (the first token is C by construction).](plots/continuation_stability.png)
+![common greedy-prefix length across the C run](plots/continuation_stability.png)
+
+**Figure 14.** Is the C region the same state throughout its run? x: the six inspected candidates,
+labelled with their C token and interpolation block; y: number of leading greedy-decoded tokens (out
+of 20) that are identical across continuations generated at the first, middle and last α of the C
+run. The dotted line at 1 is the trivial floor, since the first decoded token is C by construction.
 
 ## Headline
 
@@ -205,6 +356,14 @@ not resting — and only **1.39% of eligible paths (CI [1.15, 1.68], 1 in 72) ho
 sub-plateau (ρ < 0.5)**. Those genuine ones behave exactly as the MNIST work predicted: a shelf at
 `d̄_C` ≈ 0.5 between two sharp boundaries, longer than average, concentrated at block 6, and ranked at
 the top by a score frozen before any curve was seen. An exploratory sweep to blocks 12–30 shows the
-effect is **early-to-mid network**: it peaks around block 6 of 36 and is gone by block 18. The verdict is therefore
-**"robust third output region, mostly fragile"** — not a null result, and not, for most paths, the
-crisp third-class plateau seen in MNIST.
+effect is **early-to-mid network**: it peaks around block 6 of 36 and is gone by block 18.
+
+**And it is not an artefact of leaving the activation manifold.** Rebuilt in text space — every point
+a real 32-token sequence, no patching anywhere — the flat third region becomes *more* common, not
+less: **7.9% of real-language paths (CI [6.4, 9.7]) hold a sub-plateau against 1.29% of activation
+paths (CI [1.06, 1.57])** under the same symmetric rule, and the median third region's flatness flips
+from ρ = 2.05 to ρ = 0.45. The right picture for real language is a **staircase with many steps**: as
+context is swapped token by token the output holds still, jumps, and holds still again, about seven
+times over 32 tokens, with sharp boundaries (motion concentration κ = 0.49, where a smooth ramp would
+give 0.1). The verdict is therefore **"robust third output region, fragile on interpolated
+activations, genuinely flat in real language — but rarely a clean three-step `A → C → B`"**.

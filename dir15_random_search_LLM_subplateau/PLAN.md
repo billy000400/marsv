@@ -255,9 +255,26 @@ between blocks 6 and 12 and falls to 1.7% by block 30; the sub-plateau rate peak
 and is zero from block 18 on. The phenomenon is early-to-mid network. Verdict, all figures and all
 controls are in `RESULTS.md` / `REPORT.md`; history in `CHANGELOG.md`.
 
+`human_feedback_2` (*"does the sub-plateau exist in real language data?"*) was then addressed and the
+file renamed `human_feedback_2.addressed.md`. It removed the synthetic step entirely: paths built in
+**text** space (step k = context B's first k tokens ++ context A's remaining 32−k), so all 33 points
+are real 32-token sequences run through the unmodified model. Two frozen banks, 2,000 paths. Key new
+number: under one symmetric rule (A, C and B runs each ≥3 points) applied to both, **7.9% of
+real-language paths [6.4, 9.7] hold a true sub-plateau against 1.29% of activation paths
+[1.06, 1.57]** — six times more common — and the median C-window flatness flips from ρ = 2.05 to 0.45.
+This retires the direction's strongest objection: the third region is *not* an artefact of leaving the
+activation manifold. The real-language shape is different, though — a many-step staircase (7 top-1
+predictions per path vs 3) with sharp boundaries (motion concentration κ = 0.49 vs 0.1 for a ramp),
+so the shelf is one step of a long climb, and only 5.8% of real-text candidates are a clean `A, C, B`.
+The same iteration fixed a deliverable bug: all figure captions had been in alt text (which never
+renders), so both files now carry visible numbered captions and pass `experiments/check_render.py`.
+
 ## Next step
 
 None — every success criterion is met and no unaddressed feedback file remains, so `STOP` is written.
-If reopened: (a) give the depth sweep its own disjoint pair bank so it becomes independent evidence
-rather than a reuse of the primary pairs; (b) enlarge the natural reference bank beyond 2,000 contexts
-so nearest-neighbour distances are not inflated by the small search space.
+If reopened: (a) build the real-language bank R2 from a window pool disjoint from the primary bank so
+that screen becomes independent evidence; (b) replace the splice with a morph whose intermediate
+points are natural prose rather than spliced prose; (c) generate continuations from real-text C
+shelves (the S4 analogue, never run for that section); (d) give the depth sweep its own disjoint pair
+bank; (e) enlarge the natural reference bank beyond 2,000 contexts so nearest-neighbour distances are
+not inflated by the small search space.
