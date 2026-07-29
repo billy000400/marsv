@@ -110,3 +110,53 @@ $R_3(k{=}10) = 1.455 \pm 0.036$ against a target of 2.70; it is now $\Gamma_3(k{
 against a target of 5.00. On the 10,000-image grid, $R_3(k{=}10) = 1.823 \pm 0.222$ (output 2.42) ->
 $\Gamma_3(k{=}320) = 1.659 \pm 0.168$ (output 4.13). The $k \le 10$ rows themselves are unchanged — the
 models and analysis for those settings were not re-run.
+
+## 2026-07-29 — iteration 3: operator feedback #2 — what movement looks like INSIDE the transition
+
+**Trigger.** `human_feedback_2.txt`: *"The current plots in report does not show the most extreme
+situation, can you show what d(t) during digit transition looks like for different K"*. Read in this
+direction's terms: the sharpest targets switch inside one step of the 201-point brightness probe
+(spacing 0.003 vs a $k=320$ transition width of 0.0046), so no existing figure could show the movement
+curve *during* the transition. Addressed by re-probing on a 30x finer grid and adding three figures,
+two metrics, one table and a new Results section. Renamed to `human_feedback_2.addressed.md`.
+
+**New experiment (`experiments/zoom.py`, `experiments/zoom_plots.py`).** All 60 final checkpoints
+(10 $k$ x 3 seeds x 2 training-set sizes) re-swept on **6001 evenly spaced brightness values**
+(spacing $10^{-4}$, 46 steps across the $k=320$ transition) over the same 100 held-out probe images,
+streaming the activations so only movement norms are kept. Missing `ckpt10k` checkpoints for
+$k \le 10$ (never saved in iteration 1) were retrained with the documented command and reproduce the
+published 10,000-image numbers exactly (e.g. $\Gamma_3(k{=}10) = 1.823$ both times), so **no existing
+table changed**.
+
+**Two metrics added to REPORT.md Methods**, both on the $\Gamma$ scale (1 = uniform):
+- **movement rate** $g_l(b) = (S-1)\,s_l(b)$ — grid-independent version of $s_l$, so curves from the
+  201- and 6001-point grids are comparable and the target's spike can share an axis with the layers'.
+- **scale-resolved** $\Gamma_l(w)$ (window of half-width $w$ centred on $b_0$; $\Gamma_l(0.06)$ is
+  exactly the old $\Gamma$) and **alignment-free** $\Lambda_l(w)$ (largest share of a *single image's*
+  movement in *any* window of width $2w$, then averaged). $\Lambda$ exists because $\Gamma$ pins its
+  window to $b_0$ and averages curves across images, which could in principle hide a sharp turn sitting
+  at a different brightness per image.
+
+**New results (RESULTS.md + REPORT.md §6, new Table 4/Table 5 in RESULTS/REPORT).**
+- Resolution objection dead: recomputing $\Gamma_3$ on the 30x finer grid moves it by $\le 0.006$ at
+  every $k$ on both grids ($1.459$ vs $1.458$ at $k=320$).
+- No hidden spike: shrinking the window from $\pm 0.06$ to $\pm 0.0025$ leaves layer 3 flat
+  ($1.50 \to 1.50$) and layer 1 flat ($1.02$) while the target climbs $5.0 \to 79.7$ toward a ceiling
+  of 120. Peak movement rate at the switch: target $96$x uniform, layer 3 $1.5$x.
+- Alignment objection dead: $\Lambda_3(0.0025) = 2.431 \pm 0.374$ (1000 images) and
+  $3.029 \pm 0.886$ (10,000 images) at $k=320$, against a $k=0.5$ floor of $1.164$ / $1.115$, an output
+  reaching $5.443$ / $11.924$ on the same paths, and a target at $79.68$.
+- **One nuance recorded rather than smoothed over:** measured alignment-free, $\Lambda_3$ keeps creeping
+  up past $k=20$ ($1.887 \to 2.431$), so part of the $\Gamma_3$ saturation reported in §4 is the model's
+  transition drifting off $b_0$, not purely a representational ceiling. The verdict is unchanged (the
+  output's $\Lambda$ grows much faster over the same range, so the gap widens with $k$); REPORT.md
+  Limitation (4) was rewritten accordingly, and the Summary/Conclusion now say "sharpens very slowly and
+  stays two orders of magnitude below the target" rather than "stops responding entirely".
+
+**Figures.** Three new, embedded with visible numbered captions in BOTH deliverables:
+`transition_zoom.png` (Figure 7), `transition_zoom_n10k.png` (Figure 8), `transition_scale.png`
+(Figure 9). Numbering after them shifted: checkpoint robustness 7 -> 10, main summary 8 -> 11. Table
+numbering in REPORT.md: the new $\Lambda$ table is Table 4 and the fit/training diagnostics table moved
+4 -> 5, keeping tables in reading order. `check_render.py` passes: 15 display eqs, 11 embedded+captioned
+figures per deliverable, 0 problems. (Fixed on the way: `$2.5\%$`-style inline math, which CLAUDE.md 8b
+predicts GitHub breaks by stripping the backslash — now plain-text percentages.)

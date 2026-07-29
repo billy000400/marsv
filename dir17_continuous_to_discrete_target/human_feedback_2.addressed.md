@@ -1,0 +1,1 @@
+The current plots in report does not show the most extremee situation, can you show what d(t) during digit transition looks like for different K

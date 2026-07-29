@@ -129,3 +129,58 @@ drives $\Phi_3$ toward zero.
 
 On track? yes — S1–S4 complete at 10 sharpness settings, 100% done, no blocker; feedback #1 fully
 addressed and the negative verdict is now much better supported.
+
+## 2026-07-29 — iteration 3: operator feedback #2 — the transition at 30x resolution
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: `human_feedback_2.txt` had no
+`.addressed.md` suffix, so addressing it WAS this iteration. Ask: *"The current plots in report does not
+show the most extreme situation, can you show what d(t) during digit transition looks like for
+different K"*.
+
+**Interpretation (logged because it required a judgment call).** This direction has no digit-to-digit
+interpolation — PLAN.md explicitly puts that out of scope — so "d(t) during the transition" reads as the
+local-movement curve $s_l(b)$ *inside the target transition*, the analogue of dir13's $d(t)$. And the
+operator is right that no existing figure shows it: the probe grid's spacing (0.003) is coarser than the
+$k=320$ target's transition width (0.0046), so the entire switch happens inside one plotted step.
+Rejected alternatives: (a) doing a literal digit-identity interpolation — out of scope, and not what the
+sharpness sweep is about; (b) simply re-cropping the existing Figure 4 x-axis — it would show a straight
+line between two grid points and answer nothing.
+
+**What I did.**
+- `experiments/zoom.py`: dense 6001-point brightness sweep (spacing $10^{-4}$) of all 60 final
+  checkpoints on the same 100 held-out probe images, streaming activations chunk-by-chunk so only
+  movement norms are stored (~0.3 s/model, 7 MB RAM). Metrics: movement rate $g_l(b)$, scale-resolved
+  $\Gamma_l(w)$ for $w \in \{0.06,0.03,0.01,0.005,0.0025\}$, and alignment-free $\Lambda_l(w)$.
+- Retrained the 15 missing `ckpt10k` models ($k \le 10$, never saved in iteration 1) and re-ran
+  `analyze.py` for them; they reproduce the published numbers exactly, so no table was superseded.
+- `experiments/zoom_plots.py`: Figures 7-9. Curated RESULTS.md and REPORT.md (new §6, new table, updated
+  Summary/Conclusion/Limitation 4, figure+table renumbering), appended CHANGELOG.
+
+**What I learned.**
+1. **Nothing is hiding under the coarse grid.** $\Gamma_3$ recomputed at 30x resolution moves by
+   $\le 0.006$ at every $k$. The 201-point probe was not smearing a spike — a real possibility a priori,
+   since chord lengths under-count a curved path.
+2. **The alignment metric was the more valuable half, and I nearly missed it.** My first pass measured
+   the peak of the *image-averaged* curve; the 10k output peaked at only 5.5x uniform there despite
+   $\Gamma_{\text{out}} = 4.13$, which flagged that averaging over images whose switches sit at slightly
+   different brightnesses flattens peaks. $\Lambda$ (best window anywhere, per image, then average) fixes
+   it: the output goes to 11.9x, layer 3 only to 3.0x. Without this the zoom figures alone would have
+   been open to "your averaging destroyed the spike".
+3. **An honest correction to the previous iteration's headline.** Alignment-free, layer 3 does *not*
+   stop responding past $k=20$ — $\Lambda_3$ creeps $1.887 \to 2.431$. Some of the $\Gamma_3$ saturation
+   is transition drift off $b_0$. Deliverables now say "sharpens very slowly, two orders of magnitude
+   below the target" instead of "stops responding entirely"; the verdict is unchanged because the
+   output-to-representation gap *widens* over exactly that range.
+4. **CLAUDE.md 8b bit again in a new spot:** `$2.5\%$` inline. GitHub strips the backslash, `%` opens a
+   KaTeX comment and eats the closing `$`. `check_render.py` caught all six instances; percentages now
+   live outside math.
+
+**Next step.** None required by PLAN.md — S1-S4 remain complete, and feedback #2 is fully addressed and
+renamed to `human_feedback_2.addressed.md`, leaving zero unaddressed feedback files, so `STOP` is
+written. If another feedback file appears, delete `STOP`, address it, re-write `STOP` only when clean
+(rules 10-11). The scientific follow-up is unchanged and belongs to a new direction: reintroduce the
+removed ingredients (softmax head, cross-entropy, multi-class competition) one at a time and see which
+drives $\Phi_3$ toward zero.
+
+On track? yes — S1-S4 complete, 100% done, no blocker; feedback #2 addressed with a 30x-finer probe that
+closes both the resolution and the alignment objection to the negative verdict.

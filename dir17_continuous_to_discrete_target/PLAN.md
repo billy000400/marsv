@@ -337,7 +337,7 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-**COMPLETE (2026-07-29), operator feedback #1 addressed.** S1-S4 done at the **extended ten-\(k\) scale**
+**COMPLETE (2026-07-29), operator feedback #1 and #2 addressed.** S1-S4 done at the **extended ten-\(k\) scale**
 (\(k\) up to 320, a step function at probe-grid resolution). All five success criteria are met: ten \(k\)
 settings trained with identical inputs/hyperparameters, all 30 primary runs (10 \(k\) x 3 seeds) pass both
 training-adequacy conditions, `REPORT.md` contains every required element, primary results use 3 seeds with
@@ -356,12 +356,27 @@ sweep \(R^2\) 0.848) while the deepest hidden layer stays at \(\Gamma_3 = 1.659 
 continuous target is **not sufficient** to produce classification-style plateaus, and the ceiling is a
 property of the representation rather than a failure to fit.
 
+**Operator feedback #2 (2026-07-29), addressed.** "The current plots do not show the most extreme
+situation — show what d(t) during the transition looks like for different K." The 201-point probe grid
+(spacing 0.003) is coarser than the \(k=320\) transition (width 0.0046), so the whole switch fell inside
+one plotted step. Added a **6001-point dense probe** (`experiments/zoom.py`, spacing \(10^{-4}\)) over all
+60 final checkpoints, two metrics beyond the plan — movement rate \(g_l(b)=(S-1)s_l(b)\), scale-resolved
+\(\Gamma_l(w)\) and alignment-free \(\Lambda_l(w)\) — and three figures (`transition_zoom.png`,
+`transition_zoom_n10k.png`, `transition_scale.png`) as REPORT.md §6. Findings: recomputing \(\Gamma_3\) at
+30x resolution changes it by \(\le 0.006\) at every \(k\) (no hidden spike); at \(k=320\) the target's
+movement rate peaks at 96x uniform while layer 3 reaches 1.5x and is flat; alignment-free, layer 3's best
+0.005-wide stretch anywhere reaches \(\Lambda_3 = 2.43\) (1k images) / \(3.03\) (10k) against the output's
+\(5.44\) / \(11.92\) and the target's \(79.7\). One correction to the previous status: measured
+alignment-free, \(\Lambda_3\) does keep creeping up past \(k=20\) (1.89 -> 2.43), so part of the
+\(\Gamma_3\) saturation is the model's transition drifting off \(b_0\) rather than a pure representational
+ceiling — the verdict is unchanged because the output-to-representation gap widens over the same range.
+
 Deviations from this plan, all logged in JOURNAL.md and CHANGELOG.md: primary training set is 1000
 digit-balanced images rather than "all training images" (the two PLAN requirements conflict — a 1-D target
 on 50k images shows no validation overfitting, failing the adequacy gate), with the 10,000-image grid
 reported in full as the control that removes the fitting confound; a global cosine LR decay was added to
 satisfy the smooth-convergence condition; one metric was added beyond the plan, the flank share
-\(\Phi_l(k)\); and the concentration score is written \(\Gamma_l(k)\) rather than \(R_l(k)\) per operator
+\(\Phi_l(k)\), plus \(g_l\), \(\Gamma_l(w)\) and \(\Lambda_l(w)\) for feedback #2; and the concentration score is written \(\Gamma_l(k)\) rather than \(R_l(k)\) per operator
 feedback #1.
 
 ## Next step

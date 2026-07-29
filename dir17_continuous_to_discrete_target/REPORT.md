@@ -43,10 +43,18 @@ nonetheless still nearly uniform — concentration $1.659 \pm 0.168$, with 28% o
 the flanks. The network can compute a switch at its output while keeping a representation that slides
 smoothly the whole way.
 
+**Looking at the most extreme moment itself.** Because the sharpest target switches inside a single step
+of our standard probe, we re-measured everything on a 30x finer brightness grid and looked *inside* the
+transition (§6). Nothing is hiding there. The target's movement rate at its switch reaches $96$x the
+uniform rate; the deepest hidden layer's reaches $1.5$x, and it is flat rather than peaked. Even when each
+image is allowed to nominate the busiest $0.005$-wide stretch anywhere along its own path — so neither a
+mis-centred window nor averaging across images can hide a spike — the deepest layer concentrates $2.4$x
+(and $3.0$x with 10x data) against the target's $80$x and a possible $120$x.
+
 **Verdict: a switch-like continuous target is not sufficient to produce classification-style activation
 plateaus.** It nudges the representation in that direction — measurably, and more strongly the deeper you
 look — but plateau-transition-plateau structure never appears, at any sharpness, at either training-set
-size.
+size, and at no scale of magnification.
 
 **How to read this.** This is a clean negative result about *one* candidate cause. It does not say
 plateaus in classifiers are unexplained — only that "the target has few discrete values" is not by itself
@@ -161,6 +169,62 @@ plateau-like. Figure 5b and Table 2 report $\Phi$. Taken together $\Gamma$ and $
 verdict falsifiable: the hypothesis needs *both* a rising $\Gamma$ and a collapsing $\Phi$, and we find
 only the first, weakly.
 
+### Looking inside the transition: a 30x finer probe and two scale-aware metrics
+
+Everything above is measured on the 201-point grid, whose spacing $0.003$ is **coarser than the
+$k=320$ target's own transition** (width $0.0046$). The whole switch therefore happens inside one or two
+plotted steps, and no figure built on that grid can show what the representation does *while* the target
+is switching — the single most extreme moment of the experiment. Two objections follow, and neither can
+be answered on the coarse grid:
+
+1. **Resolution.** Could a narrow spike of activation movement be hiding inside one $0.003$-wide step,
+   smeared flat by the coarse binning?
+2. **Alignment.** If the representation *does* turn sharply, but at a slightly different brightness for
+   each image, would a window pinned to $b_0$ — or an average over 100 images — hide it?
+
+So we re-ran the identical sweep on a **6001-point grid** (spacing $10^{-4}$, 30x finer), which resolves
+even the $k=320$ transition with 46 steps, and defined two metrics on it. Both are on the same scale as
+$\Gamma$ ($1$ = uniform), so they can be read directly against the numbers above.
+
+**Movement rate $g_l(b)$ — for plotting curves whose scale does not depend on the grid.** $s_l$ itself
+shrinks as the grid gets finer (it sums to 1 over more steps), so curves from two grids cannot be
+compared. Dividing by the uniform value fixes that. With $S$ grid points:
+
+```math
+g_l(b_i) = (S-1)\, s_l(b_i)
+```
+
+$g_l = 1$ everywhere means movement is spread perfectly evenly; $g_l = 100$ means that step carries 100x
+its uniform share. Figures 7 and 8 plot $g$.
+
+**Scale-resolved concentration gain $\Gamma_l(w)$ — answers objection 1.** The same question as $\Gamma$,
+asked at every zoom level instead of one fixed window. For a window of half-width $w$ centred on $b_0$:
+
+```math
+\Gamma_l(w) = \frac{0.6}{2w}\sum_{|b_i - b_0| \le w} s_l(b_i), \qquad
+\Gamma_l^{\max}(w) = \frac{0.3}{w}
+```
+
+$\Gamma_l(0.06)$ is exactly the $\Gamma$ of Table 1, so this is a strict generalization, and comparing the
+two is also the resolution check on the coarse grid. Shrinking $w$ raises the ceiling ($120$ at
+$w = 0.0025$), which is what makes a *hidden* narrow spike detectable: a spike smaller than the window
+cannot raise $\Gamma$ at the coarse scale but will send it up as $w$ shrinks. Figure 9a reports it.
+
+**Alignment-free concentration $\Lambda_l(w)$ — answers objection 2.** Instead of pinning the window to
+$b_0$, take, **for each image separately**, the largest share of that image's movement falling in *any*
+window of width $2w$, and only then average over images:
+
+```math
+\Lambda_l(w) = \Big\langle\; \max_{c}\; \frac{0.6}{2w} \sum_{|b_i - c| \le w} s_l^{(n)}(b_i) \;\Big\rangle_{n}
+```
+
+where $s^{(n)}$ is image $n$'s normalized movement and $c$ ranges over all window centres. $\Lambda$ is by
+construction $\ge \Gamma$ at the same $w$: it is the best case over all placements, so it asks "does this
+path turn sharply *anywhere*?" rather than "does it turn sharply *at $b_0$*?". One caveat when reading it:
+because it maximizes over thousands of window positions, $\Lambda$ sits slightly above $1$ even for a
+perfectly uniform path, so it must be read against the near-linear $k=0.5$ control (its empirical floor)
+rather than against $1$ exactly. Figures 9b and 9c and Table 4 report it.
+
 **Sweep fit $R^2$ — a validity check, not a result.** Concentration scores mean nothing if the model
 never learned the map, and "but did it learn the switch?" is exactly the objection the large-$k$ runs must
 answer. Over the probe sweep, with the average taken across probe images, brightness points and seeds:
@@ -181,7 +245,7 @@ network. With $V(e)$ the validation loss at epoch $e$ and $E$ the final epoch:
 ```
 
 The pre-registered gate is $\rho_{\mathrm{val}} \le 1.2$ with the minimum occurring before the last epoch,
-plus a training loss ending within 5% of its own minimum. Figure 2 and Table 4 report this.
+plus a training loss ending within 5% of its own minimum. Figure 2 and Table 5 report this.
 
 ### Baselines
 
@@ -282,7 +346,7 @@ epoch, the final validation loss is 1.7–10.9% above it (gate: $\le$ 20%), and 
 validation minimum arrives very early (mean epoch 15 of 2000), because those targets are essentially
 unlearnable in detail from 1000 images, so the curve is flat-then-slightly-rising from the start. The
 gate's numeric conditions still hold, but the minimum-validation checkpoint at those two settings is a
-barely-trained network — which matters only for §6.
+barely-trained network — which matters only for §7.
 
 ### 3. The models fit the smooth targets well and the step targets poorly — at 1000 images
 
@@ -296,7 +360,7 @@ seeds, coloured and styled by $k$ as in Figure 1; shaded band = $\pm 1$ SD acros
 the central window. Sweep $R^2$ appears in each panel title. The predictions for $k \ge 40$ are all much
 the same soft sigmoid no matter how sharp the target gets.
 
-Sweep $R^2$ is flat at $0.90$ for $k \le 5$ and then falls steadily to $0.612$ at $k=320$ (Table 4). With
+Sweep $R^2$ is flat at $0.90$ for $k \le 5$ and then falls steadily to $0.612$ at $k=320$ (Table 5). With
 only 1000 training images the network cannot place a step precisely enough to generalize, and its mean
 prediction stops sharpening past $k \approx 40$. That is a real limit of the primary grid, and §5 removes
 it.
@@ -368,7 +432,8 @@ Reading the two tables together:
   exactly as hypothesized: across the full sweep layer 1 barely moves ($1.007 \to 1.021$), layer 2 rises
   modestly ($1.034 \to 1.114$), layer 3 rises most ($1.094 \to 1.458$). Over the range where the rise
   happens ($k = 0.5 \to 20$) it is monotone and seed-consistent.
-- **The negative half, and it is decisive.** Past $k=20$ the deepest layer stops responding —
+- **The negative half, and it is decisive.** Past $k=20$ the deepest layer stops responding on this
+  metric —
   $1.491$, $1.483$, $1.468$, $1.451$, $1.458$ across a 16x increase in target sharpness, every value inside
   every other's confidence interval — while the target reference climbs from $4.17$ to its $5.00$ ceiling.
   Layer 3 ends at 11% of the distance from uniform to maximum. The flank share says it more bluntly:
@@ -377,7 +442,9 @@ Reading the two tables together:
   layer show plateau-transition-plateau structure.**
 - **This is a saturation, not a slow climb.** Extending the grid is what made this visible: on $k \le 10$
   alone the curve looks like it might keep rising — precisely the ambiguity that motivated adding the five
-  larger settings.
+  larger settings. §6 qualifies this in one way worth reading: measured with a window each image may place
+  itself, the deepest layer does keep sharpening past $k=20$, very slowly, so part of the flatness here is
+  the model's transition drifting off $b_0$. The gap to the target and to the output still widens with $k$.
 
 Variation across probe *images* is much larger than across seeds, and grows with $k$: the image-level SD of
 $\Gamma_3$ is $0.036$ at $k=0.5$ and $0.507$ at $k=320$. Individual images differ a lot in how sharply
@@ -439,11 +506,111 @@ data the models show essentially no validation overfitting ($\rho_{\mathrm{val}}
 $k$), and the plan requires slight overfitting for the primary result. We report it in full because it
 removes the fitting confound that would otherwise weaken §4.
 
-### 6. Neither the checkpoint choice nor the training diagnostics change anything
+### 6. Inside the transition: what the representation does at the most extreme moment
+
+Sections 4 and 5 measure the whole brightness path. But the sharpest targets switch inside a single step
+of the 201-point grid, so the figures so far literally cannot show the moment the target flips. This
+section zooms in with the 6001-point probe and asks the two questions of Methods: is a narrow spike
+hiding below the coarse grid's resolution, and does averaging over images hide a spike that sits at a
+slightly different brightness in each one?
+
+Figure 7 is the direct answer to the first question, and the plot the whole extension was built for: the
+movement rate $g(b)$ during the transition itself, for all ten $k$, at two zoom levels.
+
+![movement rate versus brightness inside the transition, ten k values, target and output and three hidden layers at two zoom levels](plots/transition_zoom.png)
+
+**Figure 7.** Primary grid (1000 training images). x: brightness $b$; y: movement rate $g(b)$ = share of
+the path's travel at that step divided by the uniform share, so $1$ = perfectly uniform movement. Columns
+left to right: the target's own $|\Delta y_k|$, the model output $\hat y$, and hidden layers 1, 2 and 3
+(deepest). Ten series per panel, one per sharpness $k$, dark blue ($k=0.5$) to yellow ($k=320$) with a
+distinct line style each, exactly as in Figure 1; curves are means over 100 held-out images and 3 seeds.
+Dotted vertical line = $b_0 = 0.7$; dotted horizontal line = the uniform level $g = 1$. **Top row:** zoom
+to $b_0 \pm 0.04$ on **one shared logarithmic y-axis**, so the panels are directly comparable — the
+target's spike reaches nearly $100$x uniform while every hidden-layer curve hugs $1$. **Bottom row:** zoom
+to $b_0 \pm 0.0025$ — narrower than the $k=320$ transition — with **each panel on its own linear axis** so
+the layers' small structure is visible at all. Note the bottom-row y-ranges: the target reaches $96$, the
+output $2.4$, layer 3 $1.5$, layer 1 $1.03$.
+
+Zooming 30x finer reveals **no hidden spike**. Layer 3's movement rate at the target's transition centre is
+$1.50$x uniform at $k=320$ — the same value the coarse grid reported for the whole central window — and it
+is flat across the transition rather than peaked. Layer 1 is at $1.02$x. The resolution objection also
+fails quantitatively: recomputing the Table 1 metric on the 30x finer grid changes $\Gamma_3$ by at most
+$0.006$ at any $k$ on either training-set size (e.g. $1.459$ vs $1.458$ at $k=320$), so nothing was being
+smeared away by the coarse probe.
+
+The 10,000-image control is where this test bites hardest, because there the **output** really is a switch:
+
+![movement rate inside the transition for the 10,000-image models, same layout](plots/transition_zoom_n10k.png)
+
+**Figure 8.** Same axes, panels, series and zoom levels as Figure 7, for the 10,000-image control grid —
+the models whose output learned the step ($R^2 = 0.85$ at $k=320$). The output panel now rises to $5.5$x
+uniform inside the transition while hidden layer 3 reaches only $2.3$x and layer 1 stays at $1.05$x. The
+output's bump looks broad here only because each image switches at a slightly different brightness and
+this is an average across images — which is exactly what $\Lambda$ in Figure 9 corrects for.
+
+That caveat is the second question, and it needs the alignment-free metric. Figure 9 answers both at once:
+panel (a) sweeps the window width with the window pinned to $b_0$, panel (b) lets every image pick its own
+best window, and panel (c) tracks the finest scale against $k$.
+
+![three panels: concentration versus window half-width centred on b0, versus best window anywhere, and finest-scale concentration versus k](plots/transition_scale.png)
+
+**Figure 9.** All panels: log-log; dotted horizontal line = uniform ($1$); dashed grey line = the maximum a
+perfectly plateaued path could reach. Series (shared legend below the figure): target reference (dark
+dotted, star), model output (orange dash-dot, inverted triangle), hidden layers 1 / 2 / 3 (blue solid
+circle / vermillion dashed square / pink dash-dot triangle); filled markers with solid-ish lines = 1000
+training images, open markers with fine dotted lines = 10,000 training images. **(a)** x: window half-width
+$w$ around $b_0$, *decreasing* left to right (zooming in); y: $\Gamma(w)$, at $k=320$. **(b)** same axes for
+$\Lambda(w)$, the best window anywhere along each image's own path, at $k=320$. **(c)** x: target sharpness
+$k$; y: $\Lambda(w = 0.0025)$, the finest scale. In (a) and (b) the target climbs with the ceiling while
+every hidden layer stays flat — the representation has no characteristic scale at which it turns sharply.
+
+**Table 4 — alignment-free concentration $\Lambda(w = 0.0025)$**, the best $0.005$-wide stretch of
+brightness *anywhere* on each image's own path, at the finest scale. $1$ = uniform, $120$ = maximum;
+mean over 100 held-out images and 3 seeds, $\pm$ = 95% CI across seeds. Read the model columns against the
+$k = 0.5$ row, which is this metric's empirical floor.
+
+| $k$ | target curve | model output (1k images) | hidden layer 3 (1k images) | model output (10k images) | hidden layer 3 (10k images) |
+|---:|---:|---:|---:|---:|---:|
+| 0.5 | 1.01 | 1.195 ± 0.020 | 1.164 ± 0.016 | 1.130 ± 0.006 | 1.115 ± 0.006 |
+| 1   | 1.03 | 1.202 ± 0.030 | 1.165 ± 0.021 | 1.129 ± 0.005 | 1.113 ± 0.009 |
+| 2   | 1.12 | 1.240 ± 0.026 | 1.192 ± 0.016 | 1.183 ± 0.013 | 1.149 ± 0.011 |
+| 5   | 1.66 | 1.510 ± 0.047 | 1.404 ± 0.036 | 1.639 ± 0.019 | 1.477 ± 0.010 |
+| 10  | 3.01 | 2.103 ± 0.061 | 1.655 ± 0.064 | 2.690 ± 0.042 | 1.990 ± 0.227 |
+| 20  | 6.00 | 2.915 ± 0.021 | 1.887 ± 0.186 | 4.340 ± 0.075 | 2.292 ± 0.199 |
+| 40  | 11.96 | 3.439 ± 0.147 | 1.991 ± 0.294 | 5.911 ± 0.205 | 2.634 ± 0.691 |
+| 80  | 23.69 | 4.275 ± 0.429 | 2.207 ± 0.353 | 7.037 ± 0.146 | 2.277 ± 0.077 |
+| 160 | 45.59 | 4.464 ± 0.093 | 2.343 ± 0.399 | 9.593 ± 1.413 | 2.629 ± 0.370 |
+| 320 | 79.68 | 5.443 ± 0.771 | 2.431 ± 0.374 | 11.924 ± 2.834 | 3.029 ± 0.886 |
+
+What the extreme case shows:
+
+- **No hidden spike, at any scale.** Pinned to $b_0$ (Figure 9a), the target's concentration rises with the
+  ceiling as the window shrinks — $5.0 \to 79.7$ from $w = 0.06$ to $w = 0.0025$ — because all its movement
+  is inside every window. Every hidden layer is *flat*: layer 3 goes $1.50 \to 1.50$, layer 1 $1.02 \to
+  1.02$. A curve that is flat in $w$ has no characteristic scale of sharp turning; that is the signature of
+  a path that just slides.
+- **It is not an averaging artifact either.** Allowed to pick its own best window per image (Table 4),
+  layer 3 reaches $2.43 \pm 0.37$ at $k=320$ on the primary grid and $3.03 \pm 0.89$ on the 10,000-image
+  grid — against a floor of $1.16$ / $1.12$ set by the near-linear $k=0.5$ control, an output that reaches
+  $5.44$ / $11.92$ on the same paths, and a target at $79.7$. In plain terms: the $0.005$-wide slice of
+  brightness that is the busiest anywhere on the path carries 2.5% of the deepest layer's total travel,
+  where a uniform path would carry 0.83% and the target carries 66%.
+- **One honest nuance the fine grid adds.** Measured alignment-free, layer 3 does *not* saturate as flatly
+  as $\Gamma$ suggested: $\Lambda_3$ keeps creeping up past $k=20$ ($1.89 \to 2.43$ on the primary grid).
+  Part of the $\Gamma$ saturation in §4 is therefore the model's transition drifting off $b_0$, not purely
+  a representational ceiling. It does not change the verdict — the output's $\Lambda$ grows far faster over
+  the same range ($2.92 \to 5.44$, and $4.34 \to 11.92$ with 10x data), so the representation-to-output gap
+  *widens* with $k$ — but the honest statement is "layer 3 sharpens very slowly and stays two orders of
+  magnitude below the target", not "layer 3 stops responding entirely".
+- **Depth ordering survives at the extreme.** At $k=320$ on the 10,000-image grid, $\Lambda(0.0025)$ is
+  $1.064 \pm 0.001$ (layer 1), $1.324 \pm 0.044$ (layer 2), $3.029 \pm 0.886$ (layer 3): the effect is real
+  and grows with depth, and is still nowhere near a plateau.
+
+### 7. Neither the checkpoint choice nor the training diagnostics change anything
 
 ![concentration gain for the final versus minimum-validation-loss checkpoint, all layers](plots/checkpoint_robustness.png)
 
-**Figure 7.** x: target sharpness $k$, log scale; y: concentration gain $\Gamma_l(k)$; dotted line = uniform
+**Figure 10.** x: target sharpness $k$, log scale; y: concentration gain $\Gamma_l(k)$; dotted line = uniform
 baseline $\Gamma = 1$. Six series: hidden layers 1 / 2 / 3 (blue circle / vermillion square / pink triangle),
 each drawn twice — solid with filled markers = final checkpoint, dashed with open markers =
 minimum-validation-loss checkpoint. Error bars = 95% CI across 3 seeds. The two checkpoint choices are
@@ -455,7 +622,7 @@ in §2 — barely trained — and reads $1.336$ and $1.331$ against the final ch
 that difference reflects the checkpoint being untrained, not a dependence of the conclusion on checkpoint
 choice. No conclusion in this report changes if the other checkpoint is read.
 
-**Table 4 — fit and training diagnostics, primary grid.** Mean over 3 seeds. $\rho_{\mathrm{val}}$ is the
+**Table 5 — fit and training diagnostics, primary grid.** Mean over 3 seeds. $\rho_{\mathrm{val}}$ is the
 adequacy ratio (gate: $\le 1.2$); "val-min epoch" is where the validation minimum falls within the 2000
 epochs.
 
@@ -472,11 +639,11 @@ epochs.
 | 160 | 0.622 | 0.343 | 1.062 | 15 |
 | 320 | 0.612 | 0.369 | 1.094 | 15 |
 
-### 7. The whole experiment in one figure
+### 8. The whole experiment in one figure
 
 ![four-panel summary: targets, predictions, deepest-layer movement, concentration gain](plots/main_summary.png)
 
-**Figure 8.** All panels use the ten-$k$ colour and line-style scheme of Figure 1; grey bands in (a)–(c) =
+**Figure 11.** All panels use the ten-$k$ colour and line-style scheme of Figure 1; grey bands in (a)–(c) =
 the central window $[0.64, 0.76]$. **(a)** x: brightness $b$, y: target $y_k(b)$ — the manipulation, running
 from a straight line to a step. **(b)** x: $b$, y: mean prediction $\hat y(b)$ over probe images and seeds —
 the primary-grid models answer every sharp target with much the same soft sigmoid. **(c)** x: $b$, y:
@@ -495,13 +662,17 @@ effect strengthens with depth, and (iv) the sharpest model shows *low movement a
 (i)–(iii) hold. **Condition (iv) fails, and by a wide margin**: at the step-function targets the deepest
 layer keeps 27–28% of its movement out on the flanks against the target's 0%, and its concentration gain is
 stuck near $1.5$ (primary grid) or $1.7$ (10,000-image control) against a maximum of $5.0$. Extending the
-grid to $k=320$ converted what had looked like a slowly rising trend into a clear saturation.
+grid to $k=320$ converted what had looked like a slowly rising trend into a clear saturation, and
+magnifying the transition 30x (§6) shows the flanks are not quiet at *any* scale: even the busiest
+$0.005$-wide stretch anywhere on an image's own path carries only $2.4$–$3.0$x the uniform share of the
+deepest layer's travel, against $80$x for the target on the same paths.
 
 **So: a switch-like continuous target is not sufficient to produce classification-style activation
 plateaus.** The most informative single comparison is the 10,000-image control at $k=320$, where the
 network's output is 78% of the way from uniform to a perfect switch while its deepest hidden layer is 16% of
-the way. A network can compute an almost-discrete function through a representation that still slides
-smoothly along the input direction. Whatever produces plateaus in classifiers, target discreteness alone is
+the way — and, at the finest scale we can measure, 9.9% of the output's total change happens in the
+busiest 0.83% of the brightness range against 2.5% of the deepest layer's. A network can compute an
+almost-discrete function through a representation that still slides smoothly along the input direction. Whatever produces plateaus in classifiers, target discreteness alone is
 not the mechanism.
 
 **Limitations.** (1) One architecture (4-layer, width-200 MLP), one input direction (global brightness), one
@@ -511,10 +682,11 @@ targets, a discrete latent bottleneck, or a classification head — could behave
 experiment says nothing about them. (3) Even the near-linear control $k=0.5$ is not perfectly uniform
 ($\Gamma_3 = 1.094$, and $s_3(b)$ peaks around $b \approx 0.6$), which is a baseline property of ReLU
 networks under input rescaling rather than a target effect; we therefore read *changes* in $\Gamma$ and
-$\Phi$ with $k$, not their absolute values. (4) The concentration window is fixed at the middle 20% of the
-brightness range and centred on the true $b_0$, so a model whose transition sits slightly off-centre is
-scored down — which if anything biases *toward* rejecting the hypothesis, and the primary-grid predictions
-do sit slightly right of $b_0$ (Figure 3). (5) The primary grid under-fits the sharpest targets; the
+$\Phi$ with $k$, not their absolute values. (4) $\Gamma$ and $\Phi$ pin their windows to the true $b_0$, so a model whose transition
+sits slightly off-centre is scored down; the primary-grid predictions do sit slightly right of $b_0$
+(Figure 3). The alignment-free $\Lambda$ of §6 removes this bias entirely and the verdict survives, but
+$\Lambda$ shows the bias is real: part of $\Gamma_3$'s apparent saturation past $k=20$ is transition drift,
+not a representational ceiling. (5) The primary grid under-fits the sharpest targets; the
 10,000-image grid fixes that but shows no validation overfitting, so neither grid is ideal on every axis.
 They agree, which is the reassuring part. (6) We do not claim this explains classification plateaus, and we
 do not claim the activation path is a manifold in any technical sense.
@@ -530,4 +702,6 @@ and it is a direct extension of this setup.
 `python3 experiments/train.py --epochs 2000 --seeds 0 1 2 --tag main --save_ckpt`, then
 `python3 experiments/analyze.py`, then `python3 experiments/plots.py`. The 10,000-image grid uses
 `--epochs 200 --n_train 10000 --tag n10k --ckpt_prefix ckpt10k`, analyzed with
-`CKPT_PREFIX=ckpt10k ANALYSIS_OUT=analysis_n10k.json`.
+`CKPT_PREFIX=ckpt10k ANALYSIS_OUT=analysis_n10k.json`. The §6 fine-grid analysis is
+`python3 experiments/zoom.py main`, `python3 experiments/zoom.py n10k`, then
+`python3 experiments/zoom_plots.py`.
