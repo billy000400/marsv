@@ -1,0 +1,17 @@
+self_test OK: step w=0.089 detected, line w=0.800 rejected
+65 characters, 2080 unordered pairs
+  final|L0: 500/2080 pairs (9s)
+  final|L0: 1000/2080 pairs (17s)
+  final|L0: 1500/2080 pairs (26s)
+  final|L0: 2000/2080 pairs (34s)
+final|L0: n=2080 median w=0.355 strict 182/2080 (35s)
+final|L0|swap: n=100 median w=0.366 strict 12/100 (2s)
+final|L4: n=200 median w=0.763 strict 0/200 (3s)
+final|L8: n=200 median w=0.806 strict 0/200 (2s)
+final|L11: n=200 median w=0.806 strict 0/200 (2s)
+  init|L0: 500/2080 pairs (8s)
+  init|L0: 1000/2080 pairs (17s)
+  init|L0: 1500/2080 pairs (25s)
+  init|L0: 2000/2080 pairs (33s)
+init|L0: n=2080 median w=0.803 strict 0/2080 (34s)
+DONE

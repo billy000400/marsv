@@ -71,6 +71,7 @@ def run_pair(model, seq_A, seq_B, interp_block, ts, device, batch_k=101):
     rec_blocks = list(range(interp_block + 1, n_layer))  # downstream resid_post recording points
     d_layer = {l: np.empty(len(ts)) for l in rec_blocks}
     d_logit = np.empty(len(ts))
+    argmax = np.empty(len(ts), dtype=np.int64)
     ep_err = {}
 
     base = res[interp_block][0]  # [T,C]; prefix rows identical for A and B (checked above)
@@ -88,6 +89,7 @@ def run_pair(model, seq_A, seq_B, interp_block, ts, device, batch_k=101):
         for l in rec_blocks:
             d_layer[l][i0:i1] = rel_dist(rec[l], res[l][0, -1], res[l][1, -1])
         d_logit[i0:i1] = rel_dist(lg, xA_logit, xB_logit)
+        argmax[i0:i1] = lg.argmax(dim=-1).cpu().numpy()
         if i0 == 0:
             ep_err["t0_logit"] = float((lg[0] - xA_logit).abs().max())
             ep_err["t0_patch"] = float((H[0] - hA).abs().max())
@@ -95,7 +97,7 @@ def run_pair(model, seq_A, seq_B, interp_block, ts, device, batch_k=101):
             ep_err["t1_logit"] = float((lg[-1] - xB_logit).abs().max())
             ep_err["t1_patch"] = float((H[-1] - hB).abs().max())
 
-    return {"d_logit": d_logit, "d_layer": d_layer, "prefix_err": prefix_err,
+    return {"d_logit": d_logit, "d_layer": d_layer, "argmax": argmax, "prefix_err": prefix_err,
             "endpoint_err": ep_err, "d0": float(d_logit[0]), "d1": float(d_logit[-1])}
 
 
@@ -113,23 +115,24 @@ def pava_isotonic(y):
     return out
 
 
+def iso_crossing(ts, iso, level):
+    """Linearly interpolated first upward crossing of `level` by the isotonic curve `iso`."""
+    idx = np.argmax(iso >= level)
+    if iso[idx] < level:
+        return np.nan
+    if idx == 0:
+        return float(ts[0])
+    t0, t1, y0, y1 = ts[idx - 1], ts[idx], iso[idx - 1], iso[idx]
+    return float(t0 + (level - y0) / (y1 - y0) * (t1 - t0)) if y1 > y0 else float(t1)
+
+
 def transition_width(ts, d, lo=0.1, hi=0.9):
     """w_{10->90} on the isotonic copy: first t with iso-d >= hi minus first t with iso-d >= lo.
     Returns (width, t_lo, t_hi, max_iso_dev). max_iso_dev = max |raw - isotonic|: large values
     flag non-monotone curves, which are reported separately and excluded from the width stat."""
     iso = pava_isotonic(d)
     max_dev = float(np.abs(d - iso).max())
-
-    def cross(level):  # linear interpolation of the first upward crossing
-        idx = np.argmax(iso >= level)
-        if iso[idx] < level:
-            return np.nan
-        if idx == 0:
-            return float(ts[0])
-        t0, t1, y0, y1 = ts[idx - 1], ts[idx], iso[idx - 1], iso[idx]
-        return float(t0 + (level - y0) / (y1 - y0) * (t1 - t0)) if y1 > y0 else float(t1)
-
-    t_lo, t_hi = cross(lo), cross(hi)
+    t_lo, t_hi = iso_crossing(ts, iso, lo), iso_crossing(ts, iso, hi)
     w = t_hi - t_lo if np.isfinite(t_lo) and np.isfinite(t_hi) else np.nan
     return w, t_lo, t_hi, max_dev
 

@@ -133,6 +133,115 @@ The final report must choose one bounded conclusion:
 
 This is evidence about temporal association, not causation. One training run cannot show that Grokking creates plateaus.
 
+## Experiment 5 - all-pairs character interpolation: does every character own a plateau?
+
+**Operator request (2026-08-01), reopening the direction.** Feedback #3 asked one character (the
+comma) against the other 64. This series generalises that to the whole vocabulary: interpolate from
+*every* character to *every* other character and ask whether each character sits in its own plateau,
+then say what the plateaus correspond to.
+
+Everything below reuses the existing frozen code path - no new assay. `experiments/matthew_assay.py`
+(`slerp_rescale` on the final-position `resid_post`, 50 evenly spaced `t` including both endpoints,
+patch only the final position, relative distance `d(t)` in final-logit space, `w_{10->90}` on the
+isotonic copy) is the source of truth, exactly as in `comma_sweep.py`/`context_sweep.py`. Do not
+invent a new plateau score, a new interpolation scheme, or a new step grid.
+
+### 5.1 The sweep
+
+- Vocabulary: the 65-character tinyshakespeare vocabulary already restored in `comma_sweep.py`.
+- Shared context: `"The house was "` (the frozen S6/feedback-#3 context), so the new numbers are
+  directly comparable to the existing comma sweep and to the `b/i`, `b/l` controls.
+- Pairs: all `C(65,2) = 2080` unordered character pairs, at interpolation block 0 of the final
+  (step-30000) fresh character checkpoint. Endpoint order is fixed by vocabulary index (`A` = lower
+  index) so the run is deterministic.
+- **Symmetry check (required, cheap):** re-run 100 randomly chosen pairs with the endpoints swapped
+  and report the median `|w(A,B) - w(B,A)|`. `d(t)` is not symmetric by construction, so the heatmap
+  may only be drawn symmetric if this check says the asymmetry is negligible; otherwise draw the
+  full ordered 65x65 matrix and say so.
+- Reuse the existing diagnostics per pair: endpoint reproduction error, prefix invariance,
+  `d(0)`, `d(1)`, `max_iso_dev`. A pair failing the endpoint checks is dropped and counted, never
+  silently kept.
+
+Per pair record: `w_{10->90}`, the midpoint crossing `t*` (isotonic `t` at `d = 0.5`), the strict
+plateau flag from `is_plateau`, `max_iso_dev`, the logit-space endpoint separation, and the model's
+next-character probabilities `p(A | context)` and `p(B | context)`.
+
+### 5.2 The per-character question ("is each character in its own plateau?")
+
+Make this a decidable statement rather than an impression. For character `c`, over its 64 partners:
+
+- `med_w(c)` - median transition width. Small = every path in and out of `c` is a sharp switch.
+- `flat_frac(c)` - fraction of partners for which the path stays within 0.1 of the `c` endpoint for
+  at least 10% of the path (`t_lo >= 0.10` when `c` is the `A` endpoint, `t_hi <= 0.90` when it is
+  `B`). This is the "`c` has a basin of its own" statistic.
+- `strict_frac(c)` - fraction of partners passing the frozen `is_plateau` rule (`w <= 0.25`, both
+  margins `>= 0.10`, near-monotone).
+
+Report the joint distribution over the 65 characters and state plainly which of these holds:
+(i) every character has its own plateau; (ii) only a subset does (name them and their class);
+(iii) plateau-ness is a property of the *pair*, not of either character alone. Decide (iii) with a
+simple variance decomposition: fit `w_ij ~ a_i + a_j` by least squares and report the fraction of
+variance in `w` explained by per-character terms versus the residual (pair-specific) term. High
+per-character variance supports "each character owns a region"; a dominant residual supports "the
+sharpness lives in the pair".
+
+### 5.3 What do the plateaus correspond to? (the mechanistic hooks)
+
+The point of the sweep is to license a hypothesis, so measure the two things that can distinguish
+the obvious candidate explanations. Both are cheap additions to the same forward passes:
+
+1. **Readout-decision test.** Along each path also record `argmax` of the final logits at every `t`
+   and the number of distinct `argmax` characters visited. Then compare the `d(t)` jump location
+   `t*` with the first `argmax` flip `t_flip`. If `|t* - t_flip|` is small for most pairs and paths
+   visit exactly 2 `argmax` regions, the plateau boundary *is* the model's next-character decision
+   boundary, and a "plateau" is the set of residual states that decode to the same prediction.
+2. **Where is the sharpness generated?** Re-run a random 200-pair subsample at interpolation blocks
+   0, 4, 8 and 11 (block 11 leaves only `ln_f` + unembedding downstream, so it is the near-linear
+   readout reference). If `w` grows toward the shallow end, the sharpness is produced by the
+   intervening blocks, not by the geometry of the unembedding.
+
+Two controls, both mandatory before the hypothesis is written:
+
+- **Learned-vs-init.** Repeat the full 2080-pair sweep at the step-0 checkpoint. If the width
+  distribution at init already matches the final one, the structure is architectural, not learned.
+- **Plausibility confound.** Feedback #3 found width correlates with next-character probability
+  (median Spearman `rho = -0.41` across contexts). Recompute that correlation on the all-pairs set
+  using `max(p(A), p(B))` and `|log p(A) - log p(B)|`, and report partial correlations against
+  endpoint separation so the report does not attribute to "plateaus" what is really "the model is
+  confident about one endpoint".
+
+### 5.4 Figures
+
+Six figures, each motivated by a claim in 5.2-5.3 and subject to `../CLAUDE.md` rules 12 and 13
+(visible bold `**Figure N.**` caption under every embed, axes and every legend entry defined in
+Methods first, CVD palette, no red-vs-green, no series named by colour):
+
+1. 65x65 heatmap of `w`, axes ordered by character class (space/newline, punctuation/digit,
+   upper-case, lower-case), diagonal masked, `viridis`.
+2. Per-character strip or box plot of `w` over the 64 partners, characters sorted by `med_w`, with
+   `flat_frac` on a twin axis - the direct answer to "is each character in its own plateau".
+3. Small multiples of raw `d(t)` curves for 6 representative characters (all 64 partners overlaid
+   each): the extremes of `med_w` plus one per character class. Raw curves stay the primary evidence.
+4. `t*` versus `log p(A) - log p(B)`, marker by character class - does the boundary sit where the
+   two characters become equally likely?
+5. Readout-decision test: histogram of `t* - t_flip` and the distribution of distinct `argmax`
+   regions per path.
+6. Controls in one panel: init versus final width distributions, and `w` by interpolation block on
+   the 200-pair subsample.
+
+### 5.5 The hypothesis (the actual deliverable)
+
+`RESULTS.md` and `REPORT.md` each get a subsection **"What do the plateaus correspond to?"**
+containing a **3-4 sentence hypothesis**, written from these results only. It must:
+
+- name what a plateau region corresponds to in this model, in plain words;
+- cite the specific numbers that support it (which figure, which statistic);
+- name the leading alternative the data does *not* rule out;
+- end with one concrete falsifiable prediction a follow-up run could test.
+
+No more than four sentences. Speculation beyond what Figures 1-6 support does not belong there;
+put longer discussion in ordinary prose around it.
+
 ## Success criterion
 
 `RESULTS.md` and `REPORT.md` are complete only when they contain:
@@ -142,7 +251,11 @@ This is evidence about temporal association, not causation. One training run can
 - Matthew-faithful 50-step, all-layer `big/in` and `big/large` curves across selected BPE checkpoints, if the token and model gates pass;
 - the two character-token controls, with no large letter-transition dataset in the headline analysis;
 - one checkpoint-aligned figure showing both Grokking and plateau evolution;
-- a bounded relationship verdict from the five cases above, with reconstruction limitations stated prominently.
+- a bounded relationship verdict from the five cases above, with reconstruction limitations stated prominently;
+- the Experiment 5 all-pairs series: the 2080-pair sweep with its symmetry and endpoint checks, an
+  explicit per-character verdict (i/ii/iii from 5.2) backed by the `a_i + a_j` variance
+  decomposition, the readout-decision and depth measurements, the init and plausibility controls,
+  the six figures of 5.4, and the 3-4 sentence hypothesis of 5.5.
 
 Null results are complete when the validity gates pass. When complete, write an empty `STOP` file.
 
@@ -155,6 +268,10 @@ Null results are complete when the validity gates pass. When complete, write an 
 - raw Matthew outputs for every selected checkpoint, interpolation layer, recording layer, and hook.
 - `plots/grokking_char.*`, `plots/grokking_bpe.*`, `plots/matthew_bpe_by_checkpoint.*`, and `plots/joint_timeline.*`.
 - a rewritten `REPORT.md` that moves the existing 40-letter result to `CHANGELOG.md` or a clearly labeled exploratory appendix.
+- Experiment 5: `experiments/allpairs_sweep.py` and `experiments/plot_allpairs.py`;
+  `results/allpairs_raw.npz` (per-pair `d(t)` and per-`t` `argmax`) plus `results/allpairs_summary.json`
+  (per-pair stats, per-character stats, variance decomposition, correlations, all diagnostic checks);
+  `plots/allpairs_{width_matrix,width_by_char,curves_small_multiples,boundary_vs_logp,readout_decision,controls}.png`.
 
 ## Stages
 
@@ -166,6 +283,22 @@ Null results are complete when the validity gates pass. When complete, write an 
 - [x] **S6 - Checkpoint-aligned plateau assays.** Ran Matthew's exact code path with `b/i`,`b/l` char controls across the 6 frozen phases (steps 0,56,831,7819,17500,30000). Plateau **emerges during the first LC descent**: block-0 final-logit width 0.80 (init) → 0.33 (step 831), flat to 30k; formed *before* robustness saturates. `plots/matthew_char_ctrl_by_checkpoint.png`, `plots/joint_timeline_char_ctrl.png`; raw `results/matthew_char_ctrl_{raw.npz,summary.json}`.
 - [x] **S7 - Joint analysis.** `plots/joint_timeline.png` + bounded relationship verdict = **PLAN case 5 (primary relationship not testable)**, refined by the S6 secondary temporal observation (no coupling to grokking).
 - [x] **S8 - Rewrite the report.** De-emphasised the 40-pair reconstruction dataset (now clearly-labelled *exploratory*); S6 char controls are the primary plateau evidence. STOP written.
+- [x] **S9 - All-pairs character sweep (Experiment 5).** Reopened 2026-08-01 by operator request; COMPLETE.
+  - [x] **S9a - Sweep.** `experiments/allpairs_sweep.py`: 2080 pairs at interpolation block 0 of the
+        step-30000 char checkpoint, 50-step slerp, final-logit `d(t)`; per-`t` `argmax` recorded;
+        endpoint/prefix diagnostics and the 100-pair swap-symmetry check. -> verify: every pair's
+        `d(0) < 1e-3`, `d(1) > 1 - 1e-3`, and `matthew_assay.self_test()` passes before the sweep runs.
+  - [x] **S9b - Per-character verdict.** `med_w`, `flat_frac`, `strict_frac` per character plus the
+        `w_ij ~ a_i + a_j` variance decomposition. -> verify: one of the three verdicts (i/ii/iii in
+        5.2) is stated with its supporting fraction-of-variance number.
+  - [x] **S9c - Mechanism and controls.** Readout-decision test (`t*` vs `t_flip`, number of `argmax`
+        regions), 200-pair depth subsample at blocks 0/4/8/11, full sweep re-run at step 0, and the
+        plausibility partial correlations. -> verify: each control produces a number that either
+        supports or contradicts the hypothesis, and contradictions are reported.
+  - [x] **S9d - Figures + hypothesis.** The six figures of 5.4 embedded with visible `**Figure N.**`
+        captions in both deliverables, and the 3-4 sentence hypothesis of 5.5. -> verify:
+        `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0, and the figure/caption
+        grep from `../CLAUDE.md` rule 12 matches the embed count.
 
 ## Fallback
 
@@ -173,7 +306,10 @@ Prioritize in this order: Figure 9 validity gate, BPE training/validation, Matth
 
 ## Out of scope
 
-- No new minimal-pair dataset or 40-pair letter search in the primary analysis.
+- No new minimal-pair dataset or 40-pair letter search in the primary *Grokking* analysis. The
+  Experiment 5 all-pairs sweep is an explicitly operator-requested character-level series: it is
+  reported as its own section and must not be used to restate or revise the Grokking relationship
+  verdict (still case 5), which no new interpolation data can change.
 - No random-direction ray assay as evidence for Matthew-style plateaus.
 - No new plateau score suite, semantic clustering, steering, or manifold interpretation.
 - No silent multi-token interpolation workaround.
@@ -188,71 +324,52 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**COMPLETE (2026-07-26): all stages S1–S8 done, all four operator feedback files addressed, both
-deliverables verified to render on GitHub. Bounded verdict = case 5 + S6 secondary (unchanged).
-STOP re-written.**
+**PLAN COMPLETE (S1-S9). `STOP` written 2026-08-01.** All four `human_feedback*` files are
+`.addressed.md`; zero unaddressed feedback remains. If new feedback or a new operator request arrives:
+delete `STOP`, address it, run `python3 experiments/check_render.py REPORT.md RESULTS.md` (must exit 0)
+before finishing, and re-write `STOP` only when clean again.
 
-- **Feedback #4 (`human_feedback_4.addressed.md`) — REPORT.md math did not render.** One Methods
-  equation used `\operatorname{softmax}`, which GitHub's math renderer **refuses** ("The following
-  macros are not allowed: operatorname"), so that definition was invisible on GitHub. Fixed to
-  `\mathrm{softmax}` (and `x_{ctx}` → `x_{\text{ctx}}`). This was a **regression of feedback #1**, so
-  the real fix is mechanical: new `experiments/check_render.py` (+ `katex_compile.js`) KaTeX-compiles
-  every display and inline expression — inline ones *after* applying GitHub's backslash-stripping —
-  flags denylisted macros, and confirms display-math placement and figure embeds through the GitHub
-  markdown API. Both deliverables pass with **0 problems**; `../CLAUDE.md` gained rules **8c** (blocked
-  macros) and **8d** (run the one script). No numbers, figures or verdicts changed.
-
-- **CVD compliance (CLAUDE.md rule 13).** All 14 embedded figures regenerated via new
-  `experiments/cvd_style.py`: the Figure-9 panels' train/test/**random** local-complexity lines were
-  C0/C1/**green** against a **red** adversarial line, and the comma-sweep character classes were
-  **green** vs **red** with colour as the only channel. Now green-free, every series also carrying a
-  linestyle/marker/hatch, sequential ramps viridis/cividis, and every caption in both deliverables
-  rewritten so no series is named by colour. `run_matthew.py` re-run end-to-end: **bit-exact**
-  reproduction (14/40, median w 0.309) — no result changed.
-- **Context control (`experiments/context_sweep.py`).** The comma→all-64-characters sweep repeated in
-  **8 further held-out contexts** spanning p(comma) 5e-20 … 0.997 → **576 pairs**. Shape claim
-  replicates and strengthens: **0/576** near-linear, per-context median widths 0.313–0.436 (pooled
-  0.381), 11/576 strict. Correlation claim refined to a range: negative in **9/9** contexts (sign test
-  p = 0.004) but median **−0.41** (−0.05 … −0.74), so the earlier −0.74 was the strongest context, not
-  a typical one. The "implausible comma endpoint" caveat is retired (p(comma) does not predict
-  sharpness across contexts: ρ = −0.32, p = 0.41). New figures `plots/context_{widths,rho}.png`.
-
-- **Feedback #3 (`human_feedback_3.txt.addressed.md`) — comma vs every other character.** New
-  `experiments/comma_sweep.py`: endpoint A fixed at `"The house was ,"`, endpoint B = same context +
-  each of the 64 other characters; same 50-step slerp / final-position patch / final-logit `d(t)`
-  path as the S6 controls. Result: **no pair is linear** (median transition width **0.340** vs 0.80
-  for a straight line, 0/64 near-linear, 64/64 monotone) but only **1/64** meets the strict ≤0.25
-  plateau rule; sharpness tracks the model's next-character probability (Spearman **ρ = −0.74**,
-  n = 64) more than endpoint separation (ρ = −0.48). Depth and across-training controls replicate at
-  n = 64; the `b↔i`/`b↔l` controls sit at the sweep's median. Four new figures
-  (`plots/comma_{all_chars_curves,width_by_char,width_vs_endpoints,depth_and_training}.png`) embedded
-  in RESULTS.md + REPORT.md with a discussion section in each. Grokking verdict unchanged (case 5).
-
-- **All three Figure-9 gates = FAIL** (pilot char, fresh char 30k, fresh BPE 10k). Each shows a first
-  LC descent + emerging `ε=0.03`-PGD robustness but **no second LC descent** within budget. Fresh char
-  is the crispest null: adv acc 0.528 (> pilot's 0.327) yet LC monotone to 8.1 (min at last ckpt).
-  Verdicts in `results/fig9_{pilot_char,grok_char,grok_bpe}_verdict.json`; curves
-  `plots/grokking_{pilot_char,fresh_char,fresh_bpe}.png`.
-- **Joint timeline (S7):** `plots/joint_timeline.png` (`experiments/plot_joint_timeline.py`) overlays
-  LC + adv vs step for all three runs + verdict/plateau text panel. **Bounded relationship verdict =
-  PLAN case 5 (primary relationship not testable):** no run reproduces Figure 9, so plateaus cannot be
-  tied to a grokking transition. Plateau result (char reconstruction, 14/40 pairs) stands alone.
-- RESULTS.md + REPORT.md curated to this current-best state (3-model gate table, three curve figures,
-  joint timeline, case-5 verdict). Render checks pass (6/6 display-math, all figures embedded).
-- Note: fresh char training reached step 30000 (checkpoints intact); its post-run metadata save crashed
-  on an int64 JSON error — harmless. Matthew checkpoint-sweep driver ready (`run_matthew_ckpts.py`).
+- **S9 / Experiment 5 - all-pairs character sweep (2026-08-01).** All `C(65,2) = 2080` character pairs
+  at interpolation block 0 of the step-30000 fresh-char checkpoint, same frozen code path
+  (`experiments/allpairs_sweep.py` -> `analyze_allpairs.py` -> `plot_allpairs.py`; raw
+  `results/allpairs_raw.npz`, stats `results/allpairs_summary.json`).
+  - **Diagnostics**: 0 pairs dropped (max `d(0)` 3e-6, min `d(1)` 0.999998, prefix error exactly 0.0),
+    all 2080 curves exactly monotone. Swap symmetry median = max |dw| = **0.000** - an algebraic
+    identity (`d(t) -> 1-d(1-t)` on a symmetric grid) that the check confirms, so the heatmap is drawn
+    symmetric.
+  - **Per-character verdict = PLAN case (i)**: every character has a basin (`flat_frac` >= 0.86 for all
+    65, = 1.00 for 59); per-character median widths 0.264 (`o`) - 0.590 (`3`); the additive fit
+    `w_ij ~ a_i + a_j` explains **78.2%** of the variance (adjusted 77.6%) vs a 3.0% permutation null,
+    ruling out cases (ii) and (iii). Median width 0.355; strict rule 182/2080 (8.8%).
+  - **Mechanism**: 91% of next-character prediction changes fall inside the transition window, 79% of
+    pairs have all changes inside it, 80% have single-prediction flat arms, median |t*-t_flip| = 0.045.
+  - **Controls**: at init all 2080 paths are straight (median w 0.803 -> 0.355 trained, 0 strict,
+    Mann-Whitney p < 1e-300) and sharpness is generated by blocks 1-4 (w 0.344/0.763/0.806/0.806 at
+    blocks 0/4/8/11). Plausibility confound survives partial correlation (rho = -0.59 both ways), so it
+    is reported as the live alternative.
+  - **Hypothesis (5.5)**: a plateau is the set of final-position residual states that decode to the
+    same next-character prediction, one basin per character, built by blocks 1-4. Six figures embedded
+    in both deliverables (Figures 14-19).
+- **Rule-12 fix (2026-08-01).** Both deliverables had all 16 captions in `![...]` **alt text** (invisible
+  on GitHub) with out-of-order numbering. Rewritten: 22 embeds each, short alt text + a visible
+  `**Figure N.**` caption under every image, sequential numbering 1-22 in reading order, each figure
+  cited by number and motivated by preceding prose. `check_render.py` -> 0 problems.
+- **Grokking side closed and unchanged**: all three Figure-9 gates FAIL (pilot char, fresh char 30k,
+  fresh BPE 10k - first LC descent + emerging robustness, no second descent), bounded relationship
+  verdict = **PLAN case 5 (primary relationship not testable)**, refined by the S6 observation that the
+  plateau forms during the *first* LC descent (width 0.80 -> 0.33 by step ~831) with no coupling to
+  grokking. S9 did not and cannot revise this.
+- Earlier series stand as reported: comma-vs-64 sweep (median w 0.340, 1/64 strict), 8-context control
+  (576 pairs, 0/576 near-linear, per-context medians 0.313-0.436, rho negative in 9/9, median -0.41),
+  CVD compliance across every figure, and the `check_render.py` guard from feedback #4.
 
 ## Next step
 
-None — plan complete, feedback #1–#4 all addressed, figures CVD-safe, deliverables render-verified
-(`python3 experiments/check_render.py REPORT.md RESULTS.md` → exit 0; run this before finishing any
-future iteration), `STOP` re-written. All success criteria
-met: three Figure-9 gate verdicts (all FAIL), a checkpoint-aligned figure showing both Grokking metrics
-and plateau width on one axis, the two `b/i`/`b/l` char controls as primary plateau evidence, the
-40-pair set demoted to a labelled exploratory appendix, and the bounded case-5 relationship verdict.
-If new `human_feedback*.md` / `*REVIEW*` arrives, delete `STOP`, address it, and re-STOP when clean.
-If the direction is reopened, the two untested scope limits are: interpolation positions other than
-the final token, and a second model.
+**None - plan complete, `STOP` written.** Untested scope limits if the direction is reopened:
+interpolation positions other than the final token; a second model; and the one intervention that would
+separate the two live accounts of the basins - rebalancing the unembedding so `p(A) = p(B)` without
+touching blocks 1-11 (the decision account predicts `t*` moves to 0.5 with the width unchanged; the
+plausibility account predicts the width itself changes).
 
 ## Primary references
 
