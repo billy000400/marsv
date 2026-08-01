@@ -186,6 +186,33 @@ box in the browser.
 - **Grep before committing** for the hazard in inline math (outside fences):
   `grep -nP '\$[^$\n]*\\[,;!:{}|_%#&][^$\n]*\$' REPORT.md` — every hit is a latent break.
 
+### 8c. GitHub REJECTS some macros outright. `\operatorname` is the one that keeps biting us.
+
+GitHub runs KaTeX with a macro **denylist**, and one denied macro replaces the whole equation with the
+red error **"The following macros are not allowed: operatorname"** — the formula is simply gone. The
+LaTeX is valid and both checks above pass, which is why an operator has now reported this twice
+(dir13 feedback #1 and #4, the second a regression introduced by a later rewrite).
+
+- Never `\operatorname{…}` (nor `\operatorname*`, `\DeclareMathOperator`). Write `\mathrm{softmax}` or
+  `\text{softmax}` instead. Built-in operators (`\max`, `\min`, `\arg\max`, `\Pr`, `\sin`, `\arccos`,
+  `\exp`, `\log`) are fine and need no wrapper.
+- Never definition macros (`\def \gdef \edef \xdef \let \newcommand \renewcommand \providecommand`)
+  or HTML/link macros (`\href \url \includegraphics \htmlClass \htmlId \htmlStyle \htmlData`).
+
+### 8d. Run ONE script that checks 8a–8c and rule 12. Eyeballing has failed every time.
+
+`dir13_plateau_on_grok_gpt/experiments/check_render.py` (with `katex_compile.js`) does all four checks
+and exits non-zero on any problem: it compiles every ` ```math ` fence with KaTeX, compiles every
+inline `$…$` **after applying GitHub's backslash-stripping** (so 8b breaks surface as real KaTeX
+errors), flags every denylisted macro, and confirms via the GitHub API that each display equation
+became `js-display-math` and none became `<pre lang="math">` — plus that no `(plots/x.png)` path is
+missing its `![…]` embed. One-time setup: `npm install --prefix /tmp/katexcheck katex`. Copy it into
+your direction and run it before you finish an iteration:
+
+~~~
+python3 experiments/check_render.py REPORT.md RESULTS.md   # exit 0 = renders on GitHub
+~~~
+
 ---
 
 **These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying assumptions are logged before implementation rather than discovered after mistakes, and RESULTS.md/REPORT.md always read as a clean current-best paper with all history in CHANGELOG.md.
@@ -197,7 +224,132 @@ Key points it instructs agents to follow:
 - **Lead with the "why"** — open with the safety question and stakes before method detail.
 - **Define jargon on first use** and spell out acronyms (OOD, SAE, AUROC, probe, logit lens, …).
 - **Explain every metric in words next to its equation** (what it measures, how to read it, higher-is-better, etc.) — additive to rule 8's equation requirement.
+- **Motivate every metric BEFORE defining it** — one or two sentences on what question this metric answers and why the obvious alternative doesn't work (e.g. "softmax confidence saturates under MSE training, so we use max raw output"). Then say which Result/figure consumes it. Methods must read as a narrative ("to answer X we measure Y"), never as a bare list of definitions. A metric no Result uses gets cut.
 - **Interpret the numbers** — say whether a result is strong/weak/surprising and what it implies.
 - **Plain words, short sentences, active voice.**
 - **Keep rigor intact** — accessible means well-explained, not vague; don't drop caveats/CIs/sample sizes to sound friendlier.
 - A one-line **test**: could a capable ML engineer new to the subfield read REPORT.md and correctly explain what you did, why it matters, and what you found, without another source?
+
+---
+
+# Part C — Operator feedback & plot embedding (applies to EVERY direction, EVERY iteration)
+
+## 10. Address operator feedback before anything else.
+
+Humans drop feedback into this direction as files named `human_feedback*.md` (also `*REVIEW*`). An
+**unaddressed** feedback file is any such file whose name does NOT end in `.addressed.md`.
+
+Every iteration, **before** advancing the plan:
+- Glob this direction for `human_feedback*.md` and `*REVIEW*` that lack the `.addressed.md` suffix.
+  (`ls` the direction root; do not assume there are none — check.)
+- If any exist, that IS this iteration's work. Read each in full and **address every point** — run the
+  requested experiment, add the requested plot/metric, answer the requested question in
+  RESULTS.md/REPORT.md. In loop mode you cannot reply to the human, so the answer lives in the
+  deliverables + a JOURNAL entry.
+- When a file is fully addressed, **rename it** `mv human_feedback_XXXX.md human_feedback_XXXX.addressed.md`
+  (never delete it, never edit its contents). Record in CHANGELOG.md what you changed and in JOURNAL.md
+  which file you addressed.
+- If a point is genuinely infeasible (missing data, out of budget), still rename to `.addressed.md` but
+  state plainly in the deliverable + JOURNAL why it could not be done and what you did instead.
+
+## 11. Never STOP while unaddressed feedback remains.
+
+The wrapper's loop halts the moment a `STOP` file exists. So **do NOT write `STOP` if any
+`human_feedback*.md` / `*REVIEW*` file without `.addressed.md` is present** — a STOP'd direction stops
+looping and will silently ignore feedback dropped afterward. Only write `STOP` once (a) the plan is
+complete AND (b) zero unaddressed feedback files remain. If you re-enter and find new unaddressed
+feedback next to a stale `STOP`, delete `STOP`, address the feedback, and only re-write `STOP` when
+clean again.
+
+## 12. Embed every plot as a RENDERED image in REPORT.md and RESULTS.md — every iteration.
+
+A bare path like `(plots/foo.png)` in prose does NOT render — it is just text, and the figure never
+appears. **Every quantitative result must be embedded as an actual Markdown image** so it renders on
+GitHub:
+
+```
+![Short descriptive caption](plots/foo.png)
+```
+
+- This applies to REPORT.md too, not only RESULTS.md, and on **normal iterations**, not only at
+  finalization: whenever you curate the deliverables, (re)embed the current-best figures as `![](…)`
+  images. Do not defer REPORT.md's figures to the last 20 minutes.
+- Grep before committing to catch un-rendered path references:
+  `grep -nE '\(plots/[^)]+\.png\)' REPORT.md RESULTS.md` — every hit that is not preceded by `!` and
+  a caption in `![...]` is a figure that will NOT render. Convert it to an `![caption](plots/….png)`
+  embed (a parenthetical pointer alongside an already-embedded figure is fine).
+- **Motivate every figure BEFORE it appears, and cut the ones nothing needs** (the figure analogue of
+  rule 9's metric rule). Each embedded plot must be preceded by prose naming the question it answers or
+  the claim it evidences — "to show X, we plot Y" — not merely describing what it depicts. Two figures
+  in a row with no prose between them means the second is unmotivated: either give it its own
+  sentence or drop it. **A figure no claim in Results depends on gets CUT, not embedded** — leave the
+  PNG in plots/ if you like, but it does not enter the deliverables. Coverage ("a PNG per quantitative
+  result") governs what you *save*; this rule governs what you *show*.
+- **ALT TEXT IS NOT A CAPTION — it does not render.** GitHub shows the `![...]` text only when the
+  image fails to load. A caption written inside the brackets is INVISIBLE to every reader. (This has
+  already cost us a whole report: dir13 put all 16 captions in alt text and rendered 16 unlabeled
+  images.) Every figure needs a **visible caption line immediately below the image**, starting with a
+  bold figure number:
+
+~~~
+![short alt text for screen readers](plots/foo.png)
+
+**Figure 3.** What the figure shows and what to conclude from it. x: interpolation position `t`;
+y: relative distance `d(t)`. Solid = between-plateau pairs, dashed = within-plateau controls.
+~~~
+
+  Keep the alt text short (one clause); the caption below carries the axes, the series, and the point.
+- **Number figures sequentially in reading order, and reference them from the prose.** Figure 3 must
+  appear after Figure 2 and before Figure 4 in the file — not renumbered from a deleted draft, not left
+  unnumbered, not appended out of order in an appendix (dir13 currently embeds Figures 3–5 *after*
+  Figure 11, and two figures with no number at all). Every figure is cited at least once by number in
+  the body ("Figure 3 shows…"); a figure the prose never cites is a figure rule 12's motivation clause
+  says to cut.
+- **Check before finishing** — every embed must be followed by a visible caption line:
+
+~~~
+grep -A2 -nE '^!\[' REPORT.md RESULTS.md | grep -c '\*\*Figure'   # must equal the number of embeds
+~~~
+
+- **Every figure must be readable from the report alone.** For each embedded plot, the caption or the
+  adjacent prose must state what the x-axis and y-axis are (variable name, units/scale, e.g. log axis),
+  and every variable appearing on an axis, in a legend, or as a group label (e.g. "confident",
+  "contrast") must be DEFINED in the report's Methods before the figure appears. Before committing,
+  check each figure: "could a newcomer name both axes and every legend entry using only this report?"
+  If not, the figure is not done.
+- Save figures headless (`plt.savefig(...)` + `plt.close()`, never `plt.show()`; `MPLBACKEND=Agg`).
+
+## 13. Plots must be readable with red-green color deficiency. This is a HARD requirement.
+
+**The operator of this project has red-green color deficiency.** A figure whose meaning depends on
+telling red from green is unreadable to its primary reader — treat that as a broken figure, exactly
+like an unrendered one.
+
+- **Never use red vs green as a contrast.** Not for two series, not for pass/fail, not for
+  above/below-baseline. This is the single most common failure and it is already pervasive in this
+  project's existing plots.
+- **Categorical series — use this palette, in this order** (green-free; validated for deuteranopia,
+  protanopia, and tritanopia at worst-pair ΔE 9.6, above the ΔE 8 target, across ALL pairs):
+
+```python
+CVD = ["#0072B2",  # blue
+       "#D55E00",  # vermillion
+       "#CC79A7",  # reddish purple
+       "#56B4E9",  # sky blue
+       "#E69F00"]  # orange
+plt.rcParams["axes.prop_cycle"] = plt.cycler(color=CVD)
+```
+
+  Take hues in order; do not cycle or invent a 6th. More than 5 series → small multiples, or fold the
+  tail into one gray "other".
+- **Color alone must NEVER be the only channel carrying identity.** Every series also varies
+  `linestyle` (`-`, `--`, `:`, `-.`) or `marker` (`o`, `s`, `^`, `D`); every hatched/filled region also
+  varies `hatch` (`//`, `\\`, `..`). Direct-label series at their right-hand end where the plot allows
+  it. The test: **would this figure still be readable printed in grayscale?** If not, it is not done.
+- **Colormaps.** Sequential: `viridis` or `cividis` (`cividis` is designed for CVD). Diverging:
+  `coolwarm` or `RdBu` — blue↔red/orange with a neutral midpoint. **NEVER `jet`, `rainbow`, `hsv`,
+  `RdYlGn`, or `Spectral`** — all fail on red-green and none encode magnitude monotonically.
+- **Never identify a series by its color in prose or captions.** Write "the between-plateau median
+  (dashed)" or "the MSE seeds", not "the red curve" / "the green baseline". A caption that says
+  "red and green distributions overlap" conveys nothing to this reader — name the series and the
+  non-color channel that distinguishes it.

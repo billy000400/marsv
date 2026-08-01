@@ -6,14 +6,20 @@ set -uo pipefail
 
 export IS_SANDBOX=1              # allow --dangerously-skip-permissions as root on this disposable pod
 export MPLBACKEND=Agg            # headless matplotlib: figures save to file, never try to display
+export GIT_TERMINAL_PROMPT=0     # never block on a git credential prompt (HTTPS remote, no stored creds)
 
-# Don't depend on the launching shell's PATH: the claude CLI lives in ~/.local/bin
-# (e.g. /mars-vol/.local/bin), which tmux/cron/non-login shells may not have. Prepend it,
+# Don't depend on the launching shell's PATH: the claude CLI location varies per environment
+# (this box installs it via nvm at ~/.nvm/versions/node/*/bin; other pods used ~/.local/bin),
+# and tmux/cron/non-login shells may not have it on PATH. Prepend every plausible location,
 # then fail LOUDLY if claude is still missing — otherwise every iteration silently prints
 # 'claude: command not found' and the loop spins for hours doing nothing.
-export PATH="${HOME:-/mars-vol}/.local/bin:/mars-vol/.local/bin:$PATH"
+export PATH="${HOME:-/home/user}/.local/bin:$PATH"
+for _d in "${HOME:-/home/user}"/.nvm/versions/node/*/bin; do
+  [ -d "$_d" ] && PATH="$_d:$PATH"
+done
+export PATH
 command -v claude >/dev/null 2>&1 || {
-  echo "[run.sh] FATAL: 'claude' not found on PATH (looked in ~/.local/bin and /mars-vol/.local/bin)." >&2
+  echo "[run.sh] FATAL: 'claude' not found on PATH (looked in ~/.local/bin and ~/.nvm/versions/node/*/bin)." >&2
   echo "[run.sh] Install/symlink claude or fix PATH, then relaunch. Aborting instead of spin-failing." >&2
   exit 127
 }
@@ -25,6 +31,7 @@ BUDGET_ABS="$(pwd)/$BUDGET_FILE"
 RULES_ABS="$(pwd)/CLAUDE.md"     # operator rules (read before write, curation, report structure)
 read_budget() { grep -E "^$1:" "$BUDGET_FILE" 2>/dev/null | head -1 | sed -E "s/^$1:[[:space:]]*//; s/[[:space:]].*$//"; }
 
+MODEL="$(read_budget MODEL)";                    MODEL="${MODEL:-opus}"
 HOURS="${2:-$(read_budget HOURS)}";              HOURS="${HOURS:-4}"
 N_AGENTS="$(read_budget N_AGENTS)";              N_AGENTS="${N_AGENTS:-1}"
 CPU_CORES="$(read_budget CPU_CORES_TOTAL)";      CPU_CORES="${CPU_CORES:-4}"
@@ -54,7 +61,7 @@ END=$(( $(date +%s) + BUDGET_SEC ))
 cd "$DIR" || { echo "[run.sh] cannot cd into $DIR"; exit 1; }
 mkdir -p experiments results plots
 
-echo "[run.sh] start $(date '+%F %T')  dir=$DIR  budget=${HOURS}h  agents=${N_AGENTS}"
+echo "[run.sh] start $(date '+%F %T')  dir=$DIR  budget=${HOURS}h  agents=${N_AGENTS}  model=${MODEL}"
 echo "[run.sh] gpu='${GPU_NAME}' ${GPU_VRAM_GB}GB  | per-agent: vram_frac=${VRAM_FRACTION} (~${VRAM_PER_AGENT}GB)  ram=${RAM_PER_AGENT}GB  threads=${CPU_THREADS}"
 
 # --- git checkpoint --------------------------------------------------------
@@ -99,14 +106,16 @@ git_sync() {
       git pull --rebase origin "$branch" >/dev/null 2>&1 || git rebase --abort >/dev/null 2>&1 || true
       git push origin "HEAD:$branch" 2>&1
     }
-    fail_re="permission denied|host key verification|could not read from remote|authenticity of host|publickey|connection timed out"
+    fail_re="permission denied|host key verification|could not read from remote|authenticity of host|publickey|connection timed out|authentication failed|could not read username"
     out="$(push)"; echo "$out"
     if printf "%s" "$out" | grep -qiE "$fail_re"; then
-      echo "[git] $DIR: push failed on ssh/auth -> running $SSH_SETUP"
-      bash "$SSH_SETUP" || true
-      out="$(push)"; echo "$out"
+      if [ -x "$SSH_SETUP" ]; then
+        echo "[git] $DIR: push failed on ssh/auth -> running $SSH_SETUP"
+        bash "$SSH_SETUP" || true
+        out="$(push)"; echo "$out"
+      fi
       if printf "%s" "$out" | grep -qiE "$fail_re"; then
-        echo "[git] $DIR: push STILL failing after ssh setup — committed locally, will retry next iteration."
+        echo "[git] $DIR: push failing (no push credential in this env) — committed LOCALLY, will retry next iteration."
       fi
     fi
   ' _ "$phase" "$branch" "$DIR" "$SSH_SETUP"
@@ -119,6 +128,11 @@ while [ "$(date +%s)" -lt "$END" ] && [ ! -f STOP ]; do
   claude -p "You are mid-project and your working memory RESETS every iteration. \
 FIRST read CLAUDE.md (operator rules, at ${RULES_ABS}) and BUDGET.md (at ${BUDGET_ABS}), then \
 PLAN.md, JOURNAL.md, RESULTS.md, and CHANGELOG.md in full. OBEY every rule in CLAUDE.md. \
+FEEDBACK FIRST (CLAUDE.md Part C): before advancing the plan, list this direction for files matching \
+'human_feedback*.md' or '*REVIEW*' that do NOT end in '.addressed.md'. If any exist, addressing them IS \
+this iteration: read each in full, do every ask (run the experiment / add the plot / add the metric / \
+answer the question in RESULTS.md+REPORT.md), then 'mv' the file to end in '.addressed.md' (never delete/edit \
+it), and log it in CHANGELOG.md + JOURNAL.md. \
 KEY RULES: RESULTS.md and REPORT.md are FINAL, presentable deliverables — read them, then overwrite \
 to current-best ONLY (no version history, no 'changed after review', no weaker/superseded variant of \
 an experiment when a stronger one exists). Put ALL change history in CHANGELOG.md (append-only). \
@@ -130,15 +144,19 @@ If that number is <= ${FINALIZE_MIN}: do ONLY finalization — refresh RESULTS.m
 write a clean presentable REPORT.md per CLAUDE.md (Summary -> Methods -> Results -> Conclusion; the \
 Methods section MUST give Data/Model/Layer, and DEFINE every metric and baseline with rendered \$\$LaTeX\$\$ \
 equations; embed plots/ figures; current-best numbers only). Append a final CHANGELOG.md entry, then \
-create an empty STOP file and stop. \
+create an empty STOP file and stop — BUT ONLY IF no unaddressed 'human_feedback*.md'/'*REVIEW*' file remains \
+(never write STOP while feedback is unaddressed; a STOP'd direction stops looping and ignores it). \
 Otherwise do ONE focused iteration: advance the plan by the smallest useful step, write/modify code under \
 experiments/, RUN it, then CURATE RESULTS.md to current-best (read it, overwrite clean — no history) and \
 save a PNG for every quantitative result into plots/ (plt.savefig + plt.close, NEVER plt.show; headless Agg) \
-referenced from RESULTS.md/REPORT.md. APPEND to CHANGELOG.md what changed in the deliverables this iteration \
+and EMBED each as a rendered Markdown image '![caption](plots/foo.png)' in BOTH RESULTS.md AND REPORT.md \
+(a bare '(plots/foo.png)' path in prose does NOT render — it must be an '![...](...)' image; embed REPORT.md \
+figures every iteration, do not defer them to finalization). APPEND to CHANGELOG.md what changed in the deliverables this iteration \
 (old -> new numbers if a result was superseded). Then append to JOURNAL.md (what you did, learned, next step) \
 and update PLAN.md 'Current status'/'Next step'/checkboxes. End the JOURNAL entry with the 'On track?' line. \
 Persist ALL state to disk before you finish; assume nothing carries over." \
-    --append-system-prompt "Obey CLAUDE.md every iteration. File roles are STRICT: RESULTS.md and REPORT.md are curated, presentable, current-best — read then overwrite clean, NEVER keep history or superseded/weaker results in them. CHANGELOG.md and JOURNAL.md are append-only history. REPORT.md must have a Methods section defining every metric and baseline with \$\$LaTeX\$\$ equations plus the data/model/layer used. Visualize every reported result: PNGs in plots/ (savefig+close, never show). Read before write. Persist every iteration. Prefer small verifiable steps; on a broken experiment debug minimally or fall back per PLAN.md." \
+    --append-system-prompt "Obey CLAUDE.md every iteration. File roles are STRICT: RESULTS.md and REPORT.md are curated, presentable, current-best — read then overwrite clean, NEVER keep history or superseded/weaker results in them. CHANGELOG.md and JOURNAL.md are append-only history. REPORT.md must have a Methods section defining every metric and baseline with \$\$LaTeX\$\$ equations plus the data/model/layer used. Visualize every reported result: PNGs in plots/ (savefig+close, never show) EMBEDDED as rendered '![caption](plots/x.png)' images in BOTH RESULTS.md and REPORT.md every iteration — a bare path in prose does not render. OPERATOR FEEDBACK (CLAUDE.md Part C): each iteration, before other work, address any 'human_feedback*.md'/'*REVIEW*' file lacking a '.addressed.md' suffix, then rename it to '.addressed.md'; NEVER write STOP while any such file is unaddressed. Read before write. Persist every iteration. Prefer small verifiable steps; on a broken experiment debug minimally or fall back per PLAN.md." \
+    --model "$MODEL" \
     --dangerously-skip-permissions \
     2>&1 | tee -a session.log
 

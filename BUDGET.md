@@ -6,6 +6,7 @@
 > is present, so it adapts automatically. **To retune, edit these values — nothing else changes.**
 
 ## Inputs (keep the `KEY: value` format — run.sh greps these)
+MODEL: opus                 # claude model per iteration: alias (opus/sonnet/fable) or full id (claude-opus-5)
 HOURS: 4
 N_AGENTS: 4                 # how many loops you launch CONCURRENTLY — set to match reality
 CPU_CORES_TOTAL: 8          # static
