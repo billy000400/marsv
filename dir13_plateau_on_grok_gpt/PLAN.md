@@ -407,11 +407,21 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**PLAN COMPLETE (S1-S13) + operator feedback #4 (2026-08-02 file) addressed + eight PLAN-named
+**PLAN COMPLETE (S1-S14) + operator feedback #4 (2026-08-02 file) addressed + nine PLAN-named
 follow-ups DONE (denser Figure-9 grid, readout rebalancing, MLP-gain intervention, per-block scan,
-frozen-block training test, deep-freeze training test, mirror-image freeze, two-block freeze).** All
-five `human_feedback*` files are `.addressed.md`; zero unaddressed feedback remains. S14 is the open
-item.
+frozen-block training test, deep-freeze training test, mirror-image freeze, two-block freeze, narrow
+run).** All five `human_feedback*` files are `.addressed.md`; zero unaddressed feedback remains.
+
+- **S14 narrow run COMPLETE (2026-08-02, latest) - the depth/capacity confound is BROKEN and the depth
+  account wins.** `--n_embd 192` with nothing frozen: all 12 blocks trainable but only 5,584,896
+  parameters, within 0.3% of frozen_early's 5,601,360 trainable parameters. At matched accuracy (step
+  2750, val 0.5543) median `w` **0.397** (IQR 0.311-0.526) - the depth account's ~0.35-0.44, not the
+  capacity account's ~0.47. Paired: **-0.073** vs frozen_early (23% of pairs wider, p=2.5e-15),
+  **-0.092** vs frozen_late (13%, p=1.8e-19), **-0.014** vs the reference at its own matched step (39%,
+  p=1.9e-4, i.e. slightly SHARPER). Depth profile 0.397/0.569/0.686/0.763/0.807/0.832 at injection
+  blocks 0/2/4/8/10/11 (the reference's front-loaded shape); partial rho -0.65; strict_frac **0.133**,
+  the only run besides the reference to keep the sharpest tail (frozen runs 0-0.007). New Figure 24.
+  Open follow-up: re-run `narrow_assay.py` when `ckpt_last.pt` lands to add the fully-trained row.
 
 - **S13 two-block freeze COMPLETE (2026-08-02, latest) - the trainable-depth prediction CONFIRMED, and
   the first run in which the plateau actually breaks.** `--freeze 1,...,10`: 82.9% of the parameters
@@ -608,14 +618,16 @@ relocation is free in *site* but not in *amount*, and below roughly one usable b
 plateau left to relocate. What the responsible blocks actually *compute* to produce the sharp change
 remains uncharacterised - that gap has not moved in five iterations.
 
-**S14 is the direct successor**, and it is the prediction both hypothesis paragraphs now end on. S13
-confounds trainable depth with parameter count (it froze 82.9% of the weights *and* left one usable
-block), so the cleanest next test holds depth fixed and cuts capacity instead: retrain the reference
-recipe with `n_embd` 192 rather than 384, nothing frozen, all 12 blocks trainable. If trainable depth
-is what sets the sharpness, the width should land near the reference's 0.351; if parameter count is
-what matters, near the eight-trainable-block runs' 0.47. Same harness (`train_frozen.py --freeze ''`
-with a width flag, or a one-line config change), ~20 min, plus one condition entry in
-`frozen_assay.py` and a `plot_frozen.py` re-render, which is generic in the number of runs.
+**S14 is DONE and it answered the question.** The narrow run (`n_embd` 192, nothing frozen, 5.58M
+parameters against frozen_early's 5.60M trainable ones) lands at median `w` **0.397** at matched
+accuracy - the depth account's ~0.35-0.44, not the capacity account's ~0.47, and in fact 0.014 *sharper*
+than the reference at its own matched step. Trainable depth is the variable; parameter count is not.
+
+**Two smaller successors remain.** (1) Re-run `narrow_assay.py` once
+`/tmp/dir13_frozen/checkpoints_narrow192/ckpt_last.pt` exists to add the fully-trained row against
+ref_trained's 0.351; the script is idempotent per condition key and takes ~70 s. (2) The depth series
+still has one seed per condition, so a second seed at `n_embd` 192 and at one frozen condition would put
+an error bar on the 0.397-vs-0.476 gap that now carries the argument.
 
 Everything else still open needs new compute or a new model: a longer character run whose second
 descent separates from initial fit; the denser Figure-9 grid applied to the *pilot* run's local

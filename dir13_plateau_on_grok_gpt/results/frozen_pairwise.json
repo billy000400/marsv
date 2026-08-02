@@ -54,5 +54,37 @@
   "wilcoxon_p": 2.700490135772405e-26,
   "median_w_a": 0.7263,
   "median_w_b": 0.4428
+ },
+ "narrow192_matched_minus_ref_matched_step": {
+  "n": 150,
+  "median_dw": -0.0138,
+  "frac_increased": 0.3867,
+  "wilcoxon_p": 0.0001851886429023396,
+  "median_w_a": 0.3972,
+  "median_w_b": 0.4428
+ },
+ "narrow192_matched_minus_frozen_early_matched": {
+  "n": 150,
+  "median_dw": -0.0725,
+  "frac_increased": 0.2267,
+  "wilcoxon_p": 2.5496887560503916e-15,
+  "median_w_a": 0.3972,
+  "median_w_b": 0.4755
+ },
+ "narrow192_matched_minus_frozen_late_matched": {
+  "n": 150,
+  "median_dw": -0.0919,
+  "frac_increased": 0.1333,
+  "wilcoxon_p": 1.7559301128878317e-19,
+  "median_w_a": 0.3972,
+  "median_w_b": 0.5004
+ },
+ "narrow192_matched_minus_ref_trained": {
+  "n": 150,
+  "median_dw": 0.0425,
+  "frac_increased": 0.6867,
+  "wilcoxon_p": 3.1306332886540406e-08,
+  "median_w_a": 0.3972,
+  "median_w_b": 0.3507
  }
 }

@@ -43,8 +43,9 @@ REF_FINAL_VAL_ACC = 0.5501790364583333  # results/train_meta_grok_char.json, the
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--freeze", required=True, help="comma-separated block indices frozen at init")
+    ap.add_argument("--freeze", default="", help="comma-separated block indices frozen at init ('' = none)")
     ap.add_argument("--tag", required=True, help="run tag, e.g. frozen_early")
+    ap.add_argument("--n_embd", type=int, default=240, help="model width (240 = reference run)")
     ap.add_argument("--steps", type=int, default=30000)
     ap.add_argument("--max_minutes", type=float, default=95.0)
     ap.add_argument("--bs", type=int, default=48)
@@ -56,7 +57,7 @@ def main():
     torch.cuda.set_per_process_memory_fraction(args.vram_frac)
     torch.set_num_threads(args.threads)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    frozen = [int(x) for x in args.freeze.split(",")]
+    frozen = [int(x) for x in args.freeze.split(",") if x.strip()]
     model_seed, data_seed = 1337, 42
     torch.manual_seed(model_seed)
 
@@ -71,7 +72,7 @@ def main():
     n = int(0.9 * len(data))
     train_data, val_data = data[:n], data[n:]
 
-    cfg = GPTConfig(vocab_size=vocab_size, block_size=128, n_layer=12, n_head=12, n_embd=240, dropout=0.2)
+    cfg = GPTConfig(vocab_size=vocab_size, block_size=128, n_layer=12, n_head=12, n_embd=args.n_embd, dropout=0.2)
     model = GPT(cfg).to(device)
 
     n_frozen = 0

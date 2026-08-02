@@ -68,7 +68,7 @@ REF_MATCHED_STEP = 2500  # reference-run checkpoint nearest the frozen runs' mat
 # 2 was added for frozen_mirror, whose only trainable blocks are 0-4, so its drop should sit there.
 DEPTH_BLOCKS = [0, 2, 4, 8, 10, 11]
 DEPTH_CONDS = ("ref_trained", "frozen_early_last", "frozen_late_last", "frozen_deep_last",
-               "frozen_mirror_last", "frozen_two_last")
+               "frozen_mirror_last", "frozen_two_last", "narrow192_last")
 
 
 def load_ckpt(path, device):
@@ -116,7 +116,8 @@ def main():
     for tag, blocks in (("frozen_early", [1, 2, 3, 4]), ("frozen_late", [8, 9, 10, 11]),
                         ("frozen_deep", [1, 2, 3, 4, 5, 6, 7]),
                         ("frozen_mirror", [5, 6, 7, 8, 9, 10, 11]),
-                        ("frozen_two", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])):
+                        ("frozen_two", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+                        ("narrow192", [])):
         for which, fn in (("matched", "ckpt_matched.pt"), ("last", "ckpt_last.pt")):
             p = os.path.join(CKPT_ROOT, f"checkpoints_{tag}", fn)
             if os.path.exists(p):

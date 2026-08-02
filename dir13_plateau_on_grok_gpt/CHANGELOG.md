@@ -858,3 +858,29 @@ published frozen-mirror vs frozen-deep numbers exactly (+0.0633, 81.3%, p = 6.1e
 conditions), `results/frozen_pairwise.json`, `results/train_hist_frozen_two.json`,
 `plots/frozen_blocks.png`. Checkpoints in gitignored scratch at
 `/tmp/dir13_frozen/checkpoints_frozen_two/`.
+
+## 2026-08-02 (S14 — narrow run: trainable depth vs trainable capacity de-confounded)
+
+- **New experiment.** `experiments/train_frozen.py` gained `--n_embd` and now accepts an empty
+  `--freeze`, so the same harness trains the **narrow** control: `n_embd` 192, nothing frozen, every
+  other setting identical to the reference character run. 5,584,896 parameters vs the reference's
+  8,378,640 — within 0.3% of frozen-early's 5,601,360 *trainable* parameters, but with all 12 blocks
+  trainable. New `experiments/narrow_assay.py` scores just this condition with the frozen assay's own
+  functions and merges the row into `results/frozen_assay_summary.json` / `frozen_assay_raw.npz`;
+  `experiments/frozen_pairwise.py` gained its three matched-accuracy comparisons.
+- **Result (new, nothing superseded).** At matched accuracy (step 2,750, val 0.5543) the narrow run's
+  median transition width is **0.397** (IQR 0.311–0.526) — the depth account's prediction (≈0.35–0.44),
+  falsifying the capacity account's ≈0.47. Paired over the same 150 pairs: **−0.073** vs frozen-early
+  (23% of pairs wider, p = 2.5e-15), **−0.092** vs frozen-late (13%, p = 1.8e-19), and **−0.014** vs the
+  reference at its own matched step (39% wider, p = 1.9e-4), i.e. slightly sharper. Depth profile
+  0.397 / 0.569 / 0.686 / 0.763 / 0.807 / 0.832 at injection blocks 0 / 2 / 4 / 8 / 10 / 11 (the
+  reference's front-loaded shape); partial ρ = −0.65; strict-rule fraction **13.3%**, the only run
+  besides the reference to retain the sharpest tail (frozen runs: 0–0.7%).
+- **RESULTS.md / REPORT.md.** New bullet/paragraph in both frozen-block subsections; new Methods
+  paragraph in REPORT defining the narrow run and both accounts' point predictions as a rendered
+  equation. New **Figure 24** (`plots/capacity_vs_depth.png`) embedded with a visible caption in both
+  files. The three exploratory figures were renumbered 24–26 → **25–27** in captions and prose so
+  figures stay in reading order. Figure 23 is unchanged: the narrow run is not a frozen-block run and
+  a seventh series would have exceeded the five-colour CVD palette.
+- **Reading updated.** The five-run summary "trainable depth first, position second" now rests on a
+  matched control for the confound it carried: depth is the variable, parameter count is not.

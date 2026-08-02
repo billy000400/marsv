@@ -476,6 +476,28 @@ near $w\approx 0.70$ with its residual drop split between injection blocks $0\to
 whereas if a single trainable block beside the readout suffices it lands near frozen-deep's 0.558. Any
 other outcome falsifies them (Figure 23).
 
+**The narrow run — separating trainable depth from trainable capacity.** All five frozen runs remove
+trainable blocks and trainable parameters together, so "width is set by how many blocks can train" and
+"width is set by how many parameters can train" fit them equally well. The fifth prediction, recorded in
+`PLAN.md` before this run was launched, breaks that confound by moving the other variable alone:
+retrain with **nothing frozen** at width $n_{\mathrm{embd}}=192$ instead of 240, keeping every other
+setting (12 blocks, 12 heads, corpus, split, seeds, optimizer, schedule, batch size, checkpoint grid)
+identical. This **narrow** run holds trainable depth at its maximum of 12 blocks while cutting the
+parameter count from 8,378,640 to 5,584,896 — within 0.3% of frozen-early's 5,601,360 *trainable*
+parameters. Writing $w$ for the median transition width, $B$ for the number of trainable blocks and $P$
+for the number of trainable parameters, the two accounts make opposite point predictions for it:
+
+```math
+w_{\mathrm{narrow}} \approx w(B{=}12) \approx 0.35\text{--}0.44
+\qquad\text{(depth account)},\qquad
+w_{\mathrm{narrow}} \approx w(P{\approx}5.6\mathrm{M}) \approx 0.47
+\qquad\text{(capacity account)}.
+```
+
+It is assayed exactly like the frozen runs — same 150 pairs, same interpolation block 0, same
+matched-accuracy rule $k_{\mathrm{match}}$, same depth control — and compared against the reference at
+*its* matched-accuracy checkpoint, so neither training length nor task performance differs (Figure 24).
+
 ### Spherical interpolation and patching
 
 A straight line between two activations cuts through low-norm regions the model never produces, which
@@ -1379,6 +1401,39 @@ against 0.214 under the MLP ablation), and the plausibility association survives
 still placing its boundary mid-path ($t^{*}=0.481$) with 87% of endpoint pairs predicting different
 characters.
 
+**Trainable depth, not trainable capacity, is the variable that matters.** The narrow run — all 12
+blocks trainable, but only 5,584,896 parameters, matching frozen-early's trainable budget to within
+0.3% — reaches the reference's accuracy at step 2,750 (val 0.5543) and lands at median width
+$w=0.397$ (IQR 0.311–0.526). That is the depth account's prediction and falsifies the capacity
+account's $\approx 0.47$: paired against the same 150 pairs it is **−0.073** narrower than frozen-early
+(only 23% of pairs wider, Wilcoxon $p=2.5\times10^{-15}$) and **−0.092** narrower than frozen-late (13%,
+$p=1.8\times10^{-19}$), while against the reference at *its* matched-accuracy step it is not blunter but
+slightly **sharper**, $-0.014$ (39% of pairs wider, $p=1.9\times10^{-4}$). Removing a third of the
+parameters therefore costs nothing measurable; removing a third of the trainable blocks costs 0.11–0.12
+of width. The narrow run also keeps the reference's front-loaded depth profile (median width 0.397,
+0.569, 0.686, 0.763, 0.807, 0.832 at injection blocks 0, 2, 4, 8, 10, 11 — the sharpening made in the
+first few blocks), its plausibility association (partial $\rho=-0.65$ vs −0.634) and its boundary
+placement (median $|t^{*}-t_{\mathrm{flip}}|=0.061$), and it is the only run other than the reference to
+retain the sharpest tail: **13.3%** of its pairs meet the strict plateau rule, against 0–0.7% for all
+five frozen runs. Narrowing the network is thus not a weak version of freezing it — on this measure it
+is not a perturbation at all.
+
+To show which of the two variables orders the runs, we plot every run's median width against both at
+once, with all seven measured at the same validation accuracy.
+
+![median transition width against trainable blocks and against trainable parameters, for seven runs at matched validation accuracy](plots/capacity_vs_depth.png)
+
+**Figure 24.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0,
+every run taken at its first checkpoint to reach the reference's final validation accuracy 0.550. y
+(both panels): median transition width $w_{10\to90}$ (lower = sharper plateau), bars = interquartile
+range; the gray dashed horizontal line is the untrained value 0.803. **Left:** x = number of trainable
+transformer blocks (axis reversed, 12 → 2). **Right:** x = trainable parameters in millions. Filled
+circles are the two runs with all 12 blocks trainable (the 240-wide reference and the 192-wide narrow
+run); open diamonds are the five runs with blocks frozen at initialization. Width falls monotonically
+along the left panel's axis but is unordered along the right one: at $\approx5.6$M trainable parameters
+the narrow run (filled) is sharper than both eight-block frozen runs (open), and the 8.4M reference is
+no sharper than the 5.6M narrow run.
+
 **What this settles.** "Blocks 1–4 build the sharpness" holds for *this trained network at inference* —
 deleting their MLPs still flattens $d(t)$ entirely — but fails as a training-time claim. The sharp
 transition is a **relocatable** computation: denied blocks 1–4 training installs it in blocks 5–8;
@@ -1407,11 +1462,11 @@ character natural prefixes rather than one short shared context.)* With interpol
 recording at final logits, 14 of 40 pairs meet the strict frozen rule (IDs 0, 4, 5, 6, 7, 9, 14, 20,
 21, 22, 28, 34, 36, 37); 24/40 have $w \le 0.35$; only 2/40 are near-straight (#10, #19, $w \ge 0.6$);
 0/40 are non-monotone. Median width is 0.309 (range [0.110, 0.773]) against the straight line's 0.8.
-The structure is visible pair by pair, with no averaging involved (Figure 24).
+The structure is visible pair by pair, with no averaging involved (Figure 25).
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 24.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
+**Figure 25.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
 final-logit space, one panel per frozen pair; panel titles give the pair ID, the two endpoint
 characters, and the transition width $w$. Gray dashed = the straight-line reference $d = t$. Most
 curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) track the straight line.
@@ -1420,11 +1475,11 @@ curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) trac
 and recording $d(t)$ at each later block's final-position residual, median width falls strictly
 monotonically from 0.777 (block 1) to 0.445 (block 11) and 0.309 at the logits; the strict rule is
 passed only at the logits (14 pairs), never at intermediate residuals. The plateau is *formed* by the
-downstream stack, not present in the interpolated activation itself (Figure 25).
+downstream stack, not present in the interpolated activation itself (Figure 26).
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 25.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
+**Figure 26.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
 frozen before inspection): $d(t)$ (y) vs interpolation position $t$ (x). Thin lines are the recording
 blocks, shaded on the cividis scale from block 1 (dark) to block 11 (light) per the colour bar; the
 thick black line is the final logits and the gray dashed line the straight-line reference. Early-block
@@ -1433,11 +1488,11 @@ curves are near-straight and progressively sharpen into plateau–boundary–pla
 **Later interpolation kills the plateau — the predicted control.** If downstream layers create the
 plateau, interpolating later (fewer layers left) must weaken it. It does, monotonically: median
 $w_{10\to 90}$ = 0.309, 0.564, 0.647, 0.733, 0.757, 0.802 for interpolation blocks 0, 2, 4, 6, 8, 10 —
-reaching the straight-line reference 0.8 when only one block remains (Figure 26).
+reaching the straight-line reference 0.8 when only one block remains (Figure 27).
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 26.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
+**Figure 27.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
 per interpolation block, shaded on the cividis scale from block 0 (dark) to block 10 (light) as given
 in the legend; the block-0 curve is strongly sigmoid and later blocks collapse onto the gray dashed
 straight line. Right: median transition width $w_{10\to90}$ (y; bars = inter-quartile range across the

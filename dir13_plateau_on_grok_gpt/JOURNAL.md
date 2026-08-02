@@ -1011,3 +1011,56 @@ STOP'd direction would silently ignore it (CLAUDE.md rule 11).
 
 On track? yes — plan complete (S1–S13), eight PLAN-named follow-ups done, this iteration's prediction
 tested and confirmed with its impossible half diagnosed and reported; blocker: none.
+
+## 2026-08-02 (iteration: S14 narrow run — the depth/capacity confound broken)
+
+No unaddressed `human_feedback*`/`*REVIEW*` files (all five end in `.addressed.md`), so this went
+straight to the open plan item: S14, the prediction both hypothesis paragraphs ended on — hold trainable
+depth fixed and cut capacity instead, by retraining at `n_embd` 192 with nothing frozen.
+
+**Why this was the right next run.** Five frozen runs had produced a clean monotone series in trainable
+depth (0.351 → 0.471/0.484 → 0.558/0.626 → 0.726), but every one of them cut blocks and parameters
+*together*. "Width tracks trainable depth" and "width tracks trainable capacity" fit all five equally
+well, and the whole relocatability story rests on which it is. The narrow run is the matched control:
+5,584,896 parameters against frozen-early's 5,601,360 trainable ones — 0.3% apart, essentially a
+coincidence I checked only after training started — with all 12 blocks trainable.
+
+**Result: the depth account wins outright.** Median width **0.397** at matched accuracy, against ≈0.47
+predicted by capacity and ≈0.35–0.44 by depth. Paired against the identical 150 pairs it is 0.073
+narrower than frozen-early (p = 2.5e-15) and 0.092 narrower than frozen-late (p = 1.8e-19); against the
+reference at *its* matched-accuracy step it is 0.014 **sharper** (p = 1.9e-4). Removing a third of the
+parameters cost nothing measurable; removing a third of the trainable blocks costs 0.11–0.12. It also
+kept the reference's front-loaded depth profile and, unlike all five frozen runs, the sharpest tail
+(13.3% of pairs meet the strict rule vs 0–0.7%). So narrowing is not a mild freeze — on this measure it
+is not a perturbation at all.
+
+**A time-management decision worth recording.** With ~28 minutes left and training needing ~18 for the
+full 30,000 steps, I did not wait for `ckpt_last.pt`. Instead I assayed `ckpt_matched.pt` — which had
+already been written at step 2,750 — and framed the whole comparison at **matched validation accuracy**,
+which is the frozen series' primary framing anyway and the only apples-to-apples axis across runs of
+different capacity. I also wrote `narrow_assay.py` to score the one new condition rather than re-running
+`frozen_assay.py` over all eight: 70 seconds instead of ~8 minutes, same functions, same pairs, merged
+into the same output files. The rejected alternative was killing training early and calling the last
+periodic checkpoint "final", which would have introduced a truncated-cosine-schedule confound into the
+one run whose job is to remove a confound. Training was left running; its `_last` row can be added later
+by re-running `narrow_assay.py`, which is idempotent per condition key.
+
+**Deliverables.** New bullet + Figure 24 (`capacity_vs_depth.png`, median width vs trainable blocks and
+vs trainable parameters, CVD-safe: filled circles = all-12-trainable, open diamonds = frozen) in
+RESULTS.md; matching Methods paragraph with the two accounts' point predictions as a fenced equation,
+Results paragraph and the same embedded figure in REPORT.md. Exploratory Figures 24–26 renumbered 25–27
+so reading order holds. Figure 23 deliberately left alone — a seventh series would break the five-colour
+CVD palette, and the narrow run is not a frozen-block run.
+
+**Next step.** Two loose ends this run creates. (1) Re-run `narrow_assay.py` once
+`checkpoints_narrow192/ckpt_last.pt` exists to add the fully-trained row; the matched row is the load-
+bearing one, but the final-step comparison against ref_trained's 0.351 would complete the table.
+(2) The depth series still has one seed per condition; a second seed at `n_embd` 192 and at one frozen
+condition would put an error bar on the 0.397 vs 0.476 gap. Everything else still open needs a longer
+character run whose second descent separates from initial fit, the denser Figure-9 grid on the pilot
+run's local maximum, interpolation at non-final positions, or a second model/tokenizer. No `STOP`
+written — a follow-up operator request remains plausible and a STOP'd direction would silently ignore it
+(CLAUDE.md rule 11).
+
+On track? yes — plan complete (S1–S14), nine PLAN-named follow-ups done, this iteration's prediction
+tested and the depth/capacity confound removed; blocker: none.
