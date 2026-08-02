@@ -324,8 +324,41 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**PLAN COMPLETE (S1-S9). `STOP` written 2026-08-01.** All four `human_feedback*` files are
-`.addressed.md`; zero unaddressed feedback remains. If new feedback or a new operator request arrives:
+**PLAN COMPLETE (S1-S9) + operator feedback #4 (2026-08-02 file) addressed + all four PLAN-named
+follow-ups DONE (denser Figure-9 grid, readout rebalancing, MLP-gain intervention, per-block scan).** All five `human_feedback*` files are `.addressed.md`; zero
+unaddressed feedback remains.
+
+- **Grid densified on the passing run (2026-08-02, later).** The corrected gate's LC local maximum for
+  the fresh char run rested on ONE log-spaced checkpoint (step 56). The run had 35 saved checkpoints but
+  only 14 evaluated, so 10 unmeasured ones (steps 1,2,6,9,23,36,88,138,339,531) were re-run through
+  `experiments/fig9.py` with everything frozen - no training extended, no threshold changed. Grid
+  **14 -> 24**. Result: the turnaround is real and larger than measured before. LC 491.2 @15 -> 987.7 @23
+  -> **989.1 @36** -> 769.4 @56 -> 8.1, so **three** points now sit above the first minimum; local max
+  **769 @56 -> 989 @36**, rise **278 -> 498** units (2.9x -> **5.1x** the frozen 5% tolerance, ~110x the
+  CI); verdict stays **PASS**. Sustained robustness onset **831 -> 531** (step 531 = 0.077 was never
+  measured before). Pilot char PASS and BPE FAIL unchanged. Association window restated: second descent
+  **36 -> 30,000**, robustness onset **531**, so the `b/i`,`b/l` sharpening interval (56 -> 831) now
+  *strictly contains* the onset; verdicts unchanged (primary case 5, character analogues case 1). The
+  "local maximum = one checkpoint" caveat is now scoped to the **pilot** run only. Two incidental fixes:
+  `/tmp/tinyshakespeare.txt` was re-fetched (SHA-256 verified against `train_meta_grok_char.json`), and
+  `fig9.py` was run at `--vram_frac 0.225` because its 0.05 default OOMs - the PGD batch was deliberately
+  NOT halved, since that would change the attack's random starts and break comparability.
+
+- **Figure-9 gate CORRECTED (2026-08-02).** `experiments/fig9_verdict.py` had located the LC minimum
+  with `np.argmin`, i.e. the GLOBAL minimum = the last checkpoint, so no rise could ever be found after
+  it. Rewritten to find the first significant local minimum -> its local maximum (= second-descent
+  onset) -> a sustained second descent, plus the two preregistered ordering checks that were missing
+  (onset before the clean-accuracy peak; adv robustness rising >= 0.05 from its value at the onset,
+  with a sustained-onset definition). Rerun on the existing JSONs only, no training extended.
+  **Pilot char FAIL -> PASS** (LC 1940 -> 484 @19 -> 1043 @33 -> 68), **fresh char FAIL -> PASS**
+  (1940 -> 491 @15 -> 769 @56 -> 8.1; rise 278 vs tol 96.6, CI +-3; adv 0.0006 -> 0.530, sustained
+  onset 831), **fresh BPE FAIL** (only upturn 30 units = 1.4% of range, inside the frozen 5% tol).
+  **Bounded verdict now split:** primary (Matthew-exact `big/in`,`big/large`, BPE-only tokens) stays
+  **PLAN case 5**, because BPE is the run that still fails; the `b/i`,`b/l` character analogues sit on
+  a passing run and upgrade to **PLAN case 1 (temporally associated)** - plateau width 0.80 -> 0.33
+  between steps 56 and 831, inside the second-descent window (56 -> 30000) and across the sustained
+  robustness onset. Caveats kept: one run, six checkpoints, onset at step 56 overlaps initial fit, and
+  the LC local maximum is resolved by one checkpoint. If new feedback or a new operator request arrives:
 delete `STOP`, address it, run `python3 experiments/check_render.py REPORT.md RESULTS.md` (must exit 0)
 before finishing, and re-write `STOP` only when clean again.
 
@@ -354,22 +387,76 @@ before finishing, and re-write `STOP` only when clean again.
   on GitHub) with out-of-order numbering. Rewritten: 22 embeds each, short alt text + a visible
   `**Figure N.**` caption under every image, sequential numbering 1-22 in reading order, each figure
   cited by number and motivated by preceding prose. `check_render.py` -> 0 problems.
-- **Grokking side closed and unchanged**: all three Figure-9 gates FAIL (pilot char, fresh char 30k,
-  fresh BPE 10k - first LC descent + emerging robustness, no second descent), bounded relationship
-  verdict = **PLAN case 5 (primary relationship not testable)**, refined by the S6 observation that the
-  plateau forms during the *first* LC descent (width 0.80 -> 0.33 by step ~831) with no coupling to
-  grokking. S9 did not and cannot revise this.
+- **Grokking side** as corrected above: gates PASS / PASS / FAIL, primary verdict still case 5 (BPE),
+  character analogues case 1. S9 did not and cannot revise this.
 - Earlier series stand as reported: comma-vs-64 sweep (median w 0.340, 1/64 strict), 8-context control
   (576 pairs, 0/576 near-linear, per-context medians 0.313-0.436, rho negative in 9/9, median -0.41),
   CVD compliance across every figure, and the `check_render.py` guard from feedback #4.
 
+- **Readout-rebalancing intervention DONE (2026-08-02, later still).** The last PLAN-named follow-up.
+  `experiments/rebalance_probe.py` adds a constant to one unembedding row (pure readout bias, every
+  residual activation on the path bit-identical) and asks whether the plateau boundary follows the
+  decision boundary it moves. 1,873 of 2,080 pairs (207 predict the same character at both endpoints),
+  block 0, step 30000. Two findings: (a) `d(t)` is a ratio of distances *between* logit vectors, so a
+  common bias cancels **exactly** - measured deviation 1.3e-6, i.e. `w` and `t*` are invariant to any
+  readout bias, which also makes this test structurally unable to check the plausibility account's
+  "width changes" prediction (that must be tested inside blocks 1-11); (b) the readout gap swings a
+  median 21.9 nats along the path, so the boundary is stiff - 2.44 nats moves it 0.020, and the 5.28
+  nats needed to force it to the midpoint moves it 0.052; median `|t* - t_gap|` 0.025 -> 0.015 -> 0.035.
+  **Interpretation change:** the S9 `t* ~ t_flip` alignment is correlational, not causal - both are
+  downstream of one sharp residual-stream change built by blocks 1-4. The hypothesis stands as a
+  *description* of the basins, not their mechanism. New Figure 20 in both deliverables; the three
+  exploratory figures renumbered 21-23.
+
+- **MLP-gain intervention DONE (2026-08-02, latest).** The successor the rebalancing probe named.
+  `experiments/mlp_gain_probe.py` scales the MLP-branch output of a block group by a gain `g` (all else
+  untouched) and re-runs the frozen assay with endpoints recomputed under the modified model; 150 random
+  pairs, block 0, step 30000. Early group (blocks 1–4): median `w` **0.796** (g=0) → 0.533 (g=0.5) →
+  0.351 (unmodified) → **0.305** (g=1.5), strict rate 0.00/0.00/0.10/**0.30**; at g=0 the width is back
+  at the untrained 0.803 and all 150 pairs widen (median Δw +0.433). Late group (blocks 8–11): 0.337 /
+  0.333 / 0.380, median |Δw| ≤ 0.025. `t*` barely moves (|Δt*| ≤ 0.074). So blocks 1–4 **causally** set
+  the sharpness — Experiment 5's depth *observation* upgraded to an intervention — while the
+  plausibility alternative survives, now pinned to those same early weights. New **Figure 21** in both
+  deliverables; the three exploratory figures renumbered 22–24.
+
+- **Per-block MLP scan DONE (2026-08-02, latest).** The successor the MLP-gain intervention named.
+  `experiments/mlp_block_scan.py` deletes each of blocks 1–4's MLP branch on its own (`g=0`) and
+  re-measures both candidate mechanisms under every ablated model; same 150 pairs, block 0, step 30000.
+  **(a) Distributed, front-loaded:** median `w` 0.351 (unmodified) → 0.541 / 0.478 / 0.446 / 0.402
+  (block 1 / 2 / 3 / 4 alone) → 0.796 (all four); shares **41 / 28 / 18 / 11%** of the group effect,
+  monotone in depth, summing to 98%, so no single block carries it. **(b) Not plausibility:** the
+  partial ρ(`w`, `max_p` | separation) survives every ablation (−0.634 unmodified, reproducing
+  Experiment 5's −0.587; −0.45 to −0.64 ablated), so plausibility still predicts *which* pairs are
+  sharp — but it does not mediate the intervention (ρ(Δ`w`, Δ`max_p`) ≤ +0.22, median |Δ`max_p`| ≤
+  0.0007 against Δ`w` = +0.433) and where it moves it moves the wrong way (median `max_p` 0.0034 →
+  0.0136, the direction predicting *narrower* plateaus). **(c) Not the decision:** 80.7% of pairs still
+  predict different characters at their endpoints with all four MLPs deleted (86.7% unmodified), median
+  `argmax` regions unchanged at 3, yet `d(t)` is straight; `|t* − t_flip|` decouples 0.043 → 0.214.
+  **Interpretation change:** the "decodes to the same prediction" clause is demoted from mechanism to
+  description in both hypothesis paragraphs, which now end with the PLAN 5.5 falsifiable prediction
+  (freeze blocks 1–4 at step-0 weights, train the rest to matched validation accuracy, expect straight
+  paths). REPORT Limitation 6 rewritten (it still pointed at the rebalancing test as future work).
+  New Figure 22 in both deliverables; exploratory figures renumbered 23–25.
+  `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
+
 ## Next step
 
-**None - plan complete, `STOP` written.** Untested scope limits if the direction is reopened:
-interpolation positions other than the final token; a second model; and the one intervention that would
-separate the two live accounts of the basins - rebalancing the unembedding so `p(A) = p(B)` without
-touching blocks 1-11 (the decision account predicts `t*` moves to 0.5 with the width unchanged; the
-plausibility account predicts the width itself changes).
+**No `STOP` written this iteration** (deliberate, same reason as last): feedback #4 says "do not extend
+training *yet*", so a follow-up ask is anticipated and a STOP'd direction would silently ignore it
+(CLAUDE.md rule 11). Otherwise: plan complete, feedback #4 addressed, and both PLAN-named follow-ups
+(denser Figure-9 grid, readout rebalancing) done. Every remaining item needs new compute: a longer run
+whose second descent is separated from initial fit; the same densification applied to the *pilot* run's
+local maximum (still one point); interpolation positions other than the final token; a second model.
+That chain of cheap re-analyses is now exhausted: the per-block scan answered its own predecessor's
+question (the sharpness is distributed 41/28/18/11% across blocks 1-4) and, more importantly, ruled
+BOTH standing accounts out as mechanisms - the decision survives the ablation that destroys the
+plateau, and the widening is not mediated by endpoint plausibility. What blocks 1-4 actually compute
+to produce the sharp change remains uncharacterised. The direct successor is the falsifiable
+prediction the hypothesis now ends on: **freeze blocks 1-4 at their step-0 weights, train the rest of
+the network to matched validation accuracy, and check whether the paths stay straight (median width
+near 0.80) while the readout still makes sharp next-character decisions.** That is a ~30k-step
+training run, so it is the first follow-up here that is not a cheap re-analysis and it needs a
+dedicated compute budget.
 
 ## Primary references
 

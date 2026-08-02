@@ -12,30 +12,36 @@ robustness**)? A "plateau" is this: interpolate between two natural inputs' fina
 and the downstream output stays locked near endpoint A, snaps across a narrow boundary, then locks near
 endpoint B — a plateau–boundary–plateau `d(t)` curve, not a straight diagonal.
 
-**Bounded verdict = PLAN case 5, "primary relationship not testable," refined by a secondary
-temporal observation.**
+**Bounded verdict = PLAN case 5, "primary relationship not testable," for Matthew's exact tokens;
+PLAN case 1, "temporally associated," for the character analogues.**
 
-1. **Grokking gate: all three trained models FAIL.** The existing 3,500-step pilot, a fresh 30k-step
-   character run, and a fresh BPE run each show the *first* local-complexity (LC) descent and emerging
-   `ε=0.03`-PGD robustness, but **no second LC descent** within budget — the ordering that *defines*
-   grokking is absent. In particular the **BPE** model, required to carry Matthew's exact `big/in`,
-   `big/large` single tokens, fails the gate. So the **primary** Matthew-exact Grokking↔plateau
-   relationship is **not testable** on a grokking model here.
+1. **Grokking gate: both character runs PASS, the BPE run FAILs.** Test local complexity in the fresh
+   30k character run falls 1940 → 491 (step 15), turns back **up** to 989 (step 36; a 498-unit rise
+   against a ±3 99% CI), then descends for the rest of training to 8.1 — Fig. 9's first-descent →
+   rise → **second descent** shape. On a grid densified to 24 checkpoints the rise is resolved by
+   three points (steps 23, 36, 56), not one. The onset (step 36) precedes the clean-accuracy peak
+   (step 4,994) and `ε=0.03`-PGD robustness rises from 0.001 there to 0.53, still climbing after clean
+   accuracy saturates. The 3,500-step pilot shows the same ordering (484 @ 19 → 1043 @ 33 → 68). The **BPE**
+   run — the only tokenizer under which Matthew's exact `big/in`, `big/large` completions are single
+   tokens — shows only a 30-unit upturn (1.4% of range, inside the preregistered 5% tolerance) and
+   **FAILs**. So the **primary** Matthew-exact relationship is **not testable** here, while the
+   character analogues now sit on a run that does reproduce Figure 9.
 
 2. **Plateaus are present and we can time their emergence.** Using Matthew's exact config path
    (`shared_context = "The house was"`, 50-step slerp grid, full interpolation-layer sweep) with the
    two preregistered single-token **character controls** `b↔i` and `b↔l`, plateaus **emerge during
    training**: at initialization the `d(t)` curve is the diagonal (width ≈ 0.80, no plateau); by
-   **step ~831** it is already a sharp sigmoid (width ≈ 0.33–0.35) and stays there to step 30k. This
-   emergence coincides with the **first** LC descent and the initial clean-accuracy rise, and is
-   **fully formed before** adversarial robustness saturates — so, in this non-grokking model, the
-   plateau tracks *initial fit*, not the (absent) grokking transition.
+   **step ~831** it is already a sharp sigmoid (width ≈ 0.33–0.35) and stays there to step 30k. That
+   sharpening happens **inside** the fresh char run's second-descent window (steps 36 → 30,000) and
+   straddles its sustained robustness onset (step 531).
 
-3. **Bounded relationship claim.** We **cannot** claim plateaus sharpen *during* a second-descent /
-   delayed-robustness window, because no run ever opens that window. The secondary evidence we *do*
-   have points the other way: the plateau is a property of the trained-and-memorising downstream
-   stack that appears early, so there is **no visible temporal coupling to the grokking signature**
-   (which never occurs). This is evidence about temporal association only, not causation.
+3. **Bounded relationship claim.** For the character analogues this is **PLAN case 1, temporally
+   associated**: the plateau sharpens in the same checkpoint interval as the second LC descent and the
+   emergence of delayed robustness. Three limits keep it bounded — one training run cannot show
+   causation; the second descent opens at step 36, early enough that its window also contains ordinary
+   initial fitting, so "sharpens with grokking" and "sharpens with initial fit" are not separated here;
+   and the plateau is complete by step ~831 while robustness keeps rising to ~7,819, so the plateau is
+   not waiting on the grokking transition. Matthew's *exact* tokens remain untested (case 5).
 
 4. **The plateau shape is general, but graded — and it survives a change of context.** Holding one
    endpoint fixed at the **comma** and interpolating to **all 64 other characters**, every pair bends
@@ -75,7 +81,7 @@ GPT code/checkpoint is **not public** (repo audited 2026-07-15), so these are fa
 Right: validation next-character accuracy (y) vs training step (x), rising to 0.56. The model is
 clearly trained, not random.
 
-## Figure-9 grokking gate — all three models FAIL
+## Figure-9 grokking gate — both character runs PASS, the BPE run FAILs
 
 PLAN makes a **validity gate** mandatory before any *joint* claim: the model must qualitatively
 reproduce *Deep Networks Always Grok* Fig. 9 — a **second LC descent** beginning before the
@@ -87,21 +93,33 @@ repo (`experiments/fig9.py`, 0.0 logit-reimplementation error). Preregistered PA
 
 | Figure-9 quantity | Pilot char (3.5k) | **Fresh char (30k)** | **Fresh BPE (10k)** |
 |---|---|---|---|
-| checkpoints evaluated | 13 | 14 | 10 |
+| checkpoints evaluated | 13 | 24 | 10 |
 | clean acc (peak / final) | 0.564 / 0.564 | 0.568@4994 / 0.554 | 0.299@831 / 0.274 |
 | `ε=0.03` PGD adv acc (final) | 0.327 | **0.528** | **0.187** |
-| test LC (first → min → final) | 1940 → 68 → 68 | 1940 → **8.1** → 8.1 | 2182 → **95** → 95 |
-| LC minimum at… | last ckpt | last ckpt | last ckpt |
-| second LC descent? | No | No | No |
-| delayed robustness emerged? | Yes | Yes | Yes |
-| **preregistered verdict** | **FAIL** | **FAIL** | **FAIL** |
+| test LC (first → 1st local min → local max → final) | 1940 → 484 @ 19 → 1043 @ 33 → 68 | 1940 → 491 @ 15 → **989 @ 36** → **8.1** | 2182 → — → — → **95** |
+| points resolving the LC local maximum | 1 (step 33) | **3** (steps 23, 36, 56) | — |
+| LC rise vs 5%-of-range tolerance | 558 ≫ 94 | **498 ≫ 96.8** | 30 < 104 → rejected |
+| second LC descent? | **Yes**, onset step 33 | **Yes**, onset step 36 | No |
+| onset before clean-accuracy peak? | Yes (33 < 3500) | Yes (36 < 4994) | n/a |
+| adv acc at onset → max at/after onset | 0.000 → 0.327 | 0.001 → 0.530 | n/a |
+| sustained robustness onset (adv ≥ 0.05 thereafter) | step 1,091 | step 531 | step 217 |
+| **preregistered verdict** | **PASS** | **PASS** | **FAIL** |
 
-The fresh char run reaches *higher* adversarial accuracy than the pilot (0.53 vs 0.33), so robustness
-clearly emerges — but test LC descends **monotonically** to its minimum (8.1) at the last checkpoint,
-never rising to produce a second descent. Both fresh runs **overfit** (val loss bottoms early — char
-≈step 3,750, BPE ≈step 750 — then rises while train loss falls), the opposite of grokking's delayed
-val-loss recovery. Robustness here is a property of the first fold-collapse of a memorising network,
-not the grokking second-descent event. Figures 2–4 show the three gate curves.
+The fresh char run is the cleanest case: LC 491.2 ± 2.7 at step 15 → 989.1 ± 4.5 at step 36 (5.1× the
+96.8-unit tolerance, ~110× the CI) → 8.1 at step 30,000 without rebound, well below the first minimum;
+robustness crosses 0.05 for good at step 531 and keeps rising after clean accuracy saturates (0.55 by
+step 2,038). Its grid was **densified from 14 to 24 checkpoints** this iteration (10 already-saved but
+never-measured checkpoints at steps 1, 2, 6, 9, 23, 36, 88, 138, 339, 531 run through the identical
+pipeline) specifically to test whether the turnaround was an artifact of one log-spaced point. It was
+not: the rise is now traced by three points above the minimum (988 @ 23, 989 @ 36, 769 @ 56) and both
+its height (278 → 498 units) and the verdict's margin grew. The BPE run's only upturn (459.5 @ 56 →
+489.2 @ 217) is 1.4% of its LC range, inside the tolerance fixed in advance, so it is scored as no
+second descent → **FAIL**. Two honest caveats remain on the passing runs: the turnaround happens very
+early (steps 15–56) rather than long after saturation as in the paper, and in the **pilot** run the
+local maximum is still resolved by a single log-spaced checkpoint. Both fresh
+runs also **overfit** in ordinary validation loss (char ≈step 3,750, BPE ≈step 750), so classic delayed
+val-loss recovery is absent even where the LC/robustness ordering passes. Figures 2–4 show the three
+gate curves with the detected landmarks annotated.
 
 ![pilot char Figure-9 gate](plots/grokking_pilot_char.png)
 
@@ -109,26 +127,37 @@ not the grokking second-descent event. Figures 2–4 show the three gate curves.
 over the 12 GeLU layers) for the train (solid), test (dashed) and random (dash-dot) base-point sets,
 with 99% CI bands. Right y-axis: next-token accuracy — black with circles = clean test accuracy,
 black dotted with squares = `ε=0.03` PGD adversarial accuracy. x-axis: training step (log scale, step
-0 drawn at 1). LC is monotone to the 3,500-step horizon (no second descent) while adversarial accuracy
-climbs to 0.33 → **FAIL**.
+0 drawn at 1). Grey vertical rules mark the detector's landmarks, labelled along the top: the first LC
+local minimum (dash-dot, ▽), the local maximum opening the second descent (dashed, △), the sustained
+robustness onset (dotted) and the clean-accuracy peak. LC falls to 484 at step 19, rises to 1043 at
+step 33, then descends to 68 while adversarial accuracy climbs to 0.33 → **PASS**.
 
 ![fresh char Figure-9 gate](plots/grokking_fresh_char.png)
 
-**Figure 3.** Fresh char (30k) Figure-9 gate, same axes and line styles as Figure 2. LC monotone to
-8.1 while adversarial accuracy climbs to 0.53; no second descent → **FAIL**. This is the crispest null
-of the three: robustness is unambiguous, the second descent is simply absent.
+**Figure 3.** Fresh char (30k) Figure-9 gate on the densified 24-checkpoint grid, same axes, line
+styles and landmark rules as Figure 2. The LC turnaround at steps 15 → 36 (491 → 989, CIs ±3 and ±4)
+is the V-then-Λ notch between the ▽ and △ markers, now traced by three measured points above the
+minimum (steps 23, 36, 56) rather than one; LC then descends to 8.1 while adversarial accuracy reaches
+0.53, crossing 0.05 for good at step 531 and still rising after clean accuracy saturates → **PASS**.
+This is the clearest of the three gate curves.
 
 ![fresh BPE Figure-9 gate](plots/grokking_fresh_bpe.png)
 
-**Figure 4.** Fresh BPE (10k) Figure-9 gate, same axes and line styles as Figure 2. LC monotone to 95
-while adversarial accuracy climbs to 0.19; no second descent → **FAIL**. This is the run that would
+**Figure 4.** Fresh BPE (10k) Figure-9 gate, same axes and line styles as Figure 2 (only the
+robustness-onset and accuracy-peak rules appear — no significant LC minimum/maximum was found). The
+step-56 → step-217 upturn is 30 units, inside the 104-unit tolerance, so LC counts as descending to 95
+while adversarial accuracy climbs to 0.19 → **FAIL**. This is the run that would
 have carried Matthew's exact `big/in`, `big/large` tokens, so its failure is what makes the primary
 relationship untestable.
 
-**Joint timeline (S7).** On one training-step axis the Grokking side is uniform across runs — LC falls
-monotonically and PGD robustness rises, no second descent anywhere. Because the BPE bridge to Matthew's
-exact tokens does not reproduce Figure 9 (nor does either character run), the primary Matthew-exact
-relationship is not testable: that window never opens. Figure 5 puts all three runs side by side.
+**Joint timeline (S7).** On one training-step axis the two questions separate. The BPE bridge to
+Matthew's exact tokens does not reproduce Figure 9, so the **primary** Matthew-exact relationship stays
+untestable (PLAN case 5). On the fresh character run, which does pass, the second descent spans steps
+36 → 30,000 and sustained robustness begins at step 531 — and the `b↔i`/`b↔l` plateau collapses from
+width ≈ 0.80 (steps 0 and 56) to ≈ 0.33 by step 831, i.e. **inside** that window and straddling the
+robustness onset. That is **PLAN case 1 (temporally associated)** for the character analogues, with two
+limits: one run cannot show causation, and the window opens so early (step 36) that it also contains
+ordinary initial fitting. Figure 5 puts all three runs side by side.
 
 ![joint checkpoint timeline for the three runs](plots/joint_timeline.png)
 
@@ -136,8 +165,8 @@ relationship is not testable: that window never opens. Figure 5 puts all three r
 the pilot char run (dotted, triangles), fresh char run (solid, circles) and fresh BPE run (dashed,
 squares); the legend gives each run's Figure-9 verdict. Middle: `ε=0.03` PGD adversarial accuracy (y)
 vs step (x, log), same three line styles; the horizontal dashed line is the 0.05 robustness threshold
-used by the verdict rule. Right: text summary of the three FAIL verdicts and the bounded relationship
-verdict. No second LC descent in any run → primary relationship not testable.
+used by the verdict rule. Right: text summary of the three gate verdicts (PASS / PASS / FAIL) and the
+bounded relationship verdict — the BPE FAIL is what keeps the Matthew-exact relationship untestable.
 
 ## Primary plateau evidence — Matthew-faithful char-token controls across training (S6)
 
@@ -177,8 +206,9 @@ straight line is the diagonal `d = t` expected with no plateau. Curves lie on th
 step 56 and are sharp plateau–boundary–plateau sigmoids by step 831, stable thereafter.
 
 To read the plateau's emergence against the grokking metrics directly, Figure 7 puts both on one
-training-step axis: the width reaches its floor while LC is still in its *first* descent and
-robustness has not yet risen — no coupling to a (non-existent) second descent.
+training-step axis: the width reaches its floor between steps 56 and 831 — inside the second-descent
+window (36 → 30,000) and straddling the sustained robustness onset (531), but long before robustness saturates
+(~7,819). This is the association behind the case-1 verdict, and also its limit.
 
 ![grokking metrics and plateau width on one timeline](plots/joint_timeline_char_ctrl.png)
 
@@ -304,8 +334,8 @@ lines.
    to separate", width would grow with smaller endpoint separation *and* that would be the dominant
    effect. Separation correlates only −0.48, and the sign says well-separated endpoints transition
    *faster*.
-5. **It does not change the grokking verdict.** These 64 pairs are measured on the same non-grokking
-   character run, at the same frozen checkpoints, so the bounded relationship verdict stays case 5.
+5. **It does not change the grokking verdict.** These 64 pairs are measured on the character
+   run at one checkpoint, so they add nothing to the checkpoint-aligned verdict.
 
 ## Does the plateau depend on the context? — 8 further contexts, 576 pairs
 
@@ -542,18 +572,174 @@ endpoints switch *faster*, not slower.
 ### The hypothesis
 
 **A plateau in this model is the set of final-position residual states that decode to the same
-next-character prediction, one basin per character, built by the first few blocks.** The evidence:
-91% of all prediction changes along a path fall inside the transition window and 80% of paths have
-single-prediction flat arms (Figure 18), every character retains its own basin against every partner
-(`flat_frac` ≥ 0.86 for all 65) with 78% of the width variance explained by per-character terms alone
-(Figures 14–15), and the structure is absent at initialization and gone again if we patch below block 4
-(Figure 19). The leading alternative these data do **not** rule out is that the basin is carved by how
-*plausible* the model finds each endpoint rather than by the decision itself — width still tracks
-`max(p(A), p(B))` at partial ρ = −0.59 after controlling for endpoint separation, and the boundary
-drifts toward the less likely endpoint (Figure 17). A follow-up could separate the two: bias the
-unembedding to equalize `p(A)` and `p(B)` without touching blocks 1–11 — the decision account predicts
-`t*` moves to 0.5 while the width stays near 0.35, the plausibility account predicts the width itself
-changes.
+next-character prediction, one basin per character — a shape that the MLPs of blocks 1–4 build and
+everything downstream merely reads.** The evidence: 91% of all prediction changes along a path fall
+inside the transition window and 80% of paths have single-prediction flat arms (Figure 18), every
+character retains its own basin against every partner (`flat_frac` ≥ 0.86 for all 65) with 78% of the
+width variance explained by per-character terms alone (Figures 14–15), the structure is absent at
+initialization (Figure 19), and deleting the block-1–4 MLPs returns the width to that untrained value
+while amplifying them sharpens it further (0.80 → 0.35 → 0.31, Figure 21). That "decodes to the same
+prediction" clause is a **description, not the mechanism**: the decision survives the ablation that
+flattens `d(t)` (80.7% of pairs still predict different characters at their endpoints, Figure 22), and
+the leading alternative — that the basin is carved by endpoint *plausibility* — still predicts which
+pairs are sharp (partial ρ = −0.59) even though it does not mediate the intervention
+(ρ(Δw, Δmax_p) = +0.22). **Falsifiable prediction:** freeze blocks 1–4 at their step-0 weights and
+train the rest of the network to the same validation accuracy — the paths should stay straight
+(median width near 0.80) even though the trained readout still makes sharp next-character decisions.
+
+### The readout-rebalancing intervention — the plateau is upstream of the decision
+
+The hypothesis above says a plateau is a set of states that *decode* to the same prediction. If that
+is causal, then moving the readout's decision boundary should move the plateau boundary with it. We
+tested this on all 1,873 of the 2,080 pairs whose two endpoints predict different next characters
+(207 pairs predict the same character at both ends and have no boundary to move). The intervention
+adds a constant to one row of the unembedding output — a pure readout bias — so every residual-stream
+activation along the path is bit-identical. Two bias sizes, both fixed before looking at the result:
+one that makes the two endpoint predictions score symmetrically (**equalised**, median 2.44 nats), and
+one that forces the decision boundary exactly to the path midpoint (**midpoint-forced**, median 5.28
+nats). Figure 20 shows where the boundary lands.
+
+![histograms of decision-boundary position under three readouts, and boundary shift versus bias size](plots/rebalance_readout.png)
+
+**Figure 20.** Readout rebalancing on 1,873 character pairs, interpolation block 0, step 30000.
+Left (a): number of pairs (y) against position along the path `t` (x) for the plateau midpoint `t*`
+(solid) and for the decision boundary `t_gap` under the unmodified readout (dashed), the equalised
+bias (dash-dot) and the midpoint-forced bias (dotted, a spike at 0.5 by construction). Right (b):
+shift of the decision boundary `t_gap^c − t_gap` (y) against the bias applied as a fraction of the
+endpoint logit-gap span (x); circles = midpoint-forced, triangles = equalised. The inset states the
+measured invariance of `d(t)`.
+
+Two findings, one of them algebraic and one empirical.
+
+- **The plateau cannot be moved by the readout at all.** `d(t)` is a ratio of distances *between*
+  logit vectors, so adding the same bias vector to every point on the path cancels exactly. Measured
+  deviation between the biased and unbiased `d(t)` is **1.3 × 10⁻⁶** (float32 noise), so the width
+  `w_10→90` and the midpoint `t*` are **exactly invariant** to any additive readout bias, of any size.
+  This also means the intervention cannot test the plausibility account's prediction that the *width*
+  would change: no readout-level change of endpoint plausibility can alter `d(t)`. Plausibility, if it
+  acts at all, must act through the learned weights of blocks 1–11 — consistent with those blocks being
+  where the sharpness is built (Figure 19).
+- **The decision boundary barely moves either — it is pinned to the residual-stream transition.** The
+  logit gap swings a median **21.9 nats** across the path, so it is very steep. A 2.44-nat equalising
+  bias moves the boundary by a median of only **0.020** in `t` (80% of pairs move less than 0.05), and
+  even the 5.28-nat bias needed to force the boundary to the midpoint moves it a median **0.052**.
+  Boundary and plateau midpoint stay aligned throughout: median `|t* − t_gap|` = **0.025** unmodified,
+  **0.015** equalised, **0.035** midpoint-forced.
+
+**What this changes in the hypothesis.** The tight `t* ≈ t_gap` alignment reported above is *not*
+evidence that the decision creates the plateau — the causal arrow runs the other way. The prediction
+flip and the `d(t)` transition coincide because both are driven by the same sharp change in the
+residual stream, produced by blocks 1–4; the readout is a steep but passive reader of it. The wording
+"a plateau is the set of states that decode to the same prediction" therefore stands as a *description*
+of the basins, not as a mechanism, and the mechanism sits upstream of the unembedding.
+
+### The MLP-gain intervention — blocks 1–4 causally set the sharpness
+
+The readout probe pushed the mechanism upstream but could not say *which* upstream computation makes
+the transition sharp. Experiment 5's depth control pointed at blocks 1–4 (width 0.34 patching at
+block 0 vs 0.76–0.81 patching at blocks 4/8/11), but that is an observation about where the patch is
+injected, not an intervention on the model. So we intervene: we multiply the MLP-branch output of a
+group of blocks by a gain `g` (attention, LayerNorms and every other block untouched) and re-run the
+identical assay, with the endpoints recomputed under the modified model. `g = 1` is the unmodified
+model, `g = 0` deletes those MLPs, `g = 1.5` amplifies them. We do this for the **early** group
+(blocks 1–4) and, as a specificity control, for a **late** group (blocks 8–11) that the depth
+measurement says contributes almost nothing. 150 randomly chosen pairs (fixed seed) of the 2,080, at
+interpolation block 0 of the step-30000 checkpoint, so widths are directly comparable to Experiment 5.
+
+![transition width versus MLP gain for early and late blocks, and paired per-pair width changes](plots/mlp_gain_intervention.png)
+
+**Figure 21.** MLP-gain intervention, 150 character pairs, interpolation block 0, step 30000. Left
+(A): median transition width `w_10→90` (y) against the MLP-branch gain `g` (x; 1.0 = unmodified
+model), band = interquartile range; solid/circles = gain applied to blocks 1–4, dashed/squares =
+blocks 8–11. The dashed horizontal reference is the untrained (step-0) median width 0.803 and the
+dotted one is the strict plateau threshold `w ≤ 0.25`. Right (B): paired per-pair change in width
+`Δw` relative to the unmodified model, one box per condition (boxes hatched `//` = blocks 1–4,
+`..` = blocks 8–11); boxes are the interquartile range, whiskers 1.5×IQR, outliers hidden.
+
+- **Deleting the early MLPs destroys the plateau completely.** Median width goes 0.351 (unmodified) →
+  0.533 at `g = 0.5` → **0.796** at `g = 0`, i.e. back to the straight-line/untrained value 0.803, and
+  the strict plateau rule is passed by **0/150** pairs instead of 15/150. Every single pair widens
+  (fraction with `Δw > 0` = **1.00**, median `Δw` = **+0.433**).
+- **Amplifying them sharpens it further.** At `g = 1.5` the median width falls to **0.305** and the
+  strict-rule pass rate *triples*, 10% → **30%**. The dose–response is monotone across all four gains,
+  which is what a "these MLPs build the sharpness" account predicts and a nuisance-side-effect account
+  does not.
+- **The late blocks do almost nothing.** The same gains on blocks 8–11 move the median width only
+  0.337 / 0.333 / 0.380 for `g = 0 / 0.5 / 1.5` — median paired `|Δw| ≤ 0.025`, a 17× smaller effect at
+  `g = 0` than the early group. Deleting four whole MLPs at the top of the stack barely registers.
+- **The boundary stays put.** Median `|Δt*|` is 0.074 at `g = 0` and ≤ 0.024 elsewhere: the
+  intervention changes how *sharp* the transition is, not where it sits.
+
+This is the first causal statement in this series: the plateau's sharpness is manufactured by the
+MLPs of blocks 1–4 and merely read out downstream. It also sharpens the live alternative rather than
+killing it — the plausibility account can only act through these same weights.
+
+### The per-block scan — the sharpness is distributed, and tracks neither plausibility nor the decision
+
+The gain intervention left two questions open: *which* of blocks 1–4 carries the sharpness, and does
+the width change it produces track the **plausibility** confound or the **decision** structure — the
+two accounts still standing. We answer both from the same runs. We delete each early block's MLP on
+its own (`g = 0`, one block at a time) on the identical 150-pair subsample, and under every condition
+we re-measure the two candidate mediators for each pair: the endpoint plausibility
+`max_p = max(p(A | context), p(B | context))` (Experiment 5's confound) and the decision structure
+(whether the two endpoints still predict different next characters, how many distinct `argmax`
+regions the path visits, and the gap `|t* − t_flip|` between the plateau midpoint and the prediction
+flip). Deleting all four MLPs is re-run in the same script as an in-run reference.
+
+![median width per single-block MLP deletion, width change versus plausibility change, and decision-structure survival](plots/mlp_block_scan.png)
+
+**Figure 22.** Per-block MLP ablation, 150 character pairs, interpolation block 0, step 30000.
+**A** (left): median transition width `w_10→90` (y; bars = interquartile range) for each condition
+(x: unmodified model, each single early block's MLP deleted, then all four). The dashed horizontal
+reference is the untrained (step-0) median width 0.803 and the dotted one is the unmodified model's
+0.351; the percentage above each point is that block's median width change as a fraction of the
+all-four effect. **B** (middle): the mediation test — per-pair change in width `Δw` (y) against the
+per-pair change in endpoint plausibility `Δmax_p` (x), one point per pair, for the all-four deletion;
+dashed horizontal line = no width change, dotted vertical = no plausibility change. **C** (right):
+decision structure per condition (x as in A) — solid line with circles (left y) = fraction of the 150
+pairs whose two endpoints still predict different next characters; dashed line with squares (right y)
+= median `|t* − t_flip|`.
+
+- **No single block carries it; the contribution is graded and front-loaded.** Deleting one block's
+  MLP widens the median transition to 0.541 (block 1), 0.478 (block 2), 0.446 (block 3), 0.402
+  (block 4), against 0.351 unmodified and 0.796 for all four. As a fraction of the all-four effect
+  that is **41% / 28% / 18% / 11%** — monotonically decreasing with depth, and summing to 98%, so the
+  four contributions are close to additive. The largest single block recovers under half the effect,
+  and every single-block deletion widens almost every pair (fraction with `Δw > 0` = 0.99 / 0.96 /
+  1.00 / 0.95) while dropping the strict plateau rate from 10% to 0–3%.
+- **The widening does not track plausibility.** Two facts, and they point the same way. First, the
+  plausibility association itself *survives* every ablation essentially unchanged: the partial
+  Spearman correlation between width and `max_p`, controlling for endpoint separation, is **−0.634**
+  in the unmodified model (reproducing Experiment 5's −0.587 on all 2,080 pairs) and stays between
+  **−0.45 and −0.64** in all five ablated models. So plausibility keeps explaining *which pairs* are
+  sharp. Second, it does not explain the *ablation effect*: the per-pair widening is essentially
+  uncorrelated with the per-pair plausibility change (Spearman `ρ(Δw, Δmax_p)` = +0.11, +0.15, −0.01,
+  +0.02 for the four single blocks and **+0.22** for all four — Figure 22B), and the plausibility
+  landscape barely moves at all (median `|Δmax_p| ≤ 0.0007`) while the width moves by up to +0.433.
+  Where plausibility *does* move, it moves the wrong way: deleting all four MLPs raises median `max_p`
+  from 0.0034 to 0.0136, and higher plausibility is associated with *narrower* plateaus, yet these
+  plateaus vanish.
+- **The decision structure survives the ablation that destroys the plateau.** With all four early
+  MLPs deleted, **80.7%** of pairs still predict different characters at their two endpoints (86.7%
+  unmodified) and the median number of distinct `argmax` regions along the path is **3**, unchanged in
+  every condition. So the path still crosses a decision boundary — but `d(t)` is now a straight line
+  (0.796 ≈ the untrained 0.803). The two also come apart in position: median `|t* − t_flip|` grows
+  from **0.043** unmodified to **0.214** with all four deleted, a 5× decoupling.
+
+**What this settles.** The answer to PLAN's question is *neither*. A plateau is not the decision
+region — you can keep the decision and lose the plateau — and the widening is not mediated by
+endpoint plausibility, which stays put (and shifts against the predicted direction) while the width
+doubles. What blocks 1–4 build is a sharp change in the residual stream that is upstream of, and
+separable from, both: the decision and the plausibility ranking are things the readout computes
+*from* that geometry, not things that create it. The plausibility association therefore survives as a
+description of which pairs get sharp basins, but is now excluded as the mechanism that makes them
+sharp.
+
+**Caveats.** 150 pairs, one shared context, one checkpoint, one model. Deleting four MLPs is a large
+perturbation that degrades the model broadly; the decision structure being largely preserved is what
+licenses the comparison, but it is not preserved perfectly (86.7% → 80.7%). The near-additivity of
+the four per-block fractions is descriptive — single-block ablations need not compose linearly, and
+we did not test pairs or triples of blocks.
 
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
@@ -572,32 +758,32 @@ changes.
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 20 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 23 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 20.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 23.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 21 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 24 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 21.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 24.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 22 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 25 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 22.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 25.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -620,13 +806,16 @@ width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers)
 
 ## Headline
 
-No model we trained reproduces *Deep Networks Always Grok* Figure 9 (all three FAIL the mandatory
-second-descent gate; the BPE bridge to Matthew's exact tokens fails too), so the **primary
-Grokking↔plateau relationship is not testable** (PLAN case 5). But the Matthew-faithful char-token
-controls (`b↔i`, `b↔l`) let us time the plateau: it is **absent at initialization**, **emerges during
-the first LC descent** (width 0.80 → 0.33 by step ~831), and is **fully formed before** adversarial
-robustness saturates — so, in this non-grokking model, the plateau is an early property of the trained
-downstream stack with **no visible temporal coupling** to the grokking signature (which never occurs).
+Both character runs reproduce *Deep Networks Always Grok* Figure 9's ordering (fresh char: LC
+1940 → 491 @ 15 → 989 @ 36 → 8.1 on a 24-checkpoint grid, robustness 0.53 still rising after clean
+accuracy saturates), but the
+BPE run — the only one carrying Matthew's exact `big/in`, `big/large` tokens — **FAILs**, so the
+**primary Grokking↔plateau relationship remains not testable** (PLAN case 5). The Matthew-faithful
+char-token controls (`b↔i`, `b↔l`) do give a checkpoint-aligned answer for the character analogues: the
+plateau is **absent at initialization**, sharpens from width 0.80 to 0.33 between steps 56 and 831 —
+**inside** the second-descent window and straddling the sustained robustness onset — and is flat to 30k.
+That is **temporal association** (PLAN case 1), bounded by one run, six checkpoints, and a second
+descent that opens early enough (step 36) to overlap ordinary initial fitting.
 Sweeping the comma against all 64 other characters — and repeating that sweep in 8 further held-out
 contexts, 576 pairs in all — shows the same shape everywhere (**0/576** curves near the straight line)
 while making clear that sharpness is graded: only 11/576 clear the strict ≤ 0.25 bar. The exhaustive

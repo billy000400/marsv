@@ -1,0 +1,17 @@
+4 checkpoints, 14 already done
+step     23 clean 0.192 adv 0.000 LC tr 986 te 988 rnd 1047 [48s]
+step     36 clean 0.246 adv 0.001 LC tr 976 te 989 rnd 1161 [48s]
+step     88 clean 0.276 adv 0.006 LC tr 599 te 604 rnd 713 [49s]
+step    138 clean 0.286 adv 0.010 LC tr 490 te 494 rnd 614 [49s]
+DONE
+4 checkpoints, 18 already done
+step      6 clean 0.148 adv 0.000 LC tr 1118 te 1123 rnd 1372 [49s]
+step      9 clean 0.148 adv 0.013 LC tr 740 te 747 rnd 935 [49s]
+step    339 clean 0.365 adv 0.027 LC tr 329 te 329 rnd 399 [49s]
+step    531 clean 0.424 adv 0.077 LC tr 192 te 192 rnd 268 [49s]
+DONE
+2 checkpoints, 22 already done
+step      1 clean 0.034 adv 0.000 LC tr 1939 te 1945 rnd 2103 [49s]
+step      2 clean 0.097 adv 0.000 LC tr 1893 te 1899 rnd 2077 [49s]
+DONE
+[dense] ALLDONE Sun Aug  2 01:49:05 UTC 2026

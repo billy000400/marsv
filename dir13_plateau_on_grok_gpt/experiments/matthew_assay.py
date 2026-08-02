@@ -44,7 +44,7 @@ def rel_dist(X, xA, xB):
 
 
 @torch.no_grad()
-def run_pair(model, seq_A, seq_B, interp_block, ts, device, batch_k=101):
+def run_pair(model, seq_A, seq_B, interp_block, ts, device, batch_k=101, return_logits=False):
     """Run the full assay for one pair.
 
     seq_A/seq_B: [T] int64 numpy arrays identical except the last element.
@@ -72,6 +72,7 @@ def run_pair(model, seq_A, seq_B, interp_block, ts, device, batch_k=101):
     d_layer = {l: np.empty(len(ts)) for l in rec_blocks}
     d_logit = np.empty(len(ts))
     argmax = np.empty(len(ts), dtype=np.int64)
+    all_logits = np.empty((len(ts), xA_logit.shape[0]), dtype=np.float32) if return_logits else None
     ep_err = {}
 
     base = res[interp_block][0]  # [T,C]; prefix rows identical for A and B (checked above)
@@ -90,6 +91,8 @@ def run_pair(model, seq_A, seq_B, interp_block, ts, device, batch_k=101):
             d_layer[l][i0:i1] = rel_dist(rec[l], res[l][0, -1], res[l][1, -1])
         d_logit[i0:i1] = rel_dist(lg, xA_logit, xB_logit)
         argmax[i0:i1] = lg.argmax(dim=-1).cpu().numpy()
+        if return_logits:
+            all_logits[i0:i1] = lg.float().cpu().numpy()
         if i0 == 0:
             ep_err["t0_logit"] = float((lg[0] - xA_logit).abs().max())
             ep_err["t0_patch"] = float((H[0] - hA).abs().max())
@@ -97,8 +100,11 @@ def run_pair(model, seq_A, seq_B, interp_block, ts, device, batch_k=101):
             ep_err["t1_logit"] = float((lg[-1] - xB_logit).abs().max())
             ep_err["t1_patch"] = float((H[-1] - hB).abs().max())
 
-    return {"d_logit": d_logit, "d_layer": d_layer, "argmax": argmax, "prefix_err": prefix_err,
-            "endpoint_err": ep_err, "d0": float(d_logit[0]), "d1": float(d_logit[-1])}
+    out = {"d_logit": d_logit, "d_layer": d_layer, "argmax": argmax, "prefix_err": prefix_err,
+           "endpoint_err": ep_err, "d0": float(d_logit[0]), "d1": float(d_logit[-1])}
+    if return_logits:
+        out["logits"] = all_logits
+    return out
 
 
 def pava_isotonic(y):

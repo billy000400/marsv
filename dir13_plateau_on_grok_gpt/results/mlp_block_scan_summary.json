@@ -1,0 +1,770 @@
+{
+ "summary": {
+  "context": "The house was ",
+  "step": 30000,
+  "block": 0,
+  "n_t": 50,
+  "n_pairs": 150,
+  "seed": 0,
+  "early_blocks": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "conditions": {
+   "baseline": {
+    "blocks": [],
+    "median_w": 0.3507,
+    "iqr_w": [
+     0.2872,
+     0.4254
+    ],
+    "strict_frac": 0.1,
+    "median_t_star": 0.488,
+    "frac_endpoints_differ": 0.8667,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0425,
+    "median_max_p": 0.0034,
+    "rho_w_vs_max_p": -0.4843,
+    "partial_rho_w_vs_max_p_given_sep": -0.6337,
+    "rho_w_vs_abs_dlogp": 0.0889
+   },
+   "block1_g0": {
+    "blocks": [
+     1
+    ],
+    "median_w": 0.5407,
+    "iqr_w": [
+     0.4713,
+     0.6083
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4591,
+    "frac_endpoints_differ": 0.8867,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0952,
+    "median_max_p": 0.0044,
+    "rho_w_vs_max_p": -0.4657,
+    "partial_rho_w_vs_max_p_given_sep": -0.6103,
+    "rho_w_vs_abs_dlogp": 0.0083,
+    "median_paired_dw": 0.1781,
+    "frac_w_increased": 0.9933,
+    "median_abs_paired_dtstar": 0.0317,
+    "frac_of_group_effect": 0.4112,
+    "median_paired_dmax_p": 0.0,
+    "rho_dw_vs_dmax_p": 0.106,
+    "rho_dw_vs_base_max_p": 0.1529
+   },
+   "block2_g0": {
+    "blocks": [
+     2
+    ],
+    "median_w": 0.4783,
+    "iqr_w": [
+     0.4027,
+     0.5534
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4811,
+    "frac_endpoints_differ": 0.8667,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0687,
+    "median_max_p": 0.0047,
+    "rho_w_vs_max_p": -0.3782,
+    "partial_rho_w_vs_max_p_given_sep": -0.5651,
+    "rho_w_vs_abs_dlogp": 0.0014,
+    "median_paired_dw": 0.1212,
+    "frac_w_increased": 0.96,
+    "median_abs_paired_dtstar": 0.0142,
+    "frac_of_group_effect": 0.2797,
+    "median_paired_dmax_p": 0.0002,
+    "rho_dw_vs_dmax_p": 0.1484,
+    "rho_dw_vs_base_max_p": 0.2515
+   },
+   "block3_g0": {
+    "blocks": [
+     3
+    ],
+    "median_w": 0.4456,
+    "iqr_w": [
+     0.3588,
+     0.5116
+    ],
+    "strict_frac": 0.0133,
+    "median_t_star": 0.4794,
+    "frac_endpoints_differ": 0.8867,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0636,
+    "median_max_p": 0.0047,
+    "rho_w_vs_max_p": -0.3549,
+    "partial_rho_w_vs_max_p_given_sep": -0.5613,
+    "rho_w_vs_abs_dlogp": 0.1014,
+    "median_paired_dw": 0.0787,
+    "frac_w_increased": 1.0,
+    "median_abs_paired_dtstar": 0.0123,
+    "frac_of_group_effect": 0.1817,
+    "median_paired_dmax_p": 0.0,
+    "rho_dw_vs_dmax_p": -0.0071,
+    "rho_dw_vs_base_max_p": 0.4031
+   },
+   "block4_g0": {
+    "blocks": [
+     4
+    ],
+    "median_w": 0.4017,
+    "iqr_w": [
+     0.3377,
+     0.4819
+    ],
+    "strict_frac": 0.0333,
+    "median_t_star": 0.4794,
+    "frac_endpoints_differ": 0.8867,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0573,
+    "median_max_p": 0.0043,
+    "rho_w_vs_max_p": -0.4295,
+    "partial_rho_w_vs_max_p_given_sep": -0.6406,
+    "rho_w_vs_abs_dlogp": 0.052,
+    "median_paired_dw": 0.0477,
+    "frac_w_increased": 0.9467,
+    "median_abs_paired_dtstar": 0.0119,
+    "frac_of_group_effect": 0.1101,
+    "median_paired_dmax_p": 0.0,
+    "rho_dw_vs_dmax_p": 0.0158,
+    "rho_dw_vs_base_max_p": 0.1737
+   },
+   "early_all_g0": {
+    "blocks": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "median_w": 0.7961,
+    "iqr_w": [
+     0.757,
+     0.8224
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4518,
+    "frac_endpoints_differ": 0.8067,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.2139,
+    "median_max_p": 0.0136,
+    "rho_w_vs_max_p": -0.3386,
+    "partial_rho_w_vs_max_p_given_sep": -0.4499,
+    "rho_w_vs_abs_dlogp": -0.1105,
+    "median_paired_dw": 0.4331,
+    "frac_w_increased": 1.0,
+    "median_abs_paired_dtstar": 0.0744,
+    "frac_of_group_effect": 1.0,
+    "median_paired_dmax_p": 0.0007,
+    "rho_dw_vs_dmax_p": 0.2205,
+    "rho_dw_vs_base_max_p": 0.3741
+   }
+  }
+ },
+ "pairs": [
+  [
+   "T",
+   "h"
+  ],
+  [
+   "X",
+   "t"
+  ],
+  [
+   "X",
+   "b"
+  ],
+  [
+   "\n",
+   ";"
+  ],
+  [
+   "B",
+   "b"
+  ],
+  [
+   ".",
+   "Y"
+  ],
+  [
+   "\n",
+   "f"
+  ],
+  [
+   ":",
+   "S"
+  ],
+  [
+   ",",
+   "k"
+  ],
+  [
+   "A",
+   "C"
+  ],
+  [
+   "\n",
+   ","
+  ],
+  [
+   "&",
+   "w"
+  ],
+  [
+   "c",
+   "w"
+  ],
+  [
+   " ",
+   "Z"
+  ],
+  [
+   ".",
+   "t"
+  ],
+  [
+   "V",
+   "x"
+  ],
+  [
+   "3",
+   "u"
+  ],
+  [
+   "W",
+   "z"
+  ],
+  [
+   "\n",
+   "E"
+  ],
+  [
+   "B",
+   "s"
+  ],
+  [
+   "M",
+   "d"
+  ],
+  [
+   ",",
+   "f"
+  ],
+  [
+   "G",
+   "u"
+  ],
+  [
+   "&",
+   "L"
+  ],
+  [
+   "!",
+   "Y"
+  ],
+  [
+   "U",
+   "d"
+  ],
+  [
+   "P",
+   "r"
+  ],
+  [
+   "D",
+   "O"
+  ],
+  [
+   "A",
+   "p"
+  ],
+  [
+   "J",
+   "z"
+  ],
+  [
+   "'",
+   "W"
+  ],
+  [
+   "P",
+   "z"
+  ],
+  [
+   "H",
+   "J"
+  ],
+  [
+   "e",
+   "g"
+  ],
+  [
+   "R",
+   "f"
+  ],
+  [
+   " ",
+   "$"
+  ],
+  [
+   "B",
+   "L"
+  ],
+  [
+   "w",
+   "y"
+  ],
+  [
+   "E",
+   "a"
+  ],
+  [
+   "F",
+   "u"
+  ],
+  [
+   "j",
+   "n"
+  ],
+  [
+   "a",
+   "d"
+  ],
+  [
+   "$",
+   "v"
+  ],
+  [
+   " ",
+   "E"
+  ],
+  [
+   "M",
+   "m"
+  ],
+  [
+   "I",
+   "s"
+  ],
+  [
+   "\n",
+   "r"
+  ],
+  [
+   "G",
+   "M"
+  ],
+  [
+   "a",
+   "s"
+  ],
+  [
+   "R",
+   "u"
+  ],
+  [
+   ";",
+   "f"
+  ],
+  [
+   "N",
+   "b"
+  ],
+  [
+   "P",
+   "g"
+  ],
+  [
+   "y",
+   "z"
+  ],
+  [
+   "I",
+   "Y"
+  ],
+  [
+   "-",
+   "o"
+  ],
+  [
+   "L",
+   "h"
+  ],
+  [
+   "-",
+   "b"
+  ],
+  [
+   "3",
+   ";"
+  ],
+  [
+   "f",
+   "l"
+  ],
+  [
+   "G",
+   "S"
+  ],
+  [
+   "h",
+   "v"
+  ],
+  [
+   "b",
+   "g"
+  ],
+  [
+   "'",
+   "b"
+  ],
+  [
+   ":",
+   ";"
+  ],
+  [
+   "G",
+   "U"
+  ],
+  [
+   "O",
+   "p"
+  ],
+  [
+   "N",
+   "u"
+  ],
+  [
+   "G",
+   "a"
+  ],
+  [
+   "O",
+   "X"
+  ],
+  [
+   "n",
+   "q"
+  ],
+  [
+   "!",
+   "I"
+  ],
+  [
+   "d",
+   "h"
+  ],
+  [
+   " ",
+   "X"
+  ],
+  [
+   "l",
+   "p"
+  ],
+  [
+   "?",
+   "x"
+  ],
+  [
+   "M",
+   "Q"
+  ],
+  [
+   "V",
+   "k"
+  ],
+  [
+   ".",
+   "V"
+  ],
+  [
+   "r",
+   "u"
+  ],
+  [
+   "L",
+   "u"
+  ],
+  [
+   "I",
+   "f"
+  ],
+  [
+   ".",
+   "h"
+  ],
+  [
+   "f",
+   "z"
+  ],
+  [
+   "?",
+   "R"
+  ],
+  [
+   "E",
+   "f"
+  ],
+  [
+   "T",
+   "n"
+  ],
+  [
+   "T",
+   "z"
+  ],
+  [
+   "A",
+   "M"
+  ],
+  [
+   ".",
+   ";"
+  ],
+  [
+   "A",
+   "R"
+  ],
+  [
+   "A",
+   "m"
+  ],
+  [
+   "J",
+   "b"
+  ],
+  [
+   " ",
+   "f"
+  ],
+  [
+   "!",
+   "J"
+  ],
+  [
+   "J",
+   "f"
+  ],
+  [
+   "p",
+   "u"
+  ],
+  [
+   "!",
+   "m"
+  ],
+  [
+   "L",
+   "g"
+  ],
+  [
+   ",",
+   "g"
+  ],
+  [
+   ":",
+   "z"
+  ],
+  [
+   "B",
+   "d"
+  ],
+  [
+   ";",
+   "j"
+  ],
+  [
+   " ",
+   "s"
+  ],
+  [
+   ":",
+   "u"
+  ],
+  [
+   "e",
+   "p"
+  ],
+  [
+   "P",
+   "V"
+  ],
+  [
+   "D",
+   "v"
+  ],
+  [
+   "d",
+   "n"
+  ],
+  [
+   "E",
+   "l"
+  ],
+  [
+   "N",
+   "r"
+  ],
+  [
+   "T",
+   "t"
+  ],
+  [
+   "!",
+   "h"
+  ],
+  [
+   "J",
+   "M"
+  ],
+  [
+   "K",
+   "W"
+  ],
+  [
+   "U",
+   "k"
+  ],
+  [
+   "D",
+   "U"
+  ],
+  [
+   "G",
+   "d"
+  ],
+  [
+   "I",
+   "t"
+  ],
+  [
+   "j",
+   "l"
+  ],
+  [
+   "S",
+   "j"
+  ],
+  [
+   "K",
+   "X"
+  ],
+  [
+   "f",
+   "y"
+  ],
+  [
+   "M",
+   "X"
+  ],
+  [
+   "!",
+   "x"
+  ],
+  [
+   "l",
+   "u"
+  ],
+  [
+   ";",
+   "N"
+  ],
+  [
+   "L",
+   "O"
+  ],
+  [
+   "P",
+   "w"
+  ],
+  [
+   "!",
+   "V"
+  ],
+  [
+   "U",
+   "i"
+  ],
+  [
+   "L",
+   "M"
+  ],
+  [
+   "U",
+   "w"
+  ],
+  [
+   "W",
+   "m"
+  ],
+  [
+   ":",
+   "Y"
+  ],
+  [
+   "N",
+   "l"
+  ],
+  [
+   "X",
+   "o"
+  ],
+  [
+   "A",
+   "B"
+  ],
+  [
+   "q",
+   "r"
+  ],
+  [
+   "P",
+   "t"
+  ],
+  [
+   "Z",
+   "q"
+  ],
+  [
+   "E",
+   "p"
+  ],
+  [
+   "j",
+   "m"
+  ],
+  [
+   "F",
+   "Y"
+  ],
+  [
+   "B",
+   "v"
+  ],
+  [
+   "A",
+   "H"
+  ],
+  [
+   "b",
+   "w"
+  ],
+  [
+   "$",
+   "U"
+  ],
+  [
+   "A",
+   "W"
+  ],
+  [
+   "\n",
+   "U"
+  ]
+ ]
+}

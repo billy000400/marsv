@@ -1,11 +1,11 @@
 {
  "verdict": "PASS",
- "n_ckpts": 24,
+ "n_ckpts": 14,
  "step_range": [
   0,
   30000
  ],
- "lc_tol_5pct_of_range": 96.83,
+ "lc_tol_5pct_of_range": 96.59,
  "final_clean_acc": 0.5538,
  "peak_clean_acc": 0.568,
  "clean_acc_peak_step": 4994,
@@ -16,22 +16,22 @@
  "second_lc_descent": true,
  "first_local_min_step": 15,
  "first_local_min_value": 491.2,
- "local_max_step": 36,
- "local_max_value": 989.1,
- "second_descent_onset_step": 36,
+ "local_max_step": 56,
+ "local_max_value": 769.4,
+ "second_descent_onset_step": 56,
  "onset_before_clean_acc_peak": true,
- "adv_acc_at_onset": 0.0012,
+ "adv_acc_at_onset": 0.0006,
  "max_adv_acc_at_or_after_onset": 0.5297,
- "adv_rise_from_onset": 0.5285,
+ "adv_rise_from_onset": 0.529,
  "robustness_rises_during_or_after_descent": true,
- "sustained_adv_onset_step": 531,
+ "sustained_adv_onset_step": 831,
  "adv_onset_at_or_after_second_descent": true,
  "lc_still_in_first_descent_at_end": false,
  "clean_acc_still_climbing": false,
  "detector_diagnostics": {
-  "n_candidate_minima": 5,
+  "n_candidate_minima": 2,
   "largest_rejected_rise": 0.0,
-  "first_min_rise": 497.9,
-  "second_descent_fall": 981.05
+  "first_min_rise": 278.21,
+  "second_descent_fall": 761.36
  }
 }
