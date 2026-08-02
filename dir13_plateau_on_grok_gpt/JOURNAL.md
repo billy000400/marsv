@@ -777,3 +777,70 @@ training run (~30k steps), so it is the first follow-up here that is not a cheap
 
 On track? yes — plan complete (S1–S9) plus four PLAN-named follow-ups done (denser Figure-9 grid,
 readout rebalancing, MLP-gain intervention, per-block scan); blocker: none.
+
+## 2026-08-02 (iteration: frozen-block training test — S10 finished, prediction falsified)
+
+No unaddressed `human_feedback*`/`*REVIEW*` files (all five end in `.addressed.md`). I found the
+previous iteration had been cut off mid-S10: `train_frozen.py`, `frozen_assay.py`, `plot_frozen.py` and
+a REPORT Methods block existed, PLAN's S10 was already ticked, but the two training runs were still at
+~7k/30k steps and neither deliverable had the Results subsection or Figure 23. So this iteration was
+"finish what is running", not "start something new".
+
+**Process note worth recording.** My first attempt to chain the assay behind the trainings used
+`nohup bash -c '...' &` inside a Bash tool call; the detached shell died with its parent when the tool
+call returned, so 50 minutes later `/tmp/chain_frozen.log` was still empty and no assay had run. The
+trainings themselves survived (they were launched the same way by the previous iteration and had been
+running for an hour) — so the failure mode is not "nohup never works" but "a wrapper whose only job is
+to wait can be reaped before its child starts". Waiting in the foreground in ~9-minute Bash calls was
+reliable and cost nothing. Both runs finished 30,000 steps cleanly.
+
+**The result is a clean falsification of our own prediction, which is the point of having written it
+down.** The hypothesis paragraph in both deliverables ended on: freeze blocks 1–4 at initialization,
+train the rest to matched accuracy, expect straight paths (width ≈ 0.80). Outcome: median width
+**0.471** — 73% of the reference run's sharpening recovered — at *better* validation accuracy than the
+reference (0.5625 vs 0.5502). The specificity control decides the reading: freezing blocks 8–11, which
+the ablations said contribute nothing, costs the same width (0.484, paired Δw +0.120 vs +0.107). If the
+early group were special at training time, the two controls would have separated; they did not. So the
+0.11 shortfall is a generic capacity cost of freezing a third of the stack.
+
+**The depth control is what makes it more than a null.** Injecting the interpolated activation at
+blocks 0/4/8 gives 0.351/0.761/0.805 for the trained reference (sharpening in blocks 1–4) and
+0.484/0.793/0.806 for frozen-late — same profile. Frozen-early gives 0.471/**0.471**/0.788: injecting
+after the frozen group changes the width by exactly 0.000, so those blocks contribute none of the
+sharpening and all of it has moved to blocks 5–7. The computation relocated rather than disappearing.
+
+**What I learned.** Three iterations of ablation had built toward "blocks 1–4 build the sharpness".
+That statement is still true of the trained network at inference — deleting their MLPs flattens `d(t)`
+completely — but it is false as a claim about training. Ablation necessity and training-time necessity
+are different claims, and only the retraining test separates them. The honest summary now is that the
+plateau is a robust, relocatable product of this architecture + objective, and what the responsible
+blocks actually compute is still uncharacterised — three candidate mechanisms (the decision,
+plausibility, those particular weights) have now been excluded in turn.
+
+**Deliverables.** New subsection + **Figure 23** in RESULTS.md and REPORT.md; one added sentence in the
+REPORT Methods block for the depth control; REPORT Summary, REPORT Conclusion, RESULTS verdict item 5
+and RESULTS Headline curated to current best; both hypothesis paragraphs rewritten to report the
+falsification and to end on a new falsifiable prediction (freeze blocks 1–7, train only the top of the
+stack — sharpening should reappear between injection blocks 8 and 11). REPORT Limitation 6 updated,
+Limitation 7 added. 26 embeds and 26 `**Figure N.**` captions per file, numbering sequential 1–26.
+`check_render.py` → **ALL CHECKS PASS**.
+
+**Next step.** The new prediction above is the cheapest meaningful follow-up (one more ~46-minute
+training run, same harness, `--freeze 1,2,3,4,5,6,7`). Everything else still open needs new compute or
+a new model: a longer character run whose second descent separates from initial fit; the denser
+Figure-9 grid applied to the pilot run's local maximum; interpolation at positions other than the final
+token; a second model/tokenizer. No `STOP` written — a follow-up operator request is still plausible
+and a STOP'd direction would silently ignore it (CLAUDE.md rule 11).
+
+On track? yes — plan complete (S1–S10), five PLAN-named follow-ups done, the hypothesis's own
+falsifiable prediction tested and reported as falsified; blocker: none.
+
+**Addendum (19:55).** I pre-launched the follow-up this entry names — `train_frozen.py --freeze
+1,2,3,4,5,6,7 --tag frozen_deep --steps 30000 --max_minutes 70` — writing to
+`/tmp/dir13_frozen/checkpoints_frozen_deep/` and `/tmp/dir13_frozen/train_frozen_deep.log`
+(~46 min, `vram_frac 0.11`, 1 thread, so it does not crowd the other agents). It is a *pre-fetch*, not
+a claimed result: nothing about it is in the deliverables. The next iteration should check the log,
+and if the run finished, add `frozen_deep` to `frozen_assay.py`'s condition list (the loop already
+looks for `ckpt_matched.pt` / `ckpt_last.pt` per tag) with the depth control at injection blocks 8/10/11
+as well as 0/4/8, since the prediction is about where the drop appears above block 8. If feedback
+arrives instead, feedback comes first — the run costs nothing to ignore or kill.

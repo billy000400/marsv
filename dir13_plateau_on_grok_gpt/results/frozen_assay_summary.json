@@ -116,6 +116,43 @@
     "median_paired_dw_vs_ref_init": -0.3296,
     "frac_w_increased_vs_ref_init": 0.0067
    },
+   "frozen_early_last": {
+    "kind": "frozen",
+    "step": 30000,
+    "frozen_blocks": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "val_acc": 0.5624593098958334,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_early/ckpt_last.pt",
+    "depth_median_w": {
+     "0": 0.4713,
+     "4": 0.4709,
+     "8": 0.7882
+    },
+    "median_w": 0.4713,
+    "mean_w": 0.4724,
+    "iqr_w": [
+     0.4032,
+     0.5235
+    ],
+    "strict_frac": 0.0067,
+    "median_t_star": 0.4914,
+    "frac_endpoints_differ": 0.84,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0624,
+    "median_max_p": 0.0089,
+    "rho_w_vs_max_p": -0.4467,
+    "partial_rho_w_vs_max_p_given_sep": -0.6105,
+    "median_paired_dw_vs_ref_trained": 0.1074,
+    "frac_w_increased_vs_ref_trained": 0.94,
+    "median_paired_dw_vs_ref_matched_step": 0.0325,
+    "frac_w_increased_vs_ref_matched_step": 0.6467,
+    "median_paired_dw_vs_ref_init": -0.3302,
+    "frac_w_increased_vs_ref_init": 0.0
+   },
    "frozen_late_matched": {
     "kind": "frozen",
     "step": 2500,
@@ -147,6 +184,43 @@
     "frac_w_increased_vs_ref_matched_step": 0.8067,
     "median_paired_dw_vs_ref_init": -0.3017,
     "frac_w_increased_vs_ref_init": 0.0133
+   },
+   "frozen_late_last": {
+    "kind": "frozen",
+    "step": 30000,
+    "frozen_blocks": [
+     8,
+     9,
+     10,
+     11
+    ],
+    "val_acc": 0.5621500651041667,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_late/ckpt_last.pt",
+    "depth_median_w": {
+     "0": 0.4842,
+     "4": 0.7925,
+     "8": 0.8061
+    },
+    "median_w": 0.4841,
+    "mean_w": 0.4868,
+    "iqr_w": [
+     0.4272,
+     0.5509
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4949,
+    "frac_endpoints_differ": 0.9333,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0587,
+    "median_max_p": 0.006,
+    "rho_w_vs_max_p": -0.4456,
+    "partial_rho_w_vs_max_p_given_sep": -0.5964,
+    "median_paired_dw_vs_ref_trained": 0.1199,
+    "frac_w_increased_vs_ref_trained": 0.96,
+    "median_paired_dw_vs_ref_matched_step": 0.0379,
+    "frac_w_increased_vs_ref_matched_step": 0.6733,
+    "median_paired_dw_vs_ref_init": -0.3167,
+    "frac_w_increased_vs_ref_init": 0.0
    }
   }
  },

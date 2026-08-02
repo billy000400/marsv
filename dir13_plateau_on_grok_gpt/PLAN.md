@@ -310,7 +310,10 @@ Null results are complete when the validity gates pass. When complete, write an 
       same 150 pairs, plus the depth control at injection blocks 0/4/8. -> verify: both frozen runs
       reach the reference run's final validation accuracy (0.550) before being assayed, and the
       prediction ("frozen-early stays near the untrained width 0.80") is reported as confirmed or
-      falsified with the paired per-pair shifts that decide it.
+      falsified with the paired per-pair shifts that decide it. **DONE 2026-08-02: verified (0.5625 /
+      0.5622 final val acc; matched at steps 2750 / 2500) and the prediction is FALSIFIED** - w = 0.471
+      (early) and 0.484 (late), paired dw +0.107 / +0.120 vs the trained reference, with the depth
+      control showing the sharpening relocated to blocks 5-7. Figure 23 in both deliverables.
 
 ## Fallback
 
@@ -336,9 +339,30 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**PLAN COMPLETE (S1-S9) + operator feedback #4 (2026-08-02 file) addressed + all four PLAN-named
-follow-ups DONE (denser Figure-9 grid, readout rebalancing, MLP-gain intervention, per-block scan).** All five `human_feedback*` files are `.addressed.md`; zero
+**PLAN COMPLETE (S1-S10) + operator feedback #4 (2026-08-02 file) addressed + all five PLAN-named
+follow-ups DONE (denser Figure-9 grid, readout rebalancing, MLP-gain intervention, per-block scan,
+frozen-block training test).** All five `human_feedback*` files are `.addressed.md`; zero
 unaddressed feedback remains.
+
+- **S10 frozen-block training test COMPLETE (2026-08-02, latest) - the hypothesis's own prediction is
+  FALSIFIED.** Both frozen runs finished the full 30,000 steps at *better* validation accuracy than the
+  reference (0.5625 / 0.5622 vs 0.5502; matched accuracy at steps 2750 / 2500). Prediction on record:
+  frozen-early (blocks 1-4) stays near the untrained width 0.80. Outcome: median `w` **0.471**
+  (IQR 0.403-0.524), i.e. 73% of the reference run's sharpening (0.803 -> 0.351) recovered without any
+  trainable weights in the implicated blocks. The specificity control decides the reading: frozen-late
+  (blocks 8-11) ends at **0.484**, paired median `dw` +0.120 vs +0.107 for early, so freezing *any*
+  four blocks costs the same and the shortfall is generic capacity loss. Against the reference at the
+  matched step (2500, 0.443) the gap is only +0.033 / +0.038 - freezing mostly *slows* the sharpening;
+  what is lost is the sharp tail (strict rate 10% -> 0.7% / 0%). **Depth control shows the computation
+  relocated:** injection blocks 0/4/8 give 0.351/0.761/0.805 (reference, sharpening in blocks 1-4),
+  0.484/0.793/0.806 (frozen-late, same profile) and 0.471/**0.471**/0.788 (frozen-early) - zero change
+  across the frozen group, so all the sharpening is now produced by blocks 5-7. Geometry otherwise
+  unchanged (`t*` 0.491/0.495, endpoints differ 84%/93%, 3 argmax regions, |t*-t_flip| 0.062/0.059,
+  partial rho -0.61/-0.60). **Interpretation change:** "blocks 1-4 build the sharpness" is true at
+  inference but false as a training-time claim; the sharp transition is a *relocatable* computation.
+  Both hypothesis paragraphs rewritten and re-ended on a new falsifiable prediction (freeze blocks 1-7,
+  train only the top of the stack). New **Figure 23** in both deliverables; Limitation 6 updated,
+  Limitation 7 added. `check_render.py`: ALL CHECKS PASS (26 figures / 26 captions per file).
 
 - **Grid densified on the passing run (2026-08-02, later).** The corrected gate's LC local maximum for
   the fresh char run rested on ONE log-spaced checkpoint (step 56). The run had 35 saved checkpoints but
@@ -459,16 +483,25 @@ training *yet*", so a follow-up ask is anticipated and a STOP'd direction would 
 (denser Figure-9 grid, readout rebalancing) done. Every remaining item needs new compute: a longer run
 whose second descent is separated from initial fit; the same densification applied to the *pilot* run's
 local maximum (still one point); interpolation positions other than the final token; a second model.
-That chain of cheap re-analyses is now exhausted: the per-block scan answered its own predecessor's
-question (the sharpness is distributed 41/28/18/11% across blocks 1-4) and, more importantly, ruled
-BOTH standing accounts out as mechanisms - the decision survives the ablation that destroys the
-plateau, and the widening is not mediated by endpoint plausibility. What blocks 1-4 actually compute
-to produce the sharp change remains uncharacterised. The direct successor is the falsifiable
-prediction the hypothesis now ends on: **freeze blocks 1-4 at their step-0 weights, train the rest of
-the network to matched validation accuracy, and check whether the paths stay straight (median width
-near 0.80) while the readout still makes sharp next-character decisions.** That is a ~30k-step
-training run, so it is the first follow-up here that is not a cheap re-analysis and it needs a
-dedicated compute budget.
+That chain of cheap re-analyses is exhausted and the training run it pointed at (S10) has now run and
+falsified its own prediction. Three candidate mechanisms have been excluded in turn - the
+next-character decision (survives the ablation that destroys the plateau), endpoint plausibility (does
+not mediate the intervention and moves the wrong way), and the specific weights of blocks 1-4 (freezing
+them at init still yields plateaus, relocated to blocks 5-7). What those blocks actually *compute* to
+produce the sharp change remains uncharacterised.
+
+The direct successor is the new falsifiable prediction the hypothesis now ends on: **freeze blocks 1-7
+at their step-0 weights and train only the top of the stack** (`train_frozen.py --freeze 1,2,3,4,5,6,7`,
+same harness, ~46 min). If the sharpening simply moves to whatever blocks remain trainable, the paths
+should still sharpen well below 0.80 with the width drop appearing between injection blocks 8 and 11;
+if it needs several trainable blocks below the readout, the paths should stay straight. **That run was
+pre-launched at 19:55 on 2026-08-02** (tag `frozen_deep`, log `/tmp/dir13_frozen/train_frozen_deep.log`,
+checkpoints `/tmp/dir13_frozen/checkpoints_frozen_deep/`, ~46 min); nothing from it is in the
+deliverables. Next iteration: check the log, then add `frozen_deep` to `frozen_assay.py`'s condition
+list and run the depth control at injection blocks 8/10/11 as well as 0/4/8. Everything else
+still open needs new compute or a new model: a longer character run whose second descent separates from
+initial fit; the denser Figure-9 grid applied to the *pilot* run's local maximum; interpolation
+positions other than the final token; a second model.
 
 ## Primary references
 

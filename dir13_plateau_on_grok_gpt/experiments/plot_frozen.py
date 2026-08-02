@@ -30,8 +30,8 @@ ts = raw["ts"]
 CURVE_CONDS = [("ref_init", "reference, untrained (step 0)"),
                ("ref_matched_step", "reference at step 2500"),
                ("ref_trained", "reference, trained (step 30000)"),
-               ("frozen_early_matched", "blocks 1-4 frozen, matched acc"),
-               ("frozen_late_matched", "blocks 8-11 frozen, matched acc")]
+               ("frozen_early_last", "blocks 1-4 frozen, final (30000)"),
+               ("frozen_late_last", "blocks 8-11 frozen, final (30000)")]
 BAR_CONDS = [c for c in ["ref_init", "ref_matched_step", "frozen_early_matched",
                          "frozen_late_matched", "frozen_early_last", "frozen_late_last",
                          "ref_trained"] if c in C]

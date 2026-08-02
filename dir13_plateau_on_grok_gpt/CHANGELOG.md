@@ -640,3 +640,53 @@ would have rendered as stray commas; both fixed.
 
 **Raw.** `results/mlp_block_scan_summary.json`, `results/mlp_block_scan_raw.npz`,
 `plots/mlp_block_scan.png`.
+
+## 2026-08-02 (latest) — frozen-block training test: the hypothesis's own prediction is FALSIFIED
+
+**What ran.** The training run PLAN S10 specifies and the previous iteration set up but could not
+finish: `experiments/train_frozen.py` retrained the reference character recipe twice from scratch with
+a block group held at its step-0 weights — `frozen_early` (blocks 1–4, the group the MLP-gain probe and
+per-block scan implicate) and `frozen_late` (blocks 8–11, the specificity control) — everything else
+identical (same corpus SHA, model/data seeds, Adam schedule, 30,000 steps, batch, checkpoint grid).
+Both reached step 30,000 (46 min each, `vram_frac 0.11`, 1 thread). `experiments/frozen_assay.py` then
+ran the frozen assay on each at its matched-accuracy checkpoint AND its final checkpoint against three
+reference conditions (step 0 / 2500 / 30000) on the same fixed 150-pair subsample, plus the
+injection-depth control (blocks 0/4/8) on the three final models. 36 s at `vram_frac 0.225`.
+
+**New numbers.** Final validation next-character accuracy **0.5625** (frozen-early) / **0.5622**
+(frozen-late) vs the reference run's **0.5502**; matched accuracy reached at step 2750 / 2500.
+Median `w_10→90`: **0.471** (frozen-early final, IQR 0.403–0.524) and **0.484** (frozen-late final,
+IQR 0.427–0.551), against 0.803 untrained, 0.443 at the reference's matched step and 0.351 at the
+trained reference. Paired median `Δw` vs the trained reference **+0.107** (94% of pairs widen) and
+**+0.120** (96%); vs the reference at step 2500 only **+0.033** / **+0.038**. Strict plateau rate
+10% (reference) → **0.7%** / **0%**. Depth control (injection blocks 0/4/8): reference
+0.351/0.761/0.805, frozen-late 0.484/0.793/0.806 (same profile), frozen-early
+0.471/**0.471**/0.788 — zero width change across the frozen group, so the sharpening now happens in
+blocks 5–7. Unchanged: median `t*` 0.491/0.495 (vs 0.488), endpoints differ 84%/93% (vs 86.7%),
+median `argmax` regions 3, median `|t*−t_flip|` 0.062/0.059 (vs 0.043; 0.214 under the MLP ablation),
+partial ρ(`w`, `max_p` | sep) −0.61/−0.60 (vs −0.634).
+
+**Superseded interpretation (no superseded numbers).** Both deliverables' hypothesis paragraphs ended
+on the prediction "freeze blocks 1–4 at step-0 weights, train the rest to matched accuracy, expect the
+paths to stay straight (≈0.80)". That prediction is **falsified**: 0.471 recovers 73% of the reference
+run's sharpening, and the specificity control costs just as much width (0.484), so the shortfall is a
+generic capacity cost of freezing four blocks rather than anything about blocks 1–4. The claim "blocks
+1–4 build the sharpness" is therefore narrowed from a training-time necessity to an inference-time fact
+about this trained network; the sharp transition is a **relocatable** computation. Both hypothesis
+paragraphs now say this and end with a new falsifiable prediction (freeze blocks 1–7, train only the
+top of the stack: sharpening should reappear between injection blocks 8 and 11). REPORT Limitation 6
+updated accordingly and a new Limitation 7 added for the frozen test's own scope (one seed per
+condition, two frozen groups, three injection depths).
+
+**Deliverables.** New subsection "The frozen-block training test — the sharpness does not have to be
+learned in blocks 1–4" in RESULTS.md and REPORT.md; new **Figure 23** embedded in both with a visible
+caption defining all four panels' axes and series; REPORT Methods §Frozen-block training test gained a
+sentence defining the depth control it uses; REPORT Summary, REPORT Conclusion, RESULTS verdict item 5
+and the RESULTS Headline each gained the frozen-block result. Exploratory figures were already numbered
+24–26 by the previous iteration, so numbering stays sequential (26 embeds, 26 `**Figure N.**` captions
+per file). `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+(REPORT 28 display / 350 inline eqs / 26 figures; RESULTS 26 figures; 0 problems).
+
+**Raw.** `results/frozen_assay_summary.json`, `results/frozen_assay_raw.npz`,
+`results/frozen_assay.log`, `results/train_hist_frozen_{early,late}.json`,
+`plots/frozen_blocks.png`. Checkpoints live in gitignored scratch at `/tmp/dir13_frozen/`.
