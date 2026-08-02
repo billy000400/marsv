@@ -13,6 +13,15 @@ that four blocks are held at their step-0 initialization:
                                       (width well below 0.80, with the drop appearing between
                                       injection blocks 8 and 11) or it needs several trainable
                                       blocks below the readout and the paths stay straight.
+  frozen_two    blocks 1-10 frozen -- only blocks 0 and 11 train. The two-term reading of the first
+                                      four runs (trainable depth first, position second) predicts a
+                                      width near 0.70; if a single trainable block beside the
+                                      readout suffices it should land near frozen_deep's 0.558.
+                                      Note the assay injects at resid_post of the interpolation
+                                      block, so trainable block 0 is *bypassed* whenever we inject
+                                      at block 0 or later: only block 11 can sharpen the path, and
+                                      the depth profile should be flat from injection block 0 to 10
+                                      with the entire drop between 10 and 11.
   frozen_mirror blocks 5-11 frozen -- mirror image of frozen_deep: the same number of blocks frozen
                                       but the trainable capacity at the *bottom* of the stack. Tests
                                       whether width is set by the count of trainable blocks (expect
@@ -59,7 +68,7 @@ REF_MATCHED_STEP = 2500  # reference-run checkpoint nearest the frozen runs' mat
 # 2 was added for frozen_mirror, whose only trainable blocks are 0-4, so its drop should sit there.
 DEPTH_BLOCKS = [0, 2, 4, 8, 10, 11]
 DEPTH_CONDS = ("ref_trained", "frozen_early_last", "frozen_late_last", "frozen_deep_last",
-               "frozen_mirror_last")
+               "frozen_mirror_last", "frozen_two_last")
 
 
 def load_ckpt(path, device):
@@ -106,7 +115,8 @@ def main():
     conds = []
     for tag, blocks in (("frozen_early", [1, 2, 3, 4]), ("frozen_late", [8, 9, 10, 11]),
                         ("frozen_deep", [1, 2, 3, 4, 5, 6, 7]),
-                        ("frozen_mirror", [5, 6, 7, 8, 9, 10, 11])):
+                        ("frozen_mirror", [5, 6, 7, 8, 9, 10, 11]),
+                        ("frozen_two", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])):
         for which, fn in (("matched", "ckpt_matched.pt"), ("last", "ckpt_last.pt")):
             p = os.path.join(CKPT_ROOT, f"checkpoints_{tag}", fn)
             if os.path.exists(p):

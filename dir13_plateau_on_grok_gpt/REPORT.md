@@ -404,7 +404,7 @@ rank vectors $R_x,R_y$ on the rank vector $R_z$:
 \rho_{xy\cdot z}=\mathrm{corr}\big(R_x-\hat R_x(R_z),\ \ R_y-\hat R_y(R_z)\big).
 ```
 
-### Frozen-block training test (does the sharpness have to be learned in blocks 1–4?)
+### Frozen-block training test (does the sharpness have to be learned in a particular place?)
 
 Every intervention above removes or rescales a component of an already-trained network. That can show
 a trained block is load-bearing *at inference*, but it cannot show the sharpness had to be **learned
@@ -418,20 +418,25 @@ else. So we retrain from scratch, holding a block group $S$ at its initializatio
 with every other detail identical to the reference fresh character run — same corpus and SHA-256, same
 90/10 split, same model seed (so the frozen blocks hold *exactly* the reference run's random
 initialization), same data order, same Adam(lr $10^{-3}$ cosine $\to 10^{-4}$, betas 0.9/0.99, weight
-decay 0), same 30,000-step schedule, same batch size, same checkpoint grid. Four runs, each launched
+decay 0), same 30,000-step schedule, same batch size, same checkpoint grid. Five runs, each launched
 after the previous one's result was in:
 $S=\lbrace 1,2,3,4\rbrace$ (**frozen-early**, the group the ablations implicate),
 $S=\lbrace 8,9,10,11\rbrace$ (**frozen-late**, the same *number* of blocks at a depth those ablations
 showed contributes almost nothing), $S=\lbrace 1,\dots,7\rbrace$ (**frozen-deep**, 58.0% of the
-parameters, leaving blocks 0 and 8–11 trainable) and $S=\lbrace 5,\dots,11\rbrace$ (**frozen-mirror**,
+parameters, leaving blocks 0 and 8–11 trainable), $S=\lbrace 5,\dots,11\rbrace$ (**frozen-mirror**,
 the mirror image: the same 58.0% of parameters and the same five trainable blocks, but at the bottom of
-the stack). Frozen-late is the specificity control: if merely removing four blocks' worth of capacity
+the stack) and $S=\lbrace 1,\dots,10\rbrace$ (**frozen-two**, 82.9% of the parameters, leaving only
+blocks 0 and 11 trainable — the extreme of the trainable-depth axis). Frozen-late is the specificity
+control: if merely removing four blocks' worth of capacity
 straightened the paths, it would straighten them too. Frozen-deep tests the successor prediction those
 two generated — if the sharpening simply moves to whatever blocks remain trainable, squeezing the
 trainable region up against the readout should still sharpen the paths, with the width drop appearing
 between injection blocks 8 and 11. Frozen-mirror then separates *how many* trainable blocks are left
 from *where* they sit, which frozen-deep alone confounds: it holds both the frozen parameter fraction
-and the trainable block count fixed and moves only the position.
+and the trainable block count fixed and moves only the position. Frozen-two pushes the resulting
+two-term reading (trainable depth first, position second) to its limit: with blocks 1–10 frozen, the
+only trainable block *downstream of a block-0 injection* is block 11, so it is the minimal case the
+account has to survive.
 
 The prediction is only meaningful at equal task performance — a network that simply failed to learn
 would trivially have untrained-looking geometry. So we assay each frozen run at its **matched-accuracy
@@ -457,9 +462,13 @@ unembedding downstream, so it is the near-linear readout reference — and block
 whose trainable blocks are 0–4.) The original hypothesis predicted frozen-early stays near the
 untrained width $\approx 0.80$ while frozen-late sharpens like the reference; the successor prediction,
 fixed after those two runs, is that frozen-deep still sharpens well below 0.80 with its width drop
-confined to injection blocks 8–11; and the third, fixed after frozen-deep, is that if the *count* of
+confined to injection blocks 8–11; the third, fixed after frozen-deep, is that if the *count* of
 trainable blocks is what sets the width then frozen-mirror lands near frozen-deep's value with its drop
-between injection blocks 0 and 4. Any other outcome falsifies them (Figure 23).
+between injection blocks 0 and 4; and the fourth, fixed after frozen-mirror and recorded in `PLAN.md`
+before frozen-two was launched, is that if trainable depth is the first-order term frozen-two lands
+near $w\approx 0.70$ with its residual drop split between injection blocks $0\to 2$ and $10\to 11$,
+whereas if a single trainable block beside the readout suffices it lands near frozen-deep's 0.558. Any
+other outcome falsifies them (Figure 23).
 
 ### Spherical interpolation and patching
 

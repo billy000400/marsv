@@ -23,6 +23,11 @@ RES, PLOTS = os.path.join(ROOT, "results"), os.path.join(ROOT, "plots")
 
 use_cvd()
 DASH5 = (0, (3, 1, 1, 1, 1, 1))  # 5th line style: the four named ones are already taken
+DASH6 = (0, (5, 1, 1, 1))         # 6th line style
+# The CVD palette holds five hues (cvd_style.CVD) and CLAUDE.md forbids inventing a sixth. There are
+# six conditions in the depth/accuracy panels, so the sixth (frozen_two) is drawn in neutral gray
+# with its own linestyle and marker -- distinguishable by lightness in grayscale as well as by hue.
+GRAY = "0.35"
 S = json.load(open(os.path.join(RES, "frozen_assay_summary.json")))["summary"]
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 C = S["conditions"]
@@ -34,19 +39,23 @@ CURVE_CONDS = [("ref_init", "reference, untrained (step 0)"),
                ("frozen_early_last", "blocks 1-4 frozen, final (30000)"),
                ("frozen_late_last", "blocks 8-11 frozen, final (30000)"),
                ("frozen_deep_last", "blocks 1-7 frozen, final (30000)"),
-               ("frozen_mirror_last", "blocks 5-11 frozen, final (30000)")]
+               ("frozen_mirror_last", "blocks 5-11 frozen, final (30000)"),
+               ("frozen_two_last", "blocks 1-10 frozen, final (30000)")]
 CURVE_CONDS = [c for c in CURVE_CONDS if c[0] in C]
 BAR_CONDS = [c for c in ["ref_init", "ref_matched_step", "frozen_early_matched",
                          "frozen_late_matched", "frozen_deep_matched", "frozen_mirror_matched",
                          "frozen_early_last", "frozen_late_last", "frozen_deep_last",
-                         "frozen_mirror_last", "ref_trained"] if c in C]
+                         "frozen_mirror_last", "frozen_two_matched", "frozen_two_last",
+                         "ref_trained"] if c in C]
 BAR_TICKS = {"ref_init": "reference\nuntrained", "ref_trained": "reference\ntrained\n(30000)",
              "ref_matched_step": "reference\nstep 2500",
              "frozen_early_matched": "frozen 1-4\nmatched acc", "frozen_early_last": "frozen 1-4\nfinal",
              "frozen_late_matched": "frozen 8-11\nmatched acc", "frozen_late_last": "frozen 8-11\nfinal",
              "frozen_deep_matched": "frozen 1-7\nmatched acc", "frozen_deep_last": "frozen 1-7\nfinal",
              "frozen_mirror_matched": "frozen 5-11\nmatched acc",
-             "frozen_mirror_last": "frozen 5-11\nfinal"}
+             "frozen_mirror_last": "frozen 5-11\nfinal",
+             "frozen_two_matched": "frozen 1-10\nmatched acc",
+             "frozen_two_last": "frozen 1-10\nfinal"}
 NC = len(CURVE_CONDS)
 
 fig = plt.figure(figsize=(3.25 * NC, 8.4))
@@ -104,13 +113,15 @@ DEPTH_LABELS = {"ref_trained": ("reference, trained", 0, "-", "o"),
                 "frozen_early_last": ("blocks 1-4 frozen", 1, "--", "s"),
                 "frozen_late_last": ("blocks 8-11 frozen", 3, "-.", "^"),
                 "frozen_deep_last": ("blocks 1-7 frozen", 4, ":", "D"),
-                "frozen_mirror_last": ("blocks 5-11 frozen", 2, DASH5, "v")}
+                "frozen_mirror_last": ("blocks 5-11 frozen", 2, DASH5, "v"),
+                "frozen_two_last": ("blocks 1-10 frozen", None, DASH6, "P")}
 for cond, (lab, ci, ls, mk) in DEPTH_LABELS.items():
     d = C.get(cond, {}).get("depth_median_w")
     if not d:
         continue
     bl = sorted(int(k) for k in d)
-    axd.plot(bl, [d[str(b)] for b in bl], color=CVD[ci], ls=ls, marker=mk, ms=7, lw=2, label=lab)
+    axd.plot(bl, [d[str(b)] for b in bl], color=GRAY if ci is None else CVD[ci], ls=ls, marker=mk,
+             ms=7, lw=2, label=lab)
 axd.axhline(C["ref_init"]["median_w"], **REF_DIAG)
 axd.set_xlabel("interpolation block")
 axd.set_ylabel("median $w_{10\\to90}$")
@@ -125,22 +136,23 @@ runs = [("grok_char", "reference (all blocks train)", 0, "-"),
         ("frozen_early", "blocks 1-4 frozen at init", 1, "--"),
         ("frozen_late", "blocks 8-11 frozen at init", 3, "-."),
         ("frozen_deep", "blocks 1-7 frozen at init", 4, ":"),
-        ("frozen_mirror", "blocks 5-11 frozen at init", 2, DASH5)]
+        ("frozen_mirror", "blocks 5-11 frozen at init", 2, DASH5),
+        ("frozen_two", "blocks 1-10 frozen at init", None, DASH6)]
 ref_acc = S["ref_final_val_acc"]
 for tag, lab, ci, ls in runs:
     p = os.path.join(RES, f"train_hist_{tag}.json")
     if not os.path.exists(p):
         continue
     h = json.load(open(p))
-    axa.plot(h["step"], h["val_acc"], color=CVD[ci], ls=ls, lw=2, label=lab)
+    axa.plot(h["step"], h["val_acc"], color=GRAY if ci is None else CVD[ci], ls=ls, lw=2, label=lab)
 axa.axhline(ref_acc, **REF_RULE)
 axa.annotate(f"reference final val acc = {ref_acc:.3f}", (1.5, ref_acc + 0.008), fontsize=8)
 for tag, ci, mk in (("frozen_early", 1, "s"), ("frozen_late", 3, "^"), ("frozen_deep", 4, "D"),
-                    ("frozen_mirror", 2, "v")):
+                    ("frozen_mirror", 2, "v"), ("frozen_two", None, "P")):
     key = f"{tag}_matched"
     if key in C and C[key].get("val_acc") is not None:
         axa.plot([C[key]["step"]], [C[key]["val_acc"]], marker=mk, ms=11, mfc="none", mew=2,
-                 color=CVD[ci], ls="none",
+                 color=GRAY if ci is None else CVD[ci], ls="none",
                  label=f"assayed checkpoint (step {C[key]['step']})")
 axa.set_xscale("symlog", linthresh=100)
 axa.set_xlabel("optimization step (symlog, linear below 100)")
