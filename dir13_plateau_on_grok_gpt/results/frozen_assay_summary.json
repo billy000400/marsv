@@ -12,6 +12,11 @@
     "step": 30000,
     "frozen_blocks": [],
     "val_acc": 0.5501790364583333,
+    "depth_median_w": {
+     "0": 0.3507,
+     "4": 0.761,
+     "8": 0.8053
+    },
     "median_w": 0.3507,
     "mean_w": 0.3691,
     "iqr_w": [
@@ -26,8 +31,34 @@
     "median_max_p": 0.0034,
     "rho_w_vs_max_p": -0.4843,
     "partial_rho_w_vs_max_p_given_sep": -0.6337,
+    "median_paired_dw_vs_ref_matched_step": -0.0727,
+    "frac_w_increased_vs_ref_matched_step": 0.22,
     "median_paired_dw_vs_ref_init": -0.4539,
     "frac_w_increased_vs_ref_init": 0.0
+   },
+   "ref_matched_step": {
+    "kind": "reference",
+    "step": 2500,
+    "frozen_blocks": [],
+    "val_acc": 0.5522216796875,
+    "median_w": 0.4428,
+    "mean_w": 0.4407,
+    "iqr_w": [
+     0.3194,
+     0.5544
+    ],
+    "strict_frac": 0.1267,
+    "median_t_star": 0.5083,
+    "frac_endpoints_differ": 0.94,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0602,
+    "median_max_p": 0.0177,
+    "rho_w_vs_max_p": -0.3211,
+    "partial_rho_w_vs_max_p_given_sep": -0.555,
+    "median_paired_dw_vs_ref_trained": 0.0727,
+    "frac_w_increased_vs_ref_trained": 0.78,
+    "median_paired_dw_vs_ref_init": -0.3595,
+    "frac_w_increased_vs_ref_init": 0.0067
    },
    "ref_init": {
     "kind": "reference",
@@ -49,7 +80,9 @@
     "rho_w_vs_max_p": 0.2432,
     "partial_rho_w_vs_max_p_given_sep": 0.2074,
     "median_paired_dw_vs_ref_trained": 0.4539,
-    "frac_w_increased_vs_ref_trained": 1.0
+    "frac_w_increased_vs_ref_trained": 1.0,
+    "median_paired_dw_vs_ref_matched_step": 0.3595,
+    "frac_w_increased_vs_ref_matched_step": 0.9933
    },
    "frozen_early_matched": {
     "kind": "frozen",
@@ -78,6 +111,8 @@
     "partial_rho_w_vs_max_p_given_sep": -0.4989,
     "median_paired_dw_vs_ref_trained": 0.1206,
     "frac_w_increased_vs_ref_trained": 0.8667,
+    "median_paired_dw_vs_ref_matched_step": 0.0339,
+    "frac_w_increased_vs_ref_matched_step": 0.66,
     "median_paired_dw_vs_ref_init": -0.3296,
     "frac_w_increased_vs_ref_init": 0.0067
    },
@@ -108,6 +143,8 @@
     "partial_rho_w_vs_max_p_given_sep": -0.363,
     "median_paired_dw_vs_ref_trained": 0.1391,
     "frac_w_increased_vs_ref_trained": 0.8933,
+    "median_paired_dw_vs_ref_matched_step": 0.0585,
+    "frac_w_increased_vs_ref_matched_step": 0.8067,
     "median_paired_dw_vs_ref_init": -0.3017,
     "frac_w_increased_vs_ref_init": 0.0133
    }
