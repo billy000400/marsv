@@ -798,3 +798,63 @@ curated to current-best. Figure count unchanged at 26 embeds / 26 `**Figure N.**
 **Raw.** `results/frozen_assay_summary.json` and `results/frozen_assay_raw.npz` (now eleven
 conditions), `results/train_hist_frozen_mirror.json`, `plots/frozen_blocks.png`. Checkpoints in
 gitignored scratch at `/tmp/dir13_frozen/checkpoints_frozen_mirror/`.
+
+---
+
+## 2026-08-02 (S13) — Two-block freeze: the trainable-depth prediction confirmed, and the first run in which the plateau breaks
+
+No unaddressed `human_feedback*`/`*REVIEW*` files (all five end in `.addressed.md`), so this iteration
+advanced the plan: the S12 successor prediction, tested.
+
+**New experiment.** `experiments/train_frozen.py --freeze 1,2,3,4,5,6,7,8,9,10 --tag frozen_two` —
+82.9% of the parameters (6.94M of 8.38M) held at their step-0 weights, leaving only blocks 0 and 11
+trainable, everything else identical to the reference character run. 19 minutes of training, then
+`frozen_assay.py` (which already carried the condition entry) on the same fixed 150 pairs.
+
+**Prediction on record → outcome.** Predicted ≈0.70 if trainable depth is the first-order term, ≈0.56
+if one trainable block beside the readout suffices. Outcome **w = 0.726** (IQR 0.642–0.802) →
+**trainable-depth prediction CONFIRMED**, the one-block alternative excluded. Final val acc **0.5668**
+(above the reference's 0.5502); matched at step **7000** vs 2500–3000 for every other frozen run.
+Paired shifts: **+0.160** vs frozen-deep (97% of pairs, p = 7e-26), **+0.094** vs frozen-mirror (89%,
+p = 3e-21), **+0.363** vs the trained reference (99%, p = 2e-26).
+
+**The half of the prediction that could not have come true.** It also said the residual drop would
+split between injection blocks 0→2 and 10→11. The measured profile is
+0.726/0.725/0.724/0.725/0.725/**0.803** at blocks 0/2/4/8/10/11 — the entire 0.077 sits in 10→11, i.e.
+block 11 alone. Reason, now stated in both deliverables: injecting at block 0 *overwrites* block 0's
+output, so block 0's trainable weights are invisible to the measurement and block 11 is the only
+trainable block downstream of it. Recorded as a methods point, not a surprise about the network.
+
+**Superseded numbers.** Nothing was re-measured, so no prior number changed; the cross-run summary
+sentence was extended, old → new: "0.351 → 0.47–0.48 → 0.56–0.63 for 12, 8 and 5 trainable blocks" →
+"0.351 → 0.47–0.48 → 0.56–0.63 → 0.726 for 12, 8, 5 and effectively 1 usable block". Both deliverables'
+framing of the frozen series changed from "freezing only costs *how* sharp it gets" to that claim plus
+an explicit floor, because frozen-two is the first condition where the geometry itself fails: 26% of
+its pairs are *wider* than untrained (0–1% in the other four runs), |t*−t_flip| 0.146 vs 0.043,
+partial ρ −0.18 vs −0.63, strict_frac 0, and only 17% of the reference sharpening recovered.
+
+**New falsifiable prediction** replacing S12's (which this run answered): frozen-two confounds
+trainable depth with parameter count, so the next test holds depth fixed and cuts capacity — retrain at
+`n_embd` 192 instead of 384 with nothing frozen. Depth account → ≈0.35 like the reference; parameter
+count account → ≈0.47 like the eight-trainable-block runs.
+
+**Deliverables.** Both frozen-block subsections rewritten around a five-run prediction/outcome table,
+with a new paragraph/bullet on the two-block run and where the plateau breaks; Figure 23 re-rendered
+(eight top-row panels, six injection curves, six accuracy curves) and its caption updated in both
+files; the bottom-left panel title corrected from "Freezing a block group slows the sharpening but does
+not prevent it" to "…blunts the sharpening; only the 1-10 run nearly removes it", which the new
+condition made the old title overclaim; REPORT Methods already defined the fifth run and needed no
+change; REPORT Summary, REPORT Conclusion, REPORT Limitations 6–7, both hypothesis paragraphs, RESULTS
+Headline and RESULTS verdict item 5 all curated to current-best. Figure count unchanged at 26 embeds /
+26 `**Figure N.**` captions per file. `python3 experiments/check_render.py REPORT.md RESULTS.md` →
+**ALL CHECKS PASS** (REPORT 28 display / 408 inline eqs / 26 figures; RESULTS 26 figures; 0 problems).
+
+**New code.** `experiments/frozen_pairwise.py` — paired median shift + Wilcoxon signed-rank *between*
+frozen runs, read off the per-pair widths already stored in `frozen_assay_raw.npz` (the assay itself
+only pairs each condition against the three reference conditions). Validated by reproducing S12's
+published frozen-mirror vs frozen-deep numbers exactly (+0.0633, 81.3%, p = 6.1e-17).
+
+**Raw.** `results/frozen_assay_summary.json` and `results/frozen_assay_raw.npz` (now thirteen
+conditions), `results/frozen_pairwise.json`, `results/train_hist_frozen_two.json`,
+`plots/frozen_blocks.png`. Checkpoints in gitignored scratch at
+`/tmp/dir13_frozen/checkpoints_frozen_two/`.

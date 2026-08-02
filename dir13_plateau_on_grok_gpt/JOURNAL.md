@@ -943,3 +943,71 @@ Everything else open still needs a longer run, a second model, or interpolation 
 
 On track? yes — plan complete (S1–S12), seven PLAN-named follow-ups done, two predictions tested this
 iteration (one confirmed, one split); blocker: none.
+
+## 2026-08-02 (iteration: S13 two-block freeze — trainable depth confirmed as the first-order term)
+
+No unaddressed `human_feedback*`/`*REVIEW*` files (all five end in `.addressed.md`), so this iteration
+went straight to the plan. The previous iteration had pre-launched
+`train_frozen.py --freeze 1,...,10 --tag frozen_two` and `frozen_assay.py`/`plot_frozen.py` already
+knew about the condition, so the work here was: wait for the run, chain the assay, curate.
+
+**A process bug that cost ~5 minutes and is worth not repeating.** I chained the assay behind training
+with `while pgrep -f "train_frozen.py --freeze" > /dev/null; do sleep 20; done; python3 …`. That never
+fires: the waiter's *own* bash command line contains the string `train_frozen.py --freeze`, so `pgrep
+-f` matches the waiter itself and the loop is infinite. Worse, my status checks used
+`pgrep -f "frozen_assay.py"`, which matched the same waiter's command line and cheerfully reported
+"ASSAY RUNNING" for five minutes while nothing was running at all. Training had actually finished at
+21:12. The tell was `nvidia-smi --query-compute-apps` showing no process on the GPU — a liveness check
+should look at the *resource*, not at a pattern that can match the checker. S11's note ("use
+`ps -p <pid>`, not a detached nohup") was right for a different reason than I applied it: the real rule
+is **never `pgrep -f` a pattern that appears in your own command line**. Once diagnosed, I killed both
+self-matching waiters and ran the assay directly.
+
+**The result confirms the prediction on record, and adds the boundary condition four runs of
+relocation had been missing.** With blocks 1–10 frozen (82.9% of parameters, only blocks 0 and 11
+trainable) the network still beats the reference on the task (0.5668 vs 0.5502) but median width lands
+at **0.726** — the ≈0.70 that trainable depth predicts, not the ≈0.56 that "one trainable block beside
+the readout suffices" predicts. Paired: +0.160 vs frozen_deep (97% of pairs, p = 7e-26), +0.094 vs
+frozen_mirror (89%, p = 3e-21). The cross-run series is now monotone in trainable depth —
+0.351 (12) → 0.471/0.484 (8) → 0.558/0.626 (5) → 0.726 (1 usable) — which is as clean as this design
+gets with one seed per condition.
+
+**The more interesting half is where the prediction was structurally impossible.** I had written that
+the residual drop would split between injection blocks 0→2 and 10→11. It cannot: `run_pair` injects at
+`resid_post` of the interpolation block, so injecting at block 0 *overwrites* block 0's output and its
+trainable weights are invisible to the measurement. Block 11 is the only trainable block downstream.
+The measured profile (0.726/0.725/0.724/0.725/0.725/0.803) says exactly that — all 0.077 of sharpening
+in block 11 alone. So the run measures "one usable block", not "two trainable blocks", and I have
+labelled it that way throughout rather than quietly restating the prediction as if it had been about
+one block all along. Same class of error as S11's off-by-one on span attribution: the injection
+semantics are easy to state and easy to forget when writing the *next* prediction.
+
+**What actually changed in the reading.** Four runs had supported "the site is contingent, only the
+sharpness costs anything". Frozen-two is the first condition where the sharpness cost becomes a
+qualitative failure: 26% of its pairs are *wider* than the untrained network's (0–1% in the other four
+runs), the boundary comes unstuck from the prediction flip (|t*−t_flip| 0.146 vs 0.043), the
+plausibility association mostly collapses (partial ρ −0.18 vs −0.63), and no pair passes the strict
+rule. It is also the only run that needed materially longer to reach reference accuracy (step 7000 vs
+2500–3000). So the honest summary gained a floor: the plateau relocates freely in *site*, its sharpness
+scales with trainable depth, and below about one usable block there is no plateau left to relocate.
+
+**Deliverables.** Five-run prediction/outcome table in both frozen-block subsections; new
+bullet/paragraph on the two-block run; Figure 23 re-rendered with eight top-row panels and six
+injection curves, caption updated in both files; the bottom-left panel title fixed because the new
+condition made "…does not prevent it" an overclaim; REPORT Summary/Conclusion/Limitations 6–7, both
+hypothesis paragraphs, RESULTS Headline and verdict item 5 curated. REPORT Methods already defined the
+fifth run from last iteration, so it needed no edit. New helper `experiments/frozen_pairwise.py` for
+between-run paired Wilcoxon shifts, validated against S12's published numbers before use. 26 embeds /
+26 captions per file; `check_render.py` → ALL CHECKS PASS.
+
+**Next step.** Frozen-two confounds trainable depth with parameter count (82.9% frozen *and* one usable
+block), which is the one loose end this run creates. S14, now the prediction both hypothesis paragraphs
+end on, cuts capacity while holding depth fixed: retrain at `n_embd` 192 with nothing frozen. Depth
+account → ≈0.35 like the reference; parameter-count account → ≈0.47. ~20 min on this harness.
+Everything else still open needs a longer character run whose second descent separates from initial
+fit, the denser Figure-9 grid on the pilot run's local maximum, interpolation at non-final positions,
+or a second model/tokenizer. No `STOP` written — a follow-up operator request remains plausible and a
+STOP'd direction would silently ignore it (CLAUDE.md rule 11).
+
+On track? yes — plan complete (S1–S13), eight PLAN-named follow-ups done, this iteration's prediction
+tested and confirmed with its impossible half diagnosed and reported; blocker: none.

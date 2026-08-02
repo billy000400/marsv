@@ -103,7 +103,8 @@ axb.set_xticks(x)
 axb.set_xticklabels([BAR_TICKS[c] for c in BAR_CONDS], fontsize=8)
 axb.set_ylabel("transition width $w_{10\\to90}$")
 axb.set_ylim(0, 1.05)
-axb.set_title("Freezing a block group slows the sharpening but does not prevent it", fontsize=10)
+axb.set_title("Freezing a block group blunts the sharpening; only the 1-10 run nearly removes it",
+              fontsize=10)
 axb.grid(alpha=0.3, axis="y")
 axb.legend(fontsize=8, loc="lower left")
 
