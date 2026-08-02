@@ -884,3 +884,39 @@ conditions), `results/frozen_pairwise.json`, `results/train_hist_frozen_two.json
   a seventh series would have exceeded the five-colour CVD palette.
 - **Reading updated.** The five-run summary "trainable depth first, position second" now rests on a
   matched control for the confound it carried: depth is the variable, parameter count is not.
+
+## 2026-08-02 (S14b — narrow run scored at the end of training; Figure 24 gains both framings)
+
+- **New measurement (nothing superseded).** The narrow run (`n_embd` 192, nothing frozen) finished
+  training and `experiments/narrow_assay.py` scored its final checkpoint, adding the
+  `narrow192_last` row that S14 left open. Median transition width **0.332** (IQR 0.288–0.389) at step
+  27,143, validation accuracy 0.5639, over the same 150 pairs at interpolation block 0. Paired
+  (`experiments/frozen_pairwise.py`, four comparisons added): **−0.010** vs the reference's
+  fully-trained 0.351 (43% of pairs wider, Wilcoxon p = 2.1e-4), **−0.124** vs frozen-early's 0.471
+  (1.3%, p = 2.6e-26), **−0.146** vs frozen-late's 0.484 (3.3%, p = 3.6e-26), and **−0.065** against its
+  own matched-accuracy row (23%, p = 3.1e-14). Depth profile 0.332 / 0.626 / 0.746 / 0.794 / 0.802 /
+  0.808 at injection blocks 0 / 2 / 4 / 8 / 10 / 11; strict-rule fraction 12.0% (reference 10.0%);
+  partial ρ = −0.51. Caveat recorded with the number in both deliverables: the harness time budget
+  stopped this run at 27,143 of 30,000 steps (lr annealed to 1.2e-4 rather than 1.0e-4), which can only
+  understate its final sharpness since it was still sharpening.
+- **Figure 24 re-rendered** (`experiments/plot_capacity.py`): each run now shows its matched-accuracy
+  point (large marker) *and* its end-of-training width (small open square, dotted connector, new legend
+  entry), the two 12-block runs are separated along the left panel's x-axis so they no longer overlap,
+  the subtitle states both framings, and the legend moved to the left panel's free corner. CVD-safe as
+  before — no red/green, family carried by colour AND marker AND fill.
+- **RESULTS.md / REPORT.md.** New bullet (RESULTS) / paragraph (REPORT) reporting the fully-trained row
+  and its caveat; Figure 24's caption rewritten in both files for the two-framing figure; REPORT Methods
+  extended to state that the narrow run is also assayed at its final checkpoint and that it stopped at
+  27,143 steps.
+- **Two stale claims corrected in REPORT.md.** Limitation 7 still read "separating them needs a
+  narrower-but-full-depth run, **which was not performed**" — it was performed in S14; it now names the
+  narrow run and states the remaining limitation (single seed, so the 0.397-vs-0.476 gap has no
+  across-seed error bar). The Experiment-5 "What this settles" paragraph's closing caveat was corrected
+  the same way. The REPORT **Summary** did not mention the depth-versus-capacity result at all; it now
+  carries it in one sentence with both numbers (0.397 matched, 0.332 trained).
+- **Raw.** `results/frozen_assay_summary.json` and `results/frozen_assay_raw.npz` (fourteen conditions),
+  `results/frozen_pairwise.json`, `plots/capacity_vs_depth.png`. `narrow_assay.py` is now genuinely
+  idempotent per condition key (it skipped the already-published `matched` row instead of re-scoring
+  it). Figure count 27 embeds / 27 captions per file; `python3 experiments/check_render.py REPORT.md
+  RESULTS.md` → **ALL CHECKS PASS** (REPORT 29 display / 437 inline eqs / 27 figures; RESULTS 27
+  figures; 0 problems).

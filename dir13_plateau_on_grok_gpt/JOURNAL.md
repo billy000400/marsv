@@ -1064,3 +1064,60 @@ written — a follow-up operator request remains plausible and a STOP'd directio
 
 On track? yes — plan complete (S1–S14), nine PLAN-named follow-ups done, this iteration's prediction
 tested and the depth/capacity confound removed; blocker: none.
+
+## 2026-08-02 (iteration: S14b — the narrow run's fully-trained row, and three stale claims)
+
+No unaddressed `human_feedback*`/`*REVIEW*` files (all five end in `.addressed.md`), so this went to the
+first of the two loose ends S14 recorded: score the narrow run's final checkpoint, which did not exist
+when the last iteration ran out of clock.
+
+**Waiting correctly this time.** Training was still running when I started (launched by the previous
+iteration with `--max_minutes 16`). Last iteration's process-liveness bug — `pgrep -f` matching the
+waiter's *own* command line, which silently reported a job as running for five minutes — was avoided by
+waiting on `ps -p 50442` for the concrete PID instead of on a pattern. The wait fired at 21:44:49 within
+seconds of the training process exiting.
+
+**Result: 0.332, i.e. the narrow model ends up marginally sharper than the full-width reference.**
+Against ref_trained's 0.351 that is −0.010 paired (43% of pairs wider, p = 2.1e-4); against the
+fully-trained frozen runs it is −0.124 and −0.146 with 1.3% and 3.3% of pairs wider (p ≈ 3e-26). So the
+matched-accuracy conclusion from S14 (0.397 vs the capacity account's ≈0.47) is not an artifact of the
+matching rule — the two framings agree, and the second one is the more conservative of the two since
+the narrow run had *more* steps at its final checkpoint than at step 2,750.
+
+**The honest caveat on this row.** The 16-minute budget stopped the run at step 27,143 of 30,000, so its
+cosine schedule reached lr 1.2e-4 rather than 1.0e-4 while every frozen run's `_last` row is a clean
+30,000. I report the truncation next to the number in both deliverables rather than presenting the row
+as if it were schedule-matched. The direction of the bias is checkable and favourable: the run was still
+sharpening (0.397 → 0.332 between the matched step and step 27,143, p = 3.1e-14), so a truncated run can
+only understate how sharp the full schedule would have left it. The rejected alternative was to omit the
+row entirely; that would have left S14's conclusion resting on one framing when a second was available
+for 70 seconds of GPU.
+
+**Curation caught three stale claims that the new number made obvious.** REPORT Limitation 7 still said
+the depth/capacity separation "needs a narrower-but-full-depth run, which was not performed" — S14
+performed it; the closing caveat of Experiment 5's "What this settles" said the same thing; and the
+REPORT **Summary** never mentioned the depth-versus-capacity result at all, even though it is the
+finding that makes the whole five-run frozen series interpretable. All three fixed. The lesson worth
+keeping: when an iteration adds a result under time pressure, the *distant* prose that the result
+contradicts is what gets missed — grepping for "not performed"/"was not run"/"future work" across the
+deliverables is a cheap sweep and found two of the three.
+
+**Figure 24 now carries both framings.** Each run keeps its matched-accuracy marker and gains a small
+open square at its end-of-training width, joined by a dotted connector, so the claim "the ordering is
+not an artifact of the matching rule" is visible rather than asserted. Two fixes fell out of drawing it:
+the reference and narrow runs both sit at 12 trainable blocks and were overplotting, so they are now
+offset along x; and my first attempt drew the trained value as a `_` tick, which is indistinguishable
+from an error-bar cap — an open square is unambiguous. Legend moved to the left panel's empty corner
+because it was clipping the "narrow 192" label in the right panel.
+
+**Next step.** The remaining loose end from S14 is unchanged and is now the top open item: every point
+in the depth series is a single seed, so the 0.397-vs-0.476 gap that carries the depth conclusion has no
+across-seed error bar. A second seed at `n_embd` 192 and at one frozen condition (~16 min training each
+on this harness plus ~70 s of assay) would give it one. Everything else still open needs a longer
+character run whose second descent separates from initial fit, the denser Figure-9 grid on the pilot
+run's local maximum, interpolation at non-final positions, or a second model/tokenizer. No `STOP`
+written — a follow-up operator request remains plausible and a STOP'd direction would silently ignore it
+(CLAUDE.md rule 11).
+
+On track? yes — plan complete (S1–S14), ten PLAN-named follow-ups done, S14's first loose end closed and
+its conclusion confirmed under a second framing; blocker: none.

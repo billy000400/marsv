@@ -506,6 +506,42 @@
      "10": 0.8069,
      "11": 0.8324
     }
+   },
+   "narrow192_last": {
+    "kind": "narrow",
+    "step": 27143,
+    "frozen_blocks": [],
+    "n_embd": 192,
+    "val_acc": 0.5639322916666667,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_narrow192/ckpt_last.pt",
+    "median_w": 0.3316,
+    "mean_w": 0.3435,
+    "iqr_w": [
+     0.2876,
+     0.3887
+    ],
+    "strict_frac": 0.12,
+    "median_t_star": 0.5126,
+    "frac_endpoints_differ": 0.8933,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0613,
+    "median_max_p": 0.0089,
+    "rho_w_vs_max_p": -0.3161,
+    "partial_rho_w_vs_max_p_given_sep": -0.5065,
+    "median_paired_dw_vs_ref_trained": -0.0102,
+    "frac_w_increased_vs_ref_trained": 0.4267,
+    "median_paired_dw_vs_ref_matched_step": -0.101,
+    "frac_w_increased_vs_ref_matched_step": 0.18,
+    "median_paired_dw_vs_ref_init": -0.4702,
+    "frac_w_increased_vs_ref_init": 0.0,
+    "depth_median_w": {
+     "0": 0.3315,
+     "2": 0.6262,
+     "4": 0.7458,
+     "8": 0.7943,
+     "10": 0.8024,
+     "11": 0.8084
+    }
    }
   }
  },

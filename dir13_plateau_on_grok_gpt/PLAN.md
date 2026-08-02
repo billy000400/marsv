@@ -407,10 +407,10 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**PLAN COMPLETE (S1-S14) + operator feedback #4 (2026-08-02 file) addressed + nine PLAN-named
+**PLAN COMPLETE (S1-S14) + operator feedback #4 (2026-08-02 file) addressed + ten PLAN-named
 follow-ups DONE (denser Figure-9 grid, readout rebalancing, MLP-gain intervention, per-block scan,
 frozen-block training test, deep-freeze training test, mirror-image freeze, two-block freeze, narrow
-run).** All five `human_feedback*` files are `.addressed.md`; zero unaddressed feedback remains.
+run, narrow run scored at end of training).** All five `human_feedback*` files are `.addressed.md`; zero unaddressed feedback remains.
 
 - **S14 narrow run COMPLETE (2026-08-02, latest) - the depth/capacity confound is BROKEN and the depth
   account wins.** `--n_embd 192` with nothing frozen: all 12 blocks trainable but only 5,584,896
@@ -421,7 +421,20 @@ run).** All five `human_feedback*` files are `.addressed.md`; zero unaddressed f
   p=1.9e-4, i.e. slightly SHARPER). Depth profile 0.397/0.569/0.686/0.763/0.807/0.832 at injection
   blocks 0/2/4/8/10/11 (the reference's front-loaded shape); partial rho -0.65; strict_frac **0.133**,
   the only run besides the reference to keep the sharpest tail (frozen runs 0-0.007). New Figure 24.
-  Open follow-up: re-run `narrow_assay.py` when `ckpt_last.pt` lands to add the fully-trained row.
+
+- **S14b fully-trained row DONE (2026-08-02, latest) - both framings agree.** The narrow run finished
+  and `narrow_assay.py` scored `ckpt_last.pt`: median `w` **0.332** (IQR 0.288-0.389) at step 27,143,
+  val 0.5639. Paired: **-0.010** vs ref_trained's 0.351 (43% of pairs wider, p=2.1e-4, i.e. marginally
+  sharper than the full-width reference), **-0.124** vs frozen_early_last's 0.471 (1.3%, p=2.6e-26),
+  **-0.146** vs frozen_late_last's 0.484 (3.3%, p=3.6e-26), **-0.065** vs its own matched row
+  (23%, p=3.1e-14). Front-loaded depth profile 0.332/0.626/0.746/0.794/0.802/0.808; strict_frac
+  **0.120** (reference 0.100); partial rho -0.51. Caveat carried with the number: the harness time
+  budget stopped it at 27,143 of 30,000 steps (lr 1.2e-4 not 1.0e-4), which can only understate its
+  final sharpness since it was still sharpening. Figure 24 re-rendered to show BOTH framings per run
+  (large marker = matched accuracy, small open square = end of training). Also fixed three stale
+  REPORT claims the new row exposed: Limitation 7 and the Experiment-5 closing caveat both still said
+  the narrower-but-full-depth run "was not performed", and the Summary never carried the
+  depth-vs-capacity result at all.
 
 - **S13 two-block freeze COMPLETE (2026-08-02, latest) - the trainable-depth prediction CONFIRMED, and
   the first run in which the plateau actually breaks.** `--freeze 1,...,10`: 82.9% of the parameters
@@ -623,11 +636,17 @@ parameters against frozen_early's 5.60M trainable ones) lands at median `w` **0.
 accuracy - the depth account's ~0.35-0.44, not the capacity account's ~0.47, and in fact 0.014 *sharper*
 than the reference at its own matched step. Trainable depth is the variable; parameter count is not.
 
-**Two smaller successors remain.** (1) Re-run `narrow_assay.py` once
-`/tmp/dir13_frozen/checkpoints_narrow192/ckpt_last.pt` exists to add the fully-trained row against
-ref_trained's 0.351; the script is idempotent per condition key and takes ~70 s. (2) The depth series
-still has one seed per condition, so a second seed at `n_embd` 192 and at one frozen condition would put
-an error bar on the 0.397-vs-0.476 gap that now carries the argument.
+**S14b is DONE: the fully-trained row confirms it under the second framing.** The narrow run finished
+(stopped by the harness time budget at step 27,143 of 30,000, lr 1.2e-4 rather than 1.0e-4 - reported
+with the number) and `narrow_assay.py` scored it: median `w` **0.332**, i.e. **-0.010** against
+ref_trained's 0.351 (43% of pairs wider, p = 2.1e-4) and **-0.124 / -0.146** against frozen-early's
+0.471 and frozen-late's 0.484 (1.3% / 3.3% wider, p ~ 3e-26). Both framings therefore agree, and the
+truncation biases against the finding rather than for it, since the run was still sharpening
+(0.397 -> 0.332, p = 3.1e-14). Figure 24 now shows both framings per run.
+
+**One smaller successor remains.** The depth series still has one seed per condition, so a second seed
+at `n_embd` 192 and at one frozen condition would put an across-seed error bar on the 0.397-vs-0.476
+gap that carries the argument. ~16 min of training each on this harness plus ~70 s of assay.
 
 Everything else still open needs new compute or a new model: a longer character run whose second
 descent separates from initial fit; the denser Figure-9 grid applied to the *pilot* run's local

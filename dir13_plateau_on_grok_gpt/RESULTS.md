@@ -882,21 +882,38 @@ final accuracy and the open markers are the matched-accuracy checkpoints.
   `|t* − t_flip|` 0.061 — and it is the only non-reference run that keeps the sharpest tail, meeting the
   strict plateau rule on **13.3%** of pairs against 0–0.7% for all five frozen runs.
 
+- **Trained on to the end, the narrow run is if anything sharper than the full-width reference.** The
+  matched-accuracy comparison above is the primary one, because it is the only axis on which runs of
+  different capacity are directly comparable; but the same conclusion holds at the end of training.
+  Left to run, the narrow model reaches median width **0.332** (IQR 0.288–0.389) at step 27,143 (val
+  accuracy 0.5639), against the reference's fully-trained **0.351**: paired over the same 150 pairs
+  that is **−0.010**, with only 43% of pairs wider (p = 2.1e-4), i.e. indistinguishable-to-slightly-
+  sharper. Against the fully-trained frozen runs the gap is large and one-sided — **−0.124** vs
+  frozen-early (0.471; just 1.3% of pairs wider, p = 2.6e-26) and **−0.146** vs frozen-late (0.484;
+  3.3%, p = 3.6e-26). Its depth profile stays front-loaded (0.332 / 0.626 / 0.746 / 0.794 / 0.802 /
+  0.808 at injection blocks 0 / 2 / 4 / 8 / 10 / 11), 12.0% of pairs meet the strict rule (reference
+  10.0%), and the plausibility association holds (partial ρ = −0.51). One caveat on this row only: the
+  harness time budget stopped it at 27,143 of the planned 30,000 steps, so its cosine schedule had
+  annealed to lr 1.2e-4 rather than 1.0e-4 — a truncation that can only *understate* how sharp it
+  would end up, since the run was still sharpening (0.397 at its matched step → 0.332 here, p = 3.1e-14).
+
 To show which of the two variables orders the runs, we plot each run's median width against both at
-once, with all seven measured at the same validation accuracy.
+once, with every run shown at the same validation accuracy and again at the end of its training.
 
 ![median transition width against trainable blocks and against trainable parameters, for seven runs at matched validation accuracy](plots/capacity_vs_depth.png)
 
-**Figure 24.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0,
-every run taken at its first checkpoint to reach the reference's final validation accuracy 0.550. y (both
-panels): median transition width `w_10→90` (lower = sharper plateau), bars = interquartile range; the
-gray dashed horizontal line is the untrained value 0.803. **Left:** x = number of trainable transformer
-blocks (axis reversed, 12 → 2). **Right:** x = trainable parameters in millions. Filled circles are the
-two runs with all 12 blocks trainable (the 240-wide reference and the 192-wide narrow run); open
-diamonds are the five runs with blocks frozen at initialization. Width falls monotonically along the
-left panel's axis but is unordered along the right one: at ≈5.6M trainable parameters the narrow run
-(filled) is sharper than both eight-block frozen runs (open), and the 8.4M reference is no sharper than
-the 5.6M narrow run.
+**Figure 24.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0.
+y (both panels): median transition width `w_10→90` (lower = sharper plateau), bars = interquartile
+range; the gray dashed horizontal line is the untrained value 0.803. **Left:** x = number of trainable
+transformer blocks (axis reversed, 12 → 2; the two 12-block runs are drawn side by side). **Right:**
+x = trainable parameters in millions. Large filled circles are the two runs with all 12 blocks
+trainable (the 240-wide reference and the 192-wide narrow run); large open diamonds are the five runs
+with blocks frozen at initialization; each large marker is that run's first checkpoint to reach the
+reference's final validation accuracy 0.550. The small open square joined to it by a dotted line is the
+same run at the end of training. Width falls monotonically along the left panel's axis but is unordered
+along the right one: at ≈5.6M trainable parameters the narrow run (filled) is sharper than both
+eight-block frozen runs (open), and the 8.4M reference is no sharper than the 5.6M narrow run — and the
+end-of-training squares preserve that ordering, so it is not an artifact of the matching rule.
 
 **What this settles.** "Blocks 1–4 build the sharpness" is true of *this trained network at inference*
 — deleting their MLPs still flattens `d(t)` completely — but false as a claim about training. The sharp

@@ -87,7 +87,12 @@ prediction of ≈0.70 and excluding the ≈0.56 that "one block beside the reado
 Across the five runs the widths form a monotone series in trainable depth (0.351 → 0.47–0.48 →
 0.56–0.63 → 0.726 for 12, 8, 5 and effectively 1 usable block), and at that last point the plateau
 stops being a plateau: it recovers only 17% of the reference sharpening and its boundary no longer
-tracks the model's prediction flip.
+tracks the model's prediction flip. Every one of those runs removes trainable blocks and trainable
+parameters together, so a sixth run separates them: retrained **narrow** (`d_model` 192, nothing frozen,
+5.58M parameters — frozen-early's trainable budget at the reference's full depth), it lands at
+**0.397** at matched accuracy and **0.332** at the end of training, i.e. at or below the full-width
+reference's 0.443 and 0.351 rather than at the frozen runs' 0.47–0.48. Trainable depth is the variable;
+parameter count is not.
 **Verdict: plateaus are real in this model, and they are next-character decision basins** — but
 "decision basin" is a *description* of them, not their mechanism, which sits upstream in the early
 MLPs. Qualified further because we tested a reconstruction rather than the paper's exact checkpoint,
@@ -497,6 +502,9 @@ w_{\mathrm{narrow}} \approx w(P{\approx}5.6\mathrm{M}) \approx 0.47
 It is assayed exactly like the frozen runs — same 150 pairs, same interpolation block 0, same
 matched-accuracy rule $k_{\mathrm{match}}$, same depth control — and compared against the reference at
 *its* matched-accuracy checkpoint, so neither training length nor task performance differs (Figure 24).
+It is also assayed at its final checkpoint, for comparison with the frozen runs' final checkpoints; the
+harness time budget ended this one run at step 27,143 rather than 30,000, which is reported with the
+result.
 
 ### Spherical interpolation and patching
 
@@ -1418,21 +1426,38 @@ retain the sharpest tail: **13.3%** of its pairs meet the strict plateau rule, a
 five frozen runs. Narrowing the network is thus not a weak version of freezing it — on this measure it
 is not a perturbation at all.
 
+The matched-accuracy comparison is the primary one, since it is the only axis on which runs of
+different capacity are directly comparable, but the conclusion does not depend on it. Left to train on,
+the narrow model reaches $w=0.332$ (IQR 0.288–0.389) at step 27,143 (validation accuracy 0.5639)
+against the reference's fully-trained $0.351$ — paired, $-0.010$ with 43% of pairs wider
+($p=2.1\times10^{-4}$), i.e. indistinguishable to slightly sharper — while the fully-trained frozen runs
+stay far behind: $-0.124$ versus frozen-early's 0.471 (1.3% of pairs wider, $p=2.6\times10^{-26}$) and
+$-0.146$ versus frozen-late's 0.484 (3.3%, $p=3.6\times10^{-26}$). Its depth profile is still
+front-loaded (0.332, 0.626, 0.746, 0.794, 0.802, 0.808 at injection blocks 0, 2, 4, 8, 10, 11), 12.0% of
+pairs meet the strict rule against the reference's 10.0%, and the plausibility association holds
+(partial $\rho=-0.51$). One caveat applies to this row alone: the harness time budget stopped the run at
+27,143 of the planned 30,000 steps, so its cosine schedule had annealed only to $\eta=1.2\times10^{-4}$
+rather than $1.0\times10^{-4}$. That truncation can only understate the run's final sharpness, because it
+was still sharpening when it stopped ($w=0.397$ at the matched step versus $0.332$ here,
+$p=3.1\times10^{-14}$).
+
 To show which of the two variables orders the runs, we plot every run's median width against both at
-once, with all seven measured at the same validation accuracy.
+once, with every run shown at matched validation accuracy and again at the end of its training.
 
 ![median transition width against trainable blocks and against trainable parameters, for seven runs at matched validation accuracy](plots/capacity_vs_depth.png)
 
-**Figure 24.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0,
-every run taken at its first checkpoint to reach the reference's final validation accuracy 0.550. y
-(both panels): median transition width $w_{10\to90}$ (lower = sharper plateau), bars = interquartile
+**Figure 24.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0.
+y (both panels): median transition width $w_{10\to90}$ (lower = sharper plateau), bars = interquartile
 range; the gray dashed horizontal line is the untrained value 0.803. **Left:** x = number of trainable
-transformer blocks (axis reversed, 12 → 2). **Right:** x = trainable parameters in millions. Filled
-circles are the two runs with all 12 blocks trainable (the 240-wide reference and the 192-wide narrow
-run); open diamonds are the five runs with blocks frozen at initialization. Width falls monotonically
-along the left panel's axis but is unordered along the right one: at $\approx5.6$M trainable parameters
-the narrow run (filled) is sharper than both eight-block frozen runs (open), and the 8.4M reference is
-no sharper than the 5.6M narrow run.
+transformer blocks (axis reversed, 12 → 2; the two 12-block runs are drawn side by side). **Right:**
+x = trainable parameters in millions. Large filled circles are the two runs with all 12 blocks trainable
+(the 240-wide reference and the 192-wide narrow run); large open diamonds are the five runs with blocks
+frozen at initialization; each large marker is that run's first checkpoint to reach the reference's
+final validation accuracy 0.550. The small open square joined to it by a dotted line is the same run at
+the end of training. Width falls monotonically along the left panel's axis but is unordered along the
+right one: at $\approx5.6$M trainable parameters the narrow run (filled) is sharper than both
+eight-block frozen runs (open), and the 8.4M reference is no sharper than the 5.6M narrow run — and the
+end-of-training squares preserve that ordering, so it is not an artifact of the matching rule.
 
 **What this settles.** "Blocks 1–4 build the sharpness" holds for *this trained network at inference* —
 deleting their MLPs still flattens $d(t)$ entirely — but fails as a training-time claim. The sharp
@@ -1451,8 +1476,9 @@ five frozen groups out of many possible ones; the relocation is read off six inj
 narrowed further, and for frozen-deep the $0.139$ attributed to block 8 is inferred from its frozen
 neighbours 5–7 contributing nothing, not measured on block 8 alone. The depth-versus-count contrast
 rests on a single matched pair of runs at one capacity level, and frozen-two confounds "few trainable
-blocks" with "83% of parameters frozen", so it bounds the depth account rather than isolating depth
-from parameter count.
+blocks" with "83% of parameters frozen", so on its own it bounds the depth account rather than
+isolating depth from parameter count — that separation is what the narrow run supplies, and it too is
+a single seed.
 
 ### Exploratory corroboration: 40 natural minimal pairs
 
@@ -1619,4 +1645,5 @@ natural activation-to-activation directions.
    step to block 8 is an inference from its frozen neighbours 5–7 contributing nothing, not a direct
    measurement. Frozen-two additionally confounds trainable depth with parameter count (82.9% of the
    parameters are frozen), so it bounds the trainable-depth account rather than isolating depth from
-   capacity; separating them needs a narrower-but-full-depth run, which was not performed.
+   capacity; the narrow run separates the two, but it too is a single seed, so the 0.397-versus-0.476
+   gap that carries the depth conclusion has no error bar across seeds.

@@ -52,6 +52,9 @@ def main():
             print(f"[skip] {path} missing", flush=True)
             continue
         name = f"{TAG}_{which}"
+        if name in S["conditions"] and f"{name}_w" in old:
+            print(f"[skip] {name} already scored", flush=True)
+            continue
         model, ck = load_ckpt(path, device)
         r = sweep(model, seqs, pairs, ts, device, *endpoint_stats(model, stoi, seqs, device))
         row = {"kind": "narrow", "step": int(ck["step"]), "frozen_blocks": [],

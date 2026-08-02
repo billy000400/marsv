@@ -24,7 +24,11 @@ PAIRS = [("frozen_two_last", "frozen_deep_last"),
          ("narrow192_matched", "ref_matched_step"),
          ("narrow192_matched", "frozen_early_matched"),
          ("narrow192_matched", "frozen_late_matched"),
-         ("narrow192_matched", "ref_trained")]
+         ("narrow192_matched", "ref_trained"),
+         ("narrow192_last", "ref_trained"),
+         ("narrow192_last", "frozen_early_last"),
+         ("narrow192_last", "frozen_late_last"),
+         ("narrow192_last", "narrow192_matched")]
 
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 out = {}

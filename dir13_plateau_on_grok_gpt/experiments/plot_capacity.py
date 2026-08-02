@@ -4,8 +4,10 @@ The five frozen runs made width monotone in trainable depth, but each of them al
 parameters, so the two explanations were confounded. The narrow run (n_embd 192, nothing frozen) breaks
 the tie: it has frozen_early's trainable-parameter budget with the reference's full trainable depth.
 
-Every point is that run's FIRST checkpoint to reach the reference run's final validation accuracy
-(0.5502), so all seven are compared at matched task performance.
+The large marker for each run is its FIRST checkpoint to reach the reference run's final validation
+accuracy (0.5502), so all seven are compared at matched task performance; the small open square joined
+to it by a dotted line is the same run at the end of training, showing the ordering is not an artifact
+of the matching rule.
 
 Left panel: median w vs number of trainable blocks. Right panel: the same runs vs trainable
 parameters. Whichever x-axis orders the points is the variable that sets plateau sharpness.
@@ -53,14 +55,25 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                 ha="right", va="top", fontsize=8, color="0.35")
     for key, lab, nb, npar, full in RUNS:
         x = nb if xi == 2 else npar / 1e6
+        if xi == 2 and nb == 12:  # the two all-trainable runs share a block count; separate them
+            x += 0.50 if key.startswith("ref") else -0.50
         med = C[key]["median_w"]
         lo, hi = C[key]["iqr_w"]
         st = dict(color=CVD[0], marker="o", ms=9, mfc=CVD[0]) if full else \
              dict(color=CVD[1], marker="D", ms=8, mfc="white")
         ax.errorbar([x], [med], yerr=[[med - lo], [hi - med]], capsize=4, elinewidth=1.3,
                     lw=0, mew=1.6, **st)
-        dy = 0.032 if key not in ("frozen_late_matched", "narrow192_matched") else -0.055
-        ax.annotate(lab, (x, med + dy), ha="center", va="bottom" if dy > 0 else "top", fontsize=8)
+        trained = C.get(key.replace("_matched_step", "_trained").replace("_matched", "_last"))
+        if trained is not None:  # same run at the end of training, second framing
+            dx = (0.34 if xi == 2 else 0.22) * (1 if full else -1)
+            ax.plot([x, x + dx], [med, trained["median_w"]], color=st["color"], lw=0.9, ls=":",
+                    zorder=1)
+            ax.plot([x + dx], [trained["median_w"]], color=st["color"], marker="s", ms=5.5,
+                    mfc="white", mew=1.4, lw=0, zorder=3)
+        below = key == "frozen_late_matched" or (key == "narrow192_matched" and xi == 3)
+        dy = -0.055 if below else 0.032
+        lx = x - 0.45 if (xi == 3 and key == "narrow192_matched") else x  # clear of its own square
+        ax.annotate(lab, (lx, med + dy), ha="center", va="bottom" if dy > 0 else "top", fontsize=8)
     ax.set_xlabel(xlabel)
     ax.set_ylim(0.24, 0.94)
     ax.grid(alpha=0.3)
@@ -73,11 +86,14 @@ axes[1].set_title("NOT ordered by trainable CAPACITY", fontsize=10)
 
 h = [plt.Line2D([], [], color=CVD[0], marker="o", ms=9, lw=0, label="all 12 blocks trainable"),
      plt.Line2D([], [], color=CVD[1], marker="D", ms=8, lw=0, mfc="white",
-                label="some blocks frozen at init")]
-axes[1].legend(handles=h, fontsize=8, loc="lower left", framealpha=0.95)
+                label="some blocks frozen at init"),
+     plt.Line2D([], [], color="0.35", marker="s", ms=5.5, mfc="white", mew=1.4, ls=":", lw=0.9,
+                label="same run, end of training (small square)")]
+axes[0].legend(handles=h, fontsize=8, loc="lower right", framealpha=0.95)
 
 fig.suptitle("Plateau sharpness tracks how many blocks can train, not how many parameters they hold\n"
-             "(all runs at matched validation accuracy 0.550)", fontsize=11)
+             "(large markers: matched validation accuracy 0.550; small squares: end of training)",
+             fontsize=11)
 fig.tight_layout(rect=(0, 0, 1, 0.92))
 fig.savefig(os.path.join(PLOTS, "capacity_vs_depth.png"), dpi=130, bbox_inches="tight")
 plt.close(fig)
