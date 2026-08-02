@@ -690,3 +690,111 @@ per file). `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL 
 **Raw.** `results/frozen_assay_summary.json`, `results/frozen_assay_raw.npz`,
 `results/frozen_assay.log`, `results/train_hist_frozen_{early,late}.json`,
 `plots/frozen_blocks.png`. Checkpoints live in gitignored scratch at `/tmp/dir13_frozen/`.
+
+## 2026-08-02 (S11) — deep-freeze training test: the relocation prediction is CONFIRMED
+
+**What ran.** `experiments/train_frozen.py --freeze 1,2,3,4,5,6,7 --tag frozen_deep --steps 30000`
+(the run pre-launched at the end of the previous iteration) finished the full 30,000 steps, and
+`experiments/frozen_assay.py` was re-run with `frozen_deep` in its condition list and the
+injection-depth grid extended from blocks 0/4/8 to **0/4/8/10/11**. Same frozen assay, same fixed
+150-pair subsample, same context, same seed — only the condition list and the depth grid changed.
+`experiments/plot_frozen.py` re-rendered `plots/frozen_blocks.png` with the third run added.
+
+**New result (Figure 23, both deliverables).** Prediction on record: with blocks 1–7 held at
+initialization the paths should still sharpen well below the untrained 0.80, with the width drop
+appearing between injection blocks 8 and 11. **Confirmed.** Final validation next-character accuracy
+**0.5742** — the highest of any run, reference 0.5502 — matched accuracy at step 3000. Median width
+**0.558** (IQR 0.471–0.621), narrower than untrained for 149/150 pairs (Wilcoxon p = 2e-26), i.e. 54%
+of the reference sharpening recovered with 58% of the blocks never updated. Depth profile
+0.558 / 0.557 / 0.695 / 0.767 / 0.805 at injection blocks 0/4/8/10/11: the frozen blocks 1–4 contribute
+−0.002 and the entire 0.248 of sharpening sits in the four trainable blocks (0.139 across blocks 5–8,
+of which only block 8 can train; 0.071 across 9–10; 0.039 in block 11). Geometry otherwise unchanged
+(t* 0.486, endpoints differ 87.3%, median 3 argmax regions, |t*−t_flip| 0.092, partial rho −0.62);
+strict plateau rate 0%.
+
+**New cross-run finding.** The width cost tracks the *number* of frozen blocks, not their depth:
+0.351 (none) → 0.471 / 0.484 (four) → 0.558 (seven). Paired: frozen-deep wider than frozen-early by
++0.073 (83% of pairs, p = 1e-17) and than frozen-late by +0.064 (80%, p = 1e-16), while frozen-early
+and frozen-late differ by only −0.015.
+
+**Corrections to numbers already published.** (a) The injection convention is that patching at block
+`b` replaces `resid_post` of block `b`, so the width drop between injection points `b1 < b2` is
+produced by blocks `b1+1 … b2`. Frozen-early's relocation was therefore reported one block too narrow:
+**"relocated to blocks 5–7" → "relocated to blocks 5–8"** everywhere in both deliverables (the
+underlying numbers 0.471 @4 vs 0.788 @8 are unchanged). (b) The reference and frozen-early/late depth
+profiles gained their blocks 10 and 11 entries: reference 0.805 @8 → **0.806 @10, 0.805 @11**;
+frozen-early 0.788 @8 → **0.804 @10, 0.809 @11**; frozen-late 0.806 @8 → **0.806 @10, 0.806 @11** —
+i.e. nothing above block 8 contributes in any of them, which is what makes frozen-deep's rise across
+9–11 informative.
+
+**Superseded interpretation.** The previous hypothesis paragraphs ended on the prediction that freezing
+blocks 1–7 would either relocate the sharpening again or leave the paths straight. It relocated, so
+both paragraphs now state the general finding — the sharp transition is a relocatable computation whose
+sharpness degrades with the number of frozen blocks, not their depth — and end on a **new** falsifiable
+prediction: freeze blocks 5–11 (the mirror image, same count frozen, trainable capacity at the bottom).
+If count is what matters the width should land near 0.558 with the whole drop between injection blocks
+0 and 4; if depth matters it should differ markedly.
+
+**Deliverables.** RESULTS.md subsection retitled "The frozen-block training test — the sharpening
+relocates into whatever blocks stay trainable" and rewritten around a three-run prediction/outcome
+table; the matching REPORT.md Results subsection rewritten the same way; Figure 23's caption updated
+for six top-row panels and five injection depths in both files; REPORT Methods §Frozen-block training
+test now defines the third run, the extended depth grid and the span-attribution rule; REPORT Summary,
+REPORT Conclusion, REPORT Limitations 6–7, RESULTS Headline and RESULTS verdict item 5 all curated to
+current-best. Figure count unchanged at 26 embeds / 26 `**Figure N.**` captions per file.
+`python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS** (REPORT 28 display /
+373 inline eqs / 26 figures; RESULTS 26 figures; 0 problems).
+
+**Raw.** `results/frozen_assay_summary.json` and `results/frozen_assay_raw.npz` (both now carry all
+nine conditions), `results/train_hist_frozen_deep.json`, `plots/frozen_blocks.png`. Checkpoints remain
+in gitignored scratch at `/tmp/dir13_frozen/checkpoints_frozen_deep/`.
+
+## 2026-08-02 (S12, same iteration as S11) — mirror-image freeze: relocation confirmed a third time, "count not depth" falsified
+
+**What ran.** `experiments/train_frozen.py --freeze 5,6,7,8,9,10,11 --tag frozen_mirror --steps 30000`
+— the mirror image of `frozen_deep`: the same 4.86M of 8.38M parameters frozen (58.0%) and the same
+five trainable blocks, but at the *bottom* of the stack (blocks 0–4 trainable) instead of the top
+(blocks 0, 8–11). `experiments/frozen_assay.py` gained the condition and injection block **2** (so the
+drop can be resolved inside the trainable group), giving a depth grid of 0/2/4/8/10/11 for all five
+depth conditions; `experiments/plot_frozen.py` was generalised to render one top-row panel per frozen
+run present (7 panels now) and re-rendered `plots/frozen_blocks.png`.
+
+**New result (Figure 23, both deliverables).** Prediction on record: if width is set by the *count* of
+trainable blocks rather than their depth, frozen-mirror should land near frozen-deep's 0.558 with its
+entire width drop between injection blocks 0 and 4 and nothing above. **Split verdict.** The location
+half is confirmed exactly — depth profile 0.626 / 0.764 / **0.805** / 0.806 / 0.806 / 0.806 at
+injection blocks 0/2/4/8/10/11, i.e. injecting at block 4 already gives the untrained straight line and
+all sharpening sits in blocks 1–4 (0.138 in blocks 1–2, 0.042 in 3–4). The magnitude half is falsified:
+median `w` **0.626** (IQR 0.555–0.681), not 0.558 — paired median Δw vs frozen-deep **+0.063**, 81% of
+pairs wider, p = 6e-17, i.e. **39%** vs 54% of the reference sharpening recovered. Final validation
+accuracy **0.5744** (matched at step 2750), the highest of any run and within 0.0002 of frozen-deep's,
+so this is not a capacity or task-performance difference. Geometry otherwise unchanged (t* 0.499,
+endpoints differ 86.7%, |t*−t_flip| 0.085, partial rho −0.54); strict plateau rate 0%.
+
+**Superseded numbers/claims from the S11 entry above.** (a) "The width cost tracks the *number* of
+frozen blocks, not their depth" → replaced by: **trainable depth is the first-order term, position a
+second-order one that only bites once depth is scarce.** With 8 trainable blocks position is worth
+0.015 (frozen-early 0.471 vs frozen-late 0.484); with 5 it is worth 0.068 (frozen-deep 0.558 vs
+frozen-mirror 0.626), favouring blocks near the readout. Series across runs: 0.351 (12 trainable) →
+0.471/0.484 (8) → 0.558/0.626 (5). (b) The depth grid gained block 2, so three published profiles
+gained a point: reference 0.351/**0.646**/0.761/…, frozen-early 0.471/**0.471**/0.471/…, frozen-late
+0.484/**0.739**/0.793/…, frozen-deep 0.558/**0.558**/0.557/… — showing the reference's sharpening is
+front-loaded into blocks 1–2, matching the per-block MLP scan's 41/28/18/11% shares.
+
+**New falsifiable prediction** replacing S11's (which this run answered): if trainable depth really is
+the first-order term, freezing *ten* blocks (training only block 0 and block 11) should land straighter
+still, near 0.70, with its residual drop split between injection blocks 0→2 and 10→11; if instead one
+trainable block adjacent to the readout suffices, it should come out near 0.56.
+
+**Deliverables.** Both frozen-block subsections rewritten around a four-run prediction/outcome table
+with the new depth-vs-count paragraph; Figure 23 caption updated for seven top-row panels, six
+injection depths and five accuracy curves in both files; REPORT Methods §Frozen-block training test now
+defines the fourth run and why it isolates position from count; REPORT Summary, REPORT Conclusion,
+REPORT Limitations 6–7, both hypothesis paragraphs, RESULTS Headline and RESULTS verdict item 5 all
+curated to current-best. Figure count unchanged at 26 embeds / 26 `**Figure N.**` captions per file.
+`python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS** (REPORT 28 display /
+383 inline eqs / 26 figures; RESULTS 26 figures; 0 problems).
+
+**Raw.** `results/frozen_assay_summary.json` and `results/frozen_assay_raw.npz` (now eleven
+conditions), `results/train_hist_frozen_mirror.json`, `plots/frozen_blocks.png`. Checkpoints in
+gitignored scratch at `/tmp/dir13_frozen/checkpoints_frozen_mirror/`.

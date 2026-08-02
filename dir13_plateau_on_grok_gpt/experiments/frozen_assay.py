@@ -8,11 +8,16 @@ that four blocks are held at their step-0 initialization:
   frozen_late   blocks 8-11 frozen -- specificity control, same number of blocks at a depth those
                                       interventions showed contributes almost nothing;
   frozen_deep   blocks 1-7 frozen  -- the successor prediction: after frozen_early merely relocated
-                                      the sharpening to blocks 5-7, freeze those too and leave only
+                                      the sharpening to blocks 5-8, freeze those too and leave only
                                       blocks 8-11 trainable. Either the sharpening relocates again
                                       (width well below 0.80, with the drop appearing between
                                       injection blocks 8 and 11) or it needs several trainable
                                       blocks below the readout and the paths stay straight.
+  frozen_mirror blocks 5-11 frozen -- mirror image of frozen_deep: the same number of blocks frozen
+                                      but the trainable capacity at the *bottom* of the stack. Tests
+                                      whether width is set by the count of trainable blocks (expect
+                                      ~0.558 again, drop between injection blocks 0 and 4, nothing
+                                      above) or by their depth (expect a markedly different width).
 
 Here we run the frozen assay on both at *matched validation accuracy* (the first checkpoint whose
 val accuracy reaches the reference run's final 0.5502) and at their last checkpoint, against three
@@ -51,8 +56,10 @@ REF_MATCHED_STEP = 2500  # reference-run checkpoint nearest the frozen runs' mat
 # injection depths for the "where is the sharpness made now?" control. 10 and 11 were added for
 # frozen_deep, whose only trainable blocks are 8-11: the prediction is about whether the width drop
 # appears between injection blocks 8 and 11. Block 11 leaves only ln_f + unembedding downstream.
-DEPTH_BLOCKS = [0, 4, 8, 10, 11]
-DEPTH_CONDS = ("ref_trained", "frozen_early_last", "frozen_late_last", "frozen_deep_last")
+# 2 was added for frozen_mirror, whose only trainable blocks are 0-4, so its drop should sit there.
+DEPTH_BLOCKS = [0, 2, 4, 8, 10, 11]
+DEPTH_CONDS = ("ref_trained", "frozen_early_last", "frozen_late_last", "frozen_deep_last",
+               "frozen_mirror_last")
 
 
 def load_ckpt(path, device):
@@ -98,7 +105,8 @@ def main():
 
     conds = []
     for tag, blocks in (("frozen_early", [1, 2, 3, 4]), ("frozen_late", [8, 9, 10, 11]),
-                        ("frozen_deep", [1, 2, 3, 4, 5, 6, 7])):
+                        ("frozen_deep", [1, 2, 3, 4, 5, 6, 7]),
+                        ("frozen_mirror", [5, 6, 7, 8, 9, 10, 11])):
         for which, fn in (("matched", "ckpt_matched.pt"), ("last", "ckpt_last.pt")):
             p = os.path.join(CKPT_ROOT, f"checkpoints_{tag}", fn)
             if os.path.exists(p):

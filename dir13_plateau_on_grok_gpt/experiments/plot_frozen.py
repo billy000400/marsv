@@ -1,12 +1,12 @@
 """Figure for the frozen-block training test (train_frozen.py + frozen_assay.py).
 
-Top row:      raw d(t) curves (the primary evidence) for the same 20 pairs under six models -- the
-              reference run untrained / at step 2500 / fully trained, and the three frozen-block runs
-              at their final checkpoint.
+Top row:      raw d(t) curves (the primary evidence) for the same 20 pairs -- the reference run
+              untrained / at step 2500 / fully trained, plus each frozen-block run present in the
+              summary at its final checkpoint (one panel each).
 Bottom left:  median transition width per condition, against the untrained and trained references.
 Bottom middle: depth control -- median width by interpolation block for the trained reference and
-              the three final frozen models, i.e. whether the sharpening moved to another depth.
-Bottom right: validation accuracy across training for the three runs, showing where the frozen runs
+              each final frozen model, i.e. whether the sharpening moved to another depth.
+Bottom right: validation accuracy across training for every run, showing where the frozen runs
               reach the reference run's final accuracy (the "matched" checkpoints assayed above).
 """
 import os, sys, json
@@ -22,6 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES, PLOTS = os.path.join(ROOT, "results"), os.path.join(ROOT, "plots")
 
 use_cvd()
+DASH5 = (0, (3, 1, 1, 1, 1, 1))  # 5th line style: the four named ones are already taken
 S = json.load(open(os.path.join(RES, "frozen_assay_summary.json")))["summary"]
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 C = S["conditions"]
@@ -32,18 +33,24 @@ CURVE_CONDS = [("ref_init", "reference, untrained (step 0)"),
                ("ref_trained", "reference, trained (step 30000)"),
                ("frozen_early_last", "blocks 1-4 frozen, final (30000)"),
                ("frozen_late_last", "blocks 8-11 frozen, final (30000)"),
-               ("frozen_deep_last", "blocks 1-7 frozen, final (30000)")]
+               ("frozen_deep_last", "blocks 1-7 frozen, final (30000)"),
+               ("frozen_mirror_last", "blocks 5-11 frozen, final (30000)")]
+CURVE_CONDS = [c for c in CURVE_CONDS if c[0] in C]
 BAR_CONDS = [c for c in ["ref_init", "ref_matched_step", "frozen_early_matched",
-                         "frozen_late_matched", "frozen_deep_matched", "frozen_early_last",
-                         "frozen_late_last", "frozen_deep_last", "ref_trained"] if c in C]
+                         "frozen_late_matched", "frozen_deep_matched", "frozen_mirror_matched",
+                         "frozen_early_last", "frozen_late_last", "frozen_deep_last",
+                         "frozen_mirror_last", "ref_trained"] if c in C]
 BAR_TICKS = {"ref_init": "reference\nuntrained", "ref_trained": "reference\ntrained\n(30000)",
              "ref_matched_step": "reference\nstep 2500",
              "frozen_early_matched": "frozen 1-4\nmatched acc", "frozen_early_last": "frozen 1-4\nfinal",
              "frozen_late_matched": "frozen 8-11\nmatched acc", "frozen_late_last": "frozen 8-11\nfinal",
-             "frozen_deep_matched": "frozen 1-7\nmatched acc", "frozen_deep_last": "frozen 1-7\nfinal"}
+             "frozen_deep_matched": "frozen 1-7\nmatched acc", "frozen_deep_last": "frozen 1-7\nfinal",
+             "frozen_mirror_matched": "frozen 5-11\nmatched acc",
+             "frozen_mirror_last": "frozen 5-11\nfinal"}
+NC = len(CURVE_CONDS)
 
-fig = plt.figure(figsize=(19.5, 8.4))
-gs = fig.add_gridspec(2, 6, height_ratios=[1.0, 1.05], hspace=0.42, wspace=0.32)
+fig = plt.figure(figsize=(3.25 * NC, 8.4))
+gs = fig.add_gridspec(2, NC, height_ratios=[1.0, 1.05], hspace=0.42, wspace=0.32)
 
 # ---- top: raw d(t) curves ---------------------------------------------------------------------
 for k, (cond, title) in enumerate(CURVE_CONDS):
@@ -67,7 +74,7 @@ for k, (cond, title) in enumerate(CURVE_CONDS):
         ax.annotate("straight path\n(no plateau)", (0.62, 0.30), fontsize=7, color="0.35")
 
 # ---- bottom left: median width per condition --------------------------------------------------
-axb = fig.add_subplot(gs[1, :3])
+axb = fig.add_subplot(gs[1, :NC - 3])
 x = np.arange(len(BAR_CONDS))
 med = np.array([C[c]["median_w"] for c in BAR_CONDS])
 lo = np.array([C[c]["iqr_w"][0] for c in BAR_CONDS])
@@ -92,11 +99,12 @@ axb.grid(alpha=0.3, axis="y")
 axb.legend(fontsize=8, loc="lower left")
 
 # ---- bottom middle: depth control -------------------------------------------------------------
-axd = fig.add_subplot(gs[1, 3])
+axd = fig.add_subplot(gs[1, NC - 3])
 DEPTH_LABELS = {"ref_trained": ("reference, trained", 0, "-", "o"),
                 "frozen_early_last": ("blocks 1-4 frozen", 1, "--", "s"),
                 "frozen_late_last": ("blocks 8-11 frozen", 3, "-.", "^"),
-                "frozen_deep_last": ("blocks 1-7 frozen", 4, ":", "D")}
+                "frozen_deep_last": ("blocks 1-7 frozen", 4, ":", "D"),
+                "frozen_mirror_last": ("blocks 5-11 frozen", 2, DASH5, "v")}
 for cond, (lab, ci, ls, mk) in DEPTH_LABELS.items():
     d = C.get(cond, {}).get("depth_median_w")
     if not d:
@@ -112,11 +120,12 @@ axd.grid(alpha=0.3)
 axd.legend(fontsize=7, loc="lower right")
 
 # ---- bottom right: validation accuracy across training ----------------------------------------
-axa = fig.add_subplot(gs[1, 4:])
+axa = fig.add_subplot(gs[1, NC - 2:])
 runs = [("grok_char", "reference (all blocks train)", 0, "-"),
         ("frozen_early", "blocks 1-4 frozen at init", 1, "--"),
         ("frozen_late", "blocks 8-11 frozen at init", 3, "-."),
-        ("frozen_deep", "blocks 1-7 frozen at init", 4, ":")]
+        ("frozen_deep", "blocks 1-7 frozen at init", 4, ":"),
+        ("frozen_mirror", "blocks 5-11 frozen at init", 2, DASH5)]
 ref_acc = S["ref_final_val_acc"]
 for tag, lab, ci, ls in runs:
     p = os.path.join(RES, f"train_hist_{tag}.json")
@@ -126,7 +135,8 @@ for tag, lab, ci, ls in runs:
     axa.plot(h["step"], h["val_acc"], color=CVD[ci], ls=ls, lw=2, label=lab)
 axa.axhline(ref_acc, **REF_RULE)
 axa.annotate(f"reference final val acc = {ref_acc:.3f}", (1.5, ref_acc + 0.008), fontsize=8)
-for tag, ci, mk in (("frozen_early", 1, "s"), ("frozen_late", 3, "^"), ("frozen_deep", 4, "D")):
+for tag, ci, mk in (("frozen_early", 1, "s"), ("frozen_late", 3, "^"), ("frozen_deep", 4, "D"),
+                    ("frozen_mirror", 2, "v")):
     key = f"{tag}_matched"
     if key in C and C[key].get("val_acc") is not None:
         axa.plot([C[key]["step"]], [C[key]["val_acc"]], marker=mk, ms=11, mfc="none", mew=2,

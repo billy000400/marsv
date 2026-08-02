@@ -844,3 +844,102 @@ and if the run finished, add `frozen_deep` to `frozen_assay.py`'s condition list
 looks for `ckpt_matched.pt` / `ckpt_last.pt` per tag) with the depth control at injection blocks 8/10/11
 as well as 0/4/8, since the prediction is about where the drop appears above block 8. If feedback
 arrives instead, feedback comes first — the run costs nothing to ignore or kill.
+
+## 2026-08-02 (iteration: S11 deep-freeze training test — the relocation prediction confirmed)
+
+No unaddressed `human_feedback*`/`*REVIEW*` files (all five end in `.addressed.md`), so this iteration
+went straight to the plan. The previous iteration had pre-launched
+`train_frozen.py --freeze 1,2,3,4,5,6,7 --tag frozen_deep` and had already edited `frozen_assay.py` to
+know about the condition and to extend the injection-depth grid to 0/4/8/10/11, so the work here was:
+wait for the run, chain the assay behind it, and curate.
+
+**Process note that worked this time.** Last iteration's `nohup bash -c '…' &` chain was reaped before
+its child started. This time I used the harness's own `run_in_background` Bash with
+`while ps -p <pid>; do sleep 30; done; python3 frozen_assay.py; python3 plot_frozen.py` — it survived,
+notified me on completion, and cost nothing. That is the right pattern for "run B when A finishes"
+here; a detached `nohup` wrapper whose only job is to wait is not.
+
+**Result — for once the prediction on record was confirmed, and it is the more informative outcome.**
+With blocks 1–7 (58% of the stack) held at their step-0 weights, the network still reaches the best
+validation accuracy of any run in this direction (0.5742 vs the reference's 0.5502) and still builds
+plateaus: median width 0.558 against 0.803 untrained, narrower than untrained for 149/150 pairs. The
+depth profile is the part that decides it — 0.558 / 0.557 / 0.695 / 0.767 / 0.805 at injection blocks
+0/4/8/10/11. The frozen blocks 1–4 contribute −0.002 (they do nothing, as they must), and the whole
+0.248 of sharpening lives in the four trainable blocks, rising monotonically as the injection point
+descends from 11 to 8. Exactly the predicted signature.
+
+**The cross-run pattern is the real finding.** Median width 0.351 (nothing frozen) → 0.471 / 0.484
+(four frozen, either end) → 0.558 (seven frozen). Paired Wilcoxon puts deep above both four-block runs
+(+0.073 and +0.064, p ~ 1e-17) while the two four-block runs differ by 0.015. So the cost of freezing
+is a function of *how many* blocks are frozen, not which — the sharp transition is not just relocatable
+but relocatable at a predictable price. Together with S10 this closes the "blocks 1–4 are special"
+thread: they are special at inference in the trained network and not at all at training time.
+
+**An off-by-one I found while writing this up.** `matthew_assay.run_pair` patches `resid_post` of the
+interpolation block, so the width drop between injection points b1 < b2 is produced by blocks
+b1+1 … b2. S10 had reported frozen-early's relocation as "blocks 5–7" from the 4 → 8 drop; the correct
+span is **5–8**. Corrected everywhere in both deliverables and logged in CHANGELOG. The numbers were
+never wrong, only the block label attached to them — but it is exactly the sort of thing that would
+have propagated into the next hypothesis.
+
+**What I learned.** Three iterations ago the honest summary was "blocks 1–4 build the sharpness". Two
+retraining runs later the summary is "any four contiguous blocks below the readout will do, and losing
+three more only widens the transition by ~0.09". Ablation necessity, training-time necessity, and
+depth specificity are three separable claims, and only retraining separates them. What the responsible
+blocks actually *compute* is still uncharacterised — that gap has not moved.
+
+**Deliverables.** Both frozen-block subsections rewritten around a three-run prediction/outcome table;
+Figure 23 re-rendered with six top-row panels and the five-depth injection profile, caption updated in
+both files; REPORT Methods gained the third run, the extended depth grid and the span-attribution rule;
+REPORT Summary/Conclusion/Limitations 6–7, RESULTS Headline and RESULTS verdict item 5 curated; both
+hypothesis paragraphs rewritten and re-ended on a new falsifiable prediction (freeze blocks 5–11, the
+mirror image — same count frozen, trainable capacity at the bottom). 26 embeds / 26 captions per file;
+`check_render.py` → ALL CHECKS PASS.
+
+**Next step.** The mirror-image run above (`--freeze 5,6,7,8,9,10,11`, ~21 min at the rate frozen_deep
+managed) is the direct successor and would settle count-vs-depth outright. Everything else still open
+needs new compute or a new model: a longer character run whose second descent separates from initial
+fit; the denser Figure-9 grid applied to the *pilot* run's local maximum; interpolation at positions
+other than the final token; a second model/tokenizer. No `STOP` written — a follow-up operator request
+remains plausible and a STOP'd direction would silently ignore it (CLAUDE.md rule 11).
+
+On track? yes — plan complete (S1–S11), six PLAN-named follow-ups done, the successor prediction tested
+and confirmed; blocker: none.
+
+**Addendum (S12, same iteration).** S11 finished with ~90 minutes left, so I ran its own successor
+rather than pre-launching it for next time: `train_frozen.py --freeze 5,6,7,8,9,10,11` — the mirror
+image of frozen_deep, same 58.0% of parameters frozen, same five trainable blocks, moved from the top
+of the stack to the bottom. 21 minutes of training, 79 seconds of assay.
+
+**The result is the most useful kind: half the prediction confirmed, half falsified.** The *location*
+half landed exactly — the depth profile is 0.626 / 0.764 / 0.805 / 0.806 / 0.806 / 0.806 at injection
+blocks 0/2/4/8/10/11, so injecting at block 4 already returns the untrained straight line and every bit
+of sharpening is back in blocks 1–4. That is the third distinct site across four runs (5–8, 8–11, 1–4),
+which retires "the sharpening lives in a particular place" completely. The *magnitude* half failed:
+0.626, not the predicted ~0.558, with a paired median +0.063 over frozen_deep (81% of pairs,
+p = 6e-17), on runs whose final validation accuracies agree to 0.0002. So the S11 summary I had just
+written — "the cost tracks how many blocks are frozen, not which" — is too strong, and I replaced it
+with the two-term reading the four runs actually support: trainable depth first (0.351 → 0.47 → 0.56–
+0.63 for 12, 8, 5 trainable blocks), position second, and position only matters once depth is scarce
+(worth 0.015 at eight trainable blocks, 0.068 at five, favouring the readout end).
+
+**Worth recording as a methods point.** I only got a clean answer because frozen_deep and frozen_mirror
+are matched on everything a capacity story can see — frozen parameter fraction, trainable block count,
+final accuracy. S11's three runs confounded count with position; one extra run at 21 minutes
+de-confounded them. Cheap matched controls beat more conditions.
+
+**Also fixed while here.** Adding injection block 2 to the depth grid (needed to resolve the drop
+*inside* frozen_mirror's trainable group) incidentally sharpened the reference profile: 0.351 → 0.646
+at block 2 → 0.761 at block 4, i.e. the reference's sharpening is front-loaded into blocks 1–2, which
+independently matches the per-block MLP scan's 41/28/18/11% shares. `plot_frozen.py` is now generic in
+the number of frozen runs (it lays out one top-row panel per condition present) rather than hard-coded
+to six panels.
+
+**Next step (revised).** The hypothesis paragraphs now end on: freeze ten blocks, train only block 0 and
+block 11. If trainable depth is the first-order term it should land near 0.70 with its residual drop
+split between injection blocks 0→2 and 10→11; if one trainable block beside the readout suffices it
+should land near 0.56. ~21 min, same harness, `frozen_assay.py` needs one more condition entry.
+Everything else open still needs a longer run, a second model, or interpolation at non-final positions.
+
+On track? yes — plan complete (S1–S12), seven PLAN-named follow-ups done, two predictions tested this
+iteration (one confirmed, one split); blocker: none.
