@@ -542,6 +542,42 @@
      "10": 0.8024,
      "11": 0.8084
     }
+   },
+   "narrow192_s2_matched": {
+    "kind": "narrow",
+    "step": 2750,
+    "frozen_blocks": [],
+    "n_embd": 192,
+    "val_acc": 0.5547037760416667,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_narrow192_s2/ckpt_matched.pt",
+    "median_w": 0.4367,
+    "mean_w": 0.4311,
+    "iqr_w": [
+     0.3262,
+     0.514
+    ],
+    "strict_frac": 0.1067,
+    "median_t_star": 0.5196,
+    "frac_endpoints_differ": 0.9,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0726,
+    "median_max_p": 0.0132,
+    "rho_w_vs_max_p": -0.2749,
+    "partial_rho_w_vs_max_p_given_sep": -0.4613,
+    "median_paired_dw_vs_ref_trained": 0.0781,
+    "frac_w_increased_vs_ref_trained": 0.6667,
+    "median_paired_dw_vs_ref_matched_step": -0.0041,
+    "frac_w_increased_vs_ref_matched_step": 0.46,
+    "median_paired_dw_vs_ref_init": -0.3676,
+    "frac_w_increased_vs_ref_init": 0.0067,
+    "depth_median_w": {
+     "0": 0.4367,
+     "2": 0.5862,
+     "4": 0.6773,
+     "8": 0.7581,
+     "10": 0.8063,
+     "11": 0.8324
+    }
    }
   }
  },

@@ -1121,3 +1121,57 @@ written — a follow-up operator request remains plausible and a STOP'd directio
 
 On track? yes — plan complete (S1–S14), ten PLAN-named follow-ups done, S14's first loose end closed and
 its conclusion confirmed under a second framing; blocker: none.
+
+## 2026-08-02 (iteration: S14c — the second narrow seed, and one sub-claim retracted)
+
+No unaddressed `human_feedback*`/`*REVIEW*` files (all five end in `.addressed.md`), so this went to the
+top open item S14b left: every point in the depth series was a single seed, so the 0.397-vs-0.476 gap
+that carries the whole depth-over-capacity conclusion had no across-seed error bar.
+
+**What I ran.** Added `--seed` to `train_frozen.py` (two lines: the flag, and `model_seed = args.seed`;
+data seed left at 42 so only the initialization moves) and trained a second `n_embd` 192 run with
+nothing frozen from model seed 2024. Made `narrow_assay.py` take its tag from `sys.argv` so the same
+scorer handles both seeds, and scored the new run on the identical 150 pairs. ~2.5 min of training plus
+~70 s of assay.
+
+**Time management.** With ~25 min on the clock I launched training with `--max_minutes 5.5`, aiming only
+at `ckpt_matched.pt` (seed 1337 hit it at step 2,750, ≈1.6 min in), and killed the process the moment
+that file appeared rather than letting it keep competing for the GPU I also needed for the assay. So
+this seed contributes a matched-accuracy row only — which is the right one anyway, since matched
+accuracy is the only apples-to-apples axis across runs of different capacity and is the framing the
+whole frozen series uses. The rejected alternative, a full 30,000-step run, needed ~18 min and would
+have left no time to curate.
+
+**Result: the conclusion holds, and one sub-claim does not.** Seed 2 reached the reference's accuracy at
+the *same* step 2,750 (val 0.5547 vs 0.5543) and gave median width **0.437** against seed 1337's 0.397 —
+so the across-seed spread is ≈0.04 (paired +0.015, p = 0.015). That is real but roughly half the 0.08–0.10
+gap it is being used to judge: both seeds stay below frozen-early (seed 2 −0.044, p = 2.7e-8) and well
+below frozen-late (−0.062, p = 1.6e-16), and the two-seed mean 0.417 sits nearer the depth account's
+≈0.35–0.44 than the capacity account's ≈0.47. But S14's extra flourish — that the narrow run is
+*sharper* than the full-width reference at matched accuracy (−0.014, p = 1.9e-4) — does not survive:
+seed 2 is −0.004 at p = 0.17. The honest claim is "removing a third of the parameters costs nothing
+measurable", not "it helps". Retracted in the Summary, in Experiment 5, and in the figure caption.
+
+**Lesson worth keeping.** The sub-claim that died was the one with the smallest effect size in the
+bullet (−0.014 against gaps of −0.073 and −0.092) and the one stated with the most confidence-sounding
+p-value. A single-seed p-value measures spread across *pairs*, not across *initializations*; when the
+effect is a hundredth of a unit, the second source of variance is the one that decides it. Worth
+applying the same scepticism to the frozen series' smaller ordering claim (5 trainable blocks next to
+the readout beat 5 at the bottom, 0.558 vs 0.626) — that gap is larger, but it is still one seed each.
+
+**Deliverables.** New RESULTS bullet and REPORT paragraph with the seed-2 numbers; Figure 24 regenerated
+with the second seed as a third filled circle at 12 trainable blocks, nudged apart on both axes (the
+three all-trainable runs were overplotting, and the labels needed an explicit per-key offset table);
+both captions now read the gap between the two filled circles as the across-seed spread. REPORT
+Limitation 7 and the Summary updated so no stale "single seed, no error bar" text remains.
+`check_render.py` passes on both files (29 display eqs, 27 embeds each, 0 problems).
+
+**Next step.** The five frozen conditions are still one seed each; a second seed at frozen-early
+(~16 min training, 70 s assay) would give the 12→8-block step its own error bar and is now the cheapest
+remaining strengthening. After that, everything open needs a longer character run whose second descent
+separates from initial fit, the denser Figure-9 grid on the pilot run's local maximum, interpolation at
+non-final positions, or a second model/tokenizer. No `STOP` written — a follow-up operator request
+remains plausible and a STOP'd direction would silently ignore it (CLAUDE.md rule 11).
+
+On track? yes — plan complete (S1–S14), eleven PLAN-named follow-ups done, the depth conclusion now
+carries an across-seed error bar and its one unsupported sub-claim is retracted; blocker: none.

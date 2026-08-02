@@ -920,3 +920,29 @@ conditions), `results/frozen_pairwise.json`, `results/train_hist_frozen_two.json
   it). Figure count 27 embeds / 27 captions per file; `python3 experiments/check_render.py REPORT.md
   RESULTS.md` → **ALL CHECKS PASS** (REPORT 29 display / 437 inline eqs / 27 figures; RESULTS 27
   figures; 0 problems).
+
+## 2026-08-02 — S14c: a second seed for the narrow run (across-seed error bar on the depth conclusion)
+
+- **New run.** `train_frozen.py` gained a `--seed` flag (model init seed only; data order unchanged);
+  a second `n_embd` 192 run with nothing frozen was trained from model seed 2024 and scored with
+  `narrow_assay.py narrow192_s2` on the same 150 pairs. It reached the reference's final validation
+  accuracy 0.5502 at the same step 2,750 (val 0.5547) as seed 1337.
+- **RESULTS.md / REPORT.md (Experiment 5).** New result: narrow seed 2 median transition width
+  **0.437** (IQR 0.326–0.514, strict rule 10.7%) against seed 1337's 0.397, i.e. an across-seed spread
+  of ≈0.04 (paired Δw +0.015, p = 0.015). Both seeds stay below frozen-early (seed 2: −0.044, 33% of
+  pairs wider, p = 2.7e-8) and frozen-late (−0.062, 20%, p = 1.6e-16); two-seed mean 0.417 vs the
+  capacity account's ≈0.47 and the depth account's ≈0.35–0.44. The depth-over-capacity conclusion is
+  unchanged, now with the spread quantified.
+- **Sub-claim retracted (old → new).** "At matched accuracy the narrow run is slightly *sharper* than
+  the full-width reference (−0.014, p = 1.9e-4)" → the second seed is indistinguishable from the
+  reference (−0.004, 46% of pairs wider, p = 0.17), so the deliverables now say narrowing costs
+  nothing measurable rather than that it helps. REPORT Summary and Results wording updated to match.
+- **Figure 24 (`plots/capacity_vs_depth.png`) regenerated** with the second narrow seed as a third
+  filled circle at 12 trainable blocks (and nudged apart from seed 1 on the parameter axis); label
+  offsets reworked because the three all-trainable runs overplotted. Caption in both deliverables now
+  reads the gap between the two filled circles at 12 blocks as the across-seed spread.
+- **Limitation 7 updated (old → new).** "the narrow run … is a single seed, so the 0.397-versus-0.476
+  gap has no error bar across seeds" → the spread is now bounded at ≈0.04, and the remaining
+  single-seed caveat is narrowed to the five frozen conditions.
+- Caveat recorded in the deliverables: this second run was stopped after its matched-accuracy
+  checkpoint (wall clock), so it contributes a matched-accuracy row only, no end-of-training row.

@@ -37,6 +37,7 @@ NARROW = sum(v.numel() for v in ck["model"].values())
 # (condition key, label, trainable blocks, trainable params, all-12-trainable?)
 RUNS = [("ref_matched_step",      "reference\n(240 wide)",  12, TOTAL,            True),
         ("narrow192_matched",     "narrow 192",             12, NARROW,           True),
+        ("narrow192_s2_matched",  "narrow 192\n(seed 2)",   12, NARROW,           True),
         ("frozen_early_matched",  "frozen 1-4",              8, TOTAL - 2777280,  False),
         ("frozen_late_matched",   "frozen 8-11",             8, TOTAL - 2777280,  False),
         ("frozen_deep_matched",   "frozen 1-7",              5, TOTAL - 4860240,  False),
@@ -55,8 +56,9 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                 ha="right", va="top", fontsize=8, color="0.35")
     for key, lab, nb, npar, full in RUNS:
         x = nb if xi == 2 else npar / 1e6
-        if xi == 2 and nb == 12:  # the two all-trainable runs share a block count; separate them
-            x += 0.50 if key.startswith("ref") else -0.50
+        if nb == 12:  # the all-trainable runs coincide on both axes; separate them
+            off = {"ref_matched_step": 1.0, "narrow192_matched": 0.0, "narrow192_s2_matched": -1.0}[key]
+            x += off * (0.55 if xi == 2 else 0.14)
         med = C[key]["median_w"]
         lo, hi = C[key]["iqr_w"]
         st = dict(color=CVD[0], marker="o", ms=9, mfc=CVD[0]) if full else \
@@ -70,10 +72,18 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                     zorder=1)
             ax.plot([x + dx], [trained["median_w"]], color=st["color"], marker="s", ms=5.5,
                     mfc="white", mew=1.4, lw=0, zorder=3)
-        below = key == "frozen_late_matched" or (key == "narrow192_matched" and xi == 3)
-        dy = -0.055 if below else 0.032
-        lx = x - 0.45 if (xi == 3 and key == "narrow192_matched") else x  # clear of its own square
-        ax.annotate(lab, (lx, med + dy), ha="center", va="bottom" if dy > 0 else "top", fontsize=8)
+        # per-key label offsets: the three all-trainable runs sit on top of each other on both
+        # axes, and on the right panel they also collide with the two eight-block frozen runs
+        lab_dx, lab_dy = {2: {"ref_matched_step": (0.0, 0.075),
+                              "narrow192_matched": (0.0, -0.055),
+                              "narrow192_s2_matched": (0.0, 0.032),
+                              "frozen_late_matched": (0.0, -0.055)},
+                          3: {"narrow192_matched": (-0.55, -0.055),
+                              "narrow192_s2_matched": (-0.55, 0.075),
+                              "frozen_early_matched": (0.75, 0.032),
+                              "frozen_late_matched": (0.75, -0.055)}}[xi].get(key, (0.0, 0.032))
+        ax.annotate(lab, (x + lab_dx, med + lab_dy), ha="center",
+                    va="bottom" if lab_dy > 0 else "top", fontsize=8)
     ax.set_xlabel(xlabel)
     ax.set_ylim(0.24, 0.94)
     ax.grid(alpha=0.3)

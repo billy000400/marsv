@@ -91,8 +91,9 @@ tracks the model's prediction flip. Every one of those runs removes trainable bl
 parameters together, so a sixth run separates them: retrained **narrow** (`d_model` 192, nothing frozen,
 5.58M parameters — frozen-early's trainable budget at the reference's full depth), it lands at
 **0.397** at matched accuracy and **0.332** at the end of training, i.e. at or below the full-width
-reference's 0.443 and 0.351 rather than at the frozen runs' 0.47–0.48. Trainable depth is the variable;
-parameter count is not.
+reference's 0.443 and 0.351 rather than at the frozen runs' 0.47–0.48; a second seed of that narrow run
+gives 0.437, so the across-seed spread (≈0.04) is smaller than the gap it decides. Trainable depth is
+the variable; parameter count is not.
 **Verdict: plateaus are real in this model, and they are next-character decision basins** — but
 "decision basin" is a *description* of them, not their mechanism, which sits upstream in the early
 MLPs. Qualified further because we tested a reconstruction rather than the paper's exact checkpoint,
@@ -1415,10 +1416,18 @@ blocks trainable, but only 5,584,896 parameters, matching frozen-early's trainab
 $w=0.397$ (IQR 0.311–0.526). That is the depth account's prediction and falsifies the capacity
 account's $\approx 0.47$: paired against the same 150 pairs it is **−0.073** narrower than frozen-early
 (only 23% of pairs wider, Wilcoxon $p=2.5\times10^{-15}$) and **−0.092** narrower than frozen-late (13%,
-$p=1.8\times10^{-19}$), while against the reference at *its* matched-accuracy step it is not blunter but
-slightly **sharper**, $-0.014$ (39% of pairs wider, $p=1.9\times10^{-4}$). Removing a third of the
+$p=1.8\times10^{-19}$), while against the reference at *its* matched-accuracy step it is no blunter
+($-0.014$, 39% of pairs wider, $p=1.9\times10^{-4}$). Removing a third of the
 parameters therefore costs nothing measurable; removing a third of the trainable blocks costs 0.11–0.12
-of width. The narrow run also keeps the reference's front-loaded depth profile (median width 0.397,
+of width. A **second seed** of the same narrow model (model seed 2024, same data order and schedule)
+puts an error bar on that comparison: it reaches the reference's accuracy at the same step 2,750 (val
+0.5547) and lands at $w=0.437$ (IQR 0.326–0.514), so the across-seed spread is $\approx0.04$ (paired
+$+0.015$ against seed 1337, $p=0.015$) — real, but smaller than the 0.08–0.10 gap it is judging. Both
+seeds remain below frozen-early (seed 2: $-0.044$, 33% of pairs wider, $p=2.7\times10^{-8}$) and well
+below frozen-late ($-0.062$, 20%, $p=1.6\times10^{-16}$), and their mean 0.417 is nearer the depth
+account's $\approx0.35\text{–}0.44$ than the capacity account's $\approx0.47$. The second seed does
+retract one sub-claim: it is statistically indistinguishable from the full-width reference at matched
+accuracy ($-0.004$, 46% wider, $p=0.17$), so narrowing costs nothing rather than helping. The narrow run also keeps the reference's front-loaded depth profile (median width 0.397,
 0.569, 0.686, 0.763, 0.807, 0.832 at injection blocks 0, 2, 4, 8, 10, 11 — the sharpening made in the
 first few blocks), its plausibility association (partial $\rho=-0.65$ vs −0.634) and its boundary
 placement (median $|t^{*}-t_{\mathrm{flip}}|=0.061$), and it is the only run other than the reference to
@@ -1449,15 +1458,18 @@ once, with every run shown at matched validation accuracy and again at the end o
 **Figure 24.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0.
 y (both panels): median transition width $w_{10\to90}$ (lower = sharper plateau), bars = interquartile
 range; the gray dashed horizontal line is the untrained value 0.803. **Left:** x = number of trainable
-transformer blocks (axis reversed, 12 → 2; the two 12-block runs are drawn side by side). **Right:**
-x = trainable parameters in millions. Large filled circles are the two runs with all 12 blocks trainable
-(the 240-wide reference and the 192-wide narrow run); large open diamonds are the five runs with blocks
+transformer blocks (axis reversed, 12 → 2; the three 12-block runs are drawn side by side). **Right:**
+x = trainable parameters in millions (the two narrow seeds share an x and are likewise nudged apart).
+Large filled circles are the three runs with all 12 blocks trainable
+(the 240-wide reference and the two seeds of the 192-wide narrow run); large open diamonds are the five runs with blocks
 frozen at initialization; each large marker is that run's first checkpoint to reach the reference's
 final validation accuracy 0.550. The small open square joined to it by a dotted line is the same run at
 the end of training. Width falls monotonically along the left panel's axis but is unordered along the
-right one: at $\approx5.6$M trainable parameters the narrow run (filled) is sharper than both
-eight-block frozen runs (open), and the 8.4M reference is no sharper than the 5.6M narrow run — and the
-end-of-training squares preserve that ordering, so it is not an artifact of the matching rule.
+right one: at $\approx5.6$M trainable parameters both narrow seeds (filled) are sharper than both
+eight-block frozen runs (open), and the 8.4M reference is no sharper than the 5.6M narrow runs — and the
+end-of-training squares preserve that ordering, so it is not an artifact of the matching rule. The gap
+between the two filled circles at 12 blocks is the across-seed spread (0.397 vs 0.437), smaller than
+the step from 12 to 8 trainable blocks.
 
 **What this settles.** "Blocks 1–4 build the sharpness" holds for *this trained network at inference* —
 deleting their MLPs still flattens $d(t)$ entirely — but fails as a training-time claim. The sharp
@@ -1645,5 +1657,6 @@ natural activation-to-activation directions.
    step to block 8 is an inference from its frozen neighbours 5–7 contributing nothing, not a direct
    measurement. Frozen-two additionally confounds trainable depth with parameter count (82.9% of the
    parameters are frozen), so it bounds the trainable-depth account rather than isolating depth from
-   capacity; the narrow run separates the two, but it too is a single seed, so the 0.397-versus-0.476
-   gap that carries the depth conclusion has no error bar across seeds.
+   capacity; the narrow run separates the two, and a second narrow seed bounds the across-seed spread at
+   ≈0.04 (0.397 and 0.437), below the 0.08–0.10 gap to the frozen runs — but the five *frozen*
+   conditions are still one seed each, so their monotone ordering carries no error bar.

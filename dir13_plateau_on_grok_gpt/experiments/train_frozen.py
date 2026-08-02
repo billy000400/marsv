@@ -52,13 +52,14 @@ def main():
     ap.add_argument("--vram_frac", type=float, default=0.11)
     ap.add_argument("--threads", type=int, default=1)
     ap.add_argument("--ckpt_root", default="/tmp/dir13_frozen")
+    ap.add_argument("--seed", type=int, default=1337, help="model init seed (1337 = reference run)")
     args = ap.parse_args()
 
     torch.cuda.set_per_process_memory_fraction(args.vram_frac)
     torch.set_num_threads(args.threads)
     device = "cuda" if torch.cuda.is_available() else "cpu"
     frozen = [int(x) for x in args.freeze.split(",") if x.strip()]
-    model_seed, data_seed = 1337, 42
+    model_seed, data_seed = args.seed, 42
     torch.manual_seed(model_seed)
 
     tag = args.tag

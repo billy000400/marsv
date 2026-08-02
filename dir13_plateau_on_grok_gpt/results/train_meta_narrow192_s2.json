@@ -1,0 +1,34 @@
+{
+  "corpus_sha256": "86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed",
+  "tokenizer": "char",
+  "vocab_size": 65,
+  "frozen_blocks": [],
+  "frozen_params": 0,
+  "params": 5375808,
+  "model_seed": 2024,
+  "data_seed": 42,
+  "cfg": {
+    "vocab_size": 65,
+    "block_size": 128,
+    "n_layer": 12,
+    "n_head": 12,
+    "n_embd": 192,
+    "dropout": 0.2
+  },
+  "optimizer": "Adam(lr 1e-3 cosine->1e-4, betas 0.9/0.99, wd 0.0)",
+  "planned_steps": 30000,
+  "final_step": 9000,
+  "batch_size": 48,
+  "ckpt_dir": "/tmp/dir13_frozen/checkpoints_narrow192_s2",
+  "final_val_loss": 1.5239411473274231,
+  "final_val_acc": 0.5712076822916666,
+  "ref_final_val_acc": 0.5501790364583333,
+  "matched": {
+    "step": 2750,
+    "val_acc": 0.5547037760416667,
+    "val_loss": 1.4923835515975952
+  },
+  "best_val_acc": 0.5769775390625,
+  "minutes": 5.5,
+  "torch": "2.8.0.dev20250319+cu128"
+}

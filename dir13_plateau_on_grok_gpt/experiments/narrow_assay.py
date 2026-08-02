@@ -25,7 +25,7 @@ from mlp_gain_probe import N_PAIRS, SEED
 from mlp_block_scan import sweep, endpoint_stats, rho, partial_rho
 from frozen_assay import load_ckpt, curves, depth_widths, CKPT_ROOT, RES
 
-TAG = "narrow192"
+TAG = sys.argv[1] if len(sys.argv) > 1 else "narrow192"  # e.g. narrow192_s2 for the second seed
 
 
 def main():

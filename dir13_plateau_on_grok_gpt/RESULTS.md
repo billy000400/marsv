@@ -882,6 +882,20 @@ final accuracy and the open markers are the matched-accuracy checkpoints.
   `|t* − t_flip|` 0.061 — and it is the only non-reference run that keeps the sharpest tail, meeting the
   strict plateau rule on **13.3%** of pairs against 0–0.7% for all five frozen runs.
 
+- **A second seed puts an error bar on that gap, and the conclusion survives.** Every point in the
+  depth series is one seed, so the load-bearing 0.397-vs-0.476 comparison had no across-seed spread.
+  Retraining the narrow model from a different initialization (model seed 2024, same data order, same
+  schedule) reaches the reference's accuracy at the same step 2,750 (val 0.5547) and lands at median
+  width **0.437** (IQR 0.326–0.514, strict rule 10.7%). So the seed-to-seed spread on this measure is
+  ≈**0.04** (paired `Δw` +0.015 against seed 1337, p = 0.015) — real, but smaller than the effect it is
+  being used to judge. Both narrow seeds still sit **below** frozen-early (seed 2 paired `Δw`
+  **−0.044**, 33% of pairs wider, p = 2.7e-8) and far below frozen-late (**−0.062**, 20%, p = 1.6e-16),
+  and their mean 0.417 is nearer the depth account's ≈0.35–0.44 than the capacity account's ≈0.47. The
+  one sub-claim the second seed **retracts** is that the narrow run beats the full-width reference at
+  matched accuracy: seed 2 is statistically indistinguishable from the reference's 0.443 (paired `Δw`
+  −0.004, 46% wider, p = 0.17), so the honest statement is that removing a third of the parameters
+  costs nothing measurable, not that it helps.
+
 - **Trained on to the end, the narrow run is if anything sharper than the full-width reference.** The
   matched-accuracy comparison above is the primary one, because it is the only axis on which runs of
   different capacity are directly comparable; but the same conclusion holds at the end of training.
@@ -905,15 +919,18 @@ once, with every run shown at the same validation accuracy and again at the end 
 **Figure 24.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0.
 y (both panels): median transition width `w_10→90` (lower = sharper plateau), bars = interquartile
 range; the gray dashed horizontal line is the untrained value 0.803. **Left:** x = number of trainable
-transformer blocks (axis reversed, 12 → 2; the two 12-block runs are drawn side by side). **Right:**
-x = trainable parameters in millions. Large filled circles are the two runs with all 12 blocks
-trainable (the 240-wide reference and the 192-wide narrow run); large open diamonds are the five runs
+transformer blocks (axis reversed, 12 → 2; the three 12-block runs are drawn side by side). **Right:**
+x = trainable parameters in millions (the two narrow seeds share an x and are likewise nudged apart).
+Large filled circles are the three runs with all 12 blocks
+trainable (the 240-wide reference and the two seeds of the 192-wide narrow run); large open diamonds are the five runs
 with blocks frozen at initialization; each large marker is that run's first checkpoint to reach the
 reference's final validation accuracy 0.550. The small open square joined to it by a dotted line is the
 same run at the end of training. Width falls monotonically along the left panel's axis but is unordered
-along the right one: at ≈5.6M trainable parameters the narrow run (filled) is sharper than both
-eight-block frozen runs (open), and the 8.4M reference is no sharper than the 5.6M narrow run — and the
-end-of-training squares preserve that ordering, so it is not an artifact of the matching rule.
+along the right one: at ≈5.6M trainable parameters both narrow seeds (filled) are sharper than both
+eight-block frozen runs (open), and the 8.4M reference is no sharper than the 5.6M narrow runs — and the
+end-of-training squares preserve that ordering, so it is not an artifact of the matching rule. The gap
+between the two filled circles at 12 blocks is the across-seed spread (0.397 vs 0.437), which is
+smaller than the step from 12 to 8 trainable blocks.
 
 **What this settles.** "Blocks 1–4 build the sharpness" is true of *this trained network at inference*
 — deleting their MLPs still flattens `d(t)` completely — but false as a claim about training. The sharp

@@ -407,10 +407,20 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**PLAN COMPLETE (S1-S14) + operator feedback #4 (2026-08-02 file) addressed + ten PLAN-named
+**PLAN COMPLETE (S1-S14) + operator feedback #4 (2026-08-02 file) addressed + eleven PLAN-named
 follow-ups DONE (denser Figure-9 grid, readout rebalancing, MLP-gain intervention, per-block scan,
 frozen-block training test, deep-freeze training test, mirror-image freeze, two-block freeze, narrow
-run, narrow run scored at end of training).** All five `human_feedback*` files are `.addressed.md`; zero unaddressed feedback remains.
+run, narrow run scored at end of training, second narrow seed).** All five `human_feedback*` files are `.addressed.md`; zero unaddressed feedback remains.
+
+- **S14c second narrow seed DONE (2026-08-02, latest) - the depth conclusion now has an across-seed
+  error bar, and one sub-claim is retracted.** A second `n_embd` 192 run (model seed 2024, nothing
+  frozen) reaches the reference's accuracy at the same step 2750 (val 0.5547) and gives median `w`
+  **0.437** against seed 1337's 0.397, i.e. across-seed spread ~0.04 (paired +0.015, p = 0.015) - about
+  half the 0.08-0.10 gap to the frozen runs. Both seeds stay below frozen-early (-0.044, p = 2.7e-8)
+  and frozen-late (-0.062, p = 1.6e-16), two-seed mean 0.417 vs capacity's ~0.47. RETRACTED: the narrow
+  run is NOT sharper than the full-width reference at matched accuracy (seed 2: -0.004, p = 0.17) -
+  narrowing costs nothing measurable, it does not help. Only a matched-accuracy row exists for this
+  seed (training stopped at that checkpoint for wall clock).
 
 - **S14 narrow run COMPLETE (2026-08-02, latest) - the depth/capacity confound is BROKEN and the depth
   account wins.** `--n_embd 192` with nothing frozen: all 12 blocks trainable but only 5,584,896
@@ -633,8 +643,15 @@ remains uncharacterised - that gap has not moved in five iterations.
 
 **S14 is DONE and it answered the question.** The narrow run (`n_embd` 192, nothing frozen, 5.58M
 parameters against frozen_early's 5.60M trainable ones) lands at median `w` **0.397** at matched
-accuracy - the depth account's ~0.35-0.44, not the capacity account's ~0.47, and in fact 0.014 *sharper*
-than the reference at its own matched step. Trainable depth is the variable; parameter count is not.
+accuracy - the depth account's ~0.35-0.44, not the capacity account's ~0.47. Trainable depth is the
+variable; parameter count is not. (S14c's second seed gives 0.437, so the spread is ~0.04; its one
+casualty is the claim that the narrow run is *sharper* than the reference, which does not replicate.)
+
+**Immediate next candidate: a second seed for one frozen condition.** The narrow condition now has two
+seeds; the five frozen conditions have one each, so the 12->8-block step (0.397/0.437 -> 0.476) that
+carries the depth ordering still has no across-seed error bar on the frozen side. Retraining
+frozen-early from model seed 2024 (`--freeze 1,2,3,4 --seed 2024`, ~16 min to a matched checkpoint plus
+70 s of `frozen_assay`-style scoring) is the cheapest remaining strengthening.
 
 **S14b is DONE: the fully-trained row confirms it under the second framing.** The narrow run finished
 (stopped by the harness time budget at step 27,143 of 30,000, lr 1.2e-4 rather than 1.0e-4 - reported
