@@ -1,0 +1,800 @@
+{
+ "summary": {
+  "context": "The house was ",
+  "block": 0,
+  "n_t": 50,
+  "n_pairs": 150,
+  "seed": 0,
+  "ref_final_val_acc": 0.5501790364583333,
+  "conditions": {
+   "ref_trained": {
+    "kind": "reference",
+    "step": 30000,
+    "frozen_blocks": [],
+    "val_acc": 0.5501790364583333,
+    "median_w": 0.3507,
+    "mean_w": 0.3691,
+    "iqr_w": [
+     0.2872,
+     0.4254
+    ],
+    "strict_frac": 0.1,
+    "median_t_star": 0.488,
+    "frac_endpoints_differ": 0.8667,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0425,
+    "median_max_p": 0.0034,
+    "rho_w_vs_max_p": -0.4843,
+    "partial_rho_w_vs_max_p_given_sep": -0.6337,
+    "median_paired_dw_vs_ref_init": -0.4539,
+    "frac_w_increased_vs_ref_init": 0.0
+   },
+   "ref_init": {
+    "kind": "reference",
+    "step": 0,
+    "frozen_blocks": [],
+    "val_acc": null,
+    "median_w": 0.803,
+    "mean_w": 0.803,
+    "iqr_w": [
+     0.8001,
+     0.8053
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4909,
+    "frac_endpoints_differ": 0.6267,
+    "median_n_argmax": 2.0,
+    "median_abs_tstar_minus_tflip": 0.2018,
+    "median_max_p": 0.0158,
+    "rho_w_vs_max_p": 0.2432,
+    "partial_rho_w_vs_max_p_given_sep": 0.2074,
+    "median_paired_dw_vs_ref_trained": 0.4539,
+    "frac_w_increased_vs_ref_trained": 1.0
+   },
+   "frozen_early_matched": {
+    "kind": "frozen",
+    "step": 2750,
+    "frozen_blocks": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "val_acc": 0.5564778645833334,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_early/ckpt_matched.pt",
+    "median_w": 0.4755,
+    "mean_w": 0.477,
+    "iqr_w": [
+     0.3795,
+     0.565
+    ],
+    "strict_frac": 0.0267,
+    "median_t_star": 0.4945,
+    "frac_endpoints_differ": 0.84,
+    "median_n_argmax": 2.0,
+    "median_abs_tstar_minus_tflip": 0.0652,
+    "median_max_p": 0.0145,
+    "rho_w_vs_max_p": -0.2766,
+    "partial_rho_w_vs_max_p_given_sep": -0.4989,
+    "median_paired_dw_vs_ref_trained": 0.1206,
+    "frac_w_increased_vs_ref_trained": 0.8667,
+    "median_paired_dw_vs_ref_init": -0.3296,
+    "frac_w_increased_vs_ref_init": 0.0067
+   },
+   "frozen_late_matched": {
+    "kind": "frozen",
+    "step": 2500,
+    "frozen_blocks": [
+     8,
+     9,
+     10,
+     11
+    ],
+    "val_acc": 0.5512939453125,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_late/ckpt_matched.pt",
+    "median_w": 0.5004,
+    "mean_w": 0.4997,
+    "iqr_w": [
+     0.4054,
+     0.5851
+    ],
+    "strict_frac": 0.02,
+    "median_t_star": 0.494,
+    "frac_endpoints_differ": 0.8533,
+    "median_n_argmax": 2.0,
+    "median_abs_tstar_minus_tflip": 0.0759,
+    "median_max_p": 0.0148,
+    "rho_w_vs_max_p": -0.1316,
+    "partial_rho_w_vs_max_p_given_sep": -0.363,
+    "median_paired_dw_vs_ref_trained": 0.1391,
+    "frac_w_increased_vs_ref_trained": 0.8933,
+    "median_paired_dw_vs_ref_init": -0.3017,
+    "frac_w_increased_vs_ref_init": 0.0133
+   }
+  }
+ },
+ "pairs": [
+  [
+   "T",
+   "h"
+  ],
+  [
+   "X",
+   "t"
+  ],
+  [
+   "X",
+   "b"
+  ],
+  [
+   "\n",
+   ";"
+  ],
+  [
+   "B",
+   "b"
+  ],
+  [
+   ".",
+   "Y"
+  ],
+  [
+   "\n",
+   "f"
+  ],
+  [
+   ":",
+   "S"
+  ],
+  [
+   ",",
+   "k"
+  ],
+  [
+   "A",
+   "C"
+  ],
+  [
+   "\n",
+   ","
+  ],
+  [
+   "&",
+   "w"
+  ],
+  [
+   "c",
+   "w"
+  ],
+  [
+   " ",
+   "Z"
+  ],
+  [
+   ".",
+   "t"
+  ],
+  [
+   "V",
+   "x"
+  ],
+  [
+   "3",
+   "u"
+  ],
+  [
+   "W",
+   "z"
+  ],
+  [
+   "\n",
+   "E"
+  ],
+  [
+   "B",
+   "s"
+  ],
+  [
+   "M",
+   "d"
+  ],
+  [
+   ",",
+   "f"
+  ],
+  [
+   "G",
+   "u"
+  ],
+  [
+   "&",
+   "L"
+  ],
+  [
+   "!",
+   "Y"
+  ],
+  [
+   "U",
+   "d"
+  ],
+  [
+   "P",
+   "r"
+  ],
+  [
+   "D",
+   "O"
+  ],
+  [
+   "A",
+   "p"
+  ],
+  [
+   "J",
+   "z"
+  ],
+  [
+   "'",
+   "W"
+  ],
+  [
+   "P",
+   "z"
+  ],
+  [
+   "H",
+   "J"
+  ],
+  [
+   "e",
+   "g"
+  ],
+  [
+   "R",
+   "f"
+  ],
+  [
+   " ",
+   "$"
+  ],
+  [
+   "B",
+   "L"
+  ],
+  [
+   "w",
+   "y"
+  ],
+  [
+   "E",
+   "a"
+  ],
+  [
+   "F",
+   "u"
+  ],
+  [
+   "j",
+   "n"
+  ],
+  [
+   "a",
+   "d"
+  ],
+  [
+   "$",
+   "v"
+  ],
+  [
+   " ",
+   "E"
+  ],
+  [
+   "M",
+   "m"
+  ],
+  [
+   "I",
+   "s"
+  ],
+  [
+   "\n",
+   "r"
+  ],
+  [
+   "G",
+   "M"
+  ],
+  [
+   "a",
+   "s"
+  ],
+  [
+   "R",
+   "u"
+  ],
+  [
+   ";",
+   "f"
+  ],
+  [
+   "N",
+   "b"
+  ],
+  [
+   "P",
+   "g"
+  ],
+  [
+   "y",
+   "z"
+  ],
+  [
+   "I",
+   "Y"
+  ],
+  [
+   "-",
+   "o"
+  ],
+  [
+   "L",
+   "h"
+  ],
+  [
+   "-",
+   "b"
+  ],
+  [
+   "3",
+   ";"
+  ],
+  [
+   "f",
+   "l"
+  ],
+  [
+   "G",
+   "S"
+  ],
+  [
+   "h",
+   "v"
+  ],
+  [
+   "b",
+   "g"
+  ],
+  [
+   "'",
+   "b"
+  ],
+  [
+   ":",
+   ";"
+  ],
+  [
+   "G",
+   "U"
+  ],
+  [
+   "O",
+   "p"
+  ],
+  [
+   "N",
+   "u"
+  ],
+  [
+   "G",
+   "a"
+  ],
+  [
+   "O",
+   "X"
+  ],
+  [
+   "n",
+   "q"
+  ],
+  [
+   "!",
+   "I"
+  ],
+  [
+   "d",
+   "h"
+  ],
+  [
+   " ",
+   "X"
+  ],
+  [
+   "l",
+   "p"
+  ],
+  [
+   "?",
+   "x"
+  ],
+  [
+   "M",
+   "Q"
+  ],
+  [
+   "V",
+   "k"
+  ],
+  [
+   ".",
+   "V"
+  ],
+  [
+   "r",
+   "u"
+  ],
+  [
+   "L",
+   "u"
+  ],
+  [
+   "I",
+   "f"
+  ],
+  [
+   ".",
+   "h"
+  ],
+  [
+   "f",
+   "z"
+  ],
+  [
+   "?",
+   "R"
+  ],
+  [
+   "E",
+   "f"
+  ],
+  [
+   "T",
+   "n"
+  ],
+  [
+   "T",
+   "z"
+  ],
+  [
+   "A",
+   "M"
+  ],
+  [
+   ".",
+   ";"
+  ],
+  [
+   "A",
+   "R"
+  ],
+  [
+   "A",
+   "m"
+  ],
+  [
+   "J",
+   "b"
+  ],
+  [
+   " ",
+   "f"
+  ],
+  [
+   "!",
+   "J"
+  ],
+  [
+   "J",
+   "f"
+  ],
+  [
+   "p",
+   "u"
+  ],
+  [
+   "!",
+   "m"
+  ],
+  [
+   "L",
+   "g"
+  ],
+  [
+   ",",
+   "g"
+  ],
+  [
+   ":",
+   "z"
+  ],
+  [
+   "B",
+   "d"
+  ],
+  [
+   ";",
+   "j"
+  ],
+  [
+   " ",
+   "s"
+  ],
+  [
+   ":",
+   "u"
+  ],
+  [
+   "e",
+   "p"
+  ],
+  [
+   "P",
+   "V"
+  ],
+  [
+   "D",
+   "v"
+  ],
+  [
+   "d",
+   "n"
+  ],
+  [
+   "E",
+   "l"
+  ],
+  [
+   "N",
+   "r"
+  ],
+  [
+   "T",
+   "t"
+  ],
+  [
+   "!",
+   "h"
+  ],
+  [
+   "J",
+   "M"
+  ],
+  [
+   "K",
+   "W"
+  ],
+  [
+   "U",
+   "k"
+  ],
+  [
+   "D",
+   "U"
+  ],
+  [
+   "G",
+   "d"
+  ],
+  [
+   "I",
+   "t"
+  ],
+  [
+   "j",
+   "l"
+  ],
+  [
+   "S",
+   "j"
+  ],
+  [
+   "K",
+   "X"
+  ],
+  [
+   "f",
+   "y"
+  ],
+  [
+   "M",
+   "X"
+  ],
+  [
+   "!",
+   "x"
+  ],
+  [
+   "l",
+   "u"
+  ],
+  [
+   ";",
+   "N"
+  ],
+  [
+   "L",
+   "O"
+  ],
+  [
+   "P",
+   "w"
+  ],
+  [
+   "!",
+   "V"
+  ],
+  [
+   "U",
+   "i"
+  ],
+  [
+   "L",
+   "M"
+  ],
+  [
+   "U",
+   "w"
+  ],
+  [
+   "W",
+   "m"
+  ],
+  [
+   ":",
+   "Y"
+  ],
+  [
+   "N",
+   "l"
+  ],
+  [
+   "X",
+   "o"
+  ],
+  [
+   "A",
+   "B"
+  ],
+  [
+   "q",
+   "r"
+  ],
+  [
+   "P",
+   "t"
+  ],
+  [
+   "Z",
+   "q"
+  ],
+  [
+   "E",
+   "p"
+  ],
+  [
+   "j",
+   "m"
+  ],
+  [
+   "F",
+   "Y"
+  ],
+  [
+   "B",
+   "v"
+  ],
+  [
+   "A",
+   "H"
+  ],
+  [
+   "b",
+   "w"
+  ],
+  [
+   "$",
+   "U"
+  ],
+  [
+   "A",
+   "W"
+  ],
+  [
+   "\n",
+   "U"
+  ]
+ ],
+ "curve_pairs": [
+  [
+   "T",
+   "h"
+  ],
+  [
+   "X",
+   "t"
+  ],
+  [
+   "X",
+   "b"
+  ],
+  [
+   "\n",
+   ";"
+  ],
+  [
+   "B",
+   "b"
+  ],
+  [
+   ".",
+   "Y"
+  ],
+  [
+   "\n",
+   "f"
+  ],
+  [
+   ":",
+   "S"
+  ],
+  [
+   ",",
+   "k"
+  ],
+  [
+   "A",
+   "C"
+  ],
+  [
+   "\n",
+   ","
+  ],
+  [
+   "&",
+   "w"
+  ],
+  [
+   "c",
+   "w"
+  ],
+  [
+   " ",
+   "Z"
+  ],
+  [
+   ".",
+   "t"
+  ],
+  [
+   "V",
+   "x"
+  ],
+  [
+   "3",
+   "u"
+  ],
+  [
+   "W",
+   "z"
+  ],
+  [
+   "\n",
+   "E"
+  ],
+  [
+   "B",
+   "s"
+  ]
+ ]
+}

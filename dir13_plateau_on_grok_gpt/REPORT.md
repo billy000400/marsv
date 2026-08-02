@@ -394,6 +394,43 @@ rank vectors $R_x,R_y$ on the rank vector $R_z$:
 \rho_{xy\cdot z}=\mathrm{corr}\big(R_x-\hat R_x(R_z),\ \ R_y-\hat R_y(R_z)\big).
 ```
 
+### Frozen-block training test (does the sharpness have to be learned in blocks 1–4?)
+
+Every intervention above removes or rescales a component of an already-trained network. That can show
+a trained block is load-bearing *at inference*, but it cannot show the sharpness had to be **learned
+there**: a network denied those weights during training might simply build the same shape somewhere
+else. So we retrain from scratch, holding a block group $S$ at its initialization for the whole run:
+
+```math
+\theta_l^{(k)}=\theta_l^{(0)}\quad\text{for every block } l\in S \text{ and every optimization step } k,
+```
+
+with every other detail identical to the reference fresh character run — same corpus and SHA-256, same
+90/10 split, same model seed (so the frozen blocks hold *exactly* the reference run's random
+initialization), same data order, same Adam(lr $10^{-3}$ cosine $\to 10^{-4}$, betas 0.9/0.99, weight
+decay 0), same 30,000-step schedule, same batch size, same checkpoint grid. Two runs:
+$S=\lbrace 1,2,3,4\rbrace$ (**frozen-early**, the group the ablations implicate) and
+$S=\lbrace 8,9,10,11\rbrace$ (**frozen-late**, the same *number* of blocks at a depth those ablations
+showed contributes almost nothing). Frozen-late is the specificity control: if merely removing four
+blocks' worth of capacity straightened the paths, it would straighten them too.
+
+The prediction is only meaningful at equal task performance — a network that simply failed to learn
+would trivially have untrained-looking geometry. So we assay each frozen run at its **matched-accuracy
+checkpoint**, the first step whose validation next-character accuracy reaches the reference run's final
+value $a^{\mathrm{ref}}_{\mathrm{val}}(30000)=0.550$:
+
+```math
+k_{\mathrm{match}}=\min\lbrace k\ :\ a_{\mathrm{val}}(k)\ \ge\ a^{\mathrm{ref}}_{\mathrm{val}}(30000)\rbrace,
+```
+
+and again at its final checkpoint. The frozen assay then runs unchanged on the same fixed 150-pair
+subsample at interpolation block 0, so every width is comparable to the ablation results above. Three
+reference conditions are measured on those same pairs: the reference run at step 0 (untrained), at
+step $2500$ (the checkpoint nearest $k_{\mathrm{match}}$, which separates "sharpness at matched
+accuracy" from "sharpness this early in training"), and at step 30,000 (fully trained). The hypothesis
+predicts frozen-early stays near the untrained width $\approx 0.80$ while frozen-late sharpens like the
+reference; any other outcome falsifies it (Figure 23).
+
 ### Spherical interpolation and patching
 
 A straight line between two activations cuts through low-norm regions the model never produces, which
@@ -1177,11 +1214,11 @@ character natural prefixes rather than one short shared context.)* With interpol
 recording at final logits, 14 of 40 pairs meet the strict frozen rule (IDs 0, 4, 5, 6, 7, 9, 14, 20,
 21, 22, 28, 34, 36, 37); 24/40 have $w \le 0.35$; only 2/40 are near-straight (#10, #19, $w \ge 0.6$);
 0/40 are non-monotone. Median width is 0.309 (range [0.110, 0.773]) against the straight line's 0.8.
-The structure is visible pair by pair, with no averaging involved (Figure 23).
+The structure is visible pair by pair, with no averaging involved (Figure 24).
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 23.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
+**Figure 24.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
 final-logit space, one panel per frozen pair; panel titles give the pair ID, the two endpoint
 characters, and the transition width $w$. Gray dashed = the straight-line reference $d = t$. Most
 curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) track the straight line.
@@ -1190,11 +1227,11 @@ curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) trac
 and recording $d(t)$ at each later block's final-position residual, median width falls strictly
 monotonically from 0.777 (block 1) to 0.445 (block 11) and 0.309 at the logits; the strict rule is
 passed only at the logits (14 pairs), never at intermediate residuals. The plateau is *formed* by the
-downstream stack, not present in the interpolated activation itself (Figure 24).
+downstream stack, not present in the interpolated activation itself (Figure 25).
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 24.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
+**Figure 25.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
 frozen before inspection): $d(t)$ (y) vs interpolation position $t$ (x). Thin lines are the recording
 blocks, shaded on the cividis scale from block 1 (dark) to block 11 (light) per the colour bar; the
 thick black line is the final logits and the gray dashed line the straight-line reference. Early-block
@@ -1203,11 +1240,11 @@ curves are near-straight and progressively sharpen into plateau–boundary–pla
 **Later interpolation kills the plateau — the predicted control.** If downstream layers create the
 plateau, interpolating later (fewer layers left) must weaken it. It does, monotonically: median
 $w_{10\to 90}$ = 0.309, 0.564, 0.647, 0.733, 0.757, 0.802 for interpolation blocks 0, 2, 4, 6, 8, 10 —
-reaching the straight-line reference 0.8 when only one block remains (Figure 25).
+reaching the straight-line reference 0.8 when only one block remains (Figure 26).
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 25.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
+**Figure 26.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
 per interpolation block, shaded on the cividis scale from block 0 (dark) to block 10 (light) as given
 in the legend; the block-0 curve is strongly sigmoid and later blocks collapse onto the gray dashed
 straight line. Right: median transition width $w_{10\to90}$ (y; bars = inter-quartile range across the

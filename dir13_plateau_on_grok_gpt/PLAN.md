@@ -300,6 +300,18 @@ Null results are complete when the validity gates pass. When complete, write an 
         `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0, and the figure/caption
         grep from `../CLAUDE.md` rule 12 matches the embed count.
 
+- [x] **S10 - Frozen-block training test (the hypothesis's own falsifiable prediction).** Reopened
+      2026-08-02. `experiments/train_frozen.py` retrains the reference character recipe from scratch
+      with a block group held at its step-0 weights (`frozen_early` = blocks 1-4, the group the
+      ablations implicate; `frozen_late` = blocks 8-11, the specificity control), everything else
+      identical (same corpus SHA, seeds, optimizer, 30k schedule, batch, checkpoint grid).
+      `experiments/frozen_assay.py` runs the frozen assay on each at its matched-accuracy checkpoint
+      and its final checkpoint, against the reference run at step 0 / step 2500 / step 30000 on the
+      same 150 pairs, plus the depth control at injection blocks 0/4/8. -> verify: both frozen runs
+      reach the reference run's final validation accuracy (0.550) before being assayed, and the
+      prediction ("frozen-early stays near the untrained width 0.80") is reported as confirmed or
+      falsified with the paired per-pair shifts that decide it.
+
 ## Fallback
 
 Prioritize in this order: Figure 9 validity gate, BPE training/validation, Matthew's exact BPE examples, then the two character controls. If either long training run ends before the relevant transition, preserve all checkpoints and report **inconclusive** rather than treating ordinary convergence as Grokking. Reserve the final 20 minutes for figures, current-best `RESULTS.md`/`REPORT.md`, `CHANGELOG.md`, and `STOP`.

@@ -1,0 +1,4 @@
+# checkpoint dirs were moved to /tmp (shared-volume quota); these are symlinks to scratch
+results/checkpoints
+results/checkpoints_grok_char
+results/checkpoints_grok_bpe
