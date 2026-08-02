@@ -315,6 +315,18 @@ Null results are complete when the validity gates pass. When complete, write an 
       (early) and 0.484 (late), paired dw +0.107 / +0.120 vs the trained reference, with the depth
       control showing the sharpening relocated to blocks 5-7. Figure 23 in both deliverables.
 
+- [ ] **S11 - Deep-freeze training test (the relocation prediction).** Reopened 2026-08-02. S10 showed
+      the sharpening merely *relocated* from the frozen blocks 1-4 to blocks 5-7, so the hypothesis's
+      new prediction is that freezing blocks 1-7 relocates it again into the only trainable blocks
+      left (8-11). `experiments/train_frozen.py --freeze 1,2,3,4,5,6,7 --tag frozen_deep` retrains the
+      reference recipe with 58% of the parameters held at step-0 weights; `experiments/frozen_assay.py`
+      adds `frozen_deep` to its condition list and extends the injection-depth control to blocks
+      0/4/8/10/11, since the prediction is specifically about where the width drop appears *above*
+      block 8. -> verify: the run reaches the reference run's final validation accuracy (0.550) before
+      being assayed, and the prediction ("paths still sharpen well below 0.80, with the width drop
+      between injection blocks 8 and 11") is reported as confirmed or falsified with the depth profile
+      that decides it.
+
 ## Fallback
 
 Prioritize in this order: Figure 9 validity gate, BPE training/validation, Matthew's exact BPE examples, then the two character controls. If either long training run ends before the relevant transition, preserve all checkpoints and report **inconclusive** rather than treating ordinary convergence as Grokking. Reserve the final 20 minutes for figures, current-best `RESULTS.md`/`REPORT.md`, `CHANGELOG.md`, and `STOP`.

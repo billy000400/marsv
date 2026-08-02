@@ -6,7 +6,13 @@ that four blocks are held at their step-0 initialization:
   frozen_early  blocks 1-4 frozen  -- the group the MLP-gain probe and per-block scan showed
                                       causally sets the transition sharpness;
   frozen_late   blocks 8-11 frozen -- specificity control, same number of blocks at a depth those
-                                      interventions showed contributes almost nothing.
+                                      interventions showed contributes almost nothing;
+  frozen_deep   blocks 1-7 frozen  -- the successor prediction: after frozen_early merely relocated
+                                      the sharpening to blocks 5-7, freeze those too and leave only
+                                      blocks 8-11 trainable. Either the sharpening relocates again
+                                      (width well below 0.80, with the drop appearing between
+                                      injection blocks 8 and 11) or it needs several trainable
+                                      blocks below the readout and the paths stay straight.
 
 Here we run the frozen assay on both at *matched validation accuracy* (the first checkpoint whose
 val accuracy reaches the reference run's final 0.5502) and at their last checkpoint, against three
@@ -42,8 +48,11 @@ RES = os.path.join(ROOT, "results")
 N_CURVES = 20  # pairs whose raw d(t) curves are stored for the figure
 CKPT_ROOT = "/tmp/dir13_frozen"  # train_frozen.py --ckpt_root (checkpoints are gitignored scratch)
 REF_MATCHED_STEP = 2500  # reference-run checkpoint nearest the frozen runs' matched-accuracy step
-DEPTH_BLOCKS = [0, 4, 8]  # injection depths for the "where is the sharpness made now?" control
-DEPTH_CONDS = ("ref_trained", "frozen_early_last", "frozen_late_last")
+# injection depths for the "where is the sharpness made now?" control. 10 and 11 were added for
+# frozen_deep, whose only trainable blocks are 8-11: the prediction is about whether the width drop
+# appears between injection blocks 8 and 11. Block 11 leaves only ln_f + unembedding downstream.
+DEPTH_BLOCKS = [0, 4, 8, 10, 11]
+DEPTH_CONDS = ("ref_trained", "frozen_early_last", "frozen_late_last", "frozen_deep_last")
 
 
 def load_ckpt(path, device):
@@ -88,7 +97,8 @@ def main():
     pairs = [all_pairs[i] for i in rng.choice(len(all_pairs), N_PAIRS, replace=False)]
 
     conds = []
-    for tag, blocks in (("frozen_early", [1, 2, 3, 4]), ("frozen_late", [8, 9, 10, 11])):
+    for tag, blocks in (("frozen_early", [1, 2, 3, 4]), ("frozen_late", [8, 9, 10, 11]),
+                        ("frozen_deep", [1, 2, 3, 4, 5, 6, 7])):
         for which, fn in (("matched", "ckpt_matched.pt"), ("last", "ckpt_last.pt")):
             p = os.path.join(CKPT_ROOT, f"checkpoints_{tag}", fn)
             if os.path.exists(p):
