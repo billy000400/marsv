@@ -1175,3 +1175,48 @@ remains plausible and a STOP'd direction would silently ignore it (CLAUDE.md rul
 
 On track? yes — plan complete (S1–S14), eleven PLAN-named follow-ups done, the depth conclusion now
 carries an across-seed error bar and its one unsupported sub-claim is retracted; blocker: none.
+
+## 2026-08-02 (iteration: finalization — verify, close, STOP)
+
+~21 minutes on the clock, which the harness treats as finalization only: no new experiment, verify the
+deliverables and close the direction.
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: five `human_feedback*` files,
+all five ending in `.addressed.md`. Zero unaddressed feedback, so rule 11's bar for writing `STOP` is
+met.
+
+**What I did.** Verified rather than rewrote. `check_render.py REPORT.md RESULTS.md` returns ALL CHECKS
+PASS (REPORT 29 display / 449 inline equations / 27 figures; RESULTS 27 figures; 0 problems), so every
+equation renders as `js-display-math` on GitHub, none degraded to a `<pre lang="math">` code block, no
+denylisted macro (`\operatorname`) crept back in, and every inline `$…$` still compiles after GitHub
+strips backslashes before punctuation. Figure hygiene: 27 embeds and 27 visible `**Figure N.**` caption
+lines per file, counts equal, zero bare `(plots/x.png)` paths outside an embed, and all 27 referenced
+PNGs present on disk. Structure is `Summary → Methods → Results → Conclusion` with Methods carrying
+data/model/layer plus every metric and baseline defined. A staleness grep for version-history language
+and for the two phrases that caught stale claims last iteration ("not performed", "was not run")
+returned nothing.
+
+**The one judgement call.** The finalization instruction says to "write a clean presentable REPORT.md",
+which could be read as rewrite-from-scratch. I did not: REPORT.md is 127 KB, was curated to current-best
+in S14c hours ago, and passes every mechanical check. Rewriting it in the remaining minutes has a real
+downside with precedent — the `\operatorname` regression that drew operator feedback #4 was introduced
+by exactly such a late rewrite — and no upside I could name. The rejected alternative was a full
+re-curation pass; I chose verification plus a documented staleness sweep instead, and recorded the
+verification numbers in CHANGELOG.md so the claim "verified, not rewritten" is checkable.
+
+**One thing worth flagging for whoever reads this next.** The strongest remaining weakness in the
+deliverables is not a rendering or curation problem, it is a statistical one that S14c exposed: the five
+frozen conditions are one seed each, and S14c showed that across-seed spread (~0.04) is the same order
+as the smaller ordering claims those single-seed runs support (5 trainable blocks next to the readout
+beating 5 at the bottom, 0.558 vs 0.626, is safe; finer steps in the monotone ordering are not). The
+headline depth-over-capacity conclusion is safe because its gap (0.08–0.10) is about twice the
+across-seed spread, and Limitation 7 states this correctly. A second seed at frozen-early (~16 min
+training + 70 s assay) remains the cheapest strengthening if this direction is ever resumed.
+
+**Closing.** Appended the finalization entry to CHANGELOG.md, updated PLAN.md's Current status and Next
+step, and wrote an empty `STOP` file — permitted here because the plan is complete and no unaddressed
+feedback file remains. If an operator drops new feedback next to this `STOP`, the re-entering agent must
+delete `STOP`, address the file, and only re-write it once clean (rule 11).
+
+On track? yes — plan complete (S1–S14) plus twelve PLAN-named follow-ups, deliverables verified rendering
+clean and current-best, direction closed with STOP; blocker: none.

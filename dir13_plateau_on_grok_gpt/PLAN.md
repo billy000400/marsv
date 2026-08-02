@@ -407,6 +407,15 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**DIRECTION CLOSED 2026-08-02 (`STOP` written).** Final iteration was verification only: no experiment
+run, no deliverable rewritten. `python3 experiments/check_render.py REPORT.md RESULTS.md` returns ALL
+CHECKS PASS (REPORT 29 display / 449 inline equations / 27 figures; RESULTS 27 figures; 0 problems);
+27 `![…]` embeds match 27 visible `**Figure N.**` captions in each file; all 27 referenced PNGs exist;
+zero bare `(plots/x.png)` paths; structure is Summary -> Methods -> Results -> Conclusion; a staleness
+grep for version-history and "not performed"/"was not run" language returns nothing. All five
+`human_feedback*` files end in `.addressed.md`, so rule 11's bar for `STOP` is met. **If new feedback
+is dropped here, delete `STOP` first, address it, then re-write `STOP` only once clean.**
+
 **PLAN COMPLETE (S1-S14) + operator feedback #4 (2026-08-02 file) addressed + eleven PLAN-named
 follow-ups DONE (denser Figure-9 grid, readout rebalancing, MLP-gain intervention, per-block scan,
 frozen-block training test, deep-freeze training test, mirror-image freeze, two-block freeze, narrow
@@ -628,9 +637,17 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
-**No `STOP` written this iteration** (deliberate, same reason as before): feedback #4 says "do not
-extend training *yet*", so a follow-up ask is anticipated and a STOP'd direction would silently ignore
-it (CLAUDE.md rule 11).
+**`STOP` WRITTEN 2026-08-02** — the plan is complete and zero unaddressed `human_feedback*`/`*REVIEW*`
+files remain, which is the whole of rule 11's bar. (Earlier iterations held off because feedback #4's
+"do not extend training *yet*" anticipated a follow-up ask; that ask never arrived and the time budget
+is now spent.) A re-entering agent that finds new feedback beside this `STOP` must delete `STOP`,
+address the file, and only re-write it once clean.
+
+If the direction is resumed, the cheapest strengthening is a **second seed at frozen-early**
+(`--freeze 1,2,3,4 --seed 2024`, ~16 min to a matched checkpoint plus ~70 s of `frozen_assay` scoring).
+S14c showed the across-seed spread is ~0.04, which is the same order as the frozen series' *finer*
+ordering claims — those five conditions are still one seed each. The headline depth-over-capacity gap
+(0.08-0.10) is roughly twice that spread and is safe; Limitation 7 already states this correctly.
 
 Four candidate mechanisms have now been excluded in turn: the next-character decision (survives the
 ablation that destroys the plateau), endpoint plausibility (does not mediate the intervention and moves

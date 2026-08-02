@@ -946,3 +946,29 @@ conditions), `results/frozen_pairwise.json`, `results/train_hist_frozen_two.json
   single-seed caveat is narrowed to the five frozen conditions.
 - Caveat recorded in the deliverables: this second run was stopped after its matched-accuracy
   checkpoint (wall clock), so it contributes a matched-accuracy row only, no end-of-training row.
+
+## 2026-08-02 — Finalization: deliverables verified, direction closed
+
+- **No content changes to RESULTS.md or REPORT.md.** Both were already curated to current-best in the
+  S14c iteration; this pass verified them rather than rewriting them, since a 127 KB prose rewrite
+  under a 20-minute finalization budget risks regressions of exactly the kind CLAUDE.md rule 8c warns
+  about (a later rewrite reintroduced `\operatorname` once already).
+- **Verification performed (all passing).** `python3 experiments/check_render.py REPORT.md RESULTS.md`
+  → **ALL CHECKS PASS**: REPORT.md 29 display equations, 449 inline equations, 27 embedded figures,
+  0 problems; RESULTS.md 27 embedded figures, 0 problems. Every display equation renders as
+  `js-display-math` on the GitHub API, no `<pre lang="math">` code blocks, no denylisted macros, and
+  every inline `$…$` compiles after GitHub's backslash-stripping (rules 8a–8c).
+- **Figure hygiene (rule 12) re-checked.** 27 `![…]` embeds and 27 visible `**Figure N.**` caption
+  lines in each of REPORT.md and RESULTS.md (counts match exactly); zero bare `(plots/x.png)` paths
+  outside an image embed; all 27 referenced PNGs exist on disk in `plots/`.
+- **Structure (rule 8) re-checked.** REPORT.md is `Summary → Methods → Results → Conclusion`, with
+  Methods giving data/model/layer and defining every metric and baseline with rendered equations.
+- **Staleness sweep.** Grepped both deliverables for version-history language ("previously",
+  "superseded", "v1/v2", "changed after review", "not performed", "was not run") — zero hits, so no
+  superseded result or retracted claim survives in the curated files. The one remaining
+  "sharper than the reference" sentence is the *fully-trained* framing (0.332 vs 0.351, p = 2.1e-4),
+  which is a different comparison from the retracted matched-accuracy sub-claim and is hedged in its
+  own text as "indistinguishable-to-slightly-sharper"; it is correct as written.
+- **STOP written.** The plan (S1–S14) plus twelve PLAN-named follow-ups are complete and all five
+  `human_feedback*` files end in `.addressed.md`, so zero unaddressed feedback remains (CLAUDE.md
+  rule 11 satisfied).
