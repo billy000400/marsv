@@ -1,0 +1,8 @@
+{
+  "n_reversal_pairs": 20,
+  "grid_spacing": 0.02040816326530612,
+  "max_abs_w_change_on_reversal": 1.0827062081220085e-05,
+  "median_abs_w_change_on_reversal": 1.3788135683756586e-06,
+  "max_prefix_block0_residual_diff": 0.0,
+  "context": "The thing was"
+}

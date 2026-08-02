@@ -1,0 +1,43 @@
+1/75 ' later'/' done' w=0.570
+11/75 ' best'/' big' w=0.614
+21/75 ' part'/' full' w=0.698
+31/75 ' real'/' necessary' w=0.658
+41/75 ' such'/' long' w=0.638
+51/75 ' some'/' used' w=0.477
+61/75 ' red'/' pretty' w=0.538
+71/75 ' relatively'/' strange' w=0.516
+valid-curve rate 1.000  median w 0.562  IQR(w) 0.111  max endpoint rel-err 4.68e-05
+1/75 ' later'/' done' w=0.826
+11/75 ' best'/' big' w=0.830
+21/75 ' part'/' full' w=0.826
+31/75 ' real'/' necessary' w=0.832
+41/75 ' such'/' long' w=0.830
+51/75 ' some'/' used' w=0.826
+61/75 ' red'/' pretty' w=0.829
+71/75 ' relatively'/' strange' w=0.829
+valid-curve rate 1.000  median w 0.831  IQR(w) 0.004  max endpoint rel-err 3.81e-06
+1/75 ' later'/' done' w=0.666
+11/75 ' best'/' big' w=0.773
+21/75 ' part'/' full' w=0.792
+31/75 ' real'/' necessary' w=0.793
+41/75 ' such'/' long' w=0.646
+51/75 ' some'/' used' w=0.622
+61/75 ' red'/' pretty' w=0.687
+71/75 ' relatively'/' strange' w=0.614
+valid-curve rate 1.000  median w 0.655  IQR(w) 0.075  max endpoint rel-err 7.76e-05
+' making'/' getting' w=[0.613 0.674 0.741 0.811 0.805]
+' later'/' done' w=[0.531 0.649 0.756 0.795 0.805]
+' nothing'/' someone' w=[0.588 0.665 0.743 0.816 0.806]
+' called'/' taking' w=[0.483 0.643 0.728 0.796 0.804]
+' true'/' enough' w=[0.717 0.789 0.798 0.817 0.804]
+' relatively'/' strange' w=[0.541 0.615 0.701 0.78  0.807]
+' back'/' very' w=[0.474 0.581 0.699 0.798 0.806]
+' un'/' before' w=[0.364 0.498 0.621 0.761 0.798]
+' gonna'/' happening' w=[0.611 0.657 0.717 0.785 0.805]
+' ra'/' okay' w=[0.557 0.633 0.724 0.784 0.799]
+block 0: median w = 0.549 (valid 10/10)
+block 6: median w = 0.646 (valid 10/10)
+block 12: median w = 0.726 (valid 10/10)
+block 18: median w = 0.796 (valid 10/10)
+block 23: median w = 0.805 (valid 10/10)
+ALL_ASSAYS_DONE

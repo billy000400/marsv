@@ -1,0 +1,31 @@
+{
+  "source": "EleutherAI/pile-deduped-pythia-preshuffled",
+  "idx_verified": {
+    "magic": "MMIDIDX",
+    "version": 1,
+    "dtype_code": 8,
+    "dtype": "uint16",
+    "n_sequences": 146432000,
+    "seq_len": 2049,
+    "idx_bytes_predicted": 1757184042,
+    "idx_bytes_actual": 1757184042,
+    "bin_bytes_actual": 600078336000,
+    "bin_bytes_predicted": 600078336000
+  },
+  "splits": {
+    "A": {
+      "start_row": 1000000,
+      "shard": 0,
+      "n_rows": 500000,
+      "tokens": 1024500000,
+      "byte_start": 4098000000
+    },
+    "B": {
+      "start_row": 73300000,
+      "shard": 10,
+      "n_rows": 500000,
+      "tokens": 1024500000,
+      "byte_start": 300383400000
+    }
+  }
+}

@@ -1,0 +1,41 @@
+Fetching 7 files:   0%|          | 0/7 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 7 files:  14%|█▍        | 1/7 [00:00<00:02,  2.12it/s]Fetching 7 files:  71%|███████▏  | 5/7 [00:00<00:00,  9.21it/s]Fetching 7 files:  86%|████████▌ | 6/7 [00:19<00:00,  9.21it/s]Fetching 7 files: 100%|██████████| 7/7 [00:21<00:00,  4.04s/it]Fetching 7 files: 100%|██████████| 7/7 [00:21<00:00,  3.10s/it]
+OK EleutherAI/pythia-1.4b-deduped step143000 /workspacen/hf_home/hub/models--EleutherAI--pythia-1.4b-deduped/snapshots/6d1288ca1da05b700367a229ed2000de0eab8c4d
+Fetching 7 files:   0%|          | 0/7 [00:00<?, ?it/s]Fetching 7 files:  14%|█▍        | 1/7 [00:00<00:01,  3.04it/s]Fetching 7 files:  86%|████████▌ | 6/7 [00:16<00:02,  2.96s/it]Fetching 7 files: 100%|██████████| 7/7 [00:19<00:00,  2.95s/it]Fetching 7 files: 100%|██████████| 7/7 [00:19<00:00,  2.84s/it]
+OK EleutherAI/pythia-1.4b-deduped step0 /workspacen/hf_home/hub/models--EleutherAI--pythia-1.4b-deduped/snapshots/ee49b763c5873072fda3e56443c77108f73d9913
+Fetching 6 files:   0%|          | 0/6 [00:00<?, ?it/s]Fetching 6 files:  17%|█▋        | 1/6 [00:00<00:01,  2.77it/s]Fetching 6 files:  50%|█████     | 3/6 [00:00<00:00,  6.88it/s]Fetching 6 files:  67%|██████▋   | 4/6 [00:00<00:00,  7.64it/s]Fetching 6 files:  67%|██████▋   | 4/6 [00:09<00:04,  2.31s/it]
+Traceback (most recent call last):
+  File "/workspacen/marsv_agent_haoyang/dir18_continuation_jsd_plateau/experiments/dl_models.py", line 5, in <module>
+    p = snapshot_download(repo, revision=rev, allow_patterns=["*.json","*.bin","*.safetensors","*.txt"])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/_snapshot_download.py", line 522, in snapshot_download
+    hf_thread_map(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/tqdm.py", line 441, in hf_thread_map
+    results[future_to_index[future]] = future.result()
+                                       ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/_snapshot_download.py", line 502, in _inner_hf_hub_download
+    hf_hub_download(  # type: ignore
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 1019, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 1242, in _hf_hub_download_to_cache_dir
+    _download_to_tmp_and_move(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 1932, in _download_to_tmp_and_move
+    xet_get(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 565, in xet_get
+    with session.new_file_download_group(
+RuntimeError: Task error: File reconstruction error: IO Error: Disk quota exceeded (os error 122)
