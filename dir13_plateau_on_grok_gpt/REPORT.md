@@ -1221,7 +1221,11 @@ matched-accuracy width in the study. Ten runs support no geometric summary. They
 network-to-network facts that need no rule: blocks 1–5 alone are 0.118 sharper than blocks 0–7, a
 strict superset of them, and blocks 6–10 alone — five trainable blocks, 58% of the parameters left at
 their random initialization — are 0.072 sharper than the untouched 12-block reference at the same
-accuracy ($p=8.5\times10^{-18}$). Removing trainable blocks can sharpen the path.
+accuracy ($p=8.5\times10^{-18}$). The second fact also holds at the end of training, where both
+networks have run all 30,000 steps: blocks 6–10 give median $w = 0.328$ against the reference's
+$0.351$ (paired $-0.037$, 36.7% of pairs wider), and the run kept sharpening past its
+matched-accuracy checkpoint ($0.342 \rightarrow 0.328$), so the matched-accuracy number understates
+the gap. Removing trainable blocks can sharpen the path.
 
 #### The readout-rebalancing intervention: the plateau sits upstream of the decision
 
@@ -1392,8 +1396,8 @@ relative distance $d(t)$ (y) against interpolation position $t$ (x) for the same
 models — reference untrained (step 0), reference at step 2500, reference trained (step 30000), and
 blocks 1–4, 8–11, 1–7, 0–3&9–11, 0–4&8–11, 0–1&7–11, 0&6–11, 5–11 and 1–10 frozen (each at its final step
 30000); the eleventh frozen group, blocks 0–5&11 (trainable 6–10), is shown at its matched-accuracy
-checkpoint in the panels below, its step-30000 assay having still been running when this iteration
-closed. Thin lines are
+checkpoint in the panels below, which is this section's primary comparison axis (its step-30000 width,
+0.328, is given in the text above and is sharper still). Thin lines are
 individual pairs, the thick dashed line their median, and the gray dashed diagonal the straight-line
 (no-plateau) reference $d=t$; panel titles give each model's median width. The tenth panel (blocks 0
 and 6–11 frozen, five trainable blocks at 1–5) carries the sharpest median of any panel in

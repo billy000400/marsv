@@ -1586,3 +1586,49 @@ seed at blocks 6–10 to confirm the study's sharpest network is not a seed arte
 On track? yes — S21 done, its pre-registered prediction refuted and the refuted description withdrawn
 from both deliverables the same iteration, replaced by the honest "no geometric summary" reading plus a
 second rule-free two-network fact; blocker: none.
+
+## 2026-08-03 (iteration: S22 — the pending final-step row arrives and does not cost anything)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: five `human_feedback*` files,
+all five already ending in `.addressed.md`. Zero unaddressed feedback, so this iteration advanced the
+plan.
+
+**What I did.** No new training. S21 had launched `train_frozen.py --freeze 0,1,2,3,4,5,11` chained to
+`narrow_assay.py frozen_high`, and closed with the trainer at step 27,000 and the step-30,000 assay
+still pending. That chain finished during this iteration (trainer DONE at step 30,000, val_acc 0.5720,
+best 0.5764; assay merged `frozen_high_last`), and I picked the row up: median `w` **0.328**
+(IQR 0.252–0.395, strict 24.0%) against the reference's 0.351 at the same step, paired **−0.037**,
+36.7% of pairs wider.
+
+**Why this mattered more than one extra row.** The load-bearing claim from S21 — training only blocks
+6–10, with 58% of the parameters never moved from initialization, gives a *sharper* plateau than the
+untouched 12-block network — rested entirely on the matched-accuracy checkpoint (step 3,750 vs the
+reference's 30,000). A skeptic could read that as an artefact of comparing an early checkpoint against
+a converged one. The final-step row removes that reading: both networks have now run the identical
+30,000-step schedule and the frozen one is still sharper. It also shows the run kept sharpening after
+matched accuracy (0.342 → 0.328), so the matched-accuracy comparison is the conservative one, and the
+truncation direction is against the finding rather than for it — the same pattern S14b found for the
+narrow run.
+
+**Time management.** ~24 minutes on the clock with a trainer already ~18 minutes in, so the whole
+iteration was budgeted around waiting for the chain rather than starting anything. Polling in a wait
+loop cost more wall clock than expected (the trainer's last 3,000 steps plus a ~70 s assay ran to
+about the 26-minute mark of its own log), which left only the deliverable edits — the right call was
+still to wait, since the alternative was closing a second iteration with the row still pending.
+
+**One scope note retired.** Both Figure 23 captions had carried "its step-30000 assay having still been
+running when this iteration closed". That is now false, so both were rewritten to say the figure shows
+the matched-accuracy checkpoint because it is the section's primary comparison axis, and to point at
+the step-30,000 width in the prose. The figure itself was not regenerated — no claim depends on a
+panel that does not exist.
+
+**Verification.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 29 display / 581
+inline equations / 27 figures; RESULTS 27 figures; 0 problems).
+
+**Next step.** S23: the two named seed replications, in order — a second seed at blocks 6–10, to check
+that the study's sharpest network is not a seed artefact (it now carries a two-network fact at both
+matched accuracy and step 30,000, so it is the more load-bearing of the two), then a second seed at
+frozen-mirror. ~21 min of training plus ~70 s of assay each. No `STOP` written.
+
+On track? yes — S22 done, the pending step-30,000 row collected and it strengthens rather than
+qualifies the claim it was pending on; blocker: none.

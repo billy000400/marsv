@@ -837,8 +837,8 @@ the two comparisons the conclusions rest on each have a measured seed spread und
 pairs under twelve models — reference untrained (step 0), reference at step 2500, reference trained
 (step 30000), and blocks 1–4, 8–11, 1–7, 0–3&9–11, 0–4&8–11, 0–1&7–11, 0&6–11, 5–11 and 1–10 frozen (each at
 its final step 30000); the eleventh frozen group, blocks 0–5&11 (trainable 6–10), appears in the panels
-below at its matched-accuracy checkpoint, its step-30000 assay having still been running when this
-iteration closed.
+below at its matched-accuracy checkpoint, which is this section's primary comparison axis (its
+step-30000 width, 0.328, is reported in the text below and is sharper still).
 Thin lines are individual pairs, the thick dashed line is their median, and the gray dashed diagonal is
 the straight-line (no-plateau) reference `d = t`; each panel title gives that model's median width. The
 tenth panel — blocks 0 and 6–11 frozen, i.e. five trainable blocks at 1–5 — has the sharpest
@@ -1127,7 +1127,12 @@ frozen).
 
 - **What replaces the rule is a second rule-free network-to-network fact.** Blocks 6–10 alone, with
   58.0% of the parameters left at their random initialization, are **0.072 sharper than the untouched
-  12-block reference** at the same validation accuracy (18.7% of pairs wider, p = 8.5e-18). Together
+  12-block reference** at the same validation accuracy (18.7% of pairs wider, p = 8.5e-18). The
+  comparison holds at the end of training as well, where both networks have run the full 30,000 steps:
+  blocks 6–10 give median `w` **0.328** (IQR 0.252–0.395, strict plateau rate 24.0%) against the
+  reference's 0.351, a paired **−0.037** with 36.7% of pairs wider. The run also kept sharpening after
+  the matched-accuracy checkpoint (0.342 → 0.328), so the matched-accuracy comparison is the
+  conservative one. Together
   with the ninth run's subset comparison, this is what the frozen-block series establishes without
   fitting anything: training fewer blocks does not blunt the plateau and can sharpen it, so width is
   not read off trainable count, trainable capacity, or window geometry.

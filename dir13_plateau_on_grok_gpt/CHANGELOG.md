@@ -1328,3 +1328,27 @@ PLAN.md and REPORT.md Methods before it was scored.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 29 display / 577 inline equations / 27 figures; RESULTS 27 figures; 0 problems).
 - **No `STOP` written** — the run's final-step assay and two named seed replications remain.
+
+## 2026-08-03 — S22: the sharpest network's final-step row lands, and the comparison survives it
+
+- **No new training.** The chained `narrow_assay.py frozen_high` from S21 completed (trainer reached
+  step 30,000, val_acc 0.5720, best 0.5764) and wrote `frozen_high_last` into
+  `results/frozen_assay_summary.json`. This iteration picks up that row.
+- **The step-30,000 numbers strengthen the claim they were pending on.** Blocks 6–10 trainable
+  (58.0% of parameters frozen at random init) give median `w` **0.328** (IQR 0.252–0.395, strict
+  plateau rate **24.0%**) at step 30,000, against the untouched 12-block reference's 0.351 at the
+  same step — paired **−0.037**, 36.7% of pairs wider. Both networks have now run the full schedule,
+  so the "training fewer blocks can sharpen the plateau" fact no longer rests only on the
+  matched-accuracy checkpoint.
+- **The run kept sharpening past matched accuracy** (0.342 at step 3,750 → 0.328 at step 30,000),
+  which makes the matched-accuracy comparison the conservative one. Both deliverables say so.
+- **Scope note retired from both deliverables** (old: Figure 23's caption said the eleventh frozen
+  group's "step-30000 assay was still running when this iteration closed" → new: the caption states
+  the figure shows the matched-accuracy checkpoint because that is the section's primary comparison
+  axis, and points to the step-30,000 width in the text).
+- **Figures unchanged this iteration** — Figure 23 continues to show `frozen_high` at its
+  matched-accuracy checkpoint; no plot was regenerated, and no claim in either deliverable depends on
+  a figure that does not exist.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 581 inline equations / 27 figures; RESULTS 27 figures; 0 problems).
+- **No `STOP` written** — two named seed replications remain.

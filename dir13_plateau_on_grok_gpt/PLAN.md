@@ -528,7 +528,17 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**S21 DONE 2026-08-03 (latest) — the pre-registered coverage test was run and REFUTED it, and the run
+**S22 DONE 2026-08-03 (latest) — the pending step-30,000 row for blocks 6–10 arrived and strengthens
+the claim it was pending on.** No new training: S21's chained assay finished (trainer step 30,000,
+val_acc 0.5720) and gives median `w` **0.328** (IQR 0.252–0.395, strict 24.0%) against the untouched
+reference's 0.351 at the *same* step — paired **−0.037**, 36.7% of pairs wider. The "training fewer
+blocks can sharpen the plateau" fact therefore holds on two axes, not just at matched accuracy, and
+the run kept sharpening past matched accuracy (0.342 → 0.328), so the matched-accuracy comparison is
+the conservative one. Figure 23's "assay still running" scope note is retired from both deliverables.
+**Next: S23 — a second seed at blocks 6–10 (the more load-bearing of the two named replications), then
+a second seed at frozen-mirror.**
+
+**S21 DONE 2026-08-03 — the pre-registered coverage test was run and REFUTED it, and the run
 is the sharpest network in the study.** Five trainable blocks at 6–10 (freeze 0–5 and 11) excluded
 mid-stack block 5, so coverage required **>= 0.55**. It lands at **0.342** (IQR 0.240–0.446) at matched
 accuracy (step 3,750, val 0.5523) — the lowest matched width of the fifteen models here, sharper than
