@@ -16,7 +16,6 @@ CVD-safe (CLAUDE.md rule 13): two families separated by colour AND marker AND fi
 """
 import json, os, sys
 import numpy as np
-import torch
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -30,15 +29,19 @@ RES, PLOTS = os.path.join(ROOT, "results"), os.path.join(ROOT, "plots")
 C = json.load(open(os.path.join(RES, "frozen_assay_summary.json")))["summary"]["conditions"]
 TOTAL = 8378640  # reference-run parameter count (results/train_meta_frozen_deep.json)
 
-ck = torch.load("/tmp/dir13_frozen/checkpoints_narrow192/ckpt_matched.pt",
-                map_location="cpu", weights_only=False)
-NARROW = sum(v.numel() for v in ck["model"].values())
+# Narrow run's parameter count, rebuilt from its recorded config so the figure does not depend on the
+# scratch checkpoints. Counted the same way train_frozen.py counts the frozen/total parameters --
+# model.parameters(), which yields the tied tok_emb/head weight once and excludes the causal-mask
+# buffers. (Summing the state_dict instead double-counts the tied weight: 5,584,896 vs 5,375,808.)
+NARROW = json.load(open(os.path.join(RES, "train_meta_narrow192.json")))["params"]
 
 # (condition key, label, trainable blocks, trainable params, all-12-trainable?)
+SECOND_SEED = {"narrow192_s2_matched", "frozen_early_s2_matched"}  # drawn, but share the seed-1 label
 RUNS = [("ref_matched_step",      "reference\n(240 wide)",  12, TOTAL,            True),
-        ("narrow192_matched",     "narrow 192",             12, NARROW,           True),
-        ("narrow192_s2_matched",  "narrow 192\n(seed 2)",   12, NARROW,           True),
-        ("frozen_early_matched",  "frozen 1-4",              8, TOTAL - 2777280,  False),
+        ("narrow192_matched",     "narrow 192\n(2 seeds)",  12, NARROW,           True),
+        ("narrow192_s2_matched",  "",                       12, NARROW,           True),
+        ("frozen_early_matched",  "frozen 1-4\n(2 seeds)",   8, TOTAL - 2777280,  False),
+        ("frozen_early_s2_matched", "",                      8, TOTAL - 2777280,  False),
         ("frozen_late_matched",   "frozen 8-11",             8, TOTAL - 2777280,  False),
         ("frozen_deep_matched",   "frozen 1-7",              5, TOTAL - 4860240,  False),
         ("frozen_mirror_matched", "frozen 5-11",             5, TOTAL - 4860240,  False),
@@ -56,9 +59,11 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                 ha="right", va="top", fontsize=8, color="0.35")
     for key, lab, nb, npar, full in RUNS:
         x = nb if xi == 2 else npar / 1e6
-        if nb == 12:  # the all-trainable runs coincide on both axes; separate them
-            off = {"ref_matched_step": 1.0, "narrow192_matched": 0.0, "narrow192_s2_matched": -1.0}[key]
-            x += off * (0.55 if xi == 2 else 0.14)
+        # runs that share a trainable-block count also share both x values; nudge the seeds apart
+        off = {"ref_matched_step": 1.0, "narrow192_matched": 0.0, "narrow192_s2_matched": -1.0,
+               "frozen_early_matched": 1.0, "frozen_early_s2_matched": 0.0,
+               "frozen_late_matched": -1.0}.get(key, 0.0)
+        x += off * (0.55 if xi == 2 else 0.14)
         med = C[key]["median_w"]
         lo, hi = C[key]["iqr_w"]
         st = dict(color=CVD[0], marker="o", ms=9, mfc=CVD[0]) if full else \
@@ -72,18 +77,19 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                     zorder=1)
             ax.plot([x + dx], [trained["median_w"]], color=st["color"], marker="s", ms=5.5,
                     mfc="white", mew=1.4, lw=0, zorder=3)
-        # per-key label offsets: the three all-trainable runs sit on top of each other on both
-        # axes, and on the right panel they also collide with the two eight-block frozen runs
+        # Label each CONDITION once, not each run: the two two-seed conditions are drawn as adjacent
+        # markers and share one label placed between them (the second-seed rows carry no label).
+        # Offsets are per key because the runs bunch together on both axes.
         lab_dx, lab_dy = {2: {"ref_matched_step": (0.0, 0.075),
-                              "narrow192_matched": (0.0, -0.055),
-                              "narrow192_s2_matched": (0.0, 0.032),
+                              "narrow192_matched": (-0.28, -0.095),
+                              "frozen_early_matched": (-0.28, 0.075),
                               "frozen_late_matched": (0.0, -0.055)},
-                          3: {"narrow192_matched": (-0.55, -0.055),
-                              "narrow192_s2_matched": (-0.55, 0.075),
-                              "frozen_early_matched": (0.75, 0.032),
-                              "frozen_late_matched": (0.75, -0.055)}}[xi].get(key, (0.0, 0.032))
-        ax.annotate(lab, (x + lab_dx, med + lab_dy), ha="center",
-                    va="bottom" if lab_dy > 0 else "top", fontsize=8)
+                          3: {"narrow192_matched": (-0.80, -0.055),
+                              "frozen_early_matched": (0.95, 0.075),
+                              "frozen_late_matched": (0.72, -0.055)}}[xi].get(key, (0.0, 0.032))
+        if key not in SECOND_SEED:
+            ax.annotate(lab, (x + lab_dx, med + lab_dy), ha="center",
+                        va="bottom" if lab_dy > 0 else "top", fontsize=8)
     ax.set_xlabel(xlabel)
     ax.set_ylim(0.24, 0.94)
     ax.grid(alpha=0.3)

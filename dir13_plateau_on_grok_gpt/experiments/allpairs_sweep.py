@@ -18,7 +18,7 @@ next-character probabilities for both endpoints (plausibility confound).
 Raw curves -> results/allpairs_raw.npz; per-pair/per-character stats -> results/allpairs_summary.json.
 Analysis (variance decomposition, correlations) lives in analyze_allpairs.py; plots in plot_allpairs.py.
 """
-import os, sys, json, time, itertools
+import os, sys, json, time, itertools, hashlib
 import numpy as np
 import torch
 
@@ -29,6 +29,8 @@ from matthew_assay import run_pair, transition_width, is_plateau, pava_isotonic,
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RES = os.path.join(ROOT, "results")
 CKPT_DIR = os.path.join(RES, "checkpoints_grok_char")
+CORPUS = "/tmp/tinyshakespeare.txt"
+CORPUS_SHA = "86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed"
 CONTEXT = "The house was "
 N_T = 50
 FINAL_STEP = 30000
@@ -40,11 +42,18 @@ SEED = 0
 
 
 def load_vocab():
-    """Character vocabulary of the tinyshakespeare corpus, restored from a pilot checkpoint (the
-    corpus file itself is no longer on this pod). Both runs built stoi as sorted(set(text))."""
-    ck = torch.load(os.path.join(RES, "checkpoints", "ckpt_00000.pt"),
-                    map_location="cpu", weights_only=False)
-    return ck["stoi"]
+    """Character vocabulary of the tinyshakespeare corpus. Prefer a pilot checkpoint's saved stoi;
+    if the scratch checkpoints have been wiped, rebuild it from the corpus, which every run built as
+    sorted(set(text)) -- identical as long as the corpus SHA matches the one the runs recorded."""
+    ck_path = os.path.join(RES, "checkpoints", "ckpt_00000.pt")
+    if os.path.exists(ck_path):
+        return torch.load(ck_path, map_location="cpu", weights_only=False)["stoi"]
+    raw = open(CORPUS, "rb").read()
+    sha = hashlib.sha256(raw).hexdigest()
+    assert sha == CORPUS_SHA, f"corpus SHA {sha} != training corpus {CORPUS_SHA}"
+    stoi = {c: i for i, c in enumerate(sorted(set(raw.decode("utf-8"))))}
+    assert len(stoi) == 65, f"vocab size {len(stoi)} != 65"
+    return stoi
 
 
 def load_model(step, device):

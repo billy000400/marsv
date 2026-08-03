@@ -1,0 +1,46 @@
+self_test OK: step w=0.089 detected, line w=0.800 rejected
+[skip] frozen_early_s2_matched already scored
+{
+  "frozen_early_s2_last": {
+    "kind": "frozen",
+    "step": 30000,
+    "frozen_blocks": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5628987630208333,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_early_s2/ckpt_last.pt",
+    "median_w": 0.4446,
+    "mean_w": 0.4493,
+    "iqr_w": [
+      0.3709,
+      0.502
+    ],
+    "strict_frac": 0.0267,
+    "median_t_star": 0.4844,
+    "frac_endpoints_differ": 0.88,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0558,
+    "median_max_p": 0.0063,
+    "rho_w_vs_max_p": -0.3934,
+    "partial_rho_w_vs_max_p_given_sep": -0.5555,
+    "median_paired_dw_vs_ref_trained": 0.0839,
+    "frac_w_increased_vs_ref_trained": 0.8733,
+    "median_paired_dw_vs_ref_matched_step": 0.0135,
+    "frac_w_increased_vs_ref_matched_step": 0.54,
+    "median_paired_dw_vs_ref_init": -0.3583,
+    "frac_w_increased_vs_ref_init": 0.0,
+    "depth_median_w": {
+      "0": 0.4446,
+      "2": 0.444,
+      "4": 0.4434,
+      "8": 0.7837,
+      "10": 0.7995,
+      "11": 0.809
+    }
+  }
+}
+merged into frozen_assay_summary.json / frozen_assay_raw.npz

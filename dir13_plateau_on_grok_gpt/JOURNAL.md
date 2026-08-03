@@ -1220,3 +1220,69 @@ delete `STOP`, address the file, and only re-write it once clean (rule 11).
 
 On track? yes — plan complete (S1–S14) plus twelve PLAN-named follow-ups, deliverables verified rendering
 clean and current-best, direction closed with STOP; blocker: none.
+
+## 2026-08-03 (iteration: S15 — second seed at frozen-early)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: five `human_feedback*` files,
+all five already ending in `.addressed.md`. Zero unaddressed feedback, so this iteration advanced the
+plan instead.
+
+**Two surprises before any work.** (1) The `STOP` file written on 2026-08-02 is gone and the wrapper
+relaunched the direction, so the plan is live again. (2) The pod was reset: every `/tmp` scratch
+checkpoint (`/tmp/dir13_ckpt_grok_char`, `/tmp/dir13_frozen/*`) and `/tmp/tinyshakespeare.txt` are
+gone. That mattered immediately, because `allpairs_sweep.load_vocab()` restored the 65-character
+vocabulary from a pilot checkpoint. I re-downloaded the corpus, confirmed its SHA-256 matches the value
+every `train_meta*.json` records, and made `load_vocab` fall back to rebuilding `sorted(set(text))` from
+the SHA-asserted corpus — byte-identical to what the runs used, and no longer dependent on scratch.
+The assumption I logged and proceeded on: a SHA match makes the rebuilt vocabulary provably the same
+object, so nothing has to be re-measured. The rejected alternative was retraining the reference run to
+regenerate its checkpoints (~45 min, and it would have produced a *different* reference than the one
+every published number is scored against).
+
+**What I ran.** The step the previous `Next step` named: `train_frozen.py --freeze 1,2,3,4 --seed 2024
+--tag frozen_early_s2`, a second initialization of frozen-early with everything else held fixed. It
+matched the reference's final validation accuracy at step 2,750 — the same step as seed 1337 — and
+completed all 30,000 steps in 44.7 min (val 0.5629 vs 0.5625). `narrow_assay.py` scored both its
+checkpoints on the same fixed 150 pairs; I generalised that script by two lines so it reads the frozen
+block list off the checkpoint instead of hard-coding "narrow, nothing frozen".
+
+**What it says.** Seed noise on this measure is small and directionless. At matched accuracy the two
+frozen-early seeds give medians 0.476 and 0.498, but pair-by-pair they are indistinguishable (paired
++0.001, exactly half the pairs each way, p = 0.40) and their distributions agree decile by decile — the
+0.022 gap in the marginal median is tail behaviour, not a shift. At step 30,000 the second seed is
+0.445 against 0.471, i.e. 0.027 the *other* way. The relocation signature reproduces exactly (injecting
+inside the frozen group changes the width by ≤0.003 at either checkpoint). And the comparison this was
+run for now separates cleanly: the three runs with 12 trainable blocks (0.443, 0.397, 0.437) are
+disjoint from the three with 8 (0.476, 0.498, 0.500), one-sided rank-sum p = 0.05 — the floor a 3-vs-3
+design can reach — with all four narrow-vs-frozen-early seed combinations agreeing pair by pair.
+
+**One error found and corrected.** Rebuilding `plot_capacity.py` without its checkpoint dependency
+exposed that the narrow run's published parameter count (5,584,896) came from summing the `state_dict`,
+which double-counts the tied embedding/unembedding weight and includes the causal-mask buffers. Counted
+the way every other run is counted, it is **5,375,808** — so the narrow run has 4.0% *fewer* trainable
+parameters than frozen-early, not 0.3% more. I checked which direction this cuts before rewriting: it
+strengthens the depth conclusion, because the sharper run turns out to be the one with less capacity.
+Corrected in the Summary, Methods, Results and Figure 24 caption of REPORT.md and the matching text in
+RESULTS.md, and recorded as a correction in CHANGELOG.md.
+
+**Figure work.** Figure 24 gained a sixth frozen marker and immediately became unreadable — three runs
+now share x = 8 blocks and three share x ≈ 5.4–5.6M parameters, and the per-key label offsets collided.
+Rather than keep nudging, I changed the convention: each *condition* is labelled once, and where a
+label reads "(2 seeds)" its two markers sit adjacent. Caption rewritten in both deliverables to define
+that convention and to name both across-seed gaps. I also fixed a rule-9a failure the updated
+`check_render.py` flagged (the "Models actually tested" table had no prose above it).
+
+**A trap worth recording.** I queued the post-training assay with
+`while pgrep -f "train_frozen.py --freeze 1,2,3,4 --seed 2024"; do sleep 20; done`. `pgrep -f` matched
+the waiter's *own* command line, so it would have spun forever; I noticed only because the log file it
+was supposed to create never appeared. Any future waiter needs a pattern that cannot match itself (or
+should just wait on the meta JSON the trainer writes at the end, which is what I switched to).
+
+**Next step.** The finer ordering claim that still rests on one seed each is "5 trainable blocks next to
+the readout beat 5 at the bottom" (frozen-deep 0.558 vs frozen-mirror 0.626). That 0.068 gap is only
+~1.7× the seed spread measured here, making it the weakest surviving sub-claim; a second seed at
+frozen-deep (~45 min training under contention plus ~2 min of scoring) would settle it. No `STOP`
+written — wall clock and a named next experiment both remain.
+
+On track? yes — plan complete (S1–S15) plus twelve PLAN-named follow-ups; the depth step now has two
+seeds a side and separates disjointly, and one published parameter count was corrected; blocker: none.

@@ -374,7 +374,7 @@ Null results are complete when the validity gates pass. When complete, write an 
       deliverables. New helper `experiments/frozen_pairwise.py` computes the between-run paired
       Wilcoxon shifts from `frozen_assay_raw.npz`.
 
-- [ ] **S14 - Width control (depth vs parameter count).** The prediction the hypothesis paragraphs now
+- [x] **S14 - Width control (depth vs parameter count).** The prediction the hypothesis paragraphs now
       end on, and the confound S13 leaves open: frozen_two froze 82.9% of the parameters *and* left one
       usable block, so it cannot separate trainable depth from capacity. Retrain the reference recipe at
       full depth but half width (`n_embd` 192 instead of 384, nothing frozen), which removes a
@@ -382,6 +382,28 @@ Null results are complete when the validity gates pass. When complete, write an 
       the reference run's final validation accuracy before being assayed, and the prediction ("depth is
       what matters, so ~0.35 like the reference" versus "parameter count matters, so ~0.47 like the
       eight-trainable-block runs") is reported as confirmed or falsified with the depth profile.
+      **DONE 2026-08-02:** confirmed - median `w` 0.397 at matched accuracy (0.437 for the second
+      seed), the depth account's range, against the capacity account's ~0.47.
+
+- [x] **S15 - Second seed at frozen-early (error bar on the depth step).** Reopened 2026-08-03 after a
+      pod reset wiped the `/tmp` scratch checkpoints. S14c gave the 12-trainable-block end of the depth
+      comparison two seeds; the 8-block end still had one, so the load-bearing 0.397-vs-0.476 step could
+      not be read against the seed spread. `train_frozen.py --freeze 1,2,3,4 --seed 2024 --tag
+      frozen_early_s2` retrains frozen-early from a fresh initialization, everything else identical, and
+      `narrow_assay.py frozen_early_s2` scores it on the same 150 pairs. -> verify: the replicate reaches
+      the reference's final validation accuracy before being assayed, and the report states the paired
+      per-seed shift plus a rank test over the six matched-accuracy runs.
+      **DONE 2026-08-03: verified** (matched at step 2750, val 0.5529, the same step as seed 1337).
+      Median `w` **0.498** against seed 1337's 0.476, per-pair widths indistinguishable (paired `dw`
+      +0.001, p = 0.40); relocation signature reproduced (0.498/0.498/0.501 at injection blocks 0/2/4).
+      The 12- and 8-trainable-block groups are now **disjoint** across three runs each (0.397-0.443 vs
+      0.476-0.500, one-sided rank-sum p = 0.05, the floor for 3-vs-3). Figure 24 in both deliverables.
+      Side fixes forced by the scratch wipe: `allpairs_sweep.load_vocab` rebuilds the 65-character
+      vocabulary from the SHA-verified corpus when the pilot checkpoint is gone, and `plot_capacity.py`
+      reads the narrow run's parameter count from `results/train_meta_narrow192.json` instead of a
+      checkpoint - which exposed a counting error (the old value summed the state_dict, double-counting
+      the tied embedding/unembedding weight: 5,584,896 -> **5,375,808**, so the narrow run has 4.0%
+      *fewer* trainable parameters than frozen-early, not 0.3% more).
 
 ## Fallback
 
@@ -407,19 +429,36 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**DIRECTION CLOSED 2026-08-02 (`STOP` written).** Final iteration was verification only: no experiment
-run, no deliverable rewritten. `python3 experiments/check_render.py REPORT.md RESULTS.md` returns ALL
-CHECKS PASS (REPORT 29 display / 449 inline equations / 27 figures; RESULTS 27 figures; 0 problems);
-27 `![…]` embeds match 27 visible `**Figure N.**` captions in each file; all 27 referenced PNGs exist;
-zero bare `(plots/x.png)` paths; structure is Summary -> Methods -> Results -> Conclusion; a staleness
-grep for version-history and "not performed"/"was not run" language returns nothing. All five
-`human_feedback*` files end in `.addressed.md`, so rule 11's bar for `STOP` is met. **If new feedback
-is dropped here, delete `STOP` first, address it, then re-write `STOP` only once clean.**
+**REOPENED 2026-08-03** (the wrapper relaunched the direction and the earlier `STOP` is gone; the pod
+was also reset, so every `/tmp` scratch checkpoint from the previous sessions was wiped). This
+iteration ran the cheapest strengthening the previous `Next step` named — a second seed at
+frozen-early — and re-verified the deliverables. `python3 experiments/check_render.py REPORT.md
+RESULTS.md` returns ALL CHECKS PASS (REPORT 29 display / 456 inline equations / 27 figures; RESULTS 27
+figures; 0 problems); 27 `![…]` embeds match 27 visible `**Figure N.**` captions in each file; all 27
+referenced PNGs exist; zero bare `(plots/x.png)` paths. All five `human_feedback*` files end in
+`.addressed.md`; zero unaddressed feedback remains. **No `STOP` is written while wall clock and a named
+next experiment remain.**
 
-**PLAN COMPLETE (S1-S14) + operator feedback #4 (2026-08-02 file) addressed + eleven PLAN-named
+**PLAN COMPLETE (S1-S15) + operator feedback #4 (2026-08-02 file) addressed + twelve PLAN-named
 follow-ups DONE (denser Figure-9 grid, readout rebalancing, MLP-gain intervention, per-block scan,
 frozen-block training test, deep-freeze training test, mirror-image freeze, two-block freeze, narrow
-run, narrow run scored at end of training, second narrow seed).** All five `human_feedback*` files are `.addressed.md`; zero unaddressed feedback remains.
+run, narrow run scored at end of training, second narrow seed, second frozen-early seed).**
+
+- **S15 second frozen-early seed DONE (2026-08-03, latest) - the depth step now separates cleanly with
+  two seeds a side.** `--freeze 1,2,3,4 --seed 2024` reaches the reference's accuracy at step 2750 (val
+  0.5529, the same step as seed 1337) and completes the full 30000 steps (val 0.5629 vs 0.5625). Median
+  `w` **0.498** at matched accuracy against seed 1337's 0.476 - per-pair widths indistinguishable
+  (paired +0.001, half the pairs each way, p = 0.40), deciles matching within 0.02 - and **0.445** at
+  step 30000 against 0.471, i.e. 0.027 the *other* way (paired -0.030, p = 3.3e-5), so seed noise is
+  <=0.04 with no consistent sign. Relocation signature reproduced at both checkpoints (injection blocks
+  0/2/4 give 0.498/0.498/0.501 and 0.445/0.444/0.443 - the frozen group contributes nothing). Across
+  runs, the three with 12 trainable blocks (0.443, 0.397, 0.437) are **disjoint** from the three with 8
+  (0.476, 0.498, 0.500): one-sided rank-sum p = 0.05, the floor for 3-vs-3. All four
+  narrow-vs-frozen-early seed combinations agree pair by pair (-0.073, -0.067, -0.044, -0.063, each
+  p <= 2.7e-8). CORRECTED this iteration: the narrow run's parameter count was summing the state_dict,
+  which double-counts the tied embedding/unembedding weight - 5,584,896 -> **5,375,808**, so the narrow
+  run has 4.0% *fewer* trainable parameters than frozen-early rather than 0.3% more (this strengthens
+  the depth conclusion: the sharper run is the one with less capacity).
 
 - **S14c second narrow seed DONE (2026-08-02, latest) - the depth conclusion now has an across-seed
   error bar, and one sub-claim is retracted.** A second `n_embd` 192 run (model seed 2024, nothing
@@ -637,17 +676,26 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
-**`STOP` WRITTEN 2026-08-02** — the plan is complete and zero unaddressed `human_feedback*`/`*REVIEW*`
-files remain, which is the whole of rule 11's bar. (Earlier iterations held off because feedback #4's
-"do not extend training *yet*" anticipated a follow-up ask; that ask never arrived and the time budget
-is now spent.) A re-entering agent that finds new feedback beside this `STOP` must delete `STOP`,
-address the file, and only re-write it once clean.
+**S15 IS DONE (2026-08-03) — the frozen side of the depth step now has its own seed.** Both ends of the
+12-vs-8-trainable-block comparison carry two initializations, the two groups' matched-accuracy medians
+are disjoint (0.397-0.443 vs 0.476-0.500, one-sided rank-sum p = 0.05), and within-condition seed noise
+is <=0.04 with no consistent sign.
 
-If the direction is resumed, the cheapest strengthening is a **second seed at frozen-early**
-(`--freeze 1,2,3,4 --seed 2024`, ~16 min to a matched checkpoint plus ~70 s of `frozen_assay` scoring).
-S14c showed the across-seed spread is ~0.04, which is the same order as the frozen series' *finer*
-ordering claims — those five conditions are still one seed each. The headline depth-over-capacity gap
-(0.08-0.10) is roughly twice that spread and is safe; Limitation 7 already states this correctly.
+**Immediate next candidate: a second seed at frozen-deep or frozen-mirror.** The *finer* ordering claim
+that still rests on one seed each is "5 trainable blocks next to the readout beat 5 at the bottom"
+(0.558 vs 0.626). That 0.068 gap is only ~1.7x the seed spread measured here, so it is the weakest
+surviving sub-claim; `--freeze 1,2,3,4,5,6,7 --seed 2024 --tag frozen_deep_s2` (~45 min to the full
+30000 steps under GPU contention, ~2 min of `narrow_assay.py` scoring, and both checkpoints usable)
+would settle it. Everything else open needs a longer character run whose second descent separates from
+initial fit, the denser Figure-9 grid on the pilot run's local maximum, interpolation at non-final
+positions, or a second model/tokenizer.
+
+**Practical note for the next agent: `/tmp` does not survive.** The pod reset before this iteration
+wiped every scratch checkpoint (`/tmp/dir13_ckpt_*`, `/tmp/dir13_frozen/*`) and the corpus. Re-download
+tinyshakespeare to `/tmp/tinyshakespeare.txt` (SHA-256 `86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed`,
+asserted by `allpairs_sweep.load_vocab`) before running anything. Only the reference run's *per-pair*
+results survive, in `results/frozen_assay_raw.npz` — which is enough to score a new run against every
+existing condition, but not to re-measure an old one.
 
 Four candidate mechanisms have now been excluded in turn: the next-character decision (survives the
 ablation that destroys the plateau), endpoint plausibility (does not mediate the intervention and moves
@@ -658,17 +706,12 @@ relocation is free in *site* but not in *amount*, and below roughly one usable b
 plateau left to relocate. What the responsible blocks actually *compute* to produce the sharp change
 remains uncharacterised - that gap has not moved in five iterations.
 
-**S14 is DONE and it answered the question.** The narrow run (`n_embd` 192, nothing frozen, 5.58M
-parameters against frozen_early's 5.60M trainable ones) lands at median `w` **0.397** at matched
-accuracy - the depth account's ~0.35-0.44, not the capacity account's ~0.47. Trainable depth is the
-variable; parameter count is not. (S14c's second seed gives 0.437, so the spread is ~0.04; its one
-casualty is the claim that the narrow run is *sharper* than the reference, which does not replicate.)
-
-**Immediate next candidate: a second seed for one frozen condition.** The narrow condition now has two
-seeds; the five frozen conditions have one each, so the 12->8-block step (0.397/0.437 -> 0.476) that
-carries the depth ordering still has no across-seed error bar on the frozen side. Retraining
-frozen-early from model seed 2024 (`--freeze 1,2,3,4 --seed 2024`, ~16 min to a matched checkpoint plus
-70 s of `frozen_assay`-style scoring) is the cheapest remaining strengthening.
+**S14 is DONE and it answered the question.** The narrow run (`n_embd` 192, nothing frozen, 5.38M
+parameters against frozen_early's 5.60M trainable ones - 4.0% *fewer*, corrected 2026-08-03) lands at
+median `w` **0.397** at matched accuracy - the depth account's ~0.35-0.44, not the capacity account's
+~0.47. Trainable depth is the variable; parameter count is not. (S14c's second seed gives 0.437, so the
+spread is ~0.04; its one casualty is the claim that the narrow run is *sharper* than the reference,
+which does not replicate.)
 
 **S14b is DONE: the fully-trained row confirms it under the second framing.** The narrow run finished
 (stopped by the harness time budget at step 27,143 of 30,000, lr 1.2e-4 rather than 1.0e-4 - reported

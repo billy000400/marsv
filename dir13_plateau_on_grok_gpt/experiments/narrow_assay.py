@@ -25,7 +25,9 @@ from mlp_gain_probe import N_PAIRS, SEED
 from mlp_block_scan import sweep, endpoint_stats, rho, partial_rho
 from frozen_assay import load_ckpt, curves, depth_widths, CKPT_ROOT, RES
 
-TAG = sys.argv[1] if len(sys.argv) > 1 else "narrow192"  # e.g. narrow192_s2 for the second seed
+# Any single run tag under CKPT_ROOT: narrow192, narrow192_s2, frozen_early_s2 (the second seed of
+# a frozen condition -- the frozen block list is read off the checkpoint, so no flag is needed).
+TAG = sys.argv[1] if len(sys.argv) > 1 else "narrow192"
 
 
 def main():
@@ -57,7 +59,9 @@ def main():
             continue
         model, ck = load_ckpt(path, device)
         r = sweep(model, seqs, pairs, ts, device, *endpoint_stats(model, stoi, seqs, device))
-        row = {"kind": "narrow", "step": int(ck["step"]), "frozen_blocks": [],
+        blocks = list(ck.get("frozen_blocks", []))
+        row = {"kind": "frozen" if blocks else "narrow", "step": int(ck["step"]),
+               "frozen_blocks": blocks,
                "n_embd": int(ck["cfg"]["n_embd"]), "val_acc": ck.get("val_acc"), "ckpt": path,
                "median_w": round(float(np.nanmedian(r["w"])), 4),
                "mean_w": round(float(np.nanmean(r["w"])), 4),

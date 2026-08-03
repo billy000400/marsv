@@ -972,3 +972,59 @@ conditions), `results/frozen_pairwise.json`, `results/train_hist_frozen_two.json
 - **STOP written.** The plan (S1–S14) plus twelve PLAN-named follow-ups are complete and all five
   `human_feedback*` files end in `.addressed.md`, so zero unaddressed feedback remains (CLAUDE.md
   rule 11 satisfied).
+
+## 2026-08-03 — S15: second seed at frozen-early; the depth step now separates with two seeds a side
+
+Direction reopened by the wrapper (the previous `STOP` is gone). No unaddressed `human_feedback*` /
+`*REVIEW*` file exists — all five end in `.addressed.md` — so this iteration advanced the plan by the
+step the previous `Next step` named. The pod had also been reset, wiping every `/tmp` scratch
+checkpoint and the corpus.
+
+- **New experiment (`train_frozen.py --freeze 1,2,3,4 --seed 2024 --tag frozen_early_s2`, 30,000 steps,
+  44.7 min).** Frozen-early retrained from a second model initialization, everything else identical
+  (corpus SHA, split, data order, optimizer, cosine schedule, batch, checkpoint grid, freeze mask).
+  Reaches the reference's final validation accuracy at step **2,750** — the same step as seed 1337 —
+  with val 0.5529, and finishes at val **0.5629** (seed 1337: 0.5625). Scored on the same 150 pairs by
+  `narrow_assay.py frozen_early_s2`, which now reads the frozen block list off the checkpoint so it
+  handles frozen as well as narrow tags.
+- **RESULTS.md / REPORT.md — seed-replication result added (new numbers, nothing superseded).**
+  Frozen-early matched-accuracy median width **0.498** against seed 1337's 0.476, with per-pair widths
+  statistically indistinguishable (paired `Δw` +0.001, exactly half the pairs each way, p = 0.40) and
+  the two distributions agreeing decile by decile (10th/50th/90th 0.286/0.498/0.653 vs
+  0.308/0.476/0.647). At step 30,000: **0.445** against 0.471, i.e. 0.027 in the opposite direction
+  (paired −0.030, p = 3.3e-5). Seed noise is therefore ≤ 0.04 with no consistent sign. The relocation
+  signature reproduces at both checkpoints (injection blocks 0/2/4 → 0.498/0.498/0.501 and
+  0.445/0.444/0.443; the frozen group contributes nothing).
+- **New cross-run statistic.** With two seeds at each end, the three runs with 12 trainable blocks
+  (reference 0.443, narrow 0.397 and 0.437) are **disjoint** from the three with 8 (frozen-early 0.476
+  and 0.498, frozen-late 0.500): one-sided rank-sum **p = 0.05**, the floor for a 3-vs-3 design.
+  All four narrow-vs-frozen-early seed combinations agree pair by pair (−0.073, −0.067, −0.044,
+  −0.063; each p ≤ 2.7e-8). `experiments/frozen_pairwise.py` now computes both the second-seed paired
+  shifts and this rank test into `results/frozen_pairwise.json`.
+- **CORRECTION carried into both deliverables — narrow-run parameter count.** The published count
+  summed the model's `state_dict`, which double-counts the tied embedding/unembedding weight and adds
+  the causal-mask buffers. Corrected to `model.parameters()`, the count used for every other run:
+  **5,584,896 → 5,375,808**. The narrow run therefore has **4.0% fewer** trainable parameters than
+  frozen-early's 5,601,360, not 0.3% more. This strengthens rather than weakens the depth conclusion —
+  the sharper run is the one with *less* capacity — and the text now says so. Summary, Methods,
+  Results and the Figure 24 caption updated in REPORT.md; the matching bullet and caption in RESULTS.md.
+- **Figure 24 regenerated** (`plots/capacity_vs_depth.png`): six frozen-run markers instead of five
+  (five frozen groups, two seeds of frozen 1–4), the corrected narrow-run x position, and each
+  condition labelled once — the two-seed conditions read "(2 seeds)" with their two markers adjacent,
+  which also fixed the label collisions the extra run introduced. Caption rewritten in both
+  deliverables to define the new marker convention and to name both across-seed gaps.
+- **Limitation 7 / caveats updated.** Two conditions now carry a second seed; the other four frozen
+  conditions are still one seed each, so the *finer* ordering claim (5 trainable blocks near the
+  readout beating 5 at the bottom, 0.558 vs 0.626) is flagged as resting on a gap only ≈1.5× the
+  measured seed spread.
+- **Rule 9a fix.** The "Models actually tested" table in RESULTS.md sat directly under its heading with
+  no prose; a lead paragraph now states what each of the three models is doing and why it matters.
+- **Repairs forced by the scratch wipe (no result changed).** `allpairs_sweep.load_vocab()` rebuilds
+  the 65-character vocabulary from the SHA-verified corpus when the pilot checkpoint is missing
+  (verified byte-identical vocabulary), and `plot_capacity.py` reads the narrow run's parameter count
+  from `results/train_meta_narrow192.json` rather than loading a checkpoint.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 456 inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds
+  and 27 visible `**Figure N.**` captions per file; zero bare `(plots/x.png)` paths.
+- **No `STOP` written** — wall clock and a named next experiment (a second seed at frozen-deep or
+  frozen-mirror) both remain.

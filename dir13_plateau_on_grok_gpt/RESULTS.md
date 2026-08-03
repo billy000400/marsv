@@ -72,6 +72,13 @@ PLAN case 1, "temporally associated," for the character analogues.**
 
 ## Models actually tested
 
+Three models carry every number below, and which one carries which matters for how far the claims
+reach: the fresh **character** GPT is the only model that both passes the grokking gate and supports
+the plateau assays, so it does all the mechanistic work; the **BPE** GPT is the only one that can hold
+Matthew's exact words as single tokens, and it fails the gate, which is precisely why the primary
+Grokking↔plateau question stays untestable; the **pilot** run is kept only as a sanity check that
+the recipe trains.
+
 | Model | Tokenizer | Params | Trained to | Role |
 |---|---|---|---|---|
 | Fresh character GPT | char (vocab 65) | 8.38M | 30,000 steps, val acc 0.554 (peak 0.568) | Figure-9 control + **Matthew char-control assay** + all-pairs sweep |
@@ -869,8 +876,10 @@ final accuracy and the open markers are the matched-accuracy checkpoints.
 - **Depth, not parameter count: the confound is now broken.** Every frozen run removes trainable
   blocks *and* trainable parameters at once, so "width tracks trainable depth" and "width tracks
   trainable capacity" fit all five equally well. The narrow run separates them: `n_embd` 192 instead of
-  240, **nothing frozen**, so all 12 blocks train but the network holds only **5,584,896** parameters —
-  within **0.3%** of frozen-early's 5,601,360 trainable parameters. The capacity account predicts
+  240, **nothing frozen**, so all 12 blocks train but the network holds only **5,375,808** parameters —
+  **4.0% fewer** than frozen-early's 5,601,360 trainable parameters (both counted the same way, with
+  the tied embedding/unembedding weight counted once), so on the capacity axis the narrow run is if
+  anything handicapped rather than favoured. The capacity account predicts
   frozen-early's ≈0.47; the depth account predicts the reference's ≈0.35–0.44. At matched accuracy
   (step 2,750, val 0.5543) it lands at **0.397** (IQR 0.311–0.526): paired `Δw` **−0.073** vs
   frozen-early (only 23% of pairs wider, p = 2.5e-15) and **−0.092** vs frozen-late (13%, p = 1.8e-19),
@@ -882,19 +891,35 @@ final accuracy and the open markers are the matched-accuracy checkpoints.
   `|t* − t_flip|` 0.061 — and it is the only non-reference run that keeps the sharpest tail, meeting the
   strict plateau rule on **13.3%** of pairs against 0–0.7% for all five frozen runs.
 
-- **A second seed puts an error bar on that gap, and the conclusion survives.** Every point in the
-  depth series is one seed, so the load-bearing 0.397-vs-0.476 comparison had no across-seed spread.
-  Retraining the narrow model from a different initialization (model seed 2024, same data order, same
-  schedule) reaches the reference's accuracy at the same step 2,750 (val 0.5547) and lands at median
-  width **0.437** (IQR 0.326–0.514, strict rule 10.7%). So the seed-to-seed spread on this measure is
-  ≈**0.04** (paired `Δw` +0.015 against seed 1337, p = 0.015) — real, but smaller than the effect it is
-  being used to judge. Both narrow seeds still sit **below** frozen-early (seed 2 paired `Δw`
-  **−0.044**, 33% of pairs wider, p = 2.7e-8) and far below frozen-late (**−0.062**, 20%, p = 1.6e-16),
-  and their mean 0.417 is nearer the depth account's ≈0.35–0.44 than the capacity account's ≈0.47. The
-  one sub-claim the second seed **retracts** is that the narrow run beats the full-width reference at
-  matched accuracy: seed 2 is statistically indistinguishable from the reference's 0.443 (paired `Δw`
-  −0.004, 46% wider, p = 0.17), so the honest statement is that removing a third of the parameters
-  costs nothing measurable, not that it helps.
+- **Both ends of the load-bearing comparison now carry a second seed, and seed noise is small.** The
+  depth conclusion rests on runs with 12 trainable blocks coming out sharper than runs with 8, and
+  until now every point on that axis was a single initialization — so a 0.397-vs-0.476 gap had no error
+  bar under it. Both ends were therefore retrained from a fresh model seed (2024; identical data order,
+  schedule, freeze mask and matched-accuracy rule). The **narrow** run repeats at median width
+  **0.437** (IQR 0.326–0.514, strict rule 10.7%) against seed 1337's 0.397 — a small but detectable
+  shift (paired `Δw` +0.015, p = 0.015). **Frozen-early** repeats almost exactly: **0.498** against
+  0.476, and its per-pair widths are statistically indistinguishable from the first seed's (paired `Δw`
+  **+0.001**, exactly half the pairs shifting each way, p = 0.40), with the two distributions agreeing
+  decile by decile (10th/50th/90th percentile 0.286 / 0.498 / 0.653 against 0.308 / 0.476 / 0.647).
+  Seed noise on this measure is therefore **≤ 0.04**, comfortably inside the 0.06–0.10 step it is being
+  asked to resolve, and it has no consistent direction: trained on to step 30,000 (val accuracy 0.5629,
+  against seed 1337's 0.5625) the second frozen-early seed comes out at **0.445** where the first gave
+  0.471, i.e. 0.027 in the *opposite* direction (paired `Δw` −0.030, p = 3.3e-5). The second seed also
+  reproduces the *relocation*: injecting at blocks 0, 2 and 4 gives 0.498 / 0.498 / 0.501 at matched
+  accuracy and 0.445 / 0.444 / 0.443 at step 30,000 — its frozen group contributes nothing at either
+  checkpoint — with the sharpening spread over blocks 5–8 and 9–10, the same signature as seed 1337.
+
+- **With two seeds a side the depth step is a clean separation, not an overlap.** Ranking the six
+  matched-accuracy runs by median width puts all three with 12 trainable blocks (reference 0.443,
+  narrow 0.397 and 0.437) below all three with 8 (frozen-early 0.476 and 0.498, frozen-late 0.500):
+  the two groups are **disjoint**, which is the smallest one-sided rank-sum p a 3-versus-3 comparison
+  can produce (**p = 0.05**). All four narrow-versus-frozen-early seed combinations agree pair by pair
+  as well — `Δw` −0.073, −0.067, −0.044 and −0.063, each with p ≤ 2.7e-8 — so the gap does not depend
+  on which initialization is placed on which side. The one sub-claim a second seed **retracts** is that
+  the narrow run beats the full-width reference at matched accuracy: narrow seed 2 is statistically
+  indistinguishable from the reference's 0.443 (paired `Δw` −0.004, 46% of pairs wider, p = 0.17), so
+  the honest statement is that removing a third of the parameters costs nothing measurable, not that it
+  helps.
 
 - **Trained on to the end, the narrow run is if anything sharper than the full-width reference.** The
   matched-accuracy comparison above is the primary one, because it is the only axis on which runs of
@@ -903,8 +928,8 @@ final accuracy and the open markers are the matched-accuracy checkpoints.
   accuracy 0.5639), against the reference's fully-trained **0.351**: paired over the same 150 pairs
   that is **−0.010**, with only 43% of pairs wider (p = 2.1e-4), i.e. indistinguishable-to-slightly-
   sharper. Against the fully-trained frozen runs the gap is large and one-sided — **−0.124** vs
-  frozen-early (0.471; just 1.3% of pairs wider, p = 2.6e-26) and **−0.146** vs frozen-late (0.484;
-  3.3%, p = 3.6e-26). Its depth profile stays front-loaded (0.332 / 0.626 / 0.746 / 0.794 / 0.802 /
+  frozen-early (0.471; just 1.3% of pairs wider, p = 2.6e-26), **−0.098** vs frozen-early's second seed
+  (0.445; 11%, p = 6.5e-24) and **−0.146** vs frozen-late (0.484; 3.3%, p = 3.6e-26). Its depth profile stays front-loaded (0.332 / 0.626 / 0.746 / 0.794 / 0.802 /
   0.808 at injection blocks 0 / 2 / 4 / 8 / 10 / 11), 12.0% of pairs meet the strict rule (reference
   10.0%), and the plausibility association holds (partial ρ = −0.51). One caveat on this row only: the
   harness time budget stopped it at 27,143 of the planned 30,000 steps, so its cosine schedule had
@@ -919,18 +944,20 @@ once, with every run shown at the same validation accuracy and again at the end 
 **Figure 24.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0.
 y (both panels): median transition width `w_10→90` (lower = sharper plateau), bars = interquartile
 range; the gray dashed horizontal line is the untrained value 0.803. **Left:** x = number of trainable
-transformer blocks (axis reversed, 12 → 2; the three 12-block runs are drawn side by side). **Right:**
-x = trainable parameters in millions (the two narrow seeds share an x and are likewise nudged apart).
-Large filled circles are the three runs with all 12 blocks
-trainable (the 240-wide reference and the two seeds of the 192-wide narrow run); large open diamonds are the five runs
-with blocks frozen at initialization; each large marker is that run's first checkpoint to reach the
-reference's final validation accuracy 0.550. The small open square joined to it by a dotted line is the
-same run at the end of training. Width falls monotonically along the left panel's axis but is unordered
-along the right one: at ≈5.6M trainable parameters both narrow seeds (filled) are sharper than both
-eight-block frozen runs (open), and the 8.4M reference is no sharper than the 5.6M narrow runs — and the
-end-of-training squares preserve that ordering, so it is not an artifact of the matching rule. The gap
-between the two filled circles at 12 blocks is the across-seed spread (0.397 vs 0.437), which is
-smaller than the step from 12 to 8 trainable blocks.
+transformer blocks (axis reversed, 12 → 2). **Right:** x = trainable parameters in millions. Runs that
+share an x on either axis are nudged apart so they can be told apart; where a label says "(2 seeds)",
+the two adjacent markers of that style are the same run trained from two model seeds. Large filled
+circles are the three runs with all 12 blocks trainable (the 240-wide reference and the two seeds of
+the 192-wide narrow run); large open diamonds are the six runs with blocks frozen at initialization
+(five frozen groups, with two seeds of frozen 1–4); each large marker is that run's first checkpoint to
+reach the reference's final validation accuracy 0.550. The small open square joined to it by a dotted
+line is the same run at the end of training. Width falls monotonically along the left panel's axis but
+is unordered along the right one: at 5.4–5.6M trainable parameters both narrow seeds (filled) are
+sharper than all three eight-block frozen runs (open), and the 8.4M reference is no sharper than the
+5.4M narrow runs — and the end-of-training squares preserve that ordering, so it is not an artifact of
+the matching rule. The gaps between the two filled circles at 12 blocks and the two adjacent diamonds
+at 8 blocks are the across-seed spreads (0.397 vs 0.437; 0.476 vs 0.498); both are smaller than the
+step between the two groups, whose ranges do not overlap.
 
 **What this settles.** "Blocks 1–4 build the sharpness" is true of *this trained network at inference*
 — deleting their MLPs still flattens `d(t)` completely — but false as a claim about training. The sharp
@@ -1040,4 +1067,7 @@ whichever blocks stay trainable (blocks 5–8 at width 0.471, blocks 8–11 at 0
 and block 11 alone at 0.726). So the plateau is a decision *basin* by description, produced by a
 **relocatable** computation that we have not yet characterised, whose sharpness is set by how much
 trainable depth is left rather than by any particular weights or site — and which degrades into a
-17%-strength remnant once only one usable block remains.
+17%-strength remnant once only one usable block remains. That depth ordering now carries a seed check
+at its load-bearing step: with two initializations at each end, the three runs with 12 trainable blocks
+(0.397–0.443) stay disjoint from the three with 8 (0.476–0.500), and the spread between seeds of one
+condition (≤ 0.04) is smaller than the step between the groups.
