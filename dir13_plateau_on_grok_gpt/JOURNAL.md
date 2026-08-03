@@ -1486,3 +1486,50 @@ remains.
 On track? yes — S17, S18 and S19 all done and curated this iteration, the frozen-block conclusion
 re-framed once and its follow-up description falsified and replaced, with the replacement's own test
 pre-registered; blocker: none.
+
+## 2026-08-03 (iteration: S20 — the pre-registered test runs and the split falls)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: five `human_feedback*` files,
+all five already ending in `.addressed.md`. Zero unaddressed feedback, so this iteration advanced the
+plan. `/tmp` had survived — the corpus was present, so no re-download.
+
+**I ran the experiment the last three iterations had been building toward, and it falsified its own
+prediction.** `train_frozen.py --freeze 0,6,7,8,9,10,11 --tag frozen_mid_low` (trainable 1–5) was
+pre-registered in PLAN, both hypothesis paragraphs and the Conclusion as the test of the interior/end
+split: its usable window touches block 1, so it had to land **above 0.47**. It lands at **0.363** at
+matched accuracy and **0.326** at step 30,000, indistinguishable from the two mid-stack five-block
+windows (p = 0.27, 0.23) and 0.10–0.23 clear of every end window. The split is withdrawn. That is the
+second post-hoc description of this series to die on the first experiment aimed at it, and the second
+time in three iterations that pre-registering the number *before* launching the run is what made the
+retraction cheap rather than embarrassing.
+
+**The replacement is not another fitted rule, and that is deliberate.** The strongest thing this run
+gives is a two-network comparison with no regularity in it: blocks 1–5 are a strict *subset* of
+frozen-late's trainable 0–7, and they are 0.118 sharper (p = 2.2e-25). Removing trainable blocks
+sharpens the plateau. Nine runs cannot be summarised by trainable count, and now they cannot be
+summarised by window geometry either, but that one sentence stands on two runs and survives whatever
+happens to the descriptions. I promoted it to the front of the frozen-block story in both deliverables
+and demoted the geometry to a labelled description: every usable window covering block 5 gives
+0.363–0.500, the three without it 0.559–0.712 — stated with the explicit note that it earns no credit
+until tested, and with its test (a window at blocks 6–10, which excludes block 5 while touching neither
+end, predicted ≥ 0.55) written into PLAN and both deliverables before it is run.
+
+**Practical notes.** (1) The ten-series figure needed the palette re-assigned rather than extended:
+the five CVD hues now map onto the five five-block windows, which are exactly the left small multiple,
+and the four other freeze sizes take four gray lightnesses in the right one — so each panel is one
+family and no panel exceeds five hues. A tenth *five-block* run would break this; the next split would
+have to be by window position. (2) The capacity figure's 5-block column holds six markers now and
+needed a finer nudge grid (±2.0 in steps of 0.8). (3) Chaining assay+plots off the trainer's meta JSON
+worked again; 20.2 min for 30,000 steps at bs 48.
+
+**Verification.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 29 display / 569
+inline equations / 27 figures; RESULTS 27 figures; 0 problems).
+
+**Next step.** S21: `--freeze 0,1,2,3,4,5,11 --tag frozen_high` (trainable 6–10), the pre-registered
+test of the coverage description — ≥ 0.55 confirms it, near 0.365 refutes it and leaves the series with
+no geometric summary at all, which would itself be the honest finding. A second seed at frozen-mirror
+remains the runner-up. No `STOP` written — a named, pre-registered experiment remains.
+
+On track? yes — S20 done, its pre-registered prediction refuted and the refuted claim withdrawn from
+both deliverables the same iteration, with a rule-free replacement claim (subset of blocks, sharper
+plateau) promoted in its place; blocker: none.

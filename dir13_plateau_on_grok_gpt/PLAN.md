@@ -528,7 +528,15 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**S17 DONE 2026-08-03 (latest) — its prediction was FALSIFIED, and that falsification re-framed the
+**S20 DONE 2026-08-03 (latest) — the pre-registered interior/end test was run and REFUTED the split.**
+Five trainable blocks at 1–5 (freeze block 0 and 6–11) had to land above 0.47; they land at **0.363**
+(matched) / **0.326** (step 30,000), with the mid-stack group. Withdrawn from both deliverables and
+replaced by a rule-free claim — blocks 1–5 are a strict subset of frozen-late's 0–7 and are 0.118
+sharper (p = 2.2e-25), so removing trainable blocks sharpens the plateau — plus a labelled, untested
+coverage description (windows over block 5: 0.363–0.500; without it: 0.559–0.712) whose own test is
+S21, pre-registered below.
+
+**S17 DONE 2026-08-03 — its prediction was FALSIFIED, and that falsification re-framed the
 frozen-block conclusion (rule 9b).** Five trainable blocks in the *middle* of the stack (freeze 0–3 and
 9–11) were predicted to land between the two known five-block values at 0.58–0.60. They land at
 **0.365** at matched accuracy and **0.331** at step 30,000 — below both siblings, below every
@@ -813,15 +821,29 @@ accuracy) below frozen-mirror's 0.626, spread 0.031.
 
 **S17, S18 and S19 are all DONE and fully curated (2026-08-03); nothing is waiting on disk.**
 
-**Immediate next candidate: S20, the five-block window at blocks 1-5** (`train_frozen.py --freeze
-0,6,7,8,9,10,11 --tag frozen_mid_low`). It is the pre-registered test of the only surviving descriptive
-account - the interior-versus-end split - and its prediction is already written into the S20 stage
-entry, both hypothesis paragraphs and the Conclusion (**above 0.47**; near 0.365 falsifies the split).
-~21 min of training plus ~2 min of `narrow_assay.py frozen_mid_low`, then `frozen_pairwise.py` ->
-`plot_capacity.py` -> `plot_frozen.py`. Both plot scripts need the new tag added to their run lists
-before they draw it: `plot_capacity.py` needs a nudge offset (the 5-block column already holds four
-markers) and `plot_frozen.py` needs the tag in `STYLE` and in the left-hand `DEPTH_GROUPS` panel, which
-would then carry six series - so that panel needs splitting again, or the mirror run demoting to gray.
+**S20 IS DONE (2026-08-03) and it REFUTED its own pre-registered prediction.** The five-block window
+at blocks 1-5 (`--freeze 0,6,7,8,9,10,11 --tag frozen_mid_low`) had to land **above 0.47** if the
+interior/end split held. It lands at **0.363** (matched acc, step 3,500) and **0.326** (step 30,000) -
+the sharpest final width of any of the fourteen models here - indistinguishable from the two mid-stack
+five-block windows (p = 0.27, 0.23) and 0.10-0.23 clear of every end window. The split is **withdrawn**
+from both deliverables.
+
+What replaced it is deliberately not another fitted rule: blocks 1-5 are a strict **subset** of
+frozen-late's trainable 0-7 and are **0.118 sharper** (p = 2.2e-25), so removing trainable blocks
+sharpens the plateau - a two-network fact that survives whatever happens to the descriptions. The
+geometry is demoted to a labelled description: every usable window covering mid-stack **block 5** gives
+0.363-0.500, the three without it 0.559-0.712.
+
+**Immediate next candidate: S21, the five-block window at blocks 6-10** (`train_frozen.py --freeze
+0,1,2,3,4,5,11 --tag frozen_high`). It is the pre-registered test of that description - it excludes
+block 5 while touching neither end, so coverage predicts **>= 0.55** on a window the refuted rule would
+have called sharp; near 0.365 refutes it too and leaves the series with no geometric summary, which is
+itself the honest finding. ~21 min of training plus ~2 min of `narrow_assay.py frozen_high`, then
+`frozen_pairwise.py` -> `plot_capacity.py` -> `plot_frozen.py`; all three need the tag added first
+(`plot_frozen.py` STYLE + the left DEPTH_GROUPS panel, which would then hold six five-block series -
+split it by window position, the five-hue budget is exhausted; `plot_capacity.py` needs a seventh nudge
+slot in the 5-block column).
+
 **The alternative** is a second seed
 at frozen-mirror, the only remaining single-seed run carrying a load-bearing comparison (the
 bottom-of-stack end of the position ordering); it firms up an old number rather than answering a new

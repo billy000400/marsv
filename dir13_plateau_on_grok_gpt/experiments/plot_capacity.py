@@ -48,6 +48,7 @@ RUNS = [("ref_matched_step",      "reference\n(240 wide)",  12, TOTAL,          
         ("frozen_deep_s2_matched", "",                       5, TOTAL - 4860240,  False),
         ("frozen_mid_matched",    "frozen 0-3, 9-11",        5, TOTAL - 4860240,  False),
         ("frozen_mid_off_matched","frozen 0-1, 7-11",        5, TOTAL - 4860240,  False),
+        ("frozen_mid_low_matched","frozen 0, 6-11",          5, TOTAL - 4860240,  False),
         ("frozen_mirror_matched", "frozen 5-11",             5, TOTAL - 4860240,  False),
         ("frozen_mid3_matched",   "frozen 0-4, 8-11",        3, TOTAL - 6248880,  False),
         ("frozen_two_matched",    "frozen 1-10",             2, TOTAL - 6943200,  False)]
@@ -68,8 +69,10 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
         off = {"ref_matched_step": 1.0, "narrow192_matched": 0.0, "narrow192_s2_matched": -1.0,
                "frozen_early_matched": 1.0, "frozen_early_s2_matched": 0.0,
                "frozen_late_matched": -1.0,
-               "frozen_deep_matched": 2.0, "frozen_deep_s2_matched": 1.0,
-               "frozen_mid_matched": 0.0, "frozen_mid_off_matched": -1.0,
+               # six markers now share the 5-block column, so its nudges are on a finer grid
+               "frozen_deep_matched": 2.0, "frozen_deep_s2_matched": 1.2,
+               "frozen_mid_matched": 0.4, "frozen_mid_low_matched": -0.4,
+               "frozen_mid_off_matched": -1.2,
                "frozen_mirror_matched": -2.0}.get(key, 0.0)
         x += off * (0.55 if xi == 2 else 0.14)
         med = C[key]["median_w"]
@@ -95,6 +98,7 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                               "frozen_deep_matched": (0.55, 0.075),
                               "frozen_mid_matched": (0.15, 0.075),
                               "frozen_mid_off_matched": (0.0, -0.090),
+                              "frozen_mid_low_matched": (0.62, 0.030),
                               "frozen_mid3_matched": (-0.85, 0.075),
                               "frozen_mirror_matched": (-0.20, -0.115)},
                           3: {"narrow192_matched": (-0.80, -0.055),
@@ -103,6 +107,7 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                               "frozen_deep_matched": (-0.70, 0.075),
                               "frozen_mid_matched": (0.62, 0.075),
                               "frozen_mid_off_matched": (-0.62, -0.080),
+                              "frozen_mid_low_matched": (0.55, 0.030),
                               "frozen_mirror_matched": (0.25, -0.115)}}[xi].get(key, (0.0, 0.032))
         if key not in SECOND_SEED:
             ax.annotate(lab, (x + lab_dx, med + lab_dy), ha="center",

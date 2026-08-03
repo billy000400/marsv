@@ -1241,3 +1241,46 @@ PLAN.md and REPORT.md Methods before it was scored.
   (REPORT 29 display / 558 inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds
   and 27 visible `**Figure N.**` captions per file; zero bare `(plots/x.png)` paths.
 - **No `STOP` written** — a named, pre-registered next experiment remains.
+
+## 2026-08-03 — S20: the pre-registered interior/end test runs, and REFUTES the split
+
+- **New run (ninth frozen group, fourteenth model): `frozen_mid_low`** — `train_frozen.py --freeze
+  0,6,7,8,9,10,11 --tag frozen_mid_low`, five trainable blocks at 1–5, 58.0% of parameters frozen,
+  everything else identical to the reference character run. Matched the reference validation accuracy
+  0.5502 at step 3,500 (val 0.5503); finished step 30,000 at val 0.5732.
+- **The pre-registered prediction FAILED, and both deliverables now say so.** The interior/end split
+  (recorded in PLAN, both hypothesis paragraphs and the Conclusion last iteration) required this window
+  to land **above 0.47** because its usable window touches block 1. It lands at **0.363** (IQR
+  0.280–0.447) at matched accuracy and **0.326** (IQR 0.258–0.416) at step 30,000 — the sharpest final
+  width of any model in the study — indistinguishable from the two mid-stack five-block windows
+  (paired Δw +0.008, p = 0.27; −0.009, p = 0.23) and 0.10–0.23 sharper than every end window
+  (p ≤ 2e-21). **The interior/end split is withdrawn from both deliverables** (old: "strictly interior
+  windows 0.365–0.446, end-touching 0.476–0.712, no overlap, pre-registered test waiting" → new: the
+  test was run and refuted it).
+- **New rule-free claim promoted to the front of the frozen-block story.** frozen_mid_low's trainable
+  blocks 1–5 are a strict **subset** of frozen-late's trainable 0–7, and it is **0.118 sharper**
+  (4.7% of pairs wider, p = 2.2e-25). Removing two trainable blocks sharpens the plateau — a direct
+  two-network comparison that needs no regularity fitted to nine runs. This now leads the Summary and
+  the "what this settles" paragraph in both files, replacing the geometric split.
+- **Replacement description, explicitly given no predictive credit.** Every usable window containing
+  mid-stack **block 5** gives 0.363, 0.365, 0.365, 0.446, 0.476, 0.500; the three excluding it (8–11,
+  1–4, block 11) give 0.559–0.590, 0.629, 0.712. Vivid pair: blocks 1–4 (0.629) vs blocks 1–5 (0.363).
+  Both deliverables state that the previous description died on its first test, so this one earns
+  nothing until it survives the same treatment.
+- **New pre-registered prediction (replaces the refuted one) in PLAN, both hypothesis paragraphs, the
+  Results section and the Conclusion:** a five-block window at blocks **6–10** (freeze 0–5 and 11)
+  excludes block 5 while touching neither end, so the coverage description requires **≥ 0.55** — on a
+  window the refuted rule would have called sharp. Near 0.365 refutes it in turn.
+- **Counts updated throughout both files:** nine frozen groups / eleven frozen runs / fourteen models;
+  five runs at exactly five trainable blocks spanning 0.363–0.629; four mid-stack-window runs keep the
+  strict tail (24.7%, 21.3%, **19.3%**, 9.3%) against five that lose it.
+- **Figures.** `plots/frozen_blocks.png` (Figure 23): twelve curve panels; the ten-series palette
+  re-assigned along the two small multiples — the five CVD hues now go to the five five-block windows
+  (left panel, the runs carrying the position result) and the four other freeze sizes to gray at four
+  lightnesses (right panel), each series keeping its own dash pattern and marker.
+  `plots/capacity_vs_depth.png` (Figure 24): a fifth diamond in the 5-block column on a finer nudge
+  grid. Both captions rewritten in both deliverables (panel lists, sharpest panel now the tenth,
+  matched-accuracy step list).
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 569 inline equations / 27 figures; RESULTS 27 figures; 0 problems).
+- **No `STOP` written** — a named, pre-registered next experiment remains.

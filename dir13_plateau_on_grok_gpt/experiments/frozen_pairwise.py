@@ -83,7 +83,23 @@ PAIRS = [("frozen_two_last", "frozen_deep_last"),
          ("frozen_mid_off_last", "frozen_mid_last"),
          ("frozen_mid_off_last", "frozen_deep_last"),
          ("frozen_mid_off_last", "frozen_mirror_last"),
-         ("frozen_mid_off_last", "ref_trained")]
+         ("frozen_mid_off_last", "ref_trained"),
+         # bottom-shifted five-block window (freeze 0 and 6-11, trainable 1-5): the fifth position at
+         # five trainable blocks and the pre-registered test of the interior/end split -- its usable
+         # window touches block 1, so the split predicts it lands with the end-touching runs (> 0.47)
+         # rather than with the two interior five-block windows (0.365)
+         ("frozen_mid_low_matched", "frozen_mid_matched"),
+         ("frozen_mid_low_matched", "frozen_mid_off_matched"),
+         ("frozen_mid_low_matched", "frozen_deep_matched"),
+         ("frozen_mid_low_matched", "frozen_deep_s2_matched"),
+         ("frozen_mid_low_matched", "frozen_mirror_matched"),
+         ("frozen_mid_low_matched", "frozen_early_matched"),
+         ("frozen_mid_low_matched", "ref_matched_step"),
+         ("frozen_mid_low_last", "frozen_mid_last"),
+         ("frozen_mid_low_last", "frozen_mid_off_last"),
+         ("frozen_mid_low_last", "frozen_deep_last"),
+         ("frozen_mid_low_last", "frozen_mirror_last"),
+         ("frozen_mid_low_last", "ref_trained")]
 
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 out = {}
@@ -152,6 +168,31 @@ if "frozen_deep_s2_matched" in C:
             out[f"position_contrast_{which}"]["frozen_mid3_median"] = mid3["median_w"]
             out[f"position_contrast_{which}"]["mid3_below_both_five_block_ends"] = \
                 bool(mid3["median_w"] < min(d1, d2, m))
+
+# The interior/end split, stated after S19 and tested by S20. Order the frozen runs by their USABLE
+# trainable window -- trainable blocks intersected with 1-11, since patching at block 0 overwrites
+# block 0's output. Windows strictly inside 1-11 are "interior"; windows containing block 1 or block 11
+# are "end-touching". The split says the two groups do not overlap. frozen_mid_low (trainable 1-5)
+# was run to test it: its window touches block 1, so the split predicts it joins the end-touching
+# group. Reported as a group separation, not a p-value: one run per condition.
+INTERIOR = {"frozen_mid_matched": "4-8", "frozen_mid_off_matched": "2-6",
+            "frozen_mid3_matched": "5-7"}
+END_TOUCH = {"frozen_mid_low_matched": "1-5", "frozen_early_matched": "5-11",
+             "frozen_early_s2_matched": "5-11", "frozen_late_matched": "1-7",
+             "frozen_deep_matched": "8-11", "frozen_deep_s2_matched": "8-11",
+             "frozen_mirror_matched": "1-4", "frozen_two_matched": "11"}
+have_i = {k: C[k]["median_w"] for k in INTERIOR if k in C}
+have_e = {k: C[k]["median_w"] for k in END_TOUCH if k in C}
+if have_i and have_e:
+    out["interior_end_split"] = {
+        "interior_windows": {k: [INTERIOR[k], v] for k, v in have_i.items()},
+        "end_touching_windows": {k: [END_TOUCH[k], v] for k, v in have_e.items()},
+        "max_interior": max(have_i.values()), "min_end_touching": min(have_e.values()),
+        "groups_disjoint": bool(max(have_i.values()) < min(have_e.values())),
+        "gap": round(min(have_e.values()) - max(have_i.values()), 4),
+        "frozen_mid_low_median": have_e.get("frozen_mid_low_matched"),
+        "mid_low_joins_end_group": (None if "frozen_mid_low_matched" not in have_e else
+                                    bool(have_e["frozen_mid_low_matched"] > max(have_i.values())))}
 
 print(json.dumps(out, indent=2))
 with open(os.path.join(RES, "frozen_pairwise.json"), "w") as f:

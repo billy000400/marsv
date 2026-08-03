@@ -27,27 +27,28 @@ DASH6 = (0, (5, 1, 1, 1))         # 6th line style
 DASH7 = (0, (1, 1))               # 7th line style
 DASH8 = (0, (4, 2, 1, 2))         # 8th line style
 DASH9 = (0, (7, 2))               # 9th line style (long dashes; distinct from the default "--")
-# The CVD palette holds five hues (cvd_style.CVD) and CLAUDE.md forbids inventing a sixth. Nine
-# conditions now appear, so: the trained reference is drawn in neutral black (it is the anchor, not a
-# category), the five hues go to the five frozen runs that carry the position result, and the other
-# three go to gray at three lightnesses. Every series also has its own dash pattern and marker, so all
-# nine stay distinguishable in grayscale. The depth panel is additionally split into two small
-# multiples of five series each, which is what CLAUDE.md asks for above five categories.
-GRAYS = ("0.25", "0.50", "0.70")
+# The CVD palette holds five hues (cvd_style.CVD) and CLAUDE.md forbids inventing a sixth. Ten
+# conditions now appear, so the assignment follows the two small multiples: the trained reference is
+# neutral black in both (it is the anchor, not a category), the five hues go to the five FIVE-BLOCK
+# windows, which are exactly the runs carrying the position result and sit together in the left panel,
+# and the four other freeze sizes go to gray at four lightnesses in the right panel. Every series also
+# has its own dash pattern and marker, so all ten stay distinguishable in grayscale.
+GRAYS = ("0.15", "0.38", "0.58", "0.74")
 # condition -> (label, colour, linestyle, marker)
 STYLE = {"ref_trained":         ("reference, trained",        "black", "-",    "o"),
          "frozen_mid_last":     ("blocks 0-3, 9-11 frozen",   CVD[0], DASH5,  "v"),
          "frozen_mid_off_last": ("blocks 0-1, 7-11 frozen",   CVD[1], DASH9,  "<"),
-         "frozen_mid3_last":    ("blocks 0-4, 8-11 frozen",   CVD[2], DASH7,  "X"),
+         "frozen_mid_low_last": ("blocks 0, 6-11 frozen",     CVD[2], DASH7,  ">"),
          "frozen_deep_last":    ("blocks 1-7 frozen",         CVD[3], ":",    "D"),
          "frozen_mirror_last":  ("blocks 5-11 frozen",        CVD[4], DASH6,  "P"),
          "frozen_early_last":   ("blocks 1-4 frozen",        GRAYS[0], "--",  "s"),
          "frozen_late_last":    ("blocks 8-11 frozen",       GRAYS[1], "-.",  "^"),
-         "frozen_two_last":     ("blocks 1-10 frozen",       GRAYS[2], DASH8, "*")}
-# the two depth small-multiples: four five-block windows against the reference, then the other sizes
-DEPTH_GROUPS = [("Five trainable blocks, four positions",
+         "frozen_mid3_last":    ("blocks 0-4, 8-11 frozen",  GRAYS[2], DASH7, "X"),
+         "frozen_two_last":     ("blocks 1-10 frozen",       GRAYS[3], DASH8, "*")}
+# the two depth small-multiples: five five-block windows against the reference, then the other sizes
+DEPTH_GROUPS = [("Five trainable blocks, five positions",
                  ["ref_trained", "frozen_mirror_last", "frozen_mid_off_last", "frozen_mid_last",
-                  "frozen_deep_last"]),
+                  "frozen_mid_low_last", "frozen_deep_last"]),
                 ("Other freeze sizes",
                  ["ref_trained", "frozen_early_last", "frozen_late_last", "frozen_mid3_last",
                   "frozen_two_last"])]
@@ -65,15 +66,17 @@ CURVE_CONDS = [("ref_init", "reference, untrained (step 0)"),
                ("frozen_mid_last", "blocks 0-3, 9-11 frozen, final (30000)"),
                ("frozen_mid3_last", "blocks 0-4, 8-11 frozen, final (30000)"),
                ("frozen_mid_off_last", "blocks 0-1, 7-11 frozen, final (30000)"),
+               ("frozen_mid_low_last", "blocks 0, 6-11 frozen, final (30000)"),
                ("frozen_mirror_last", "blocks 5-11 frozen, final (30000)"),
                ("frozen_two_last", "blocks 1-10 frozen, final (30000)")]
 CURVE_CONDS = [c for c in CURVE_CONDS if c[0] in C]
 BAR_CONDS = [c for c in ["ref_init", "ref_matched_step", "frozen_early_matched",
                          "frozen_late_matched", "frozen_deep_matched", "frozen_mid_matched",
-                         "frozen_mid3_matched", "frozen_mid_off_matched", "frozen_mirror_matched",
+                         "frozen_mid3_matched", "frozen_mid_off_matched",
+                         "frozen_mid_low_matched", "frozen_mirror_matched",
                          "frozen_early_last", "frozen_late_last", "frozen_deep_last",
                          "frozen_mid_last", "frozen_mid3_last", "frozen_mid_off_last",
-                         "frozen_mirror_last",
+                         "frozen_mid_low_last", "frozen_mirror_last",
                          "frozen_two_matched", "frozen_two_last",
                          "ref_trained"] if c in C]
 BAR_TICKS = {"ref_init": "reference\nuntrained", "ref_trained": "reference\ntrained\n(30000)",
@@ -87,6 +90,8 @@ BAR_TICKS = {"ref_init": "reference\nuntrained", "ref_trained": "reference\ntrai
              "frozen_mid3_last": "frozen 0-4,\n8-11\nfinal",
              "frozen_mid_off_matched": "frozen 0-1,\n7-11\nmatched acc",
              "frozen_mid_off_last": "frozen 0-1,\n7-11\nfinal",
+             "frozen_mid_low_matched": "frozen 0,\n6-11\nmatched acc",
+             "frozen_mid_low_last": "frozen 0,\n6-11\nfinal",
              "frozen_mirror_matched": "frozen 5-11\nmatched acc",
              "frozen_mirror_last": "frozen 5-11\nfinal",
              "frozen_two_matched": "frozen 1-10\nmatched acc",
@@ -171,6 +176,7 @@ runs = [("grok_char", "ref_trained", "reference (all blocks train)"),
         ("frozen_mid", "frozen_mid_last", "blocks 0-3, 9-11 frozen at init"),
         ("frozen_mid3", "frozen_mid3_last", "blocks 0-4, 8-11 frozen at init"),
         ("frozen_mid_off", "frozen_mid_off_last", "blocks 0-1, 7-11 frozen at init"),
+        ("frozen_mid_low", "frozen_mid_low_last", "blocks 0, 6-11 frozen at init"),
         ("frozen_mirror", "frozen_mirror_last", "blocks 5-11 frozen at init"),
         ("frozen_two", "frozen_two_last", "blocks 1-10 frozen at init")]
 ref_acc = S["ref_final_val_acc"]
