@@ -18,6 +18,11 @@ reduces plateaus even when the continuous task *adds* predicted detail rather th
 
 ## Task adequacy — both gates pass
 
+The plateau comparison only means something if both models actually learned their tasks, so each
+gate was fixed before training and each is cleared with room to spare: the classifier is a competent
+low-resolution digit recognizer and the predictor recovers real high-resolution detail rather than
+echoing its input.
+
 | gate | requirement | measured | pass |
 |---|---|---|---|
 | classifier | ≥ 95% top-1 on the untouched pool | 95.8 / 96.3 / 96.8% (seeds 0/1/2) | yes |
@@ -26,7 +31,10 @@ reduces plateaus even when the continuous task *adds* predicted detail rather th
 
 ### Low-to-high task quality on the untouched pool (test[:2000], best-val checkpoints)
 
-Lower MSE is better; higher R²detail is better (0 = no detail beyond a block-constant image).
+The predictor beats every frozen baseline — including the privileged one that is told the true digit
+— on both error columns, so the detail it recovers is specific to the individual handwriting sample
+rather than a per-digit average. Lower MSE is better; higher R²detail is better (0 = no detail
+beyond a block-constant image).
 
 | predictor of `y` | full-image MSE | removed-detail MSE | R²detail [95% CI] | low-res consistency MSE |
 |---|---|---|---|---|
@@ -41,7 +49,11 @@ The predictor beats the *privileged* digit-template diagnostic by 0.0198 detail-
 
 ## Main comparison — linearity deviation LD at the best-val checkpoint (lower = smoother)
 
-90 fixed cross-digit pairs, seeds 0/1/2, 95% percentile bootstrap CI over pairs (10,000 resamples).
+Across 90 fixed cross-digit pairs and seeds 0/1/2, the predictor's representation stays about five
+times closer to a constant-rate transition than the classifier's at both architecturally identical
+hidden layers, and it wins on every single pair — the effect is a property of the objective, not of
+a favourable subset of digits. Intervals are 95% percentile bootstrap CIs over pairs (10,000
+resamples).
 
 | layer | classifier | predictor | paired diff (clf − pre) [95% CI] | ratio | pairs predictor smoother |
 |---|---|---|---|---|---|
@@ -53,6 +65,11 @@ Per-seed paired differences at hidden layer 3: 0.1373 / 0.1381 / 0.1251 — ever
 
 ## Plateau-and-cliff shape — max normalized jump MJ (1 = perfectly constant rate)
 
+LD is an average, so it could stay low for a curve that still contains one violent cliff. MJ targets
+the cliff itself — the largest single step of the 101-point path. The predictor's worst step is
+1.13–1.38 constant-rate steps, essentially a smooth traversal, while the classifier covers up to
+2.9 steps' worth of ground in one hundredth of the path, and 6.4 at its output.
+
 | layer | classifier | predictor | paired diff [95% CI] | ratio |
 |---|---|---|---|---|
 | hidden 2 | 2.32 | 1.13 | **1.19** [1.08, 1.31] | 2.1x |
@@ -63,6 +80,11 @@ MJ agrees with LD in sign and significance at every layer, so the verdict is **r
 not mixed.
 
 ## Robustness controls
+
+Two preregistered checks ask whether the verdict rests on choices that could have gone another way —
+the endpoint-relative normalization of `d(α)`, and the rule that probes the best-validation weights.
+Neither moves the conclusion: every interval stays above zero, and the final-checkpoint control is
+if anything slightly larger than the headline effect.
 
 | control | hidden 2 | hidden 3 | output |
 |---|---|---|---|

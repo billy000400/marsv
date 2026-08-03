@@ -315,7 +315,12 @@ beyond a block-constant image). Block repetition sits at exactly 0 on the right 
 construction. The trained predictor is far below every baseline on both error panels and far above
 all of them on detail recovery.
 
-**Task quality on the untouched pool (test[:2000], best-validation checkpoints, seed-averaged):**
+The table below gives the numbers behind Figure 4, measured on the untouched pool at the
+best-validation checkpoints and averaged over the three seeds. The trained predictor cuts full-image
+error to roughly two-fifths of the best fixed upsampler's and recovers two-thirds of the detail
+energy, and it does so while keeping the block means it was handed (rightmost column). That margin
+is what licenses reading its later plateau behaviour as the behaviour of a model that actually
+solved the continuous task rather than one that learned to output something bland.
 
 | predictor of `y` | full-image MSE | removed-detail MSE | $R^2_{\mathrm{detail}}$ [95% CI] | low-res consistency MSE |
 |---|---|---|---|---|
@@ -363,7 +368,12 @@ hatched bands give the interquartile range across pairs and seeds. Solid with ci
 dashed with squares = predictor, dotted = the straight line. The predictor's mean curve is visually
 on the diagonal at all three layers, with a band several times narrower than the classifier's.
 
-**Main comparison — linearity deviation LD (lower = smoother), best-validation checkpoints:**
+This is the report's primary result. Averaged over the frozen bank at the best-validation
+checkpoints, the predictor's linearity deviation is about a fifth of the classifier's at both
+architecturally identical hidden layers, and the gap widens with depth — the classifier's departure
+from a constant-rate transition compounds as its representation is pushed toward a ten-way decision,
+while the predictor's stays near the diagonal. Lower LD is smoother; "pairs predictor smoother"
+counts the pairs on which the predictor wins outright.
 
 | layer | classifier | predictor | paired diff (clf − pre) [95% CI] | ratio | pairs predictor smoother |
 |---|---|---|---|---|---|
@@ -382,7 +392,10 @@ panel for MJ (positive = predictor smoother). Circles with error bars = the seed
 its 95% bootstrap CI over the 90 pairs; upward triangles = the three individual seed means. Every
 interval sits above the dashed zero line, and no seed crosses it.
 
-**Plateau-and-cliff shape — max normalized jump MJ (1 = perfectly constant rate):**
+LD could in principle be low for a curve that still contains one violent cliff, so the secondary
+metric checks the sharpest single step of each path. A perfectly constant-rate traversal scores
+exactly 1, so MJ reads directly as "how many steps' worth of ground the representation covers in its
+worst hundredth of the path".
 
 | layer | classifier | predictor | paired diff [95% CI] | ratio |
 |---|---|---|---|---|

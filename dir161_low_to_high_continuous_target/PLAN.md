@@ -311,8 +311,15 @@ Classifier − predictor linearity deviation: hidden 2 0.0968 [0.0873, 0.1063], 
 0.1335 [0.1197, 0.1474], output 0.1403 [0.1300, 0.1510]; predictor smoother on 90/90 pairs at every
 layer with every seed positive, max normalized jump agreeing at every layer. Fraction-normalization
 and final-checkpoint controls both keep every interval above zero. `RESULTS.md` and `REPORT.md` are
-curated current-best with all 10 figures embedded and captioned; `check_render.py` exits 0. No
-feedback file has ever been present, so `STOP` is written.
+curated current-best with all 10 figures embedded and captioned. No feedback file has ever been
+present, so `STOP` is written.
+
+Re-entered 2026-08-03: `STOP` is gitignored repo-wide and did not survive the workspace checkout, and
+the shared `check_render.py` had meanwhile gained the rule-9a / rule-9d checks, which the deliverables
+failed on five tables sitting under a bare label or heading. Each now carries a claim-stating prose
+paragraph above it. No experiment was rerun; every published number was re-verified against
+`results/aggregate.json` and is unchanged, `check_render.py REPORT.md RESULTS.md` exits 0, and `STOP`
+is rewritten.
 
 ## Next step
 
