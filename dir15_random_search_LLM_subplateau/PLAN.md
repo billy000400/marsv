@@ -231,6 +231,12 @@ relaxing the rule post hoc. Reserve the final 20 minutes for current-best figure
 
 End each `JOURNAL.md` entry with: `On track? <yes/no> — <stage, % done, blocker if any>`.
 
+- [x] **S7 — Operator feedback #3: token→token interpolation in a fixed context.** Freeze a bank of
+  1,000 token pairs sharing a 31-token context, interpolate the final token at the embedding and at
+  blocks 0/2/4/6, apply the unchanged detector plus a flat-and-intermediate sub-plateau criterion, run
+  the geometry/agreement/self/discrete controls, decode continuations from every candidate's C run, and
+  lead both deliverables with the result.
+
 ## Current status
 
 **Complete (S1-S6), plus one operator-feedback iteration.** The protocol was frozen and run: 5,980
@@ -269,12 +275,28 @@ so the shelf is one step of a long climb, and only 5.8% of real-text candidates 
 The same iteration fixed a deliverable bug: all figure captions had been in alt text (which never
 renders), so both files now carry visible numbered captions and pass `experiments/check_render.py`.
 
+`human_feedback_3` (*"I was looking for interpolating from one token to another token with the same
+context"*) was then addressed and the file renamed `human_feedback_3.addressed.md`. The redesign holds
+a 31-token context fixed and moves only the final token: endpoints `c ++ [t_A]` and `c ++ [t_B]` are
+real sentences differing in one token, and the path interpolates that token's embedding (plus
+`resid_post` at blocks 0/2/4/6 for comparability). 1,000 frozen pairs (seed 21) × 5 hook points.
+Headline: **7.2% [5.8, 9.0] of token paths hold a persistent third prediction and 1.70% [1.06, 2.71]
+a true sub-plateau — flat and at intermediate height — against 0 of 72 matched control windows** and
+1.34% for whole-context interpolation. Token paths are near-step functions (median transition width
+0.103 vs 0.459), which is why they give the cleanest staircases here; deeper hooks buy third-token
+labels (19.5% at block 4) and lose every shelf. Continuations: the 17 sub-plateaus agree with
+themselves on a median 11 of 20 greedy tokens (29% on all 20) and share 0 with either endpoint, while
+A/B-region points reproduce their unpatched endpoints exactly. Limits reported alongside: the nearest
+real token to any interpolant is always an endpoint (median 2 distinct tokens per discrete path, 0
+third regions), and same-prediction pairs detour threefold less often. A disjoint confirmation bank
+(300 pairs, seed 22, nothing retuned) replicates both rates: 7.7% [5.2, 11.2] and 2.00% [0.92, 4.29].
+
 ## Next step
 
 None — every success criterion is met and no unaddressed feedback file remains, so `STOP` is written.
-If reopened: (a) build the real-language bank R2 from a window pool disjoint from the primary bank so
-that screen becomes independent evidence; (b) replace the splice with a morph whose intermediate
-points are natural prose rather than spliced prose; (c) generate continuations from real-text C
-shelves (the S4 analogue, never run for that section); (d) give the depth sweep its own disjoint pair
-bank; (e) enlarge the natural reference bank beyond 2,000 contexts so nearest-neighbour distances are
-not inflated by the small search space.
+If reopened: (a) give the token screen an independent window pool, since both of its
+banks come from the same 5,980 windows as the context banks; (b) restrict token pairs to whole-word
+tokens, since corpus position 32 is often a sub-word fragment; (c) run the nearest-natural-activation analysis for token-path C regions;
+(d) repeat the token screen on a second model; (e) build the real-language bank R2 from a window pool
+disjoint from the primary bank; (f) replace the text splice with a morph whose intermediate points are
+natural prose; (g) enlarge the natural reference bank beyond 2,000 contexts.

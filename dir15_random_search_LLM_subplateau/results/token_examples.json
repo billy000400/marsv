@@ -1,0 +1,267 @@
+[
+ {
+  "hook": "embed",
+  "rank": 1,
+  "path": 306,
+  "context": " Classic sculpture to survive at Tikal . A long hieroglyphic text is carved onto the back of the monument , the longest to survive from the Early",
+  "t_A": " Classic",
+  "t_B": " the",
+  "A": " period",
+  "C": "ban",
+  "B": " Bronze",
+  "rho": 0.49283436685800563,
+  "d_mean_C": 0.6784041523933411,
+  "alpha_in": 0.44897959183673464,
+  "alpha_out": 0.6122448979591836,
+  "run_len": 9,
+  "clean": false,
+  "score": 0.07487476236966191,
+  "sequence": [
+   {
+    "token": " period",
+    "a_lo": 0.0,
+    "a_hi": 0.4081632653061224
+   },
+   {
+    "token": " Period",
+    "a_lo": 0.42857142857142855,
+    "a_hi": 0.42857142857142855
+   },
+   {
+    "token": "ban",
+    "a_lo": 0.44897959183673464,
+    "a_hi": 0.6122448979591836
+   },
+   {
+    "token": "rop",
+    "a_lo": 0.6326530612244897,
+    "a_hi": 0.673469387755102
+   },
+   {
+    "token": " Bronze",
+    "a_lo": 0.6938775510204082,
+    "a_hi": 1.0
+   }
+  ]
+ },
+ {
+  "hook": "embed",
+  "rank": 2,
+  "path": 325,
+  "context": " ) between Ringoes and Flemington and Route 12 between Flemington and Somerville . In 1938 , Route 29B was planned as an extension of Route 29",
+  "t_A": "A",
+  "t_B": " boy",
+  "A": " ,",
+  "C": "l",
+  "B": "c",
+  "rho": 0.10005894899368285,
+  "d_mean_C": 0.6118424534797668,
+  "alpha_in": 0.5714285714285714,
+  "alpha_out": 0.673469387755102,
+  "run_len": 6,
+  "clean": false,
+  "score": 0.07180988788604738,
+  "sequence": [
+   {
+    "token": " ,",
+    "a_lo": 0.0,
+    "a_hi": 0.5306122448979591
+   },
+   {
+    "token": "ce",
+    "a_lo": 0.5510204081632653,
+    "a_hi": 0.5510204081632653
+   },
+   {
+    "token": "l",
+    "a_lo": 0.5714285714285714,
+    "a_hi": 0.673469387755102
+   },
+   {
+    "token": "ce",
+    "a_lo": 0.6938775510204082,
+    "a_hi": 0.6938775510204082
+   },
+   {
+    "token": " to",
+    "a_lo": 0.7142857142857142,
+    "a_hi": 0.7142857142857142
+   },
+   {
+    "token": "c",
+    "a_lo": 0.7346938775510203,
+    "a_hi": 1.0
+   }
+  ]
+ },
+ {
+  "hook": "embed",
+  "rank": 3,
+  "path": 648,
+  "context": " . Among them are : Dennis Ray \" Oil Can \" Boyd , former Major League Baseball pitcher ; Negro league baseball catcher Paul Hardy ; professional basketball player Derrick Mc",
+  "t_A": "Key",
+  "t_B": " renamed",
+  "A": " ;",
+  "C": "e",
+  "B": " \"",
+  "rho": 0.2295747150977454,
+  "d_mean_C": 0.34850358963012695,
+  "alpha_in": 0.4897959183673469,
+  "alpha_out": 0.6122448979591836,
+  "run_len": 7,
+  "clean": true,
+  "score": 0.01685653626918792,
+  "sequence": [
+   {
+    "token": " ;",
+    "a_lo": 0.0,
+    "a_hi": 0.4693877551020408
+   },
+   {
+    "token": "e",
+    "a_lo": 0.4897959183673469,
+    "a_hi": 0.6122448979591836
+   },
+   {
+    "token": " \"",
+    "a_lo": 0.6326530612244897,
+    "a_hi": 1.0
+   }
+  ]
+ },
+ {
+  "hook": "6",
+  "rank": 1,
+  "path": 707,
+  "context": " 1st Division of the 1st Fleet . She participated in the Battle of Port Arthur on 9 February 1904 , when Vice Admiral T\u014dg\u014d Heih",
+  "t_A": "ach",
+  "t_B": " New",
+  "A": "iro",
+  "C": "an",
+  "B": "k",
+  "rho": 1.5242617726325995,
+  "d_mean_C": 0.4808931350708008,
+  "alpha_in": 0.5102040816326531,
+  "alpha_out": 0.6530612244897959,
+  "run_len": 8,
+  "clean": false,
+  "score": 0.03445201017418685,
+  "sequence": [
+   {
+    "token": "iro",
+    "a_lo": 0.0,
+    "a_hi": 0.4081632653061224
+   },
+   {
+    "token": "\u014d",
+    "a_lo": 0.42857142857142855,
+    "a_hi": 0.4897959183673469
+   },
+   {
+    "token": "an",
+    "a_lo": 0.5102040816326531,
+    "a_hi": 0.6530612244897959
+   },
+   {
+    "token": "\u014d",
+    "a_lo": 0.673469387755102,
+    "a_hi": 0.7551020408163265
+   },
+   {
+    "token": "sh",
+    "a_lo": 0.7755102040816326,
+    "a_hi": 0.7755102040816326
+   },
+   {
+    "token": "k",
+    "a_lo": 0.7959183673469387,
+    "a_hi": 1.0
+   }
+  ]
+ },
+ {
+  "hook": "6",
+  "rank": 2,
+  "path": 159,
+  "context": " later began training under Jacques Bouhy , whom she would later credit for her vocal technique . In 1906 , Gauthier was retained by fellow Canadian singer Emma",
+  "t_A": " Alb",
+  "t_B": "oll",
+  "A": "ou",
+  "C": "ans",
+  "B": "es",
+  "rho": 0.9913635194301608,
+  "d_mean_C": 0.5352381467819214,
+  "alpha_in": 0.32653061224489793,
+  "alpha_out": 0.5306122448979591,
+  "run_len": 11,
+  "clean": false,
+  "score": 0.03354897730204524,
+  "sequence": [
+   {
+    "token": "ou",
+    "a_lo": 0.0,
+    "a_hi": 0.16326530612244897
+   },
+   {
+    "token": "iston",
+    "a_lo": 0.18367346938775508,
+    "a_hi": 0.3061224489795918
+   },
+   {
+    "token": "ans",
+    "a_lo": 0.32653061224489793,
+    "a_hi": 0.5306122448979591
+   },
+   {
+    "token": "ier",
+    "a_lo": 0.5510204081632653,
+    "a_hi": 0.673469387755102
+   },
+   {
+    "token": "es",
+    "a_lo": 0.6938775510204082,
+    "a_hi": 1.0
+   }
+  ]
+ },
+ {
+  "hook": "6",
+  "rank": 3,
+  "path": 552,
+  "context": " the Burmese as Gandalarit ( \u1002\u1014 \u1039 \u1010\u101c\u101b\u102c",
+  "t_A": "\ufffd",
+  "t_B": " devices",
+  "A": "\ufffd",
+  "C": "\ufffd",
+  "B": ")",
+  "rho": 2.7975783407688173,
+  "d_mean_C": 0.6497698426246643,
+  "alpha_in": 0.5102040816326531,
+  "alpha_out": 0.6122448979591836,
+  "run_len": 6,
+  "clean": false,
+  "score": 0.028428890267196947,
+  "sequence": [
+   {
+    "token": "\ufffd",
+    "a_lo": 0.0,
+    "a_hi": 0.4897959183673469
+   },
+   {
+    "token": "\ufffd",
+    "a_lo": 0.5102040816326531,
+    "a_hi": 0.6122448979591836
+   },
+   {
+    "token": " )",
+    "a_lo": 0.6326530612244897,
+    "a_hi": 0.8571428571428571
+   },
+   {
+    "token": ")",
+    "a_lo": 0.8775510204081632,
+    "a_hi": 1.0
+   }
+  ]
+ }
+]

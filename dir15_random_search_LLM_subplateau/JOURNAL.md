@@ -208,3 +208,70 @@ S4, which was never run for this section.
 
 On track? yes — S1-S6 complete, feedback #1 and #2 both addressed, 100% of the plan's success
 criteria met, no blocker.
+
+## 2026-08-03 — iteration 4: operator feedback #3 — token→token interpolation in a fixed context
+
+**Feedback file.** `human_feedback_3.txt` (no `.addressed` suffix, so this was the iteration):
+*"It looks like you were interpolating from one context to another context? I was looking for
+interpolating from one token to another token with the same context inducing a plateau. Can you
+redesign your experiment and search again?"* Renamed `human_feedback_3.addressed.md` after the work.
+
+**Reading of the question (loop mode: recorded, not asked).** The operator is right about the design:
+every screen so far moved between two different 32-token passages — the activation screen slerps two
+contexts' activations, and even the real-text screen rewrites the context token by token. The
+requested design fixes the context and varies only the token being predicted from. I implemented it as
+`S_A = c ++ [t_A]`, `S_B = c ++ [t_B]` with a shared 31-token `c`, and interpolated the **token
+embedding** as the primary hook (the literal token→token path), plus `resid_post` at the four
+preregistered blocks so the new screen is directly comparable with the old one. Rejected alternatives:
+(a) interpolating only at block 6 — cheaper but it hides that the shelf lives at the embedding, which
+turned out to be the main finding; (b) hand-choosing semantically contrasting token pairs (e.g. ' cat'
+vs ' dog') — that is exactly the hand-picked-pair design this direction exists to avoid; (c) walking
+through real vocabulary tokens only — kept, but as a control, because it turns out there are no real
+tokens in between at all.
+
+**Did.** `experiments/token_interp.py` (1,000-pair frozen bank, seed 21; 5 hook points; controls:
+lerp, same-prediction, self-pairs, nearest-real-token) → 27 min on the shared GPU;
+`experiments/token_continuations.py` (20-token greedy decodes from 5 path points of all 72
+candidates); `experiments/plot_token.py`, `experiments/plot_token_cont.py` → 3 figures. Added
+`Runner.forward_embeds` to `common.py` (the only change to frozen code).
+
+**Learned.**
+- **The phenomenon does not need a context change.** With 31 of 32 tokens identical at both ends,
+  7.2% [5.8, 9.0] of paths hold a persistent third prediction and **1.70% [1.06, 2.71] hold a true
+  sub-plateau — more than the 1.34% of the whole-context screen**, and 0 of 72 matched control windows
+  qualify. This kills the deflationary reading of the whole direction (that a third prediction is what
+  the model does when fed a blend of two passages).
+- **A token swap is a near-step function.** Median transition width 0.103 of the path against 0.459
+  for a context swap; κ = 0.83. That is why these are the cleanest staircases in the direction — and
+  why flatness alone stopped working as a criterion: 43% of *arbitrary* windows on these paths are
+  flat. I added the height condition (0.2 < d̄_C < 0.8); it is nearly inert on context paths
+  (1.39% → 1.34%) and decisive on token paths.
+- **Depth trades shelves for labels.** Interpolating the same token pairs at blocks 0/2/4/6 raises the
+  third-token rate to 19.5% but drops the sub-plateau rate to zero, because the boundary widens from
+  10% to 42% of the path. The label statistic and the geometry statistic genuinely measure different
+  things; only the geometry one tracks the MNIST picture.
+- **There is nothing between two tokens in the vocabulary.** Snapping every interpolant to its nearest
+  real token gives a median of 2 distinct tokens per path and 0/500 third regions. The shelves are
+  reachable by activation editing and by no prompt — an honest limit that also sharpens the safety
+  reading.
+- **Many shelves are a real state, not an argmax coincidence.** A/B-region points reproduce their
+  unpatched endpoint continuations exactly (median 20/20 tokens — a strong extra correctness check),
+  while the C run agrees with itself on a median 11 of 20 tokens for true sub-plateaus (29% all 20) and
+  shares 0 with either endpoint. The distribution is bimodal: prefix 1 or prefix 20.
+
+**Next step.** None required: the plan's success criteria were already met and this feedback is now
+addressed, so `STOP` is written. If reopened: (a) give the token screen a disjoint confirmation bank
+(it currently draws from the same 5,980 windows as the primary bank and has no validation half);
+(b) restrict token pairs to whole-word tokens, since corpus position 32 is often a sub-word fragment;
+(c) run the nearest-natural-activation analysis for token-path C regions; (d) repeat the token screen
+on a second model to see whether the embedding-level shelf is architecture-specific.
+
+On track? yes — S1-S6 complete plus feedback #1-#3 all addressed, 100% of the plan's success criteria
+met, no blocker.
+
+**Addendum (same iteration).** With time left after the deliverables, I closed the one gap the new
+screen had against the plan's own success criteria — no disjoint confirmation bank —
+(`experiments/token_validation.py`, 300 pairs from the 3,980 windows the primary token bank never
+touched, seed 22, nothing retuned). It replicates: 7.7% [5.2, 11.2] third-token vs 7.2% [5.8, 9.0],
+2.00% [0.92, 4.29] true sub-plateau vs 1.70% [1.06, 2.71], and both shape statistics (w = 0.107,
+κ = 0.82) land on the primary values. Figure 1(A) now carries the validation group.

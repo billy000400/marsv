@@ -1,0 +1,22 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  20%|█▉        | 86/436 [00:00<00:00, 856.61it/s]Loading weights:  39%|███▉      | 172/436 [00:00<00:00, 717.03it/s]Loading weights:  56%|█████▋    | 246/436 [00:00<00:00, 637.04it/s]Loading weights:  71%|███████▏  | 311/436 [00:00<00:00, 623.32it/s]Loading weights:  89%|████████▉ | 387/436 [00:00<00:00, 664.18it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 681.56it/s]
+  20/72
+  40/72
+  60/72
+{
+ "n_candidates": 72,
+ "n_subplateau": 17,
+ "median_prefix_C_run_all": 7.0,
+ "median_prefix_C_run_subplateau": 11.0,
+ "median_prefix_C_run_other": 7.0,
+ "frac_prefix_ge_5_all": 0.5555555555555556,
+ "frac_prefix_ge_5_subplateau": 0.5882352941176471,
+ "frac_prefix_ge_10_subplateau": 0.5294117647058824,
+ "frac_prefix_full_subplateau": 0.29411764705882354,
+ "median_prefix_C_vs_A_end": 0.0,
+ "median_prefix_C_vs_B_end": 0.0,
+ "median_prefix_A_region_vs_A_end": 20.0,
+ "median_prefix_B_region_vs_B_end": 20.0,
+ "n_new": 20
+}
+saved results/token_continuations.json

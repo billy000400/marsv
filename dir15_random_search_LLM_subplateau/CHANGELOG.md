@@ -187,3 +187,84 @@ section, two new figures, and a rewritten Headline.
 `experiments/add_captions.py`, `experiments/check_render.py` + `katex_compile.js` (copied),
 `results/real_text_paths.json`, `results/real_text_curves.npz`, `results/real_text_extra.json`,
 `results/log_real_text.txt`.
+
+## 2026-08-03 — operator feedback #3: redesigned as a TOKEN→TOKEN screen inside one fixed context
+
+**Feedback addressed.** `human_feedback_3.txt`: *"It looks like you were interpolating from one
+context to another context? I was looking for interpolating from one token to another token with the
+same context inducing a plateau. Can you redesign your experiment and search again?"* Renamed
+`human_feedback_3.addressed.md` after the work below.
+
+**New experiment (new frozen bank, new hook point, same detector).** `experiments/token_interp.py`
+holds the context fixed and moves one token: endpoints `S_A = c ++ [t_A]` and `S_B = c ++ [t_B]`
+share a 31-token context `c` drawn from the same 5,980 WikiText-103 windows; `t_A` is that window's
+own 32nd token and `t_B` a second window's (frozen shuffle, seed 21); pairs are kept only when
+`t_A ≠ t_B` and the two unpatched top-1 predictions differ. 1,000 pairs × 5 hook points = 5,000 paths:
+the **token embedding** (slerp of `wte[t_A]`, `wte[t_B]`, run from `inputs_embeds`) and `resid_post` at
+blocks 0/2/4/6. One path per pair — with a shared context the two-conditioning-context ambiguity of the
+old screen disappears. Endpoint fidelity is now exact at BOTH ends (max|Δlogit| ≤ 2.3e-05), which the
+context-to-context screen could not check. Controls: 1,000 linear-interpolation paths, 161
+same-prediction pairs, 300 self-pairs, 500 nearest-real-token (fully unpatched) paths.
+`experiments/token_continuations.py` then decoded 20 greedy tokens from five points of every
+candidate path. Added `Runner.forward_embeds` in `common.py`; new plots from
+`experiments/plot_token.py` and `experiments/plot_token_cont.py`.
+
+**New metric.** "True sub-plateau" now requires the C window to be flat **and** at an intermediate
+output height: ρ < 0.5 **and** 0.2 < d̄_C < 0.8. The height condition is necessary on token paths
+(43% of arbitrary windows there are flat, because a token path is a step function) and almost inert on
+context paths, where it moves the rate 1.39% → 1.34%. Both numbers are now shown in RESULTS.md, with
+the ρ-only row relabelled "flat shelf" so the two definitions are not confused.
+
+**New numbers (nothing superseded; every earlier result stands unchanged).**
+Token-embedding paths: persistent third token **7.2% [5.8, 9.0]** of 1,000 paths (30.6% of them clean
+`A, C, B`), true sub-plateau **1.70% [1.06, 2.71]** against **0 of 72** matched control windows and
+1.34% [1.11, 1.62] for the context screen. Path shape: median w(10→90) = **0.103** (context: 0.459),
+κ = 0.83, 3 top-1 runs. By hook point, third-token rate 7.2 / 6.9 / 14.2 / 19.5 / 18.3% and true
+sub-plateau rate 1.70 / 0.20 / 0.60 / 0.00 / 0.00% for embedding / blocks 0, 2, 4, 6 — deeper
+interpolation buys labels and loses shelves as the boundary widens from 10% to 42% of the path.
+Controls (detour rate): linear 11.8% [9.9, 13.9], same-prediction 2.5% [1.0, 6.2], self-pairs 0%
+[0, 1.3], nearest-real-token 0% [0, 0.8] with a median of 2 distinct tokens per path. Continuations:
+A- and B-region points reproduce their unpatched endpoints (median 20/20 tokens); the C run agrees
+with itself on a median 7 of 20 tokens over all 72 candidates and **11 of 20** for the 17 true
+sub-plateaus (53% ≥ 10, 29% all 20), while sharing a median 0 tokens with either endpoint.
+Persistence sensitivity 17.6 / 7.2 / 2.8% at 2 / 3 / 5 points.
+
+**Interpretation added.** The third region does not need a context change: one token inside a fixed
+sentence produces it, at a *higher* true-sub-plateau rate than whole-context interpolation, and the
+resulting curves are the cleanest staircases in the direction. Two boundaries on the claim are
+reported in the same place: GPT-2's vocabulary contains nothing between two tokens (nearest-real-token
+paths visit a median of 2 tokens and never show a third region), so these shelves are reachable by
+activation editing and not by any prompt; and same-prediction pairs show a threefold lower detour
+rate, so the third region is tied to the endpoints disagreeing.
+
+**Figures added (embedded in BOTH deliverables).** `token_prevalence.png` (six panels: rate by hook
+point vs the context screen; transition width; flatness ρ; the flat-and-intermediate criterion with
+its control; controls; top-1 runs), `token_examples.png` (six d(α) curves — three token-embedding
+sub-plateaus, three block-6 candidates), `token_continuation_stability.png` (two panels: common greedy
+prefix across the C run, and the five-way prefix comparison).
+
+**Deliverables changed.** REPORT.md: title now says "between two inputs"; new Summary opening
+paragraph and new Conclusion opening paragraph leading with the token result; new Methods subsection
+"Same context, two tokens: the token-to-token path" (construction, embedding path, block paths,
+one-path-per-pair, nearest-real-token path, detour rate, continuations); new Methods definition of the
+true sub-plateau criterion with equation; new bank row; **new Results Section 1** with Figures 1–3, and
+all previous Results sections renumbered 2–11 with their figures renumbered 4–17; new limitation (vii);
+new safety paragraph. RESULTS.md: reframed Question/Setup around three path constructions, new leading
+metrics block "Same context, one token changed", the three new figures at the head of the Figures
+section, a new worked example, a new Headline paragraph, and a lead sentence above each table that
+previously sat directly under a heading (rule 9a).
+
+**Code/data added.** `experiments/token_interp.py`, `experiments/token_continuations.py`,
+`experiments/plot_token.py`, `experiments/plot_token_cont.py`, `Runner.forward_embeds` in
+`experiments/common.py`; `results/token_interp.json`, `token_interp_rows.pkl`,
+`token_interp_curves.npz`, `token_examples.json`, `token_summary.json`, `token_continuations.json`,
+`log_token_interp.txt`.
+
+**Added in the same iteration: a disjoint confirmation bank for the token screen.**
+`experiments/token_validation.py` rebuilds 300 pairs (seed 22) from the 3,980 windows the primary
+token bank never used and applies the detector, thresholds and sub-plateau criterion unchanged:
+third-token rate **7.7% [5.2, 11.2]** against the primary 7.2% [5.8, 9.0], true sub-plateau
+**2.00% [0.92, 4.29]** against 1.70% [1.06, 2.71], median w(10→90) 0.107 against 0.103 and κ 0.82
+against 0.83. The validation group was added to Figure 1(A) and a confirmation table to Section 1 of
+REPORT.md and to the token block of RESULTS.md; limitation (vii) was narrowed accordingly
+(`results/token_validation.json`).

@@ -101,6 +101,17 @@ class Runner:
         return rec, logits
 
     @torch.no_grad()
+    def forward_embeds(self, ids, last_embed=None):
+        """Unhooked forward from token embeddings; `last_embed` [B,C] replaces the final position's
+        wte vector (positional embeddings are still added by the model). Returns logits [B,V]."""
+        self._rec_layers, self._rec, self._patch = set(), {}, None
+        e = self.model.transformer.wte(ids.to(self.device))
+        if last_embed is not None:
+            e = torch.cat([e[:, :-1, :], last_embed[:, None, :].to(e.dtype)], dim=1)
+        h = self.model.transformer(inputs_embeds=e).last_hidden_state
+        return self.model.lm_head(h[:, -1, :])
+
+    @torch.no_grad()
     def generate(self, ids, patch=None, n_new=20, temperature=0.0, seed=0):
         """Continue `ids` [1,T]. The patch (if any) is applied on the FIRST step only; the KV cache
         then carries the patched state forward, so later steps are ordinary decoding."""
