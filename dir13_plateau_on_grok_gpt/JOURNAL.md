@@ -1286,3 +1286,90 @@ written — wall clock and a named next experiment both remain.
 
 On track? yes — plan complete (S1–S15) plus twelve PLAN-named follow-ups; the depth step now has two
 seeds a side and separates disjointly, and one published parameter count was corrected; blocker: none.
+
+## 2026-08-03 (iteration: S16 — second seed at frozen-deep, the position term)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: five `human_feedback*` files,
+all five already ending in `.addressed.md`. Zero unaddressed feedback, so this iteration advanced the
+plan. `/tmp` had survived this time — the corpus was present and its SHA-256 matched the value every
+`train_meta*.json` records, so no re-download was needed.
+
+**What I ran, and why that one.** The previous `Next step` named it: after S15 gave the depth step two
+seeds a side, the only surviving sub-claim resting on a single pair of runs was the *position* term —
+five trainable blocks beside the readout (frozen-deep, `w` 0.558) beating five at the bottom
+(frozen-mirror, 0.626). A 0.068 gap against a ~0.04 measured seed spread is not a comfortable margin,
+so `train_frozen.py --freeze 1,2,3,4,5,6,7 --seed 2024 --tag frozen_deep_s2`. I wrote the prediction
+into PLAN.md **and** REPORT Methods before the assay ran: land within ≈0.04 of 0.558 and stay below
+0.626, else the position term is falsified.
+
+**Outcome: confirmed at both framings.** Matched at step 3,000 — the same step as seed 1337 — with
+val 0.5503, finished at val 0.5730 (seed 1337: 0.5742). Median width **0.559** at matched accuracy
+against 0.590, and **0.579** at step 30,000 against 0.558. Two things worth recording about that. The
+first is that the seed spread is again small (0.031, 0.021) and again *sign-inconsistent*: seed 2024 is
+narrower at the matched checkpoint and wider at the end, exactly the pattern frozen-early showed, which
+is now two independent conditions saying the marginal median moves by ~0.02–0.03 in whichever
+direction. The second is that both seeds clear frozen-mirror on both axes — the worst frozen-deep seed
+is still 0.039 (matched) and 0.046 (final) narrower, and pair by pair the replicate is −0.060 and
+−0.040 against it (p = 5.9e-14, 3.4e-8). The relocation signature reproduced to three decimals
+(injection blocks 0/2/4 give 0.559/0.558/0.557, so the seven frozen blocks contribute nothing).
+
+**One thing the replicate does *not* fix, and I said so in Limitation 7 rather than glossing it.** The
+position comparison now has a seed spread under one of its two sides. Frozen-mirror is still a single
+run, so "0.626" could itself be a high draw. What the replicate rules out is that *frozen-deep* was a
+low draw, which was the more likely failure mode given the direction of the claim; the honest statement
+is a one-sided error bar, and that is what both deliverables now say.
+
+**Curation beyond the new numbers.** Both hypothesis paragraphs still ended on the narrow-run
+prediction that S14 answered two iterations ago, and both misdescribed the reference width as `n_embd`
+384 (it is 240) — a stale sentence that had survived several passes because it sat at the end of a long
+paragraph. Replaced with the narrow-run *outcome* plus the genuinely open successor: five trainable
+blocks in the middle of the stack (freeze 0–3 and 9–11 — same seven frozen blocks, neither end) should
+land near 0.58–0.60 if position is a real second-order term. Figure 24 needed the same treatment as
+last iteration: a seventh diamond made the "frozen 1-7" and "frozen 5-11" labels collide on both
+panels, so I moved two offsets rather than adding another marker style.
+
+**Verification.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 29 display / 472
+inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds and 27 visible `**Figure N.**`
+captions per file; zero bare `(plots/x.png)` paths.
+
+**Next step.** The middle-of-stack five-block freeze the hypothesis now ends on
+(`--freeze 0,1,2,3,9,10,11 --tag frozen_mid`, ~21 min training plus ~2 min scoring) is the natural
+successor: it is the only one of the three five-block positions not yet run, and it turns the position
+term from a two-point contrast into an ordered three-point one. A second seed at frozen-mirror would
+instead close the one-sided error bar noted above; of the two, the middle-of-stack run answers a new
+question and the mirror replicate only firms up an old one, so I would run the former first. No `STOP`
+written — wall clock and a named next experiment both remain.
+
+On track? yes — plan complete (S1–S15) plus thirteen PLAN-named follow-ups, S16 done and its prediction
+confirmed; both terms of the depth/position reading now rest on gaps larger than a measured seed spread;
+blocker: none.
+
+## 2026-08-03 (same iteration, addendum: S17 launched — middle-of-stack five-block freeze)
+
+With the S16 deliverables verified and wall clock left, I launched the successor the hypothesis
+paragraphs now end on rather than idling: `train_frozen.py --freeze 0,1,2,3,9,10,11 --tag frozen_mid`,
+which freezes the same seven blocks as frozen-deep and frozen-mirror but leaves the trainable five in
+the middle (blocks 4–8). It is the only one of the three five-block positions not yet run, and it turns
+the position term from a two-point contrast into an ordered three-point one. Freezing block 0 costs the
+measurement nothing, since injecting at block 0 overwrites block 0's output anyway, so all five
+trainable blocks sit downstream of the injection — the same as frozen-deep, unlike frozen-two.
+
+**Prediction fixed before scoring** (PLAN S17 and the hypothesis paragraphs): `w` lands between the two
+known five-block values, near 0.58–0.60; at or below frozen-deep's 0.559–0.590, or at or above
+frozen-mirror's 0.626, falsifies the ordered reading. The run matched the reference's validation
+accuracy at step 3,750 — later than frozen-deep's 3,000 and frozen-mirror's 2,750, which is itself a
+small data point for the position account, since the middle placement optimizes more slowly.
+
+**Code changes made while it trained** (all no-ops until its rows exist): `frozen_pairwise.py` gained
+seven `frozen_mid` comparisons plus a `frozen_mid_median` / `mid_between_deep_and_mirror` field on the
+position-contrast summary; `plot_capacity.py` gained the condition at five trainable blocks with the
+four-marker nudge and label offsets that keeps the 5-block cluster legible.
+
+**If this entry is the last word on frozen_mid, the run finished after the iteration did.** PLAN's
+"Current status" carries the handover: the scored rows land in `results/frozen_assay_summary.json` and
+`results/frozen_pairwise.json` and Figure 24 redraws itself, so the next iteration's first job is
+curating the text — the numbers will already be on disk, and the prediction is on record above so the
+verdict cannot be written after the fact.
+
+On track? yes — S16 complete and verified (position term replicated), S17 launched with its prediction
+pre-registered and its scoring chained; blocker: none.

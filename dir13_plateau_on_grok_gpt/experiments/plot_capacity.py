@@ -36,14 +36,17 @@ TOTAL = 8378640  # reference-run parameter count (results/train_meta_frozen_deep
 NARROW = json.load(open(os.path.join(RES, "train_meta_narrow192.json")))["params"]
 
 # (condition key, label, trainable blocks, trainable params, all-12-trainable?)
-SECOND_SEED = {"narrow192_s2_matched", "frozen_early_s2_matched"}  # drawn, but share the seed-1 label
+SECOND_SEED = {"narrow192_s2_matched", "frozen_early_s2_matched",
+               "frozen_deep_s2_matched"}  # drawn, but share the seed-1 label
 RUNS = [("ref_matched_step",      "reference\n(240 wide)",  12, TOTAL,            True),
         ("narrow192_matched",     "narrow 192\n(2 seeds)",  12, NARROW,           True),
         ("narrow192_s2_matched",  "",                       12, NARROW,           True),
         ("frozen_early_matched",  "frozen 1-4\n(2 seeds)",   8, TOTAL - 2777280,  False),
         ("frozen_early_s2_matched", "",                      8, TOTAL - 2777280,  False),
         ("frozen_late_matched",   "frozen 8-11",             8, TOTAL - 2777280,  False),
-        ("frozen_deep_matched",   "frozen 1-7",              5, TOTAL - 4860240,  False),
+        ("frozen_deep_matched",   "frozen 1-7\n(2 seeds)",   5, TOTAL - 4860240,  False),
+        ("frozen_deep_s2_matched", "",                       5, TOTAL - 4860240,  False),
+        ("frozen_mid_matched",    "frozen 0-3, 9-11",        5, TOTAL - 4860240,  False),
         ("frozen_mirror_matched", "frozen 5-11",             5, TOTAL - 4860240,  False),
         ("frozen_two_matched",    "frozen 1-10",             2, TOTAL - 6943200,  False)]
 RUNS = [r for r in RUNS if r[0] in C]
@@ -62,7 +65,10 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
         # runs that share a trainable-block count also share both x values; nudge the seeds apart
         off = {"ref_matched_step": 1.0, "narrow192_matched": 0.0, "narrow192_s2_matched": -1.0,
                "frozen_early_matched": 1.0, "frozen_early_s2_matched": 0.0,
-               "frozen_late_matched": -1.0}.get(key, 0.0)
+               "frozen_late_matched": -1.0,
+               "frozen_deep_matched": 1.5, "frozen_deep_s2_matched": 0.5,
+               "frozen_mid_matched": -0.5,
+               "frozen_mirror_matched": -1.5}.get(key, 0.0)
         x += off * (0.55 if xi == 2 else 0.14)
         med = C[key]["median_w"]
         lo, hi = C[key]["iqr_w"]
@@ -83,10 +89,16 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
         lab_dx, lab_dy = {2: {"ref_matched_step": (0.0, 0.075),
                               "narrow192_matched": (-0.28, -0.095),
                               "frozen_early_matched": (-0.28, 0.075),
-                              "frozen_late_matched": (0.0, -0.055)},
+                              "frozen_late_matched": (0.0, -0.055),
+                              "frozen_deep_matched": (0.55, 0.075),
+                              "frozen_mid_matched": (0.15, 0.075),
+                              "frozen_mirror_matched": (-0.20, -0.115)},
                           3: {"narrow192_matched": (-0.80, -0.055),
                               "frozen_early_matched": (0.95, 0.075),
-                              "frozen_late_matched": (0.72, -0.055)}}[xi].get(key, (0.0, 0.032))
+                              "frozen_late_matched": (0.72, -0.055),
+                              "frozen_deep_matched": (-0.70, 0.075),
+                              "frozen_mid_matched": (0.62, 0.075),
+                              "frozen_mirror_matched": (0.25, -0.115)}}[xi].get(key, (0.0, 0.032))
         if key not in SECOND_SEED:
             ax.annotate(lab, (x + lab_dx, med + lab_dy), ha="center",
                         va="bottom" if lab_dy > 0 else "top", fontsize=8)

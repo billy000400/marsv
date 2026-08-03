@@ -1028,3 +1028,48 @@ checkpoint and the corpus.
   and 27 visible `**Figure N.**` captions per file; zero bare `(plots/x.png)` paths.
 - **No `STOP` written** — wall clock and a named next experiment (a second seed at frozen-deep or
   frozen-mirror) both remain.
+
+## 2026-08-03 — S16: second seed at frozen-deep; the position term now has an error bar under it
+
+Direction still open (no `STOP` present). No unaddressed `human_feedback*` / `*REVIEW*` file exists —
+all five end in `.addressed.md` — so this iteration advanced the plan by the step the previous
+`Next step` named: the last sub-claim resting on a single pair of runs.
+
+- **New experiment (`train_frozen.py --freeze 1,2,3,4,5,6,7 --seed 2024 --tag frozen_deep_s2`, 30,000
+  steps, 20.9 min).** Frozen-deep retrained from a second model initialization, everything else
+  identical (corpus SHA, split, data order, optimizer, cosine schedule, batch, checkpoint grid, freeze
+  mask). Reaches the reference's final validation accuracy at step **3,000** — the same step as seed
+  1337 — with val 0.5503, and finishes at val **0.5730** (seed 1337: 0.5742). Scored on the same 150
+  pairs by `narrow_assay.py frozen_deep_s2`.
+- **Prediction on record before scoring** (PLAN S16, REPORT Methods): the replicate lands within the
+  ≈0.04 seed spread of frozen-deep's 0.558 and stays below frozen-mirror's 0.626. **CONFIRMED at both
+  framings.**
+- **RESULTS.md / REPORT.md — new numbers, nothing superseded.** Median width **0.559** at matched
+  accuracy against seed 1337's 0.590, and **0.579** at step 30,000 against 0.558: within-condition
+  spreads 0.031 and 0.021, with no consistent sign (paired `Δw` −0.016, p = 8.9e-4, then +0.023,
+  p = 4.5e-5). Both seeds sit below frozen-mirror on both framings — worst seed still 0.039 (matched)
+  and 0.046 (final) narrower — and pair by pair the replicate is **−0.060** vs frozen-mirror at matched
+  accuracy (21% of pairs wider, p = 5.9e-14) and **−0.040** at the end of training (29%, p = 3.4e-8).
+  Relocation signature reproduced (injection blocks 0/2/4 → 0.559/0.558/0.557 and 0.579/0.578/0.577;
+  the frozen blocks 1–7 contribute nothing, all sharpening in 8–11). Geometry unchanged (`t*` 0.486,
+  endpoints differ 88%, 3 argmax regions, |t*−t_flip| 0.084, partial ρ = −0.58, strict rate 0).
+- **`experiments/frozen_pairwise.py`** gained the eight frozen-deep-second-seed comparisons and a
+  `position_contrast_{matched,last}` summary (both seeds' medians, the seed spread, whether both sit
+  below frozen-mirror, and the worst-seed gap) → `results/frozen_pairwise.json`.
+- **Figure 24 regenerated** (`plots/capacity_vs_depth.png`): seven frozen-run markers instead of six,
+  with frozen 1–7 now labelled "(2 seeds)" and its two markers adjacent; two label offsets moved so the
+  frozen 1–7 and frozen 5–11 labels no longer collide on either panel. Caption rewritten in both
+  deliverables to name all three across-seed spreads (0.397 vs 0.437 at 12 blocks, 0.476 vs 0.498 at 8,
+  0.590 vs 0.559 at 5) and to state that both frozen-1–7 seeds sit below the frozen-5–11 diamond.
+- **Stale closing prediction replaced in both hypothesis paragraphs.** They still ended on the narrow-run
+  prediction, which S14 answered, and misstated the reference width as `n_embd` 384 (it is 240). They now
+  report the narrow-run outcome and end on the open successor: five trainable blocks in the *middle*
+  (freeze 0–3 and 9–11) should land near 0.58–0.60, between the two known five-block values.
+- **Limitation 7 and the two closing paragraphs updated**: three conditions carry a second seed, and the
+  position claim's remaining weakness is stated precisely — a seed spread exists on the frozen-deep side
+  only, since frozen-mirror is still one run.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 472 inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds and
+  27 visible `**Figure N.**` captions per file; zero bare `(plots/x.png)` paths.
+- **No `STOP` written** — wall clock and a named next experiment (the middle-of-stack five-block freeze)
+  both remain.

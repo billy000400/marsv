@@ -606,11 +606,15 @@ accuracy (Figure 23) — so the site is contingent and what freezing costs is sh
 by how many blocks stay trainable and only secondly by where they sit. A fifth run tested that reading
 at its limit and **confirmed** it: freezing ten blocks so that only block 11 is both trainable and
 downstream of the injection lands at **0.726**, matching the ≈0.70 trainable-depth prediction and
-excluding the ≈0.56 "one block beside the readout suffices" alternative. **Falsifiable prediction:**
-because trainable depth rather than any particular site sets the sharpness, a *wider* network with the
-same depth should not recover it — retraining at 12 blocks but half the width (`n_embd` 192 instead of
-384) should land near the reference's 0.351, whereas if raw parameter count is what matters it should
-land nearer the 8-trainable-block runs' 0.47.
+excluding the ≈0.56 "one block beside the readout suffices" alternative. A sixth run separated depth
+from capacity: retrained at 12 trainable blocks but only 5.38M parameters (`n_embd` 192 instead of
+240 — 4% *fewer* trainable parameters than freezing blocks 1–4 leaves), it lands at **0.397**, the
+depth account's value rather than the capacity account's ≈0.47, and the second seed of each end of that
+comparison leaves the two groups disjoint. **Falsifiable prediction:** if position is a genuine
+second-order term that only bites once depth is scarce, then five trainable blocks in the *middle* of
+the stack — freeze blocks 0–3 and 9–11, leaving 4–8 trainable, the same seven frozen blocks as the two
+runs above but at neither end — should land between the two known five-block values, near 0.58–0.60
+rather than at either 0.56 or 0.63.
 
 ### The readout-rebalancing intervention — the plateau is upstream of the decision
 
@@ -791,7 +795,9 @@ the reference run's **0.5502**, reaching the reference's final accuracy at steps
 least as well as the reference. Note in particular that frozen-deep and frozen-mirror are matched on
 everything a capacity argument can see — 4.86M of 8.38M parameters frozen (58.0%), five trainable
 blocks each, and final accuracies that agree to within 0.0002 — and differ only in *where* the
-trainable blocks sit.
+trainable blocks sit. Two of the five conditions were later repeated from a second initialization
+(frozen-early and frozen-deep, both again above the reference at 0.5629 and 0.5730 final accuracy), so
+the two comparisons the conclusions rest on each have a measured seed spread under them.
 
 ![raw interpolation curves, transition widths, injection-depth profile and validation accuracy for the reference and five frozen-block runs](plots/frozen_blocks.png)
 
@@ -841,7 +847,8 @@ final accuracy and the open markers are the matched-accuracy checkpoints.
   five trainable blocks, differing only in whether those blocks abut the readout (8–11) or the
   embedding (0–4). They do not come out equal: **0.558** vs **0.626**, a paired median `Δw` of +0.063
   (81% of pairs wider, p = 6e-17), i.e. 54% vs **39%** of the reference sharpening recovered. So the
-  count-only prediction is falsified at the margin. Yet with eight trainable blocks the same contrast
+  count-only prediction is falsified at the margin, and a second frozen-deep seed (below) confirms the
+  gap is larger than seed noise. Yet with eight trainable blocks the same contrast
   is nearly nil (frozen-early 0.471 vs frozen-late 0.484, Δ = 0.015). Reading the five runs together:
   median width **0.351** (12 trainable) → **0.471 / 0.484** (8 trainable) → **0.558 / 0.626** (5
   trainable) → **0.726** (2 trainable, and only 1 of them downstream of the injection). The number of
@@ -891,7 +898,7 @@ final accuracy and the open markers are the matched-accuracy checkpoints.
   `|t* − t_flip|` 0.061 — and it is the only non-reference run that keeps the sharpest tail, meeting the
   strict plateau rule on **13.3%** of pairs against 0–0.7% for all five frozen runs.
 
-- **Both ends of the load-bearing comparison now carry a second seed, and seed noise is small.** The
+- **Both ends of the load-bearing comparison also carry a second seed, and seed noise is small.** The
   depth conclusion rests on runs with 12 trainable blocks coming out sharper than runs with 8, and
   until now every point on that axis was a single initialization — so a 0.397-vs-0.476 gap had no error
   bar under it. Both ends were therefore retrained from a fresh model seed (2024; identical data order,
@@ -936,6 +943,24 @@ final accuracy and the open markers are the matched-accuracy checkpoints.
   annealed to lr 1.2e-4 rather than 1.0e-4 — a truncation that can only *understate* how sharp it
   would end up, since the run was still sharpening (0.397 at its matched step → 0.332 here, p = 3.1e-14).
 
+- **Five trainable blocks beside the readout really do beat five at the bottom — the position term
+  replicates.** This was the last sub-claim resting on a single pair of runs, and its 0.068 gap is
+  small enough that seed noise could have produced it. Frozen-deep was therefore retrained from a
+  second initialization (seed 2024, everything else fixed); the prediction fixed beforehand was that it
+  lands within the measured ≈0.04 seed spread of 0.558 and stays below frozen-mirror's 0.626. It does,
+  at both framings. At matched accuracy (step 3,000, val 0.5503 — the same step as seed 1337) it gives
+  **0.559** against seed 1337's 0.590, and at step 30,000 (val 0.5730) **0.579** against 0.558: a
+  within-condition spread of 0.031 and 0.021, again with no consistent sign (paired `Δw` −0.016 at
+  matched accuracy, p = 8.9e-4, and +0.023 at the end of training, p = 4.5e-5). Both seeds sit below
+  frozen-mirror on both axes — the *worst* frozen-deep seed is still 0.039 (matched) and 0.046 (final)
+  narrower — and pair by pair the replicate is **−0.060** against frozen-mirror at matched accuracy
+  (only 21% of pairs wider, p = 5.9e-14) and **−0.040** at the end of training (29%, p = 3.4e-8). The
+  relocation signature reproduces exactly: injecting at blocks 0, 2 and 4 gives 0.559 / 0.558 / 0.557
+  at matched accuracy and 0.579 / 0.578 / 0.577 at step 30,000, so the frozen blocks 1–7 again
+  contribute nothing and all the sharpening sits in the trainable blocks 8–11 (0.683 and 0.714 by
+  injection block 8). Geometry unchanged as well (median `t*` 0.486, endpoints differ for 88% of pairs,
+  3 `argmax` regions, `|t* − t_flip|` 0.084, partial ρ = −0.58, strict rate 0).
+
 To show which of the two variables orders the runs, we plot each run's median width against both at
 once, with every run shown at the same validation accuracy and again at the end of its training.
 
@@ -948,16 +973,19 @@ transformer blocks (axis reversed, 12 → 2). **Right:** x = trainable parameter
 share an x on either axis are nudged apart so they can be told apart; where a label says "(2 seeds)",
 the two adjacent markers of that style are the same run trained from two model seeds. Large filled
 circles are the three runs with all 12 blocks trainable (the 240-wide reference and the two seeds of
-the 192-wide narrow run); large open diamonds are the six runs with blocks frozen at initialization
-(five frozen groups, with two seeds of frozen 1–4); each large marker is that run's first checkpoint to
+the 192-wide narrow run); large open diamonds are the seven runs with blocks frozen at initialization
+(five frozen groups, with two seeds each of frozen 1–4 and frozen 1–7); each large marker is that run's
+first checkpoint to
 reach the reference's final validation accuracy 0.550. The small open square joined to it by a dotted
 line is the same run at the end of training. Width falls monotonically along the left panel's axis but
 is unordered along the right one: at 5.4–5.6M trainable parameters both narrow seeds (filled) are
 sharper than all three eight-block frozen runs (open), and the 8.4M reference is no sharper than the
 5.4M narrow runs — and the end-of-training squares preserve that ordering, so it is not an artifact of
-the matching rule. The gaps between the two filled circles at 12 blocks and the two adjacent diamonds
-at 8 blocks are the across-seed spreads (0.397 vs 0.437; 0.476 vs 0.498); both are smaller than the
-step between the two groups, whose ranges do not overlap.
+the matching rule. Markers of one condition that sit adjacent are its two seeds, and the gap between
+them is the across-seed spread: 0.397 vs 0.437 at 12 blocks, 0.476 vs 0.498 at 8, and 0.590 vs 0.559
+at 5. All three spreads are smaller than the steps they have to resolve — the 12-block and 8-block
+groups do not overlap, and both frozen-1–7 seeds stay below the frozen-5–11 diamond at the same
+x-position on both panels, which is the position effect.
 
 **What this settles.** "Blocks 1–4 build the sharpness" is true of *this trained network at inference*
 — deleting their MLPs still flattens `d(t)` completely — but false as a claim about training. The sharp
@@ -968,7 +996,8 @@ What freezing costs is *how* sharp the transition gets, and that cost is governe
 trainable depth is left — median width 0.351 → 0.47–0.48 → 0.56–0.63 → 0.726 for 12, 8, 5 and
 effectively 1 trainable block below the readout, a monotone series across five runs — and only
 secondarily by where that depth sits (5 trainable blocks next to the readout beat 5 at the bottom,
-0.558 vs 0.626). The plateau is therefore not tied to particular weights or a particular depth; it is
+0.558 and 0.579 across two seeds against 0.626, with both seeds on the near-readout side clear of the
+seed spread). The plateau is therefore not tied to particular weights or a particular depth; it is
 something this architecture and objective produce wherever there is room for it. But "wherever there is
 room" has a floor: with one usable block the shape survives only as a 17%-strength remnant whose
 boundary no longer tracks the prediction flip, so depth is not merely a matter of degree for the
@@ -1067,7 +1096,8 @@ whichever blocks stay trainable (blocks 5–8 at width 0.471, blocks 8–11 at 0
 and block 11 alone at 0.726). So the plateau is a decision *basin* by description, produced by a
 **relocatable** computation that we have not yet characterised, whose sharpness is set by how much
 trainable depth is left rather than by any particular weights or site — and which degrades into a
-17%-strength remnant once only one usable block remains. That depth ordering now carries a seed check
-at its load-bearing step: with two initializations at each end, the three runs with 12 trainable blocks
-(0.397–0.443) stay disjoint from the three with 8 (0.476–0.500), and the spread between seeds of one
-condition (≤ 0.04) is smaller than the step between the groups.
+17%-strength remnant once only one usable block remains. Both orderings now carry a seed check: with
+two initializations at each end of the depth step, the three runs with 12 trainable blocks
+(0.397–0.443) stay disjoint from the three with 8 (0.476–0.500); and with two initializations of the
+five-block near-readout condition, both (0.559, 0.590) stay below the five-block bottom-of-stack run
+(0.626). Within-condition seed spread is ≤ 0.04 throughout, smaller than either step.

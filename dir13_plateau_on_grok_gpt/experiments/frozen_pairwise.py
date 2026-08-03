@@ -42,7 +42,26 @@ PAIRS = [("frozen_two_last", "frozen_deep_last"),
          ("frozen_early_s2_last", "frozen_early_last"),
          ("frozen_early_s2_last", "ref_trained"),
          ("frozen_early_s2_last", "narrow192_last"),
-         ("frozen_early_s2_last", "frozen_deep_last")]
+         ("frozen_early_s2_last", "frozen_deep_last"),
+         # second seed of frozen 1-7: the position sub-claim (5 trainable blocks by the readout vs
+         # 5 at the bottom) rests on frozen_deep vs frozen_mirror, one seed each until now
+         ("frozen_deep_s2_matched", "frozen_deep_matched"),
+         ("frozen_deep_s2_matched", "frozen_mirror_matched"),
+         ("frozen_deep_s2_matched", "frozen_early_matched"),
+         ("frozen_deep_s2_matched", "ref_matched_step"),
+         ("frozen_deep_s2_last", "frozen_deep_last"),
+         ("frozen_deep_s2_last", "frozen_mirror_last"),
+         ("frozen_deep_s2_last", "frozen_early_last"),
+         ("frozen_deep_s2_last", "ref_trained"),
+         # middle-of-stack five trainable blocks (freeze 0-3 and 9-11): the third position at the same
+         # trainable-block count, which turns the position term into an ordered three-point comparison
+         ("frozen_mid_matched", "frozen_deep_matched"),
+         ("frozen_mid_matched", "frozen_deep_s2_matched"),
+         ("frozen_mid_matched", "frozen_mirror_matched"),
+         ("frozen_mid_matched", "ref_matched_step"),
+         ("frozen_mid_last", "frozen_deep_last"),
+         ("frozen_mid_last", "frozen_mirror_last"),
+         ("frozen_mid_last", "ref_trained")]
 
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 out = {}
@@ -81,6 +100,26 @@ if all(k in C for g in GROUPS.values() for k in g):
                                    - C["narrow192_s2_matched"]["median_w"]), 4),
             "frozen_early": round(abs(C["frozen_early_matched"]["median_w"]
                                       - C["frozen_early_s2_matched"]["median_w"]), 4)}}
+
+# The position sub-claim: 5 trainable blocks next to the readout (frozen 1-7) against 5 at the bottom
+# (frozen 5-11). Both conditions freeze the same 58.0% of parameters, so only position differs. With
+# two seeds on the frozen_deep side the question is whether BOTH of them sit below frozen_mirror by
+# more than the frozen_deep seed spread.
+if "frozen_deep_s2_matched" in C:
+    for which in ("matched", "last"):
+        d1 = C[f"frozen_deep_{which}"]["median_w"]
+        d2 = C[f"frozen_deep_s2_{which}"]["median_w"]
+        m = C[f"frozen_mirror_{which}"]["median_w"]
+        out[f"position_contrast_{which}"] = {
+            "frozen_deep_medians": [d1, d2], "frozen_mirror_median": m,
+            "frozen_deep_seed_spread": round(abs(d1 - d2), 4),
+            "both_deep_seeds_below_mirror": bool(max(d1, d2) < m),
+            "gap_worst_deep_seed_to_mirror": round(m - max(d1, d2), 4)}
+        mid = C.get(f"frozen_mid_{which}")
+        if mid is not None:  # the third position at five trainable blocks
+            out[f"position_contrast_{which}"]["frozen_mid_median"] = mid["median_w"]
+            out[f"position_contrast_{which}"]["mid_between_deep_and_mirror"] = \
+                bool(max(d1, d2) < mid["median_w"] < m)
 
 print(json.dumps(out, indent=2))
 with open(os.path.join(RES, "frozen_pairwise.json"), "w") as f:

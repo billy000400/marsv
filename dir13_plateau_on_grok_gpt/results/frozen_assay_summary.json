@@ -660,6 +660,94 @@
      "10": 0.7995,
      "11": 0.809
     }
+   },
+   "frozen_deep_s2_matched": {
+    "kind": "frozen",
+    "step": 3000,
+    "frozen_blocks": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5503499348958333,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_deep_s2/ckpt_matched.pt",
+    "median_w": 0.5587,
+    "mean_w": 0.5577,
+    "iqr_w": [
+     0.4541,
+     0.6569
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4925,
+    "frac_endpoints_differ": 0.8867,
+    "median_n_argmax": 2.0,
+    "median_abs_tstar_minus_tflip": 0.0817,
+    "median_max_p": 0.0147,
+    "rho_w_vs_max_p": -0.261,
+    "partial_rho_w_vs_max_p_given_sep": -0.5889,
+    "median_paired_dw_vs_ref_trained": 0.193,
+    "frac_w_increased_vs_ref_trained": 0.9667,
+    "median_paired_dw_vs_ref_matched_step": 0.1266,
+    "frac_w_increased_vs_ref_matched_step": 0.9333,
+    "median_paired_dw_vs_ref_init": -0.2448,
+    "frac_w_increased_vs_ref_init": 0.02,
+    "depth_median_w": {
+     "0": 0.5587,
+     "2": 0.5583,
+     "4": 0.5574,
+     "8": 0.6826,
+     "10": 0.7929,
+     "11": 0.8196
+    }
+   },
+   "frozen_deep_s2_last": {
+    "kind": "frozen",
+    "step": 30000,
+    "frozen_blocks": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5729654947916667,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_deep_s2/ckpt_last.pt",
+    "median_w": 0.5792,
+    "mean_w": 0.5752,
+    "iqr_w": [
+     0.5018,
+     0.6541
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4863,
+    "frac_endpoints_differ": 0.88,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0836,
+    "median_max_p": 0.0144,
+    "rho_w_vs_max_p": -0.3046,
+    "partial_rho_w_vs_max_p_given_sep": -0.5788,
+    "median_paired_dw_vs_ref_trained": 0.2088,
+    "frac_w_increased_vs_ref_trained": 0.9867,
+    "median_paired_dw_vs_ref_matched_step": 0.1388,
+    "frac_w_increased_vs_ref_matched_step": 0.9,
+    "median_paired_dw_vs_ref_init": -0.2248,
+    "frac_w_increased_vs_ref_init": 0.02,
+    "depth_median_w": {
+     "0": 0.5792,
+     "2": 0.5777,
+     "4": 0.5769,
+     "8": 0.7142,
+     "10": 0.7798,
+     "11": 0.8067
+    }
    }
   }
  },
