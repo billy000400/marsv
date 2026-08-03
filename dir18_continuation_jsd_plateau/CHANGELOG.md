@@ -192,3 +192,87 @@ and post-hoc top-512 banks.
 **Figure 8** (mediation/learned sharpening) sits after the output-JSD validation, pushing formation
 8 -> 9, bank comparison 9 -> 10 and block scan 10 -> 11; all in-text figure references renumbered.
 `check_render.py` passes on both files (10 display equations, 11 embeds each, 0 problems).
+
+---
+
+## 2026-08-03 — operator feedback #3: terminology, split naming, and a 1,000-pair endpoint-clustered generality test
+
+Addressed `human_feedback_3.txt` (renamed `human_feedback_3.addressed.md`). All 26 points are
+reflected in RESULTS.md and REPORT.md; the two substantive new experiments are recorded here.
+
+**NEW — secondary 1,000-pair bank (new Figure 11, `plots/large_bank.png`).** Built by
+`experiments/build_large_bank.py` from the same 123 eligible endpoints and the same frequency-ratio
+rule as the primary bank, replacing endpoint-disjointness with a cap of 20 pairs per endpoint and
+taking 200 pairs in each selection-split quintile (no transition curve consulted). Assayed on
+`pythia-1.4b-deduped` step143000 and step0, 3 contexts x 50 positions = 3,000 curves per checkpoint,
+all valid under the strict criteria (max backslide 0.0000). New `experiments/large_analysis.py` does
+endpoint-clustered inference only:
+
+| | trained step143000 | untrained step0 |
+|---|---|---|
+| Spearman rho(J_hold, w) | **-0.486** | -0.008 |
+| dyadic endpoint-bootstrap 95% CI (4,000) | [-0.603, -0.353] | [-0.126, +0.109] |
+| endpoint-label permutation p (4,000) | **< 0.00025** (0 reached it) | 0.86 |
+| naive pair-bootstrap CI (invalid, contrast only) | [-0.533, -0.437] | [-0.068, +0.053] |
+| rho(J_hold, JSD_out) | +0.729 | +0.001 |
+| median w (IQR) | 0.555 (0.129) | 0.831 (0.005) |
+
+Binned medians over 10 non-overlapping equal-count holdout-JSD bins fall 0.649 -> 0.611 -> 0.602 ->
+0.567 -> 0.563 -> 0.542 -> 0.520 -> 0.524 -> 0.497 -> 0.499, i.e. essentially monotone with a
+flattening above ~0.75 bits — so the association is not driven by the small matched bank and shows no
+non-monotonicity. Reported throughout as an **endpoint-dependent robustness analysis**, never as 1,000
+independent observations; no naive p-value is quoted for it.
+
+**NEW — selection-split sensitivity (`experiments/split_sensitivity.py`,
+`results/split_sensitivity.json`).** Using the selection split as the predictor instead of the holdout
+split changes nothing: rho = -0.526 vs -0.525 (trained 1.4B), -0.053 vs -0.056 (step 0), -0.511 vs
+-0.512 (410M), with rho(J_sel, J_hold) = 0.99972 on the bank. Matches the operator's numbers.
+
+**Terminology and claim corrections (deliverables + figure labels regenerated).**
+- Predictor renamed and redefined explicitly as **context-averaged immediate-next-token JSD**,
+  `J_hold(u,v)`, with its own equation; splits renamed **selection**/**holdout** (was A/B) and
+  endpoints renamed `(u,v)` (was A/B, which clashed with endpoint labels). Every axis label, legend
+  and caption regenerated (`analyze.py`, `revisions.py`), e.g. "JSD (split B, bits)" ->
+  "held-out corpus next-token JSD J_hold(u,v) [bits]".
+- Methods now states why only the holdout JSD is used **and** that the holdout split is not untouched
+  (its counts gate eligibility; summed counts drive frequency matching).
+- Figure 4 caption now states that each dot is one endpoint pair (median w over 3 contexts, each from
+  50 positions), that there are only 60 pair-level observations re-used across the three panels, that
+  hue/marker = selection-split stratum, and that the crosses are 5 non-overlapping binned medians
+  after re-binning by holdout JSD — not a running median, not extra observations.
+- Added the explanation of why n = 60 (123 eligible endpoints -> at most 61 disjoint pairs), with the
+  weaker claim "removes direct dependence from endpoint reuse", not "statistically independent".
+- "complete words" -> **single-token word-start endpoints**; "every prompt is in-distribution" ->
+  "endpoints are **model-plausible under the three carrier contexts**".
+- Plateau language narrowed to **relative-logit-coordinate plateau**, with an explicit statement that
+  a flat d(t) does not show the full logit vector or output distribution stays put; `w` is now always
+  described as the **10%-90% transition width**, never as generic transition strength.
+- "predicted from the training corpus alone" -> "the JSD predictor itself is computed from corpus
+  statistics" (filtering and matching use model probabilities and surprisal).
+- Removed the Figure 1 claim that "93% is real signal"; the noise ratio is now described as a ratio of
+  medians, not an additive signal/noise decomposition.
+- "the bins are indistinguishable" -> "we detected no significant imbalance".
+- Step-0 `w` described as a **restricted range / near-ceiling**, no longer a "floor effect".
+- 410M relabelled a **cross-scale robustness check**, not an independent replication.
+- `JSD_out` defined precisely: median across the 3 carrier contexts, over the 50,060 corpus-observed
+  target IDs.
+- "almost nothing survives adjustment" -> "the association is attenuated after adjustment, and the
+  fully adjusted estimate is not statistically significant"; the -0.277 (p = 0.032) row is now
+  explicitly flagged as still significant.
+- "full strength by step 1000, then no further change" -> "already comparable to later checkpoints at
+  the earliest measured checkpoint", plus "nothing constrains what happened between step 0 and 1000".
+- Figure 2 scope corrected: it draws all 180 curves at **two** checkpoints; the validity audit spans
+  1,080 primary-bank curves plus the 3,000 secondary-bank curves.
+- Block scan scope stated in both the caption and Methods: 10 extreme pairs, one carrier context;
+  panel title changed from "Sharpness needs downstream blocks".
+- Prespecification claim narrowed to "the top-256 selection rules were prespecified, and the
+  exact-pair curves were not used during pair selection".
+- New precise headline sentence adopted verbatim in both deliverables.
+
+**Figures.** 12 captioned figures now embedded in BOTH files (was 11); new **Figure 11** = the
+1,000-pair bank, pushing the block scan 11 -> 12. All other PNGs regenerated with the new axis
+labels. `check_render.py` passes on both files (12 display equations, 12 embeds each, 0 problems).
+
+**Unchanged numbers.** The corpus pipeline was rebuilt from scratch this iteration (the /tmp cache
+does not survive sessions) and reproduces exactly: Spearman(J_sel, J_hold) = 0.9998, noise ratio
+0.0723, 50,060 valid target IDs, 123 eligible endpoints, primary rho = -0.525 / -0.056 / -0.512.

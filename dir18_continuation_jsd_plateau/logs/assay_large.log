@@ -1,0 +1,103 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<08:43,  1.80s/it]Loading weights:  19%|█▉        | 56/292 [00:01<00:05, 39.85it/s]Loading weights:  27%|██▋       | 80/292 [00:02<00:04, 44.78it/s]Loading weights:  33%|███▎      | 96/292 [00:02<00:04, 41.92it/s]Loading weights:  37%|███▋      | 107/292 [00:02<00:03, 48.09it/s]Loading weights:  40%|████      | 118/292 [00:03<00:03, 51.03it/s]Loading weights:  44%|████▍     | 128/292 [00:03<00:03, 47.65it/s]Loading weights:  47%|████▋     | 136/292 [00:03<00:03, 48.89it/s]Loading weights:  49%|████▉     | 144/292 [00:03<00:03, 45.47it/s]Loading weights:  53%|█████▎    | 156/292 [00:03<00:02, 47.34it/s]Loading weights:  56%|█████▌    | 164/292 [00:04<00:02, 47.04it/s]Loading weights:  62%|██████▏   | 180/292 [00:04<00:02, 53.85it/s]Loading weights:  64%|██████▎   | 186/292 [00:04<00:01, 53.97it/s]Loading weights:  66%|██████▌   | 192/292 [00:04<00:01, 54.71it/s]Loading weights:  68%|██████▊   | 198/292 [00:04<00:01, 49.57it/s]Loading weights:  71%|███████   | 206/292 [00:04<00:01, 47.31it/s]Loading weights:  74%|███████▍  | 216/292 [00:05<00:01, 54.55it/s]Loading weights:  76%|███████▌  | 222/292 [00:05<00:01, 53.57it/s]Loading weights:  79%|███████▉  | 230/292 [00:05<00:01, 59.04it/s]Loading weights:  82%|████████▏ | 240/292 [00:05<00:00, 60.15it/s]Loading weights:  85%|████████▍ | 247/292 [00:05<00:00, 60.62it/s]Loading weights:  87%|████████▋ | 254/292 [00:05<00:00, 44.65it/s]Loading weights:  90%|█████████ | 264/292 [00:05<00:00, 52.73it/s]Loading weights:  95%|█████████▌| 278/292 [00:06<00:00, 56.40it/s]Loading weights:  99%|█████████▉| 290/292 [00:06<00:00, 61.44it/s]Loading weights: 100%|██████████| 292/292 [00:06<00:00, 46.23it/s]
+1/1000 ' my'/' your' w=0.677
+11/1000 ' at'/' from' w=0.537
+21/1000 ' actually'/' probably' w=0.733
+31/1000 ' hard'/' difficult' w=0.787
+41/1000 ' nice'/' amazing' w=0.781
+51/1000 ' done'/' written' w=0.722
+61/1000 ' strange'/' wonderful' w=0.694
+71/1000 ' also'/' just' w=0.616
+81/1000 ' interesting'/' impossible' w=0.669
+91/1000 ' fun'/' easy' w=0.701
+101/1000 ' some'/' most' w=0.622
+111/1000 ' perfect'/' fine' w=0.768
+121/1000 ' like'/' what' w=0.534
+131/1000 ' about'/' because' w=0.631
+141/1000 ' already'/' probably' w=0.600
+151/1000 ' nothing'/' difficult' w=0.550
+161/1000 ' nothing'/' easy' w=0.596
+171/1000 ' already'/' simply' w=0.566
+181/1000 ' now'/' made' w=0.668
+191/1000 ' enough'/' bad' w=0.613
+201/1000 ' up'/' well' w=0.585
+211/1000 ' as'/' not' w=0.659
+221/1000 ' better'/' hard' w=0.623
+231/1000 ' good'/' much' w=0.595
+241/1000 ' mostly'/' totally' w=0.698
+251/1000 ' no'/' our' w=0.455
+261/1000 ' big'/' fine' w=0.672
+271/1000 ' his'/' no' w=0.442
+281/1000 ' being'/' never' w=0.609
+291/1000 ' called'/' working' w=0.524
+301/1000 ' hot'/' amazing' w=0.700
+311/1000 ' made'/' still' w=0.537
+321/1000 ' better'/' big' w=0.618
+331/1000 ' coming'/' fine' w=0.591
+341/1000 ' always'/' getting' w=0.585
+351/1000 ' too'/' true' w=0.522
+361/1000 ' going'/' something' w=0.518
+371/1000 ' one'/' there' w=0.527
+381/1000 ' by'/' not' w=0.601
+391/1000 ' actually'/' almost' w=0.658
+401/1000 ' not'/' from' w=0.555
+411/1000 ' almost'/' quite' w=0.664
+421/1000 ' written'/' perfect' w=0.532
+431/1000 ' hard'/' far' w=0.678
+441/1000 ' after'/' being' w=0.453
+451/1000 ' simply'/' worth' w=0.511
+461/1000 ' not'/' this' w=0.613
+471/1000 ' called'/' bad' w=0.531
+481/1000 ' as'/' this' w=0.540
+491/1000 ' simply'/' nice' w=0.545
+501/1000 ' such'/' good' w=0.643
+511/1000 ' mostly'/' wonderful' w=0.424
+521/1000 ' true'/' kind' w=0.708
+531/1000 ' me'/' when' w=0.392
+541/1000 ' great'/' still' w=0.449
+551/1000 ' most'/' really' w=0.668
+561/1000 ' bad'/' exactly' w=0.563
+571/1000 ' all'/' your' w=0.481
+581/1000 ' most'/' different' w=0.627
+591/1000 ' right'/' still' w=0.546
+601/1000 ' perfect'/' completely' w=0.518
+611/1000 ' hot'/' coming' w=0.562
+621/1000 ' much'/' going' w=0.563
+631/1000 ' his'/' about' w=0.403
+641/1000 ' worth'/' obvious' w=0.532
+651/1000 ' over'/' different' w=0.532
+661/1000 ' my'/' about' w=0.429
+671/1000 ' their'/' like' w=0.441
+681/1000 ' worth'/' interesting' w=0.646
+691/1000 ' easy'/' completely' w=0.496
+701/1000 ' me'/' some' w=0.550
+711/1000 ' there'/' over' w=0.632
+721/1000 ' hard'/' taking' w=0.495
+731/1000 ' out'/' no' w=0.573
+741/1000 ' an'/' this' w=0.467
+751/1000 ' there'/' about' w=0.497
+761/1000 ' getting'/' pretty' w=0.567
+771/1000 ' meant'/' absolutely' w=0.511
+781/1000 ' just'/' different' w=0.513
+791/1000 ' big'/' almost' w=0.438
+801/1000 ' part'/' being' w=0.599
+811/1000 ' mostly'/' extremely' w=0.519
+821/1000 ' hot'/' exactly' w=0.563
+831/1000 ' an'/' his' w=0.358
+841/1000 ' real'/' getting' w=0.495
+851/1000 ' completely'/' worth' w=0.469
+861/1000 ' an'/' by' w=0.412
+871/1000 ' under'/' good' w=0.476
+881/1000 ' actually'/' difficult' w=0.420
+891/1000 ' what'/' well' w=0.526
+901/1000 ' never'/' enough' w=0.608
+911/1000 ' hard'/' pretty' w=0.575
+921/1000 ' you'/' his' w=0.479
+931/1000 ' written'/' pretty' w=0.561
+941/1000 ' there'/' some' w=0.542
+951/1000 ' part'/' such' w=0.633
+961/1000 ' extremely'/' wonderful' w=0.568
+971/1000 ' un'/' either' w=0.377
+981/1000 ' un'/' much' w=0.476
+991/1000 ' un'/' made' w=0.374
+valid-curve rate 1.000  median w 0.555  IQR(w) 0.129  max endpoint rel-err 6.32e-05

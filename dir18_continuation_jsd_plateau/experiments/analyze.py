@@ -80,14 +80,14 @@ def fig_reliability(rel, npz):
     ax[0].scatter(jA, jB, s=3, alpha=0.15, color=CVD[0], marker="o", edgecolors="none")
     lim = [min(jA.min(), jB.min()), max(jA.max(), jB.max())]
     ax[0].plot(lim, lim, ls="--", color="0.35", lw=1, label="y = x")
-    ax[0].set_xlabel("$JSD_A$ (split A, bits)")
-    ax[0].set_ylabel("$JSD_B$ (split B, bits)")
+    ax[0].set_xlabel("selection-split next-token JSD $\\hat{J}_{\\mathrm{sel}}(u,v)$ [bits]")
+    ax[0].set_ylabel("held-out next-token JSD $\\hat{J}_{\\mathrm{hold}}(u,v)$ [bits]")
     ax[0].set_title(f"Between-token JSD, two disjoint corpus splits\nSpearman = {rel['spearman_A_B']:.3f}"
                     f"  (n = {len(jA):,} pairs)")
     ax[0].legend(frameon=False, fontsize=8)
     bins = np.linspace(0, max(jB.max(), sh.max()), 60)
     ax[1].hist(jB, bins=bins, color=CVD[0], histtype="stepfilled", alpha=0.55, hatch="//",
-               label=f"between-token $JSD_B$ (median {np.median(jB):.3f})")
+               label=f"between-token $\\hat{{J}}_{{\\mathrm{{hold}}}}$ (median {np.median(jB):.3f})")
     ax[1].hist(sh, bins=bins, color=CVD[1], histtype="stepfilled", alpha=0.55, hatch="\\\\",
                label=f"same-token split-half (median {np.median(sh):.3f})")
     ax[1].set_xlabel("JSD (bits)")
@@ -100,7 +100,7 @@ def fig_reliability(rel, npz):
 
 
 def fig_all_curves(tags, labels):
-    """Every raw d(t) curve -- one panel per JSD_A quintile, both checkpoints, all 3 contexts."""
+    """Every raw d(t) curve at these checkpoints -- one panel per selection-JSD quintile, all 3 contexts."""
     fig, ax = plt.subplots(2, 5, figsize=(15.5, 6.0), sharex=True, sharey=True)
     for row, (tag, lab) in enumerate(zip(tags, labels)):
         Q = qc(tag)
@@ -126,7 +126,7 @@ def fig_all_curves(tags, labels):
             if q == 0:
                 a.set_ylabel(f"{lab}\nrelative logit distance $d(t)$", fontsize=8)
                 a.legend(frameon=False, fontsize=7, loc="upper left")
-    fig.suptitle("Every raw curve in the frozen top-256 bank (100% pass the strict validity criteria)",
+    fig.suptitle("All 180 curves at each of these two checkpoints (validity audited over all 1,080 curves, six checkpoints)",
                  fontsize=11)
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "all_curves.png"))
@@ -149,12 +149,12 @@ def fig_reference_curves(tag):
             ax.plot(grid, C[i, ci], ls=LS[0] if grp == "low" else LS[1], color=col, lw=1.0,
                     alpha=0.75, marker=MARK[n % 3] if ci == 0 else None, ms=3,
                     label=(f"{r['a_str'].strip()}/{r['b_str'].strip()}  "
-                           f"$JSD_B$={r['jsd_B']:.2f} ({grp})") if ci == 0 else None)
+                           f"$\\hat{{J}}_{{\\mathrm{{hold}}}}$={r['jsd_B']:.2f} ({grp})") if ci == 0 else None)
     ax.axhline(0.1, color="0.6", lw=0.8, ls=":")
     ax.axhline(0.9, color="0.6", lw=0.8, ls=":")
     ax.set_xlabel("interpolation position $t$ (block-0 residual, SLERP)")
     ax.set_ylabel("relative logit distance $d(t)$")
-    ax.set_title("Raw curves, 3 lowest vs 3 highest $JSD_B$ pairs\n(all 3 carrier contexts drawn, no averaging)")
+    ax.set_title("Raw curves, 3 lowest vs 3 highest $\\hat{J}_{\\mathrm{hold}}$ pairs\n(all 3 carrier contexts drawn, no averaging)")
     ax.legend(frameon=False, fontsize=7)
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "reference_curves.png"))
@@ -170,17 +170,17 @@ def fig_jsd_vs_width(Qs, labels):
         for q in range(5):
             m = b == q
             a.scatter(x[m], y[m], s=26, color=CVD[q], marker=MARK[q], alpha=0.85,
-                      edgecolors="none", label=f"$JSD_A$ quintile {q+1}")
+                      edgecolors="none", label=f"$\\hat{{J}}_{{\\mathrm{{sel}}}}$ quintile {q+1}")
         good = np.isfinite(x) & np.isfinite(y)
-        if good.sum() > 10:  # running median of w in 5 equal-count JSD_B bins
+        if good.sum() > 10:  # medians of w in 5 non-overlapping equal-count holdout-JSD bins
             xs, ys = x[good], y[good]
             e = np.quantile(xs, np.linspace(0, 1, 6))
             bi = np.clip(np.digitize(xs, e[1:-1]), 0, 4)
             a.plot([np.median(xs[bi == q]) for q in range(5)],
                    [np.median(ys[bi == q]) for q in range(5)],
-                   color="0.25", ls="--", lw=1.4, marker="x", ms=6, label="running median")
+                   color="0.25", ls="--", lw=1.4, marker="x", ms=6, label="median in 5 non-overlapping $\\hat{J}_{\\mathrm{hold}}$ bins")
         r, lo, hi, n, p = boot_spearman(x, y)
-        a.set_xlabel("$JSD_B$: corpus continuation divergence (bits)")
+        a.set_xlabel("held-out corpus next-token JSD $\\hat{J}_{\\mathrm{hold}}(u,v)$ [bits]")
         a.set_ylabel("transition width $w$  (smaller = sharper)")
         a.set_title(f"{lab}\nSpearman $\\rho$ = {r:+.3f}  [{lo:+.2f}, {hi:+.2f}]  n = {n}")
         if k == 0:
@@ -210,7 +210,7 @@ def fig_width_by_bin(Qs, labels):
                        label=lab if q == 0 else None)
     ax.set_xticks(range(5))
     ax.set_xticklabels([f"Q{q+1}" for q in range(5)])
-    ax.set_xlabel("$JSD_A$ quintile of the frozen bank (Q1 = most similar continuations)")
+    ax.set_xlabel("$\\hat{J}_{\\mathrm{sel}}$ quintile of the frozen bank (Q1 = most similar continuations)")
     ax.set_ylabel("transition width $w$")
     ax.set_title("Transition width by corpus-divergence bin")
     ax.legend(frameon=False, fontsize=8)
@@ -263,7 +263,7 @@ def fig_output_jsd(Q):
         ax.scatter(x[m], y[m], s=26, color=CVD[q], marker=MARK[q], alpha=0.85, edgecolors="none",
                    label=f"quintile {q+1}")
     r, lo, hi, n, p = boot_spearman(x, y)
-    ax.set_xlabel("$JSD_B$: corpus continuation divergence (bits)")
+    ax.set_xlabel("held-out corpus next-token JSD $\\hat{J}_{\\mathrm{hold}}(u,v)$ [bits]")
     ax.set_ylabel("model output JSD in carrier context (bits)")
     ax.set_title(f"Does corpus JSD predict a distinction the model learned?\n"
                  f"Spearman $\\rho$ = {r:+.3f}  [{lo:+.2f}, {hi:+.2f}]  n = {n}")
@@ -291,7 +291,7 @@ def fig_bank_comparison(prim, sec, drop=None):
     ax.axhline(0, color="0.4", lw=1, ls=":")
     ax.set_xticks(xs)
     ax.set_xticklabels(labs)
-    ax.set_ylabel(r"Spearman $\rho$($JSD_B$, $w$)")
+    ax.set_ylabel(r"Spearman $\rho$($\hat{J}_{\mathrm{hold}}$, $w$)")
     ax.set_title("The conclusion does not depend on the endpoint filter")
     ax.legend(frameon=False, fontsize=7.5, loc="lower right")
     fig.tight_layout()
@@ -307,16 +307,16 @@ def fig_formation(form, rev=None):
     r = np.array([f["rho_w"] for f in form])
     lo = np.array([f["ci_w"][0] for f in form])
     hi = np.array([f["ci_w"][1] for f in form])
-    ax[0].plot(xpos, r, ls="-", marker="o", color=CVD[0], lw=1.6, label=r"$\rho$($JSD_B$, $w$)")
+    ax[0].plot(xpos, r, ls="-", marker="o", color=CVD[0], lw=1.6, label=r"$\rho$($\hat{J}_{\mathrm{hold}}$, $w$)")
     ax[0].fill_between(xpos, lo, hi, color=CVD[0], alpha=0.18, hatch="//", edgecolor=CVD[0])
     ax[0].plot(xpos, [f["rho_out"] for f in form], ls="--", marker="s", color=CVD[1], lw=1.6,
-               label=r"$\rho$($JSD_B$, model output JSD)")
+               label=r"$\rho$($\hat{J}_{\mathrm{hold}}$, model output JSD)")
     ax[0].axhline(0, color="0.4", lw=1, ls=":")
     ax[0].set_xscale("log")
     ax[0].set_xticks(xpos)
     ax[0].set_xticklabels([str(s) for s in steps], fontsize=8)
     ax[0].set_xlabel("training step (log scale; step 0 at the left edge)")
-    ax[0].set_ylabel(r"Spearman $\rho$ with corpus $JSD_B$")
+    ax[0].set_ylabel(r"Spearman $\rho$ with corpus $\hat{J}_{\mathrm{hold}}$")
     ax[0].set_title("The corpus predictor is at full strength by step 1000")
     ax[0].legend(frameon=False, fontsize=8, loc="center right")
 
@@ -371,13 +371,13 @@ def fig_block_scan():
                       for r in bs["rows"] if r["group"] == grp], dtype=float)
         med = np.nanmedian(W, axis=0)
         ax.plot(blocks, med, ls=LS[gi], marker=MARK[gi], color=CVD[gi], lw=1.6,
-                label=f"{grp} $JSD_B$ pairs (n={W.shape[0]})")
+                label=f"{grp} $\\hat{{J}}_{{\\mathrm{{hold}}}}$ pairs (n={W.shape[0]})")
         for row in W:
             ax.plot(blocks, row, ls=LS[gi], color=CVD[gi], lw=0.6, alpha=0.3)
     ax.set_xticks(blocks)
     ax.set_xlabel("patched block $L$ (residual stream after this block is interpolated)")
     ax.set_ylabel("transition width $w$")
-    ax.set_title("Sharpness needs downstream blocks")
+    ax.set_title("Width grows as fewer blocks follow the patch\n(10 extreme pairs, carrier context 1 only)")
     ax.legend(frameon=False, fontsize=8)
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "block_scan.png"))

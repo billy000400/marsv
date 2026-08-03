@@ -274,3 +274,78 @@ divergence estimate, which is also the natural way to attack the mediation null 
 not just a proxy for the model's own output separation).
 
 On track? yes — S1-S6 complete (100%), operator feedback #2 fully addressed, no blocker.
+
+---
+
+## 2026-08-03 (iter: operator feedback #3 — 1,000-pair generality test + terminology overhaul)
+
+**Situation on entry.** `human_feedback_3.txt` sat unaddressed (no `STOP` present). 26 points: mostly
+definition/claim precision, plus two real experiments — a selection-split sensitivity check and a
+~1,000-pair secondary analysis with endpoint-clustered inference, explicitly to be run on the final
+1.4B checkpoint first.
+
+**Blocker I hit first:** `/tmp/dir18_data` (corpus sample + bigram counts + `reliability_bank.npz`) is
+wiped between sessions, and the whole 1,000-pair bank needs pairwise JSD from those counts. So the
+iteration began by re-downloading both 500k-row splits by byte range (~5 min each, resumable ledger)
+and re-running `count_jsd.py` (~4 min). Everything reproduced bit-for-bit: 50,060 valid target IDs,
+123 eligible endpoints, Spearman(J_sel, J_hold) = 0.9998, noise ratio 0.0723. Worth remembering: the
+models are cached under `/workspace/hf_home` and survive, the corpus is not.
+
+**What I did.**
+
+1. **`build_large_bank.py`** — 1,000 pairs from the same 123 endpoints, same frequency-ratio rule,
+   endpoint-disjointness replaced by a cap of 20 uses per endpoint (actual uses 1/17/20), 200 pairs
+   per selection-split quintile, seed 7, no curve consulted. Also precomputes the full 123x123
+   holdout-JSD matrix, which the permutation test needs.
+2. **Assay** at step143000 and step0 (3,000 curves each; ~8 min per checkpoint on the shared GPU).
+   All curves valid, max backslide 0.0000.
+3. **`large_analysis.py`** — endpoint-clustered inference only: dyadic (pigeonhole) endpoint
+   bootstrap, endpoint-label (QAP) permutation test, 10 non-overlapping binned medians for the
+   nonlinearity question, and the naive pair bootstrap shown *only* to quantify the correction.
+   Trained: rho = **-0.486**, clustered CI [-0.603, -0.353], permutation p < 0.00025 (0/4,000 reached
+   it; 97.5th pct of |rho_perm| was 0.116). Step 0: -0.008, CI [-0.126, +0.109], p = 0.86.
+4. **`split_sensitivity.py`** — reproduces the operator's numbers exactly: -0.5260 (selection) vs
+   -0.5247 (holdout), rho(J_sel, J_hold) = 0.99972.
+5. **Terminology overhaul** across both deliverables *and* the figure-generating code (splits renamed
+   selection/holdout, endpoints (u,v), J_hold notation on every axis and legend), plus the ~20 claim
+   corrections listed in CHANGELOG.
+
+**What I learned.**
+
+- **Endpoint clustering costs a factor of 2.6 in the interval, not the conclusion.** The naive pair
+  bootstrap gives [-0.533, -0.437] (SD 0.025) and the dyadic endpoint bootstrap [-0.603, -0.353]
+  (SD 0.064) on the same 1,000 pairs. The naive p-value (2.6e-60) is meaningless; the permutation test
+  still gives < 0.00025. So the operator's warning was right in principle and the effect survives it.
+- **The relationship is monotone, not thresholded.** Ten binned medians fall 0.649 -> 0.499 with a
+  mild flattening above ~0.75 bits. That was an open possibility the 60-pair bank could not resolve.
+- **The larger bank is slightly weaker (-0.486 vs -0.525), as expected** — it is not matched
+  pair-by-pair on frequency/surprisal and fills the crowded middle of the divergence range. Reported
+  as such rather than as a discrepancy.
+- **The 1,000-pair step-0 control tightens the untrained null** from "wide CI containing 0" to
+  [-0.126, +0.109]. The restricted-range caveat still stands (untrained IQR(w) = 0.005), so I kept it.
+- **`check_render.py` has grown rules 9a/9d** (a table needs a prose claim above it; a budget of 2
+  "X rather than Y" constructions). Both deliverables now pass all of them.
+
+**Assumptions logged (loop mode — could not ask).**
+
+- Treated `human_feedback_3.txt` as an operator feedback file despite the `.txt` extension (same
+  precedent as rounds 1-2); renamed to `human_feedback_3.addressed.md` with contents untouched.
+- Chose 1,000 pairs = 200 per selection quintile with a 20-use cap. The operator said "approximately
+  1,000" and "prevent a few endpoints from dominating"; the cap of 20 is the smallest round number
+  that still admits 1,000 pairs from the 1,763 frequency-matched candidates (2,000 endpoint slots /
+  123 endpoints = 16.3 average).
+- Ran the optional step-0 checkpoint on the large bank (the operator called extra checkpoints
+  optional) because the "requires training" claim is the one the large bank could most cheaply
+  strengthen. Did not run 410M or the formation checkpoints on it — no new question they would answer.
+- Kept the primary 60-pair bank as the confirmatory headline everywhere, per the operator's
+  instruction, with the 1,000-pair result presented as an endpoint-dependent robustness analysis.
+
+**Next step.** Nothing outstanding: the plan's definition of done holds, all three feedback rounds are
+addressed, and zero unaddressed feedback files remain, so `STOP` is written. If new feedback appears
+next to it, delete `STOP`, address it, and re-write `STOP` only when clean. The out-of-scope follow-up
+is unchanged and now better motivated: a **context-conditioned** divergence estimate, which is the
+natural way to attack the mediation null (a predictor that is not merely a proxy for the model's own
+output separation) and to test the late checkpoints where the global statistic stops improving.
+
+On track? yes — S1-S6 complete (100%) on the prespecified bank plus a 1,000-pair generality test;
+operator feedback #3 fully addressed, no blocker.

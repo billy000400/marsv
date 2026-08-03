@@ -187,8 +187,13 @@ checkpoints test whether the negative relationship strengthens during training.
   *(RESULTS.md + REPORT.md current-best, 11 captioned figures in both, render check passes; raw
   curves committed and independently re-scorable)*
 - [x] **Optional formation subset:** step1000/8000/32000/64000 on the same frozen bank.
-  *(relationship does NOT strengthen: full strength by step 1000 at -0.582, then -0.456/-0.408/
-  -0.628/-0.525 within overlapping CIs, while median `w` falls 0.831 -> ~0.52)*
+  *(relationship does NOT strengthen: already at full strength at the earliest measured step, 1000,
+  at -0.582, then -0.456/-0.408/-0.628/-0.525 within overlapping CIs, while median `w` falls
+  0.831 -> ~0.52)*
+- [x] **Feedback #3 addition — 1,000-pair generality test:** secondary bank (same 123 endpoints,
+  20-use cap, 200 pairs per selection quintile), 1.4B step143000 + step0, endpoint-clustered
+  inference. *(rho = -0.486, dyadic endpoint-bootstrap CI [-0.603,-0.353], endpoint-label permutation
+  p < 0.00025; step 0: -0.008, CI [-0.126,+0.109]; binned medians monotone 0.649 -> 0.499)*
 
 ## Fallback
 
@@ -217,41 +222,50 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-S1-S6 complete on the **prespecified top-256 bank** (60 endpoint-disjoint pairs); both operator
-feedback rounds (`human_feedback.addressed.md`, `human_feedback_2.addressed.md`) fully addressed.
-Round 2 added: raw curves genuinely committed (direction-level `.gitignore` un-ignores
-`results/curves_*`); a learned-sharpening outcome `dw = w(trained) - w(step 0)` with
-`rho(JSD_B, dw) = -0.517`; a mediation ladder showing the headline is a **total** association that
-falls to `-0.277` after adjusting for model output JSD and `-0.204` (p = 0.119, **not significant**)
-after adjusting for output JSD plus the five covariates; the corrected training-dynamics reading
-(sharpening through step 64000, then a modest late reversal to 0.541, 38/60 pairs blunter, paired
-Wilcoxon p = 0.0052); and the "word-start tokens" correction plus its fragment sensitivity check
-(dropping `un`/`better` gives `rho = -0.502`, n = 59). Corpus JSD predicts narrower transitions in trained
-Pythia (`rho = -0.525`, CI [-0.701,-0.304], n = 60) and not at step 0 (`-0.056`, CI includes 0, median
-`w = 0.831` with `IQR = 0.006` — partly a floor effect), replicating at 410M (`-0.512`). Predictor
-validated against model output JSD (`+0.751`). Prespecified verdict branch: corpus JSD predicts
-model-output JSD and smaller `w`; step 0 does not — stated as **learned output separation + overall
-transition width**, not "plateau sharpening", because `w` and the new flatness metric (edge drift,
-0.076 vs the 0.184 no-plateau reference) correlate at +0.971 and cannot be separated. Attenuates to
-`-0.384` after geometry adjustment: total association, observational only. Strict curve validity
-(span / single-crossing / monotonicity) now measured, not assumed: 0 failures in 1,080 curves, max
-backslide 0.0000; all raw curves committed as `.npy` and `.csv.gz`. The relaxed top-512 bank remains
-as a clearly labelled post-hoc secondary analysis (`rho = -0.419 / -0.155 / -0.320`). RESULTS.md and
-REPORT.md are current-best with 10 captioned figures each and pass the GitHub render check.
+S1-S6 complete on the **prespecified top-256 bank** (60 endpoint-disjoint pairs), plus a **1,000-pair
+secondary bank** added for feedback round 3; all three operator feedback files are addressed
+(`human_feedback.addressed.md`, `human_feedback_2.addressed.md`, `human_feedback_3.addressed.md`).
+
+**Primary (60 endpoint-disjoint pairs, 3 contexts, 50 positions).** Held-out corpus
+immediate-next-token JSD predicts narrower 10%-90% relative-logit transitions in trained Pythia:
+`rho = -0.525`, CI [-0.701,-0.304], p = 1.7e-5; not at step 0 (`-0.056`, CI includes 0, median
+`w = 0.831` with `IQR = 0.006` — a restricted range near the linear-response ceiling); `-0.512` on
+410M as a cross-scale check (same bank, same corpus estimates). Predictor validated against model
+output JSD (`+0.751`). Using the selection split instead of the holdout split changes nothing
+(`-0.526`; the two agree at 0.99972). Learned sharpening `dw = w(trained) - w(step 0)`:
+`rho = -0.517`. Mediation ladder: `-0.525` total -> `-0.277` (p = 0.032, still significant) adjusting
+for model output JSD -> `-0.204` (p = 0.119, **not significant**) adjusting for output JSD plus the
+five covariates. Strict curve validity measured, not assumed: 0 failures in 1,080 primary-bank curves
+and 3,000 secondary-bank curves, max backslide 0.0000; all raw curves committed.
+
+**Secondary (1,000 pairs, endpoint reuse, clustered inference).** `rho = -0.486`, dyadic
+endpoint-bootstrap CI [-0.603,-0.353], endpoint-label permutation p < 0.00025 (0 of 4,000); step 0
+gives `-0.008`, CI [-0.126,+0.109], p = 0.86. Ten binned medians fall 0.649 -> 0.499 essentially
+monotonically, so the association is neither an artefact of the small matched bank nor visibly
+non-monotone. Reported as an endpoint-dependent robustness analysis, never as 1,000 independent
+observations. The relaxed top-512 bank remains a clearly labelled post-hoc secondary analysis
+(`-0.419 / -0.155 / -0.320`).
+
+Prespecified verdict branch: corpus JSD predicts model-output JSD and smaller `w`; step 0 does not —
+stated as **learned output separation + overall 10%-90% transition width**, not "plateau sharpening",
+because `w` and edge drift (0.076 vs the 0.184 no-plateau reference) correlate at +0.971 and cannot be
+separated. RESULTS.md and REPORT.md are current-best with 12 captioned figures each and pass the
+GitHub render check.
 
 The formation subset **refutes the plan's expected pattern**: the negative relationship does not
-strengthen during training. It is at full strength by `step1000` (`-0.582`) and then moves within
-overlapping CIs (`-0.456, -0.408, -0.628, -0.525`), while median `w` falls 0.831 -> ~0.52. (The
-earlier "it decays monotonically" reading came from the post-hoc top-512 bank and has been withdrawn.)
+strengthen during training. It is already comparable to later checkpoints at the earliest measured
+step (`step1000`, `-0.582`) and then moves within overlapping CIs (`-0.456, -0.408, -0.628, -0.525`),
+while median `w` falls 0.831 -> 0.512 by step 64000 and then reverses modestly to 0.541.
 
 ## Next step
 
-None — the plan is complete on the prespecified bank and zero unaddressed feedback files remain, so
-`STOP` is written. The natural follow-up, explicitly out of scope here, is a **context-conditioned**
-divergence estimate. It now has two motivations: testing whether it predicts width better at the late
-checkpoints where the global estimate stops improving, and attacking the mediation null — a predictor
-that is not simply a proxy for the model's own output separation. If a future iteration finds a new `human_feedback*` / `*REVIEW*` file next
-to the stale `STOP`, delete `STOP`, address the feedback, and only re-write `STOP` when clean again.
+None — the plan is complete and zero unaddressed feedback files remain, so `STOP` is written. The
+natural follow-up, explicitly out of scope here, is a **context-conditioned** divergence estimate. It
+has two motivations: testing whether it predicts width better at the late checkpoints where the global
+estimate stops improving, and attacking the mediation null — a predictor that is not simply a proxy
+for the model's own output separation. If a future iteration finds a new `human_feedback*` / `*REVIEW*`
+file next to the stale `STOP`, delete `STOP`, address the feedback, and only re-write `STOP` when
+clean again.
 
 ## References
 

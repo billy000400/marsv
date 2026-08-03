@@ -1,0 +1,16 @@
+pool size 527
+  splitA rows 20000/500000
+  splitA rows 120000/500000
+  splitA rows 220000/500000
+  splitA rows 320000/500000
+  splitA rows 420000/500000
+  splitB rows 20000/500000
+  splitB rows 120000/500000
+  splitB rows 220000/500000
+  splitB rows 320000/500000
+  splitB rows 420000/500000
+valid target IDs: 50060 / 50304
+endpoints with >=20,000 occurrences in BOTH splits: 393 / 527
+Spearman(JSD_A, JSD_B) = 0.9998  (need >= 0.90)
+median split-half JSD / median between-token JSD = 0.0723  (need < 0.25)
+saved

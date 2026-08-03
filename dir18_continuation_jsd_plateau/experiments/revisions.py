@@ -98,18 +98,18 @@ def fig_mediation(x, dw, out):
     for q in range(5):
         m = b == q
         ax[0].scatter(x[m], dw[m], s=26, color=CVD[q], marker=MARK[q], alpha=0.85,
-                      edgecolors="none", label=f"$JSD_A$ quintile {q+1}")
+                      edgecolors="none", label=f"$\\hat{{J}}_{{\\mathrm{{sel}}}}$ quintile {q+1}")
     ax[0].axhline(0, color="0.4", lw=1, ls=":")
     s = out["learned_sharpening_dw"]
-    ax[0].set_xlabel("$JSD_B$: corpus continuation divergence (bits)")
+    ax[0].set_xlabel("held-out corpus next-token JSD $\\hat{J}_{\\mathrm{hold}}(u,v)$ [bits]")
     ax[0].set_ylabel(r"$\Delta w = w_{\rm trained} - w_{\rm step\,0}$" "\n(more negative = training sharpened it more)")
     ax[0].set_title("Learned sharpening\n"
                     f"Spearman $\\rho$ = {s['rho']:+.3f}  [{s['ci'][0]:+.2f}, {s['ci'][1]:+.2f}]  n = {s['n']}")
     ax[0].legend(frameon=False, fontsize=7.5, loc="lower left")
 
     keys = ["total_w", "learned_sharpening_dw", "w_ctrl_outjsd", "w_ctrl_outjsd_plus5"]
-    names = ["total: $\\rho(JSD_B,\\ w)$\n(headline, unadjusted)",
-             "learned sharpening:\n$\\rho(JSD_B,\\ \\Delta w)$",
+    names = ["total: $\\rho(\\hat{J}_{\\mathrm{hold}},\\ w)$\n(headline, unadjusted)",
+             "learned sharpening:\n$\\rho(\\hat{J}_{\\mathrm{hold}},\\ \\Delta w)$",
              "$w$, adjusted for the\nmediator (model output JSD)",
              "$w$, adjusted for output\nJSD + 5 covariates"]
     r = [out[k]["rho"] for k in keys]
@@ -127,7 +127,7 @@ def fig_mediation(x, dw, out):
     ax[1].set_yticks(ypos)
     ax[1].set_yticklabels(names, fontsize=8)
     ax[1].set_ylim(-0.6, len(keys) - 0.4)
-    ax[1].set_xlabel(r"Spearman $\rho$ with corpus $JSD_B$ (95% bootstrap CI)")
+    ax[1].set_xlabel(r"Spearman $\rho$ with corpus $\hat{J}_{\mathrm{hold}}$ (95% bootstrap CI)")
     ax[1].set_title("The fully adjusted association is not significant\n"
                     "(filled marker: p < 0.05; open marker: p > 0.05)", fontsize=10)
     fig.tight_layout()
