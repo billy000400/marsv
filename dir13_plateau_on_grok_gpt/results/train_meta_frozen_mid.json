@@ -1,0 +1,42 @@
+{
+  "corpus_sha256": "86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed",
+  "tokenizer": "char",
+  "vocab_size": 65,
+  "frozen_blocks": [
+    0,
+    1,
+    2,
+    3,
+    9,
+    10,
+    11
+  ],
+  "frozen_params": 4860240,
+  "params": 8378640,
+  "model_seed": 1337,
+  "data_seed": 42,
+  "cfg": {
+    "vocab_size": 65,
+    "block_size": 128,
+    "n_layer": 12,
+    "n_head": 12,
+    "n_embd": 240,
+    "dropout": 0.2
+  },
+  "optimizer": "Adam(lr 1e-3 cosine->1e-4, betas 0.9/0.99, wd 0.0)",
+  "planned_steps": 30000,
+  "final_step": 30000,
+  "batch_size": 48,
+  "ckpt_dir": "/tmp/dir13_frozen/checkpoints_frozen_mid",
+  "final_val_loss": 1.5635456264019012,
+  "final_val_acc": 0.5728434244791667,
+  "ref_final_val_acc": 0.5501790364583333,
+  "matched": {
+    "step": 3750,
+    "val_acc": 0.5518798828125,
+    "val_loss": 1.5197952330112456
+  },
+  "best_val_acc": 0.5779866536458333,
+  "minutes": 20.13,
+  "torch": "2.8.0.dev20250319+cu128"
+}

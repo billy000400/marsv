@@ -1,94 +1,94 @@
 === training meta present ===
 self_test OK: step w=0.089 detected, line w=0.800 rejected
 {
-  "frozen_mid_matched": {
+  "frozen_mid_off_matched": {
     "kind": "frozen",
-    "step": 3750,
+    "step": 3500,
     "frozen_blocks": [
       0,
       1,
-      2,
-      3,
+      7,
+      8,
       9,
       10,
       11
     ],
     "n_embd": 240,
-    "val_acc": 0.5518798828125,
-    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_mid/ckpt_matched.pt",
-    "median_w": 0.3652,
-    "mean_w": 0.3703,
+    "val_acc": 0.5506510416666667,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_mid_off/ckpt_matched.pt",
+    "median_w": 0.3648,
+    "mean_w": 0.385,
     "iqr_w": [
-      0.2525,
-      0.4708
+      0.2705,
+      0.4679
     ],
-    "strict_frac": 0.2467,
-    "median_t_star": 0.5008,
-    "frac_endpoints_differ": 0.8933,
+    "strict_frac": 0.2133,
+    "median_t_star": 0.4879,
+    "frac_endpoints_differ": 0.92,
     "median_n_argmax": 3.0,
-    "median_abs_tstar_minus_tflip": 0.0484,
-    "median_max_p": 0.0104,
-    "rho_w_vs_max_p": -0.1975,
-    "partial_rho_w_vs_max_p_given_sep": -0.4732,
-    "median_paired_dw_vs_ref_trained": 0.0005,
-    "frac_w_increased_vs_ref_trained": 0.5,
-    "median_paired_dw_vs_ref_matched_step": -0.0564,
-    "frac_w_increased_vs_ref_matched_step": 0.2467,
-    "median_paired_dw_vs_ref_init": -0.441,
-    "frac_w_increased_vs_ref_init": 0.0067,
+    "median_abs_tstar_minus_tflip": 0.0623,
+    "median_max_p": 0.018,
+    "rho_w_vs_max_p": -0.257,
+    "partial_rho_w_vs_max_p_given_sep": -0.5288,
+    "median_paired_dw_vs_ref_trained": 0.0233,
+    "frac_w_increased_vs_ref_trained": 0.58,
+    "median_paired_dw_vs_ref_matched_step": -0.0497,
+    "frac_w_increased_vs_ref_matched_step": 0.2533,
+    "median_paired_dw_vs_ref_init": -0.4349,
+    "frac_w_increased_vs_ref_init": 0.0,
     "depth_median_w": {
-      "0": 0.3652,
-      "2": 0.3824,
-      "4": 0.5056,
-      "8": 0.8116,
-      "10": 0.8114,
-      "11": 0.8114
+      "0": 0.3648,
+      "2": 0.5217,
+      "4": 0.7211,
+      "8": 0.8206,
+      "10": 0.8206,
+      "11": 0.8208
     }
   }
 }
 {
-  "frozen_mid_last": {
+  "frozen_mid_off_last": {
     "kind": "frozen",
     "step": 30000,
     "frozen_blocks": [
       0,
       1,
-      2,
-      3,
+      7,
+      8,
       9,
       10,
       11
     ],
     "n_embd": 240,
-    "val_acc": 0.5728434244791667,
-    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_mid/ckpt_last.pt",
-    "median_w": 0.3311,
-    "mean_w": 0.3485,
+    "val_acc": 0.5743977864583333,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_mid_off/ckpt_last.pt",
+    "median_w": 0.3553,
+    "mean_w": 0.3563,
     "iqr_w": [
-      0.2575,
-      0.4282
+      0.2752,
+      0.4049
     ],
-    "strict_frac": 0.2267,
-    "median_t_star": 0.4754,
-    "frac_endpoints_differ": 0.92,
+    "strict_frac": 0.1867,
+    "median_t_star": 0.471,
+    "frac_endpoints_differ": 0.8267,
     "median_n_argmax": 3.0,
-    "median_abs_tstar_minus_tflip": 0.0447,
-    "median_max_p": 0.0142,
-    "rho_w_vs_max_p": -0.3249,
-    "partial_rho_w_vs_max_p_given_sep": -0.6136,
-    "median_paired_dw_vs_ref_trained": -0.023,
-    "frac_w_increased_vs_ref_trained": 0.3667,
-    "median_paired_dw_vs_ref_matched_step": -0.0899,
-    "frac_w_increased_vs_ref_matched_step": 0.1667,
-    "median_paired_dw_vs_ref_init": -0.4692,
+    "median_abs_tstar_minus_tflip": 0.0592,
+    "median_max_p": 0.0179,
+    "rho_w_vs_max_p": -0.2823,
+    "partial_rho_w_vs_max_p_given_sep": -0.5128,
+    "median_paired_dw_vs_ref_trained": -0.0094,
+    "frac_w_increased_vs_ref_trained": 0.4667,
+    "median_paired_dw_vs_ref_matched_step": -0.0737,
+    "frac_w_increased_vs_ref_matched_step": 0.1933,
+    "median_paired_dw_vs_ref_init": -0.4492,
     "frac_w_increased_vs_ref_init": 0.0,
     "depth_median_w": {
-      "0": 0.3311,
-      "2": 0.3418,
-      "4": 0.5245,
-      "8": 0.8022,
-      "10": 0.8024,
-      "11": 0.8025
+      "0": 0.3553,
+      "2": 0.5251,
+      "4": 0.7365,
+      "8": 0.807,
+      "10": 0.807,
+      "11": 0.807
     }
   }
 }
@@ -430,6 +430,150 @@ merged into frozen_assay_summary.json / frozen_assay_raw.npz
     "median_w_a": 0.3311,
     "median_w_b": 0.3507
   },
+  "frozen_mid3_matched_minus_frozen_mid_matched": {
+    "n": 150,
+    "median_dw": 0.0863,
+    "frac_increased": 0.8467,
+    "wilcoxon_p": 2.969240385411636e-17,
+    "median_w_a": 0.4458,
+    "median_w_b": 0.3652
+  },
+  "frozen_mid3_matched_minus_frozen_deep_matched": {
+    "n": 150,
+    "median_dw": -0.1206,
+    "frac_increased": 0.0933,
+    "wilcoxon_p": 7.163439947064793e-23,
+    "median_w_a": 0.4458,
+    "median_w_b": 0.5901
+  },
+  "frozen_mid3_matched_minus_frozen_deep_s2_matched": {
+    "n": 150,
+    "median_dw": -0.0904,
+    "frac_increased": 0.1133,
+    "wilcoxon_p": 1.3934880222392987e-21,
+    "median_w_a": 0.4458,
+    "median_w_b": 0.5587
+  },
+  "frozen_mid3_matched_minus_frozen_mirror_matched": {
+    "n": 150,
+    "median_dw": -0.1544,
+    "frac_increased": 0.0467,
+    "wilcoxon_p": 1.2794267843591237e-25,
+    "median_w_a": 0.4458,
+    "median_w_b": 0.6291
+  },
+  "frozen_mid3_matched_minus_ref_matched_step": {
+    "n": 150,
+    "median_dw": 0.0085,
+    "frac_increased": 0.5533,
+    "wilcoxon_p": 0.16933409715654935,
+    "median_w_a": 0.4458,
+    "median_w_b": 0.4428
+  },
+  "frozen_mid3_last_minus_frozen_mid_last": {
+    "n": 150,
+    "median_dw": 0.086,
+    "frac_increased": 0.8333,
+    "wilcoxon_p": 1.7868624305024123e-17,
+    "median_w_a": 0.4266,
+    "median_w_b": 0.3311
+  },
+  "frozen_mid3_last_minus_frozen_deep_last": {
+    "n": 150,
+    "median_dw": -0.1114,
+    "frac_increased": 0.08,
+    "wilcoxon_p": 9.718588379468897e-24,
+    "median_w_a": 0.4266,
+    "median_w_b": 0.5584
+  },
+  "frozen_mid3_last_minus_frozen_mirror_last": {
+    "n": 150,
+    "median_dw": -0.1836,
+    "frac_increased": 0.0267,
+    "wilcoxon_p": 8.603623257215668e-26,
+    "median_w_a": 0.4266,
+    "median_w_b": 0.6256
+  },
+  "frozen_mid3_last_minus_ref_trained": {
+    "n": 150,
+    "median_dw": 0.0706,
+    "frac_increased": 0.7333,
+    "wilcoxon_p": 5.0750528762116764e-11,
+    "median_w_a": 0.4266,
+    "median_w_b": 0.3507
+  },
+  "frozen_mid_off_matched_minus_frozen_mid_matched": {
+    "n": 150,
+    "median_dw": 0.0141,
+    "frac_increased": 0.58,
+    "wilcoxon_p": 0.06368874950428748,
+    "median_w_a": 0.3648,
+    "median_w_b": 0.3652
+  },
+  "frozen_mid_off_matched_minus_frozen_deep_matched": {
+    "n": 150,
+    "median_dw": -0.1973,
+    "frac_increased": 0.02,
+    "wilcoxon_p": 1.5906243634140302e-25,
+    "median_w_a": 0.3648,
+    "median_w_b": 0.5901
+  },
+  "frozen_mid_off_matched_minus_frozen_deep_s2_matched": {
+    "n": 150,
+    "median_dw": -0.1715,
+    "frac_increased": 0.02,
+    "wilcoxon_p": 3.300589334548355e-26,
+    "median_w_a": 0.3648,
+    "median_w_b": 0.5587
+  },
+  "frozen_mid_off_matched_minus_frozen_mirror_matched": {
+    "n": 150,
+    "median_dw": -0.225,
+    "frac_increased": 0.0067,
+    "wilcoxon_p": 2.3463081875314243e-26,
+    "median_w_a": 0.3648,
+    "median_w_b": 0.6291
+  },
+  "frozen_mid_off_matched_minus_ref_matched_step": {
+    "n": 150,
+    "median_dw": -0.0497,
+    "frac_increased": 0.2533,
+    "wilcoxon_p": 4.239638632545129e-12,
+    "median_w_a": 0.3648,
+    "median_w_b": 0.4428
+  },
+  "frozen_mid_off_last_minus_frozen_mid_last": {
+    "n": 150,
+    "median_dw": 0.0071,
+    "frac_increased": 0.5533,
+    "wilcoxon_p": 0.22874075872201782,
+    "median_w_a": 0.3553,
+    "median_w_b": 0.3311
+  },
+  "frozen_mid_off_last_minus_frozen_deep_last": {
+    "n": 150,
+    "median_dw": -0.1998,
+    "frac_increased": 0.0067,
+    "wilcoxon_p": 2.4920068939885226e-26,
+    "median_w_a": 0.3553,
+    "median_w_b": 0.5584
+  },
+  "frozen_mid_off_last_minus_frozen_mirror_last": {
+    "n": 150,
+    "median_dw": -0.2636,
+    "frac_increased": 0.0,
+    "wilcoxon_p": 2.2995481506182782e-26,
+    "median_w_a": 0.3553,
+    "median_w_b": 0.6256
+  },
+  "frozen_mid_off_last_minus_ref_trained": {
+    "n": 150,
+    "median_dw": -0.0094,
+    "frac_increased": 0.4667,
+    "wilcoxon_p": 0.2857096783952836,
+    "median_w_a": 0.3553,
+    "median_w_b": 0.3507
+  },
   "depth_step_12_vs_8_blocks": {
     "trainable_12_medians": [
       0.4428,
@@ -460,7 +604,11 @@ merged into frozen_assay_summary.json / frozen_assay_raw.npz
     "both_deep_seeds_below_mirror": true,
     "gap_worst_deep_seed_to_mirror": 0.039,
     "frozen_mid_median": 0.3652,
-    "mid_between_deep_and_mirror": false
+    "mid_between_deep_and_mirror": false,
+    "frozen_mid_off_median": 0.3648,
+    "off_between_mid_and_deep": false,
+    "frozen_mid3_median": 0.4458,
+    "mid3_below_both_five_block_ends": true
   },
   "position_contrast_last": {
     "frozen_deep_medians": [
@@ -472,7 +620,12 @@ merged into frozen_assay_summary.json / frozen_assay_raw.npz
     "both_deep_seeds_below_mirror": true,
     "gap_worst_deep_seed_to_mirror": 0.0464,
     "frozen_mid_median": 0.3311,
-    "mid_between_deep_and_mirror": false
+    "mid_between_deep_and_mirror": false,
+    "frozen_mid_off_median": 0.3553,
+    "off_between_mid_and_deep": true,
+    "frozen_mid3_median": 0.4266,
+    "mid3_below_both_five_block_ends": true
   }
 }
-wrote plots/capacity_vs_depth.png {'ref_matched_step': 0.4428, 'narrow192_matched': 0.3972, 'narrow192_s2_matched': 0.4367, 'frozen_early_matched': 0.4755, 'frozen_early_s2_matched': 0.4978, 'frozen_late_matched': 0.5004, 'frozen_deep_matched': 0.5901, 'frozen_deep_s2_matched': 0.5587, 'frozen_mid_matched': 0.3652, 'frozen_mirror_matched': 0.6291, 'frozen_two_matched': 0.7117} narrow_params 5375808
+wrote plots/capacity_vs_depth.png {'ref_matched_step': 0.4428, 'narrow192_matched': 0.3972, 'narrow192_s2_matched': 0.4367, 'frozen_early_matched': 0.4755, 'frozen_early_s2_matched': 0.4978, 'frozen_late_matched': 0.5004, 'frozen_deep_matched': 0.5901, 'frozen_deep_s2_matched': 0.5587, 'frozen_mid_matched': 0.3652, 'frozen_mid_off_matched': 0.3648, 'frozen_mirror_matched': 0.6291, 'frozen_mid3_matched': 0.4458, 'frozen_two_matched': 0.7117} narrow_params 5375808
+wrote plots/frozen_blocks.png

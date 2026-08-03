@@ -24,10 +24,33 @@ RES, PLOTS = os.path.join(ROOT, "results"), os.path.join(ROOT, "plots")
 use_cvd()
 DASH5 = (0, (3, 1, 1, 1, 1, 1))  # 5th line style: the four named ones are already taken
 DASH6 = (0, (5, 1, 1, 1))         # 6th line style
-# The CVD palette holds five hues (cvd_style.CVD) and CLAUDE.md forbids inventing a sixth. There are
-# six conditions in the depth/accuracy panels, so the sixth (frozen_two) is drawn in neutral gray
-# with its own linestyle and marker -- distinguishable by lightness in grayscale as well as by hue.
-GRAY = "0.35"
+DASH7 = (0, (1, 1))               # 7th line style
+DASH8 = (0, (4, 2, 1, 2))         # 8th line style
+DASH9 = (0, (7, 2))               # 9th line style (long dashes; distinct from the default "--")
+# The CVD palette holds five hues (cvd_style.CVD) and CLAUDE.md forbids inventing a sixth. Nine
+# conditions now appear, so: the trained reference is drawn in neutral black (it is the anchor, not a
+# category), the five hues go to the five frozen runs that carry the position result, and the other
+# three go to gray at three lightnesses. Every series also has its own dash pattern and marker, so all
+# nine stay distinguishable in grayscale. The depth panel is additionally split into two small
+# multiples of five series each, which is what CLAUDE.md asks for above five categories.
+GRAYS = ("0.25", "0.50", "0.70")
+# condition -> (label, colour, linestyle, marker)
+STYLE = {"ref_trained":         ("reference, trained",        "black", "-",    "o"),
+         "frozen_mid_last":     ("blocks 0-3, 9-11 frozen",   CVD[0], DASH5,  "v"),
+         "frozen_mid_off_last": ("blocks 0-1, 7-11 frozen",   CVD[1], DASH9,  "<"),
+         "frozen_mid3_last":    ("blocks 0-4, 8-11 frozen",   CVD[2], DASH7,  "X"),
+         "frozen_deep_last":    ("blocks 1-7 frozen",         CVD[3], ":",    "D"),
+         "frozen_mirror_last":  ("blocks 5-11 frozen",        CVD[4], DASH6,  "P"),
+         "frozen_early_last":   ("blocks 1-4 frozen",        GRAYS[0], "--",  "s"),
+         "frozen_late_last":    ("blocks 8-11 frozen",       GRAYS[1], "-.",  "^"),
+         "frozen_two_last":     ("blocks 1-10 frozen",       GRAYS[2], DASH8, "*")}
+# the two depth small-multiples: four five-block windows against the reference, then the other sizes
+DEPTH_GROUPS = [("Five trainable blocks, four positions",
+                 ["ref_trained", "frozen_mirror_last", "frozen_mid_off_last", "frozen_mid_last",
+                  "frozen_deep_last"]),
+                ("Other freeze sizes",
+                 ["ref_trained", "frozen_early_last", "frozen_late_last", "frozen_mid3_last",
+                  "frozen_two_last"])]
 S = json.load(open(os.path.join(RES, "frozen_assay_summary.json")))["summary"]
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 C = S["conditions"]
@@ -39,19 +62,31 @@ CURVE_CONDS = [("ref_init", "reference, untrained (step 0)"),
                ("frozen_early_last", "blocks 1-4 frozen, final (30000)"),
                ("frozen_late_last", "blocks 8-11 frozen, final (30000)"),
                ("frozen_deep_last", "blocks 1-7 frozen, final (30000)"),
+               ("frozen_mid_last", "blocks 0-3, 9-11 frozen, final (30000)"),
+               ("frozen_mid3_last", "blocks 0-4, 8-11 frozen, final (30000)"),
+               ("frozen_mid_off_last", "blocks 0-1, 7-11 frozen, final (30000)"),
                ("frozen_mirror_last", "blocks 5-11 frozen, final (30000)"),
                ("frozen_two_last", "blocks 1-10 frozen, final (30000)")]
 CURVE_CONDS = [c for c in CURVE_CONDS if c[0] in C]
 BAR_CONDS = [c for c in ["ref_init", "ref_matched_step", "frozen_early_matched",
-                         "frozen_late_matched", "frozen_deep_matched", "frozen_mirror_matched",
+                         "frozen_late_matched", "frozen_deep_matched", "frozen_mid_matched",
+                         "frozen_mid3_matched", "frozen_mid_off_matched", "frozen_mirror_matched",
                          "frozen_early_last", "frozen_late_last", "frozen_deep_last",
-                         "frozen_mirror_last", "frozen_two_matched", "frozen_two_last",
+                         "frozen_mid_last", "frozen_mid3_last", "frozen_mid_off_last",
+                         "frozen_mirror_last",
+                         "frozen_two_matched", "frozen_two_last",
                          "ref_trained"] if c in C]
 BAR_TICKS = {"ref_init": "reference\nuntrained", "ref_trained": "reference\ntrained\n(30000)",
              "ref_matched_step": "reference\nstep 2500",
              "frozen_early_matched": "frozen 1-4\nmatched acc", "frozen_early_last": "frozen 1-4\nfinal",
              "frozen_late_matched": "frozen 8-11\nmatched acc", "frozen_late_last": "frozen 8-11\nfinal",
              "frozen_deep_matched": "frozen 1-7\nmatched acc", "frozen_deep_last": "frozen 1-7\nfinal",
+             "frozen_mid_matched": "frozen 0-3,\n9-11\nmatched acc",
+             "frozen_mid_last": "frozen 0-3,\n9-11\nfinal",
+             "frozen_mid3_matched": "frozen 0-4,\n8-11\nmatched acc",
+             "frozen_mid3_last": "frozen 0-4,\n8-11\nfinal",
+             "frozen_mid_off_matched": "frozen 0-1,\n7-11\nmatched acc",
+             "frozen_mid_off_last": "frozen 0-1,\n7-11\nfinal",
              "frozen_mirror_matched": "frozen 5-11\nmatched acc",
              "frozen_mirror_last": "frozen 5-11\nfinal",
              "frozen_two_matched": "frozen 1-10\nmatched acc",
@@ -83,7 +118,7 @@ for k, (cond, title) in enumerate(CURVE_CONDS):
         ax.annotate("straight path\n(no plateau)", (0.62, 0.30), fontsize=7, color="0.35")
 
 # ---- bottom left: median width per condition --------------------------------------------------
-axb = fig.add_subplot(gs[1, :NC - 3])
+axb = fig.add_subplot(gs[1, :NC - 4])
 x = np.arange(len(BAR_CONDS))
 med = np.array([C[c]["median_w"] for c in BAR_CONDS])
 lo = np.array([C[c]["iqr_w"][0] for c in BAR_CONDS])
@@ -103,58 +138,61 @@ axb.set_xticks(x)
 axb.set_xticklabels([BAR_TICKS[c] for c in BAR_CONDS], fontsize=8)
 axb.set_ylabel("transition width $w_{10\\to90}$")
 axb.set_ylim(0, 1.05)
-axb.set_title("Freezing a block group blunts the sharpening; only the 1-10 run nearly removes it",
+axb.set_title("How much freezing costs depends on WHERE the trainable blocks sit, not how many",
               fontsize=10)
 axb.grid(alpha=0.3, axis="y")
 axb.legend(fontsize=8, loc="lower left")
 
 # ---- bottom middle: depth control -------------------------------------------------------------
-axd = fig.add_subplot(gs[1, NC - 3])
-DEPTH_LABELS = {"ref_trained": ("reference, trained", 0, "-", "o"),
-                "frozen_early_last": ("blocks 1-4 frozen", 1, "--", "s"),
-                "frozen_late_last": ("blocks 8-11 frozen", 3, "-.", "^"),
-                "frozen_deep_last": ("blocks 1-7 frozen", 4, ":", "D"),
-                "frozen_mirror_last": ("blocks 5-11 frozen", 2, DASH5, "v"),
-                "frozen_two_last": ("blocks 1-10 frozen", None, DASH6, "P")}
-for cond, (lab, ci, ls, mk) in DEPTH_LABELS.items():
-    d = C.get(cond, {}).get("depth_median_w")
-    if not d:
-        continue
-    bl = sorted(int(k) for k in d)
-    axd.plot(bl, [d[str(b)] for b in bl], color=GRAY if ci is None else CVD[ci], ls=ls, marker=mk,
-             ms=7, lw=2, label=lab)
-axd.axhline(C["ref_init"]["median_w"], **REF_DIAG)
-axd.set_xlabel("interpolation block")
-axd.set_ylabel("median $w_{10\\to90}$")
-axd.set_ylim(0, 1.05)
-axd.set_title("Where is the path sharpened?", fontsize=10)
-axd.grid(alpha=0.3)
-axd.legend(fontsize=7, loc="lower right")
+for gi, (gtitle, conds) in enumerate(DEPTH_GROUPS):
+    axd = fig.add_subplot(gs[1, NC - 4 + gi])
+    for cond in conds:
+        d = C.get(cond, {}).get("depth_median_w")
+        if not d:
+            continue
+        lab, col, ls, mk = STYLE[cond]
+        bl = sorted(int(k) for k in d)
+        axd.plot(bl, [d[str(b)] for b in bl], color=col, ls=ls, marker=mk, ms=7, lw=2, label=lab)
+    axd.axhline(C["ref_init"]["median_w"], **REF_DIAG)
+    axd.set_xlabel("interpolation block")
+    if gi == 0:
+        axd.set_ylabel("median $w_{10\\to90}$")
+    axd.set_ylim(0, 1.05)
+    axd.set_title(f"Where is the path sharpened?\n{gtitle}", fontsize=9)
+    axd.grid(alpha=0.3)
+    axd.legend(fontsize=7, loc="lower right")
 
 # ---- bottom right: validation accuracy across training ----------------------------------------
 axa = fig.add_subplot(gs[1, NC - 2:])
-runs = [("grok_char", "reference (all blocks train)", 0, "-"),
-        ("frozen_early", "blocks 1-4 frozen at init", 1, "--"),
-        ("frozen_late", "blocks 8-11 frozen at init", 3, "-."),
-        ("frozen_deep", "blocks 1-7 frozen at init", 4, ":"),
-        ("frozen_mirror", "blocks 5-11 frozen at init", 2, DASH5),
-        ("frozen_two", "blocks 1-10 frozen at init", None, DASH6)]
+runs = [("grok_char", "ref_trained", "reference (all blocks train)"),
+        ("frozen_early", "frozen_early_last", "blocks 1-4 frozen at init"),
+        ("frozen_late", "frozen_late_last", "blocks 8-11 frozen at init"),
+        ("frozen_deep", "frozen_deep_last", "blocks 1-7 frozen at init"),
+        ("frozen_mid", "frozen_mid_last", "blocks 0-3, 9-11 frozen at init"),
+        ("frozen_mid3", "frozen_mid3_last", "blocks 0-4, 8-11 frozen at init"),
+        ("frozen_mid_off", "frozen_mid_off_last", "blocks 0-1, 7-11 frozen at init"),
+        ("frozen_mirror", "frozen_mirror_last", "blocks 5-11 frozen at init"),
+        ("frozen_two", "frozen_two_last", "blocks 1-10 frozen at init")]
 ref_acc = S["ref_final_val_acc"]
-for tag, lab, ci, ls in runs:
+for tag, skey, lab in runs:
     p = os.path.join(RES, f"train_hist_{tag}.json")
     if not os.path.exists(p):
         continue
+    _, col, ls, _ = STYLE[skey]
     h = json.load(open(p))
-    axa.plot(h["step"], h["val_acc"], color=GRAY if ci is None else CVD[ci], ls=ls, lw=2, label=lab)
+    axa.plot(h["step"], h["val_acc"], color=col, ls=ls, lw=2, label=lab)
 axa.axhline(ref_acc, **REF_RULE)
 axa.annotate(f"reference final val acc = {ref_acc:.3f}", (1.5, ref_acc + 0.008), fontsize=8)
-for tag, ci, mk in (("frozen_early", 1, "s"), ("frozen_late", 3, "^"), ("frozen_deep", 4, "D"),
-                    ("frozen_mirror", 2, "v"), ("frozen_two", None, "P")):
+first = True
+for tag, skey, _ in runs[1:]:
     key = f"{tag}_matched"
     if key in C and C[key].get("val_acc") is not None:
+        _, col, _, mk = STYLE[skey]
+        # one legend entry for the whole marker family; the per-run steps are given in the caption
         axa.plot([C[key]["step"]], [C[key]["val_acc"]], marker=mk, ms=11, mfc="none", mew=2,
-                 color=GRAY if ci is None else CVD[ci], ls="none",
-                 label=f"assayed checkpoint (step {C[key]['step']})")
+                 color=col, ls="none",
+                 label="matched-accuracy checkpoint (assayed)" if first else None)
+        first = False
 axa.set_xscale("symlog", linthresh=100)
 axa.set_xlabel("optimization step (symlog, linear below 100)")
 axa.set_ylabel("validation next-character accuracy")

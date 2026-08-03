@@ -427,7 +427,70 @@ Null results are complete when the validity gates pass. When complete, write an 
       weakness, stated in Limitation 7: frozen-mirror is still one run, so the position gap has a seed
       spread under one side only. Figure 24 in both deliverables.
 
-- [ ] **S17 - Middle-of-stack five-block freeze (the position term as an ordered three-point claim).**
+- [ ] **S20 - The interior/end split's own test: a five-block window at blocks 1-5.** Not yet run.
+      `train_frozen.py --freeze 0,6,7,8,9,10,11 --tag frozen_mid_low` freezes the same *seven* blocks
+      (58.0%) and leaves five trainable, one block *down* from S19's sharp 2-6 window, so the usable
+      window touches block 1 - the first block after the patched activation. **Prediction on record
+      (also in both hypothesis paragraphs and the Conclusion of the deliverables):** the interior/end
+      split says it lands with the blunt group, **above 0.47**; landing near 0.365 would make the split
+      a coincidence of the eight runs that generated it. This is the cheapest decisive test of the only
+      surviving descriptive account. -> verify: reaches val accuracy 0.550 before assay, and the report
+      states which group it joins with paired shifts against frozen-mid-off (2-6) and frozen-mirror.
+
+- [x] **S19 - A five-block window one step off-centre.** DONE 2026-08-03. **PREDICTION FALSIFIED, and
+      the falsification killed a description rather than a result.** `--freeze 0,1,7,8,9,10,11`
+      (trainable 2-6, five frozen blocks below the window instead of three) was predicted to cost
+      something and land at 0.40-0.45. It costs nothing: `w` = **0.365** at matched accuracy (step
+      3500, val 0.5507) and **0.355** at step 30000 (val 0.5744, the highest of any run), identical to
+      frozen-mid (paired +0.014, p = 0.064; +0.007, p = 0.229) and level with the fully trained
+      reference (-0.009, p = 0.286). Against the end windows: -0.197 / -0.172 / -0.225 (matched) and
+      -0.200 / -0.264 (final), all p <= 3.3e-25. Strict rate 21.3%. So the "distribution of frozen
+      blocks around the window" description is withdrawn. What replaced it: across all eight frozen
+      runs, a trainable window strictly interior to the stack (usable blocks 4-8, 2-6, 5-7) gives
+      0.365 / 0.365 / 0.446 and one touching either end (5-11, 1-7, 8-11, 1-4, block 11) gives
+      0.476 / 0.500 / 0.590 / 0.629 / 0.712 - disjoint, but found post-hoc, with the three-block run's
+      0.030 margin inside the seed spread. S20 above is its pre-registered test.
+
+- [x] **S18 - How few mid-stack blocks suffice? (three trainable blocks in the middle).** DONE
+      2026-08-03. **PREDICTION CONFIRMED.** `w` = **0.446** (IQR 0.344-0.559) at matched accuracy (step
+      7000, val 0.5518) and **0.427** at step 30000 (val 0.5711), inside the predicted 0.40-0.50 band.
+      Statistically indistinguishable from the full 12-block reference (0.443; paired +0.009, 55% of
+      pairs wider, p = 0.17) and clear of every five-block end window: **-0.121** vs frozen-deep seed 1
+      (9.3% wider, p = 7.2e-23), **-0.090** vs seed 2 (11%, p = 1.4e-21), **-0.154** vs frozen-mirror
+      (4.7%, p = 1.3e-25); at step 30000 -0.111 and -0.184. Strict rate 9.3% / 10.0% against the
+      reference's 12.7% / 10.0%. Tightest relocation in the series (0.363 of 0.380 between injection
+      blocks 4 and 8). Cost of shrinking the window from five mid-stack blocks to three: +0.086 of
+      width (85% wider, p = 3.0e-17) and 7000 steps to matched accuracy rather than 3750. So window
+      size matters but position dominates it. Both deliverables curated; Figures 23 and 24 redrawn.
+
+- [x] **S18-launch - How few mid-stack blocks suffice? (three trainable blocks in the middle).** Launched
+      2026-08-03 immediately after S17's result, which falsified the ordered position reading:
+      `train_frozen.py --freeze 0,1,2,3,4,8,9,10,11 --tag frozen_mid3` freezes NINE blocks (74.2% of
+      them) and leaves only blocks 5-7 trainable - a three-block window at the same mid-stack site that
+      S17 showed recovers the whole plateau with five. It discriminates the two readings S17 leaves
+      open. **Prediction on record, fixed before the run was scored:** if mid-stack *position* is what
+      matters and the trainable-block count is secondary, three mid-stack blocks still beat five blocks
+      at either end, landing below frozen-deep's 0.559-0.590 and frozen-mirror's 0.626 - expected
+      `w` between frozen-mid's 0.365 and frozen-deep's 0.558, i.e. **~0.40-0.50**. If instead the count
+      reasserts itself once the window shrinks below five, it lands **at or above 0.558**, which
+      falsifies "position dominates count" and restores a count-plus-position reading.
+      -> verify: the run reaches the reference's final validation accuracy (0.550) before being
+      assayed, and the report states which side of 0.558 it falls on with the paired per-pair shifts
+      against frozen-mid, frozen-deep and frozen-mirror.
+
+- [x] **S17 - Middle-of-stack five-block freeze (the position term as an ordered three-point claim).**
+      DONE 2026-08-03. **PREDICTION FALSIFIED, and the falsification is the result.** `w` = **0.365**
+      at matched accuracy (step 3750, val 0.5519) and **0.331** at step 30000 (val 0.5728) - not
+      between the two known five-block values but far *below* both, and below the full 12-block
+      reference at its own matched step (0.443; paired -0.056, 24.7% of pairs wider, p = 2.7e-14).
+      Paired against the other two five-block runs: **-0.211** vs frozen-deep seed 1 (1.3% of pairs
+      wider, p = 3.3e-26), **-0.188** vs frozen-deep seed 2 (0%, p = 2.3e-26), **-0.240** vs
+      frozen-mirror (0.7%, p = 2.3e-26). Strict plateau rate **24.7%** - the highest of any model in
+      the series, more than double the reference's 10%. Relocation signature holds (injection blocks
+      0/2/4/8 -> 0.365/0.382/0.506/0.812: the frozen blocks contribute 0.017, all sharpening in the
+      trainable window 4-8). Consequence for the deliverables: the trainable-block **count** is not the
+      first-order term - the three five-block runs span 0.365-0.629 - and position is not a monotone
+      gradient toward the readout but has an interior optimum. Both deliverables re-framed (rule 9b).
       Launched 2026-08-03, the successor S16's hypothesis paragraphs end on. `train_frozen.py --freeze
       0,1,2,3,9,10,11 --tag frozen_mid` freezes the same *seven* blocks (58.0% of parameters) as
       frozen-deep and frozen-mirror but leaves the trainable five in the middle (blocks 4-8), the only
@@ -465,7 +528,35 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**S16 DONE 2026-08-03 (latest) — the position term now has an error bar, and the last single-pair
+**S17 DONE 2026-08-03 (latest) — its prediction was FALSIFIED, and that falsification re-framed the
+frozen-block conclusion (rule 9b).** Five trainable blocks in the *middle* of the stack (freeze 0–3 and
+9–11) were predicted to land between the two known five-block values at 0.58–0.60. They land at
+**0.365** at matched accuracy and **0.331** at step 30,000 — below both siblings, below every
+eight-block run, and below the untouched 12-block reference — with a strict plateau rate of **24.7%**
+against the reference's 10.0%. So the *count* of trainable blocks is not the first-order term (the
+three five-block runs span 0.365–0.629, wider than the whole 12-to-5 series) and position is not a
+gradient toward the readout but has an interior optimum. Both deliverables now say that where the
+trainable blocks sit governs the cost, described by how the seven frozen blocks are distributed around
+the trainable window (mid splits them 3/3, deep stacks seven before, mirror seven after), explicitly
+labelled a description of three points. **S18 then tested that description in the same iteration and
+CONFIRMED it:** shrinking the mid-stack window from five trainable blocks to three (freeze 0-4 and
+8-11, 74.6% of parameters frozen) still gives **0.446**, statistically indistinguishable from the full
+12-block reference (p = 0.17) and 0.09-0.18 clear of every five-block window at either end. Window size
+costs something (+0.086 from five mid-stack blocks to three) but position dominates it. **S19 then
+falsified the description S17 had offered:** sliding the five-block window one step off centre (blocks
+2-6, five frozen blocks below it instead of three) costs nothing at all - 0.365 again, identical to
+frozen-mid - so "how the frozen blocks are distributed around the window" is withdrawn. What replaced
+it, stated with its caveats in both deliverables: across the eight frozen runs, a trainable window
+strictly interior to the stack gives 0.365-0.446 and one touching either end gives 0.476-0.712, with no
+overlap; found post-hoc, mechanism not established, and the three-block run's 0.030 margin is inside
+the seed spread. Its pre-registered test is S20. All three runs curated into both deliverables;
+Figures 23 and 24 regenerated (Figure 23's depth panel split into two small multiples, since nine
+series exceeded the five-hue palette);
+`check_render.py REPORT.md RESULTS.md` returns ALL CHECKS PASS (REPORT 29 display / 558 inline
+equations / 27 figures; RESULTS 27 figures; 0 problems), 27 embeds = 27 visible captions per file.
+Nothing is left uncurated on disk; the next iteration starts from S20.
+
+**S16 DONE 2026-08-03 — the position term has an error bar, and the last single-pair
 sub-claim is replicated.** A second seed of frozen-deep (blocks 1–7 frozen, seed 2024) reaches the
 reference's accuracy at step 3000 and gives median `w` **0.559** at matched accuracy / **0.579** at step
 30000 against seed 1337's 0.590 / 0.558 — both seeds below frozen-mirror's 0.626 / 0.626 by more than
@@ -720,24 +811,21 @@ spread under it.** Depth step: 12-trainable-block runs (0.397-0.443) disjoint fr
 (0.476-0.500), two seeds a side. Position term: both frozen-deep seeds (0.559, 0.590 at matched
 accuracy) below frozen-mirror's 0.626, spread 0.031.
 
-**S17 WAS LAUNCHED IN THE SAME ITERATION (2026-08-03) and may have finished after it ended.** If
-`results/frozen_assay_summary.json` contains `frozen_mid_matched` / `frozen_mid_last` rows and
-`results/frozen_pairwise.json` a `position_contrast_*.frozen_mid_median` entry but RESULTS.md/REPORT.md
-say nothing about a middle-of-stack run, then the experiment completed unattended and **curating it into
-both deliverables is the first job of the next iteration** (prediction on record in the S17 stage entry
-above; `plots/capacity_vs_depth.png` already draws the run, so only the text and the Figure 24 caption
-need updating). The scoring chain is `experiments/narrow_assay.py frozen_mid` ->
-`frozen_pairwise.py` -> `plot_capacity.py`; re-run it if the rows are absent.
+**S17, S18 and S19 are all DONE and fully curated (2026-08-03); nothing is waiting on disk.**
 
-**Immediate next candidate: the middle-of-stack five-block freeze.** `train_frozen.py --freeze
-0,1,2,3,9,10,11 --tag frozen_mid` freezes the same *seven* blocks as frozen-deep and frozen-mirror but
-leaves the trainable five in the middle (blocks 4-8), which is the only one of the three five-block
-positions not yet run and turns the position term from a two-point contrast into an ordered three-point
-one. Prediction to fix before scoring: `w` near 0.58-0.60, between the two known values. ~21 min of
-training plus ~2 min of `narrow_assay.py frozen_mid`. Note the injection-block grid already resolves it
-(0/2/4/8/10/11) and that freezing block 0 costs the measurement nothing, since injecting at block 0
-overwrites block 0's output anyway. The alternative — a second seed at frozen-mirror — would close the
-one-sided error bar on the position gap but answers no new question, so run it second. Everything else
+**Immediate next candidate: S20, the five-block window at blocks 1-5** (`train_frozen.py --freeze
+0,6,7,8,9,10,11 --tag frozen_mid_low`). It is the pre-registered test of the only surviving descriptive
+account - the interior-versus-end split - and its prediction is already written into the S20 stage
+entry, both hypothesis paragraphs and the Conclusion (**above 0.47**; near 0.365 falsifies the split).
+~21 min of training plus ~2 min of `narrow_assay.py frozen_mid_low`, then `frozen_pairwise.py` ->
+`plot_capacity.py` -> `plot_frozen.py`. Both plot scripts need the new tag added to their run lists
+before they draw it: `plot_capacity.py` needs a nudge offset (the 5-block column already holds four
+markers) and `plot_frozen.py` needs the tag in `STYLE` and in the left-hand `DEPTH_GROUPS` panel, which
+would then carry six series - so that panel needs splitting again, or the mirror run demoting to gray.
+**The alternative** is a second seed
+at frozen-mirror, the only remaining single-seed run carrying a load-bearing comparison (the
+bottom-of-stack end of the position ordering); it firms up an old number rather than answering a new
+question, so run it second. Everything else
 open needs a longer character run whose second descent separates from initial fit, the denser Figure-9
 grid on the pilot run's local maximum, interpolation at non-final positions, or a second
 model/tokenizer.

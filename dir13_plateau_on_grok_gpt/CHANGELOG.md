@@ -1073,3 +1073,171 @@ all five end in `.addressed.md` — so this iteration advanced the plan by the s
   27 visible `**Figure N.**` captions per file; zero bare `(plots/x.png)` paths.
 - **No `STOP` written** — wall clock and a named next experiment (the middle-of-stack five-block freeze)
   both remain.
+
+## 2026-08-03 — S17: the middle-of-stack five-block freeze falsifies the count-first reading
+
+Direction still open (no `STOP` present). No unaddressed `human_feedback*` / `*REVIEW*` file exists —
+all five end in `.addressed.md` — so this iteration curated the run launched at the end of the previous
+one and then launched its successor.
+
+- **New experiment (`train_frozen.py --freeze 0,1,2,3,9,10,11 --tag frozen_mid`, 30,000 steps,
+  20.1 min).** The same seven blocks frozen as frozen-deep and frozen-mirror (58.0% of parameters) and
+  the same five trainable blocks, but in the *middle* of the stack (blocks 4–8) — the only one of the
+  three five-block positions not yet run. Reaches the reference's final validation accuracy at step
+  **3,750** (val 0.5519) and finishes at val **0.5728**. Scored on the same fixed 150 pairs by
+  `narrow_assay.py frozen_mid`.
+- **Prediction on record before scoring** (PLAN S17, REPORT Methods, and the hypothesis paragraphs of
+  both deliverables): `w` lands between the two known five-block values, near **0.58–0.60**; at or
+  below 0.559–0.590, or at or above 0.626, falsifies the ordered position reading. **FALSIFIED, and
+  the falsification is the result.**
+- **RESULTS.md / REPORT.md — new numbers.** `w` = **0.365** (IQR 0.253–0.471) at matched accuracy and
+  **0.331** (IQR 0.258–0.428) at step 30,000 — below *both* positional siblings, below every
+  eight-block run, and below the untouched 12-block reference at its own matched checkpoint (0.443;
+  paired −0.056, 25% of pairs wider, p = 2.7e-14). Paired against the siblings: **−0.211** vs
+  frozen-deep seed 1 (1.3% wider, p = 3.3e-26), **−0.188** vs seed 2 (0% wider, p = 2.3e-26),
+  **−0.240** vs frozen-mirror (0.7%, p = 2.3e-26); at the end of training **−0.206** and **−0.260**,
+  and **−0.023** against the fully trained reference (37% wider, p = 0.004). Strict plateau rate
+  **24.7%** (matched) / 22.7% (final) against the reference's 10.0% and 0–0.7% for every other frozen
+  run — the highest of any model in the report. Relocation signature holds (injection blocks 0/2/4/8 →
+  0.331/0.342/0.525/0.802: 0.277 of the sharpening over blocks 5–8, 0.183 over 3–4 of which only block
+  4 can train, 0.011 for the frozen blocks 1–2). Geometry ordinary (`t*` 0.501, endpoints differ 89%,
+  3 argmax regions, |t*−t_flip| 0.048, partial ρ −0.47 matched / −0.61 final).
+- **SUPERSEDED CLAIM (rule 9b re-framing).** Both deliverables previously read the frozen series as
+  "trainable **depth** is the first-order term, position a second-order correction that favours blocks
+  near the readout", supported by the monotone series 0.351 → 0.47–0.48 → 0.56–0.63 → 0.726 for 12, 8,
+  5 and 1 usable trainable blocks. That is now wrong: **the three five-block runs span 0.365–0.629, a
+  wider range than the entire 12-to-5 series**, and five mid-stack blocks beat all three eight-block
+  runs (0.476–0.500) and the 12-block reference. The current reading, in both files, is that
+  **position** governs the cost, that it is non-monotone with an interior optimum (the two-point
+  contrast sampled only the ends), and that the three points are described by how the seven frozen
+  blocks are *distributed* around the trainable window — mid splits them 3/3, deep stacks all seven
+  before it, mirror all seven after it (0.365 < 0.558/0.590 < 0.626/0.629) — labelled explicitly as a
+  description of three points rather than a tested law. Rewritten in the Summary, the hypothesis
+  paragraphs, the frozen-block Results section, "What this settles", the Conclusion and Limitation 7 of
+  REPORT.md, and the matching passages of RESULTS.md.
+- **Other claims corrected as a consequence.** "The sharpest tail is what every frozen run loses"
+  (0.7% early, 0% the rest against the reference's 10%) → five of six lose it and frozen-mid gains it
+  at 24.7%. "Trainable depth, not trainable capacity, is the variable that matters" → "Trainable
+  capacity is not the variable at all" (the narrow run's evidence is unchanged; only the positive half
+  of the claim was withdrawn). The relocation paragraph now reports six sites, not five, and the
+  geometry paragraph five plateau-retaining runs, not four.
+- **Figures.** `plots/frozen_blocks.png` (Figure 23) regenerated with the frozen-mid condition: a ninth
+  curve panel, two more width points, and a seventh series in the depth and accuracy panels — which
+  needed a second gray lightness (`0.62`) plus a new dash pattern and marker, since the CVD palette
+  holds five hues and the rule forbids a sixth. `plots/capacity_vs_depth.png` (Figure 24) redrawn with
+  the new diamond at 5 trainable blocks; both panel titles and the suptitle rewritten, because "ordered
+  by trainable DEPTH" is no longer true of the left panel. Captions in both deliverables rewritten to
+  state what each panel now shows.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 501 inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds
+  and 27 visible `**Figure N.**` captions per file; zero bare `(plots/x.png)` paths.
+- **Successor launched in the same iteration with its prediction pre-registered** (PLAN S18):
+  `--freeze 0,1,2,3,4,8,9,10,11 --tag frozen_mid3`, a *three*-block mid-stack window (blocks 5–7, 74.6%
+  of parameters frozen). Predicted 0.40–0.50 if position dominates the count; at or above 0.558 the
+  count returns as the leading term.
+- **No `STOP` written** — wall clock and a named running experiment both remain.
+
+## 2026-08-03 — S18: three mid-stack blocks match the full network (position confirmed as the variable)
+
+Same iteration as S17 above. Launched immediately after S17's falsification, with its prediction
+written into PLAN.md and REPORT.md Methods before it was scored.
+
+- **New experiment (`train_frozen.py --freeze 0,1,2,3,4,8,9,10,11 --tag frozen_mid3`, 30,000 steps,
+  19.4 min).** Nine of twelve blocks frozen (**74.6%** of parameters), leaving a *three*-block trainable
+  window at the same mid-stack site S17 found (blocks 5–7). Its purpose is to separate the trainable
+  window's **position** from its **size**. Reaches the reference's final validation accuracy at step
+  **7,000** (val 0.5518) and finishes at val **0.5711**.
+- **Prediction on record before scoring:** ≈**0.40–0.50**, still beating five blocks at either end, if
+  mid-stack position dominates window size; **≥ 0.558** if the block count reasserts itself once the
+  window shrinks. **CONFIRMED.**
+- **RESULTS.md / REPORT.md — new numbers.** `w` = **0.446** (IQR 0.344–0.559) at matched accuracy and
+  **0.427** (IQR 0.324–0.541) at step 30,000. Statistically **indistinguishable from the full 12-block
+  reference** at the matched checkpoint (0.443; paired +0.009, 55% of pairs wider, p = 0.17), and
+  clearly sharper than every five-block window at an end: **−0.121** vs frozen-deep seed 1 (9.3% of
+  pairs wider, p = 7.2e-23), **−0.090** vs seed 2 (11%, p = 1.4e-21), **−0.154** vs frozen-mirror
+  (4.7%, p = 1.3e-25); at the end of training **−0.111** and **−0.184**. Strict plateau rate 9.3%
+  (matched) / 10.0% (final) against the reference's 12.7% / 10.0%. Depth profile
+  0.427/0.436/0.443/0.806/0.806/0.806 — 0.363 of its total 0.380 between injection blocks 4 and 8, the
+  tightest relocation in the series; frozen blocks 1–4 and 9–11 contribute 0.017 between them. Geometry
+  ordinary (`t*` 0.479, endpoints differ 91%, 3 argmax regions, |t*−t_flip| 0.079, partial ρ −0.46).
+- **What it settles, and what it costs.** Window *size* is not irrelevant — five mid-stack blocks to
+  three costs +0.086 of width (85% of pairs wider, p = 3.0e-17) and the run needs 7,000 steps rather
+  than 3,750 to reach the reference's accuracy — but position dominates it: three trainable blocks in
+  the middle beat five at either end by 0.09–0.18 and reproduce a 12-block network's plateau geometry
+  with nine of twelve blocks never leaving their initialization. This is the first successful test of
+  the "long adjacent frozen stretch is what costs sharpness" reading S17 could only describe.
+- **Claims updated as a consequence.** Run counts throughout both deliverables (seven frozen groups,
+  eight retraining runs, six that retain a plateau); the strict-tail sentence now names both mid-stack
+  runs as exceptions; the narrow run is no longer "the only non-reference run that keeps the sharpest
+  tail" (13.3% against frozen-mid's 24.7% and frozen-mid3's 9.3%) — corrected in both files; frozen-two
+  is wider than the untrained network on 26% of pairs against 0–1.3% (was 0–1%) in the other six runs.
+  Both hypothesis paragraphs now end on a new open prediction: a five-block window one step off-centre
+  (freeze 0–1 and 7–11, leaving blocks 2–6) should land between 0.365 and 0.558, nearer the former.
+- **Figures.** `plots/frozen_blocks.png` (Figure 23) gained a tenth curve panel, two more width points
+  and an eighth series; the styling was reworked so the five CVD hues go to the reference and the four
+  runs carrying the position result, with the other three in three gray lightnesses, each with its own
+  dash pattern and marker. The accuracy panel's seven per-run legend entries collapsed into one, since
+  the steps are now given in the caption. `plots/capacity_vs_depth.png` (Figure 24) gained the
+  three-block run at x = 3 with a label offset so it clears the frozen-5–11 label. Captions rewritten
+  in both deliverables to match the new styles and to name each run's matched-accuracy step.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 536 inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds
+  and 27 visible `**Figure N.**` captions per file; zero bare `(plots/x.png)` paths.
+- **No `STOP` written** — wall clock and named next experiments both remain.
+
+## 2026-08-03 — S19: the off-centre window falsifies the "adjacent frozen stretch" reading
+
+Same iteration as S17 and S18 above. Launched after S18 landed, with its prediction written into
+PLAN.md and REPORT.md Methods before it was scored.
+
+- **New experiment (`train_frozen.py --freeze 0,1,7,8,9,10,11 --tag frozen_mid_off`, 30,000 steps,
+  19.6 min).** Seven blocks frozen (**58.0%** of parameters — the same fraction and the same five
+  trainable blocks as frozen-deep, frozen-mirror and frozen-mid), but the window slid one step off
+  centre to blocks 2–6, so five frozen blocks sit below it instead of three. Matches the reference's
+  accuracy at step **3,500** (val 0.5507); finishes at val **0.5744**, the highest of any run in the
+  study.
+- **Prediction on record before scoring:** ≈**0.40–0.45**, between frozen-mid's 0.365 and frozen-deep's
+  0.558, if the cost tracks how the frozen blocks are distributed around the trainable window; anything
+  at or below 0.365 counts against that description. **FALSIFIED.**
+- **RESULTS.md / REPORT.md — new numbers.** `w` = **0.365** (IQR 0.271–0.468) at matched accuracy and
+  **0.355** (IQR 0.275–0.405) at step 30,000 — **identical to frozen-mid** on both framings (paired
+  +0.014, p = 0.064; +0.007, p = 0.229; neither significant), sharper than the reference at its matched
+  checkpoint (−0.050, 25% of pairs wider, p = 4.2e-12) and level with the fully trained reference
+  (−0.009, p = 0.286). Against the two end windows: **−0.197** vs frozen-deep seed 1, **−0.172** vs
+  seed 2, **−0.225** vs frozen-mirror at matched accuracy, and −0.200 / −0.264 at the end (all
+  p ≤ 3.3e-25). Strict plateau rate **21.3%** / 18.7%. Depth profile
+  0.355/0.525/0.737/0.807/0.807/0.807 — 0.382 of its 0.452 total across blocks 1–4. Geometry ordinary
+  (`t*` 0.488, endpoints differ 92%, 3 argmax regions, |t*−t_flip| 0.062, partial ρ −0.53).
+- **SUPERSEDED CLAIM.** The description added one entry above — that the cost tracks how the seven
+  frozen blocks are *distributed* around the trainable window (frozen-mid splits them 3/3, frozen-deep
+  stacks seven before, frozen-mirror seven after) — is **withdrawn from both deliverables**: doubling
+  the frozen stretch below the window (three → five) changed nothing at all.
+- **REPLACEMENT CLAIM, stated with its caveats.** Ordering the eight frozen runs by their *usable*
+  window (trainable blocks intersected with 1–11, since patching at block 0 overwrites block 0's
+  output) separates them exactly. **Strictly interior** windows — blocks 4–8, 2–6, 5–7 — give 0.365,
+  0.365, 0.446. Windows **touching an end** — 5–11, 1–7, 8–11, 1–4, block 11 alone — give 0.476, 0.500,
+  0.590, 0.629, 0.712. No overlap. Both deliverables state that this was found after the fact rather
+  than predicted, that its mechanism is not established here, and that while the two five-block
+  interior windows clear every end-touching run by ≥ 0.11 (several times the ≈0.04 seed spread), the
+  three-block interior window sits only 0.030 below the nearest end-touching one, inside that spread.
+- **New pre-registered prediction in both hypothesis paragraphs and the Conclusion:** a five-block
+  window at blocks 1–5 — one block down from the sharp 2–6 window, hence touching the block immediately
+  after the patched activation — must land above 0.47 with the blunt group; near 0.365 would make the
+  interior/end split a coincidence of these eight runs.
+- **Claims updated as a consequence.** Eight frozen groups and nine retraining runs throughout; seven
+  runs retain a plateau; three interior-window runs keep the sharpest tail (24.7%, 21.3%, 9.3%);
+  frozen-two's "wider than untrained" contrast is now against the other seven runs; the four-way
+  five-block comparison replaces the three-way one as "the cleanest in the series".
+- **Figures.** `plots/frozen_blocks.png` (Figure 23): eleven curve panels, and the depth panel **split
+  into two small multiples** of five series each (the four five-block windows plus the reference; the
+  other freeze sizes plus the reference) — nine series in one panel exceeded the five-hue palette, and
+  CLAUDE.md rule 13 asks for small multiples above five categories. The trained reference moved to
+  neutral black as the anchor, freeing the five CVD hues for the runs that carry the position result,
+  with the remaining three in gray at three lightnesses; every series keeps its own dash pattern and
+  marker. `plots/capacity_vs_depth.png` (Figure 24): the fourth five-block diamond, new nudge offsets
+  so all four are separable, and the legend moved to the upper left where the new marker needed room.
+  Both captions rewritten in both deliverables.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 558 inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds
+  and 27 visible `**Figure N.**` captions per file; zero bare `(plots/x.png)` paths.
+- **No `STOP` written** — a named, pre-registered next experiment remains.

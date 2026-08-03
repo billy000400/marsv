@@ -61,7 +61,29 @@ PAIRS = [("frozen_two_last", "frozen_deep_last"),
          ("frozen_mid_matched", "ref_matched_step"),
          ("frozen_mid_last", "frozen_deep_last"),
          ("frozen_mid_last", "frozen_mirror_last"),
-         ("frozen_mid_last", "ref_trained")]
+         ("frozen_mid_last", "ref_trained"),
+         # three-block mid-stack window (freeze 0-4 and 8-11): does mid-stack position still beat five
+         # blocks at either end once the window shrinks below five?
+         ("frozen_mid3_matched", "frozen_mid_matched"),
+         ("frozen_mid3_matched", "frozen_deep_matched"),
+         ("frozen_mid3_matched", "frozen_deep_s2_matched"),
+         ("frozen_mid3_matched", "frozen_mirror_matched"),
+         ("frozen_mid3_matched", "ref_matched_step"),
+         ("frozen_mid3_last", "frozen_mid_last"),
+         ("frozen_mid3_last", "frozen_deep_last"),
+         ("frozen_mid3_last", "frozen_mirror_last"),
+         ("frozen_mid3_last", "ref_trained"),
+         # off-centre five-block window (freeze 0-1 and 7-11, trainable 2-6): the fourth position at
+         # five trainable blocks, between frozen-mid's centre and frozen-mirror's bottom
+         ("frozen_mid_off_matched", "frozen_mid_matched"),
+         ("frozen_mid_off_matched", "frozen_deep_matched"),
+         ("frozen_mid_off_matched", "frozen_deep_s2_matched"),
+         ("frozen_mid_off_matched", "frozen_mirror_matched"),
+         ("frozen_mid_off_matched", "ref_matched_step"),
+         ("frozen_mid_off_last", "frozen_mid_last"),
+         ("frozen_mid_off_last", "frozen_deep_last"),
+         ("frozen_mid_off_last", "frozen_mirror_last"),
+         ("frozen_mid_off_last", "ref_trained")]
 
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 out = {}
@@ -120,6 +142,16 @@ if "frozen_deep_s2_matched" in C:
             out[f"position_contrast_{which}"]["frozen_mid_median"] = mid["median_w"]
             out[f"position_contrast_{which}"]["mid_between_deep_and_mirror"] = \
                 bool(max(d1, d2) < mid["median_w"] < m)
+        off = C.get(f"frozen_mid_off_{which}")
+        if off is not None and mid is not None:  # the fourth position at five trainable blocks
+            out[f"position_contrast_{which}"]["frozen_mid_off_median"] = off["median_w"]
+            out[f"position_contrast_{which}"]["off_between_mid_and_deep"] = \
+                bool(mid["median_w"] < off["median_w"] < min(d1, d2))
+        mid3 = C.get(f"frozen_mid3_{which}")
+        if mid3 is not None:  # three-block mid-stack window: does position still beat the count?
+            out[f"position_contrast_{which}"]["frozen_mid3_median"] = mid3["median_w"]
+            out[f"position_contrast_{which}"]["mid3_below_both_five_block_ends"] = \
+                bool(mid3["median_w"] < min(d1, d2, m))
 
 print(json.dumps(out, indent=2))
 with open(os.path.join(RES, "frozen_pairwise.json"), "w") as f:

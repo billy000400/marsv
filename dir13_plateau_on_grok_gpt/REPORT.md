@@ -72,32 +72,41 @@ across them (shares 41/28/18/11%, none dominant), and — measuring both candida
 every ablated model — the collapse tracks **neither** of them: the next-character decision survives
 intact (80.7% of pairs still predict different characters at their endpoints) while $d(t)$ goes
 straight, and the endpoint-plausibility landscape barely moves ($\rho(\Delta w,\Delta\max p)=+0.22$).
-Five retraining runs then show that even the "built in blocks 1–4" claim is about this particular
+Nine retraining runs then show that even the "built in blocks 1–4" claim is about this particular
 trained network rather than about training. Every one of them matches or beats the reference's
 validation accuracy and still bends the paths, with the sharpening relocated into whichever blocks
 were left trainable: freezing blocks 1–4 gives width **0.471** (vs 0.803 untrained) with the drop moved
 to blocks 5–8; freezing blocks 8–11 instead costs just as much width (0.484); freezing blocks 1–7
 relocates it into the only blocks left, 8–11 (**0.558**); and freezing the mirror-image group 5–11 —
 the same 58% of parameters, the same five trainable blocks, but at the bottom of the stack — puts it
-back in blocks 1–4 (**0.626**). The sharp transition is thus a **relocatable** computation. What
-freezing costs is how sharp it gets, set first by how many blocks stay trainable and only second by
-where they sit. A fifth run takes that to its limit: freezing blocks 1–10, so that block 11 is the only
+back in blocks 1–4 (**0.626**). The sharp transition is thus a **relocatable** computation. A fifth run
+takes the trainable-depth axis to its limit: freezing blocks 1–10, so that block 11 is the only
 trainable block downstream of the injection, lands at **0.726** — matching the trainable-depth
-prediction of ≈0.70 and excluding the ≈0.56 that "one block beside the readout suffices" would give.
-Across the five runs the widths form a monotone series in trainable depth (0.351 → 0.47–0.48 →
-0.56–0.63 → 0.726 for 12, 8, 5 and effectively 1 usable block), and at that last point the plateau
-stops being a plateau: it recovers only 17% of the reference sharpening and its boundary no longer
-tracks the model's prediction flip. Every one of those runs removes trainable blocks and trainable
+prediction of ≈0.70 and excluding the ≈0.56 that "one block beside the readout suffices" would give —
+and there the plateau stops being a plateau, recovering only 17% of the reference sharpening with its
+boundary no longer tracking the model's prediction flip. Every one of those runs removes trainable
+blocks and trainable
 parameters together, so a sixth run separates them: retrained **narrow** (`d_model` 192, nothing frozen,
 5.38M parameters — 4% *below* frozen-early's trainable budget, at the reference's full depth), it lands at
 **0.397** at matched accuracy and **0.332** at the end of training, i.e. at or below the full-width
 reference's 0.443 and 0.351 rather than at the frozen runs' 0.47–0.48. Both ends of that comparison
-were then repeated from a second initialization, which bounds the across-seed spread at ≈0.04 and
-leaves all three 12-trainable-block runs below all three 8-trainable-block ones (0.397–0.443 against
-0.476–0.500, disjoint). Trainable depth is the variable; parameter count is not. A second seed of the
-five-trainable-block near-readout run gives the smaller *position* term the same treatment: it repeats
-at **0.559** (against 0.590), so both of its seeds stay below the bottom-of-stack run's 0.626 by more
-than the seed spread.
+were then repeated from a second initialization, which bounds the across-seed spread at ≈0.04.
+Parameter count is not the variable. **Nor, it turns out, is the number of trainable blocks.** A seventh
+run puts the same five trainable blocks at the one position not yet tested — the *middle* of the stack,
+freezing blocks 0–3 and 9–11 — and instead of landing between the two known five-block values (the
+prediction on record was 0.58–0.60) it lands at **0.365** at matched accuracy and **0.331** at the end,
+below every eight-block run and below the 12-block reference itself, with **24.7%** of pairs meeting
+the strict plateau rule against the reference's 10.0% and 0–0.7% for every other frozen run. The three
+five-block runs therefore span 0.365–0.629, a wider range than the entire 12-to-5 block series. The
+eighth run separates the window's position from its size by shrinking it to **three** mid-stack blocks (5–7,
+with 74.6% of the parameters frozen): it lands at **0.446**, statistically indistinguishable from the
+full 12-block reference (0.443, $p = 0.17$) and 0.09–0.18 sharper than every five-block window at
+either end, and a ninth run slides the five-block window one step off centre (blocks 2–6), where it
+reproduces the mid-stack result exactly (**0.365**). What sets the sharpness is **where** the trainable
+blocks sit, far more than how many there are: across the eight frozen runs, every one whose trainable
+window lies strictly inside the stack — touching neither the block right after the patched activation
+nor the last block — lands at 0.365–0.446, and every one whose window touches an end lands at
+0.476–0.712, with no overlap.
 **Verdict: plateaus are real in this model, and they are next-character decision basins** — but
 "decision basin" is a *description* of them, not their mechanism, which sits upstream in the early
 MLPs. Qualified further because we tested a reconstruction rather than the paper's exact checkpoint,
@@ -434,7 +443,7 @@ else. So we retrain from scratch, holding a block group $S$ at its initializatio
 with every other detail identical to the reference fresh character run — same corpus and SHA-256, same
 90/10 split, same model seed (so the frozen blocks hold *exactly* the reference run's random
 initialization), same data order, same Adam(lr $10^{-3}$ cosine $\to 10^{-4}$, betas 0.9/0.99, weight
-decay 0), same 30,000-step schedule, same batch size, same checkpoint grid. Five runs, each launched
+decay 0), same 30,000-step schedule, same batch size, same checkpoint grid. Seven runs, each launched
 after the previous one's result was in:
 $S=\lbrace 1,2,3,4\rbrace$ (**frozen-early**, the group the ablations implicate),
 $S=\lbrace 8,9,10,11\rbrace$ (**frozen-late**, the same *number* of blocks at a depth those ablations
@@ -442,7 +451,15 @@ showed contributes almost nothing), $S=\lbrace 1,\dots,7\rbrace$ (**frozen-deep*
 parameters, leaving blocks 0 and 8–11 trainable), $S=\lbrace 5,\dots,11\rbrace$ (**frozen-mirror**,
 the mirror image: the same 58.0% of parameters and the same five trainable blocks, but at the bottom of
 the stack) and $S=\lbrace 1,\dots,10\rbrace$ (**frozen-two**, 82.9% of the parameters, leaving only
-blocks 0 and 11 trainable — the extreme of the trainable-depth axis). Frozen-late is the specificity
+blocks 0 and 11 trainable — the extreme of the trainable-depth axis). A sixth run,
+$S=\lbrace 0,1,2,3,9,10,11\rbrace$ (**frozen-mid**), freezes the same seven blocks as frozen-deep and
+frozen-mirror but leaves the trainable five in the *middle* of the stack (blocks 4–8), completing the
+three positions a five-block group can occupy. A seventh,
+$S=\lbrace 0,\dots,4,8,\dots,11\rbrace$ (**frozen-mid3**, 74.6% of the parameters), shrinks that
+mid-stack window to three trainable blocks (5–7) to separate the window's *position* from its *size*.
+An eighth, $S=\lbrace 0,1,7,\dots,11\rbrace$ (**frozen-mid-off**), returns to five trainable blocks and
+the same 58.0% frozen fraction but slides the window one step off centre, to blocks 2–6.
+Frozen-late is the specificity
 control: if merely removing four blocks' worth of capacity
 straightened the paths, it would straighten them too. Frozen-deep tests the successor prediction those
 two generated — if the sharpening simply moves to whatever blocks remain trainable, squeezing the
@@ -483,10 +500,25 @@ trainable blocks is what sets the width then frozen-mirror lands near frozen-dee
 between injection blocks 0 and 4; and the fourth, fixed after frozen-mirror and recorded in `PLAN.md`
 before frozen-two was launched, is that if trainable depth is the first-order term frozen-two lands
 near $w\approx 0.70$ with its residual drop split between injection blocks $0\to 2$ and $10\to 11$,
-whereas if a single trainable block beside the readout suffices it lands near frozen-deep's 0.558. Any
+whereas if a single trainable block beside the readout suffices it lands near frozen-deep's 0.558. The
+fifth, recorded in `PLAN.md` before frozen-mid was scored, tests the position term as an *ordered*
+three-point claim rather than a two-point contrast: if position is a genuine second-order effect
+favouring the readout end, five trainable blocks in the middle should land between the two known
+five-block values, near $w \approx 0.58$–$0.60$, and landing at or below frozen-deep's 0.559–0.590 or
+at or above frozen-mirror's 0.626 falsifies the ordering. The sixth, recorded in `PLAN.md` before
+frozen-mid3 was scored, follows from frozen-mid's outcome: if mid-stack position is what does the work
+and the size of the trainable window is secondary, a three-block mid-stack window still beats five
+blocks at either end, landing near $w \approx 0.40$–$0.50$; a value at or above frozen-deep's 0.558
+would restore the block count as the leading term. The seventh, recorded before frozen-mid-off was
+scored, tests the description frozen-mid suggested — that the cost tracks how the frozen blocks are
+distributed around the trainable window: a window at blocks 2–6, with five frozen blocks below it
+instead of three, should land between frozen-mid's $0.365$ and frozen-deep's $0.558$, near
+$0.40$–$0.45$; a value at or below 0.365 counts against that description. (Freezing block 0 costs the measurement
+nothing, since injecting at block 0 overwrites block 0's output anyway, so all five of frozen-mid's
+trainable blocks sit downstream of the injection — as in frozen-deep, unlike frozen-two.) Any
 other outcome falsifies them (Figure 23).
 
-**The narrow run — separating trainable depth from trainable capacity.** All five frozen runs remove
+**The narrow run — separating trainable depth from trainable capacity.** Every frozen run removes
 trainable blocks and trainable parameters together, so "width is set by how many blocks can train" and
 "width is set by how many parameters can train" fit them equally well. The fifth prediction, recorded in
 `PLAN.md` before this run was launched, breaks that confound by moving the other variable alone:
@@ -1163,22 +1195,29 @@ flattens $d(t)$ (80.7% of pairs still predict different characters at their endp
 the leading alternative — that the basin is carved by endpoint *plausibility* — still predicts which
 pairs are sharp (partial $\rho = -0.59$) even though it does not mediate the intervention
 ($\rho(\Delta w,\Delta\max p) = +0.22$). The "blocks 1–4 build it" clause survives only as a statement
-about *this* trained network: four retraining runs show the sharpening **relocates** into whichever
+about *this* trained network: six retraining runs show the sharpening **relocates** into whichever
 blocks stay trainable — freeze 1–4 and it moves to blocks 5–8 ($w = 0.471$), freeze 1–7 and it moves to
-8–11 ($0.558$), freeze 5–11 and it moves back to 1–4 ($0.626$), each at or above the reference's
-validation accuracy (Figure 23) — so the site is contingent and what freezing costs is sharpness,
-governed first by how many blocks stay trainable and only second by where they sit. A fifth run tested
-that reading at its limit and confirmed it: freezing blocks 1–10, leaving block 11 as the only
+8–11 ($0.558$), freeze 5–11 and it moves back to 1–4 ($0.626$), freeze 0–3 and 9–11 and it sits in the
+middle window 4–8 ($0.331$), freeze all but blocks 5–7 and 96% of it lands in that three-block window
+($0.427$), each at or above the reference's
+validation accuracy (Figure 23) — so the site is contingent, and what freezing costs is sharpness,
+governed mainly by *where* the trainable blocks sit. A seventh run tested the limit of the
+trainable-depth reading and confirmed it there: freezing blocks 1–10, leaving block 11 as the only
 trainable block downstream of the injection, gives $w = 0.726$, matching the $\approx 0.70$
 trainable-depth prediction and excluding the $\approx 0.56$ that "one block beside the readout
-suffices" implies. A sixth run separated trainable depth from trainable capacity: at full depth but
+suffices" implies. An eighth run separated trainable depth from trainable capacity: at full depth but
 $n_{\mathrm{embd}}=192$ instead of 240 — 4% *fewer* trainable parameters than freezing blocks 1–4
 leaves — it lands at $0.397$, the depth account's value rather than the capacity account's
-$\approx 0.47$, and second seeds at both ends leave the two groups disjoint. **Falsifiable
-prediction:** if position is a real second-order term that bites only once depth is scarce, then five
-trainable blocks in the *middle* of the stack — freeze blocks 0–3 and 9–11, the same seven frozen
-blocks as the two five-block runs but at neither end — should land between their values, near
-0.58–0.60 rather than at 0.56 or 0.63.
+$\approx 0.47$, and second seeds at both ends leave the two groups disjoint. The middle-window run
+above then falsified the remaining count-first reading: five trainable blocks in mid-stack are enough
+for the full plateau, shrinking that window to three (freeze 0–4 and 8–11) still lands level with
+the 12-block reference at $0.446$, and sliding it one step off centre (blocks 2–6) reproduces $0.365$
+exactly. Across the eight frozen runs the widths separate on one variable: a trainable window strictly
+inside the stack gives 0.365–0.446, a window touching either end gives 0.476–0.712.
+**Falsifiable prediction:** a five-block window at blocks 1–5 — one block down from the sharp 2–6
+window, and therefore touching the block immediately after the patched activation — should land with
+the blunt group, above $0.47$; landing near $0.365$ would show that the interior/end split is a
+coincidence of these eight runs.
 
 #### The readout-rebalancing intervention: the plateau sits upstream of the decision
 
@@ -1324,36 +1363,53 @@ Every intervention so far cuts into an already-trained network, so it can only s
 component is load-bearing at inference. The hypothesis made a stronger, training-time claim, and the
 frozen-block runs (Methods §Frozen-block training test) test it: retrain from scratch with a block
 group held at its step-0 weights, then assay the result at matched validation accuracy and at the end
-of the same 30,000-step schedule. Figure 23 collects the outcome of all five runs.
+of the same 30,000-step schedule. Figure 23 collects the outcome of all seven runs.
 
-All five finished the full schedule and lost nothing on the task — each in fact ended *above* the
+All eight finished the full schedule and lost nothing on the task — each in fact ended *above* the
 reference: final validation next-character accuracy **0.5625** (blocks 1–4 frozen), **0.5622** (blocks
-8–11 frozen), **0.5742** (blocks 1–7 frozen), **0.5744** (blocks 5–11 frozen) and **0.5668** (blocks
-1–10 frozen) against the reference run's **0.5502**, reaching the reference's final accuracy at
-$k_{\mathrm{match}}=2750$, $2500$, $3000$, $2750$ and $7000$. The comparison is therefore between six
-networks that predict held-out Shakespeare at least as well as the reference. Frozen-deep and
-frozen-mirror are matched on everything a capacity argument can see — 4.86M of 8.38M parameters frozen
-(58.0%), five trainable blocks each, final accuracies agreeing to within 0.0002 — and differ only in
-where the trainable blocks sit.
+8–11 frozen), **0.5742** (blocks 1–7 frozen), **0.5744** (blocks 5–11 frozen), **0.5728** (blocks 0–3
+and 9–11 frozen), **0.5711** (blocks 0–4 and 8–11 frozen), **0.5744** (blocks 0–1 and 7–11 frozen) and **0.5668**
+(blocks 1–10 frozen) against
+the reference run's **0.5502**, reaching
+the reference's final accuracy at $k_{\mathrm{match}}=2750$, $2500$, $3000$, $2750$, $3750$, $7000$,
+$3500$ and $7000$.
+The comparison is therefore between nine
+networks that predict held-out Shakespeare at least as well as the reference. The four five-block runs
+— frozen-deep, frozen-mirror, frozen-mid and frozen-mid-off — are matched on everything a capacity
+argument can see:
+4.86M of 8.38M parameters frozen (58.0%), five trainable blocks each, and final accuracies inside a
+0.0016 band. They differ only in where those five blocks sit, which is what makes them the cleanest
+comparison in the series.
 
-![raw interpolation curves, transition widths, injection-depth profile and validation accuracy for the reference and five frozen-block runs](plots/frozen_blocks.png)
+![raw interpolation curves, transition widths, injection-depth profile and validation accuracy for the reference and eight frozen-block runs](plots/frozen_blocks.png)
 
 **Figure 23.** Frozen-block training test, 150 character pairs, interpolation block 0. **Top row:** raw
-relative distance $d(t)$ (y) against interpolation position $t$ (x) for the same 20 pairs under eight
+relative distance $d(t)$ (y) against interpolation position $t$ (x) for the same 20 pairs under eleven
 models — reference untrained (step 0), reference at step 2500, reference trained (step 30000), and
-blocks 1–4, 8–11, 1–7, 5–11 and 1–10 frozen (each at its final step 30000). Thin lines are individual
-pairs, the thick dashed line their median, and the gray dashed diagonal the straight-line (no-plateau)
-reference $d=t$; panel titles give each model's median width. **Bottom left:** median transition width
+blocks 1–4, 8–11, 1–7, 0–3&9–11, 0–4&8–11, 0–1&7–11, 5–11 and 1–10 frozen (each at its final step
+30000). Thin lines are
+individual pairs, the thick dashed line their median, and the gray dashed diagonal the straight-line
+(no-plateau) reference $d=t$; panel titles give each model's median width. The seventh panel (blocks
+0–3 and 9–11 frozen, five trainable blocks in mid-stack) carries the sharpest median of any panel in
+the figure, including the fully trained reference. **Bottom left:** median transition width
 $w_{10\to90}$ (y) per condition (x), bars = interquartile range; gray dashed horizontal line = the
-untrained value 0.803, black dotted line = the trained reference's 0.351. **Bottom middle:** median
-width (y) against the block at which the interpolated activation is injected (x: 0, 2, 4, 8, 10, 11)
-for the trained reference (solid, circles), blocks 1–4 frozen (dashed, squares), blocks 8–11 frozen
-(dash-dot, triangles), blocks 1–7 frozen (dotted, diamonds), blocks 5–11 frozen (dash-dot-dot,
-down-triangles) and blocks 1–10 frozen (gray, long-dash-dot, plus-markers); a drop between two
-injection points means the blocks in between are what sharpen the path. **Bottom right:** validation
-next-character accuracy (y) against optimization step (x, symlog, linear below 100) for the six runs in
-the same line styles; black dotted line = the reference run's final accuracy, open markers = the
-matched-accuracy checkpoints assayed above.
+untrained value 0.803, black dotted line = the trained reference's 0.351. **Bottom middle (two
+panels):** median
+width (y) against the block at which the interpolated activation is injected (x: 0, 2, 4, 8, 10, 11);
+a drop between two injection points means the blocks in between are what sharpen the path. The runs are
+split across two panels so no panel carries more than five series. The left panel holds the four runs
+with exactly five trainable blocks — blocks 5–11 frozen (long-dash-dot, plus-markers), 0–1&7–11 frozen
+(long-dashed, left-triangles), 0–3&9–11 frozen (dash-dot-dot, down-triangles) and 1–7 frozen (dotted,
+diamonds); the right panel holds the other freeze sizes — blocks 1–4 frozen (dashed, squares), 8–11
+frozen (dash-dot, triangles), 0–4&8–11 frozen (fine-dotted, crosses) and 1–10 frozen (dash-dot-dash,
+stars), the last three in gray at three lightnesses. The trained reference (black, solid, circles)
+appears in both panels as the anchor. **Bottom right:** validation
+next-character accuracy (y) against optimization step (x, symlog, linear below 100) for the nine runs
+in the same line styles — they are nearly coincident, which is the point: every run reaches the
+reference's accuracy. The black dotted line is the reference run's final accuracy and the open markers
+are each run's matched-accuracy checkpoint (steps 2750, 2500, 3000, 3750, 7000, 3500, 2750 and 7000 for
+blocks 1–4, 8–11, 1–7, 0–3&9–11, 0–4&8–11, 0–1&7–11, 5–11 and 1–10 frozen), which is the checkpoint
+assayed above.
 
 **The first prediction is falsified.** Freezing blocks 1–4 leaves the final median width at **0.471**
 (IQR 0.403–0.524), nowhere near the predicted untrained 0.803. On the untrained-to-trained scale that
@@ -1390,24 +1446,36 @@ precisely the predicted signature: straight at injection block 11, sharpening mo
 injection point descends to block 8, flat below it. Blocks-5–11-frozen moves it back to the bottom:
 $0.626/0.764/\mathbf{0.805}/0.806/0.806/0.806$ — injecting at block 4 already gives the untrained
 straight line, and all of the sharpening sits in blocks 1–4 ($0.138$ in blocks 1–2, $0.042$ in 3–4).
+Blocks-0–3-and-9–11-frozen puts it in the middle: $0.331/0.342/0.525/\mathbf{0.802}/0.802/0.803$ — flat
+above block 8, with $0.277$ of the total $0.471$ of sharpening over blocks 5–8 and $0.183$ over blocks
+3–4 of which only block 4 can train, leaving $0.011$ for the frozen blocks 1–2.
+Blocks-0–1-and-7–11-frozen shifts it one step down, into the window 2–6:
+$0.355/0.525/0.737/\mathbf{0.807}/0.807/0.807$ — flat above block 8 again, with $0.382$ of its $0.452$
+total falling across blocks 3–4 and 1–2 and only $0.070$ above block 4.
+Blocks-0–4-and-8–11-frozen concentrates it into the three-block window 5–7:
+$0.427/0.436/0.443/\mathbf{0.806}/0.806/0.806$ — $0.363$ of the total $0.380$ appears between injection
+blocks 4 and 8, which spans the trainable window plus the frozen block 8, while the frozen blocks 1–4
+and 9–11 account for $0.017$ between them.
 Blocks-1–10-frozen is the limiting case: $0.726/0.725/0.724/0.725/0.725/\mathbf{0.803}$ — flat all the
 way up, with the entire $0.077$ of sharpening appearing between injection blocks 10 and 11, produced by
-block 11 alone. Five runs, five different sites, the same phenomenon.
+block 11 alone. Eight runs, eight different sites, the same phenomenon.
 
-**But the count of trainable blocks does not fully determine the width — position matters when
-capacity is scarce.** Frozen-deep and frozen-mirror are matched on frozen parameter fraction (58.0%),
+**The count of trainable blocks does not fully determine the width — where they sit matters too.**
+Frozen-deep and frozen-mirror are matched on frozen parameter fraction (58.0%),
 trainable block count (five) and final accuracy (0.5742 vs 0.5744), and differ only in whether the
 trainable blocks abut the readout or the embedding. Their widths differ: $0.558$ against $0.626$, a
 paired median $\Delta w = +0.063$ with 81% of pairs wider ($p = 6\times10^{-17}$), i.e. **54%** vs
 **39%** of the reference sharpening recovered. The count-only prediction is therefore falsified at the
 margin, while its location claim holds exactly; a second frozen-deep seed, reported below, shows the
 gap survives the initialization noise. Yet with *eight* trainable blocks the same contrast is
-nearly nil (frozen-early 0.471 vs frozen-late 0.484, $\Delta w = -0.015$). Read together, the five runs
-give median widths $0.351$ (12 trainable) $\to 0.471/0.484$ (8 trainable) $\to 0.558/0.626$ (5
-trainable) $\to 0.726$ (2 trainable, only 1 of them usable): trainable depth is the first-order term
-and position a second-order one that only bites once depth is scarce, and then it favours blocks near
-the readout. What no frozen run recovers is the sharpest tail: the strict plateau rule is met by 10% of
-reference pairs but 0.7% (early) and 0% (late, deep, mirror, two). Measured against the reference *at
+nearly nil (frozen-early 0.471 vs frozen-late 0.484, $\Delta w = -0.015$). Ranked by width, those five
+runs read $0.351$ (12 trainable) $\to 0.471/0.484$ (8 trainable) $\to 0.558/0.626$ (5
+trainable) $\to 0.726$ (2 trainable, only 1 of them usable), which invites the reading that the count
+of trainable blocks is the first-order term and their position a small correction on top of it. The
+third five-block position, run last and reported below, breaks that reading outright.
+Five of the eight frozen runs also fail to recover the sharpest tail: the strict plateau rule is met by
+10% of reference pairs but 0.7% (early) and 0% (late, deep, mirror, two). The three interior-window
+runs are the exceptions, at 24.7%, 21.3% and 9.3%. Measured against the reference *at
 the matched-accuracy step* (2500, width 0.443) the four-block gaps are small ($+0.033$, $+0.038$),
 the seven-block gaps are $+0.110$ and $+0.171$, and frozen-two's is $+0.276$: freezing a third of the
 stack mainly *slows* the sharpening, freezing 58% of it also caps how far it gets, and freezing 83% of
@@ -1422,22 +1490,24 @@ $w = 0.726$ (IQR 0.642–0.802), paired $\Delta w = +0.160$ against frozen-deep 
 $p = 7\times10^{-26}$) and $+0.094$ against frozen-mirror (89%, $p = 3\times10^{-21}$) — the
 trainable-depth prediction, and far outside the one-block alternative. Only **17%** of the reference
 sharpening is recovered. This run is also where the *shape* finally fails rather than merely blunting:
-**26%** of its pairs are wider than the untrained network's (0–1% in the other four runs), the boundary
+**26%** of its pairs are wider than the untrained network's (0–1.3% in the other seven runs), the boundary
 comes unstuck from the model's prediction flip ($|t^{*}-t_{\mathrm{flip}}|$ 0.146 vs 0.043), and the
 plausibility association largely collapses (partial $\rho = -0.18$ vs $-0.63$). It is the only run that
 needed materially longer to reach the reference's accuracy ($k_{\mathrm{match}}=7000$ against
 2500–3000), so the cost of extreme freezing shows up in optimization speed as well as in geometry.
 
-**Everything else about the geometry is unchanged in the four runs that retain a plateau.** The
-boundary sits mid-path (median $t^{*}$ 0.491, 0.495, 0.486 and 0.499 vs 0.488), the endpoints still
-predict different characters for 84%, 93%, 87% and 87% of pairs (86.7% reference), the boundary stays
-glued to the prediction flip (median $|t^{*}-t_{\mathrm{flip}}|$ 0.062, 0.059, 0.092 and 0.085 vs 0.043,
+**Everything else about the geometry is unchanged in the seven runs that retain a plateau.** The
+boundary sits mid-path (median $t^{*}$ 0.491, 0.495, 0.486, 0.499, 0.475, 0.483 and 0.471 vs 0.488), the
+endpoints still predict different characters for 84%, 93%, 87%, 87%, 92%, 88% and 83% of pairs (86.7%
+reference), the
+boundary stays glued to the prediction flip (median $|t^{*}-t_{\mathrm{flip}}|$ 0.062, 0.059, 0.092,
+0.085, 0.045, 0.072 and 0.059 vs 0.043,
 against 0.214 under the MLP ablation), and the plausibility association survives (partial $\rho$ =
-−0.61, −0.60, −0.62 and −0.54 vs −0.634). Frozen-two departs on the last two, as just described, while
+−0.61, −0.60, −0.62, −0.54, −0.61, −0.56 and −0.51 vs −0.634). Frozen-two departs on the last two, as just described, while
 still placing its boundary mid-path ($t^{*}=0.481$) with 87% of endpoint pairs predicting different
 characters.
 
-**Trainable depth, not trainable capacity, is the variable that matters.** The narrow run — all 12
+**Trainable capacity is not the variable at all.** The narrow run — all 12
 blocks trainable, but only 5,375,808 parameters, 4.0% below frozen-early's trainable budget — reaches the reference's accuracy at step 2,750 (val 0.5543) and lands at median width
 $w=0.397$ (IQR 0.311–0.526). That is the depth account's prediction and falsifies the capacity
 account's $\approx 0.47$: paired against the same 150 pairs it is **−0.073** narrower than frozen-early
@@ -1448,9 +1518,10 @@ parameters therefore costs nothing measurable; removing a third of the trainable
 of width. The narrow run also keeps the reference's front-loaded depth profile (median width 0.397,
 0.569, 0.686, 0.763, 0.807, 0.832 at injection blocks 0, 2, 4, 8, 10, 11 — the sharpening made in the
 first few blocks), its plausibility association (partial $\rho=-0.65$ vs −0.634) and its boundary
-placement (median $|t^{*}-t_{\mathrm{flip}}|=0.061$), and it is the only run other than the reference to
-retain the sharpest tail: **13.3%** of its pairs meet the strict plateau rule, against 0–0.7% for all
-five frozen runs. Narrowing the network is thus not a weak version of freezing it — on this measure it
+placement (median $|t^{*}-t_{\mathrm{flip}}|=0.061$), and it retains the sharpest tail as well:
+**13.3%** of its pairs meet the strict plateau rule, against the reference's 12.7% and 0–0.7% for the
+five frozen runs known at the time (the three interior-window runs, reported below, later reached
+24.7%, 21.3% and 9.3%). Narrowing the network is thus not a weak version of freezing it — on this measure it
 is not a perturbation at all.
 
 **Two seeds a side, and the depth step separates cleanly.** Every point on the depth axis was a single
@@ -1495,8 +1566,98 @@ $p=3.4\times10^{-8}$). The relocation signature repeats exactly: injecting at bl
 1–7 contribute nothing and the sharpening again lives entirely in blocks 8–11 (0.683 and 0.714 by
 injection block 8). The rest of the geometry is unchanged (median $t^{*}$ 0.486, endpoints differ for
 88% of pairs, 3 $\arg\max$ regions, $|t^{*}-t_{\mathrm{flip}}|$ 0.084, partial $\rho=-0.58$, strict
-rate 0). With that, both terms of the two-term reading — trainable depth first, position second — rest
-on comparisons whose gaps exceed a measured seed spread.
+rate 0). The position effect is therefore real and larger than initialization noise. What the two runs
+could not say is how large it can get, because between them they sample only the two *ends* of the
+stack.
+
+**The third position overturns the count-first reading: five trainable blocks in mid-stack are enough
+for the whole plateau.** The two five-block runs so far differ by 0.068, small enough to read as a
+correction on top of a count-driven trend. Frozen-mid puts the same five trainable blocks at the one
+remaining position — blocks 4–8, with blocks 0–3 and 9–11 frozen, so the frozen fraction (58.0%) and
+the trainable count are identical to both — and the pre-registered prediction was that it lands between
+them, near 0.58–0.60. It does not. It reaches the reference's accuracy at step 3,750 (val 0.5519),
+ends at val 0.5728, and gives $w = \mathbf{0.365}$ (IQR 0.253–0.471) at matched accuracy and
+$\mathbf{0.331}$ (IQR 0.258–0.428) at step 30,000 — not between the other two five-block runs but
+**far below both**, and below the *full 12-block reference* at its own matched checkpoint (0.443;
+paired $-0.056$, only 25% of pairs wider, $p = 3\times10^{-14}$). Paired against its two positional
+siblings the gaps are the largest in the series: $-0.211$ against frozen-deep seed 1 (1.3% of pairs
+wider, $p = 3\times10^{-26}$), $-0.188$ against frozen-deep seed 2 (**0%** of pairs wider,
+$p = 2\times10^{-26}$) and $-0.240$ against frozen-mirror (0.7%, $p = 2\times10^{-26}$). At the end of
+training it is, if anything, sharper than the fully trained reference ($-0.023$, 37% of pairs wider,
+$p = 0.004$). It is also the first frozen run to keep the sharpest tail, and it does not merely keep
+it: **24.7%** of its pairs meet the strict plateau rule at matched accuracy and 22.7% at the end,
+against the reference's 10.0% and the 0–0.7% of the five frozen runs before it — the highest strict
+rate of any model measured anywhere in this report. The rest of the geometry is a normal plateau (median $t^{*}$
+0.501, endpoints differ for 89% of pairs, 3 $\arg\max$ regions, $|t^{*}-t_{\mathrm{flip}}| = 0.048$
+against the reference's 0.043, partial $\rho = -0.47$ at matched accuracy and $-0.61$ at the end).
+
+Three consequences follow, and they replace the two-term reading above. First, **the number of
+trainable blocks is not the first-order term**: the three five-block runs span 0.365 to 0.629, a range
+wider than the entire 12-to-5 block series, and five mid-stack blocks beat every eight-block run
+(0.476–0.500) and the 12-block reference itself. Second, **position is not a gradient toward the
+readout** — it has an interior optimum, which the two-point contrast could not see because it sampled
+only the ends. Third, what the three positions have in common is how the seven frozen blocks are
+*distributed* around the trainable window rather than how many there are. All three freeze seven
+blocks; frozen-mid splits them into two short runs of three on either side of the window (blocks 1–3
+and 9–11, all downstream of the block-0 injection), whereas frozen-deep stacks all seven before the
+window and frozen-mirror all seven after it. The run with no long frozen stretch adjacent to its
+trainable window is much the sharpest (0.365 against 0.558–0.629), and between the two that do have
+one, the stretch sitting *after* the window costs more than the same stretch before it (frozen-mirror
+0.626 against frozen-deep 0.558). That reading was a description of three
+points rather than a tested law, so we tested it.
+
+**Three trainable blocks in mid-stack match the full network, and beat five blocks at either end.**
+The test separates the window's position from its size: keep the mid-stack site and shrink the window
+from five blocks to three (freeze 0–4 and 8–11, leaving blocks 5–7 — **74.6%** of the parameters
+frozen, more than any run except frozen-two). The prediction on record was $w \approx 0.40$–$0.50$ if
+position dominates, and $\ge 0.558$ if the block count reasserts itself. The outcome is
+$w = \mathbf{0.446}$ (IQR 0.344–0.559) at matched accuracy and $\mathbf{0.427}$ (IQR 0.324–0.541) at
+step 30,000 — inside the predicted interval, and **statistically indistinguishable from the full
+12-block reference** at the matched checkpoint (0.443; paired $+0.009$, 55% of pairs wider,
+$p = 0.17$). Against the five-block windows at the two ends it wins clearly on both framings: $-0.121$
+against frozen-deep seed 1 (9.3% of pairs wider, $p = 7\times10^{-23}$), $-0.090$ against seed 2 (11%,
+$p = 1\times10^{-21}$) and $-0.154$ against frozen-mirror (4.7%, $p = 1\times10^{-25}$), and at the end
+of training $-0.111$ and $-0.184$. Its strict plateau rate is 9.3% at matched accuracy and 10.0% at the
+end, matching the reference's 12.7% and 10.0% and beaten only by frozen-mid. The relocation is the
+tightest in the series — 96% of its sharpening falls between injection blocks 4 and 8 — and the
+geometry is a normal plateau (median $t^{*}$ 0.479, endpoints differ for 91% of pairs, 3 $\arg\max$
+regions, $|t^{*}-t_{\mathrm{flip}}| = 0.079$, partial $\rho = -0.46$).
+
+Window size is therefore not irrelevant — dropping from five mid-stack blocks to three costs
+$+0.086$ of width (85% of pairs wider, $p = 3\times10^{-17}$), and the run needs 7,000 steps to reach
+the reference's accuracy against frozen-mid's 3,750 — but it is dominated by position: **three**
+trainable blocks in the middle beat **five** at either end by 0.09–0.18, and reproduce a 12-block
+network's plateau geometry while nine of twelve blocks never leave their initialization.
+
+**A fourth position falsifies the "adjacent frozen stretch" description and leaves a sharper one.**
+The description above — that the cost tracks how the frozen blocks are distributed around the window —
+predicts that a five-block window one step off-centre lands between frozen-mid and frozen-deep. So we
+ran it: freeze blocks 0–1 and 7–11, leaving blocks 2–6 trainable, with a **five**-block frozen stretch
+downstream of the window against frozen-mid's three. The prediction on record was $0.40$–$0.45$, and
+anything at or below 0.365 was to count against it. The run reaches the reference's accuracy at step
+3,500 (val 0.5507), finishes at the highest validation accuracy of any run in the study (0.5744), and
+gives $w = \mathbf{0.365}$ (IQR 0.271–0.468) at matched accuracy and $\mathbf{0.355}$ (IQR 0.275–0.405)
+at the end — **identical to frozen-mid** on both framings (paired $+0.014$, $p=0.06$, and $+0.007$,
+$p=0.23$; neither reaches significance), sharper than the reference at its matched checkpoint
+($-0.050$, 25% of pairs wider, $p=4\times10^{-12}$) and level with the fully trained reference
+($-0.009$, $p=0.29$). Against the two end windows it is 0.17–0.26 sharper on every comparison
+($p \le 3\times10^{-25}$), and 21.3% of its pairs meet the strict plateau rule. Doubling the frozen
+stretch below the window cost nothing at all, so the distribution of frozen blocks is not what governs
+the width, and that description is withdrawn.
+
+What survives is stronger and simpler. Order the eight frozen runs by where their trainable blocks sit
+*after* the injection — the block-0 patch overwrites block 0's output, so a run's usable window is its
+trainable blocks intersected with 1–11 — and the widths separate perfectly. The three runs whose usable
+window is **strictly interior**, touching neither block 1 nor block 11 (blocks 4–8, 2–6 and 5–7), give
+0.365, 0.365 and 0.446. The five whose window **touches an end** (5–11, 1–7, 8–11, 1–4 and block 11
+alone) give 0.476, 0.500, 0.590, 0.629 and 0.712. The two groups do not overlap. Two caveats belong
+with that statement. It was found after the fact rather than predicted, and these experiments do not
+establish why an interior window should help. And the separation is not uniformly large: the two
+five-block interior windows clear every end-touching run by at least 0.11, several times the ≈0.04
+across-seed spread, but the three-block interior window sits only 0.030 below the nearest end-touching
+one, which is inside that spread. The regularity does make a sharp prediction, recorded before the next
+run: a five-block window at blocks 1–5, which touches block 1 and differs from the sharp 2–6 window by
+a single block, should land with the blunt group above 0.47.
 
 The matched-accuracy comparison is the primary one, since it is the only axis on which runs of
 different capacity are directly comparable, but the conclusion does not depend on it. Left to train on,
@@ -1514,8 +1675,8 @@ rather than $1.0\times10^{-4}$. That truncation can only understate the run's fi
 was still sharpening when it stopped ($w=0.397$ at the matched step versus $0.332$ here,
 $p=3.1\times10^{-14}$).
 
-To show which of the two variables orders the runs, we plot every run's median width against both at
-once, with every run shown at matched validation accuracy and again at the end of its training.
+To show that neither candidate variable orders the runs, we plot every run's median width against both
+at once, with every run shown at matched validation accuracy and again at the end of its training.
 
 ![median transition width against trainable blocks and against trainable parameters, for seven runs at matched validation accuracy](plots/capacity_vs_depth.png)
 
@@ -1526,38 +1687,51 @@ transformer blocks (axis reversed, 12 → 2). **Right:** x = trainable parameter
 share an x on either axis are nudged apart so they can be told apart; where a label reads "(2 seeds)",
 the two adjacent markers of that style are the same run trained from two model seeds. Large filled
 circles are the three runs with all 12 blocks trainable (the 240-wide reference and the two seeds of
-the 192-wide narrow run); large open diamonds are the seven runs with blocks frozen at initialization
-(five frozen groups, with two seeds each of frozen 1–4 and frozen 1–7); each large marker is that run's
+the 192-wide narrow run); large open diamonds are the ten runs with blocks frozen at initialization
+(eight frozen groups, with two seeds each of frozen 1–4 and frozen 1–7); each large marker is that run's
 first checkpoint to
 reach the reference's final validation accuracy 0.550. The small open square joined to it by a dotted
-line is the same run at the end of training. Width falls monotonically along the left panel's axis but
-is unordered along the right one: at 5.4–5.6M trainable parameters both narrow seeds (filled) are
-sharper than all three eight-block frozen runs (open), and the 8.4M reference is no sharper than the
-5.4M narrow runs — and the end-of-training squares preserve that ordering, so it is not an artifact of
-the matching rule. Adjacent markers of one condition are its two seeds and the gap between them is the
-across-seed spread: 0.397 vs 0.437 at 12 trainable blocks, 0.476 vs 0.498 at 8, and 0.590 vs 0.559 at
-5. Every spread is smaller than the step it has to resolve — the 12-block and 8-block groups do not
-overlap, and both frozen-1–7 seeds stay below the frozen-5–11 diamond at the same x, which is the
-position effect.
+line is the same run at the end of training. Neither axis orders the runs. On the right, at 5.4–5.6M
+trainable parameters both narrow seeds (filled) are sharper than all three eight-block frozen runs
+(open) while the 8.4M reference is no sharper than the 5.4M narrow runs, so capacity explains nothing.
+On the left, the extremes are ordered by trainable depth but the middle of the axis is not: the four
+diamonds at x = 5 run from 0.365 (frozen 0–3, 9–11 and frozen 0–1, 7–11 — the two interior five-block
+windows, which land on top of each other) to 0.629
+(frozen 5–11), a spread wider than the whole 12-to-5 trend, and all three interior windows — two at
+x = 5 and one at x = 3 — sit below every eight-block run, with the three-block one level with the
+12-block reference. The end-of-training squares preserve both patterns, so neither
+is an artifact of the matching rule. Adjacent markers of one condition are its two seeds and the gap
+between them is the across-seed spread: 0.397 vs 0.437 at 12 trainable blocks, 0.476 vs 0.498 at 8, and
+0.590 vs 0.559 at 5. Every spread is far smaller than the positional gaps it has to resolve.
 
 **What this settles.** "Blocks 1–4 build the sharpness" holds for *this trained network at inference* —
 deleting their MLPs still flattens $d(t)$ entirely — but fails as a training-time claim. The sharp
 transition is a **relocatable** computation: denied blocks 1–4 training installs it in blocks 5–8;
 denied blocks 1–7 it installs it in 8–11; denied blocks 5–11 it installs it back in 1–4; denied
+blocks 0–3 and 9–11 it installs it in the middle window 4–8; denied blocks 0–1 and 7–11 it installs it
+in the window 2–6; denied all but blocks 5–7 it packs 96% of
+it into that three-block window; denied
 everything but block 11 it crams what it can into block 11. In every case the network matches or beats
 the reference's validation accuracy and still bends the path. What freezing costs is how sharp the
-transition becomes, governed first by how much trainable depth remains — a monotone series across five
-runs — and only second by where that depth sits. The plateau is thus not tied to particular weights or
+transition becomes, and that cost is governed by *where* the surviving trainable blocks sit: the same
+five trainable blocks give 0.365 at blocks 4–8 and again at 2–6, against 0.558–0.590 beside the readout
+and 0.626–0.629 at the bottom, and even a three-block mid-stack window (0.446, 74.6% of the parameters
+frozen) is
+indistinguishable from the full 12-block reference and clear of every five-block window at either end.
+Across all eight frozen runs the split is exact: a window strictly inside the stack gives 0.365–0.446,
+a window touching either end gives 0.476–0.712.
+The plateau is thus not tied to particular weights or
 a particular depth; it is something this architecture and objective produce wherever there is room. That
 room has a floor, though: with one usable block the result is a 17%-strength remnant whose boundary no
-longer tracks the prediction flip, so depth is not merely a matter of degree — below some amount of it
-there is no plateau left to relocate. **Caveats:** two seeds for the narrow, frozen-early and
-frozen-deep conditions and one seed for the other three, 150 pairs, one context, and five frozen groups
+longer tracks the prediction flip, so position is not the whole story either — below some amount of
+trainable depth there is no plateau left to relocate. **Caveats:** two seeds for the narrow, frozen-early
+and frozen-deep conditions and one seed for the other six, 150 pairs, one context, and eight frozen groups
 out of many possible ones; the relocation is read off six injection depths
 (0, 2, 4, 8, 10, 11), so within-group resolution is coarse — "blocks 5–8" for frozen-early cannot be
 narrowed further, and for frozen-deep the $0.139$ attributed to block 8 is inferred from its frozen
-neighbours 5–7 contributing nothing, not measured on block 8 alone. The depth-versus-count contrast
-rests on a single matched pair of runs at one capacity level, and frozen-two confounds "few trainable
+neighbours 5–7 contributing nothing, not measured on block 8 alone. The position result rests on the
+four five-block windows plus the three-block one, only one of which carries a second seed, and
+frozen-two confounds "few trainable
 blocks" with "83% of parameters frozen", so on its own it bounds the depth account rather than
 isolating depth from parameter count — that separation is what the narrow run supplies, and it,
 frozen-early and frozen-deep are the three conditions that carry a second seed.
@@ -1640,20 +1814,35 @@ widening is **not mediated by plausibility** ($\rho(\Delta w,\Delta\max p)=+0.22
 $|\Delta\max p|\le 0.0007$; where plausibility moves it moves in the direction that predicts *sharper*
 plateaus). So "decision basin" remains the right description of the geometry and is ruled out as its
 cause: blocks 1–4 build a sharp residual-stream change from which the readout computes both the
-decision and the plausibility ranking. Five training-time tests bound even that. Every one of them
-matches or beats the reference's validation accuracy (0.5625, 0.5622, 0.5742, 0.5744, 0.5668 vs 0.5502)
+decision and the plausibility ranking. Eight training-time tests bound even that. Every one of them
+matches or beats the reference's validation accuracy (0.5625, 0.5622, 0.5742, 0.5744, 0.5728, 0.5711,
+0.5744, 0.5668 vs 0.5502)
 and still bends the paths, with the depth control showing the computation simply moved: freezing blocks
 1–4 gives width 0.471 with the sharpening in blocks 5–8; freezing blocks 8–11 costs the same width
 (0.484) with the sharpening still in 1–4; freezing blocks 1–7 gives 0.558 with all of it inside the
 only trainable blocks, 8–11; freezing the mirror-image group 5–11 gives 0.626 with all of it back in
-blocks 1–4; and freezing blocks 1–10 gives 0.726 with all of it in block 11 alone. The site is
-contingent and what freezing costs is sharpness — set first by how much trainable depth remains
-(0.351 → 0.47 → 0.56–0.63 → 0.726 for 12, 8, 5 and effectively 1 usable block) and only second by where
-it sits (five trainable blocks beside the readout beat five at the bottom, 0.558 and 0.579 across two
-seeds against 0.626). The
+blocks 1–4; freezing blocks 0–3 and 9–11 gives **0.331** with all of it in the middle window 4–8;
+freezing blocks 0–1 and 7–11 gives **0.355** with all of it in the window 2–6;
+freezing all but blocks 5–7 gives **0.427** with 96% of it in that three-block window; and
+freezing blocks 1–10 gives 0.726 with all of it in block 11 alone. The site is
+contingent, and what freezing costs is sharpness — set mainly by *where* the trainable blocks sit
+rather than how many there are. The four runs that leave exactly five trainable blocks span
+0.365–0.629 at matched accuracy, a wider range than the whole 12-to-5 block series; the two whose
+window sits inside the stack are sharper than the full 12-block reference on both framings, one of them
+meeting the strict plateau rule on 24.7% of pairs against the reference's 10.0%; and shrinking the
+interior window to **three**
+blocks, with 74.6% of the parameters frozen, still lands level with the 12-block reference (0.446 vs
+0.443, $p = 0.17$) and 0.09–0.18 clear of every five-block window at either end. Three trainable
+transformer blocks, placed inside the stack, install the entire phenomenon. Across all eight frozen
+runs the widths separate exactly on whether the trainable window touches an end of the stack
+(0.476–0.712) or not (0.365–0.446) — a post-hoc regularity, but one with a pre-registered test waiting.
+The
 phenomenon itself is not contingent at all — until depth runs out. At one usable block only 17% of the
 sharpening survives and the boundary stops tracking the prediction flip, which is the one condition in
-this study where a network at full task accuracy fails to build a recognisable plateau.
+this study where a network at full task accuracy fails to build a recognisable plateau. The next test
+this report would run is the pre-registered one above — a five-block window at blocks 1–5, one block
+down from the sharp 2–6 window and touching the first block after the patched activation — followed by
+a second seed at frozen-mirror, the one single-seed run that carries a load-bearing comparison.
 
 **Joint Grokking↔plateau verdict: primary not testable (PLAN case 5); character analogues temporally
 associated (PLAN case 1).** The mandatory validity gate — reproducing *Deep Networks Always Grok*
@@ -1714,15 +1903,28 @@ natural activation-to-activation directions.
    *which* pairs are sharp (partial $\rho = -0.59$) but is excluded as the mechanism
    ($\rho(\Delta w,\Delta\max p) = +0.22$). What blocks 1–4 actually compute to produce the sharp
    change is still uncharacterised, and the freezing experiments have now bounded the claim further:
-   networks trained with blocks 1–4, 1–7, 5–11 or 1–10 held at initialization all reach at least the
-   reference's accuracy and still bend the paths (0.471, 0.558, 0.626, 0.726), relocating the
-   computation to blocks 5–8, 8–11, 1–4 and block 11 respectively. So the mechanism is neither the
-   decision, nor plausibility, nor those specific weights, nor any particular depth — though enough
-   depth is required, since the last of those runs no longer produces a recognisable plateau.
-7. **The frozen-block tests used five frozen groups, with a second seed for two of them.** Blocks 1–4, 8–11,
-   1–7, 5–11 and 1–10 were frozen; intermediate groups and other group sizes were not run, and the
-   position contrast (frozen-deep vs frozen-mirror) still compares two *conditions* at one capacity
-   level, with a second initialization on the frozen-deep side only. The relocation is read off six injection depths
+   networks trained with blocks 1–4, 1–7, 5–11, 0–3&9–11, 0–4&8–11, 0–1&7–11 or 1–10 held at
+   initialization all
+   reach at least the reference's accuracy and still bend the paths (0.471, 0.558, 0.626, 0.331, 0.427,
+   0.355, 0.726),
+   relocating the computation to blocks 5–8, 8–11, 1–4, 4–8, 5–7, 2–6 and block 11 respectively. So the
+   mechanism is neither the decision, nor plausibility, nor those specific weights, nor any particular
+   depth — a mid-stack window of three blocks reproduces it in full, while the extreme run that leaves
+   one usable block no longer produces a recognisable plateau.
+7. **The frozen-block tests used eight frozen groups, with a second seed for two of them.** Blocks 1–4,
+   8–11, 1–7, 5–11, 0–3&9–11, 0–4&8–11, 0–1&7–11 and 1–10 were frozen; other group sizes and other
+   window positions were not run.
+   The position result rests on the four five-block windows plus the three-block one, of which only
+   the near-readout window carries a second initialization; the interior-window advantage (0.11–0.26 of
+   width for the five-block windows, several times the ≈0.04 seed spread measured elsewhere) is
+   therefore safely outside seed
+   noise, but the *ordering of the two ends* rests on one run each. One description has already been
+   falsified here: that the cost tracks how the frozen blocks are distributed around the window, which
+   the blocks-2–6 window (five frozen blocks below it, and no worse than the 3-and-3 split) rules out.
+   The surviving interior-versus-end split was found after the fact, its narrowest gap (0.030, between
+   the three-block interior window and frozen-early) is inside the seed spread, and its mechanism is
+   not established here.
+   The relocation is read off six injection depths
    (0, 2, 4, 8, 10, 11), so it localizes the sharpening only to a span of blocks, never to a single
    block: "blocks 5–8" for frozen-early cannot be narrowed, and frozen-deep's attribution of its largest
    step to block 8 is an inference from its frozen neighbours 5–7 contributing nothing, not a direct
@@ -1730,9 +1932,6 @@ natural activation-to-activation directions.
    parameters are frozen), so it bounds the trainable-depth account rather than isolating depth from
    capacity; the narrow run separates the two. Three conditions now carry a second seed — the narrow run
    (0.397 and 0.437), frozen-early (0.476 and 0.498) and frozen-deep (0.590 and 0.559) — which bounds
-   the across-seed spread at ≈0.04 and makes the 12-versus-8 trainable-block step a disjoint separation
-   of three runs from three (one-sided rank-sum p = 0.05, the floor for that design), while both
-   frozen-deep seeds stay below frozen-mirror by more than that spread. The remaining three frozen
-   conditions (frozen-late, frozen-mirror, frozen-two) are still one seed each, so a gap measured
-   against one of them — frozen-mirror carries the position claim — has a seed spread under only one of
-   its two sides.
+   the across-seed spread at ≈0.04. The remaining five frozen
+   conditions (frozen-late, frozen-mirror, frozen-mid, frozen-mid3, frozen-two) are still one seed each,
+   so a gap measured against one of them has a seed spread under only one of its two sides.

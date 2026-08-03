@@ -1373,3 +1373,116 @@ verdict cannot be written after the fact.
 
 On track? yes — S16 complete and verified (position term replicated), S17 launched with its prediction
 pre-registered and its scoring chained; blocker: none.
+
+## 2026-08-03 (iteration: S17 curated + S18 run — the count-first reading falls)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: five `human_feedback*` files,
+all five already ending in `.addressed.md`. Zero unaddressed feedback, so this iteration curated the
+run the previous iteration launched and then advanced the plan.
+
+**S17 landed while I was reading, and it falsified its own prediction — which turned out to be the
+most useful result in the frozen-block series.** Five trainable blocks in the *middle* of the stack
+(freeze 0–3 and 9–11, so the frozen fraction and the trainable count match frozen-deep and
+frozen-mirror exactly) were predicted to land between those two at 0.58–0.60. They land at **0.365**
+at matched accuracy and **0.331** at step 30,000 — below both, below every eight-block run, and below
+the untouched 12-block reference — with a strict plateau rate of **24.7%** against the reference's
+10.0% and 0–0.7% for every other frozen run. Paired against its siblings: −0.211, −0.188, −0.240, with
+0–1.3% of pairs going the other way.
+
+**What that forced (rule 9b).** Both deliverables had read the series as "trainable depth first,
+position a second-order correction favouring the readout", resting on the monotone 0.351 → 0.47 →
+0.56–0.63 → 0.726 series. That is now wrong in its main clause: the *three five-block runs alone span
+0.365–0.629*, wider than the whole 12-to-5 series. So the count is not the first-order term, and
+position is not a gradient toward the readout — it has an interior optimum, which the earlier
+two-point contrast could not see because it sampled only the two ends. What the three points have in
+common is how the seven frozen blocks are distributed around the trainable window: mid splits them
+3/3, deep stacks seven before, mirror seven after. I wrote that as an explicit description-of-three-
+points rather than a law, and named the experiment that would test it.
+
+**Then I ran that experiment rather than leaving it as a promise.** `--freeze 0,1,2,3,4,8,9,10,11`
+shrinks the mid-stack window to three blocks (5–7) with 74.6% of parameters frozen, separating the
+window's position from its size. Prediction fixed in PLAN and REPORT Methods before scoring: 0.40–0.50
+if position dominates, ≥0.558 if the count returns. **Confirmed at 0.446** — indistinguishable from the
+full 12-block reference (0.443, p = 0.17) and 0.09–0.18 clear of every five-block end window. Size is
+not free (five mid-stack blocks → three costs +0.086 and doubles the steps to matched accuracy, 3,750
+→ 7,000), but it is dominated. Three trainable blocks in the middle reproduce a 12-block network's
+plateau geometry.
+
+**Two things worth recording for the next agent.** (1) The figures are near their legibility ceiling:
+Figure 23 now carries ten curve panels and eight series in its depth and accuracy panels, which needed
+the CVD five hues plus three gray lightnesses, each with its own dash pattern and marker, and the
+accuracy panel's seven per-run legend entries folded into one with the steps moved into the caption. A
+ninth series needs a fourth lightness or a small-multiples split. (2) Chaining the assay off the
+trainer's meta JSON (`until [ -f results/train_meta_<tag>.json ]`) worked cleanly again and avoids the
+`pgrep -f` self-match trap recorded two iterations ago.
+
+**Sweep for stale counts.** Adding two runs invalidated a dozen "five runs"/"four runs"/"the only
+non-reference run" statements scattered across both files. I grepped for every numeral phrase rather
+than trusting a read-through, and found one substantive error that way: the narrow run was described
+as "the only non-reference run that keeps the sharpest tail (13.3%)", which frozen-mid's 24.7% now
+falsifies. Corrected in both deliverables.
+
+**Verification.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 29 display / 536
+inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds and 27 visible `**Figure N.**`
+captions per file; zero bare `(plots/x.png)` paths.
+
+**Next step.** S19, the off-centre five-block window (`--freeze 0,1,7,8,9,10,11`, trainable 2–6), with
+its prediction already written into PLAN and both hypothesis paragraphs: 0.40–0.45, between
+frozen-mid's 0.365 and frozen-deep's 0.558. It is the first point that distinguishes "the optimum is
+the middle" from "the optimum is anywhere away from the ends". A second seed at frozen-mirror is the
+alternative and only firms up an old number. No `STOP` written — wall clock and a named next
+experiment both remain.
+
+On track? yes — plan complete (S1–S16) plus fifteen PLAN-named follow-ups, S17 and S18 both done and
+curated in the same iteration, and the frozen-block conclusion re-framed from "trainable depth" to
+"where the trainable window sits" on the strength of two new runs; blocker: none.
+
+## 2026-08-03 (same iteration, addendum: S19 — the off-centre window, and a description retracted)
+
+With S18 curated and ~75 minutes of wall clock left, I ran the successor the deliverables had just
+committed to rather than handing it off: `--freeze 0,1,7,8,9,10,11`, a five-block trainable window at
+blocks 2–6 — one step off centre, with five frozen blocks below it instead of frozen-mid's three. The
+prediction was on record in PLAN and in REPORT Methods before it was scored: 0.40–0.45 if the cost
+tracks how the frozen blocks are distributed around the window, with anything at or below 0.365
+counting against that description.
+
+**It landed at 0.365 — indistinguishable from frozen-mid (p = 0.064) — so the description I had
+written one hour earlier is wrong, and I retracted it.** Doubling the frozen stretch below the window
+cost nothing. That is worth recording as a process point: S17's "distribution of frozen blocks" reading
+was explicitly labelled a description of three points rather than a law, and stating it that way is
+what made retracting it cheap. Both deliverables now carry the replacement.
+
+**The replacement is stronger than what it replaced.** Ordering the eight frozen runs by their *usable*
+window — trainable blocks intersected with 1–11, since patching at block 0 overwrites block 0's output
+— separates them exactly. Strictly interior windows (4–8, 2–6, 5–7) give 0.365, 0.365, 0.446; windows
+touching either end (5–11, 1–7, 8–11, 1–4, block 11 alone) give 0.476, 0.500, 0.590, 0.629, 0.712. No
+overlap across eight runs. I wrote it with both caveats it needs: it was found post-hoc, and its
+narrowest gap (0.030, the three-block interior window against frozen-early) is inside the ≈0.04 seed
+spread, while the two five-block interior windows clear every end-touching run by ≥ 0.11. And I
+pre-registered its test — a five-block window at blocks 1–5, one block down from the sharp 2–6 window,
+which the split says must land above 0.47.
+
+**Figure work forced by the ninth series.** The depth panel could not hold nine series inside a
+five-hue palette, so I split it into two small multiples (the four five-block windows plus the
+reference; the other freeze sizes plus the reference) and moved the trained reference to neutral black
+as the anchor, which freed the five hues for the runs that carry the position result. That is what
+CLAUDE.md rule 13 asks for above five categories, and it also reads better — the four-position
+comparison is now its own panel. A tenth series would need the same treatment again; PLAN's next-step
+note says so.
+
+**Three runs in one iteration is more than the usual step, and the reason was cheap wall clock plus
+pre-registered predictions.** Each was launched only after the previous one's result was curated and
+its successor's prediction was written down first, so nothing was decided after the fact.
+
+**Verification.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 29 display / 558
+inline equations / 27 figures; RESULTS 27 figures; 0 problems); 27 embeds and 27 visible `**Figure N.**`
+captions per file.
+
+**Next step.** S20: `--freeze 0,6,7,8,9,10,11` (trainable 1–5), the pre-registered test of the
+interior/end split. Above 0.47 confirms it; near 0.365 falsifies it. A second seed at frozen-mirror is
+the runner-up and only firms up an old number. No `STOP` written — a named, pre-registered experiment
+remains.
+
+On track? yes — S17, S18 and S19 all done and curated this iteration, the frozen-block conclusion
+re-framed once and its follow-up description falsified and replaced, with the replacement's own test
+pre-registered; blocker: none.

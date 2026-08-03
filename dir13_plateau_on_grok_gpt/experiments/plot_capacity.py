@@ -47,7 +47,9 @@ RUNS = [("ref_matched_step",      "reference\n(240 wide)",  12, TOTAL,          
         ("frozen_deep_matched",   "frozen 1-7\n(2 seeds)",   5, TOTAL - 4860240,  False),
         ("frozen_deep_s2_matched", "",                       5, TOTAL - 4860240,  False),
         ("frozen_mid_matched",    "frozen 0-3, 9-11",        5, TOTAL - 4860240,  False),
+        ("frozen_mid_off_matched","frozen 0-1, 7-11",        5, TOTAL - 4860240,  False),
         ("frozen_mirror_matched", "frozen 5-11",             5, TOTAL - 4860240,  False),
+        ("frozen_mid3_matched",   "frozen 0-4, 8-11",        3, TOTAL - 6248880,  False),
         ("frozen_two_matched",    "frozen 1-10",             2, TOTAL - 6943200,  False)]
 RUNS = [r for r in RUNS if r[0] in C]
 
@@ -66,9 +68,9 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
         off = {"ref_matched_step": 1.0, "narrow192_matched": 0.0, "narrow192_s2_matched": -1.0,
                "frozen_early_matched": 1.0, "frozen_early_s2_matched": 0.0,
                "frozen_late_matched": -1.0,
-               "frozen_deep_matched": 1.5, "frozen_deep_s2_matched": 0.5,
-               "frozen_mid_matched": -0.5,
-               "frozen_mirror_matched": -1.5}.get(key, 0.0)
+               "frozen_deep_matched": 2.0, "frozen_deep_s2_matched": 1.0,
+               "frozen_mid_matched": 0.0, "frozen_mid_off_matched": -1.0,
+               "frozen_mirror_matched": -2.0}.get(key, 0.0)
         x += off * (0.55 if xi == 2 else 0.14)
         med = C[key]["median_w"]
         lo, hi = C[key]["iqr_w"]
@@ -92,12 +94,15 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                               "frozen_late_matched": (0.0, -0.055),
                               "frozen_deep_matched": (0.55, 0.075),
                               "frozen_mid_matched": (0.15, 0.075),
+                              "frozen_mid_off_matched": (0.0, -0.090),
+                              "frozen_mid3_matched": (-0.85, 0.075),
                               "frozen_mirror_matched": (-0.20, -0.115)},
                           3: {"narrow192_matched": (-0.80, -0.055),
                               "frozen_early_matched": (0.95, 0.075),
                               "frozen_late_matched": (0.72, -0.055),
                               "frozen_deep_matched": (-0.70, 0.075),
                               "frozen_mid_matched": (0.62, 0.075),
+                              "frozen_mid_off_matched": (-0.62, -0.080),
                               "frozen_mirror_matched": (0.25, -0.115)}}[xi].get(key, (0.0, 0.032))
         if key not in SECOND_SEED:
             ax.annotate(lab, (x + lab_dx, med + lab_dy), ha="center",
@@ -107,19 +112,19 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
     ax.grid(alpha=0.3)
 
 axes[0].set_ylabel("median transition width $w$\n(lower = sharper plateau)")
-axes[0].set_xticks([2, 5, 8, 12])
+axes[0].set_xticks([2, 3, 5, 8, 12])
 axes[0].invert_xaxis()
-axes[0].set_title("ordered by trainable DEPTH", fontsize=10)
-axes[1].set_title("NOT ordered by trainable CAPACITY", fontsize=10)
+axes[0].set_title("trainable DEPTH orders the extremes, not the five-block runs", fontsize=10)
+axes[1].set_title("trainable CAPACITY orders nothing", fontsize=10)
 
 h = [plt.Line2D([], [], color=CVD[0], marker="o", ms=9, lw=0, label="all 12 blocks trainable"),
      plt.Line2D([], [], color=CVD[1], marker="D", ms=8, lw=0, mfc="white",
                 label="some blocks frozen at init"),
      plt.Line2D([], [], color="0.35", marker="s", ms=5.5, mfc="white", mew=1.4, ls=":", lw=0.9,
                 label="same run, end of training (small square)")]
-axes[0].legend(handles=h, fontsize=8, loc="lower right", framealpha=0.95)
+axes[0].legend(handles=h, fontsize=8, loc="upper left", framealpha=0.95)
 
-fig.suptitle("Plateau sharpness tracks how many blocks can train, not how many parameters they hold\n"
+fig.suptitle("Where the trainable blocks sit matters more than how many there are, and capacity not at all\n"
              "(large markers: matched validation accuracy 0.550; small squares: end of training)",
              fontsize=11)
 fig.tight_layout(rect=(0, 0, 1, 0.92))
