@@ -1104,6 +1104,50 @@
      "10": 0.8116,
      "11": 0.8115
     }
+   },
+   "frozen_high_matched": {
+    "kind": "frozen",
+    "step": 3750,
+    "frozen_blocks": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     11
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5523193359375,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_high/ckpt_matched.pt",
+    "median_w": 0.3419,
+    "mean_w": 0.3555,
+    "iqr_w": [
+     0.2395,
+     0.4463
+    ],
+    "strict_frac": 0.28,
+    "median_t_star": 0.4877,
+    "frac_endpoints_differ": 0.8667,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0532,
+    "median_max_p": 0.0125,
+    "rho_w_vs_max_p": -0.1688,
+    "partial_rho_w_vs_max_p_given_sep": -0.5084,
+    "median_paired_dw_vs_ref_trained": -0.0151,
+    "frac_w_increased_vs_ref_trained": 0.42,
+    "median_paired_dw_vs_ref_matched_step": -0.0719,
+    "frac_w_increased_vs_ref_matched_step": 0.1867,
+    "median_paired_dw_vs_ref_init": -0.4598,
+    "frac_w_increased_vs_ref_init": 0.0067,
+    "depth_median_w": {
+     "0": 0.3419,
+     "2": 0.357,
+     "4": 0.3609,
+     "8": 0.7042,
+     "10": 0.8163,
+     "11": 0.8163
+    }
    }
   }
  },

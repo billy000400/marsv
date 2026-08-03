@@ -1533,3 +1533,56 @@ remains the runner-up. No `STOP` written — a named, pre-registered experiment 
 On track? yes — S20 done, its pre-registered prediction refuted and the refuted claim withdrawn from
 both deliverables the same iteration, with a rule-free replacement claim (subset of blocks, sharper
 plateau) promoted in its place; blocker: none.
+
+## 2026-08-03 (iteration: S21 — the second geometric rule dies, and the sharpest network appears)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: five `human_feedback*` files,
+all five already ending in `.addressed.md`. Zero unaddressed feedback, so this iteration advanced the
+plan. `/tmp` had survived — corpus and prior checkpoints present, no re-download.
+
+**What I ran.** `train_frozen.py --freeze 0,1,2,3,4,5,11 --tag frozen_high` (trainable 6–10), the
+experiment PLAN, both hypothesis paragraphs, Results and the Conclusion had pre-registered as the test
+of the coverage description: its usable window excludes mid-stack block 5, so coverage required
+**≥ 0.55**. It lands at **0.342** — not merely below the threshold but the **sharpest matched-accuracy
+width of the fifteen models in this study**, with the highest strict plateau rate measured (28.0%).
+Coverage is withdrawn. That is the second post-hoc description of this series to die on the first
+experiment aimed at it, and both dead rules were killed by runs whose predicted values were written
+down before launch.
+
+**The honest conclusion is now the absence of a rule, and both deliverables say it in those words.**
+Ten frozen runs are ordered by neither trainable count, trainable capacity, nor window geometry. I
+deliberately did not fit a third description — after two one-shot deaths, another curve through ten
+points would earn nothing. What the series does establish are two direct network-to-network facts that
+need no regularity: blocks 1–5 ⊂ blocks 0–7 and 0.118 sharper (from S20), and now blocks 6–10 alone —
+58.0% of parameters never moved from initialization — **0.072 sharper than the untouched 12-block
+reference at matched accuracy** (18.7% of pairs wider, p = 8.5e-18). Training fewer blocks sharpened
+the plateau, twice, measured against two different comparators.
+
+**A time-management decision worth recording.** With ~43 minutes and a 20-minute trainer, I launched
+the run first and edited the three analysis scripts while it trained, then noticed the
+matched-accuracy checkpoint (step 3,750) was already on disk at the 14-minute mark and assayed *it*
+while the final steps ran. Matched accuracy is this section's primary axis, so that bought the whole
+result without waiting for step 30,000. The step-30,000 assay was still training when the iteration
+closed; both Figure 23 captions state that this run enters the deliverables at its matched-accuracy
+checkpoint only, and the chained `narrow_assay.py frozen_high` will have written the final-step numbers
+for the next iteration to pick up.
+
+**Figure work forced by the eleventh series.** Six five-block runs no longer fit the two depth small
+multiples within the five-hue palette, so the depth panel is now **three** panels split by where the
+trainable window sits: upper-stack windows (6–10, 4–8, 2–6), bottom windows plus the one non-window
+trainable set (1–5, 0–4, and 0&8–11), and the other freeze sizes in gray. No panel carries more than
+three hues plus the black reference anchor, and `frozen_high` reuses `frozen_deep`'s hue because the
+split guarantees they never share a panel. Every series keeps its own dash pattern and marker.
+
+**Verification.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 29 display / 577
+inline equations / 27 figures; RESULTS 27 figures; 0 problems). One rule-9d contrast construction I
+introduced ("seed replications rather than a third rule") was caught by the checker and rewritten.
+
+**Next step.** S22: pick up `frozen_high`'s step-30,000 numbers from the chained assay and add them to
+the deliverables (one row, no new training), then the two seed replications the deliverables now name —
+a second seed at frozen-mirror, the one single-seed run carrying a load-bearing comparison, and a second
+seed at blocks 6–10 to confirm the study's sharpest network is not a seed artefact. No `STOP` written.
+
+On track? yes — S21 done, its pre-registered prediction refuted and the refuted description withdrawn
+from both deliverables the same iteration, replaced by the honest "no geometric summary" reading plus a
+second rule-free two-network fact; blocker: none.

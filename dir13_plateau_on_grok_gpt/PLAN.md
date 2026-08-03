@@ -528,7 +528,20 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**S20 DONE 2026-08-03 (latest) — the pre-registered interior/end test was run and REFUTED the split.**
+**S21 DONE 2026-08-03 (latest) — the pre-registered coverage test was run and REFUTED it, and the run
+is the sharpest network in the study.** Five trainable blocks at 6–10 (freeze 0–5 and 11) excluded
+mid-stack block 5, so coverage required **>= 0.55**. It lands at **0.342** (IQR 0.240–0.446) at matched
+accuracy (step 3,750, val 0.5523) — the lowest matched width of the fifteen models here, sharper than
+the two mid-stack windows it was meant to lose to (p = 0.025, 9e-4) and 0.14–0.25 sharper than every end
+window — with the highest strict plateau rate measured, 28.0%. Coverage is **withdrawn**. Two post-hoc
+geometric descriptions have now each died on the first experiment aimed at them, so both deliverables
+state the honest reading: **ten runs support no geometric summary**, and what stands are two rule-free
+two-network facts — blocks 1–5 are 0.118 sharper than blocks 0–7 which contain them, and blocks 6–10
+alone (58.0% of parameters frozen at init) are **0.072 sharper than the untouched 12-block reference**
+at matched accuracy (p = 8.5e-18). Its step-30,000 assay was still training at iteration close; the
+chained `narrow_assay.py frozen_high` writes it for the next iteration.
+
+**S20 DONE 2026-08-03 — the pre-registered interior/end test was run and REFUTED the split.**
 Five trainable blocks at 1–5 (freeze block 0 and 6–11) had to land above 0.47; they land at **0.363**
 (matched) / **0.326** (step 30,000), with the mid-stack group. Withdrawn from both deliverables and
 replaced by a rule-free claim — blocks 1–5 are a strict subset of frozen-late's 0–7 and are 0.118
@@ -834,7 +847,16 @@ sharpens the plateau - a two-network fact that survives whatever happens to the 
 geometry is demoted to a labelled description: every usable window covering mid-stack **block 5** gives
 0.363-0.500, the three without it 0.559-0.712.
 
-**Immediate next candidate: S21, the five-block window at blocks 6-10** (`train_frozen.py --freeze
+**Immediate next candidates (S22).** (a) Add `frozen_high`'s step-30,000 row from the chained assay to
+both deliverables - no new training, one row plus a Figure 23/24 refresh, and it also restores the
+final-step panel the caption currently flags as pending. (b) A **second seed at frozen-mirror**, the one
+single-seed run carrying a load-bearing comparison. (c) A **second seed at blocks 6-10** to confirm the
+study's sharpest network is not a seed artefact. Deliberately NOT a third fitted geometric rule: two
+have now died on their first test each, so another curve through ten points earns nothing. Note for the
+figure work: a seventh five-block run would break the three-panel depth split again - the next division
+would have to be by window size, not position.
+
+**Superseded next candidate (S21, now DONE and reported above): the five-block window at blocks 6-10** (`train_frozen.py --freeze
 0,1,2,3,4,5,11 --tag frozen_high`). It is the pre-registered test of that description - it excludes
 block 5 while touching neither end, so coverage predicts **>= 0.55** on a window the refuted rule would
 have called sharp; near 0.365 refutes it too and leaves the series with no geometric summary, which is

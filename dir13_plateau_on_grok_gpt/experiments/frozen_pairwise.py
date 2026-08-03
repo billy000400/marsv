@@ -99,7 +99,22 @@ PAIRS = [("frozen_two_last", "frozen_deep_last"),
          ("frozen_mid_low_last", "frozen_mid_off_last"),
          ("frozen_mid_low_last", "frozen_deep_last"),
          ("frozen_mid_low_last", "frozen_mirror_last"),
-         ("frozen_mid_low_last", "ref_trained")]
+         ("frozen_mid_low_last", "ref_trained"),
+         # upper-stack five-block window (freeze 0-5 and 11, trainable 6-10): the pre-registered test of
+         # the block-5 coverage description -- its usable window excludes block 5 and touches neither
+         # end, so coverage predicts >= 0.55 while the refuted interior/end split would have called it
+         # sharp (~0.365)
+         ("frozen_high_matched", "frozen_mid_matched"),
+         ("frozen_high_matched", "frozen_mid_off_matched"),
+         ("frozen_high_matched", "frozen_mid_low_matched"),
+         ("frozen_high_matched", "frozen_deep_matched"),
+         ("frozen_high_matched", "frozen_mirror_matched"),
+         ("frozen_high_matched", "frozen_late_matched"),
+         ("frozen_high_matched", "ref_matched_step"),
+         ("frozen_high_last", "frozen_mid_last"),
+         ("frozen_high_last", "frozen_mid_low_last"),
+         ("frozen_high_last", "frozen_mirror_last"),
+         ("frozen_high_last", "ref_trained")]
 
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 out = {}

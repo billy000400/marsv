@@ -1284,3 +1284,47 @@ PLAN.md and REPORT.md Methods before it was scored.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 29 display / 569 inline equations / 27 figures; RESULTS 27 figures; 0 problems).
 - **No `STOP` written** — a named, pre-registered next experiment remains.
+
+## 2026-08-03 — S21: the pre-registered coverage test runs, REFUTES it, and gives the sharpest network
+
+- **New run (tenth frozen group, fifteenth model): `frozen_high`** — `train_frozen.py --freeze
+  0,1,2,3,4,5,11 --tag frozen_high`, five trainable blocks at 6–10, 58.0% of parameters frozen at their
+  random initialization, everything else identical to the reference character run. Reached the
+  reference's validation accuracy 0.5502 at step 3,750 (val 0.5523).
+- **The pre-registered prediction FAILED, and both deliverables now say so.** The coverage description
+  (recorded in PLAN, both hypothesis paragraphs, Results and the Conclusion last iteration) required
+  this window to land **at or above 0.55** because its usable window excludes mid-stack block 5. It
+  lands at **0.342** (IQR 0.240–0.446) — the **sharpest matched-accuracy width of the fifteen models in
+  the study**, sharper than the two mid-stack windows it was predicted to lose to by 0.19 (paired Δw
+  −0.014, p = 0.025 vs blocks 4–8; −0.024, p = 9e-4 vs blocks 1–5) and 0.14–0.25 sharper than every end
+  window (p ≤ 1.2e-25). Strict plateau rate **28.0%**, the highest of any condition measured (old
+  highest: 24.7%, frozen-mid). **Coverage is withdrawn from both deliverables** (old: "every window
+  containing block 5 gives 0.363–0.500, the three without it 0.559–0.712, test pending" → new: the test
+  was run and refuted it).
+- **Both deliverables now state plainly that ten runs support NO geometric summary.** Two post-hoc
+  descriptions (interior/end, then coverage) have each died on the first experiment aimed at it, so
+  neither trainable count, trainable capacity nor window geometry predicts the width.
+- **Second rule-free claim promoted alongside the ninth run's subset comparison.** Blocks 6–10 alone,
+  with 58.0% of the network never moved from initialization, are **0.072 sharper than the untouched
+  12-block reference** at the same validation accuracy (18.7% of pairs wider, p = 8.5e-18). Training
+  fewer blocks sharpened the plateau — a second direct two-network fact that needs no fitted rule.
+- **Counts updated throughout both files:** ten frozen groups / twelve frozen runs / fifteen models;
+  five of ten frozen runs lose the strict tail, the five mid-stack-window runs keep it (**28.0%**,
+  24.7%, 21.3%, 19.3%, 9.3%).
+- **Next tests are now seed replications, not a third fitted rule** — a second seed at frozen-mirror
+  (the one single-seed run carrying a load-bearing comparison) and a second seed at blocks 6–10 to
+  confirm the study's sharpest network is not a seed artefact. Both deliverables and PLAN say so.
+- **Figures.** `plots/frozen_blocks.png` (Figure 23): the depth small multiples went from two panels to
+  **three** — six five-block runs no longer fit two panels inside the five-hue palette, so they are
+  split by where the trainable window sits (upper-stack windows 6–10, 4–8, 2–6; bottom windows 1–5, 0–4
+  plus the non-window trainable set 0&8–11), with the other freeze sizes in the third panel in gray at
+  four lightnesses; no panel now carries more than three hues plus the black reference anchor.
+  `plots/capacity_vs_depth.png` (Figure 24): a sixth diamond in the 5-block column on a seven-slot
+  nudge grid. Both captions rewritten in both deliverables.
+- **One scope note recorded in the deliverables:** the step-30,000 assay of `frozen_high` was still
+  training when the iteration closed, so this run enters the deliverables at its matched-accuracy
+  checkpoint only — which is the primary comparison axis throughout this section. Both Figure 23
+  captions state it.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 577 inline equations / 27 figures; RESULTS 27 figures; 0 problems).
+- **No `STOP` written** — the run's final-step assay and two named seed replications remain.
