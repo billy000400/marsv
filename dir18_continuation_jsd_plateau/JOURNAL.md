@@ -210,3 +210,67 @@ predictor stops improving.
 
 On track? yes — S1-S6 complete (100%) on the prespecified top-256 bank, no blocker; feedback file
 addressed and renamed.
+
+---
+
+## 2026-08-03 (iter: operator feedback #2 — auditability, mediation, corrected wording)
+
+**Situation on entry.** A new `human_feedback.txt` (operator review of commit c03d510, verdict *minor
+revision*) sat unaddressed next to no `STOP`. The operator had re-run the primary bank and reproduced
+`rho = -0.525, p = 1.68e-5, n = 60` and step 0 `-0.056`, confirming the top-256 rebuild, the
+endpoint-disjointness and the new validity code. Four remaining issues, all addressed this iteration;
+no GPU work was needed — everything came from the saved curves/QC JSONs, so the whole iteration was
+CPU-only.
+
+**1. Curves were never actually committed (severity: highest).** I had written three times that
+`results/curves_*.npy` / `.csv.gz` are committed. They existed on disk but the repo-root `.gitignore`
+excludes `*.npy` and `*.gz`, so git never saw them. Fixed by adding a direction-level `.gitignore` with
+`!results/curves_*.npy` / `!results/curves_*.csv.gz` — a nested .gitignore's negation beats the parent
+rule, confirmed with `git check-ignore -v` (now reports the negating line) and `git status` (all 26
+curve files now listed as untracked, so the wrapper's commit will pick them up; 1.6 MB total). Chose
+un-ignoring over deleting the claim because independent recomputation of the QC numbers is exactly
+what makes the strict-validity result checkable.
+
+**2. Mediation + learned sharpening (new `experiments/revisions.py`).** Two analyses the operator had
+asked for and I had not done. Learned sharpening `dw = w(trained) - w(step 0)` removes each pair's own
+untrained baseline: `rho(JSD_B, dw) = -0.517` [-0.694, -0.294], p = 2.3e-5 — essentially identical to
+the total, so the headline is not an artefact of pairs that start sharp. All 60 `dw < 0` (median
+-0.287): training narrows every pair. The adjustment ladder is the substantive correction: -0.525 ->
+-0.277 (adjusting for the model's own output JSD, the obvious mediator) -> **-0.204, p = 0.119, not
+significant** (mediator + the five covariates). My reproduced numbers match the operator's exactly. So
+the report now says plainly: strong total association, no significant *independent* one. Note the
+operator's two "controlling" numbers are the `w` ladder, not the `dw` ladder (`dw` gives -0.263 /
+-0.198); I report both so neither reading is hidden.
+
+**3. Training-dynamics wording was wrong.** "Transitions keep sharpening throughout training" is
+contradicted by my own table: median `w` 0.512 at 64k -> 0.541 at final. Tested it at the pair level —
+38/60 blunter, paired Wilcoxon p = 0.0052, median delta +0.012 — so the reversal is systematic, not a
+median artefact. Text, panel title and caption now read "sharpens through 64k, then a modest late
+reversal", and `formation.png` gained a third panel (per-pair 64k vs final scatter against y = x).
+
+**4. The filter never enforced complete words.** `common.py` tests only the `Ġ` word-start marker,
+lowercase alphabetic characters and length >= 2. Of the bank's 120 endpoints exactly one is a fragment
+(`un`). Rather than silently re-freeze the bank (which would break preregistration for cosmetic
+reasons), I corrected the description to "word-start tokens" everywhere including the code docstring,
+and added the sensitivity check: dropping `un`/`better` gives `rho = -0.502`, p = 5.2e-5 (n = 59) —
+matching the operator's number — plotted as a third series in the bank-comparison figure.
+
+**Learned / worth remembering.** (a) A "committed" claim about artifacts is worth verifying with
+`git check-ignore`, not `ls` — the files were there the whole time and still absent from the repo.
+(b) An unadjusted correlation and its fully adjusted version can tell genuinely different stories
+(-0.525 at p = 1.7e-5 versus -0.204 at p = 0.12); reporting only the first is what the operator
+objected to, and the fix is to state which one is the claim. (c) `/tmp/dir18_data` (the corpus cache)
+does not survive across sessions, so `analyze.py` now skips the reliability figure when the cache is
+gone rather than crashing; the committed PNG stays current-best.
+
+**Deliverables.** RESULTS.md and REPORT.md curated to current-best with 11 captioned figures each (new
+Figure 8 = mediation; formation, bank comparison and block scan renumbered 9/10/11), `check_render.py`
+passes on both. CHANGELOG entry appended. `human_feedback.txt` -> `human_feedback_2.addressed.md`.
+
+**Next step.** Nothing outstanding — the plan's definition of done holds and zero unaddressed feedback
+files remain, so `STOP` is written. If new feedback appears next to it, delete `STOP`, address it, and
+re-write `STOP` only when clean. The out-of-scope follow-up is unchanged: a context-conditioned
+divergence estimate, which is also the natural way to attack the mediation null (a predictor that is
+not just a proxy for the model's own output separation).
+
+On track? yes — S1-S6 complete (100%), operator feedback #2 fully addressed, no blocker.

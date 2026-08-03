@@ -13,8 +13,10 @@ path.** A negative correlation means higher corpus divergence predicts a sharper
 **Verdict (prespecified branch):** *corpus JSD predicts model-output JSD and smaller `w`; step 0 does
 not.* Stated precisely: **corpus continuation divergence predicts (i) how far apart the trained model
 puts the two words' output distributions and (ii) the overall width of the transition between them.**
-It is an observational total association, not a causal claim, and — see "What this does not show" —
-`w` measures the whole transition, so it does not isolate plateau flatness from overall width.
+The headline number is a **total association** — observational, not causal — and `w` measures the
+whole transition, so it does not isolate plateau flatness from overall width (see "What this does not
+show"). Once the model's own output divergence is adjusted for, the remaining independent
+relationship is **not statistically significant**.
 
 ## Primary result — prespecified top-256 bank
 
@@ -32,9 +34,34 @@ pairs.
 | Median edge drift `E` (0 = flat ends; 0.184 = no plateau) | **0.076** | 0.213 | 0.109 |
 | Valid-curve rate under the strict criteria (and in every bin) | 1.000 | 1.000 | 1.000 |
 
+**Learned sharpening and mediation.** Two follow-up analyses on the same 60 pairs. (a) *Learned
+sharpening*: predicting the **change** training produced in each pair's width,
+`Δw = w(trained) − w(step 0)`, instead of the trained width itself — this subtracts each pair's own
+untrained baseline, so it is a within-pair measure of what training did. (b) *Mediation*: the model's
+own output divergence `JSD_out` is the obvious pathway from corpus statistics to transition shape, so
+we ask how much of the association is left after adjusting for it. Adjusted `p`-values come from the
+residual rank correlation.
+
+| Association with corpus `JSD_B` | ρ | 95% CI | p |
+|---|---|---|---|
+| Trained width `w` — **headline, unadjusted (total association)** | **−0.525** | [−0.701, −0.304] | 1.7e−5 |
+| Learned sharpening `Δw = w(trained) − w(step 0)` | **−0.517** | [−0.694, −0.294] | 2.3e−5 |
+| `w`, adjusted for the mediator `JSD_out` | −0.277 | [−0.509, −0.002] | 0.032 |
+| `w`, adjusted for `JSD_out` + the 5 covariates | −0.204 | [−0.471, +0.080] | **0.119 (n.s.)** |
+| `w`, adjusted for the 5 covariates only | −0.384 | [−0.623, −0.110] | 0.0024 |
+
+Using `Δw` in place of `w` in the two adjusted rows gives −0.263 (p = 0.042) and −0.198 (p = 0.129) —
+the same picture. Median `Δw` = −0.287: training narrows the typical transition by about 0.29 of the
+path. **Read this as: the total association is strong and survives geometry adjustment, but corpus
+divergence carries little information about width that is independent of the output separation the
+model learned.**
+
 **Formation subset** — the same frozen bank at six checkpoints of `pythia-1.4b-deduped`. The plan
 expected the relationship to *strengthen* during training. It does not: it is already at full
-strength at step 1000 and then fluctuates within overlapping CIs.
+strength at step 1000 and then fluctuates within overlapping CIs. Transitions sharpen through step
+64000 and then show a **modest late reversal**: median `w` rises from 0.512 at 64k to 0.541 at the
+final checkpoint, 38 of 60 pairs end blunter than they were at 64k (paired Wilcoxon p = 0.0052,
+median per-pair Δ = +0.012).
 
 | Training step | 0 | 1000 | 8000 | 32000 | 64000 | 143000 |
 |---|---|---|---|---|---|---|
@@ -60,6 +87,7 @@ strength at step 1000 and then fluctuates within overlapping CIs.
 | Bank balance across bins (Kruskal-Wallis p) | 0.52 log-freq, 0.21 surprisal | large = balanced ✔ |
 | Per-context ρ (3 carrier contexts) | −0.486, −0.411, −0.504 | consistent ✔ |
 | Block scan: median `w` at blocks 0/6/12/18/23 | 0.599 / 0.661 / 0.741 / 0.805 / 0.804 | monotone ↑ ✔ |
+| Word-fragment sensitivity: ρ after dropping the `un`/`better` pair (n = 59) | −0.502, p = 5.2e−5 | unchanged conclusion ✔ |
 
 **Secondary, post-hoc bank (top-512).** A larger bank (n = 75) built by relaxing the endpoint filter
 from the prespecified top-256 to top-512. It is *not* a prespecified fallback; it is reported only to
@@ -150,35 +178,55 @@ in the specific carrier context — otherwise a width null would be uninterpreta
 (bits, corpus); y = model output JSD (bits) in the carrier context; marker shape and hue = `JSD_A`
 quintile. ρ = +0.751 [+0.615, +0.843]. At step 0 the same correlation is +0.145 (p = 0.27).
 
-Figure 4 shows the relationship needs training; the intermediate checkpoints ask *when* it forms —
-and separate how well corpus divergence predicts width from how sharp the transitions actually are.
+If corpus divergence predicts width only *through* that learned output separation, then adjusting for
+it should remove the association — so we test the within-pair change training produced, and then strip
+the mediator away.
 
-![Left: Spearman correlations vs training step. Right: median transition width vs training step.](plots/formation.png)
+![Left: scatter of the training-induced width change against corpus divergence. Right: forest plot of the association before and after adjustment.](plots/mediation.png)
 
-**Figure 8.** The predictor is fully formed by step 1000 while transitions keep sharpening. Both
-panels: x = training step on a log scale, step 0 drawn at the left edge, ticks at 0/1k/8k/32k/64k/143k.
-*Left:* y = Spearman ρ with corpus `JSD_B`. Solid with round markers = ρ with `w` (shaded `//`-hatched
-band = 95% bootstrap CI); dashed with square markers = ρ with model output JSD; dotted line = zero.
-Both jump from ≈ 0 at step 0 to full magnitude by step 1000 (−0.582 and +0.791) and then move within
-overlapping CIs. *Right:* y = median `w`, `//`-hatched band = median ± IQR/2, dashed horizontal = the
-linear-response value 0.8. Median `w` falls from 0.831 to ≈ 0.52 and stays there.
+**Figure 8.** Corpus divergence predicts how much training sharpened each pair, but not much of that
+survives adjusting for the model's own output separation. *Left:* x = `JSD_B` (bits); y = learned
+sharpening `Δw = w(trained) − w(step 0)` (more negative = training narrowed the transition more);
+marker shape and hue = `JSD_A` quintile; dotted horizontal = no change. ρ = −0.517 [−0.694, −0.294].
+*Right:* x = Spearman ρ with `JSD_B` (bars = 95% bootstrap CI), y = the four analyses listed top to
+bottom; a filled marker means p < 0.05, an open marker p > 0.05; dotted vertical = zero. The total
+association (−0.525) and the learned-sharpening version (−0.517) are strong; adjusting for the
+mediator `JSD_out` cuts it to −0.277, and adjusting for the mediator plus the five covariates leaves
+−0.204 (p = 0.119, not significant).
 
-The primary bank is the prespecified one; the larger relaxed bank is shown only to check the
-conclusion does not hinge on that choice.
+Figure 4 shows the relationship needs training; the intermediate checkpoints ask *when* it forms,
+separate how well corpus divergence predicts width from how sharp the transitions actually are, and
+show that the sharpening is not monotone to the end.
 
-![Spearman rho with 95% CIs for the top-256 and top-512 banks at three checkpoints.](plots/bank_comparison.png)
+![Left: Spearman correlations vs training step. Middle: median transition width vs training step. Right: per-pair width at step 64000 against the final checkpoint.](plots/formation.png)
 
-**Figure 9.** The relaxed bank gives the same conclusion, slightly weaker. x = checkpoint;
-y = Spearman ρ(`JSD_B`, `w`) with 95% bootstrap CI bars; round markers = prespecified top-256 bank
-(n = 60), square markers = post-hoc top-512 bank (n = 75); dotted line = zero. The two banks' CIs
-overlap heavily at every checkpoint, so the difference between −0.525 and −0.419 is not itself a
-finding.
+**Figure 9.** The predictor is fully formed by step 1000; transitions sharpen through step 64000 and
+then partly reverse. *Left and middle:* x = training step on a log scale, step 0 drawn at the left
+edge, ticks at 0/1k/8k/32k/64k/143k. *Left:* y = Spearman ρ with corpus `JSD_B`. Solid with round
+markers = ρ with `w` (shaded `//`-hatched band = 95% bootstrap CI); dashed with square markers = ρ
+with model output JSD; dotted line = zero. Both jump from ≈ 0 at step 0 to full magnitude by step 1000
+(−0.582 and +0.791) and then move within overlapping CIs. *Middle:* y = median `w`, `//`-hatched band
+= median ± IQR/2, dashed horizontal = the linear-response value 0.8. Median `w` falls 0.831 → 0.512 by
+step 64000 and then rises to 0.541. *Right:* per-pair check that this rebound is real. x = `w` at step
+64000, y = `w` at step 143000, one point per pair; triangles = the 38 pairs that end blunter, circles =
+the 22 that end sharper; dashed line = no change. Paired Wilcoxon p = 0.0052, median Δ`w` = +0.012.
+
+The primary bank is the prespecified one; the larger relaxed bank and the fragment-dropped bank are
+shown only to check the conclusion does not hinge on those choices.
+
+![Spearman rho with 95% CIs for the top-256, top-512 and fragment-dropped banks at three checkpoints.](plots/bank_comparison.png)
+
+**Figure 10.** No version of the bank changes the conclusion. x = checkpoint; y = Spearman
+ρ(`JSD_B`, `w`) with 95% bootstrap CI bars; round markers = prespecified top-256 bank (n = 60),
+square markers = post-hoc top-512 bank (n = 75), triangular markers = top-256 minus the one pair whose
+endpoint (`un`) is a word-start fragment rather than a complete word (n = 59); dotted line = zero. All
+three agree at every checkpoint, with heavily overlapping CIs: trained 1.4B −0.525 / −0.419 / −0.502.
 
 Finally, a control on the assay: sharpness should depend on the blocks that still run after the patch.
 
 ![Transition width vs patched block index for low- and high-divergence pairs.](plots/block_scan.png)
 
-**Figure 10.** Sharpness is produced downstream of the patch. x = patched block index `L` (block 23 is
+**Figure 11.** Sharpness is produced downstream of the patch. x = patched block index `L` (block 23 is
 the last of 24, so almost no computation remains); y = `w`. Solid with round markers = median of the 5
 lowest-`JSD_B` pairs; dashed with square markers = median of the 5 highest; faint lines are individual
 pairs. `w` rises monotonically 0.599 → 0.804, converging on the linear-response value of about 0.8.
@@ -189,10 +237,15 @@ pairs. `w` rises monotonically 0.599 → 0.804, converging on the linear-respons
 sharply the model flips between them (ρ = −0.525, p = 1.7e−5 at 1.4B; −0.512 at 410M), and predicts
 even more strongly how far apart it puts their output distributions (ρ = +0.751).** The untrained
 step-0 network shows neither (−0.056 and +0.145) — but it also has almost no variation in width to
-predict (IQR 0.006), so that control is partly a floor effect. The association attenuates to −0.384
-after adjusting for endpoint frequency, entropy, surprisal and block-0 geometry, so we report a total
-association and do **not** claim corpus divergence explains sharpness beyond learned endpoint
-geometry. Observational, not causal.
+predict (IQR 0.006), so that control is partly a floor effect. The same holds for what training
+*changed*: corpus divergence predicts the per-pair sharpening `Δw` at ρ = −0.517.
+
+**The headline is a total association.** It attenuates to −0.384 after adjusting for endpoint
+frequency, entropy, surprisal and block-0 geometry, to −0.277 after adjusting for the model's own
+output divergence, and to **−0.204 (p = 0.119, not significant)** after adjusting for both. So corpus
+divergence is a good *predictor* of transition width, but this design gives no significant evidence
+that it explains width **independently** of the output separation the model learned. Observational,
+not causal.
 
 **What this does not show.** `w` is the width of the *entire* 10%→90% transition. The trained curves
 are genuinely plateau-shaped in level terms (edge drift 0.076 versus 0.184 for a straight line), but
@@ -202,6 +255,12 @@ honest claim is the second one.
 
 **Unexpected:** contrary to the plan's expectation, the relationship does not strengthen during
 training. It is already at full strength at the earliest checkpoint we ran (step 1000, ρ = −0.582)
-and then moves within overlapping CIs (−0.456, −0.408, −0.628, −0.525), even though transitions keep
-sharpening throughout (median `w` 0.831 → ≈ 0.52). Sharpening continues after the corpus statistic
-has stopped explaining more of it.
+and then moves within overlapping CIs (−0.456, −0.408, −0.628, −0.525), even though transitions go on
+sharpening through step 64000 (median `w` 0.831 → 0.512) before a modest late reversal to 0.541 at the
+final checkpoint (38/60 pairs blunter than at 64k, paired Wilcoxon p = 0.0052). Sharpening continues
+after the corpus statistic has stopped explaining more of it, and then partly undoes itself.
+
+**Auditability.** Every raw `d(t)` curve is committed — `results/curves_*.npy` plus a plain-text
+`results/curves_*.csv.gz` export — so all width, flatness and validity numbers above can be
+recomputed independently. (This direction carries its own `.gitignore` that un-ignores them from the
+repo-wide `*.npy` / `*.gz` rules.)

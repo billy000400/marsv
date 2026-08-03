@@ -273,14 +273,16 @@ def fig_output_jsd(Q):
     plt.close(fig)
 
 
-def fig_bank_comparison(prim, sec):
-    """Prespecified top-256 bank vs the post-hoc top-512 bank, same analysis."""
-    fig, ax = plt.subplots(figsize=(6.6, 4.0))
+def fig_bank_comparison(prim, sec, drop=None):
+    """Prespecified top-256 bank vs the post-hoc top-512 bank vs top-256 minus the fragment pair."""
+    fig, ax = plt.subplots(figsize=(6.9, 4.0))
     labs = ["1.4B step143000", "1.4B step 0", "410M step143000"]
     xs = np.arange(3)
-    for k, (res, name, mk, ls, off) in enumerate(
-            [(prim, "top-256 bank (prespecified, n=60)", "o", "none", -0.09),
-             (sec, "top-512 bank (post-hoc, n=75)", "s", "none", 0.09)]):
+    series = [(prim, "top-256 bank (prespecified, n=60)", "o", "none", -0.12),
+              (sec, "top-512 bank (post-hoc, n=75)", "s", "none", 0.12)]
+    if drop:
+        series.append((drop, "top-256 minus the `un` fragment pair (n=59)", "^", "none", 0.0))
+    for k, (res, name, mk, ls, off) in enumerate(series):
         r = np.array([res[t]["spearman_jsdB_w"] for t in res])
         lo = np.array([res[t]["ci"][0] for t in res])
         hi = np.array([res[t]["ci"][1] for t in res])
@@ -290,17 +292,18 @@ def fig_bank_comparison(prim, sec):
     ax.set_xticks(xs)
     ax.set_xticklabels(labs)
     ax.set_ylabel(r"Spearman $\rho$($JSD_B$, $w$)")
-    ax.set_title("The prespecified bank gives the same conclusion, slightly stronger")
-    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    ax.set_title("The conclusion does not depend on the endpoint filter")
+    ax.legend(frameon=False, fontsize=7.5, loc="lower right")
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "bank_comparison.png"))
     plt.close(fig)
 
 
-def fig_formation(form):
+def fig_formation(form, rev=None):
     steps = [f["step"] for f in form]
     xpos = [3e2 if s == 0 else s for s in steps]  # step 0 drawn at the left edge of the log axis
-    fig, ax = plt.subplots(1, 2, figsize=(10.6, 4.1))
+    ncol = 3 if rev else 2
+    fig, ax = plt.subplots(1, ncol, figsize=(5.3 * ncol, 4.1))
     r = np.array([f["rho_w"] for f in form])
     lo = np.array([f["ci_w"][0] for f in form])
     hi = np.array([f["ci_w"][1] for f in form])
@@ -329,8 +332,28 @@ def fig_formation(form):
     ax[1].set_xticklabels([str(s) for s in steps], fontsize=8)
     ax[1].set_xlabel("training step (log scale; step 0 at the left edge)")
     ax[1].set_ylabel("transition width $w$")
-    ax[1].set_title("Transitions keep sharpening throughout training")
+    ax[1].set_title("Sharpening through 64k, then a modest late reversal")
     ax[1].legend(frameon=False, fontsize=8)
+
+    if rev:  # per-pair view of that late reversal: is the rebound in the median real?
+        lr = rev["late_reversal"]
+        w64 = arr(qc("step64000_t256")["rows"], "w")
+        wf = arr(qc("step143000_t256")["rows"], "w")
+        blunter = wf > w64
+        ax[2].scatter(w64[blunter], wf[blunter], s=28, color=CVD[1], marker="^", alpha=0.85,
+                      edgecolors="none", label=f"blunter at 143k ({int(blunter.sum())} pairs)")
+        ax[2].scatter(w64[~blunter], wf[~blunter], s=28, color=CVD[0], marker="o", alpha=0.85,
+                      edgecolors="none", label=f"sharper at 143k ({int((~blunter).sum())} pairs)")
+        lim = [min(w64.min(), wf.min()) - 0.02, max(w64.max(), wf.max()) + 0.02]
+        ax[2].plot(lim, lim, ls="--", color="0.35", lw=1, label="no change ($y = x$)")
+        ax[2].set_xlim(lim)
+        ax[2].set_ylim(lim)
+        ax[2].set_xlabel("transition width $w$ at step 64000")
+        ax[2].set_ylabel("transition width $w$ at step 143000")
+        ax[2].set_title("Most pairs get slightly blunter after 64k\n"
+                        f"paired Wilcoxon p = {lr['wilcoxon_p']:.4f}, median $\\Delta w$ = "
+                        f"{lr['median_delta']:+.3f}", fontsize=9.5)
+        ax[2].legend(frameon=False, fontsize=7.5, loc="upper left")
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "formation.png"))
     plt.close(fig)
@@ -406,8 +429,9 @@ def per_context_rho(tag, manifest):
 
 if __name__ == "__main__":
     rel = json.load(open(os.path.join(RESULTS, "jsd_reliability.json")))
-    npz = np.load(os.path.join(DATA, "reliability_bank.npz"))
-    fig_reliability(rel, npz)
+    bank = os.path.join(DATA, "reliability_bank.npz")
+    if os.path.exists(bank):  # /tmp corpus cache is not preserved across sessions
+        fig_reliability(rel, np.load(bank))
 
     prim = analyse(PRIMARY, "pair_manifest_top256.json")
     sec = analyse(SECONDARY, "pair_manifest.json")
@@ -421,7 +445,9 @@ if __name__ == "__main__":
     fig_width_by_bin(Qs, labels)
     fig_edge_drift(Qs, labels)
     fig_output_jsd(Qs[0])
-    fig_bank_comparison(prim, sec)
+    rev_path = os.path.join(RESULTS, "revisions.json")
+    rev = json.load(open(rev_path)) if os.path.exists(rev_path) else None
+    fig_bank_comparison(prim, sec, rev["drop_fragment"] if rev else None)
     bs = fig_block_scan()
 
     form = []
@@ -438,7 +464,7 @@ if __name__ == "__main__":
                          median_edge_drift=Q["median_edge_drift"],
                          valid_pair_rate=Q["valid_pair_rate"]))
     if len(form) > 2:
-        fig_formation(form)
+        fig_formation(form, rev)
 
     man = json.load(open(os.path.join(RESULTS, "pair_manifest_top256.json")))
     summary = dict(
@@ -449,7 +475,8 @@ if __name__ == "__main__":
                   balance_p_logfreq=man["balance_kruskal_p_logfreq"],
                   balance_p_surprisal=man["balance_kruskal_p_surprisal"]),
         primary=prim, secondary_post_hoc=sec, formation=form,
-        per_context_rho=per_context_rho(tags[0], "pair_manifest_top256.json"))
+        per_context_rho=per_context_rho(tags[0], "pair_manifest_top256.json"),
+        revisions=rev)
     if bs:
         summary["block_scan"] = {str(L): float(np.nanmedian(
             [r["w_by_block"][str(L)] for r in bs["rows"]])) for L in bs["blocks"]}

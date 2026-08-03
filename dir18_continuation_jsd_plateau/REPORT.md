@@ -35,14 +35,17 @@ the transition between them.** Three qualifications. First, the width metric $w$
 10%→90% transition; the trained curves *are* plateau-shaped in level terms (our flatness metric gives
 0.076 against 0.184 for a straight line), but flatness and width correlate at $+0.971$ across pairs,
 so this experiment cannot separate "predicts flatter plateaus" from "predicts narrower transitions"
-and we claim only the latter. Second, after adjusting for endpoint frequency, continuation entropy,
-surprisal, and the block-0 geometry of the two endpoint states, the association weakens from $-0.525$
-to $-0.384$; we report the *total* association and do **not** claim corpus divergence explains
-sharpness beyond learned endpoint geometry. Third, four intermediate checkpoints **contradict the
-expected pattern**: the plan predicted the negative relationship would *strengthen* during training,
-but it is already at full strength by step 1000 ($\rho = -0.582$) and afterwards moves within
-overlapping confidence intervals, even while the transitions themselves keep sharpening (median $w$
-falls from 0.831 to about 0.52). This is an observational predictor test: it does not show that
+and we claim only the latter. Second, **the headline is a total association.** It weakens to $-0.384$
+after adjusting for endpoint frequency, continuation entropy, surprisal and the block-0 geometry of
+the two endpoint states; to $-0.277$ after adjusting instead for the model's own output divergence
+(the obvious mediator); and to $-0.204$ ($p = 0.119$, **not significant**) after adjusting for both.
+Corpus divergence is therefore a good *predictor* of transition width, but we have no significant
+evidence that it explains width *independently* of the output separation the model learned. Third,
+four intermediate checkpoints **contradict the expected pattern**: the plan predicted the negative
+relationship would *strengthen* during training, but it is already at full strength by step 1000
+($\rho = -0.582$) and afterwards moves within overlapping confidence intervals — while the transitions
+themselves sharpen through step 64000 (median $w$ 0.831 → 0.512) and then show a modest late reversal
+to 0.541 at the final checkpoint. This is an observational predictor test: it does not show that
 divergence *causes* plateaus.
 
 ---
@@ -60,7 +63,7 @@ GPT-NeoX modules, `eval()` mode, `torch.inference_mode()`, float32. Every checkp
 
 **Hook point.** The residual stream at the **final token position, immediately after transformer
 block 0**. This is the single site we interpolate and patch; blocks 1–23 then run normally and we
-read the final-position logits after the final LayerNorm and unembedding. One control (Figure 10)
+read the final-position logits after the final LayerNorm and unembedding. One control (Figure 11)
 repeats the assay patching after blocks 0, 6, 12, 18 and 23 instead.
 
 **Corpus.** `EleutherAI/pile-deduped-pythia-preshuffled` — the exact tokenised, pre-shuffled stream
@@ -112,7 +115,7 @@ because it is a property of the *data*, computable without ever consulting the m
 whole point of asking whether the corpus predicts the model. $JSD_A$ (from split A) is used **only**
 to select and bin pairs; $JSD_B$ (from split B, disjoint training rows) is the predictor in every
 reported analysis, so the reported correlations are not inflated by selection on the same noise.
-Consumed by Figures 1, 4, 5, 7, 8 and 9.
+Consumed by Figures 1, 4, 5, 7, 8, 9 and 10.
 
 **Reliability and the sampling-noise floor** — a count-based divergence is only meaningful if it is
 stable across samples. Two checks, both prespecified as gates before any plateau curve was viewed.
@@ -163,7 +166,7 @@ w \;=\; t(d = 0.9) \;-\; t(d = 0.1),
 linearly interpolated on the 50-point grid. **Smaller $w$ means the output flips over a shorter
 stretch of the path.** A perfectly linear output response gives $w \approx 0.8$; a step function gives
 $w$ near 0. Each pair's outcome is the **median $w$ across its valid carrier contexts**. Consumed by
-Figures 2, 3, 4, 5, 6, 8, 9 and 10.
+Figures 2, 3, 4, 5, 6, 8, 9, 10 and 11.
 
 **Curve validity** — $w$ is only meaningful for a curve that rises once, cleanly, through both levels.
 A curve that wanders back down, or crosses a level several times, has no well-defined width, and the
@@ -198,10 +201,41 @@ $E = 0$ means perfectly flat ends — a real plateau. The **no-plateau reference
 $d(t) = t$, which gives $E = 0.184$ on our grid; anything near or above that has no plateau at all.
 Lower is flatter. Consumed by Figure 6.
 
+**Learned sharpening** — the trained width $w$ mixes two things: how sharp a pair *starts out* under
+random initialisation and how much training narrowed it. Comparing trained and untrained models at the
+group level (Figure 4) does not remove the first. Since the same frozen bank is run at both
+checkpoints, we can subtract each pair's own untrained baseline and ask what training *did* to that
+specific pair:
+
+```math
+\Delta w \;=\; w_{\text{trained}} \;-\; w_{\text{step }0}.
+```
+
+$\Delta w$ is negative when training narrowed the transition, and more negative means more sharpening.
+Correlating $JSD_B$ with $\Delta w$ is the within-pair version of the primary test. Consumed by
+Figure 8.
+
+**Mediation by the model's own output divergence** — the two results above suggest an obvious causal
+story: the corpus makes the model separate the two words' outputs ($JSD_{\mathrm{out}}$, below), and
+that separation is what produces a narrow transition. If so, $JSD_{\mathrm{out}}$ is a *mediator*, and
+adjusting for it should remove most of the association. We therefore report the same partial Spearman
+as in the sensitivity model, adjusting for (a) $JSD_{\mathrm{out}}$ alone and (b)
+$JSD_{\mathrm{out}}$ together with the five covariates. This is a rank-based *adjustment*, not a
+formal causal mediation estimate: with an observational design and one hook point we cannot separate a
+mediator from a confounder, so a shrinking coefficient is consistent with the mediation story but does
+not establish it. $p$-values for these adjusted correlations come from the rank correlation of the
+residuals, not corrected for the covariate degrees of freedom, so they are mildly optimistic. Consumed
+by Figure 8.
+
+**Late-reversal test** — median width falls from step 0 to step 64000 and then rises slightly at the
+final checkpoint. A change in a median over 60 pairs can easily be noise, so we test it at the pair
+level with a two-sided **paired Wilcoxon signed-rank test** on $w_{143000} - w_{64000}$ (the same 60
+pairs at both checkpoints), and report how many pairs ended blunter. Consumed by Figure 9.
+
 **(iii) Association** — reported as the Spearman rank correlation $\rho$ between $JSD_B$ and $w$, with
 a 95% confidence interval from 10,000 bootstrap resamples. The bank is **endpoint-disjoint** (no token
 appears in two pairs), so resampling pairs resamples endpoints as intact clusters; there is no hidden
-reuse inflating the effective sample size. Consumed by Figures 4, 5, 8 and 9.
+reuse inflating the effective sample size. Consumed by Figures 4, 5, 8, 9 and 10.
 
 **(iv) Model output divergence** — the validity check on the predictor. Corpus divergence is a global,
 context-free statistic, while the assay runs in one specific carrier context. If corpus divergence did
@@ -214,7 +248,7 @@ JSD_{\mathrm{out}} \;=\; JSD\!\big(\mathrm{softmax}(z_A),\; \mathrm{softmax}(z_B
 ```
 
 and correlate it with $JSD_B$. Higher means the model draws a bigger distinction between the two
-endpoints. Consumed by Figures 7 and 8.
+endpoints. It is also the mediator in the adjustment ladder above. Consumed by Figures 7, 8 and 9.
 
 **Sensitivity (partial Spearman)** — divergent words might simply be rarer, more surprising, or
 geometrically further apart at block 0, and any of those could drive sharpness. We rank-transform
@@ -245,7 +279,11 @@ does the deepest block-scan point.
 **Post-hoc top-512 bank** — a secondary bank of 75 pairs built by relaxing the endpoint filter (see
 below) from the prespecified top-256 to top-512. It is **not** a prespecified fallback; it exists only
 to check that the conclusion does not depend on where the filter is drawn, and it is reported as a
-clearly labelled post-hoc analysis in Figure 9.
+clearly labelled post-hoc analysis in Figure 10.
+
+**Fragment-dropped bank** — the prespecified top-256 bank minus the single pair whose endpoint `un` is
+a word-start fragment rather than a complete word (n = 59). A second robustness check on the same
+figure, for readers who expected the filter to admit only complete words.
 
 **Block scan (blocks 0, 6, 12, 18, 23)** — patching later leaves fewer blocks to compute a sharp
 response. If sharpness is produced by downstream computation rather than by readout geometry, $w$
@@ -259,7 +297,8 @@ residual (measured difference: exactly 0.0).
 
 ### Pair bank construction (frozen before any curve of this bank was seen)
 
-Endpoints are lowercase alphabetic word-start tokens that decode as one complete word and are among
+Endpoints are lowercase alphabetic **word-start tokens** of at least two characters (GPT-NeoX BPE
+marks a word start with `Ġ`) that are among
 the trained model's **top-256** eligible word continuations of **all three** carrier contexts
 (`The thing was`, `They said it was`, `I thought it was`), so every prompt is in-distribution. This is
 the filter the plan prespecified. Further rules, all fixed in advance: each endpoint occurs at least
@@ -268,6 +307,14 @@ frequencies within a pair differ by at most a factor of two (1,763 candidate pai
 endpoint token is reused anywhere in the bank**, so pairs are statistically independent; and pairs are
 taken in each $JSD_A$ quintile, round-robin across quintiles, choosing at each step the pair closest to
 the bank-wide median in corpus log-frequency and model surprisal.
+
+A word-start token need not be a **complete word**: the filter tests the `Ġ` marker, lowercase
+alphabetic characters and length, so a multi-letter word-start prefix passes it. Exactly one such
+token survives into the bank — `un` (in the pair `un`/`better`) — out of 120 endpoints; every other
+endpoint is a complete word. We do **not** treat that as a defect to be patched after the fact,
+because the bank was frozen before any curve of it was seen; instead we report the bank as
+"word-start tokens" and add a prespecified-style sensitivity check that drops that one pair (Figure
+10). Its per-pair count and divergence are estimated exactly as for every other endpoint.
 
 The endpoint-disjointness rule caps the bank at $\lfloor 123/2 \rfloor = 61$ pairs; we obtain **60**,
 distributed 14/13/11/10/12 across quintiles Q1→Q5. The covariate balance holds (Kruskal-Wallis
@@ -401,49 +448,89 @@ same correlation is $+0.145$ (CI $[-0.122, +0.394]$, $p = 0.27$), as expected fo
 This rules out the prespecified "global next-token distribution is too coarse" verdict, under which a
 width null would have been uninterpretable.
 
+### How much of the width association is independent of that learned separation? Not a significant amount
+
+Figure 7 gives the natural causal story a name: corpus divergence → learned output separation →
+narrow transition. Two analyses test it, both in Figure 8. First, because the same frozen bank runs at
+step 0, we can ask what training did to *each pair*, using the learned-sharpening outcome
+$\Delta w = w_{\text{trained}} - w_{\text{step }0}$ instead of the trained width. Second, we adjust the
+association for the candidate mediator $JSD_{\mathrm{out}}$, alone and together with the five
+covariates.
+
+![Left: scatter of the training-induced width change against corpus divergence. Right: forest plot of the association before and after adjustment.](plots/mediation.png)
+
+**Figure 8.** Corpus divergence predicts how much training sharpened each pair, but almost nothing
+survives adjustment for the model's own output separation. *Left:* x is $JSD_B$ (bits); y is the
+learned sharpening $\Delta w = w_{\text{trained}} - w_{\text{step }0}$, where more negative means
+training narrowed that pair's transition more; marker shape and hue give the $JSD_A$ quintile as in
+Figure 4; the dotted horizontal is "training changed nothing". Every pair lies below it — training
+narrowed all 60 — and the higher-divergence pairs narrow most: $\rho = -0.517$, CI $[-0.694, -0.294]$,
+$p = 2.3\times10^{-5}$, median $\Delta w = -0.287$. *Right:* a forest plot of four analyses (listed top
+to bottom on the y-axis); x is the Spearman $\rho$ with $JSD_B$ and the bars are 95% bootstrap CIs;
+a filled marker means $p < 0.05$, an open marker $p > 0.05$; the dotted vertical is zero. The total
+association is $-0.525$; the learned-sharpening version is essentially the same, $-0.517$, so the
+result is not an artefact of pairs that started out sharp. Adjusting for the mediator
+$JSD_{\mathrm{out}}$ halves it to $-0.277$ ($p = 0.032$), and adjusting for the mediator plus the five
+covariates leaves $-0.204$ with $p = 0.119$ — **not significant**. Using $\Delta w$ in the adjusted
+rows gives the same picture ($-0.263$, $p = 0.042$; $-0.198$, $p = 0.129$).
+
+The honest reading: **the headline $-0.525$ is a total association**, and it is a real, strongly
+significant one. But once you know how far apart the model puts the two words' output distributions,
+corpus divergence tells you little more about transition width that is statistically distinguishable
+from noise at n = 60. That is exactly what the mediation story predicts — and also what a plain
+common-cause story predicts, which is why we cannot decide between them here.
+
 ### When during training does the relationship appear? By step 1000, and then it stops changing
 
 Figure 4 shows the relationship needs training, but not *how much*. The plan predicted it would grow
 stronger as training proceeded. Running the same frozen bank at four intermediate checkpoints shows
-otherwise, and Figure 8 separates two things that move differently: how well corpus divergence
+otherwise, and Figure 9 separates two things that move differently: how well corpus divergence
 *predicts* width, and how sharp the transitions actually *are*.
 
-![Left: Spearman correlations against training step. Right: median transition width against training step.](plots/formation.png)
+![Left: Spearman correlations against training step. Middle: median transition width against training step. Right: per-pair width at step 64000 against the final checkpoint.](plots/formation.png)
 
-**Figure 8.** The corpus predictor is at full strength by step 1000, while transitions keep sharpening
-to the end. Both panels share the x-axis: training step on a log scale, with step 0 drawn at the left
-edge (it cannot sit on a log axis) and ticks at 0, 1k, 8k, 32k, 64k, 143k. *Left:* y is the Spearman
-$\rho$ of corpus $JSD_B$ with each outcome. The solid line with round markers is $\rho$ with
-transition width $w$ (shaded `//`-hatched band = 95% bootstrap CI); the dashed line with square markers
-is $\rho$ with the model's own output divergence $JSD_{\mathrm{out}}$; the dotted horizontal is zero.
-Both jump from ≈ 0 at step 0 to full magnitude by step 1000 ($-0.582$ and $+0.791$); afterwards the
-width correlation moves between $-0.408$ and $-0.628$ with heavily overlapping CIs — no reliable trend
-either way — and the output correlation is flat at about $+0.75$. *Right:* y is median $w$ across the
-60 pairs, with a `//`-hatched band spanning median ± IQR/2; the dashed horizontal marks the
-linear-response value $w = 0.8$. Median $w$ falls 0.831 → 0.753 → 0.601 → 0.555 → 0.512 → 0.541,
-crossing below the linear-response reference between step 0 and step 1000 and then flattening.
+**Figure 9.** The corpus predictor is at full strength by step 1000; transitions sharpen through step
+64000 and then partly reverse. The left and middle panels share an x-axis: training step on a log
+scale, with step 0 drawn at the left edge (it cannot sit on a log axis) and ticks at 0, 1k, 8k, 32k,
+64k, 143k. *Left:* y is the Spearman $\rho$ of corpus $JSD_B$ with each outcome. The solid line with
+round markers is $\rho$ with transition width $w$ (shaded `//`-hatched band = 95% bootstrap CI); the
+dashed line with square markers is $\rho$ with the model's own output divergence $JSD_{\mathrm{out}}$;
+the dotted horizontal is zero. Both jump from ≈ 0 at step 0 to full magnitude by step 1000 ($-0.582$
+and $+0.791$); afterwards the width correlation moves between $-0.408$ and $-0.628$ with heavily
+overlapping CIs — no reliable trend either way — and the output correlation is flat at about $+0.75$.
+*Middle:* y is median $w$ across the 60 pairs, with a `//`-hatched band spanning median ± IQR/2; the
+dashed horizontal marks the linear-response value $w = 0.8$. Median $w$ falls 0.831 → 0.753 → 0.601 →
+0.555 → 0.512 and then **rises** to 0.541. *Right:* the per-pair check on that rebound. x is $w$ at
+step 64000, y is $w$ at step 143000, one point per pair; triangles are the 38 pairs that end blunter,
+circles the 22 that end sharper; the dashed line is $y = x$ (no change). The reversal is systematic,
+not a median artefact: two-sided paired Wilcoxon $p = 0.0052$, median per-pair $\Delta w = +0.012$.
 
-Read together: **transitions keep getting sharper over the first tens of thousands of steps, but the
-corpus statistic's ability to say *which* pairs are sharp is established almost immediately and does
-not improve.** The plan's expected pattern — a relationship that strengthens with training — is not
-what happens. One trajectory, one bank, one model, and no resolution below step 1000, so this is a
-suggestive observation rather than an established training-dynamics result.
+Read together: **transitions get sharper over the first tens of thousands of steps, sharpest at step
+64000, and then blunt slightly by the end of training — while the corpus statistic's ability to say
+*which* pairs are sharp is established almost immediately and never improves.** The plan's expected
+pattern — a relationship that strengthens with training — is not what happens. The late reversal is
+small (about 6% of the 64k median) but consistent across pairs; we have no mechanism for it, and with
+one trajectory, one bank, one model, and no resolution below step 1000 or between 64k and 143k, both
+the reversal and the flat correlation are suggestive observations rather than established
+training-dynamics results.
 
-### The prespecified bank and the relaxed bank agree
+### The result does not depend on how the bank was filtered
 
-The bank above uses the prespecified top-256 endpoint filter, which caps it at 60 pairs. A larger
-75-pair bank can be built by relaxing the filter to top-512. That relaxation is post-hoc, so it cannot
-carry the headline; Figure 9 reports it only to show the conclusion does not hinge on where the filter
-is drawn.
+The bank above uses the prespecified top-256 endpoint filter, which caps it at 60 pairs. Two
+alternative banks test whether that choice matters: a larger 75-pair bank built by relaxing the filter
+to top-512 (post-hoc, so it cannot carry the headline), and the top-256 bank minus the one pair whose
+endpoint `un` is a word-start fragment rather than a complete word.
 
-![Spearman rho with 95% CIs for the top-256 and top-512 banks at three checkpoints.](plots/bank_comparison.png)
+![Spearman rho with 95% CIs for the top-256, top-512 and fragment-dropped banks at three checkpoints.](plots/bank_comparison.png)
 
-**Figure 9.** The relaxed bank gives the same conclusion, slightly weaker. x is the checkpoint; y is
+**Figure 10.** All three versions of the bank give the same conclusion. x is the checkpoint; y is
 Spearman $\rho(JSD_B, w)$ with 95% bootstrap CI bars; round markers = prespecified top-256 bank
-(n = 60), square markers = post-hoc top-512 bank (n = 75); the dotted horizontal is zero. Trained 1.4B:
-$-0.525$ versus $-0.419$. Step 0: $-0.056$ versus $-0.155$, both consistent with zero. 410M: $-0.512$
-versus $-0.320$. The two banks' CIs overlap heavily everywhere, so the difference between them is not
-itself a finding — the point is only that both banks support the same verdict.
+(n = 60), square markers = post-hoc top-512 bank (n = 75), triangular markers = top-256 without the
+`un`/`better` fragment pair (n = 59); the dotted horizontal is zero. Trained 1.4B: $-0.525$ /
+$-0.419$ / $-0.502$ (the last with $p = 5.2\times10^{-5}$). Step 0: $-0.056$ / $-0.155$ / $-0.019$, all
+consistent with zero. 410M: $-0.512$ / $-0.320$ / $-0.491$. The CIs overlap heavily everywhere, so the
+differences between the banks are not themselves findings — the point is that neither the filter
+threshold nor the single word-fragment endpoint drives the result.
 
 ### The sharpness is produced downstream of the patch
 
@@ -452,7 +539,7 @@ rather than of computation, moving the patch later would not matter.
 
 ![Transition width against patched block index for low- and high-divergence pairs.](plots/block_scan.png)
 
-**Figure 10.** Sharpness requires the blocks that follow the patch. x is the patched block index $L$
+**Figure 11.** Sharpness requires the blocks that follow the patch. x is the patched block index $L$
 (the residual stream is interpolated after this block; 23 is the last of the 24 blocks, so almost no
 computation remains); y is the transition width $w$. The solid line with round markers is the median
 over the 5 **lowest**-$JSD_B$ pairs, the dashed line with square markers the median over the 5
@@ -472,6 +559,20 @@ about 0.8.
 | Valid-curve rate (strict criteria) | 1.000 | 1.000 | 1.000 |
 | Max endpoint-patch relative error | $4.6\times10^{-5}$ | $3.3\times10^{-6}$ | $6.3\times10^{-5}$ |
 
+Learned sharpening and the adjustment ladder, trained 1.4B against its own step-0 baseline (n = 60):
+
+| Association with corpus $JSD_B$ | $\rho$ | 95% CI | $p$ |
+|---|---|---|---|
+| Trained width $w$ — **headline, total association** | **−0.525** | [−0.701, −0.304] | $1.7\times10^{-5}$ |
+| Learned sharpening $\Delta w = w_{\text{trained}} - w_{\text{step }0}$ | **−0.517** | [−0.694, −0.294] | $2.3\times10^{-5}$ |
+| $w$, adjusted for the mediator $JSD_{\mathrm{out}}$ | −0.277 | [−0.509, −0.002] | 0.032 |
+| $w$, adjusted for $JSD_{\mathrm{out}}$ + the 5 covariates | −0.204 | [−0.471, +0.080] | **0.119 (n.s.)** |
+| $w$, adjusted for the 5 covariates only | −0.384 | [−0.623, −0.110] | 0.0024 |
+| $\Delta w$, adjusted for $JSD_{\mathrm{out}}$ / for $JSD_{\mathrm{out}}$ + 5 covariates | −0.263 / −0.198 | — | 0.042 / 0.129 |
+
+Median $\Delta w = -0.287$, and all 60 pairs have $\Delta w < 0$: training narrowed every pair's
+transition, by about 0.29 of the interpolation path at the median.
+
 Formation subset, same frozen bank on `pythia-1.4b-deduped` at six checkpoints:
 
 | Training step | 0 | 1000 | 8000 | 32000 | 64000 | 143000 |
@@ -487,7 +588,9 @@ Supporting checks (trained 1.4B): reliability Spearman 0.9998; noise ratio 0.072
 −0.486, −0.411 and −0.504 for `The thing was`, `They said it was` and `I thought it was` respectively,
 so no single context drives the result; reversal changes $w$ by at most $1.1\times10^{-5}$; prefix
 block-0 residuals within a pair differ by exactly 0.0; zero curves out of 1,080 failed any validity
-criterion, with a largest backslide of $0.0000$.
+criterion, with a largest backslide of $0.0000$; dropping the one word-fragment pair (`un`/`better`)
+leaves $\rho = -0.502$ ($p = 5.2\times10^{-5}$, n = 59); the 64k → 143k late reversal has 38 of 60
+pairs blunter, paired Wilcoxon $p = 0.0052$, median $\Delta w = +0.012$.
 
 ---
 
@@ -502,22 +605,30 @@ $-0.512$ at 410M, consistently across all three carrier contexts, and not in the
 The trained curves are plateau-shaped in absolute terms (edge drift 0.076 against 0.184 for a straight
 line), so "plateau" is a fair description of what we are measuring — but width and flatness are
 $+0.971$ correlated across pairs, so this design cannot attribute the association to plateau flatness
-specifically rather than to overall transition width. The honest headline is the width claim.
+specifically rather than to overall transition width. The honest headline is the width claim, and it
+is a **total** association: corpus divergence also predicts how much training narrowed each pair's
+transition ($\rho = -0.517$ on $\Delta w$), but once the model's own output divergence is adjusted for,
+what remains ($-0.277$, and $-0.204$ with the five covariates as well, $p = 0.119$) is no longer
+statistically significant at n = 60.
 
 **The training trajectory did not go as predicted.** The plan expected the negative relationship to
 strengthen during training. Instead it is essentially fully formed by step 1000 — the earliest
-checkpoint we ran — and afterwards fluctuates within overlapping confidence intervals, while median $w$
-keeps falling from 0.831 to about 0.52. Sharpening continues after the corpus statistic has stopped
-explaining more of it. A natural next test is whether a *context-conditioned* divergence estimate does
-better at the late checkpoints, where the global one has plateaued.
+checkpoint we ran — and afterwards fluctuates within overlapping confidence intervals. Meanwhile the
+transitions themselves sharpen through step 64000 (median $w$ 0.831 → 0.512) and then partly reverse,
+ending at 0.541 with 38 of 60 pairs blunter than they were at 64k (paired Wilcoxon $p = 0.0052$).
+Sharpening continues long after the corpus statistic has stopped explaining more of it, and then
+undoes a little of itself. A natural next test is whether a *context-conditioned* divergence estimate
+does better at the late checkpoints, where the global one has plateaued.
 
 **What this does not show.** (1) *Not causation.* This is an observational predictor test on 60 pairs;
-we did not intervene on divergence. (2) *Not "beyond geometry".* Adjusting for endpoint frequency,
+we did not intervene on divergence. (2) *Not an independent effect.* Adjusting for endpoint frequency,
 continuation entropy, surprisal, and block-0 cosine/distance cuts the association from $-0.525$ to
-$-0.384$. It survives adjustment but is attenuated, so part of what corpus divergence predicts is
-already carried by learned endpoint geometry — and since that geometry plausibly lies *on the causal
-path* from training targets to transition shape, the adjusted number is a lower bound rather than the
-"true" effect. (3) *Not a clean untrained control.* The step-0 network's widths have an IQR of 0.006,
+$-0.384$; adjusting for the model's own output divergence cuts it to $-0.277$; adjusting for both
+leaves $-0.204$, $p = 0.119$ — not significant. So we can say corpus divergence *predicts* width, but
+not that it explains width beyond the learned separation and endpoint geometry. Because that geometry
+plausibly lies *on the causal path* from training targets to transition shape, the adjusted numbers
+are lower bounds rather than "true" effects — but the honest summary is that this design cannot
+demonstrate an independent contribution. (3) *Not a clean untrained control.* The step-0 network's widths have an IQR of 0.006,
 so its null correlation is partly a floor effect, not purely an absence of association. (4) *Not sharp
 switching.* Even the sharpest pairs have $w \approx 0.40$; these are moderate plateaus, not step
 functions. (5) *Not necessity.* Nothing here says plateaus are required for low training loss.
@@ -533,6 +644,11 @@ does every formation checkpoint.
 **Reproduction.** `experiments/download_splits.py` (byte-range corpus sample), `count_jsd.py` (bigram
 counts and reliability gates), `select_endpoints.py` and `build_pairs.py --pool strict` (frozen bank),
 `assay.py` with `run_assay.py` (plateau assay), `curve_metrics.py` with `rescore.py` (validity criteria
-and raw-curve export), `block_scan.py`, `checks.py`, `formation.py` (intermediate checkpoints), and
-`analyze.py` (figures and statistics). Manifests, per-pair summaries, raw curves
-(`results/curves_*.npy` and `results/curves_*.csv.gz`) and all summary statistics are in `results/`.
+and raw-curve export), `block_scan.py`, `checks.py`, `formation.py` (intermediate checkpoints),
+`revisions.py` (learned sharpening, adjustment ladder, late-reversal test, fragment sensitivity), and
+`analyze.py` (figures and statistics). Manifests, per-pair summaries and all summary statistics are in
+`results/`. **The raw curves are committed**, as `results/curves_*.npy` and as a plain-text
+`results/curves_*.csv.gz` export — one row per pair × context × grid point — so every width, flatness
+and validity number in this report can be recomputed from disk without a GPU. (The repo-wide
+`.gitignore` excludes `*.npy` and `*.gz`; this direction ships its own `.gitignore` that un-ignores
+`results/curves_*`, about 1.6 MB in total.)

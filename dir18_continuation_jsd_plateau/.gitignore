@@ -1,0 +1,5 @@
+# The raw d(t) curves are small auditable artifacts (~1.5 MB total), not bulk data: they are the
+# primary evidence for this direction's validity criteria, so they must be committed. Un-ignore
+# them from the repo-root rules (*.npy, *.gz).
+!results/curves_*.npy
+!results/curves_*.csv.gz

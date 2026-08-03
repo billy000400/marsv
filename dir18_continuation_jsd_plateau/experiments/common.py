@@ -27,10 +27,11 @@ def load(revision=FINAL, model=MODEL):
 
 
 def eligible_word_tokens(tok, vocab_size):
-    """Lowercase, alphabetic, word-start tokens that decode as one complete word.
+    """Lowercase, alphabetic WORD-START tokens (not necessarily complete words).
 
-    GPT-NeoX BPE marks a word start with 'Ġ'. We require >= 2 alphabetic lowercase characters so
-    single letters and sub-word fragments are excluded.
+    GPT-NeoX BPE marks a word start with 'Ġ'. We require >= 2 alphabetic lowercase characters, so
+    single letters are excluded -- but a multi-letter word-start prefix such as ' un' still passes.
+    revisions.py reports the sensitivity check that drops the one such pair from the bank.
     """
     ids = []
     for i in range(vocab_size):

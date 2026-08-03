@@ -184,7 +184,8 @@ checkpoints test whether the negative relationship strengthens during training.
 - [x] **S5 - Analyze:** produce figures, primary correlation, output-JSD validation, and one adjusted
   sensitivity analysis. *(10 figures; output-JSD rho=+0.751; partial rho=-0.384)*
 - [x] **S6 - Finalize:** curate reports, document the exact data/compute scope, and write `STOP`.
-  *(RESULTS.md + REPORT.md current-best, 10 captioned figures in both, render check passes)*
+  *(RESULTS.md + REPORT.md current-best, 11 captioned figures in both, render check passes; raw
+  curves committed and independently re-scorable)*
 - [x] **Optional formation subset:** step1000/8000/32000/64000 on the same frozen bank.
   *(relationship does NOT strengthen: full strength by step 1000 at -0.582, then -0.456/-0.408/
   -0.628/-0.525 within overlapping CIs, while median `w` falls 0.831 -> ~0.52)*
@@ -216,8 +217,16 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-S1-S6 complete on the **prespecified top-256 bank** (60 endpoint-disjoint pairs); operator feedback
-(`human_feedback.addressed.md`) fully addressed. Corpus JSD predicts narrower transitions in trained
+S1-S6 complete on the **prespecified top-256 bank** (60 endpoint-disjoint pairs); both operator
+feedback rounds (`human_feedback.addressed.md`, `human_feedback_2.addressed.md`) fully addressed.
+Round 2 added: raw curves genuinely committed (direction-level `.gitignore` un-ignores
+`results/curves_*`); a learned-sharpening outcome `dw = w(trained) - w(step 0)` with
+`rho(JSD_B, dw) = -0.517`; a mediation ladder showing the headline is a **total** association that
+falls to `-0.277` after adjusting for model output JSD and `-0.204` (p = 0.119, **not significant**)
+after adjusting for output JSD plus the five covariates; the corrected training-dynamics reading
+(sharpening through step 64000, then a modest late reversal to 0.541, 38/60 pairs blunter, paired
+Wilcoxon p = 0.0052); and the "word-start tokens" correction plus its fragment sensitivity check
+(dropping `un`/`better` gives `rho = -0.502`, n = 59). Corpus JSD predicts narrower transitions in trained
 Pythia (`rho = -0.525`, CI [-0.701,-0.304], n = 60) and not at step 0 (`-0.056`, CI includes 0, median
 `w = 0.831` with `IQR = 0.006` — partly a floor effect), replicating at 410M (`-0.512`). Predictor
 validated against model output JSD (`+0.751`). Prespecified verdict branch: corpus JSD predicts
@@ -239,8 +248,9 @@ earlier "it decays monotonically" reading came from the post-hoc top-512 bank an
 
 None — the plan is complete on the prespecified bank and zero unaddressed feedback files remain, so
 `STOP` is written. The natural follow-up, explicitly out of scope here, is a **context-conditioned**
-divergence estimate, to test whether it predicts width better at the late checkpoints where the global
-estimate stops improving. If a future iteration finds a new `human_feedback*` / `*REVIEW*` file next
+divergence estimate. It now has two motivations: testing whether it predicts width better at the late
+checkpoints where the global estimate stops improving, and attacking the mediation null — a predictor
+that is not simply a proxy for the model's own output separation. If a future iteration finds a new `human_feedback*` / `*REVIEW*` file next
 to the stale `STOP`, delete `STOP`, address the feedback, and only re-write `STOP` when clean again.
 
 ## References

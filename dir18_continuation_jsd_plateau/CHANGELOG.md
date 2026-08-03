@@ -142,3 +142,53 @@ context, no averaging), 4 JSD vs width, 5 width by bin, **6 edge drift (new)**, 
 validation, 8 formation, **9 bank comparison (new)**, 10 block scan. Figure 5's caption no longer
 claims a monotone bin trend at 1.4B (Q3 = 0.462 dips below Q4 = 0.502 and Q5 = 0.479); 410M remains
 monotone. `check_render.py` passes on both files (9 display equations, 10 embeds each, 0 problems).
+
+---
+
+## 2026-08-03 — operator feedback #2 addressed: curves committed, mediation + learned-sharpening added, training-dynamics and filter wording corrected
+
+Addressed `human_feedback.txt` (renamed `human_feedback_2.addressed.md`; the earlier round remains
+`human_feedback.addressed.md`). Its four asks and what changed. **No previously reported number was
+superseded** — the primary result is unchanged (`rho(JSD_B, w) = -0.525`, step 0 `-0.056`, 410M
+`-0.512`, output-JSD `+0.751`); everything below is added detail or corrected wording.
+
+**1. Raw curves are now actually committed.** The deliverables claimed the raw `d(t)` curves were
+committed, but the repo-root `.gitignore` excludes `*.npy` and `*.gz`, so none of them were in the
+repo and the QC numbers could not be independently recomputed. This direction now ships its own
+`.gitignore` un-ignoring `results/curves_*.npy` and `results/curves_*.csv.gz` (~1.6 MB, 1,080 curves
+across six checkpoints plus the calibration and block-scan sets); verified with `git check-ignore`.
+REPORT.md's Reproduction section now states this explicitly instead of asserting it.
+
+**2. Mediator and learned-sharpening analyses added** (new `experiments/revisions.py`,
+`results/revisions.json`, new **Figure 8** `plots/mediation.png`). Learned sharpening uses each pair's
+own untrained baseline, `dw = w(trained) - w(step 0)`: `rho(JSD_B, dw) = -0.517` [-0.694, -0.294],
+p = 2.3e-5, median `dw` = -0.287, and all 60 pairs have `dw < 0`. Adjustment ladder on `w`: total
+**-0.525** (p = 1.7e-5) -> **-0.277** (p = 0.032) adjusting for the mediator (model output JSD) ->
+**-0.204** (p = 0.119, **not significant**) adjusting for the mediator plus the five covariates; the
+5-covariate-only partial is unchanged at -0.384 (p = 0.0024). Using `dw` instead of `w` in the adjusted
+rows gives -0.263 (p = 0.042) and -0.198 (p = 0.129). Summary, Headline, Results, the current-best
+tables and the Conclusion now all say the headline is a **total association** and that the fully
+adjusted independent relationship is not significant. Methods gained equations/definitions for `dw`,
+for the mediation adjustment (with the caveat that adjustment != causal mediation, and that the
+residual p-values are not corrected for covariate df), and for the late-reversal test.
+
+**3. Training-dynamics text corrected.** The claim "transitions keep sharpening throughout training"
+was wrong: median `w` rebounds from 0.512 at step 64000 to 0.541 at step143000, 38 of 60 pairs end
+blunter, two-sided paired Wilcoxon p = 0.0052, median per-pair `dw` = +0.012. All wording now reads
+"sharpens through 64k, then a modest late reversal", including the figure's own panel title.
+`plots/formation.png` gained a **third panel** (per-pair `w` at 64k vs 143k against `y = x`), and its
+caption (now **Figure 9**) reports the Wilcoxon test.
+
+**4. "Complete-word filter" claim corrected + fragment sensitivity check.** `common.py` only tests the
+`G-dot` word-start marker, lowercase alphabetic characters and length >= 2, so it admits word-start
+*fragments*; the bank contains exactly one (`un`, in `un`/`better`, out of 120 endpoints). Methods now
+describes the filter as **word-start tokens** and says so explicitly instead of claiming complete
+words; the `common.py` docstring was corrected to match. Added sensitivity check: dropping that pair
+gives `rho = -0.502` [-0.681, -0.277], p = 5.2e-5 (n = 59) at 1.4B, `-0.019` at step 0 and `-0.491` at
+410M. `plots/bank_comparison.png` (**Figure 10**) gained this as a third series alongside the top-256
+and post-hoc top-512 banks.
+
+**Figures.** 11 captioned figures now embedded in BOTH RESULTS.md and REPORT.md (was 10): the new
+**Figure 8** (mediation/learned sharpening) sits after the output-JSD validation, pushing formation
+8 -> 9, bank comparison 9 -> 10 and block scan 10 -> 11; all in-text figure references renumbered.
+`check_render.py` passes on both files (10 display equations, 11 embeds each, 0 problems).
