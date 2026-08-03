@@ -107,7 +107,10 @@ the network **does** learn the step at its output — and the representation sti
 (This grid is *secondary* because it shows essentially no validation overfitting,
 $\rho_{\mathrm{val}} \approx 1.005$, so it fails the adequacy gate in spirit.)
 
-**Table 4 — 10,000-image grid**, final checkpoint, same averaging as above.
+**Table 4 — 10,000-image grid**, final checkpoint, same averaging as above. The two right-hand column
+pairs carry the result: as $k$ grows the output's concentration climbs to $4.13$ of a possible $5.00$ and
+its flank share collapses to $0.005$, while hidden layer 3 never exceeds $2.03$ (at $k=40$), settles back
+to $1.66$, and keeps $0.28$ of its movement out on the flanks.
 
 | $k$ | $\Gamma$ target | $\Gamma$ model output | $\Gamma$ hidden layer 3 | $\Phi$ model output | $\Phi$ hidden layer 3 | sweep $R^2$ |
 |---:|---:|---:|---:|---:|---:|---:|

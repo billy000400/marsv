@@ -150,9 +150,8 @@ uniformly, $\Gamma > 1$ means it is concentrated near the transition, and $\Gamm
 (all movement inside the window, none outside). Higher is more plateau-like. Figures 5a, 6a and 8d report
 $\Gamma$, and it is the quantity the verdict turns on.
 
-*A note on notation.* This report writes the concentration gain as $\Gamma$ rather than the $R$ used in
-the original plan, because $R$ with a subscript is easily misread as the coefficient of determination
-$R^2$. **In this report $R^2$ always means goodness of fit and nothing else**, and layer indices only ever
+*A note on notation.* The concentration gain is written $\Gamma$ throughout (the original plan called it
+$R$); a subscripted $R$ is easily misread as the coefficient of determination $R^2$. **In this report $R^2$ always means goodness of fit and nothing else**, and layer indices only ever
 appear as subscripts on $\Gamma$, $\Phi$, $s$, $C$ and $h$.
 
 **Flank share — because $\Gamma$ alone can be fooled.** A curve can raise $\Gamma$ by growing a modest
@@ -342,7 +341,7 @@ targets are harder to generalize.
 
 All 30 runs (10 values of $k$ x 3 seeds) pass the gate: the validation minimum occurs before the last
 epoch, the final validation loss is 1.7–10.9% above it (gate: $\le$ 20%), and training loss ends within
-0.1% of its own minimum (gate: $\le$ 5%). One caveat we flag rather than hide: at $k=160$ and $k=320$ the
+0.1% of its own minimum (gate: $\le$ 5%). One caveat belongs with that number: at $k=160$ and $k=320$ the
 validation minimum arrives very early (mean epoch 15 of 2000), because those targets are essentially
 unlearnable in detail from 1000 images, so the curve is flat-then-slightly-rising from the start. The
 gate's numeric conditions still hold, but the minimum-validation checkpoint at those two settings is a

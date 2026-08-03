@@ -160,3 +160,38 @@ numbering in REPORT.md: the new $\Lambda$ table is Table 4 and the fit/training 
 4 -> 5, keeping tables in reading order. `check_render.py` passes: 15 display eqs, 11 embedded+captioned
 figures per deliverable, 0 problems. (Fixed on the way: `$2.5\%$`-style inline math, which CLAUDE.md 8b
 predicts GitHub breaks by stripping the backslash — now plain-text percentages.)
+
+---
+
+## 2026-08-03 — deliverable compliance under the updated checker, plus a numbers-vs-JSON audit
+
+**Trigger.** No unaddressed feedback file exists (both are `.addressed.md`), and PLAN.md's S1–S4 are
+complete, so this iteration was verification and hygiene only. **No result changed and no number in
+either deliverable was superseded** — the science is exactly as published on 2026-07-29.
+
+**Prose fixes forced by the updated `check_render.py` (rules 9a and 9d, checks 5 and 6, which did not
+exist when these files were last written).**
+- REPORT.md failed rule 9d with 3 mechanical contrast constructions (budget 2). Two were rewritten to
+  say the thing directly: the notation note ("This report writes the concentration gain as $\Gamma$
+  rather than the $R$ used in the original plan" → "The concentration gain is written $\Gamma$
+  throughout (the original plan called it $R$)"), and the training-adequacy caveat ("One caveat we flag
+  rather than hide" → "One caveat belongs with that number"). The third, in Limitation (3), is a
+  substantive comparison of a baseline property against a target effect and was kept.
+- RESULTS.md failed rule 9a: Table 4 (the 10,000-image control) sat under a bare caption line with no
+  prose stating its claim. Added the claim to that paragraph — the output's concentration reaches
+  $4.13$ of a possible $5.00$ with flank share $0.005$, while hidden layer 3 peaks at $2.03$ ($k=40$),
+  settles at $1.66$, and keeps $0.28$ of its movement on the flanks.
+
+Both files now pass all six checks (REPORT.md: 15 display equations, 421 inline, 11 embedded figures,
+0 problems; RESULTS.md: 194 inline, 11 embedded figures, 0 problems), and each of the 11 embeds in each
+file is followed by a visible numbered caption.
+
+**New audit (`experiments/verify_tables.py`).** Re-derives every published table cell from
+`results/summary_table.json`, `results/summary_table_n10k.json`, `results/zoom_main.json` and
+`results/zoom_n10k.json` — including the seed-averaged $\Lambda(w=0.0025)$ column — and diffs it
+against the markdown, allowing for the printed precision (epochs to 0.5, 2-dp columns to 6e-3, 3-dp
+columns to 6e-4). It covers both deliverables, whose tables are in different orders. Result:
+**all 100 published rows match the stored analysis**, so no transcription error survives in either file.
+
+**`STOP` written.** The 2026-07-29 entry stated `STOP` was written, but the file was never actually
+created (it appears in no commit). It exists now: S1–S4 complete, zero unaddressed feedback files.

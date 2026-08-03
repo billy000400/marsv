@@ -184,3 +184,55 @@ drives $\Phi_3$ toward zero.
 
 On track? yes — S1-S4 complete, 100% done, no blocker; feedback #2 addressed with a 30x-finer probe that
 closes both the resolution and the alignment objection to the negative verdict.
+
+## 2026-08-03 — iteration 4: verification pass; deliverables re-linted, tables audited, STOP written
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: `human_feedback_1.addressed.md`
+and `human_feedback_2.addressed.md` are the only feedback files and both carry the `.addressed.md`
+suffix, so zero unaddressed feedback remains and the plan (S1–S4, all success criteria) is complete.
+That makes this a verification iteration, not a new experiment. PLAN.md's "Out of scope" list rules out
+the obvious ways to spend the remaining time (new target families, other architectures, cross-entropy
+comparisons), and the scientific follow-up belongs to a new direction, so I did not invent extra science
+to fill the clock.
+
+**What I did.**
+1. Ran the *updated* `experiments/check_render.py` (it grew two checks since this direction last ran it:
+   rule 9a "every table needs a prose claim above it" and rule 9d "contrast constructions ≤ 2"). Both
+   deliverables failed the new checks — REPORT.md with 3 contrast constructions, RESULTS.md with Table 4
+   sitting under a bare caption. Fixed both; all six checks now pass on both files.
+2. Wrote `experiments/verify_tables.py`, which re-derives every published table cell from the stored
+   JSON (including the seed-averaged $\Lambda(w=0.0025)$ column) and diffs it against the markdown at the
+   printed precision, for both deliverables. All 100 rows match.
+3. Checked figure hygiene by hand as well: 11 embeds and 11 visible `**Figure N.**` captions in each
+   file, no un-embedded `(plots/*.png)` paths.
+4. Created `STOP`.
+
+**What I learned.**
+1. **A completed direction is not a frozen one.** The shared checker gained two checks after this
+   direction "finished", and both fired. Re-running the current lint against finished deliverables is
+   worth an iteration on its own — the failures were real (a table the reader had to interpret unaided,
+   and defensive phrasing) even though no number moved.
+2. **My own new sentence was the only thing that introduced an error this iteration.** The claim I first
+   wrote above Table 4 said layer 3 "stalls below 1.7"; the table's own $k=40$ row is $2.024$. Caught it
+   by reading the column instead of the summary I remembered. This is exactly the failure mode
+   `verify_tables.py` now guards against for the cells themselves, and it argues for extending that kind
+   of check to prose claims eventually.
+3. **A journal entry saying a file was written is not evidence it exists.** The 2026-07-29 entry and
+   PLAN.md both state `STOP` was written; `git log -- STOP` returns nothing and the file was absent. The
+   loop therefore kept re-entering a finished direction. Verify side effects on disk, not from the log.
+
+**Assumption logged (loop mode, no human to ask).** With ~3.5 h of wall-clock available and the plan
+complete, I chose verification + `STOP` over starting unplanned science. Rejected alternatives: (a) add
+a sixth/seventh training-set size or a new target family — explicitly out of scope in PLAN.md and it
+would weaken rather than strengthen the current clean negative result; (b) leave `STOP` unwritten so the
+loop keeps running — that burns shared GPU/time on a direction whose success criteria are all met, and
+rules 10–11 only forbid `STOP` while feedback is unaddressed, which is not the case here.
+
+**Next step.** None for this direction. `STOP` is written; if an operator later drops a
+`human_feedback*` / `*REVIEW*` file, delete `STOP`, address every point, and re-write `STOP` only when
+clean again (rules 10–11). The open scientific question — which ingredient of classification (softmax
+head, cross-entropy, multi-class competition) actually drives flank movement $\Phi_3$ to zero — belongs
+to a new direction.
+
+On track? yes — S1–S4 complete, 100% done, no blocker; deliverables re-linted against the updated
+checker, all 100 published table cells verified against the stored results, STOP written.

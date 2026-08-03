@@ -379,6 +379,13 @@ satisfy the smooth-convergence condition; one metric was added beyond the plan, 
 \(\Phi_l(k)\), plus \(g_l\), \(\Gamma_l(w)\) and \(\Lambda_l(w)\) for feedback #2; and the concentration score is written \(\Gamma_l(k)\) rather than \(R_l(k)\) per operator
 feedback #1.
 
+**Verification pass (2026-08-03).** Re-ran the *updated* `check_render.py`, which has gained two checks
+since this direction last ran it (rule 9a: every table needs a prose claim above it; rule 9d: contrast
+constructions within budget). Both deliverables failed the new checks and were fixed — no number
+changed. Added `experiments/verify_tables.py`, which re-derives every published table cell from
+`results/*.json` and diffs it against both deliverables: **all 100 rows match**. `STOP` had been
+reported as written on 2026-07-29 but never actually existed; it does now.
+
 ## Next step
 
 None — the direction is complete, zero unaddressed feedback files remain, and `STOP` is written. If an
