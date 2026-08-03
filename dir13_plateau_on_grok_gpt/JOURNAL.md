@@ -1632,3 +1632,41 @@ frozen-mirror. ~21 min of training plus ~70 s of assay each. No `STOP` written.
 
 On track? yes — S22 done, the pending step-30,000 row collected and it strengthens rather than
 qualifies the claim it was pending on; blocker: none.
+
+## 2026-08-03 (iteration: FINALIZATION — verify, record the limitation honestly, STOP)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*`: five files, all five already ending in `.addressed.md`. **Zero unaddressed feedback**, so
+`STOP` is permitted under rule 11 and this iteration was free to finalize.
+
+**What I did.** The wrapper reported ~14 minutes of wall clock, which is under the 20-minute
+finalization threshold, so I ran no experiment. Instead: confirmed nothing was still training
+(`pgrep` clean), confirmed the newest artefacts in `results/` (`frozen_assay_summary.json` and
+`frozen_assay_raw.npz`, both 21:02) are the S22 rows already curated into both deliverables, re-read
+RESULTS.md and REPORT.md, ran the render checker, and updated PLAN/CHANGELOG/JOURNAL.
+
+**What I decided not to do, and why.** The standing next step (S23) was a second seed at blocks 6–10.
+It needs ~21 min of training plus ~70 s of assay. Starting it with 14 minutes left would have burned
+the whole iteration and produced a checkpoint at roughly step 20,000 — no matched-accuracy row, no
+step-30,000 row, nothing that could honestly enter a deliverable, and a half-written artefact for a
+loop that is about to stop. The alternative I picked — verify and finalize — leaves the deliverables
+consistent with what was actually measured.
+
+**How the missing replication is represented.** Not as pending work. Both deliverables already carry it
+as a limitation: eight frozen groups, three of which carry a second seed, with frozen-mirror and blocks
+6–10 named as the two single-seed runs under load-bearing comparisons. The measured seed spread on the
+conditions that *do* have two seeds is 0.031 at matched accuracy, which is what lets a reader size how
+much the missing seeds could move things — the load-bearing gaps are 0.072 and 0.118, both well clear
+of that spread, so the risk is real but small. That is the honest framing and it needed no edit.
+
+**Verification.** `check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS** (REPORT 29 display /
+581 inline equations / 27 figures; RESULTS 27 figures; 0 problems). Independently: 27 `![` embeds and
+27 visible `**Figure` caption lines in each file, and no bare `(plots/*.png)` path outside an embed.
+
+**Next step.** None — `STOP` written. If the loop is re-entered because new feedback lands, delete
+`STOP` first (rule 11), then run the two seed replications in the order PLAN's "Next step" now gives:
+blocks 6–10 first, then frozen-mirror.
+
+On track? yes — finalized cleanly with zero unaddressed feedback, deliverables verified current-best
+and fully rendered, and the one unrun experiment recorded as a limitation rather than a promise;
+blocker: none (the seed replications were out of time budget, not blocked).

@@ -1352,3 +1352,24 @@ PLAN.md and REPORT.md Methods before it was scored.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 29 display / 581 inline equations / 27 figures; RESULTS 27 figures; 0 problems).
 - **No `STOP` written** — two named seed replications remain.
+
+## 2026-08-03 — FINALIZATION: deliverables verified current-best, `STOP` written
+
+- **No content change to RESULTS.md or REPORT.md.** Both were re-read in full and confirmed to already
+  reflect the current-best state as curated at S22. No experiment ran this iteration, nothing was
+  running at close, and every row in `results/` (through `frozen_assay_summary.json`, 21:02) is already
+  in both deliverables — so there was no superseded number to replace and no old → new to record.
+- **Why no new experiment.** ~14 minutes of wall clock remained. The next planned step (S23) is a seed
+  replication needing ~21 min of training plus ~70 s of assay; starting it would have produced an
+  unusable partial checkpoint and no deliverable row. Finalization was the correct use of the time.
+- **The two seed replications stay in both deliverables as a stated limitation**, not as pending work:
+  a second seed at blocks 6–10 and one at frozen-mirror. Three of the frozen conditions already carry a
+  second seed and the measured seed spread there is small (0.031 at matched accuracy), which is the
+  caveat the reader needs to size the risk.
+- **Feedback status.** Five `human_feedback*` files, all five ending in `.addressed.md`. **Zero
+  unaddressed feedback**, which is what permits `STOP` under CLAUDE.md rule 11.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 29 display / 581 inline equations / 27 embedded figures; RESULTS 27 figures; 0 problems).
+  Figure embeds 27 and visible `**Figure` captions 27 in each file; `grep -nE '\(plots/[^)]+\.png\)'`
+  returns no un-embedded bare path in either file.
+- **`STOP` written** — plan complete for the available budget and zero unaddressed feedback.

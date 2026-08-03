@@ -528,7 +528,17 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**S22 DONE 2026-08-03 (latest) — the pending step-30,000 row for blocks 6–10 arrived and strengthens
+**FINALIZED 2026-08-03 — time budget exhausted; `STOP` written.** Zero unaddressed feedback files (all
+five `human_feedback*` end in `.addressed.md`). Both deliverables were re-read and verified as
+current-best at S22's state: `check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS** (REPORT 29
+display / 581 inline equations / 27 embedded figures with 27 visible captions; RESULTS 27 figures / 27
+captions; 0 problems; no bare `(plots/*.png)` path). No experiment was left half-written — nothing was
+running at close and every row in `results/` is already reflected in the deliverables. The two named
+seed replications (S23) were **not** run: each needs ~21 min of training plus ~70 s of assay and only
+~14 min of wall clock remained, so starting one would have left an unusable partial checkpoint. They
+stand in both deliverables as an explicit limitation, not as a promise.
+
+**S22 DONE 2026-08-03 — the pending step-30,000 row for blocks 6–10 arrived and strengthens
 the claim it was pending on.** No new training: S21's chained assay finished (trainer step 30,000,
 val_acc 0.5720) and gives median `w` **0.328** (IQR 0.252–0.395, strict 24.0%) against the untouched
 reference's 0.351 at the *same* step — paired **−0.037**, 36.7% of pairs wider. The "training fewer
@@ -836,6 +846,15 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**NONE — this direction is finalized and `STOP` is written (2026-08-03).** If the loop is ever
+re-entered (e.g. new operator feedback arrives, in which case `STOP` must be deleted first per
+CLAUDE.md rule 11), the queue is unchanged and in this order: (1) a second seed at **blocks 6–10**,
+the study's sharpest network and the one carrying a two-network fact at both matched accuracy and
+step 30,000; (2) a second seed at **frozen-mirror**, the one remaining single-seed run under a
+load-bearing comparison. Deliberately NOT a third fitted geometric rule — two have died on their
+first test each. Figure note: a seventh five-block run breaks the three-panel depth split in
+Figure 23; the next division would have to be by window size, not position.
 
 **S16 IS DONE (2026-08-03) — every claim the depth/position reading rests on now has a measured seed
 spread under it.** Depth step: 12-trainable-block runs (0.397-0.443) disjoint from 8-block runs
