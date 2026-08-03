@@ -134,3 +134,79 @@ iteration finds new feedback next to the stale `STOP`, delete `STOP`, address th
 re-write it when clean.
 
 On track? yes — S1-S6 complete (100%), no blocker; STOP written with zero unaddressed feedback files.
+
+---
+
+## 2026-08-03 — iteration 2: operator feedback (all three points), primary bank rebuilt
+
+**Feedback check.** `human_feedback.txt` present and unaddressed (the rule's glob is
+`human_feedback*.md`, but this is plainly operator feedback and I treated it as such). Its point 3 is
+**truncated mid-sentence** in the file — it ends at "* (\rho(JSD_{\text{corpus}},JS". I addressed the
+part that is legible ("Correct the interpretation. The current evidence shows that corpus JSD predicts
+learned output separation and overall transition width") and, per loop-mode rules, logged the
+assumption rather than blocking: I read it as *stop calling the outcome "plateau sharpening" when `w`
+measures the whole transition*, and answered it with (a) the wording change, (b) a new flatness metric
+that tests the plateau claim directly, (c) two further self-corrections the same logic implies (the
+step-0 floor effect, and withdrawing the "predictor decays during training" reading). Renamed the file
+`human_feedback.addressed.md`. Full detail of every change is in CHANGELOG.md.
+
+**What I did.**
+
+1. **Strict curve validity** (`experiments/curve_metrics.py`, `rescore.py`). Span + single-crossing +
+   monotonicity (backslide <= 0.02), applied per curve; pair-level rule needs >= 2 of 3 valid contexts.
+   Every saved curve set re-scored into `results/qc_<tag>.json`; all raw curves exported to committed
+   `results/curves_*.csv.gz` alongside the existing `.npy`.
+2. **Rebuilt the bank at the prespecified top-256 filter** (60 pairs, was top-512/75) and re-ran
+   everything on it: step143000, step0, 410M, the four formation checkpoints, the block scan.
+3. **Reworked `analyze.py`** to treat top-256 as primary and top-512 as labelled post-hoc secondary,
+   and added three figures (all raw curves; edge drift; bank comparison).
+4. Re-curated RESULTS.md and REPORT.md to current-best with 10 captioned figures each; render check
+   passes.
+
+**What I learned.**
+
+- **The lax `width()` was a real weakness but not a real bug.** The reviewer was right that the old
+  first-crossing search could accept a non-monotone or multi-transition curve. It never had to: across
+  1,080 curves the largest backslide is exactly **0.0000** and no curve crosses either level twice. So
+  the previously reported 1.000 valid rate was correct — it just wasn't evidence until now.
+- **The prespecified bank is *stronger*, not weaker.** Losing 15 pairs cost nothing: rho went
+  -0.419 -> **-0.525** at 1.4B and -0.320 -> **-0.512** at 410M. My earlier reasoning for relaxing to
+  top-512 ("keeps the 75-pair target and the power") was wrong on its own terms — the top-256
+  endpoints are the ones the model most strongly prefers in these contexts, and the effect is cleaner
+  there. Lesson: a deviation taken to protect statistical power is worth testing before adopting.
+- **The "predictor decays during training" story does not survive the correct bank.** On top-512 the
+  trajectory looked monotone (-0.660 -> -0.419); on top-256 it is -0.582, -0.456, -0.408, -0.628,
+  -0.525 with heavily overlapping CIs. I withdrew the decay claim and kept only what is robust: the
+  relationship is fully formed by step 1000 and does **not** strengthen, refuting the plan's
+  expectation.
+- **The curves really are plateau-shaped, but width and flatness are the same measurement.** Edge
+  drift is 0.076 trained versus the 0.184 straight-line reference (and 0.213 at step 0 — the untrained
+  curves are, if anything, slightly *anti*-plateau), which justifies the word "plateau" at the level of
+  the curve shape. But Spearman(w, E) = +0.971, so nothing in this design can attribute the
+  *correlation* to flatness rather than width. Both deliverables now say this explicitly.
+- **Bin medians are not monotone at 1.4B** on the new bank (Q3 = 0.462 dips below Q4/Q5). With ~12
+  pairs per bin that is expected noise, but the old caption claiming monotonicity was overstated and is
+  gone.
+
+**Assumptions logged (loop mode — could not ask).**
+
+- Treated `human_feedback.txt` as an operator feedback file despite the `.txt` extension; renamed to
+  `human_feedback.addressed.md` (contents untouched).
+- Rebuilding the frozen bank after curves have been seen technically breaks "never revise this bank",
+  but the *rule* used to build it is the prespecified one, so this restores preregistration rather than
+  breaking it. The only post-hoc element is that I already knew the top-512 answer; that is why the
+  top-512 bank stays in the report, labelled post-hoc, instead of being deleted.
+- Monotonicity tolerance 0.02 and the outer-20% window for edge drift are my choices, not the plan's;
+  both are stated in Methods. The validity verdict is insensitive to the tolerance (max backslide is
+  0.0000, so any tolerance >= 0 gives the same answer).
+- Ran the formation subset on all 60 pairs rather than the plan's "30 frozen pairs" — same wall-clock,
+  strictly more power, one identical bank at every checkpoint.
+
+**Next step.** Nothing outstanding: the plan's definition of done is met on the prespecified bank and
+all feedback is addressed. If no further feedback arrives, the direction is finished. The natural
+follow-up — explicitly out of scope here — is a context-conditioned divergence estimate, to test
+whether it predicts width better than the global one at the late checkpoints where the global
+predictor stops improving.
+
+On track? yes — S1-S6 complete (100%) on the prespecified top-256 bank, no blocker; feedback file
+addressed and renamed.

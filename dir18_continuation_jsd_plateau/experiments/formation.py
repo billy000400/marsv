@@ -15,8 +15,10 @@ CACHE = "/tmp/hf_formation"
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 if __name__ == "__main__":
+    man = sys.argv[1] if len(sys.argv) > 1 else "pair_manifest.json"
+    suffix = sys.argv[2] if len(sys.argv) > 2 else ""
     for rev in STEPS:
-        tag = os.path.join(ROOT, "results", f"assay_{rev}.json")
+        tag = os.path.join(ROOT, "results", f"assay_{rev}{suffix}.json")
         if os.path.exists(tag):
             print(f"{rev} already done", flush=True)
             continue
@@ -33,7 +35,8 @@ if __name__ == "__main__":
             shutil.rmtree(CACHE, ignore_errors=True)
             continue
         print(f"=== {rev}: assaying", flush=True)
-        r = subprocess.run([sys.executable, os.path.join(ROOT, "experiments", "run_assay.py"), rev],
+        r = subprocess.run([sys.executable, os.path.join(ROOT, "experiments", "run_assay.py"), rev,
+                            "--manifest", man, "--tag", rev + suffix],
                            env=env, capture_output=True, text=True, cwd=ROOT)
         print(r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-800:], flush=True)
         shutil.rmtree(CACHE, ignore_errors=True)

@@ -11,6 +11,7 @@ Selection rules (all fixed in advance):
     across the five bins.
 JSD_A selects; JSD_B is the predictor used in every analysis.
 """
+import argparse
 import json
 import os
 
@@ -35,6 +36,13 @@ def jsd_rows(p, i, j):
 
 
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--pool", choices=["strict", "relaxed"], default="strict",
+                    help="strict = the prespecified top-256 filter; relaxed = post-hoc top-512")
+    ap.add_argument("--out", default="pair_manifest.json")
+    ap.add_argument("--n-per-bin", type=int, default=N_PER_BIN)
+    args = ap.parse_args()
+    N_PER_BIN = args.n_per_bin
     cand = json.load(open(os.path.join(RESULTS, "endpoint_candidates.json")))
     rel = json.load(open(os.path.join(RESULTS, "jsd_reliability.json")))
     bank_npz = np.load(os.path.join(DATA, "reliability_bank.npz"))
@@ -47,8 +55,8 @@ if __name__ == "__main__":
     tot_B = cB.sum((0, 2))
     strict = set(cand["candidates"])          # top-256
     relaxed = set(cand["bank_pool"])          # top-512
-    use = strict if len(strict) >= 2 * N_PER_BIN * N_BINS else relaxed
-    topk_used = cand["topk"] if use is strict else cand["topk_bank"]
+    use = strict if args.pool == "strict" else relaxed
+    topk_used = cand["topk"] if args.pool == "strict" else cand["topk_bank"]
     ok = np.array([(pool[i] in use) and tot_A[i] >= 20_000 and tot_B[i] >= 20_000
                    for i in range(len(pool))])
     E = np.flatnonzero(ok)
@@ -89,26 +97,35 @@ if __name__ == "__main__":
     tgt_s = np.median(surp[E])
     sd_f, sd_s = logf[E].std(), surp[E].std()
 
-    chosen, used = [], set()
+    # Round-robin over bins: with the strict top-256 pool the endpoint-disjoint constraint is tight,
+    # so filling bin 0 to quota before touching bin 4 would starve the later bins.
+    order = {}
     for b in range(N_BINS):
         cands = np.flatnonzero(binid == b)
         cost = np.array([abs((logf[pairs[k][0]] + logf[pairs[k][1]]) / 2 - tgt_f) / sd_f
                          + abs((surp[pairs[k][0]] + surp[pairs[k][1]]) / 2 - tgt_s) / sd_s
                          for k in cands])
-        for k in cands[np.argsort(cost)]:
-            i, j = pairs[k]
-            if i in used or j in used:
+        order[b] = list(cands[np.argsort(cost)])
+    chosen, used = [], set()
+    for _ in range(N_PER_BIN):
+        for b in range(N_BINS):
+            if sum(c["bin"] == b for c in chosen) >= N_PER_BIN:
                 continue
-            used.update((i, j))
-            chosen.append(dict(bin=b, k=int(k), a=int(pool[i]), b_tok=int(pool[j]),
-                               jsd_A=float(jA[k]), jsd_B=float(jB[k]),
-                               a_str=cand["pool_strings"][i], b_str=cand["pool_strings"][j],
-                               count_a=int(freq[i]), count_b=int(freq[j]),
-                               surp_a=float(surp[i]), surp_b=float(surp[j]),
-                               ent_a=float(ent[i]), ent_b=float(ent[j]),
-                               strict_topk=bool(pool[i] in strict and pool[j] in strict)))
-            if sum(c["bin"] == b for c in chosen) == N_PER_BIN:
+            for n_k, k in enumerate(order[b]):
+                i, j = pairs[k]
+                if i in used or j in used:
+                    continue
+                used.update((i, j))
+                order[b] = order[b][n_k + 1:]
+                chosen.append(dict(bin=b, k=int(k), a=int(pool[i]), b_tok=int(pool[j]),
+                                   jsd_A=float(jA[k]), jsd_B=float(jB[k]),
+                                   a_str=cand["pool_strings"][i], b_str=cand["pool_strings"][j],
+                                   count_a=int(freq[i]), count_b=int(freq[j]),
+                                   surp_a=float(surp[i]), surp_b=float(surp[j]),
+                                   ent_a=float(ent[i]), ent_b=float(ent[j]),
+                                   strict_topk=bool(pool[i] in strict and pool[j] in strict)))
                 break
+    chosen.sort(key=lambda c: (c["bin"], c["jsd_A"]))
     print(f"bank: {len(chosen)} pairs, per-bin {[sum(c['bin']==b for c in chosen) for b in range(N_BINS)]}")
 
     lf = [[np.log10(c["count_a"] * c["count_b"]) / 2 for c in chosen if c["bin"] == b]
@@ -136,5 +153,5 @@ if __name__ == "__main__":
                          "split; within-pair frequency ratio <= 2; endpoint-disjoint; 15 pairs per "
                          "JSD_A quintile balanced on log-frequency and surprisal"),
     )
-    json.dump(man, open(os.path.join(RESULTS, "pair_manifest.json"), "w"), indent=2)
-    print("saved results/pair_manifest.json")
+    json.dump(man, open(os.path.join(RESULTS, args.out), "w"), indent=2)
+    print(f"saved results/{args.out}")

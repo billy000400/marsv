@@ -1,0 +1,13 @@
+=== step1000: downloading
+=== step1000: assaying
+valid-curve rate 1.000  median w 0.753  IQR(w) 0.107  max endpoint rel-err 2.55e-06
+=== step8000: downloading
+=== step8000: assaying
+valid-curve rate 1.000  median w 0.601  IQR(w) 0.150  max endpoint rel-err 2.83e-06
+=== step32000: downloading
+=== step32000: assaying
+valid-curve rate 1.000  median w 0.555  IQR(w) 0.131  max endpoint rel-err 2.64e-06
+=== step64000: downloading
+=== step64000: assaying
+valid-curve rate 1.000  median w 0.512  IQR(w) 0.150  max endpoint rel-err 7.77e-06
+FORMATION_DONE

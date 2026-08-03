@@ -20,10 +20,11 @@ def main():
     ap.add_argument("--model", default=MODEL)
     ap.add_argument("--calib", action="store_true", help="run only the frozen 15-pair calibration set")
     ap.add_argument("--tag", default=None)
+    ap.add_argument("--manifest", default="pair_manifest.json")
     a = ap.parse_args()
     tag = a.tag or (("calib_" if a.calib else "") + a.revision + ("" if a.model == MODEL else "_410m"))
 
-    man = json.load(open(os.path.join(RESULTS, "pair_manifest.json")))
+    man = json.load(open(os.path.join(RESULTS, a.manifest)))
     valid = torch.tensor(np.load(os.path.join(DATA, "reliability_bank.npz"))["valid"],
                          device="cuda", dtype=torch.long)
     tok, m = load(a.revision, a.model)

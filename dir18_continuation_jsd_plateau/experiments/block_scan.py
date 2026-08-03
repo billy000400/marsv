@@ -5,6 +5,7 @@ blocks remain after the patch. This is a sanity control, not a layer sweep.
 """
 import json
 import os
+import sys
 
 import numpy as np
 import torch
@@ -16,7 +17,8 @@ BLOCKS = [0, 6, 12, 18, 23]
 N_EACH = 5  # 5 lowest-JSD_B + 5 highest-JSD_B pairs
 
 if __name__ == "__main__":
-    man = json.load(open(os.path.join(RESULTS, "pair_manifest.json")))
+    man = json.load(open(os.path.join(RESULTS,
+                                      sys.argv[1] if len(sys.argv) > 1 else "pair_manifest.json")))
     valid = torch.tensor(np.load(os.path.join(DATA, "reliability_bank.npz"))["valid"],
                          device="cuda", dtype=torch.long)
     order = np.argsort([p["jsd_B"] for p in man["pairs"]])

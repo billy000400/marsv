@@ -80,3 +80,65 @@ shrinking share of which pairs are sharp. Valid-curve rate 1.000 at all six chec
 **No earlier number was superseded** — the headline step143000 and step0 figures are unchanged
 (`rho = -0.419` and `-0.155`). The Summary, Headline and Conclusion sections gained an explicit
 statement that the expected training trend was not observed.
+
+---
+
+## 2026-08-03 — operator feedback addressed: prespecified top-256 bank, strict validity, corrected interpretation
+
+Addressed `human_feedback.txt` (renamed `human_feedback.addressed.md`). Its three asks, and what
+changed in the deliverables.
+
+**1. `width()` validity checking rebuilt.** The old implementation only searched for the *first*
+upward 0.1 and 0.9 crossings, so a curve that wandered back down or crossed a level several times
+would have been silently accepted; the reported "valid-curve rate 1.000" was therefore an assumption,
+not a measurement. New module `experiments/curve_metrics.py` applies three explicit criteria per curve
+— **span** (`d(0) <= 0.1`, `d(1) >= 0.9`), **single crossing** (exactly one crossing of each level, in
+either direction) and **monotonicity** (largest backslide below the running maximum `<= 0.02`) — and
+`experiments/rescore.py` re-scores every saved curve set into `results/qc_<tag>.json`. Result: across
+1,080 curves (6 checkpoints x 60 pairs x 3 contexts) **zero** failures of any criterion and a largest
+backslide of exactly 0.0000, so the 1.000 valid-curve rate now stands as a verified measurement.
+Invalid rates are reported per divergence bin (all 0.000). All raw curves are committed as
+`results/curves_*.npy` **and** newly as plain-text `results/curves_*.csv.gz` (one row per pair x
+context x grid point) for independent auditing, and new **Figure 2** plots every one of the 180 curves
+per checkpoint in small multiples by divergence bin — the previous deliverable only showed six example
+pairs.
+
+**2. Primary bank rebuilt at the prespecified top-256 filter.** The previous headline used a top-512
+endpoint filter, described as a prespecified fallback; it was not one. The bank was rebuilt exactly as
+prespecified (`build_pairs.py --pool strict`), which gives **60** endpoint-disjoint pairs from 123
+eligible endpoints (14/13/11/10/12 per quintile; the disjointness rule caps it at 61), balanced on
+log-frequency (Kruskal-Wallis p = 0.52) and surprisal (p = 0.21). Pair selection is now round-robin
+across quintiles so the tight endpoint budget is not spent on Q1. All six checkpoints plus 410M and the
+block scan were re-run on this bank. **Superseded headline numbers (old top-512 -> new top-256):**
+rho(JSD_B, w) at 1.4B step143000 **-0.419 -> -0.525** [-0.701, -0.304], p 1.8e-4 -> 1.7e-5;
+step 0 **-0.155 -> -0.056**; 410M **-0.320 -> -0.512**; rho(JSD_B, output JSD) **+0.729 -> +0.751**
+(step 0 **-0.144 -> +0.145**); partial rho **-0.267 -> -0.384**; median w **0.562 -> 0.541** (IQR
+0.111 -> 0.169), step 0 0.831 (IQR 0.004 -> 0.006), 410M 0.655 -> 0.640; n **75 -> 60**. Formation
+trajectory (rho with w) **-0.155/-0.660/-0.605/-0.524/-0.539/-0.419 -> -0.056/-0.582/-0.456/-0.408/
+-0.628/-0.525**; median w **0.831/0.758/0.624/0.582/0.541/0.562 -> 0.831/0.753/0.601/0.555/0.512/
+0.541**. Block scan **0.549/0.646/0.726/0.796/0.805 -> 0.599/0.661/0.741/0.805/0.804**. Per-context
+rho **-0.326/-0.398/-0.437 -> -0.486/-0.411/-0.504**. Calibration IQR(w) **0.115 -> 0.109**. The
+top-512 bank is retained only as an explicitly labelled **post-hoc secondary** analysis (new
+**Figure 9**, `plots/bank_comparison.png`): rho = -0.419 / -0.155 / -0.320, CIs overlapping the
+primary bank's everywhere.
+
+**3. Interpretation corrected.** The deliverables no longer describe the primary outcome as "plateau
+sharpening". The claim is now stated as: corpus divergence predicts (i) **learned output separation**
+(rho = +0.751, the strongest association in the report) and (ii) the **overall transition width** w.
+Three corrections follow from this. (a) A new metric, **edge drift** `E` (mean movement of d away from
+its endpoint value in the outer 20% of the path), with a no-plateau reference E = 0.184 for the
+straight line d(t) = t, is defined in Methods and shown in new **Figure 6**: trained median E = 0.076
+versus 0.213 at step 0, so the curves *are* plateau-shaped — but Spearman(w, E) = +0.971, so the
+pair-level association cannot be attributed to flatness rather than width, and the report says so.
+(b) The step-0 control is now described as **partly a floor effect** (IQR of w = 0.006) rather than a
+clean absence of association. (c) The formation claim "the relationship peaks early and then decays"
+is **withdrawn**: on the prespecified bank the post-step-1000 values (-0.582, -0.456, -0.408, -0.628,
+-0.525) have heavily overlapping CIs and show no reliable trend. What survives is the refutation of
+the plan's expectation that it would *strengthen*.
+
+**Figures.** REPORT.md and RESULTS.md now embed 10 captioned figures each, renumbered sequentially in
+reading order: 1 reliability, **2 all raw curves (new)**, 3 reference curves (now drawn per carrier
+context, no averaging), 4 JSD vs width, 5 width by bin, **6 edge drift (new)**, 7 output-JSD
+validation, 8 formation, **9 bank comparison (new)**, 10 block scan. Figure 5's caption no longer
+claims a monotone bin trend at 1.4B (Q3 = 0.462 dips below Q4 = 0.502 and Q5 = 0.479); 410M remains
+monotone. `check_render.py` passes on both files (9 display equations, 10 embeds each, 0 problems).

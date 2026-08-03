@@ -12,6 +12,8 @@ and the transition width w = t(d=0.9) - t(d=0.1). Small w = sharp transition = p
 import numpy as np
 import torch
 
+import curve_metrics
+
 N_T = 50
 GRID = np.linspace(0.0, 1.0, N_T)
 
@@ -100,21 +102,8 @@ def run_pair(model, ids_a, ids_b, layer=0, valid=None, grid=GRID):
 
 
 def width(d, grid=GRID):
-    """w = t(d=0.9) - t(d=0.1) by linear interpolation; NaN if d is not monotone enough to define it."""
-    t10 = _cross(d, grid, 0.1)
-    t90 = _cross(d, grid, 0.9)
-    if t10 is None or t90 is None or t90 < t10:
-        return float("nan")
-    return t90 - t10
-
-
-def _cross(d, grid, level):
-    """First upward crossing of `level`, linearly interpolated."""
-    for i in range(len(d) - 1):
-        if d[i] <= level <= d[i + 1] and d[i + 1] > d[i]:
-            f = (level - d[i]) / (d[i + 1] - d[i])
-            return grid[i] + f * (grid[i + 1] - grid[i])
-    return None
+    """w = t(d=0.9) - t(d=0.1); NaN unless the curve passes the strict validity criteria."""
+    return curve_metrics.metrics(d, grid)["w"]
 
 
 def logit_jsd(za, zb):

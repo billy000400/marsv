@@ -174,18 +174,20 @@ checkpoints test whether the negative relationship strengthens during training.
 - [x] **S1 - Preflight and JSD:** verify data access/decoding, count both splits, and pass reliability.
   *(byte-range sample verified against the official .idx; Spearman(JSD_A,JSD_B)=0.9998, noise ratio 0.072)*
 - [x] **S2 - Freeze pairs:** build and save the untouched pair manifest.
-  *(75 endpoint-disjoint pairs, 15/quintile; balance p=0.92 log-freq, 0.81 surprisal)*
+  *(prespecified top-256 filter: 60 endpoint-disjoint pairs, 14/13/11/10/12 per quintile; balance
+  p=0.52 log-freq, 0.21 surprisal. Cap is 61 given 123 eligible endpoints.)*
 - [x] **S3 - Calibrate:** pass endpoint/self-tests and confirm the frozen pilot has usable `w` range.
-  *(valid-curve rate 1.000, IQR(w)=0.115; reversal 1.1e-5, prefix residual diff exactly 0.0)*
+  *(valid-curve rate 1.000, IQR(w)=0.109; reversal 1.1e-5, prefix residual diff exactly 0.0; strict
+  validity criteria: 0/1080 curves fail, max backslide 0.0000)*
 - [x] **S4 - Primary runs:** finish 1.4B final, 1.4B step 0, then 410M final.
-  *(rho(JSD_B,w) = -0.419 / -0.155 / -0.320)*
+  *(rho(JSD_B,w) = -0.525 / -0.056 / -0.512)*
 - [x] **S5 - Analyze:** produce figures, primary correlation, output-JSD validation, and one adjusted
-  sensitivity analysis. *(6 figures; output-JSD rho=+0.729; partial rho=-0.267)*
+  sensitivity analysis. *(10 figures; output-JSD rho=+0.751; partial rho=-0.384)*
 - [x] **S6 - Finalize:** curate reports, document the exact data/compute scope, and write `STOP`.
-  *(RESULTS.md + REPORT.md current-best, 7 captioned figures in both, render check passes)*
+  *(RESULTS.md + REPORT.md current-best, 10 captioned figures in both, render check passes)*
 - [x] **Optional formation subset:** step1000/8000/32000/64000 on the same frozen bank.
-  *(relationship does NOT strengthen: peaks at -0.660 by step 1000, decays to -0.419, while median
-  `w` falls monotonically 0.831 -> 0.562)*
+  *(relationship does NOT strengthen: full strength by step 1000 at -0.582, then -0.456/-0.408/
+  -0.628/-0.525 within overlapping CIs, while median `w` falls 0.831 -> ~0.52)*
 
 ## Fallback
 
@@ -214,27 +216,32 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-S1-S5 complete; the definition of done is met. Corpus JSD predicts sharper plateaus in trained Pythia
-(`rho = -0.419`, CI [-0.585,-0.222], n = 75) and not at step 0 (`-0.155`, CI includes 0, median
-`w = 0.831` with `IQR = 0.004`), replicating at 410M (`-0.320`). Predictor validated against model
-output JSD (`+0.729`). Prespecified verdict: predictive divergence is associated with learned plateau
-sharpening; attenuates to `-0.267` after geometry adjustment, so the claim is a total association,
-observational only. RESULTS.md and REPORT.md are current-best and pass the GitHub render check; 6
-figures embedded in both. Bank frozen at top-512 rather than top-256 (documented deviation).
+S1-S6 complete on the **prespecified top-256 bank** (60 endpoint-disjoint pairs); operator feedback
+(`human_feedback.addressed.md`) fully addressed. Corpus JSD predicts narrower transitions in trained
+Pythia (`rho = -0.525`, CI [-0.701,-0.304], n = 60) and not at step 0 (`-0.056`, CI includes 0, median
+`w = 0.831` with `IQR = 0.006` — partly a floor effect), replicating at 410M (`-0.512`). Predictor
+validated against model output JSD (`+0.751`). Prespecified verdict branch: corpus JSD predicts
+model-output JSD and smaller `w`; step 0 does not — stated as **learned output separation + overall
+transition width**, not "plateau sharpening", because `w` and the new flatness metric (edge drift,
+0.076 vs the 0.184 no-plateau reference) correlate at +0.971 and cannot be separated. Attenuates to
+`-0.384` after geometry adjustment: total association, observational only. Strict curve validity
+(span / single-crossing / monotonicity) now measured, not assumed: 0 failures in 1,080 curves, max
+backslide 0.0000; all raw curves committed as `.npy` and `.csv.gz`. The relaxed top-512 bank remains
+as a clearly labelled post-hoc secondary analysis (`rho = -0.419 / -0.155 / -0.320`). RESULTS.md and
+REPORT.md are current-best with 10 captioned figures each and pass the GitHub render check.
 
-The optional formation subset is also done, and it **refutes the plan's expected pattern**: the
-negative relationship does not strengthen during training. It is strongest at the earliest
-checkpoint run (`step1000`, `rho = -0.660`) and decays to `-0.419` at `step143000`, while median `w`
-falls monotonically 0.831 -> 0.562. Plateaus keep sharpening; a context-free corpus statistic
-explains a shrinking share of which pairs are sharp.
+The formation subset **refutes the plan's expected pattern**: the negative relationship does not
+strengthen during training. It is at full strength by `step1000` (`-0.582`) and then moves within
+overlapping CIs (`-0.456, -0.408, -0.628, -0.525`), while median `w` falls 0.831 -> ~0.52. (The
+earlier "it decays monotonically" reading came from the post-hoc top-512 bank and has been withdrawn.)
 
 ## Next step
 
-None — the plan is complete and `STOP` is written. The natural follow-up, explicitly out of scope
-here, is a **context-conditioned** divergence estimate, to test whether it retains predictive power
-at the late checkpoints where the global estimate fades. If a future iteration finds a new
-`human_feedback*.md` / `*REVIEW*` file next to the stale `STOP`, delete `STOP`, address the feedback,
-and only re-write `STOP` when clean again.
+None — the plan is complete on the prespecified bank and zero unaddressed feedback files remain, so
+`STOP` is written. The natural follow-up, explicitly out of scope here, is a **context-conditioned**
+divergence estimate, to test whether it predicts width better at the late checkpoints where the global
+estimate stops improving. If a future iteration finds a new `human_feedback*` / `*REVIEW*` file next
+to the stale `STOP`, delete `STOP`, address the feedback, and only re-write `STOP` when clean again.
 
 ## References
 
