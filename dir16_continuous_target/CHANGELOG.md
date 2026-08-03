@@ -81,3 +81,25 @@ What changed in the deliverables:
 
 Verdict unchanged: POSITIVE — continuous, information-preserving supervision reduces (but does not
 abolish) activation plateaus.
+
+## 2026-08-03 — deliverables brought into line with the updated rule-9a render check
+
+No experiment was re-run and **no number changed**: every figure in both deliverables still matches
+`results/aggregate.json` (verified this iteration against the pooled / frac_form / ckpt_control
+blocks). The project-wide `experiments/check_render.py` gained two checks since the last iteration
+(CLAUDE.md rules 9a and 9d), and both deliverables failed the rule-9a check — six tables sat directly
+under a heading or under another table with no prose stating the claim.
+
+- **REPORT.md:** added the paragraph introducing the max-normalized-jump table (it previously
+  followed the linearity-deviation table with nothing between them), saying what the second scalar
+  adds — linearity deviation shows the path is uneven, max jump shows the unevenness is a cliff.
+- **RESULTS.md:** added a claim-stating paragraph above each of its five tables (main comparison,
+  max normalized jump, checkpoint control, `d^frac` robustness, training quality), each naming what
+  the table shows and why it matters — e.g. the hidden layers carry the conclusion because they are
+  the same 200-d space with the same initial weights, and the training-quality table exists to rule
+  out a degenerate regressor that would look smooth without having learned anything.
+
+Both files now pass `check_render.py` with 0 problems (REPORT.md: 7 display equations, 86 inline,
+8 embedded figures; RESULTS.md: 25 inline, 8 embedded figures), 8 embeds and 8 visible numbered
+captions each. Verdict, numbers and figures unchanged: POSITIVE — continuous, information-preserving
+supervision reduces (but does not abolish) activation plateaus.

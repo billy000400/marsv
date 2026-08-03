@@ -321,6 +321,10 @@ interval sits far above 0, and the three seeds cluster tightly — the effect is
 | hidden 3 | 0.1295 | 0.0304 | **0.0990** [0.0874, 0.1107] | 4.3x | 89 / 90 |
 | output   | 0.1792 | 0.0304 | **0.1487** [0.1395, 0.1580] | 5.9x | 89 / 90 |
 
+Linearity deviation establishes that the classifier's path is uneven; the max normalized jump
+establishes that the unevenness takes the specific form of a cliff, which is the plateau signature
+the safety question is about. It separates the two models even more sharply at the output layer:
+
 | layer | MJ classifier | MJ regressor | paired diff [95% CI] | ratio |
 |---|---|---|---|---|
 | hidden 2 | 2.01 | 1.14 | **0.87** [0.77, 0.97] | 1.8x |

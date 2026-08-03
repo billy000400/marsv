@@ -1,6 +1,6 @@
-"""Check that a Markdown deliverable actually renders on GitHub.
+"""Check that a Markdown deliverable actually renders on GitHub -- and reads like a paper.
 
-Four checks, all of which have caught a real bug in this direction:
+Six checks, all of which have caught a real bug in this direction:
 
 1. KaTeX compile of every display (```math fence) equation.
 2. KaTeX compile of every inline $...$ expression *after* simulating GitHub's
@@ -8,6 +8,9 @@ Four checks, all of which have caught a real bug in this direction:
 3. Macros GitHub's markdown math renderer rejects outright ("The following macros
    are not allowed: ..."), e.g. \\operatorname -- use \\mathrm / \\text instead.
 4. Display-math placement via the GitHub markdown API (rule 8a) + figure embeds (rule 12).
+5. Every table is preceded by a prose sentence that states the claim (rule 9a) -- a
+   table the reader has to interpret unaided is an unfinished result.
+6. Mechanical contrast constructions ("we do X rather than Y") stay rare (rule 9d).
 
 Usage: python experiments/check_render.py REPORT.md RESULTS.md
 Exit code 1 if any check fails.
@@ -32,6 +35,15 @@ BAD_MACROS = [
 ]
 
 FENCE_RE = re.compile(r"```math\n(.*?)```", re.S)
+TABLE_ROW_RE = re.compile(r"^\s*\|.*\|\s*$")
+TABLE_SEP_RE = re.compile(r"^\s*\|[\s:|-]+\|\s*$")
+# The rule-9d tic is a *self-description* built on contrast ("we do X rather than Y"),
+# not any use of the words -- "explained by A rather than B" is ordinary comparison.
+CONTRAST_RE = re.compile(r"\b(rather than|instead of|not just|as opposed to)\b", re.I)
+SELF_RE = re.compile(r"\b(we|our|ours|this (?:paper|report|method|work))\b", re.I)
+UNLIKE_RE = re.compile(r"\bunlike (?:prior|existing|previous|other|standard)\b", re.I)
+SENTENCE_RE = re.compile(r"[^.!?\n]+[.!?]?")
+CONTRAST_BUDGET = 2
 INLINE_RE = re.compile(r"(?<![$\\])\$(?!\$)([^$\n]+?)\$(?!\$)")
 # GitHub strips a backslash before ASCII punctuation inside inline math.
 GH_STRIP_RE = re.compile(r"\\([_{}|,;!:%#&~^$\\'\"()\[\]<>*+=/?@`.-])")
@@ -55,6 +67,47 @@ def katex(items):
         p = subprocess.run(cmd, input=json.dumps(items), capture_output=True, text=True,
                            check=True)
     return json.loads(p.stdout)
+
+
+def is_prose(line):
+    """A line that can carry a claim: not a heading, table row, image, fence or rule."""
+    s = line.strip()
+    return bool(s) and not s.startswith(("#", "|", "![", "```", "~~~", "---", "<"))
+
+
+def unmotivated_tables(outside):
+    """Rule 9a: a real sentence must sit above each table, not just a heading.
+
+    The unit is the whole paragraph above the table, since prose wraps -- a
+    paragraph ending in a short line like "measurement error:" still counts.
+    """
+    lines = outside.split("\n")
+    bad = []
+    for i, line in enumerate(lines[:-1]):
+        if not (TABLE_ROW_RE.match(line) and TABLE_SEP_RE.match(lines[i + 1])):
+            continue
+        if i and TABLE_ROW_RE.match(lines[i - 1]):
+            continue  # mid-table, not the header row
+        j = i - 1
+        while j >= 0 and not lines[j].strip():
+            j -= 1
+        para = []
+        while j >= 0 and is_prose(lines[j]):
+            para.append(lines[j])
+            j -= 1
+        if len(" ".join(para).split()) < 12:
+            bad.append(i + 1)
+    return bad
+
+
+def contrast_tics(outside):
+    """Rule 9d: contrast constructions used to describe our own method."""
+    hits = []
+    for m in SENTENCE_RE.finditer(outside):
+        s = m.group(0)
+        if UNLIKE_RE.search(s) or (CONTRAST_RE.search(s) and SELF_RE.search(s)):
+            hits.append((line_of(outside, m.start()), s.strip()))
+    return hits
 
 
 def github_render(text):
@@ -102,6 +155,16 @@ def check(path):
         if m.group(1) != "]":
             fails.append(f"un-embedded plot path at L{line_of(text, m.start())}")
     n_img = len(re.findall(r"!\[[^\]]+\]\(plots/[^)]+\.png\)", text))
+
+    for ln in unmotivated_tables(outside):
+        fails.append(f"table at L{ln} has no prose sentence above it stating the claim "
+                     f"(rule 9a)")
+
+    tics = contrast_tics(outside)
+    if len(tics) > CONTRAST_BUDGET:
+        fails.append(f"{len(tics)} mechanical contrast constructions, budget is "
+                     f"{CONTRAST_BUDGET} (rule 9d): say what the method does, not what "
+                     "it isn't\n" + "\n".join(f"    L{ln}: {s[:100]}" for ln, s in tics))
 
     print(f"{path}: {len(fences)} display eqs, {len(inlines)} inline eqs, "
           f"{n_img} embedded figures, {len(fails)} problem(s)")

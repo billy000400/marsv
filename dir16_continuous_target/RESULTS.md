@@ -26,6 +26,12 @@ bootstrap CI over pairs (10,000 resamples).
 
 ### Main comparison — linearity deviation at the best-val checkpoint (lower = smoother)
 
+The headline evidence: at every layer the regressor's representation travels far closer to a
+constant-rate transition, and every paired bootstrap interval stays well clear of zero, so the gap
+does not depend on which digit pairs happen to be in the set. The two hidden layers carry the
+conclusion — they are the same 200-d space with the same initial weights in both models, so only the
+target differs.
+
 | layer | classifier | regressor | paired diff (clf − reg) [95% CI] | ratio | pairs regressor smoother |
 |---|---|---|---|---|---|
 | hidden 2 | 0.1182 | 0.0263 | **0.0918** [0.0804, 0.1036] | 4.5x | 89 / 90 |
@@ -33,6 +39,11 @@ bootstrap CI over pairs (10,000 resamples).
 | output   | 0.1792 | 0.0304 | **0.1487** [0.1395, 0.1580] | 5.9x | 89 / 90 |
 
 ### Plateau-and-cliff shape — max normalized jump (1 = constant rate)
+
+Linearity deviation says the classifier's path is uneven; this scalar says the unevenness takes the
+form of a cliff. At its steepest point the classifier's output covers 6.3x its fair share of the
+transition in one $\alpha$ step of size $1/100$, while the regressor covers 1.2x — barely more than
+a constant-rate walk.
 
 | layer | classifier | regressor | paired diff [95% CI] | ratio |
 |---|---|---|---|---|
@@ -42,6 +53,11 @@ bootstrap CI over pairs (10,000 resamples).
 
 ### Control — probing the final step-30,000 weights instead
 
+The obvious objection is that the classifier memorizes its training set (train MSE $\sim 10^{-7}$)
+while the regressor does not, so the gap might be an overtraining artifact. Re-probing the final
+weights moves the classifier's deviation by at most 6% and the regressor's not at all: the smoothness
+gap is a target-type effect, and the checkpoint rule is not creating it.
+
 | layer | clf best-val | clf step 30k | reg best-val | reg step 30k | paired diff at step 30k [95% CI] |
 |---|---|---|---|---|---|
 | hidden 2 | 0.1182 | 0.1253 | 0.0263 | 0.0263 | 0.0990 [0.0868, 0.1119] |
@@ -50,6 +66,10 @@ bootstrap CI over pairs (10,000 resamples).
 
 ### Robustness — dir12's alternative normalization $d^{\text{frac}}$
 
+Dividing the travelled distance by the total path length, which is how dir12 normalizes, shrinks
+both models' scores but leaves the ordering, the magnitude of the gap and the significance intact —
+the verdict is not an artifact of the distance normalization.
+
 | layer | classifier | regressor | paired diff [95% CI] |
 |---|---|---|---|
 | hidden 2 | 0.0842 | 0.0221 | 0.0621 [0.0568, 0.0675] |
@@ -57,6 +77,11 @@ bootstrap CI over pairs (10,000 resamples).
 | output   | 0.1617 | 0.0256 | 0.1361 [0.1256, 0.1466] |
 
 ### Training quality (both models adequate; metrics at the probed best-val checkpoint)
+
+A degenerate regressor would look perfectly smooth while having learned nothing, so both models are
+checked against their own task first. The classifier lands 3.0-3.5 points below dir12's clean-input
+MNIST baseline, the expected cost of the $\sigma=0.3$ corruption, and the regressor beats both
+denoising baselines by more than an order of magnitude.
 
 | model | test metric | seeds 0/1/2 | reference |
 |---|---|---|---|

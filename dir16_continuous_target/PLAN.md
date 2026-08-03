@@ -126,7 +126,7 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-**Complete, and operator feedback #1 addressed (2026-07-26, iteration 2).** Both models trained and
+**Complete; feedback #1 addressed; deliverables re-verified 2026-08-03 (iteration 3).** Both models trained and
 verified on 3 seeds; the frozen 90-pair probe run for both; aggregate paired comparison with
 bootstrap CIs, the hand-selected `d(alpha)` curves, reconstructions along the path, and a checkpoint
 control are all in RESULTS.md / REPORT.md with 8 embedded figures.
@@ -144,6 +144,11 @@ Deviation from the setup, logged in JOURNAL.md: under matched training the regre
 overfit (its validation loss flattens rather than rising), so the "slight overfitting" adequacy
 criterion is met by the classifier only. Matched step count was kept in preference to forcing
 regressor overfitting; reported as Limitation 2 in REPORT.md.
+
+On 2026-08-03 both deliverables were re-checked against the updated `experiments/check_render.py`
+(which added the rule-9a "prose above every table" and rule-9d contrast-budget checks). Six tables
+lacked a claim-stating paragraph; prose was added above each. All numbers were re-verified against
+`results/aggregate.json` and are unchanged; both files now pass with 0 problems.
 
 ## Next step
 

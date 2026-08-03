@@ -90,3 +90,41 @@ feedback anyway and renamed to `human_feedback_1.addressed.md` per CLAUDE.md Par
 `STOP` is written. If new feedback arrives, delete `STOP`, address it, re-write `STOP` when clean.
 
 On track? yes — S3 (aggregate & report) complete, 100% done, no blocker.
+
+## 2026-08-03 — iteration 3: rule-9a compliance pass (no science changed)
+
+**Feedback check:** listed the direction root — the only feedback file is
+`human_feedback_1.addressed.md`, which already carries the `.addressed.md` suffix. **No unaddressed
+feedback**, so this iteration was free to advance/close the plan.
+
+**Why this iteration happened at all.** The plan was complete and `STOP` was written last iteration,
+but `STOP` is gone and `experiments/check_render.py` has a newer mtime (Aug 3) than the rest of the
+direction — the project-wide checker was updated with the rule-9a (prose above every table) and
+rule-9d (contrast-construction budget) checks, and the loop was restarted so each direction
+re-verifies against it. That is exactly what I did.
+
+**What I did.**
+- Ran the updated `check_render.py` on both deliverables. Note it uses `all(check(p) for p in ...)`,
+  which **short-circuits** — running it on both files at once only reported REPORT.md's failure and
+  never checked RESULTS.md. Ran the two files separately to see everything: 1 failure in REPORT.md,
+  5 in RESULTS.md, all rule 9a.
+- Fixed all six by adding claim-stating prose above each table (REPORT.md: the max-normalized-jump
+  table; RESULTS.md: all five of its tables). Both files now pass with 0 problems.
+- Re-verified every number in both deliverables against `results/aggregate.json` (pooled, frac_form,
+  ckpt_control) before touching anything — all match, so nothing was superseded and no figure needed
+  regenerating.
+- Checked rule 12 (8 embeds / 8 visible `**Figure N.**` captions in each file) and rule 13 (all plots
+  draw from `CVD` in `common.py` and additionally vary linestyle/marker/hatch; grayscale-safe).
+
+**What I learned.**
+- Running the checker on multiple files in one call hides failures in every file after the first.
+  Check files one at a time (or read the exit-code-only summary as "at least one file failed").
+- The rule-9a failure mode here was entirely "two tables stacked with a blank line between them" and
+  "table directly under a `###` heading" — the fix is a sentence naming the claim, which also made
+  RESULTS.md readable standalone rather than as a numbers dump.
+
+**Next step.** None. The plan's success criterion is met, no feedback file is outstanding, and both
+deliverables pass every mechanical check, so `STOP` is re-written. If new feedback arrives, delete
+`STOP`, address it, and re-write `STOP` when clean.
+
+On track? yes — S3 (aggregate & report) complete, 100% done, no blocker.
