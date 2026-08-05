@@ -1,0 +1,1 @@
+How did you sample the 60-pair bank? what are they? write those in the appendix of the report.

@@ -276,3 +276,85 @@ labels. `check_render.py` passes on both files (12 display equations, 12 embeds 
 **Unchanged numbers.** The corpus pipeline was rebuilt from scratch this iteration (the /tmp cache
 does not survive sessions) and reproduces exactly: Spearman(J_sel, J_hold) = 0.9998, noise ratio
 0.0723, 50,060 valid target IDs, 123 eligible endpoints, primary rho = -0.525 / -0.056 / -0.512.
+
+---
+
+## 2026-08-05 — operator feedback #4: the two named example pairs (`big`/`large`, `big`/`in`)
+
+Addressed `human_feedback_4.txt` (renamed `human_feedback_4.addressed.md`), which asked for a plot
+validating whether the Pythia models plateau on *"My house is big/large"* and not on
+*"My house is big -> in"*. No previously reported number changed; this iteration only ADDS a result.
+
+**New experiment.** `experiments/reference_jsd.py` recounted the successors of ` big`, ` large` and
+` in` in the same two 500,000-row corpus splits used throughout (the /tmp corpus cache does not
+survive a session, so both splits were re-downloaded; the pipeline reproduces exactly — 50,060 valid
+target IDs, same as every earlier run). `experiments/reference_house.py` ran both pairs through the
+unchanged post-block-0 assay in four carriers (`My house is` plus the three project carriers) at three
+model settings, and additionally records the **absolute output movement**
+`M(t) = JSD(p(t), p(0))` in bits. `experiments/plot_reference_house.py` makes the figure.
+
+**New numbers (no supersession — these pairs had never been assayed).**
+
+- Corpus: `J_hold( big, large) = 0.412` bits, `J_hold( big, in) = 0.701` bits; split-half sampling
+  noise 0.070 / 0.059 / 0.003 bits for ` big` / ` large` / ` in`; holdout counts 122,257 / 175,159 /
+  9,821,847.
+- Trained 1.4B, carrier `My house is`: ` big`/` large` `w = 0.773`, `E = 0.162`, `M(1) = 0.035` bits;
+  ` big`/` in` `w = 0.357`, `E = 0.043`, `M(1) = 0.935` bits (`M(0.5) = 0.505`).
+- Step 0: 0.834 / 0.829 (`E` 0.216 / 0.211). 410M trained: 0.794 / 0.494 (`E` 0.198 / 0.075).
+- Context in the bank: `w = 0.357` is sharper than all 60 bank pairs (bank min 0.401); `w = 0.773` is
+  above 95% of them. Bank pairs near 0.41 bits have median `w = 0.639`; near 0.70 bits, 0.502.
+
+**Answer recorded in both deliverables.** The plateau is on ` big`/` in`, not on ` big`/` large` —
+the opposite way round from the question as phrased — and the two facts are the same fact once
+absolute movement is measured: the trained model separates *"My house is big"* from *"My house is
+large"* by only 0.035 bits, so the whole interpolation path lies inside one plateau and there is no
+boundary to cross, while ` big` and ` in` sit in different plateaus and the crossing is abrupt. Both
+behaviours are learned (step 0 shows neither) and the 410M model reproduces them.
+
+**Changed in RESULTS.md and REPORT.md**
+
+- New **Figure 13** (`plots/house_reference.png`) embedded with a visible caption in BOTH files: (a)
+  `d(t)` for the two pairs, trained 1.4B, carrier `My house is`, against the no-plateau diagonal;
+  (b) absolute movement `M(t)` in bits; (c) the same prompts at step 0; (d) both pairs placed on the
+  60-pair bank scatter with its binned medians, with a bar spanning the other three carriers.
+- New Results subsection in REPORT.md ("The two named example pairs") and a matching block in
+  RESULTS.md, each with the table above, the reading of the answer, and two caveats: the gap is wider
+  than the bank trend predicts (pair-level scatter, cf. Figure 3), and ` in` is ~80x more frequent
+  than ` big`, so this pair would fail the bank's 2x frequency-matching rule.
+- New Methods metric in REPORT.md: **absolute output movement** `M(t) = JSD(softmax z(t), softmax
+  z(0))` in bits, motivated by the blind spot of the normalised coordinate `d(t)` (it runs 0 -> 1
+  however little the output moves).
+- Summary and Conclusion each gained one paragraph/sentence on the example pairs; the sample-size
+  paragraph gained the 24 extra curves; the reproduction list gained the three new scripts.
+- Figure count 12 -> 13 in both files; `check_render.py` passes (13 display equations, 13 embeds and
+  13 captions per file, 0 problems).
+
+---
+
+## 2026-08-05 — operator feedback #5: appendix documenting the 60-pair bank
+
+Addressed `human_feedback_5.txt` (renamed `human_feedback_5.addressed.md`): "How did you sample the
+60-pair bank? what are they? write those in the appendix of the report." No result changed; this
+iteration only ADDS documentation of an existing frozen artefact.
+
+**Added to REPORT.md — new "Appendix A — the 60-pair bank: how it was sampled, and what is in it"**
+
+- **A.1, the procedure in seven steps**, each with its surviving count: eligible token type (word-start
+  `Ġ` tokens, >= 2 lowercase ASCII letters) -> top-256 model-plausibility filter intersected over all
+  three carriers -> >= 20,000 occurrences in EACH corpus split (**123 endpoints**) -> factor-of-two
+  within-pair frequency rule (**1,763 candidate pairs**) -> quintiles of `J_sel` with the actual bin
+  edges (0.118 / 0.499 / 0.605 / 0.691 / 0.768 / 0.971 bits) -> round-robin, endpoint-disjoint
+  selection minimising a stated balance cost -> **60 pairs, 14/13/11/10/12 across Q1-Q5**, ceiling 61.
+  The balance cost is now written out as a rendered equation (normalised distance of the pair's mean
+  log-frequency and mean surprisal from the eligible-endpoint medians), and the reason for
+  round-robin order is stated (endpoint-disjointness is the binding constraint).
+- **A.2, the complete list of all 60 pairs** as a table: index, quintile, both endpoint strings, both
+  corpus counts (summed over the two splits), `J_sel`, `J_hold`, `w` at step143000 and `w` at step0,
+  with the 15 frozen calibration pairs asterisked. Generated by the new
+  `experiments/appendix_bank.py` from the frozen manifest plus the two 1.4B assay runs, so it cannot
+  drift from the analysed data.
+- Cross-references added: the Methods "Pair bank construction" section now points to Appendix A, and
+  RESULTS.md points to it as well.
+
+`check_render.py` passes on both files (14 display equations in REPORT.md, 13 embeds and 13 captions
+per file, 0 problems).

@@ -1,0 +1,289 @@
+{
+  "E_linear": 0.18367346938775514,
+  "corpus_jsd": {
+    " big| large": {
+      "jsd_selection": 0.40935021397841936,
+      "jsd_holdout": 0.41152275143143635
+    },
+    " big| in": {
+      "jsd_selection": 0.7029212475219404,
+      "jsd_holdout": 0.701259231775605
+    }
+  },
+  "splithalf_noise": {
+    " big": 0.07044260183375668,
+    " large": 0.0588844555680947,
+    " in": 0.003406757138229113
+  },
+  "counts_holdout": {
+    " big": 122257,
+    " large": 175159,
+    " in": 9821847
+  },
+  "rows": [
+    {
+      "run": "1.4B trained",
+      "pair": " big| large",
+      "carrier": "My house is",
+      "w": 0.7727534006999303,
+      "edge_drift": 0.16248927830383764,
+      "out_jsd": 0.0346510149538517,
+      "m_mid": 0.007696761284023523,
+      "valid": true,
+      "err": 2.3476118010812677e-05
+    },
+    {
+      "run": "1.4B trained",
+      "pair": " big| large",
+      "carrier": "The thing was",
+      "w": 0.7927952290339028,
+      "edge_drift": 0.17780812661112577,
+      "out_jsd": 0.023821290582418442,
+      "m_mid": 0.0073498571291565895,
+      "valid": true,
+      "err": 9.737195195688831e-06
+    },
+    {
+      "run": "1.4B trained",
+      "pair": " big| large",
+      "carrier": "They said it was",
+      "w": 0.7746910553875388,
+      "edge_drift": 0.16617637528543128,
+      "out_jsd": 0.18708869814872742,
+      "m_mid": 0.08253160119056702,
+      "valid": true,
+      "err": 2.7399962242942014e-05
+    },
+    {
+      "run": "1.4B trained",
+      "pair": " big| large",
+      "carrier": "I thought it was",
+      "w": 0.7674957111550087,
+      "edge_drift": 0.1608836073482962,
+      "out_jsd": 0.3138793110847473,
+      "m_mid": 0.1479802131652832,
+      "valid": true,
+      "err": 1.3191127860985667e-05
+    },
+    {
+      "run": "1.4B trained",
+      "pair": " big| in",
+      "carrier": "My house is",
+      "w": 0.3569284678166792,
+      "edge_drift": 0.043354133321190605,
+      "out_jsd": 0.9351760149002075,
+      "m_mid": 0.5049894452095032,
+      "valid": true,
+      "err": 3.076835328206973e-05
+    },
+    {
+      "run": "1.4B trained",
+      "pair": " big| in",
+      "carrier": "The thing was",
+      "w": 0.499754494364789,
+      "edge_drift": 0.07043175505768887,
+      "out_jsd": 0.9285134673118591,
+      "m_mid": 0.838934063911438,
+      "valid": true,
+      "err": 1.1451674457295332e-05
+    },
+    {
+      "run": "1.4B trained",
+      "pair": " big| in",
+      "carrier": "They said it was",
+      "w": 0.34830513421110526,
+      "edge_drift": 0.05028835066623287,
+      "out_jsd": 0.894885778427124,
+      "m_mid": 0.7518446445465088,
+      "valid": true,
+      "err": 2.491041997018428e-05
+    },
+    {
+      "run": "1.4B trained",
+      "pair": " big| in",
+      "carrier": "I thought it was",
+      "w": 0.4227020336580146,
+      "edge_drift": 0.05437207700688305,
+      "out_jsd": 0.8434154391288757,
+      "m_mid": 0.6767511367797852,
+      "valid": true,
+      "err": 1.478549451237048e-05
+    },
+    {
+      "run": "1.4B untrained",
+      "pair": " big| large",
+      "carrier": "My house is",
+      "w": 0.834432274413936,
+      "edge_drift": 0.21638652424937846,
+      "out_jsd": 0.04138527810573578,
+      "m_mid": 0.015312496572732925,
+      "valid": true,
+      "err": 2.7716039181856636e-06
+    },
+    {
+      "run": "1.4B untrained",
+      "pair": " big| large",
+      "carrier": "The thing was",
+      "w": 0.8362040355294655,
+      "edge_drift": 0.21785987186528927,
+      "out_jsd": 0.040248434990644455,
+      "m_mid": 0.014718031510710716,
+      "valid": true,
+      "err": 3.0309089205134034e-06
+    },
+    {
+      "run": "1.4B untrained",
+      "pair": " big| large",
+      "carrier": "They said it was",
+      "w": 0.8370857280347374,
+      "edge_drift": 0.21889247149049423,
+      "out_jsd": 0.04523730278015137,
+      "m_mid": 0.016709458082914352,
+      "valid": true,
+      "err": 2.437767576514379e-06
+    },
+    {
+      "run": "1.4B untrained",
+      "pair": " big| large",
+      "carrier": "I thought it was",
+      "w": 0.8340851049632454,
+      "edge_drift": 0.2154803154502815,
+      "out_jsd": 0.04442153871059418,
+      "m_mid": 0.015511926263570786,
+      "valid": true,
+      "err": 2.603097752435818e-06
+    },
+    {
+      "run": "1.4B untrained",
+      "pair": " big| in",
+      "carrier": "My house is",
+      "w": 0.8294999863437703,
+      "edge_drift": 0.2110016194170612,
+      "out_jsd": 0.04365556314587593,
+      "m_mid": 0.015624313615262508,
+      "valid": true,
+      "err": 3.1269377538504924e-06
+    },
+    {
+      "run": "1.4B untrained",
+      "pair": " big| in",
+      "carrier": "The thing was",
+      "w": 0.8300093121073716,
+      "edge_drift": 0.2121245905708747,
+      "out_jsd": 0.04082213342189789,
+      "m_mid": 0.015178147703409195,
+      "valid": true,
+      "err": 3.3676765783482257e-06
+    },
+    {
+      "run": "1.4B untrained",
+      "pair": " big| in",
+      "carrier": "They said it was",
+      "w": 0.827369229644006,
+      "edge_drift": 0.21000954112723774,
+      "out_jsd": 0.048280417919158936,
+      "m_mid": 0.018510639667510986,
+      "valid": true,
+      "err": 2.1855847237715124e-06
+    },
+    {
+      "run": "1.4B untrained",
+      "pair": " big| in",
+      "carrier": "I thought it was",
+      "w": 0.8304382160338808,
+      "edge_drift": 0.21222888435891035,
+      "out_jsd": 0.045304737985134125,
+      "m_mid": 0.016445407643914223,
+      "valid": true,
+      "err": 2.231226644944987e-06
+    },
+    {
+      "run": "410M trained",
+      "pair": " big| large",
+      "carrier": "My house is",
+      "w": 0.7941378744112754,
+      "edge_drift": 0.19763030026806516,
+      "out_jsd": 0.04675106704235077,
+      "m_mid": 0.015282378531992435,
+      "valid": true,
+      "err": 3.471776499282305e-05
+    },
+    {
+      "run": "410M trained",
+      "pair": " big| large",
+      "carrier": "The thing was",
+      "w": 0.7785823555090505,
+      "edge_drift": 0.16677068689095903,
+      "out_jsd": 0.04434080794453621,
+      "m_mid": 0.014989027753472328,
+      "valid": true,
+      "err": 3.48902170991445e-05
+    },
+    {
+      "run": "410M trained",
+      "pair": " big| large",
+      "carrier": "They said it was",
+      "w": 0.8035037206136921,
+      "edge_drift": 0.20200695437379182,
+      "out_jsd": 0.07413880527019501,
+      "m_mid": 0.048557981848716736,
+      "valid": true,
+      "err": 1.4814793723794944e-05
+    },
+    {
+      "run": "410M trained",
+      "pair": " big| large",
+      "carrier": "I thought it was",
+      "w": 0.7765148324186991,
+      "edge_drift": 0.16871827417489837,
+      "out_jsd": 0.10964556038379669,
+      "m_mid": 0.05519251152873039,
+      "valid": true,
+      "err": 4.177330039102171e-05
+    },
+    {
+      "run": "410M trained",
+      "pair": " big| in",
+      "carrier": "My house is",
+      "w": 0.49425174770549346,
+      "edge_drift": 0.0752362038139836,
+      "out_jsd": 0.9433993697166443,
+      "m_mid": 0.8601992726325989,
+      "valid": true,
+      "err": 2.7465794874274178e-05
+    },
+    {
+      "run": "410M trained",
+      "pair": " big| in",
+      "carrier": "The thing was",
+      "w": 0.5832171673498261,
+      "edge_drift": 0.0852840310355532,
+      "out_jsd": 0.9129754304885864,
+      "m_mid": 0.6268967390060425,
+      "valid": true,
+      "err": 1.759457704387703e-05
+    },
+    {
+      "run": "410M trained",
+      "pair": " big| in",
+      "carrier": "They said it was",
+      "w": 0.5775978004941709,
+      "edge_drift": 0.08309371625509812,
+      "out_jsd": 0.8882633447647095,
+      "m_mid": 0.6297925114631653,
+      "valid": true,
+      "err": 1.8863280897564732e-05
+    },
+    {
+      "run": "410M trained",
+      "pair": " big| in",
+      "carrier": "I thought it was",
+      "w": 0.5961112884395483,
+      "edge_drift": 0.09323169519993825,
+      "out_jsd": 0.8266891241073608,
+      "m_mid": 0.4634169936180115,
+      "valid": true,
+      "err": 4.995055272958564e-05
+    }
+  ]
+}

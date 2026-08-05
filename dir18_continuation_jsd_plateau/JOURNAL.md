@@ -349,3 +349,118 @@ output separation) and to test the late checkpoints where the global statistic s
 
 On track? yes — S1-S6 complete (100%) on the prespecified bank plus a 1,000-pair generality test;
 operator feedback #3 fully addressed, no blocker.
+
+---
+
+## 2026-08-05 — iteration 4: operator feedback #4, the `big`/`large` vs `big`/`in` reference pairs
+
+**Feedback check.** Listed the direction root: `human_feedback_4.txt` was present without the
+`.addressed.md` suffix (the three earlier rounds are already `.addressed.md`). It asked for "a plot
+that validates if the pythia models show plateau on My house is big/large and does not show plateau on
+My house is big->in". That was this iteration's work; renamed to `human_feedback_4.addressed.md` when
+done. Note there was no `STOP` file on re-entry (the wrapper's checkout does not carry it), so nothing
+had to be deleted.
+
+**What I did.**
+
+1. Re-downloaded both 500,000-row corpus splits (the `/tmp` cache is gone every session) and wrote
+   `experiments/reference_jsd.py`, which tracks only the three reference endpoints, so the count table
+   is 3 x 50,304 instead of 1,024 x 50,304. It reproduces the pipeline exactly: 50,060 valid target
+   IDs, the same number as every earlier run.
+2. Wrote `experiments/reference_house.py`: the unchanged post-block-0 SLERP assay on the two pairs in
+   four carriers (`My house is` + the three project carriers) at 1.4B trained / 1.4B step 0 / 410M
+   trained, 24 curves. It also records **absolute output movement** `M(t) = JSD(p(t), p(0))` in bits.
+3. Wrote `experiments/plot_reference_house.py` -> `plots/house_reference.png`, embedded as Figure 13
+   in both deliverables with a visible caption, plus a table and prose in each.
+
+**What I learned.**
+
+- **The answer is the reverse of the question as phrased, and that is the interesting part.** Pythia
+  plateaus on ` big`/` in` (w = 0.357, edge drift 0.043 — sharper than all 60 bank pairs) and shows no
+  plateau at all on ` big`/` large` (w = 0.773 vs the linear-response 0.8; E = 0.162 vs 0.184).
+- **Adding `M(t)` reconciles the two.** The trained model separates *"My house is big"* from *"My house
+  is large"* by only 0.035 bits (0.008 by mid-path), so the whole path is inside ONE plateau and there
+  is no boundary to cross; `d(t)` is normalised, so it divides that near-zero movement by itself and
+  reports the leftover as a straight line. ` big`/` in` moves 0.935 bits, essentially all between
+  t = 0.4 and 0.6. Both readings of "plateau" therefore hold at once.
+- **This is a real limitation of `w` that the bank analysis hides.** A pair whose endpoints the model
+  barely distinguishes has no transition to measure, and any width computed for it is describing
+  noise. The bank never hits this case (its pairs are top-256 model-plausible and spread over
+  0.14-0.94 bits of corpus divergence), but a reader applying the assay to their own sentences will.
+  That is now stated in Methods, in the new Results subsection and in the Conclusion.
+- **Consistent with, but not evidence for, the main result.** Corpus divergence orders the two pairs
+  the right way (0.412 vs 0.701 bits, higher = sharper), but the observed gap is wider than the bank
+  trend at those divergences (0.639 and 0.502 for neighbouring bank pairs), and ` in` is ~80x more
+  frequent than ` big`, so it would fail the bank's 2x frequency-matching rule. Both caveats are in
+  the deliverables; the pair is presented as an illustration, not as a data point.
+
+**Assumptions logged (loop mode — could not ask).**
+
+- Treated `human_feedback_4.txt` as an operator feedback file despite the `.txt` extension, as in
+  rounds 1-3, and renamed it to `.addressed.md` with contents untouched.
+- Ran the operator's carrier `My house is` as the headline and added the three project carriers as a
+  robustness check, rather than only `My house is` (rejected: a single carrier could not show whether
+  the effect is carrier-specific) and rather than replacing the project carriers (rejected: the
+  operator named this sentence).
+- Added `M(t)` rather than only reporting `w` and edge drift (rejected: with `M(1) = 0.035` bits for
+  ` big`/` large`, `w` alone would have made the pair look like a failed plateau instead of a pair
+  with nothing to transition between).
+- Placed the new figure as **Figure 13** at the end of Results instead of renumbering all 12 existing
+  figures to slot it next to Figure 3; the reading order stays sequential either way.
+- Kept the corpus estimate defined exactly as before (full 500,000-row splits, unsmoothed JSD) rather
+  than shortcutting with a partial download; the whole point is comparability with the frozen bank.
+
+**Next step.** None outstanding: the plan's definition of done still holds, all four feedback rounds
+are addressed, and zero unaddressed feedback files remain, so `STOP` is written again. If new feedback
+appears next to it, delete `STOP`, address it, and re-write `STOP` only when clean. The out-of-scope
+follow-up is unchanged: a **context-conditioned** divergence estimate — now with one more motivation,
+since the ` big`/` in` example shows the global statistic ordering a pair correctly while badly
+under-predicting how large the width gap is.
+
+On track? yes — S1-S6 complete (100%) plus the 1,000-pair generality test and the named reference-pair
+check; operator feedback #4 fully addressed, no blocker.
+
+---
+
+## 2026-08-05 — iteration 4b: operator feedback #5, appendix documenting the 60-pair bank
+
+**Feedback check.** `human_feedback_5.txt` appeared in the direction root while I was finishing
+feedback #4 (it was dropped at 21:58; I found it when re-listing the root before writing `STOP`).
+Under CLAUDE.md rule 11 that blocks `STOP`, so I addressed it in the same session.
+
+**What it asked.** "How did you sample the 60-pair bank? what are they? write those in the appendix of
+the report."
+
+**What I did.** Wrote `experiments/appendix_bank.py`, which regenerates the bank listing from
+`results/pair_manifest_top256.json` plus the two 1.4B assay runs (so the table cannot drift from the
+analysed data), and added **Appendix A** to REPORT.md: A.1 the seven-step sampling procedure with the
+surviving count after each step and the balance cost written as a rendered equation, A.2 the full
+60-row table (index, quintile, both endpoints, both corpus counts, `J_sel`, `J_hold`, trained and
+step-0 `w`, calibration pairs asterisked). Added cross-references from Methods and from RESULTS.md.
+
+**What I learned / noticed while writing it out.**
+
+- The selection ceiling is worth stating explicitly and now is: 123 eligible endpoints -> at most 61
+  endpoint-disjoint pairs, so n = 60 is a hard consequence of the design, not a sampling choice.
+- The strata are legible from the table, which is the best defence of the predictor: Q1 is
+  ` nice`/` beautiful`, ` simple`/` easy`, ` of`/` in`; Q5 is ` out`/` your`, ` un`/` better`,
+  ` extremely`/` happening`. A reader can now sanity-check the divergence scale without running code.
+- Both endpoints of this session's reference pair appear in the bank in *other* pairs (` in` in pair 1,
+  ` big` in pair 18), which is consistent with endpoint-disjointness *within* the bank and with the
+  reference pair being outside it.
+
+**Assumptions logged (loop mode — could not ask).**
+
+- Put the listing in REPORT.md only (the operator said "the appendix of the report") and left RESULTS.md
+  with a one-line pointer, rather than duplicating a 60-row table into both deliverables.
+- Reported counts summed over both corpus splits, because that is the quantity the factor-of-two
+  frequency-matching rule actually used; per-split counts remain in the manifest.
+- Included trained and step-0 `w` columns even though the feedback only asked "what are they", since
+  the pair-level outcomes are what make the table useful for checking any figure.
+
+**Next step.** None outstanding: plan complete, feedback rounds 1-5 all addressed, zero unaddressed
+feedback files, so `STOP` is written. The out-of-scope follow-up remains a context-conditioned
+divergence estimate.
+
+On track? yes — S1-S6 complete (100%) plus the 1,000-pair test, the named reference pairs and the bank
+appendix; operator feedback #5 fully addressed, no blocker.

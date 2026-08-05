@@ -59,6 +59,14 @@ themselves keep narrowing through step 64000 (median $w$ 0.831 → 0.512) before
 to 0.541. This is an observational predictor test: it does not show that divergence *causes*
 plateaus.
 
+One concrete check makes the shape of the effect visible without any statistics. Interpolating between
+*"My house is big"* and *"My house is in"* produces a textbook plateau — flat, an abrupt jump at
+mid-path, flat again, $w = 0.357$, sharper than any pair in the bank — while *"My house is big"* to
+*"My house is large"* produces the straight line of a model with no plateau at all ($w = 0.773$). The
+reason is visible once absolute movement is measured: the trained model puts those two sentences only
+0.035 bits apart, so the interpolation path never leaves a single plateau and never crosses a boundary
+(Figure 13).
+
 ---
 
 ## Methods
@@ -104,7 +112,9 @@ check in Results).
 frozen primary bank (14/13/11/10/12 across the five divergence quintiles); **1,000** pairs over the
 same 123 endpoints in the secondary bank; 3 carrier contexts per pair; 50 interpolation positions per
 curve — so 180 raw curves per checkpoint in the primary bank and 3,000 in the secondary one; 50,060
-valid target token IDs.
+valid target token IDs. The two named reference pairs (Figure 13) add 24 curves: 2 pairs × 4 carrier
+contexts (`My house is` plus the three project carriers) × 3 model settings (1.4B trained, 1.4B step 0,
+410M trained), with their corpus divergences counted in the same two splits.
 
 ### Metrics
 
@@ -233,7 +243,22 @@ E \;=\; \frac{1}{|T_0|}\sum_{t \in T_0}\big(d(t) - d(0)\big)
 
 $E = 0$ means perfectly flat ends in this coordinate. The **no-plateau reference** is the straight
 line $d(t) = t$, which gives $E = 0.184$ on our grid; anything near or above that has no plateau at
-all. Lower is flatter. Consumed by Figure 6.
+all. Lower is flatter. Consumed by Figures 6 and 13.
+
+**Absolute output movement** — $d(t)$ is a normalised coordinate: it runs from 0 to 1 by
+construction, no matter how little the output actually changes along the path. For two near-synonyms
+whose outputs are almost identical, that normalisation can manufacture the appearance of a transition
+out of a difference of a few hundredths of a bit. So for the two named reference pairs we also record
+how far the output distribution has moved away from where it started, in bits:
+
+```math
+M(t) \;=\; JSD\big(\mathrm{softmax}(z(t)),\; \mathrm{softmax}(z(0))\big),
+```
+
+over the same valid target IDs, so $M(0) = 0$ and $M(1) = JSD_{\mathrm{out}}$ for that context.
+$M$ answers the question $d$ cannot: a flat stretch of $M$ is a stretch where the output distribution
+genuinely does not move, and a pair whose $M(1)$ is near zero has no boundary between its endpoints to
+cross in the first place. Consumed by Figure 13.
 
 **Learned sharpening** — the trained width $w$ mixes two things: how sharp a pair *starts out* under
 random initialisation and how much training narrowed it. Comparing trained and untrained models at the
@@ -384,6 +409,9 @@ most a factor of two (1,763 candidate pairs survive); **no endpoint token is reu
 primary bank**; and pairs are taken in each $\widehat J_{\mathrm{sel}}$ quintile, round-robin across
 quintiles, choosing at each step the pair closest to the bank-wide median in corpus log-frequency and
 model surprisal.
+
+**Appendix A gives the full sampling procedure step by step and lists all 60 pairs** with their
+counts, both divergence estimates and their trained and untrained widths.
 
 **Why only 60 pairs?** The strict top-256 filter leaves 123 eligible endpoints, and forbidding
 endpoint reuse therefore permits at most $\lfloor 123/2 \rfloor = 61$ disjoint pairs; we obtain 60,
@@ -687,6 +715,72 @@ of about 0.8. **Scope:** this scan uses only these **10 extreme pairs** and only
 context**, so it is consistent with a role for downstream computation but does not establish that
 downstream blocks are generally required for the effect.
 
+### The two named example pairs: `big`/`large` against `big`/`in`
+
+Everything so far is distributional. The concrete question a reader is most likely to ask is about two
+specific sentences from the source post: does Pythia plateau between *"My house is big"* and *"My house
+is large"*, and between *"My house is big"* and *"My house is in"*? We ran both pairs through the same
+assay, in the carrier `My house is` and in the three project carriers, at all three model settings, and
+added the absolute output movement $M(t)$ so that "the output stays put" can be checked directly rather
+than inferred from a normalised coordinate. Their corpus divergences were counted in the same two
+splits as the rest of the study: $\widehat J_{\mathrm{hold}} = 0.412$ bits for ` big`/` large` and
+$0.701$ bits for ` big`/` in`, against split-half sampling noise of 0.070, 0.059 and 0.003 bits for
+` big`, ` large` and ` in` respectively.
+
+![Four panels: relative-logit curves for the two named pairs in the trained 1.4B model, their absolute output movement in bits, the same curves in the untrained model, and both pairs placed on the 60-pair bank scatter.](plots/house_reference.png)
+
+**Figure 13.** The plateau is on ` big`/` in`; ` big`/` large` shows the no-plateau straight line.
+*(a)* x is the interpolation position $t$, y is the relative-logit coordinate $d(t)$, for the trained
+1.4B model in the carrier `My house is`. The solid line with round markers is ` big`/` large`
+($w = 0.773$); the dashed line with square markers is ` big`/` in` ($w = 0.357$); the gray dotted
+diagonal is the no-plateau reference $d(t) = t$ and the faint horizontals mark $d = 0.1$ and $d = 0.9$.
+*(b)* The same two pairs and line styles, with y the absolute output movement $M(t)$ in bits.
+` big`/` large` moves 0.035 bits across the entire path (0.008 bits by the midpoint); ` big`/` in`
+moves 0.935 bits, essentially all of it between $t = 0.4$ and $t = 0.6$. *(c)* The same prompts on the
+untrained step-0 network, same axes as (a): both pairs lie on the diagonal ($w = 0.834$ and $0.829$).
+*(d)* Where the two pairs sit relative to the primary bank: x is $\widehat J_{\mathrm{hold}}(u,v)$
+(bits), y is $w$; small gray dots are the 60 bank pairs, the dash-dotted line with `x` markers is
+their median $w$ in five non-overlapping equal-count $\widehat J_{\mathrm{hold}}$ bins, the large open
+circle and open square are the two reference pairs at their `My house is` width, and the vertical bar
+through each spans that pair's width across the other three carrier contexts.
+
+The measured numbers state the result plainly. ` big`/` in` crosses in about a third of the path with
+nearly flat ends, ` big`/` large` takes three quarters of the path with ends that drift about as much
+as a straight line does, and the untrained network does neither.
+
+| Quantity (carrier `My house is`) | ` big`/` large` | ` big`/` in` |
+|---|---|---|
+| Held-out corpus next-token JSD $\widehat J_{\mathrm{hold}}(u,v)$ [bits] | 0.412 | 0.701 |
+| Endpoint occurrences in the holdout split | 122,257 / 175,159 | 122,257 / 9,821,847 |
+| Trained 1.4B: $w$ (no-plateau reference $\approx 0.8$) | 0.773 | **0.357** |
+| Trained 1.4B: edge drift $E$ (no-plateau reference 0.184) | 0.162 | **0.043** |
+| Trained 1.4B: $M(1)$ / $M(0.5)$ [bits] | 0.035 / 0.008 | 0.935 / 0.505 |
+| Trained 1.4B: $w$ in the three other carriers | 0.767–0.793 | 0.348–0.500 |
+| Untrained step 0: $w$ / $E$ | 0.834 / 0.216 | 0.829 / 0.211 |
+| 410M trained: $w$ / $E$ | 0.794 / 0.198 | 0.494 / 0.075 |
+
+**What this shows.** ` big`/` in` is a textbook plateau: flat, a jump at mid-path, flat again, with
+$w = 0.357$ — sharper than every one of the 60 bank pairs, whose minimum is 0.401 — and edge drift
+0.043 against 0.184 for a straight line. ` big`/` large` produces the opposite shape, indistinguishable
+from linear response ($w = 0.773$, $E = 0.162$, above 95% of the bank). $M(t)$ explains why the two
+results belong to the same picture. The trained model's continuations of *"My house is big"* and
+*"My house is large"* differ by 0.035 bits, so no boundary lies between them: the whole path stays
+**inside a single plateau**, the output has moved 0.008 bits by the midpoint, and $d(t)$ — which
+divides that near-zero movement by itself — records the leftover as a straight line. ` big` and ` in`
+land in **different** plateaus, so the path has to cross a boundary, and it crosses abruptly. Both
+behaviours are learned: at step 0 the two pairs are indistinguishable from each other and from the
+diagonal, and the 410M model reproduces the trained pattern (0.794 against 0.494).
+
+Practically, this is the cheapest available check that the assay measures what its name suggests, and
+it is the one a reader can run on their own sentences: a pair whose $M(1)$ is near zero has no
+transition to measure, and any width computed for it describes noise. It also sits in the direction of
+the main result — the higher-divergence pair is the sharper one — but as an illustration rather than
+evidence. Two caveats. The gap is wider than the bank trend: bank pairs near 0.41 bits have median
+$w = 0.639$ and pairs near 0.70 bits have $w = 0.502$, against 0.773 and 0.357 here, which is the
+pair-level scatter Figure 3 already documented. And ` in` occurs about 80 times more often than ` big`,
+so this pair would fail the bank's 2× frequency-matching rule; word class and frequency are confounded
+with divergence in this single comparison.
+
 ### Current-best numbers
 
 On the primary bank of 60 endpoint-disjoint pairs, the association is strong and negative in both
@@ -769,7 +863,11 @@ $[-0.603, -0.353]$, permutation $p < 0.00025$, monotone across the divergence ra
 network. The trained curves are plateau-shaped in that coordinate (edge drift 0.076 against 0.184 for
 a straight line), so "relative-logit-coordinate plateau" is a fair description of what we measure —
 but width and flatness are $+0.971$ correlated across pairs, so this design cannot attribute the
-association to flatness specifically rather than to overall transition width. The headline is a
+association to flatness specifically rather than to overall transition width. The two named example
+pairs show the same thing concretely and add the caveat that comes with it: ` big`/` in` plateaus
+sharply while ` big`/` large` traces the no-plateau line, because the model separates the second pair's
+outputs by only 0.035 bits — a width computed on a pair like that is describing noise, which is why
+absolute output movement $M(t)$ belongs next to $w$ whenever a single pair is inspected. The headline is a
 **total** association: corpus divergence also predicts how much training narrowed each pair's
 transition ($\rho = -0.517$ on $\Delta w$), but the association is attenuated after adjustment
 ($-0.277$, $p = 0.032$, for the model's own output divergence alone) and the fully adjusted estimate
@@ -812,7 +910,8 @@ checkpoint.
 counts and reliability gates), `select_endpoints.py` and `build_pairs.py --pool strict` (primary
 bank), `build_large_bank.py` (secondary 1,000-pair bank), `assay.py` with `run_assay.py` (the
 transition assay), `curve_metrics.py` with `rescore.py` (validity criteria and raw-curve export),
-`block_scan.py`, `checks.py`, `formation.py` (intermediate checkpoints), `revisions.py` (learned
+`block_scan.py`, `checks.py`, `formation.py` (intermediate checkpoints), `reference_jsd.py` with
+`reference_house.py` and `plot_reference_house.py` (the two named example pairs), `revisions.py` (learned
 sharpening, adjustment ladder, late-reversal test, fragment sensitivity), `split_sensitivity.py`,
 `large_analysis.py` (endpoint-clustered inference), and `analyze.py` (figures and statistics).
 Manifests, per-pair summaries and all summary statistics are in `results/`. **The raw curves are
@@ -820,3 +919,148 @@ committed**, as `results/curves_*.npy` and as a plain-text `results/curves_*.csv
 per pair × context × grid point — so every width, flatness and validity number in this report can be
 recomputed from disk without a GPU. (The repo-wide `.gitignore` excludes `*.npy` and `*.gz`; this
 direction ships its own `.gitignore` that un-ignores `results/curves_*`.)
+
+---
+
+## Appendix A — the 60-pair bank: how it was sampled, and what is in it
+
+### A.1 The sampling procedure
+
+The bank had to satisfy three things at once: every prompt has to be a sentence the model would
+plausibly produce, every endpoint has to be counted often enough in the corpus for its next-token
+distribution to be estimated, and the pairs have to cover the whole divergence range without letting
+frequency or surprisal drift along with divergence. The procedure below was fixed before the pairs
+were assayed; no transition curve entered any step of it.
+
+**Step 1 — eligible token type.** Every token in the `pythia-1.4b-deduped` vocabulary that GPT-NeoX
+BPE marks as starting a word (the `Ġ` prefix) and whose remaining characters are at least two
+lowercase ASCII letters. Two-letter minimum excludes single letters; the filter still admits word-start
+*fragments*, and exactly one (` un`) survives into the bank, which is why Figure 10 reports the bank
+with that pair dropped.
+
+**Step 2 — model-plausibility filter.** Keep the tokens that are among the trained model's **top-256**
+eligible word continuations of **all three** carrier contexts (`The thing was`, `They said it was`,
+`I thought it was`). The intersection over the three contexts is what makes the endpoint plausible in
+every carrier it is used in. This uses the trained model's own ranking of the final token; it is not a
+claim that the exact prompts occur in the training corpus.
+
+**Step 3 — corpus count filter.** Keep the endpoints that occur at least **20,000 times in each** of
+the two 500,000-row splits, so that both the selection and the holdout estimate of the next-token
+distribution rest on at least that many observations. **123 endpoints** pass steps 1–3.
+
+**Step 4 — candidate pairs.** Form every unordered pair of those 123 endpoints whose corpus
+frequencies differ by at most a factor of two, which keeps the rarer endpoint of a pair from being
+systematically noisier. **1,763 candidate pairs** survive.
+
+**Step 5 — divergence strata.** Compute $\widehat J_{\mathrm{sel}}(u,v)$ for all 1,763 candidates and
+cut them at their own quintiles. The bin edges in bits are 0.118, 0.499, 0.605, 0.691, 0.768, 0.971,
+so Q1 holds the pairs whose training-corpus continuations are most alike and Q5 the pairs that are
+most different.
+
+**Step 6 — balanced, endpoint-disjoint selection.** Inside each quintile, rank the candidates by how
+close the pair sits to the middle of the eligible-endpoint distribution on two nuisance variables that
+could otherwise track divergence — corpus frequency and how surprising the endpoint is to the model in
+the carrier contexts. Writing $\ell(u) = \log_{10}$ of $u$'s corpus count and $s(u)$ for $u$'s mean
+surprisal in bits across the three carriers, with $\tilde\ell, \tilde s$ the medians and
+$\sigma_\ell, \sigma_s$ the standard deviations over the 123 eligible endpoints:
+
+```math
+\mathrm{cost}(u,v) \;=\;
+\frac{\left\lvert \tfrac12\left(\ell(u)+\ell(v)\right) - \tilde\ell \right\rvert}{\sigma_\ell}
+\;+\;
+\frac{\left\lvert \tfrac12\left(s(u)+s(v)\right) - \tilde s \right\rvert}{\sigma_s}.
+```
+
+Then walk the five quintiles **round-robin**, taking at each visit the cheapest remaining pair in that
+quintile whose two endpoints have not been used yet, until each quintile holds 15 pairs or runs out of
+disjoint candidates. Round-robin order matters because endpoint-disjointness is the binding
+constraint: filling Q1 to quota first would consume endpoints that Q5 then could not replace.
+
+**Step 7 — what came out.** 60 pairs, distributed **14 / 13 / 11 / 10 / 12** across Q1→Q5. The ceiling
+is 61 pairs: 123 eligible endpoints admit at most $\lfloor 123/2 \rfloor$ disjoint pairs, which is why
+the primary analysis has 60 observations and not more. Balance across bins was checked afterwards with
+a Kruskal-Wallis test and no significant imbalance was detected ($p = 0.52$ for mean pair
+log-frequency, $p = 0.21$ for mean pair surprisal). A **15-pair calibration subset** (three per
+quintile, drawn with seed 0) was then frozen and run first, to check the dynamic-range gate
+(IQR of $w$ = 0.109 against a gate of 0.05) before the remaining pairs were assayed.
+
+### A.2 The 60 pairs
+
+The table lists the whole bank in the order it is stored in `results/pair_manifest_top256.json`, so
+every number in this report can be traced to a named pair. Reading down it shows what the divergence
+strata mean in practice: Q1 pairs are near-synonyms and function words with near-identical
+continuations (` nice`/` beautiful`, ` simple`/` easy`, ` of`/` in`), while Q5 pairs mix word classes
+and continuation habits (` out`/` your`, ` un`/` better`, ` extremely`/` happening`). The widths in the
+last two columns are the per-pair outcomes behind Figures 4, 5 and 8 — each is the median over the
+three carrier contexts, and the step-0 column shows the same pair in the untrained network. An asterisk
+marks the 15 calibration pairs. Counts are occurrences summed over both corpus splits (2.05B tokens),
+which is the quantity the factor-of-two frequency rule uses.
+
+| # | Q | endpoint $u$ | endpoint $v$ | count $u$ | count $v$ | $\widehat J_{\mathrm{sel}}$ | $\widehat J_{\mathrm{hold}}$ | $w$ trained | $w$ step 0 |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | Q1 | ` of` | ` in` | 32,363,014 | 19,653,700 | 0.137 | 0.137 | 0.463 | 0.833 |
+| 2 | Q1 | ` on` | ` with` | 7,209,037 | 8,111,006 | 0.166 | 0.165 | 0.587 | 0.832 |
+| 3 | Q1 | ` never` | ` always` | 446,707 | 374,368 | 0.273 | 0.273 | 0.649 | 0.830 |
+| 4 | Q1 | ` nice` | ` beautiful` | 96,521 | 88,378 | 0.308 | 0.303 | 0.786 | 0.827 |
+| 5 | Q1 | ` as` | ` from` | 6,469,579 | 4,655,652 | 0.324 | 0.325 | 0.508 | 0.823 |
+| 6 | Q1 | ` for` | ` that` | 10,254,522 | 11,789,305 | 0.357 | 0.357 | 0.567 | 0.833 |
+| 7 | Q1 | ` up` | ` like` | 1,720,825 | 1,469,617 | 0.361 | 0.361 | 0.502 | 0.833 |
+| 8* | Q1 | ` fun` | ` fine` | 126,321 | 123,522 | 0.369 | 0.365 | 0.722 | 0.835 |
+| 9* | Q1 | ` only` | ` now` | 1,356,539 | 845,631 | 0.371 | 0.370 | 0.607 | 0.830 |
+| 10 | Q1 | ` dangerous` | ` wonderful` | 49,452 | 46,873 | 0.416 | 0.412 | 0.686 | 0.830 |
+| 11* | Q1 | ` great` | ` real` | 414,940 | 311,449 | 0.432 | 0.428 | 0.586 | 0.835 |
+| 12 | Q1 | ` after` | ` because` | 1,059,302 | 930,891 | 0.436 | 0.436 | 0.648 | 0.831 |
+| 13 | Q1 | ` simple` | ` easy` | 182,845 | 169,288 | 0.440 | 0.446 | 0.787 | 0.832 |
+| 14 | Q1 | ` true` | ` done` | 317,220 | 292,371 | 0.444 | 0.448 | 0.630 | 0.828 |
+| 15* | Q2 | ` not` | ` all` | 4,479,000 | 2,543,606 | 0.514 | 0.514 | 0.678 | 0.829 |
+| 16 | Q2 | ` absolutely` | ` totally` | 47,922 | 44,568 | 0.519 | 0.520 | 0.792 | 0.834 |
+| 17 | Q2 | ` well` | ` much` | 893,658 | 713,200 | 0.521 | 0.522 | 0.674 | 0.838 |
+| 18 | Q2 | ` important` | ` big` | 356,949 | 244,672 | 0.526 | 0.525 | 0.670 | 0.835 |
+| 19 | Q2 | ` impossible` | ` amazing` | 54,276 | 54,896 | 0.535 | 0.525 | 0.691 | 0.821 |
+| 20 | Q2 | ` something` | ` far` | 459,994 | 298,064 | 0.538 | 0.536 | 0.529 | 0.829 |
+| 21 | Q2 | ` written` | ` interesting` | 148,633 | 107,905 | 0.538 | 0.542 | 0.501 | 0.833 |
+| 22 | Q2 | ` working` | ` clear` | 263,580 | 211,582 | 0.558 | 0.560 | 0.581 | 0.825 |
+| 23 | Q2 | ` difficult` | ` dead` | 141,745 | 107,540 | 0.559 | 0.558 | 0.627 | 0.832 |
+| 24 | Q2 | ` so` | ` about` | 1,794,363 | 1,847,382 | 0.560 | 0.560 | 0.455 | 0.826 |
+| 25 | Q2 | ` cool` | ` meant` | 74,127 | 75,657 | 0.577 | 0.575 | 0.537 | 0.828 |
+| 26* | Q2 | ` nothing` | ` bad` | 225,433 | 172,704 | 0.580 | 0.580 | 0.608 | 0.838 |
+| 27* | Q2 | ` over` | ` being` | 1,221,299 | 730,384 | 0.598 | 0.599 | 0.498 | 0.834 |
+| 28 | Q3 | ` almost` | ` getting` | 216,416 | 212,073 | 0.612 | 0.612 | 0.548 | 0.832 |
+| 29 | Q3 | ` hot` | ` gone` | 102,169 | 104,476 | 0.631 | 0.629 | 0.646 | 0.831 |
+| 30 | Q3 | ` taking` | ` quite` | 182,994 | 180,384 | 0.640 | 0.640 | 0.430 | 0.824 |
+| 31 | Q3 | ` mostly` | ` strange` | 65,432 | 43,209 | 0.651 | 0.651 | 0.453 | 0.831 |
+| 32 | Q3 | ` still` | ` called` | 600,680 | 338,899 | 0.653 | 0.654 | 0.462 | 0.834 |
+| 33* | Q3 | ` either` | ` kind` | 302,187 | 229,323 | 0.659 | 0.660 | 0.604 | 0.840 |
+| 34 | Q3 | ` some` | ` made` | 1,333,069 | 720,328 | 0.664 | 0.666 | 0.432 | 0.837 |
+| 35 | Q3 | ` one` | ` my` | 2,373,054 | 1,934,081 | 0.670 | 0.670 | 0.444 | 0.833 |
+| 36 | Q3 | ` completely` | ` obvious` | 117,920 | 60,588 | 0.671 | 0.674 | 0.480 | 0.834 |
+| 37* | Q3 | ` our` | ` most` | 1,395,429 | 897,862 | 0.677 | 0.675 | 0.462 | 0.833 |
+| 38* | Q3 | ` her` | ` there` | 1,992,015 | 1,702,234 | 0.686 | 0.683 | 0.546 | 0.829 |
+| 39 | Q4 | ` me` | ` no` | 1,493,290 | 1,590,571 | 0.711 | 0.712 | 0.587 | 0.832 |
+| 40 | Q4 | ` simply` | ` wrong` | 170,783 | 149,429 | 0.716 | 0.719 | 0.510 | 0.825 |
+| 41 | Q4 | ` moving` | ` definitely` | 99,094 | 58,488 | 0.716 | 0.713 | 0.494 | 0.836 |
+| 42 | Q4 | ` coming` | ` worth` | 159,609 | 94,561 | 0.731 | 0.729 | 0.548 | 0.829 |
+| 43 | Q4 | ` more` | ` when` | 2,085,158 | 1,721,054 | 0.743 | 0.742 | 0.411 | 0.831 |
+| 44* | Q4 | ` part` | ` already` | 573,233 | 302,072 | 0.748 | 0.746 | 0.558 | 0.836 |
+| 45 | Q4 | ` hard` | ` actually` | 254,661 | 238,176 | 0.752 | 0.751 | 0.437 | 0.839 |
+| 46 | Q4 | ` his` | ` also` | 3,004,245 | 1,665,707 | 0.752 | 0.752 | 0.433 | 0.827 |
+| 47* | Q4 | ` enough` | ` probably` | 301,509 | 189,618 | 0.755 | 0.752 | 0.569 | 0.828 |
+| 48* | Q4 | ` at` | ` this` | 4,829,314 | 4,613,793 | 0.757 | 0.756 | 0.401 | 0.824 |
+| 49 | Q5 | ` such` | ` right` | 1,107,844 | 729,410 | 0.785 | 0.785 | 0.685 | 0.828 |
+| 50 | Q5 | ` their` | ` what` | 2,157,976 | 1,468,488 | 0.785 | 0.785 | 0.482 | 0.835 |
+| 51* | Q5 | ` you` | ` by` | 5,502,298 | 5,285,670 | 0.787 | 0.786 | 0.495 | 0.839 |
+| 52 | Q5 | ` under` | ` good` | 759,838 | 689,371 | 0.792 | 0.793 | 0.476 | 0.827 |
+| 53 | Q5 | ` different` | ` really` | 648,101 | 473,897 | 0.793 | 0.789 | 0.455 | 0.830 |
+| 54 | Q5 | ` pretty` | ` exactly` | 144,095 | 109,622 | 0.812 | 0.811 | 0.640 | 0.829 |
+| 55 | Q5 | ` going` | ` too` | 542,097 | 516,617 | 0.821 | 0.821 | 0.472 | 0.828 |
+| 56 | Q5 | ` perfect` | ` supposed` | 104,753 | 60,519 | 0.824 | 0.825 | 0.634 | 0.835 |
+| 57* | Q5 | ` just` | ` very` | 1,226,924 | 808,786 | 0.824 | 0.822 | 0.498 | 0.835 |
+| 58 | Q5 | ` out` | ` your` | 1,865,829 | 2,085,989 | 0.849 | 0.849 | 0.461 | 0.827 |
+| 59 | Q5 | ` un` | ` better` | 577,883 | 394,876 | 0.922 | 0.923 | 0.426 | 0.826 |
+| 60* | Q5 | ` extremely` | ` happening` | 64,188 | 42,333 | 0.946 | 0.942 | 0.406 | 0.827 |
+
+Every column here is reproducible from disk: `results/pair_manifest_top256.json` holds the token IDs,
+counts, surprisals, entropies and both divergence estimates; `results/assay_step143000_t256.json` and
+`results/assay_step0_t256.json` hold the per-pair, per-context widths; and the raw 50-point curves are
+in `results/curves_step143000_t256.npy` and its `.csv.gz` export. `experiments/appendix_bank.py`
+regenerates this table.

@@ -1,0 +1,33 @@
+{
+  "endpoint_ids": {
+    " big": 1943,
+    " large": 1781,
+    " in": 275
+  },
+  "counts_selection": {
+    " big": 122415,
+    " large": 176883,
+    " in": 9831853
+  },
+  "counts_holdout": {
+    " big": 122257,
+    " large": 175159,
+    " in": 9821847
+  },
+  "n_valid_targets": 50060,
+  "pairs": {
+    " big| large": {
+      "jsd_selection": 0.40935021397841936,
+      "jsd_holdout": 0.41152275143143635
+    },
+    " big| in": {
+      "jsd_selection": 0.7029212475219404,
+      "jsd_holdout": 0.701259231775605
+    }
+  },
+  "splithalf_noise": {
+    " big": 0.07044260183375668,
+    " large": 0.0588844555680947,
+    " in": 0.003406757138229113
+  }
+}

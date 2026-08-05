@@ -28,6 +28,8 @@ quintile), 3 carrier contexts each, 50 interpolation positions, 180 raw curves p
 pairs are possible because the top-256 filter leaves 123 eligible endpoints and forbidding endpoint
 reuse permits at most 61 disjoint pairs; that removes *direct* dependence through a shared endpoint
 without making the pairs fully independent. CIs are 95% from 10,000 bootstrap resamples over pairs.
+**Appendix A of REPORT.md gives the sampling procedure step by step and lists all 60 pairs** with
+their corpus counts, both divergence estimates, and their trained and untrained widths.
 
 | Result | Trained 1.4B (step143000) | Untrained 1.4B (step0) | 410M (step143000) |
 |---|---|---|---|
@@ -313,6 +315,64 @@ value of about 0.8. This scan covers only these 10 extreme pairs in one carrier 
 consistent with a role for downstream computation without establishing that downstream blocks are
 generally required.
 
+Two named example pairs are the cases a reader is most likely to have an intuition about, so we ran
+them directly: does Pythia plateau between *"My house is big"* and *"My house is large"*, and between
+*"My house is big"* and *"My house is in"*? Figure 13 answers both. It also adds the **absolute output
+movement** $M(t) = JSD(p(t), p(0))$ in bits — how far the output distribution has moved from where it
+started — because $d(t)$ is normalised to run from 0 to 1 however little the output actually changes.
+
+![Four panels: relative-logit curves for the two named pairs in the trained 1.4B model, their absolute output movement in bits, the same curves in the untrained model, and both pairs placed on the 60-pair bank scatter.](plots/house_reference.png)
+
+**Figure 13.** The plateau appears on ` big`/` in`, not on ` big`/` large`. *(a)* x = interpolation
+position $t$, y = relative-logit coordinate $d(t)$, trained 1.4B, carrier `My house is`. Solid with
+round markers = ` big`/` large` ($w = 0.773$), dashed with square markers = ` big`/` in`
+($w = 0.357$); the gray dotted diagonal is the no-plateau reference $d(t) = t$; faint horizontals mark
+$d = 0.1$ and $0.9$. ` big`/` large` lies on the diagonal; ` big`/` in` is flat, jumps at $t \approx
+0.5$, and is flat again. *(b)* Same two pairs and styles; y = absolute output movement $M(t)$ in bits.
+` big`/` large` moves 0.035 bits over the whole path (0.008 bits by the midpoint) — the output never
+leaves its starting neighbourhood; ` big`/` in` moves 0.935 bits, essentially all of it between
+$t = 0.4$ and $t = 0.6$. *(c)* The same prompts on the untrained step-0 network: both pairs sit on the
+diagonal ($w = 0.834$ and $0.829$), so the structure in (a) is learned. *(d)* Where the two pairs fall
+relative to the primary bank. x = $\widehat J_{\mathrm{hold}}(u,v)$ (bits), y = $w$; small gray dots
+are the 60 bank pairs, the dash-dotted `x`-marked line is their median $w$ in five non-overlapping
+equal-count $\widehat J_{\mathrm{hold}}$ bins; the large open circle and open square are the two
+reference pairs at their `My house is` width, and the vertical bar through each spans its width across
+the other three carrier contexts.
+
+| Quantity (trained `pythia-1.4b-deduped`, carrier `My house is`) | ` big`/` large` | ` big`/` in` |
+|---|---|---|
+| Held-out corpus next-token JSD $\widehat J_{\mathrm{hold}}(u,v)$ [bits] | 0.412 | 0.701 |
+| Endpoint occurrences in the holdout split | 122,257 / 175,159 | 122,257 / 9,821,847 |
+| Transition width $w$ (no-plateau reference ≈ 0.8) | 0.773 | **0.357** |
+| Edge drift $E$ (no-plateau reference 0.184) | 0.162 | **0.043** |
+| Absolute output movement $M(1)$ / $M(0.5)$ [bits] | 0.035 / 0.008 | 0.935 / 0.505 |
+| $w$ across the three other carrier contexts | 0.767–0.793 | 0.348–0.500 |
+| Untrained step 0: $w$ / $E$ | 0.834 / 0.216 | 0.829 / 0.211 |
+| 410M trained: $w$ / $E$ | 0.794 / 0.198 | 0.494 / 0.075 |
+
+**Reading the answer.** In Pythia the flat-then-jump-then-flat shape belongs to ` big`/` in`, and
+` big`/` large` shows the shape of a model with no plateau at all: $w = 0.773$ against the
+linear-response value 0.8, edge drift 0.162 against 0.184, sitting above 95% of the 60 bank pairs.
+` big`/` in` is sharper than **every** pair in the bank ($w = 0.357$ against a bank minimum of 0.401)
+with almost perfectly flat ends. The two readings of "plateau" agree once $M(t)$ is on the table.
+The model's continuations of *"My house is big"* and *"My house is large"* differ by only 0.035 bits,
+so there is no boundary anywhere between them to cross: the whole interpolation path lies **inside one
+plateau**, the output moves 0.008 bits by the midpoint, and the residual movement that remains is
+spread evenly, which is what a straight $d(t)$ records. ` big` and ` in` sit in **different** plateaus,
+so the path crosses a boundary — and the crossing is abrupt. Both facts are what the plateau picture
+predicts, and both are learned: at step 0 the two pairs are indistinguishable from each other and from
+the diagonal.
+
+This also lines up with the primary result. The corpus says these two pairs differ: 0.412 bits for
+` big`/` large` against 0.701 for ` big`/` in`, both far above these tokens' split-half sampling noise
+(0.070, 0.059, 0.003 bits). The higher-divergence pair is the sharper one, in the direction the
+bank-wide $\rho = -0.525$ describes. Two caveats keep this an illustration rather than evidence. The
+gap is larger than the bank trend predicts — bank pairs near 0.41 bits have median $w$ 0.639 and pairs
+near 0.70 bits have 0.502, against 0.773 and 0.357 here — which is the pair-level noise Figure 3
+already showed. And ` in` occurs 80 times more often than ` big`, so this pair would fail the bank's
+2× frequency-matching rule; word class and frequency are not separated from divergence in this one
+comparison.
+
 ## Interpretation
 
 **In trained Pythia, how differently two words are continued in the training corpus predicts how
@@ -346,6 +406,13 @@ transitions go on narrowing through step 64000 (median $w$ 0.831 → 0.512) befo
 to 0.541 at the final checkpoint (38/60 pairs blunter than at 64k, paired Wilcoxon p = 0.0052).
 Narrowing continues after the corpus statistic has stopped explaining more of it, and then partly
 undoes itself.
+
+**The named examples behave as the picture requires.** ` big`/` in` gives a textbook plateau
+(flat, jump at mid-path, flat: $w = 0.357$, edge drift 0.043) while ` big`/` large` gives the
+no-plateau straight line — because the model puts *"My house is big"* and *"My house is large"* only
+0.035 bits apart, leaving no boundary on the path between them. Adding the absolute movement $M(t)$
+alongside $w$ is what makes those two statements compatible, and it is the cheapest fix for the
+normalised coordinate's blind spot.
 
 **Auditability.** Every raw $d(t)$ curve is committed — `results/curves_*.npy` plus a plain-text
 `results/curves_*.csv.gz` export — so all width, flatness and validity numbers above can be recomputed

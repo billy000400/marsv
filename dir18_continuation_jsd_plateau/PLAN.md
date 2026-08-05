@@ -190,6 +190,14 @@ checkpoints test whether the negative relationship strengthens during training.
   *(relationship does NOT strengthen: already at full strength at the earliest measured step, 1000,
   at -0.582, then -0.456/-0.408/-0.628/-0.525 within overlapping CIs, while median `w` falls
   0.831 -> ~0.52)*
+- [x] **Feedback #5 addition — bank appendix:** REPORT.md Appendix A gives the seven-step sampling
+  procedure (with the surviving count after each step and the balance cost as an equation) and lists
+  all 60 pairs with counts, both divergence estimates and trained/step-0 widths.
+- [x] **Feedback #4 addition — the two named reference pairs:** ` big`/` large` and ` big`/` in` under
+  `My house is` (+ the three project carriers) at 1.4B trained / step 0 / 410M, with corpus JSD counted
+  in the same splits and a new absolute-output-movement metric. *(plateau on ` big`/` in`: w = 0.357,
+  E = 0.043, M(1) = 0.935 bits; no plateau on ` big`/` large`: w = 0.773, E = 0.162, M(1) = 0.035 bits
+  — the model puts those two sentences 0.035 bits apart, so the path never leaves one plateau)*
 - [x] **Feedback #3 addition — 1,000-pair generality test:** secondary bank (same 123 endpoints,
   20-use cap, 200 pairs per selection quintile), 1.4B step143000 + step0, endpoint-clustered
   inference. *(rho = -0.486, dyadic endpoint-bootstrap CI [-0.603,-0.353], endpoint-label permutation
@@ -223,8 +231,18 @@ End each `JOURNAL.md` entry with:
 ## Current status
 
 S1-S6 complete on the **prespecified top-256 bank** (60 endpoint-disjoint pairs), plus a **1,000-pair
-secondary bank** added for feedback round 3; all three operator feedback files are addressed
-(`human_feedback.addressed.md`, `human_feedback_2.addressed.md`, `human_feedback_3.addressed.md`).
+secondary bank** added for feedback round 3, the **two named reference pairs** added for round 4 and
+the **bank appendix** added for round 5; all five operator feedback files are addressed
+(`human_feedback.addressed.md`, `human_feedback_2.addressed.md`, `human_feedback_3.addressed.md`,
+`human_feedback_4.addressed.md`, `human_feedback_5.addressed.md`).
+
+**Named reference pairs (feedback #4).** In the carrier `My house is`, trained 1.4B plateaus on
+` big`/` in` (`w = 0.357`, edge drift 0.043, absolute output movement `M(1) = 0.935` bits, sharper than
+all 60 bank pairs) and shows no plateau on ` big`/` large` (`w = 0.773` against the linear-response
+0.8, `E = 0.162` against 0.184). The reconciliation is `M(t)`: the model separates the two ` large`
+prompts by only 0.035 bits, so the path stays inside one plateau with no boundary to cross. Neither
+shape exists at step 0 (0.834 / 0.829); 410M reproduces both (0.794 / 0.494). Corpus divergence orders
+them correctly (0.412 vs 0.701 bits) but under-predicts the size of the gap.
 
 **Primary (60 endpoint-disjoint pairs, 3 contexts, 50 positions).** Held-out corpus
 immediate-next-token JSD predicts narrower 10%-90% relative-logit transitions in trained Pythia:
@@ -249,7 +267,7 @@ observations. The relaxed top-512 bank remains a clearly labelled post-hoc secon
 Prespecified verdict branch: corpus JSD predicts model-output JSD and smaller `w`; step 0 does not —
 stated as **learned output separation + overall 10%-90% transition width**, not "plateau sharpening",
 because `w` and edge drift (0.076 vs the 0.184 no-plateau reference) correlate at +0.971 and cannot be
-separated. RESULTS.md and REPORT.md are current-best with 12 captioned figures each and pass the
+separated. RESULTS.md and REPORT.md are current-best with 13 captioned figures each and pass the
 GitHub render check.
 
 The formation subset **refutes the plan's expected pattern**: the negative relationship does not
@@ -261,9 +279,11 @@ while median `w` falls 0.831 -> 0.512 by step 64000 and then reverses modestly t
 
 None — the plan is complete and zero unaddressed feedback files remain, so `STOP` is written. The
 natural follow-up, explicitly out of scope here, is a **context-conditioned** divergence estimate. It
-has two motivations: testing whether it predicts width better at the late checkpoints where the global
-estimate stops improving, and attacking the mediation null — a predictor that is not simply a proxy
-for the model's own output separation. If a future iteration finds a new `human_feedback*` / `*REVIEW*`
+has three motivations: testing whether it predicts width better at the late checkpoints where the
+global estimate stops improving; attacking the mediation null — a predictor that is not simply a proxy
+for the model's own output separation; and closing the gap the ` big`/` in` example exposed, where the
+global statistic orders a pair correctly but badly under-predicts how wide the width gap is. If a
+future iteration finds a new `human_feedback*` / `*REVIEW*`
 file next to the stale `STOP`, delete `STOP`, address the feedback, and only re-write `STOP` when
 clean again.
 
