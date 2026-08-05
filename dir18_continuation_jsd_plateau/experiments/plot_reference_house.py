@@ -42,7 +42,7 @@ if __name__ == "__main__":
     for lv in (0.1, 0.9):
         a.axhline(lv, color="0.75", lw=0.8, ls=(0, (1, 3)))
     a.set_xlabel("interpolation position $t$")
-    a.set_ylabel("relative-logit coordinate $d(t)$")
+    a.set_ylabel("output-distance score $d(t)$")
     a.set_title("(a) 1.4B trained — “My house is …”")
     a.legend(fontsize=8, loc="upper left")
 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     for lv in (0.1, 0.9):
         c.axhline(lv, color="0.75", lw=0.8, ls=(0, (1, 3)))
     c.set_xlabel("interpolation position $t$")
-    c.set_ylabel("relative-logit coordinate $d(t)$")
+    c.set_ylabel("output-distance score $d(t)$")
     c.set_title("(c) 1.4B untrained (step 0) — same prompts")
     c.legend(fontsize=8, loc="upper left")
 
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         d.plot([j, j], [min(ws), max(ws)], color=STYLE[p]["color"], lw=2.5, alpha=0.6)
         d.plot([j], [curve(ref, "1.4B trained", p, HOUSE)["w"]], ms=13, mew=2, mfc="none",
                ls="none", **{k: v for k, v in STYLE[p].items() if k != "ls"})
-    d.set_xlabel(r"held-out corpus next-token JSD $\widehat J_{\mathrm{hold}}(u,v)$ [bits]")
+    d.set_xlabel(r"corpus next-token JSD $J(u,v)$ [bits] (measurement sample)")
     d.set_ylabel("transition width $w$")
     d.set_ylim(0, 0.95)
     d.set_title("(d) 1.4B trained — reference pairs vs the 60-pair bank")

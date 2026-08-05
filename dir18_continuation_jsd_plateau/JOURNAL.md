@@ -464,3 +464,69 @@ divergence estimate.
 
 On track? yes — S1-S6 complete (100%) plus the 1,000-pair test, the named reference pairs and the bank
 appendix; operator feedback #5 fully addressed, no blocker.
+
+---
+
+## 2026-08-05 — iteration 5: operator feedback #6, correspondence-only report
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: `human_feedback_6.txt` was
+present without the `.addressed.md` suffix, and no `STOP` file existed. That file was this iteration's
+work. `PLAN.md` had also been rewritten by the operator and now declares itself read-only.
+
+**What it asked.** Revise `REPORT.md` and `RESULTS.md` only, so the direction answers exactly one
+question — do token pairs with more different immediate-next-token distributions tend to have narrower
+transitions in the trained model's output-distance score `d(t)`? Lead with the 1,000-pair result,
+follow with the controlled 60-pair result, keep four checks plus the adjustment result plus the two
+named examples, move construction and statistics to Methods/Appendix, delete everything about
+formation, and de-jargon the main text against a supplied replacement table.
+
+**What I did.** No experiment re-run; no number changed. Rewrote both deliverables from scratch in the
+requested order (question and conclusion → 1,000 pairs → controlled 60 pairs → checks → what the score
+misses → limitations → Methods/Appendix), applied every jargon replacement, cut the formation results,
+the learned-`Δw` analysis, the block scan (demoted to Appendix B), the `width_by_jsd_bin` figure, and
+every claim about plateaus corresponding to continuation distributions. Wrote
+`experiments/plot_adjustment.py` to produce a `w`-only adjustment forest plot, since the existing
+`mediation.png` had `Δw` in both of its panels. Edited only the label strings in `analyze.py`,
+`large_analysis.py` and `plot_reference_house.py` and regenerated their figures; all statistics printed
+identically, which is the check that I touched presentation and not analysis.
+
+**Assumptions logged (loop mode — could not ask).**
+
+- **Section order.** The feedback puts "Methods/Appendix" last; CLAUDE.md rule 8 mandates
+  `Summary → Methods → Results → Conclusion`, and rule 12 requires every axis variable to be defined in
+  Methods *before* the figure appears. I kept the mandated heading order and satisfied the feedback by
+  making Methods lean and pushing pair construction, the corpus-sample check, alternative pair sets,
+  self-tests and the 60-pair table into Appendices A and B. Rejected alternative: Methods physically
+  last, which would have broken rule 12's define-before-you-show requirement.
+- **Notation.** Replaced `Ĵ_hold`/`Ĵ_sel` with `J` and `J_sel`, because the feedback's replacement for
+  "held-out JSD" is a phrase, not a symbol, and carrying a hatted two-subscript symbol through the text
+  would have reintroduced the jargon it asked to remove.
+- **`plots/mediation.png` and `plots/formation.png` are left on disk** but no longer appear in either
+  deliverable, per the feedback's "preserve all existing plots even when they are removed".
+- **`PLAN.md` not edited**, per its own read-only declaration, even though the standing loop prompt
+  asks for a status update. This entry is the status record.
+
+**What I learned / noticed while rewriting.**
+
+- Leading with the 1,000-pair result is genuinely the better story. Its ten bin medians (0.649 → 0.499,
+  one 0.002 wobble) show the *shape* of the relationship, which the 60-pair scatter cannot at ~12 pairs
+  per group; the 60-pair analysis then earns its place as the controlled version rather than as the
+  headline. The feedback was right that this ordering shows the relationship most clearly.
+- Removing formation removed the only part of the report that had contradicted its own plan, and
+  nothing in the correspondence story depended on it. The report got shorter and the claim got no
+  weaker.
+- The `big`/`large` example reads better as a caution about the metric than as evidence about
+  plateaus: `M(1) = 0.035` bits means the two outputs never separate, so `d(t)` — which normalises by
+  the total separation — has nothing to report. That framing needs no claim about what lies along the
+  path, which is exactly what the feedback forbade.
+- `jsd_reliability.png` cannot be regenerated: its 10,000-pair source array lived in the /tmp corpus
+  cache, which does not survive across sessions. Its axis labels still say "selection-split" and
+  "held-out"; the caption now maps both to the new vocabulary. Re-deriving the array would mean
+  re-downloading 4.1 GB of corpus, which is not worth it for two axis labels.
+
+**Next step.** None outstanding for this direction: `PLAN.md` stage S4 (correspondence-only report) is
+what this iteration delivered, and zero unaddressed feedback files remain, so `STOP` is written. If
+more feedback arrives, the wrapper's next entry should delete `STOP` first (rule 11).
+
+On track? yes — S1–S3 complete, S4 (correspondence-only report) delivered this iteration; operator
+feedback #6 fully addressed, no blocker.

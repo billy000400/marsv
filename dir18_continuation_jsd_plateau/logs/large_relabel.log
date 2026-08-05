@@ -1,0 +1,17 @@
+n = 1000 valid pairs over 123 endpoints
+rho(J_holdout, w) = -0.4857
+  endpoint-cluster bootstrap 95% CI [-0.603, -0.353]  (sd 0.064)
+  naive pair bootstrap  95% CI [-0.533, -0.437]  (sd 0.025)
+  endpoint-label permutation p = 0.00025   (naive p = 2.6e-60, invalid)
+  rho(selection split) = -0.4851   rho(J, out_jsd) = 0.7294
+  median w 0.555  valid rate 1.000
+   bin 0: n=100  J=0.317  median w=0.649
+   bin 1: n=100  J=0.456  median w=0.611
+   bin 2: n=100  J=0.537  median w=0.602
+   bin 3: n=100  J=0.588  median w=0.567
+   bin 4: n=100  J=0.627  median w=0.563
+   bin 5: n=100  J=0.671  median w=0.542
+   bin 6: n=100  J=0.713  median w=0.520
+   bin 7: n=100  J=0.751  median w=0.524
+   bin 8: n=100  J=0.781  median w=0.497
+   bin 9: n=100  J=0.851  median w=0.499

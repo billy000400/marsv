@@ -1,0 +1,25 @@
+1.4B trained     big| large  My house is        w=0.773 E=0.162 M(1)=0.035
+1.4B trained     big| large  The thing was      w=0.793 E=0.178 M(1)=0.024
+1.4B trained     big| large  They said it was   w=0.775 E=0.166 M(1)=0.187
+1.4B trained     big| large  I thought it was   w=0.767 E=0.161 M(1)=0.314
+1.4B trained     big| in     My house is        w=0.357 E=0.043 M(1)=0.935
+1.4B trained     big| in     The thing was      w=0.500 E=0.070 M(1)=0.929
+1.4B trained     big| in     They said it was   w=0.348 E=0.050 M(1)=0.895
+1.4B trained     big| in     I thought it was   w=0.423 E=0.054 M(1)=0.843
+1.4B untrained   big| large  My house is        w=0.834 E=0.216 M(1)=0.041
+1.4B untrained   big| large  The thing was      w=0.836 E=0.218 M(1)=0.040
+1.4B untrained   big| large  They said it was   w=0.837 E=0.219 M(1)=0.045
+1.4B untrained   big| large  I thought it was   w=0.834 E=0.215 M(1)=0.044
+1.4B untrained   big| in     My house is        w=0.829 E=0.211 M(1)=0.044
+1.4B untrained   big| in     The thing was      w=0.830 E=0.212 M(1)=0.041
+1.4B untrained   big| in     They said it was   w=0.827 E=0.210 M(1)=0.048
+1.4B untrained   big| in     I thought it was   w=0.830 E=0.212 M(1)=0.045
+410M trained     big| large  My house is        w=0.794 E=0.198 M(1)=0.047
+410M trained     big| large  The thing was      w=0.779 E=0.167 M(1)=0.044
+410M trained     big| large  They said it was   w=0.804 E=0.202 M(1)=0.074
+410M trained     big| large  I thought it was   w=0.777 E=0.169 M(1)=0.110
+410M trained     big| in     My house is        w=0.494 E=0.075 M(1)=0.943
+410M trained     big| in     The thing was      w=0.583 E=0.085 M(1)=0.913
+410M trained     big| in     They said it was   w=0.578 E=0.083 M(1)=0.888
+410M trained     big| in     I thought it was   w=0.596 E=0.093 M(1)=0.827
+corpus JSD: {" big| large": {"jsd_selection": 0.40935021397841936, "jsd_holdout": 0.41152275143143635}, " big| in": {"jsd_selection": 0.7029212475219404, "jsd_holdout": 0.701259231775605}}

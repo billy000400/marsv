@@ -80,14 +80,14 @@ def fig_reliability(rel, npz):
     ax[0].scatter(jA, jB, s=3, alpha=0.15, color=CVD[0], marker="o", edgecolors="none")
     lim = [min(jA.min(), jB.min()), max(jA.max(), jB.max())]
     ax[0].plot(lim, lim, ls="--", color="0.35", lw=1, label="y = x")
-    ax[0].set_xlabel("selection-split next-token JSD $\\hat{J}_{\\mathrm{sel}}(u,v)$ [bits]")
-    ax[0].set_ylabel("held-out next-token JSD $\\hat{J}_{\\mathrm{hold}}(u,v)$ [bits]")
+    ax[0].set_xlabel("next-token JSD $J(u,v)$ [bits], pair-selection sample")
+    ax[0].set_ylabel("next-token JSD $J(u,v)$ [bits], measurement sample")
     ax[0].set_title(f"Between-token JSD, two disjoint corpus splits\nSpearman = {rel['spearman_A_B']:.3f}"
                     f"  (n = {len(jA):,} pairs)")
     ax[0].legend(frameon=False, fontsize=8)
     bins = np.linspace(0, max(jB.max(), sh.max()), 60)
     ax[1].hist(jB, bins=bins, color=CVD[0], histtype="stepfilled", alpha=0.55, hatch="//",
-               label=f"between-token $\\hat{{J}}_{{\\mathrm{{hold}}}}$ (median {np.median(jB):.3f})")
+               label=f"between-token JSD, measurement sample (median {np.median(jB):.3f})")
     ax[1].hist(sh, bins=bins, color=CVD[1], histtype="stepfilled", alpha=0.55, hatch="\\\\",
                label=f"same-token split-half (median {np.median(sh):.3f})")
     ax[1].set_xlabel("JSD (bits)")
@@ -124,7 +124,7 @@ def fig_all_curves(tags, labels):
             if row == 1:
                 a.set_xlabel("interpolation position $t$")
             if q == 0:
-                a.set_ylabel(f"{lab}\nrelative logit distance $d(t)$", fontsize=8)
+                a.set_ylabel(f"{lab}\noutput-distance score $d(t)$", fontsize=8)
                 a.legend(frameon=False, fontsize=7, loc="upper left")
     fig.suptitle("All 180 curves at each of these two checkpoints (validity audited over all 1,080 curves, six checkpoints)",
                  fontsize=11)
@@ -149,12 +149,12 @@ def fig_reference_curves(tag):
             ax.plot(grid, C[i, ci], ls=LS[0] if grp == "low" else LS[1], color=col, lw=1.0,
                     alpha=0.75, marker=MARK[n % 3] if ci == 0 else None, ms=3,
                     label=(f"{r['a_str'].strip()}/{r['b_str'].strip()}  "
-                           f"$\\hat{{J}}_{{\\mathrm{{hold}}}}$={r['jsd_B']:.2f} ({grp})") if ci == 0 else None)
+                           f"JSD={r['jsd_B']:.2f} ({grp})") if ci == 0 else None)
     ax.axhline(0.1, color="0.6", lw=0.8, ls=":")
     ax.axhline(0.9, color="0.6", lw=0.8, ls=":")
     ax.set_xlabel("interpolation position $t$ (block-0 residual, SLERP)")
-    ax.set_ylabel("relative logit distance $d(t)$")
-    ax.set_title("Raw curves, 3 lowest vs 3 highest $\\hat{J}_{\\mathrm{hold}}$ pairs\n(all 3 carrier contexts drawn, no averaging)")
+    ax.set_ylabel("output-distance score $d(t)$")
+    ax.set_title("Raw curves, 3 lowest vs 3 highest JSD pairs\n(all 3 sentence frames drawn, no averaging)")
     ax.legend(frameon=False, fontsize=7)
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "reference_curves.png"))
@@ -170,7 +170,7 @@ def fig_jsd_vs_width(Qs, labels):
         for q in range(5):
             m = b == q
             a.scatter(x[m], y[m], s=26, color=CVD[q], marker=MARK[q], alpha=0.85,
-                      edgecolors="none", label=f"$\\hat{{J}}_{{\\mathrm{{sel}}}}$ quintile {q+1}")
+                      edgecolors="none", label=f"JSD group {q+1}")
         good = np.isfinite(x) & np.isfinite(y)
         if good.sum() > 10:  # medians of w in 5 non-overlapping equal-count holdout-JSD bins
             xs, ys = x[good], y[good]
@@ -178,9 +178,9 @@ def fig_jsd_vs_width(Qs, labels):
             bi = np.clip(np.digitize(xs, e[1:-1]), 0, 4)
             a.plot([np.median(xs[bi == q]) for q in range(5)],
                    [np.median(ys[bi == q]) for q in range(5)],
-                   color="0.25", ls="--", lw=1.4, marker="x", ms=6, label="median in 5 non-overlapping $\\hat{J}_{\\mathrm{hold}}$ bins")
+                   color="0.25", ls="--", lw=1.4, marker="x", ms=6, label="median in 5 non-overlapping JSD bins")
         r, lo, hi, n, p = boot_spearman(x, y)
-        a.set_xlabel("held-out corpus next-token JSD $\\hat{J}_{\\mathrm{hold}}(u,v)$ [bits]")
+        a.set_xlabel("corpus next-token JSD $J(u,v)$ [bits] (measurement sample)")
         a.set_ylabel("transition width $w$  (smaller = sharper)")
         a.set_title(f"{lab}\nSpearman $\\rho$ = {r:+.3f}  [{lo:+.2f}, {hi:+.2f}]  n = {n}")
         if k == 0:
@@ -210,7 +210,7 @@ def fig_width_by_bin(Qs, labels):
                        label=lab if q == 0 else None)
     ax.set_xticks(range(5))
     ax.set_xticklabels([f"Q{q+1}" for q in range(5)])
-    ax.set_xlabel("$\\hat{J}_{\\mathrm{sel}}$ quintile of the frozen bank (Q1 = most similar continuations)")
+    ax.set_xlabel("JSD group of the frozen pair set (group 1 = most similar continuations)")
     ax.set_ylabel("transition width $w$")
     ax.set_title("Transition width by corpus-divergence bin")
     ax.legend(frameon=False, fontsize=8)
@@ -261,10 +261,10 @@ def fig_output_jsd(Q):
     for q in range(5):
         m = b == q
         ax.scatter(x[m], y[m], s=26, color=CVD[q], marker=MARK[q], alpha=0.85, edgecolors="none",
-                   label=f"quintile {q+1}")
+                   label=f"JSD group {q+1}")
     r, lo, hi, n, p = boot_spearman(x, y)
-    ax.set_xlabel("held-out corpus next-token JSD $\\hat{J}_{\\mathrm{hold}}(u,v)$ [bits]")
-    ax.set_ylabel("model output JSD in carrier context (bits)")
+    ax.set_xlabel("corpus next-token JSD $J(u,v)$ [bits] (measurement sample)")
+    ax.set_ylabel("model-output JSD in the sentence frame (bits)")
     ax.set_title(f"Does corpus JSD predict a distinction the model learned?\n"
                  f"Spearman $\\rho$ = {r:+.3f}  [{lo:+.2f}, {hi:+.2f}]  n = {n}")
     ax.legend(frameon=False, fontsize=7.5)
@@ -291,7 +291,7 @@ def fig_bank_comparison(prim, sec, drop=None):
     ax.axhline(0, color="0.4", lw=1, ls=":")
     ax.set_xticks(xs)
     ax.set_xticklabels(labs)
-    ax.set_ylabel(r"Spearman $\rho$($\hat{J}_{\mathrm{hold}}$, $w$)")
+    ax.set_ylabel(r"Spearman $\rho$($J$, $w$)")
     ax.set_title("The conclusion does not depend on the endpoint filter")
     ax.legend(frameon=False, fontsize=7.5, loc="lower right")
     fig.tight_layout()
@@ -371,13 +371,13 @@ def fig_block_scan():
                       for r in bs["rows"] if r["group"] == grp], dtype=float)
         med = np.nanmedian(W, axis=0)
         ax.plot(blocks, med, ls=LS[gi], marker=MARK[gi], color=CVD[gi], lw=1.6,
-                label=f"{grp} $\\hat{{J}}_{{\\mathrm{{hold}}}}$ pairs (n={W.shape[0]})")
+                label=f"{grp}-JSD pairs (n={W.shape[0]})")
         for row in W:
             ax.plot(blocks, row, ls=LS[gi], color=CVD[gi], lw=0.6, alpha=0.3)
     ax.set_xticks(blocks)
     ax.set_xlabel("patched block $L$ (residual stream after this block is interpolated)")
     ax.set_ylabel("transition width $w$")
-    ax.set_title("Width grows as fewer blocks follow the patch\n(10 extreme pairs, carrier context 1 only)")
+    ax.set_title("Width grows as fewer blocks follow the patch\n(10 extreme pairs, sentence frame 1 only)")
     ax.legend(frameon=False, fontsize=8)
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "block_scan.png"))

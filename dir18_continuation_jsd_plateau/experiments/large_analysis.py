@@ -56,21 +56,21 @@ def figure(jB, w, binq, res, prim):
     for q in range(5):
         m = binq == q
         ax[0].scatter(jB[m], w[m], s=9, color=CVD[q], marker=MARK[q], alpha=0.55,
-                      edgecolors="none", label=f"$\\hat{{J}}_{{\\mathrm{{sel}}}}$ quintile {q+1}")
+                      edgecolors="none", label=f"JSD group {q+1}")
     b = res["binned"]
     ax[0].errorbar([x["jsd"] for x in b], [x["w"] for x in b],
                    yerr=[[x["w"] - x["w_lo"] for x in b], [x["w_hi"] - x["w"] for x in b]],
                    fmt="x--", color="0.15", lw=1.5, ms=7, capsize=3,
-                   label="median $w$ in 10 non-overlapping\n$\\hat{J}_{\\mathrm{hold}}$ bins (bars = IQR)")
-    ax[0].set_xlabel("held-out corpus next-token JSD $\\hat{J}_{\\mathrm{hold}}(u,v)$ [bits]")
+                   label="median $w$ in 10 non-overlapping\nJSD bins (bars = IQR)")
+    ax[0].set_xlabel("corpus next-token JSD $J(u,v)$ [bits] (measurement sample)")
     ax[0].set_ylabel("transition width $w$  (smaller = sharper)")
-    ax[0].set_title(f"Secondary bank: {res['n_pairs']} pairs over {res['n_endpoints']} endpoints\n"
+    ax[0].set_title(f"{res['n_pairs']} pairs built from {res['n_endpoints']} tokens\n"
                     f"Spearman $\\rho$ = {res['rho']:+.3f}")
     ax[0].legend(frameon=False, fontsize=7, loc="lower left")
 
-    names = [f"primary bank, {prim['n']} endpoint-disjoint pairs\n(bootstrap over pairs)",
-             f"secondary bank, {res['n_pairs']} pairs\nendpoint-cluster bootstrap",
-             f"secondary bank, {res['n_pairs']} pairs\nnaive pair bootstrap (invalid here)"]
+    names = [f"{prim['n']}-pair controlled set\n(no token reused; bootstrap over pairs)",
+             f"{res['n_pairs']}-pair set, uncertainty accounting\nfor tokens reused across pairs",
+             f"{res['n_pairs']}-pair set, uncertainty ignoring\ntoken reuse (invalid here)"]
     vals = [(prim["rho"], prim["ci"]), (res["rho"], res["boot_ci"]), (res["rho"], res["naive_ci"])]
     for k, ((r, ci), nm) in enumerate(zip(vals, names)):
         ax[1].errorbar([r], [2 - k], xerr=[[r - ci[0]], [ci[1] - r]], fmt=MARK[k], color=CVD[k],
@@ -78,9 +78,9 @@ def figure(jB, w, binq, res, prim):
     ax[1].set_yticks([2, 1, 0])
     ax[1].set_yticklabels(names, fontsize=7)
     ax[1].axvline(0, color="0.5", ls=":", lw=1)
-    ax[1].set_xlabel("Spearman $\\rho$($\\hat{J}_{\\mathrm{hold}}$, $w$) with 95% CI")
-    ax[1].set_title("Clustering endpoints widens the interval\n"
-                    f"endpoint-label permutation $p$ = {res['perm_p']:.4f}")
+    ax[1].set_xlabel("Spearman $\\rho$($J$, $w$) with 95% CI")
+    ax[1].set_title("Accounting for token reuse widens the interval\n"
+                    f"token-relabelling permutation $p$ = {res['perm_p']:.4f}")
     ax[1].set_ylim(-0.6, 2.6)
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "large_bank.png"))
