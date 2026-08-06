@@ -24,7 +24,11 @@ the surprising order:
 
 1. **Corpus statistics start sorting the pairs between step 8 and step 32** — within the first 32 of
    143,000 steps, at a learning rate still in warmup. At step 32 the correlation is already
-   $\rho = -0.428$, two-thirds of its final value ($-0.525$), and it never returns to zero.
+   $\rho = -0.428$, two-thirds of its final value ($-0.525$), and it never returns to zero. What
+   appears at step 32 is the top end of the divergence range rather than a graded axis: deleting the
+   highest-divergence quintile removes the effect entirely, deleting any other quintile leaves it
+   untouched, and on 600 middle-range pairs of the larger bank there is nothing at step 32
+   ($\rho = -0.055$, $p = 0.35$) where the same pairs give $-0.300$ at the end of training.
 2. **At that moment there are no plateaus at all.** Median transition width at step 32 is 0.827,
    statistically indistinguishable from the straight-line reference value of 0.8 and from the
    untrained model's 0.831. The model has ranked the pairs correctly across a total spread of
@@ -341,6 +345,32 @@ Smaller values mean the movement is bunched into a few steps. As a **location** 
 the movement mass inside a fixed window of width 0.2 in $t$, centred on the position where $d$
 crosses 0.5. Its width does not depend on $w$, so a narrowing transition cannot inflate it
 mechanically; under uniform movement it equals 0.2. Result 4 consumes both.
+
+**Divergence-subset ordering, $\rho^{(S)}$.** A rank correlation measured across a wide range can be
+produced entirely by that range's extremes. If only the very-highest-divergence and
+very-lowest-divergence pairs differ in width, then "corpus divergence orders the pairs" is really a
+two-group contrast, and the onset we date is the moment two extreme groups separate rather than the
+moment a graded relationship appears — a materially weaker claim than the one the Summary makes. To
+tell these apart we split the bank into quintiles of $J$ and recompute the ordering on subsets $S$
+that delete one quintile at a time, and on the subset that deletes both tails at once:
+
+```math
+\rho^{(S)}_s \;=\; \mathrm{Spearman}\bigl(\lbrace J_i\rbrace_{i \in S},\; \lbrace w_{s,i}\rbrace_{i \in S}\bigr)
+```
+
+Deleting a quintile removes pairs *and* divergence range, and either alone shrinks a rank
+correlation, so a smaller $\rho^{(S)}$ is not by itself evidence about that quintile. The control
+holds the sample size fixed and randomises which pairs go: we draw $N = 4{,}000$ uniform random
+subsets $R_b$ of the same size and report where the quintile-drop value falls among them,
+
+```math
+u \;=\; \frac{1}{N}\sum_{b=1}^{N} \mathbf{1}\bigl[\rho^{(R_b)}_{32} \le \rho^{(S)}_{32}\bigr], \qquad |R_b| = |S|
+```
+
+so $u \approx 0.5$ means the drop did nothing beyond losing pairs and $u \approx 1$ means no random
+subset of that size was as weak — the deleted quintile was carrying the correlation. Result 13
+consumes both, on both banks; on the 1,000-pair bank the significance of each $\rho^{(S)}$ comes from
+the same endpoint-label permutation used everywhere else, restricted to $S$.
 
 ### Baselines and references
 
@@ -885,6 +915,61 @@ thirds of the measurement: at step 128 a single context can reach at most $\pi_{
 the chance envelope, so a noisier series needs one more checkpoint to clear it. No frame ever reverses the order of the three events, and none places the ranking bracket
 anywhere near either of the other two.
 
+### Result 13 — At its onset the ordering is a top-quintile effect, not a graded one
+
+Everything above dates *when* corpus divergence starts ordering the pairs. It does not say **which
+pairs** produce that ordering, and the two readings differ in what they claim about the model. A
+graded relation at step 32 would mean the model has already spread all 60 pairs along a
+divergence-shaped axis. A top-quintile effect would mean something narrower and more mechanical: the
+handful of pairs with the most distinct corpus continuations pull away first, and the rest are still
+interchangeable. Figure 13 separates these by deleting one divergence quintile at a time and
+re-running the ordering rule on what is left.
+
+![Three panels: correlation at step 32 per divergence subset for the 60-pair bank against a size-matched random-drop envelope, per-quintile width change, and the same subsets on the 1,000-pair bank at two checkpoints](plots/quintile_dependence.png)
+
+**Figure 13.** The step-32 ordering lives in the highest-divergence quintile; the graded relation
+across the bulk of the range arrives later. **A** x: Spearman $\rho(J, w)$ at step 32 on the 60-pair
+bank; y: the subset used, from all 60 pairs down to the middle three quintiles. Circles (solid bars)
+= subsets whose simultaneous 95% band still excludes zero, open squares (dashed bars) = subsets whose
+band includes zero; bars are the simultaneous band. The gray bar above a row is the 2.5–97.5%
+envelope of $\rho_{32}$ over 4,000 *random* subsets of that same size, with its median tick — the
+size-matched control. **B** x: corpus-divergence quintile Q1 (lowest $J$) to Q5 (highest), labelled
+with each quintile's median $J$ in bits; y: median width change $\Delta w$ over step 8 → 32, in units
+of $10^{-3}$, with 95% bootstrap intervals; the dotted line is zero and the open square marks Q5.
+**C** x: Spearman $\rho(J, w)$ on the 1,000-pair bank; y: the same subsets, with the number of pairs
+each retains. Circles (solid) = step 32, squares (dashed) = step 143000; the hatched band is the 95%
+envelope of $|\rho|$ under 20,000 endpoint-label permutations.
+
+Deleting the **lowest** divergence quintile changes nothing: $\rho_{32}$ goes from $-0.428$ to
+$-0.426$, which is exactly the median of random 46-pair subsets ($u = 0.49$). The same holds for Q2,
+Q3 and Q4, all of which leave $\rho_{32}$ between $-0.46$ and $-0.48$ with a band excluding zero, and
+the step 8 → 32 bracket intact. Deleting the **highest** quintile collapses it: $\rho_{32} = -0.191$
+with a band spanning zero ($p^{\mathrm{fw}} = 0.77$), and the ordering bracket moves from step 8 → 32
+out to step 64 → 128. That is not the cost of dropping 12 pairs — every one of the 4,000 random
+48-pair subsets gave a *more* negative correlation ($u = 1.000$, random median $-0.425$). Removing
+both tails leaves $\rho_{32} = -0.134$ ($u = 0.996$) and pushes the bracket to step 256 → 512.
+Panel B says the same thing in the units the effect is actually made of: over step 8 → 32, quintiles
+Q1 through Q4 do not move at all (median $\Delta w$ from $+0.0006$ to $-0.0013$, every interval
+covering zero), while Q5 sharpens by $-0.0057$ $[-0.0094, -0.0026]$.
+
+The obvious objection is power: the 60-pair bank holds only 10 to 14 pairs per quintile, so "no
+graded relation in the middle" could just mean "not enough pairs in the middle". The frozen
+1,000-pair bank answers that, because it was built to fill exactly that crowded middle and leaves 600
+pairs after both tails are removed. It agrees (Figure 13C). At step 32, dropping Q5 takes
+$\rho$ from $-0.149$ ($p = 0.0023$) to $-0.091$ ($p = 0.081$), and the middle three quintiles alone
+give $-0.055$ with $p = 0.35$ across 600 pairs. The same 600 pairs at step 143000 give $-0.300$ with
+$p < 0.0001$ — so the bulk relation is measurable on this bank, is strongly present at the end of
+training, and is absent at step 32. The middle of the divergence range is not too small to see; there
+is nothing there yet.
+
+This narrows the headline in a way worth stating plainly. What appears between step 8 and step 32 is
+not a fully graded divergence axis but its top end: the pairs whose corpus continuations diverge most
+(here $J \gtrsim 0.78$ bits) begin to sharpen while the rest stay flat and interchangeable. The
+timing claim survives — that top-end separation happens ~60× before any plateau exists, it is what
+the bracket dates, and it replicates on the larger bank — but the mechanism it points to is a
+threshold-like early selection of the most distinguishable pairs, with the graded ordering across the
+middle of the range filling in later, on its way to the mature $\rho = -0.486$.
+
 ### Summary of the onsets
 
 The table below collects the timing verdicts. Each row is an event, the bracket the prespecified rule
@@ -906,7 +991,11 @@ checkpoints. Under the four alternative width definitions of Result 10 the order
 unchanged and the shape bracket moves at most one checkpoint earlier, leaving a separation of 31× to
 62×. Under the four alternative reference checkpoints of Result 11 the ranking bracket is unchanged.
 Recomputed inside each carrier sentence separately (Result 12), the ordering and shape brackets are
-unchanged in all three and the ranking bracket moves one checkpoint later in one of the three.
+unchanged in all three and the ranking bracket moves one checkpoint later in one of the three. The
+one qualification the robustness checks do impose is on content rather than timing: by Result 13 the
+first row of this table is carried by the highest-divergence quintile, so "divergence-selective
+ordering" at step 32 means the top of the divergence range separating, not the whole range spreading
+out.
 
 ---
 
@@ -926,6 +1015,14 @@ between step 64 and step 128; at step 32 it agrees with the final model at $\pi 
 nothing once corpus divergence is partialled out. So the order of assembly is: corpus divergence
 selects first, pair-specific detail fills in around it, and the geometry that makes any of it visible
 as a plateau comes last.
+
+The early step of that assembly is narrower than a correlation alone suggests. Removing the
+highest-divergence quintile removes the step-32 ordering completely, while removing any other
+quintile leaves it untouched, and on the 600 middle-range pairs of the 1,000-pair bank there is no
+relation at step 32 ($\rho = -0.055$, $p = 0.35$) although the same pairs reach $-0.300$ by the end.
+So what training does first is pull the most distinguishable pairs away from an otherwise
+undifferentiated field; the graded ordering across the middle of the divergence range is a later
+acquisition.
 
 Read together, these say the corpus-divergence correlate reported upstream is not a side effect of
 plateaus forming. It is present before there is anything to be a side effect of, it is the first part
@@ -956,11 +1053,12 @@ produces `results/large_late.json`, `permtest.py` produces `results/permutation.
 `persistence.py` produces `results/persistence.json`, `persistence_ref.py` produces
 `results/persistence_ref.json`, `threshold_robustness.py` produces
 `results/threshold_robustness.json`, `sentence_jackknife.py` produces
-`results/sentence_jackknife.json`, `step16_forensics.py` and `revision_audit.py`
+`results/sentence_jackknife.json`, `quintile_loo.py` and `quintile_large.py` produce
+`results/quintile_loo.json` and `results/quintile_large.json`, `step16_forensics.py` and `revision_audit.py`
 produce `results/step16_forensics.json` and `results/revision_audit.json` (network only, no GPU and
 nothing written to disk beyond those files), and `plot_formation.py`, `plot_perm.py`,
-`plot_persistence.py`, `plot_persistence_ref.py`, `plot_threshold.py` and `plot_jackknife.py`
-produce every figure above. The frozen
+`plot_persistence.py`, `plot_persistence_ref.py`, `plot_threshold.py`, `plot_jackknife.py` and
+`plot_quintile.py` produce every figure above. The frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves

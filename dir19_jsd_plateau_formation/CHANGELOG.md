@@ -347,3 +347,55 @@ Green-free CVD palette; every series also coded by linestyle and marker; bands a
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (12 embeds / 12 visible captions
 per file; 19 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 7: divergence-quintile dependence of the onset (new Result 13 / Figure 13)
+
+**What was missing.** Result 1 dates the divergence ordering by a Spearman correlation measured
+across a divergence range spanning 0.137 to 0.942 bits. A rank correlation over a wide range can be
+produced entirely by its extremes, in which case "corpus divergence orders the pairs at step 32" is a
+two-group contrast and the bracket dates two extreme groups separating rather than a graded relation
+appearing. Nothing in the report tested which pairs carry $\rho_{32}$. New code:
+`experiments/quintile_loo.py` (CPU, ~14 s: recomputes the full 20-checkpoint $\rho$ trajectory,
+simultaneous band, 20,000-draw label-permutation null, the prespecified ordering bracket and the
+step 8 → 32 interval statistic on each leave-one-quintile-out subset and on the middle-three subset;
+plus a size-matched random-drop control with 4,000 draws and per-quintile median $\Delta w$),
+`experiments/quintile_large.py` (CPU, ~38 s: the same subsets on the frozen 1,000-pair bank at
+step 32 and step 143000, under the endpoint-label QAP permutation restricted to each subset) and
+`experiments/plot_quintile.py`. New artefacts `results/quintile_loo.json`,
+`results/quintile_large.json`.
+
+**New results (nothing superseded; this qualifies Result 1's content, not its timing).**
+- **The step-32 ordering is carried by the highest-divergence quintile.** Dropping Q5 takes
+  $\rho_{32}$ from $-0.428$ to $-0.191$ with a simultaneous band spanning zero
+  ($p^{\mathrm{fw}} = 0.77$) and moves the ordering bracket from step 8 → 32 to step 64 → 128.
+  Dropping any other quintile leaves it intact: $-0.426$ (Q1), $-0.475$ (Q2), $-0.463$ (Q3),
+  $-0.473$ (Q4), all with bands excluding zero and the step 8 → 32 bracket unchanged.
+- **This is not the cost of dropping pairs.** Against 4,000 size-matched random subsets, the Q1 drop
+  sits at the median ($u = 0.49$) while the Q5 drop is more extreme than every draw ($u = 1.000$,
+  random median $-0.425$); the both-tails subset gives $\rho_{32} = -0.134$, $u = 0.996$, bracket
+  step 256 → 512.
+- **In the units of the effect:** over step 8 → 32 the median $\Delta w$ is $+0.0004$, $+0.0006$,
+  $-0.0013$, $-0.0013$ for Q1–Q4 (all 95% intervals covering zero) and $-0.0057$
+  $[-0.0094, -0.0026]$ for Q5.
+- **Power is ruled out by the large bank.** On the 1,000-pair bank at step 32, dropping Q5 takes
+  $\rho$ from $-0.149$ ($p = 0.0023$) to $-0.091$ ($p = 0.081$), and its 600 middle-range pairs give
+  $-0.055$ ($p = 0.35$). The same 600 pairs give $-0.300$ ($p < 0.0001$) at step 143000, so the bulk
+  relation is measurable there and simply absent at step 32.
+
+**Deliverable changes.** REPORT.md: new Methods run-in paragraph "Divergence-subset ordering,
+$\rho^{(S)}$" defining the subset correlation and the size-matched random-drop control $u$ (two new
+rendered equations, display count 19 → 21); new **Result 13 — "At its onset the ordering is a
+top-quintile effect, not a graded one"** after Result 12 and before the onset summary; the Summary's
+first numbered claim now states the top-quintile qualification with the large-bank numbers; a
+qualifying sentence added under the onsets table; a new paragraph in the Conclusion narrowing the
+mechanism to early separation of the most distinguishable pairs; `quintile_loo.py`,
+`quintile_large.py` and `plot_quintile.py` added to Reproducibility. RESULTS.md: the first headline
+bullet gains the same qualification, and a new "Which pairs carry the early ordering" paragraph.
+New figure `plots/quintile_dependence.png` embedded as **Figure 13** in both files (A: $\rho_{32}$
+per subset with simultaneous bands against the size-matched random envelope; B: per-quintile median
+$\Delta w$ over step 8 → 32; C: the same subsets on the 1,000-pair bank at step 32 and step 143000
+against the endpoint-label null). Figure count 12 → 13 in each file. Green-free CVD palette; every
+series also coded by marker and linestyle; bands hatched.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (13 embeds / 13 visible captions
+per file; 21 display equations in REPORT.md all render as `js-display-math`).

@@ -11,6 +11,8 @@ training time, and in the counter-intuitive order**:
 
 - **Corpus next-token divergence starts ranking pairs by sharpness between step 8 and step 32**, when
   the model has *no plateaus at all* (median transition width 0.827 vs 0.831 untrained, IQR 0.008).
+  At that moment the effect is the top of the divergence range separating, not a graded axis:
+  deleting the highest-divergence quintile removes it, deleting any other quintile does not.
 - **The per-pair ranking becomes the final one between step 64 and step 128** — a third clock. At
   step 32 the model holds only the divergence-aligned part of the final ordering.
 - **Plateau shape appears between step 1000 and step 2000**, and the single largest sharpening event
@@ -127,6 +129,20 @@ step 32 = 0.826, 0.827, 0.828). Two of the three also return the step 64 → 128
 ($\pi_{128} = +0.504$ and $+0.388$); the third closes one checkpoint later at step 256, which is what
 attenuation predicts — a single frame can reach at most $\pi_{\max} = 0.871$ at step 128 against
 0.953 for the median of three. No frame changes the order of the three events.
+
+**Which pairs carry the early ordering.** $\rho_{32}$ is a rank correlation over a wide divergence
+range, and such a number can come entirely from the range's extremes. Deleting one divergence
+quintile at a time shows it does. Dropping the *lowest* quintile leaves $\rho_{32} = -0.426$, exactly
+the median of 4,000 random 46-pair subsets; Q2, Q3 and Q4 likewise leave it between $-0.46$ and
+$-0.48$ with the step 8 → 32 bracket intact. Dropping the *highest* quintile collapses it to
+$-0.191$ (band spanning zero, $p^{\mathrm{fw}} = 0.77$) and moves the bracket to step 64 → 128 —
+and that is not the price of 12 fewer pairs, since all 4,000 random 48-pair subsets gave a more
+negative value. Over step 8 → 32 only the top quintile sharpens at all (median $\Delta w = -0.0057$
+$[-0.0094, -0.0026]$; Q1–Q4 all cover zero). The 1,000-pair bank, which fills the crowded middle of
+the range, rules out a power explanation: its 600 middle-range pairs give $\rho = -0.055$
+($p = 0.35$) at step 32 and $-0.300$ ($p < 0.0001$) at step 143000. The timing claim stands, but what
+is dated is the separation of the most distinguishable pairs; the graded ordering across the middle
+of the range arrives later.
 
 **Quality controls.** All 3,600 curves across the 20-checkpoint scan passed the strict validity
 criteria (valid-curve rate 1.000 at every checkpoint). Endpoint patching reproduces the unpatched
@@ -295,3 +311,20 @@ median $w$, dashed line = the straight-line reference 0.8; stripe = the step 100
 pointwise 95% envelope of $|\pi|$ under 20,000 relabellings; stripe = the step 64 → 128 bracket.
 **D** x: training step (log); y: the four width definitions, each row showing all three brackets as
 bars labelled with their opening and closing checkpoint.
+
+A correlation across the whole divergence range can be produced by its extremes alone, so Figure 13
+deletes one divergence quintile at a time and re-runs the ordering rule on what is left.
+
+![Three panels: correlation at step 32 per divergence subset against a size-matched random-drop envelope, per-quintile width change, and the same subsets on the large bank at two checkpoints](plots/quintile_dependence.png)
+
+**Figure 13.** The step-32 ordering lives in the highest-divergence quintile. **A** x: Spearman
+$\rho(J, w)$ at step 32 on the 60-pair bank; y: the subset used. Circles with solid bars = subsets
+whose simultaneous 95% band still excludes zero, open squares with dashed bars = bands including
+zero; the gray bar above each row is the 2.5–97.5% envelope of $\rho_{32}$ over 4,000 random subsets
+of the same size (median tick), so a point outside it is about the deleted quintile rather than the
+lost pairs. **B** x: divergence quintile Q1 (lowest $J$) to Q5 (highest), labelled with median $J$ in
+bits; y: median $\Delta w$ over step 8 → 32 in units of $10^{-3}$, 95% bootstrap intervals, dotted
+line at zero; the open square marks Q5, the only quintile that moves. **C** x: $\rho(J, w)$ on the
+1,000-pair bank; y: the same subsets with the pairs each retains. Circles (solid) = step 32, squares
+(dashed) = step 143000; hatched band = 95% envelope of $|\rho|$ under 20,000 endpoint-label
+permutations.

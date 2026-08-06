@@ -458,3 +458,68 @@ the direction silently ignore any feedback dropped later.
 
 On track? yes — S1–S6 complete plus Results 8–12 beyond the plan (~100% of plan), no blocker; the
 released checkpoint spacing, not budget, bounds any further tightening.
+
+## Iteration 7 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Ran the item iteration 6 flagged as the next candidate: a leave-one-quintile-out
+check on the step-32 ordering. $\rho_{32} = -0.428$ is a rank correlation over a divergence range of
+0.137 to 0.942 bits, and such a number can be produced by the range's extremes alone — in which case
+the report's headline ("corpus divergence starts ranking pairs between step 8 and step 32") would be
+dating a two-group separation, not a graded ordering. Wrote `experiments/quintile_loo.py` (60-pair
+bank: full trajectory, simultaneous band, permutation null and the prespecified bracket on each
+leave-one-quintile-out subset, plus a size-matched random-drop control and per-quintile
+$\Delta w$), `experiments/quintile_large.py` (same subsets on the 1,000-pair bank under its
+endpoint-label QAP null) and `experiments/plot_quintile.py`. New Result 13 / Figure 13 in both
+deliverables.
+
+**What I learned.**
+- The ordering at step 32 is **asymmetric in a way I did not expect**: dropping the lowest quintile
+  does nothing ($-0.428 \to -0.426$), dropping the highest destroys it ($\to -0.191$, band spans
+  zero, bracket slides to step 64 → 128). So it is not "the tails carry it" — it is specifically the
+  top of the divergence range.
+- The size-matched random-drop control is what makes this reportable rather than suggestive. Dropping
+  a quintile removes range *and* 12 pairs, both of which attenuate a rank correlation. Against 4,000
+  random 48-pair subsets the Q5 drop was more extreme than every single draw ($u = 1.000$) while the
+  Q1 drop landed on the median ($u = 0.49$). Without that control the whole result could have been
+  restated as "small samples give small correlations".
+- The 1,000-pair bank turned out to be the decisive instrument here, for the reason it was previously
+  described as a weakness: it fills the crowded middle of the divergence range. Its 600 middle-range
+  pairs give $\rho = -0.055$ ($p = 0.35$) at step 32 and $-0.300$ ($p < 0.0001$) at step 143000 — same
+  pairs, same test — so "nothing in the bulk at step 32" is a fact about the model, not about power.
+  I nearly skipped this run for time; it is the half of Result 13 that survives a referee.
+- Per-quintile $\Delta w$ over step 8 → 32 gives the cleanest statement of the mechanism: Q1–Q4 do
+  not move (all intervals cover zero), Q5 sharpens by $-0.0057$. The "ordering onset" is one quintile
+  pulling away from an undifferentiated field.
+- Consequence for the story (CLAUDE.md 9b/9c step 2, narrow the claim): the timing claim is
+  unchanged and still replicates, but the content claim is now "the most distinguishable pairs
+  separate first, the graded ordering fills in later". I edited the Summary, the onset-table note and
+  the Conclusion to say that rather than leaving the qualification buried in a robustness section.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Quintiles of the 60-pair bank are the inherited `bins` from the manifest (10–14 pairs each, not
+  exactly 12); on the 1,000-pair bank I cut fresh quintiles at its own 20th/40th/60th/80th
+  percentiles. Rejected forcing equal counts on the small bank: that would have reselected groups
+  the upstream design fixed.
+- The random-drop control randomises *which* pairs are removed at fixed $n$. It deliberately does not
+  hold the divergence range fixed, because range restriction is part of what deleting a quintile
+  means; the control isolates sample size, and the large-bank replication covers the range question.
+- On the large bank the subset is fixed at what was observed and only the endpoint labels permute, so
+  pairs sharing an endpoint token stay dependent — same null as `permtest.py`, restricted.
+- Scored the large bank at step 32 and step 143000 only. Step 8 would have added a "still nothing"
+  row, but the informative contrast is early-versus-mature on identical pairs.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–6.
+
+**Next step.** S1–S6 are complete and the three onsets now survive a chance null, a metric-definition
+sweep, a reference sweep, a carrier-sentence jackknife and a divergence-subset check. The natural
+follow-on from Result 13 is a within-quintile analysis of *when* the bulk relation does appear on the
+1,000-pair bank (it is absent at step 32 and strong at the end; the checkpoints in between are
+already measured on the 60-pair bank but only steps 0, 8, 32, 64000 and 143000 exist for the large
+bank, so this would need new GPU runs at intermediate checkpoints — feasible but not cheap). Did not
+write `STOP`: the deliverables are complete, but a premature STOP would make the direction silently
+ignore any feedback dropped later.
+
+On track? yes — S1–S6 complete plus Results 8–13 beyond the plan (~100% of plan), no blocker; the
+released checkpoint spacing, not budget, bounds any further tightening.
