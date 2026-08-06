@@ -1,0 +1,12 @@
+download rc=0 in 41s
+w=0.564
+841/1000 ' real'/' getting' w=0.505
+861/1000 ' an'/' by' w=0.390
+881/1000 ' actually'/' difficult' w=0.399
+901/1000 ' never'/' enough' w=0.566
+921/1000 ' you'/' his' w=0.430
+941/1000 ' there'/' some' w=0.499
+961/1000 ' extremely'/' wonderful' w=0.512
+981/1000 ' un'/' much' w=0.497
+valid-curve rate 1.000  median w 0.537  IQR(w) 0.140  loss 2.2774  lr 1.263e-04  max endpoint rel-err 1.14e-05
+LARGE_DONE in 309s

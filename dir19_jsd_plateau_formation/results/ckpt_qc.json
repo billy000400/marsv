@@ -1,0 +1,155 @@
+{
+  "steps": [
+    0,
+    1,
+    2,
+    4,
+    8,
+    16,
+    32,
+    64,
+    128,
+    256,
+    512,
+    1000,
+    2000,
+    4000,
+    8000,
+    16000,
+    32000,
+    64000,
+    96000,
+    128000,
+    143000
+  ],
+  "heldout_loss": [
+    11.01017364083904,
+    11.010172774880367,
+    11.004406505368227,
+    10.730259561258753,
+    9.889352503588055,
+    2.3200986492657147,
+    8.823815765679466,
+    8.02955836465914,
+    6.914854486394535,
+    6.036986826917197,
+    5.064992598591485,
+    3.6806164534357895,
+    3.046990135177941,
+    2.724188823289367,
+    2.538228210404428,
+    2.422945446230894,
+    2.3363279279197497,
+    2.277400959261243,
+    2.2450368063790456,
+    2.313713051334986,
+    2.321819503246688
+  ],
+  "nearest": {
+    "0": {
+      "nearest_step": 1,
+      "max_abs_curve_diff": 0.0
+    },
+    "1": {
+      "nearest_step": 0,
+      "max_abs_curve_diff": 0.0
+    },
+    "2": {
+      "nearest_step": 0,
+      "max_abs_curve_diff": 5.453824996948242e-05
+    },
+    "4": {
+      "nearest_step": 2,
+      "max_abs_curve_diff": 0.002474546432495117
+    },
+    "8": {
+      "nearest_step": 4,
+      "max_abs_curve_diff": 0.011851668357849121
+    },
+    "16": {
+      "nearest_step": 143000,
+      "max_abs_curve_diff": 0.0
+    },
+    "32": {
+      "nearest_step": 4,
+      "max_abs_curve_diff": 0.07252967357635498
+    },
+    "64": {
+      "nearest_step": 32,
+      "max_abs_curve_diff": 0.15616697072982788
+    },
+    "128": {
+      "nearest_step": 64,
+      "max_abs_curve_diff": 0.15810006856918335
+    },
+    "256": {
+      "nearest_step": 64,
+      "max_abs_curve_diff": 0.2426949143409729
+    },
+    "512": {
+      "nearest_step": 32,
+      "max_abs_curve_diff": 0.2312304675579071
+    },
+    "1000": {
+      "nearest_step": 32,
+      "max_abs_curve_diff": 0.2637808918952942
+    },
+    "2000": {
+      "nearest_step": 4000,
+      "max_abs_curve_diff": 0.2624831795692444
+    },
+    "4000": {
+      "nearest_step": 2000,
+      "max_abs_curve_diff": 0.2624831795692444
+    },
+    "8000": {
+      "nearest_step": 16000,
+      "max_abs_curve_diff": 0.2127598226070404
+    },
+    "16000": {
+      "nearest_step": 8000,
+      "max_abs_curve_diff": 0.2127598226070404
+    },
+    "32000": {
+      "nearest_step": 128000,
+      "max_abs_curve_diff": 0.26704132556915283
+    },
+    "64000": {
+      "nearest_step": 96000,
+      "max_abs_curve_diff": 0.2825372815132141
+    },
+    "96000": {
+      "nearest_step": 16,
+      "max_abs_curve_diff": 0.2064700722694397
+    },
+    "128000": {
+      "nearest_step": 16,
+      "max_abs_curve_diff": 0.12425857782363892
+    },
+    "143000": {
+      "nearest_step": 16,
+      "max_abs_curve_diff": 0.0
+    }
+  },
+  "loss_monotonicity_breaks": [
+    {
+      "step": 16,
+      "loss": 2.3200986492657147,
+      "next_step": 32,
+      "next_loss": 8.823815765679466
+    },
+    {
+      "step": 96000,
+      "loss": 2.2450368063790456,
+      "next_step": 128000,
+      "next_loss": 2.313713051334986
+    }
+  ],
+  "suspect": "step16",
+  "suspect_vs_final_max_abs_curve_diff": 0.0,
+  "hub_file_size_bytes": {
+    "step16": 2829329888,
+    "all_other_revisions": 2829329920
+  },
+  "verdict": "step16 fails the monotone-loss check and its curves are closest to a late checkpoint; treated as a mislabelled release and excluded"
+}

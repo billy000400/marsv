@@ -1,0 +1,61 @@
+step1: downloaded in 97s, assaying
+step1: valid-curve rate 1.000  median w 0.831  IQR(w) 0.006  loss 11.0102  lr 1.399e-07  max endpoint rel-err 3.32e-06
+step1: total 160s
+step2: downloaded in 102s, assaying
+step2: valid-curve rate 1.000  median w 0.831  IQR(w) 0.006  loss 11.0044  lr 2.797e-07  max endpoint rel-err 3.83e-06
+step2: total 165s
+step4: downloaded in 98s, assaying
+step4: valid-curve rate 1.000  median w 0.831  IQR(w) 0.006  loss 10.7303  lr 5.594e-07  max endpoint rel-err 3.60e-06
+step4: total 160s
+step8: downloaded in 96s, assaying
+step8: valid-curve rate 1.000  median w 0.829  IQR(w) 0.006  loss 9.8894  lr 1.119e-06  max endpoint rel-err 2.42e-06
+step8: total 158s
+step16: downloaded in 111s, assaying
+step16: valid-curve rate 1.000  median w 0.541  IQR(w) 0.169  loss 2.3201  lr 2.238e-06  max endpoint rel-err 4.58e-05
+step16: total 173s
+step32: downloaded in 103s, assaying
+step32: valid-curve rate 1.000  median w 0.827  IQR(w) 0.008  loss 8.8238  lr 4.476e-06  max endpoint rel-err 2.39e-06
+step32: total 165s
+step64: downloaded in 143s, assaying
+step64: valid-curve rate 1.000  median w 0.827  IQR(w) 0.029  loss 8.0296  lr 8.951e-06  max endpoint rel-err 2.43e-06
+step64: total 205s
+step128: downloaded in 107s, assaying
+step128: valid-curve rate 1.000  median w 0.837  IQR(w) 0.047  loss 6.9149  lr 1.790e-05  max endpoint rel-err 2.40e-06
+step128: total 169s
+step256: downloaded in 104s, assaying
+step256: valid-curve rate 1.000  median w 0.834  IQR(w) 0.044  loss 6.0370  lr 3.580e-05  max endpoint rel-err 2.94e-06
+step256: total 166s
+step512: downloaded in 103s, assaying
+step512: valid-curve rate 1.000  median w 0.814  IQR(w) 0.080  loss 5.0650  lr 7.161e-05  max endpoint rel-err 2.44e-06
+step512: total 165s
+step1000: downloaded in 100s, assaying
+step1000: valid-curve rate 1.000  median w 0.753  IQR(w) 0.107  loss 3.6806  lr 1.399e-04  max endpoint rel-err 2.55e-06
+step1000: total 163s
+step2000: downloaded in 101s, assaying
+step2000: valid-curve rate 1.000  median w 0.680  IQR(w) 0.139  loss 3.0470  lr 2.000e-04  max endpoint rel-err 2.61e-06
+step2000: total 163s
+step4000: downloaded in 126s, assaying
+step4000: valid-curve rate 1.000  median w 0.639  IQR(w) 0.144  loss 2.7242  lr 1.999e-04  max endpoint rel-err 2.87e-06
+step4000: total 189s
+step8000: downloaded in 100s, assaying
+step8000: valid-curve rate 1.000  median w 0.601  IQR(w) 0.150  loss 2.5382  lr 1.990e-04  max endpoint rel-err 2.83e-06
+step8000: total 162s
+step16000: downloaded in 145s, assaying
+step16000: valid-curve rate 1.000  median w 0.565  IQR(w) 0.132  loss 2.4229  lr 1.953e-04  max endpoint rel-err 3.09e-06
+step16000: total 207s
+step32000: downloaded in 98s, assaying
+step32000: valid-curve rate 1.000  median w 0.555  IQR(w) 0.131  loss 2.3363  lr 1.801e-04  max endpoint rel-err 2.64e-06
+step32000: total 160s
+step64000: downloaded in 185s, assaying
+step64000: valid-curve rate 1.000  median w 0.512  IQR(w) 0.150  loss 2.2774  lr 1.263e-04  max endpoint rel-err 7.77e-06
+step64000: total 247s
+step143000: downloaded in 35s, assaying
+step143000: valid-curve rate 1.000  median w 0.541  IQR(w) 0.169  loss 2.3218  lr 2.000e-05  max endpoint rel-err 4.58e-05
+step143000: total 97s
+step96000: downloaded in 100s, assaying
+step96000: valid-curve rate 1.000  median w 0.517  IQR(w) 0.143  loss 2.2450  lr 6.467e-05  max endpoint rel-err 1.51e-05
+step96000: total 162s
+step128000: downloaded in 272s, assaying
+step128000: valid-curve rate 1.000  median w 0.528  IQR(w) 0.159  loss 2.3137  lr 2.494e-05  max endpoint rel-err 3.64e-05
+step128000: total 334s
+SCAN_DONE
