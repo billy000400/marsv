@@ -452,3 +452,62 @@ hatched.
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (14 embeds / 14 visible captions
 per file; 22 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 9: the two middle clocks measured on one bank (new Result 15 / Figure 15; Result 14 bracket tightened)
+
+**What was missing.** Iteration 8 left one question named in JOURNAL: the graded-ordering bracket
+(step 32 → 256, 1,000-pair bank) contained the ranking-lock-in bracket (step 64 → 128, 60-pair bank),
+so the two could be one event and the design could not tell. Both gaps had the same cause — the large
+bank had no measurement at step 64 or step 128.
+
+**New runs.** `experiments/scan_large.py step64 step128` (GPU, 304 s and 303 s, one checkpoint on
+disk at a time) took the frozen 1,000-pair bank from eight to **ten** measured checkpoints (0, 8, 32,
+64, 128, 256, 1000, 8000, 64000, 143000; 10,000 curves). QC: valid-curve rate 1.000 at both, max
+endpoint patch rel-err 2.58e-06 (step 64) and 4.22e-06 (step 128). `bulk_onset.py` re-run over the
+ten checkpoints; new code `experiments/large_persistence.py` (CPU, ~2 min) scores the large-bank
+per-pair widths against the final ones ($\pi_{\mathrm{L}}$, $\pi^{\perp}_{\mathrm{L}}$,
+$\Delta\pi = \pi_{\mathrm{L}}(s) - \pi_{\mathrm{L}}(0)$) with the dyadic endpoint bootstrap and a
+simultaneous band over all ten checkpoints; `experiments/plot_large_persistence.py` draws it. New
+artefact `results/large_persistence.json`.
+
+**Superseded numbers (Result 14, graded ordering).** The bracket tightens with the two new
+checkpoints inside the old window:
+- Bracket: after step 32, **by step 256** → after step 32, **by step 128**.
+- Statistic at onset: $\rho = -0.315$ $[-0.470, -0.157]$ at step 256 → $-0.257$ $[-0.409, -0.106]$
+  at step 128 ($p^{\mathrm{fw}}$ < 0.0001 → 0.0004). Step 64 is $-0.157$, $p^{\mathrm{fw}} = 0.088$,
+  not significant.
+- Median $w$ at the onset checkpoint: 0.829 (step 256) → 0.832 (step 128), against 0.831 untrained.
+- Top-quintile vs rest at the onset checkpoint: 0.801 / 0.836 → 0.806 / 0.837.
+- Group gap $G$ gains two rows: $-0.0149$ (step 64), $-0.0308$ (step 128).
+- Separation from the shape bracket restated 4× → 8×.
+- Full-bank $\rho$ gains two columns: $-0.351$ $[-0.496, -0.208]$ (step 64), $-0.478$
+  $[-0.618, -0.330]$ (step 128); the step-32 endpoint-label $p$ moves 0.0031 → 0.0019 and step 8
+  0.64 → 0.65 (same estimator and null, ten-checkpoint family instead of eight).
+
+**New result (nothing else superseded).**
+- **Result 15 — the ranking lock-in and the graded ordering are one early episode.** On the
+  1,000-pair bank $\Delta\pi$ is $+0.150$ at step 32 (simultaneous band $[-0.053, +0.352]$, includes
+  zero) and $+0.389$ $[+0.187, +0.592]$ at step 64, giving the bracket **after step 32, by step 64** —
+  one checkpoint ahead of the graded ordering, both inside step 32 → 128.
+  $\pi^{\perp}_{\mathrm{L}}$ (corpus divergence partialled out) goes $+0.011$ $[-0.135, +0.154]$ →
+  $+0.184$ $[+0.028, +0.329]$ across the same interval, so pair-specific structure is being acquired.
+  This reproduces the 60-pair Result 8 on 17× more pairs. Median $w$ at those checkpoints is 0.826
+  and 0.832 against 0.831 untrained, so the episode contains no sharpening.
+
+**Deliverable changes.** REPORT.md: new Methods run-in paragraph "Ranking persistence on the
+1,000-pair bank, $\Delta\pi(s)$" (one new rendered equation, display count 22 → 23); "Pair bank
+(validation)" now says ten checkpoints / 10,000 curves; Result 14 retitled "…by step 128" and
+rewritten with the numbers above, its final paragraph on the unresolved overlap deleted (Result 15
+resolves it); new **Result 15 — "The ranking lock-in and the graded ordering are one early event, not
+two"**; the onsets table rows 2 and 3 updated and a note added that they are one episode; Summary
+claims 1–3 and two Conclusion paragraphs updated; `large_persistence.py` / `plot_large_persistence.py`
+added to Reproducibility. RESULTS.md: headline bullets 2 and 3, the two onset-table rows, the
+1,000-pair table (five → ten checkpoint columns, plus a new $\Delta\pi$ row), the "When the graded
+ordering arrives" paragraph, and a new "Are the graded ordering and the ranking lock-in one event?"
+paragraph. New figure `plots/large_persistence.png` embedded as **Figure 15** in both files (A:
+$\pi_{\mathrm{L}}$ and $\pi^{\perp}_{\mathrm{L}}$ trajectories; B: $\Delta\pi$ with its simultaneous
+band; C: both clocks as a fraction of their final value). Figure count 14 → 15 in each file.
+Green-free CVD palette; every series also coded by marker and linestyle; bands and brackets hatched.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (15 embeds / 15 visible captions
+per file; 23 display equations in REPORT.md all render as `js-display-math`).

@@ -13,12 +13,14 @@ training time, and in the counter-intuitive order**:
   the model has *no plateaus at all* (median transition width 0.827 vs 0.831 untrained, IQR 0.008).
   At that moment the effect is the top of the divergence range separating, not a graded axis:
   deleting the highest-divergence quintile removes it, deleting any other quintile does not.
-- **The rest of the divergence range fills in between step 32 and step 256** — and still before any
-  plateau. At step 256 the 1,000-pair median width is 0.829 (untrained 0.831) while its top
-  divergence quintile sits at 0.801 and the other four at 0.836: the bank separates around an
+- **The rest of the divergence range fills in between step 32 and step 128** — and still before any
+  plateau. At step 128 the 1,000-pair median width is 0.832 (untrained 0.831) while its top
+  divergence quintile sits at 0.806 and the other four at 0.837: the bank separates around an
   unchanged median.
-- **The per-pair ranking becomes the final one between step 64 and step 128** — a third clock. At
-  step 32 the model holds only the divergence-aligned part of the final ordering.
+- **The per-pair ranking becomes the final one between step 64 and step 128** (step 32 → 64 on the
+  1,000-pair bank) — at step 32 the model holds only the divergence-aligned part of the final
+  ordering. Measured on one bank at one set of checkpoints, this clock and the graded ordering are
+  one checkpoint apart, so they are one early episode rather than two.
 - **Plateau shape appears between step 1000 and step 2000**, and the single largest sharpening event
   (step 512 → 1000) is completely blind to corpus divergence.
 
@@ -37,8 +39,8 @@ that moment — the last column is the contribution.
 | Event | Onset bracket | Statistic at onset | State of the other phenomena |
 |---|---|---|---|
 | Divergence-selective ordering | after step 8, **by step 32** | $\rho_{32} = -0.428$, simultaneous band $[-0.753, -0.104]$, label-permutation $p^{\mathrm{fw}} = 0.0072$ | no sharpening: median $w = 0.827$ (untrained 0.831), IQR($w$) 0.008, $E = 0.209$ *above* the straight line; ranking not yet final ($\pi = 0.161$) |
-| Graded ordering across the whole divergence range | after step 32, **by step 256** | 600 middle-range pairs of the 1,000-pair bank: $\rho = -0.055$ ($p = 0.34$) → $-0.315$ $[-0.470, -0.157]$, $p^{\mathrm{fw}} < 0.0001$; group gap $G$ $-0.0018 \to -0.0348$ | still no sharpening: 1,000-pair median $w = 0.829$ at step 256 vs 0.831 untrained |
-| Pair ranking becomes final | after step 64, **by step 128** | $\pi = +0.437$ $[+0.202, +0.623]$, $p^{\mathrm{fw}} = 0.0053$, ceiling 0.95 | still no sharpening: median $w = 0.837$, $E = 0.222$ |
+| Graded ordering across the whole divergence range | after step 32, **by step 128** | 600 middle-range pairs of the 1,000-pair bank: $\rho = -0.055$ ($p = 0.34$) → $-0.257$ $[-0.409, -0.106]$, $p^{\mathrm{fw}} = 0.0004$; group gap $G$ $-0.0018 \to -0.0308$ | still no sharpening: 1,000-pair median $w = 0.832$ at step 128 vs 0.831 untrained |
+| Pair ranking becomes final | after step 64, **by step 128** (60 pairs); after step 32, **by step 64** (1,000 pairs) | $\pi = +0.437$ $[+0.202, +0.623]$, $p^{\mathrm{fw}} = 0.0053$, ceiling 0.95; $\Delta\pi = +0.389$ $[+0.187, +0.592]$, $\pi^{\perp}_{\mathrm{L}} = +0.184$ $[+0.028, +0.329]$ | still no sharpening: median $w = 0.837$ (60 pairs), 0.826 (1,000 pairs), $E = 0.222$ |
 | Global plateau shape | after step 1000, **by step 2000** | median $w = 0.680$ (band $\le 0.732$), $E = 0.117$ (band $\le 0.147$) | ordering established ~2,000 steps earlier; ranking already final ($\pi = 0.82$) |
 | Output-movement concentration | with the shape (step 1000–2000) | $H = 0.824$, fixed-window mass 0.583 at step 2000 | uniform ($H = 1.000$, mass 0.200) at step 32 when ordering appeared |
 | Late widening (reversal) | step 64000 → 143000 | 60-pair median $\Delta w = +0.0121$ $[+0.0016, +0.0259]$ | ordering persists, $\rho = -0.525$ |
@@ -61,11 +63,12 @@ divergence-**blind** rather than reversed.
 Validation on the frozen **1,000-pair** bank (123 endpoint tokens, so uncertainty comes from a dyadic
 bootstrap over endpoints, not pairs) reproduces both the ordering and the late reversal.
 
-| 1,000-pair bank | step 0 | step 8 | step 32 | step 256 | step 1000 | step 8000 | step 64000 | step 143000 |
-|---|---|---|---|---|---|---|---|---|
-| $\rho(J, w)$, endpoint-clustered 95% CI | $-0.008$ $[-0.117, +0.115]$ | $-0.021$ $[-0.132, +0.104]$ | $-0.149$ $[-0.286, -0.011]$ | $-0.548$ $[-0.661, -0.428]$ | $-0.604$ $[-0.705, -0.487]$ | $-0.537$ $[-0.650, -0.411]$ | $-0.563$ $[-0.668, -0.438]$ | $-0.486$ $[-0.617, -0.354]$ |
-| endpoint-label permutation $p$ | 0.87 | 0.64 | **0.0031** | <0.0001 | <0.0001 | <0.0001 | <0.0001 | <0.0001 |
-| median $w$ | 0.831 | 0.830 | 0.828 | 0.829 | 0.750 | 0.609 | 0.537 | 0.555 |
+| 1,000-pair bank | step 0 | step 8 | step 32 | step 64 | step 128 | step 256 | step 1000 | step 8000 | step 64000 | step 143000 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| $\rho(J, w)$, endpoint-clustered 95% CI | $-0.008$ $[-0.118, +0.113]$ | $-0.021$ $[-0.136, +0.100]$ | $-0.149$ $[-0.287, -0.015]$ | $-0.351$ $[-0.496, -0.208]$ | $-0.478$ $[-0.618, -0.330]$ | $-0.548$ $[-0.661, -0.428]$ | $-0.604$ $[-0.705, -0.487]$ | $-0.537$ $[-0.650, -0.411]$ | $-0.563$ $[-0.661, -0.443]$ | $-0.486$ $[-0.603, -0.356]$ |
+| endpoint-label permutation $p$ | 0.87 | 0.65 | **0.0019** | <0.0001 | <0.0001 | <0.0001 | <0.0001 | <0.0001 | <0.0001 | <0.0001 |
+| median $w$ | 0.831 | 0.830 | 0.828 | 0.826 | 0.832 | 0.829 | 0.750 | 0.609 | 0.537 | 0.555 |
+| $\Delta\pi$ (ranking acquired since step 0) | $0$ | $-0.005$ | $+0.150$ | $\mathbf{+0.389}$ | $+0.541$ | $+0.571$ | $+0.789$ | $+0.892$ | $+0.959$ | $+1.068$ |
 
 The onset bracket replicates: the interval containing zero closes and the interval excluding zero
 opens between the same two checkpoints, step 8 and step 32, on a bank 17× larger. The effect size at
@@ -149,19 +152,28 @@ the range, rules out a power explanation: its 600 middle-range pairs give $\rho 
 is dated is the separation of the most distinguishable pairs; the graded ordering across the middle
 of the range arrives later.
 
-**When the graded ordering arrives.** Running the 1,000-pair bank at step 256, step 1000 and step
-8000 dates it: the same 600 middle-range pairs go from $\rho = -0.055$ ($p = 0.34$) at step 32 to
-$-0.315$ $[-0.470, -0.157]$ at step 256 ($p^{\mathrm{fw}} < 0.0001$) and then hold that value for the
-remaining 142,744 steps ($-0.379$, $-0.319$, $-0.330$, $-0.300$). The prespecified rule brackets the
-graded ordering at **after step 32, by step 256** — still ~4× before the shape bracket opens. The
-widths have not moved at that checkpoint: 1,000-pair median $w$ is 0.829 against 0.831 untrained,
-because the top divergence quintile has gone to 0.801 while the other four have gone to 0.836. The
-group gap $G$ = median $w$(Q5) − median $w$(Q1–Q4) dates the same two events without a correlation:
-$0.0000$ (step 0), $-0.0002$ (step 8), $-0.0018$ $[-0.0037, -0.0001]$, $p = 0.0040$ (step 32),
-$-0.0348$ (step 256), $-0.0794$ (step 1000). Two caveats: with large-bank checkpoints at 32 and 256
-and no measurement between, "by step 256" is the tightest this bank supports, and that window
-contains the step 64 → 128 ranking bracket, so the graded ordering and the ranking lock-in may be one
-event.
+**When the graded ordering arrives.** Running the 1,000-pair bank at steps 64, 128, 256, 1000 and
+8000 dates it: the same 600 middle-range pairs go from $\rho = -0.055$ ($p = 0.34$) at step 32
+through $-0.157$ at step 64 ($p^{\mathrm{fw}} = 0.088$, not significant) to $-0.257$
+$[-0.409, -0.106]$ at step 128 ($p^{\mathrm{fw}} = 0.0004$), then hold for the remaining 142,872
+steps ($-0.315$, $-0.379$, $-0.319$, $-0.330$, $-0.300$). The prespecified rule brackets the graded
+ordering at **after step 32, by step 128** — still ~8× before the shape bracket opens. The widths
+have not moved at that checkpoint: 1,000-pair median $w$ is 0.832 against 0.831 untrained, because
+the top divergence quintile has gone to 0.806 while the other four have gone to 0.837. The group gap
+$G$ = median $w$(Q5) − median $w$(Q1–Q4) dates the same two events without a correlation: $0.0000$
+(step 0), $-0.0002$ (step 8), $-0.0018$ $[-0.0037, -0.0001]$, $p = 0.0040$ (step 32), $-0.0149$
+(step 64), $-0.0308$ (step 128), $-0.0794$ (step 1000).
+
+**Are the graded ordering and the ranking lock-in one event?** Yes, as far as the released checkpoint
+spacing can tell. Scoring the 1,000-pair widths against the final ones puts both clocks on the same
+pairs at the same checkpoints. The agreement training adds, $\Delta\pi(s) = \pi(s) - \pi(0)$, is
+$+0.150$ at step 32 with a simultaneous band $[-0.053, +0.352]$ that includes zero and
+$+0.389$ $[+0.187, +0.592]$ at step 64 — bracket **after step 32, by step 64**, one checkpoint ahead
+of the graded ordering. The divergence-independent part moves with it ($\pi^{\perp}_{\mathrm{L}}$
+$+0.011$ $[-0.135, +0.154]$ at step 32, $+0.184$ $[+0.028, +0.329]$ at step 64), so this is
+pair-specific structure being acquired, not the divergence axis being inherited — the 60-pair
+Result above, reproduced on 17× more pairs and one checkpoint earlier. Both clocks therefore run
+inside step 32 → 128, at median widths of 0.826 and 0.832 against 0.831 untrained.
 
 **Quality controls.** All 3,600 curves across the 20-checkpoint scan passed the strict validity
 criteria (valid-curve rate 1.000 at every checkpoint). Endpoint patching reproduces the unpatched
@@ -349,17 +361,33 @@ line at zero; the open square marks Q5, the only quintile that moves. **C** x: $
 permutations.
 
 That leaves the graded relation across the rest of the range undated, so Figure 14 tracks it on the
-three checkpoints added between step 32 and step 64000.
+five checkpoints added between step 32 and step 64000.
 
 ![Three panels: correlation trajectories for the full bank and its middle three quintiles, the top-quintile width gap over training, and the four onset brackets on one timeline](plots/bulk_onset.png)
 
-**Figure 14.** The graded ordering completes by step 256, where the widths have not moved. **A** x:
+**Figure 14.** The graded ordering completes by step 128, where the widths have not moved. **A** x:
 training step (symmetric-log); y: Spearman $\rho(J, w)$ on the 1,000-pair bank with 95% dyadic
 endpoint-bootstrap bars; solid circles = all 1,000 pairs, dashed squares = the 600 pairs in
 divergence quintiles 2–4. Dotted horizontal band = simultaneous 95% chance envelope for the full
 bank; the two dotted lines are each series' own one-sided simultaneous threshold. Vertical stripes =
 onset brackets, `\\` for the full bank (step 8 → 32) and `xx` for the middle three quintiles
-(step 32 → 256). **B** x: training step (symmetric-log); y: group gap $G$, median $w$ of the top
+(step 64 → 128). **B** x: training step (symmetric-log); y: group gap $G$, median $w$ of the top
 divergence quintile minus median $w$ of the other four (symmetric-log scale, 95% bootstrap bars);
 dashed line at 0 = no separation, negative = top quintile sharper. **C** x: training step (log); y:
 the four dated events, each a bar spanning its onset bracket.
+
+Two of those events were dated on different banks with overlapping windows, so Figure 15 re-measures
+both on the 1,000-pair bank at the same ten checkpoints.
+
+![Three panels: ranking agreement with the final widths on the 1,000-pair bank, the acquired agreement with its simultaneous band, and both clocks as a fraction of their final value](plots/large_persistence.png)
+
+**Figure 15.** The ranking lock-in and the graded ordering are one episode inside step 32 → 128.
+**A** x: training step (symmetric-log); y: rank agreement between the 1,000 per-pair widths at that
+step and at step 143000 — solid circles $\pi_{\mathrm{L}}(s)$, dashed squares
+$\pi^{\perp}_{\mathrm{L}}(s)$ with corpus divergence partialled out, 95% dyadic endpoint-bootstrap
+bars. **B** x: training step (symmetric-log); y: $\Delta\pi(s) = \pi_{\mathrm{L}}(s) -
+\pi_{\mathrm{L}}(0)$, the agreement training has added, with its simultaneous 95% band over all ten
+checkpoints; dashed line at 0. **C** x: training step (symmetric-log); y: each clock as a fraction of
+its own step-143000 value — graded ordering $\rho(J, w)$ over the middle 600 pairs (dashed squares)
+and ranking $\Delta\pi$ (dash-dot diamonds). Dotted vertical stripe = the step 32 → 64 ranking
+bracket; `xx` stripe in **C** = the step 64 → 128 graded-ordering bracket.

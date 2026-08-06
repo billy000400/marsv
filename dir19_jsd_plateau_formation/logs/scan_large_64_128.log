@@ -1,0 +1,7 @@
+step64: download rc=0 in 33s
+step64: valid-curve rate 1.000  median w 0.826  IQR(w) 0.025  loss 8.0296  lr 8.951e-06  max endpoint rel-err 2.58e-06
+step64: total 304s
+step128: download rc=0 in 36s
+step128: valid-curve rate 1.000  median w 0.832  IQR(w) 0.044  loss 6.9149  lr 1.790e-05  max endpoint rel-err 4.22e-06
+step128: total 303s
+LARGE_DONE

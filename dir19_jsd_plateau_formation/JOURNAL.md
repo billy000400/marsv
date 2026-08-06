@@ -588,3 +588,69 @@ ignore any feedback dropped later.
 
 On track? yes — S1–S6 complete plus Results 8–14 beyond the plan (~100% of plan), no blocker; the
 released checkpoint spacing, not budget, bounds any further tightening.
+
+## Iteration 9 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Closed the one open question iteration 8 named. The graded-ordering bracket
+(step 32 → 256) contained the ranking-lock-in bracket (step 64 → 128), and the two were measured on
+different banks, so they might have been one event. Ran `scan_large.py step64 step128` (~5 min each
+on GPU, VRAM fraction 0.225, 2 threads, one checkpoint on disk at a time), re-ran `bulk_onset.py`
+over the resulting ten large-bank checkpoints, and wrote `experiments/large_persistence.py` +
+`plot_large_persistence.py` to score that bank's per-pair widths against the final ones. New Result
+15 / Figure 15 in both deliverables, Result 14 rewritten with a tighter bracket, plus a Methods
+paragraph and updated onset tables.
+
+**What I learned.**
+- **The graded ordering closes at step 128, not step 256.** The 600 middle-range pairs give
+  $-0.157$ at step 64 ($p^{\mathrm{fw}} = 0.088$, inside the corrected envelope) and $-0.257$
+  $[-0.409, -0.106]$ at step 128 ($p^{\mathrm{fw}} = 0.0004$). Adding checkpoints inside an open
+  bracket is the cheapest way to tighten a timing claim, and it paid twice here.
+- **The two middle clocks are one checkpoint apart on one bank.** $\Delta\pi$ brackets at
+  step 32 → 64, the graded ordering at step 64 → 128. I had expected the ranking to lag the
+  divergence axis (the 60-pair numbers read that way); on the large bank it leads, but by less than
+  the checkpoint spacing resolves. The honest verdict is one episode, not two clocks — so I deleted
+  Result 14's "these may be one event and we cannot tell" paragraph rather than leaving a resolved
+  question standing.
+- **$\pi^{\perp}_{\mathrm{L}}$ is what makes it a result rather than a restatement.** With $J$
+  partialled out, agreement with the final ranking goes $+0.011$ $[-0.135, +0.154]$ at step 32 to
+  $+0.184$ $[+0.028, +0.329]$ at step 64. The model acquires pair-specific structure there, not just
+  more of the divergence axis — the 60-pair Result 8 finding, now on 1,000 pairs.
+- **Median width at step 128 is 0.832, slightly *above* the untrained 0.831.** The whole divergence
+  axis and the whole final ranking are in place at a checkpoint that is, if anything, a shade blunter
+  than initialisation. That is the strongest single sentence the report has for "ordering is not a
+  by-product of sharpening", and it is stronger than the step-256 version it replaces.
+- A statistic with no labels needs a different null: $\pi_{\mathrm{L}}$ correlates two width vectors,
+  so there is nothing to permute. I used the dyadic endpoint bootstrap with a simultaneous band, and
+  centred the onset rule on $\Delta\pi$ rather than $\pi$ because $\pi(0) \ne 0$ on this bank for
+  reasons unrelated to training (it is $-0.068$).
+
+**Assumptions logged (loop mode, no human to ask).**
+- Chose step 64 and step 128 as the two new large-bank checkpoints because they are exactly the
+  checkpoints that both open brackets straddle. Rejected step 16 (the revision is corrupt, Result 9)
+  and step 512 (inside a window nothing questions).
+- Onset rule for $\Delta\pi$ is the primary two-consecutive-checkpoint rule, with significance from
+  the simultaneous bootstrap band excluding zero. Rejected a pair-relabelling null: free pair
+  permutation ignores the endpoint clustering this bank has and would give too narrow an envelope.
+- Reference for $\pi_{\mathrm{L}}$ is step 143000, matching Result 8. Did not repeat Result 11's
+  reference sweep on the large bank — 5 min of CPU, but Result 11 already answered it on the bank
+  where the bracket was originally found.
+- Left the five previously published `permtest.py`/`large_late.py` large-bank numbers alone and took
+  the $\rho$/$p$ columns from the re-run `bulk_onset.py`, which is why step 32's endpoint-label $p$
+  reads 0.0019 rather than 0.0031: same estimator and null, now a ten-checkpoint family and a
+  different RNG draw. Recorded in CHANGELOG.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–8.
+
+**Next step.** S1–S6 complete; Results 8–15 go beyond the plan, and the question flagged as open in
+iteration 8 is now answered. Nothing further can be resolved from released artefacts: no genuine
+step-16 weights exist, the next unmeasured gap (step 128 → 256) contains no released checkpoint for
+this model, and everything else I can name (a second model size, a second training run) is out of
+scope under this PLAN. If another iteration runs, the highest-value remaining item is a large-bank
+version of Result 11's reference sweep, which would harden Result 15 rather than add a finding. Did
+not write `STOP`: the deliverables are complete, but a premature STOP would make the direction
+silently ignore any feedback dropped later.
+
+On track? yes — S1–S6 complete plus Results 8–15 beyond the plan (~100% of plan), no blocker; the
+released checkpoint spacing, not budget, bounds any further tightening.

@@ -32,7 +32,7 @@ from common import RESULTS
 
 B = 20000
 N_BOOT = 2000
-STEPS = [0, 8, 32, 256, 1000, 8000, 64000, 143000]
+STEPS = [0, 8, 32, 64, 128, 256, 1000, 8000, 64000, 143000]
 RNG = np.random.default_rng(4242)
 
 
