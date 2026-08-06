@@ -1,0 +1,10 @@
+step256: download rc=0 in 42s
+step256: valid-curve rate 1.000  median w 0.829  IQR(w) 0.048  loss 6.0370  lr 3.580e-05  max endpoint rel-err 3.43e-06
+step256: total 310s
+step1000: download rc=0 in 34s
+step1000: valid-curve rate 1.000  median w 0.750  IQR(w) 0.100  loss 3.6806  lr 1.399e-04  max endpoint rel-err 2.77e-06
+step1000: total 307s
+step8000: download rc=0 in 32s
+step8000: valid-curve rate 1.000  median w 0.609  IQR(w) 0.118  loss 2.5383  lr 1.990e-04  max endpoint rel-err 3.71e-06
+step8000: total 300s
+LARGE_DONE

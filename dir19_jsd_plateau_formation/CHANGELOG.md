@@ -399,3 +399,56 @@ series also coded by marker and linestyle; bands hatched.
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (13 embeds / 13 visible captions
 per file; 21 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 8: dating the graded ordering (new Result 14 / Figure 14)
+
+**What was missing.** Result 13 (iteration 7) showed the step-32 ordering is carried entirely by the
+highest-divergence quintile and that the graded relation across the middle of the divergence range is
+absent at step 32 ($\rho = -0.055$, $p = 0.35$ on 600 middle-range pairs) but strong at step 143000
+($-0.300$). Nothing dated the transition between those two states, and the answer changes the
+report's central claim: if the middle of the range only becomes ordered when the curves sharpen
+(step 1000 → 2000), then most of the divergence axis is a by-product of sharpening after all. The
+1,000-pair bank had no measurement between step 32 and step 64000.
+
+**New runs.** `experiments/scan_large.py step256 step1000 step8000` (GPU, ~5 min per checkpoint,
+one checkpoint on disk at a time) took the frozen 1,000-pair bank from five to **eight** measured
+checkpoints (0, 8, 32, 256, 1000, 8000, 64000, 143000; 8,000 curves). All three passed the standard
+QC: valid-curve rate 1.000, max endpoint patch rel-err $\le 3.7\times10^{-6}$. New code
+`experiments/bulk_onset.py` (CPU, ~40 s: the ordering rule on the full bank, the middle three
+quintiles and the top quintile at all eight checkpoints, with the endpoint-label QAP permutation, a
+simultaneous envelope over the eight checkpoints, dyadic endpoint-bootstrap intervals, and the
+top-quintile group gap $G_s$ with its own 5,000-draw relabelling null) and
+`experiments/plot_bulk.py`. New artefact `results/bulk_onset.json`.
+
+**New results (nothing superseded; this dates what Result 13 left open).**
+- **The graded ordering brackets at after step 32, by step 256.** The 600 middle-range pairs go from
+  $\rho = -0.055$ ($p = 0.34$, inside the chance envelope) at step 32 to $-0.315$
+  $[-0.470, -0.157]$ at step 256 ($p^{\mathrm{fw}} < 0.0001$), then hold ($-0.379$, $-0.319$,
+  $-0.330$, $-0.300$ at steps 1000, 8000, 64000, 143000).
+- **The full bank is at mature strength by step 256:** $\rho = -0.548$ $[-0.661, -0.428]$, larger in
+  magnitude than its final $-0.486$.
+- **Still no plateau there.** 1,000-pair median $w$ = 0.829 at step 256 against 0.831 untrained and
+  0.828 at step 32; the top divergence quintile is at 0.801 and the other four at 0.836, so the bank
+  separates around an unchanged median.
+- **Group gap $G_s$** (median $w$ of Q5 minus median $w$ of Q1–Q4): $0.0000$ (step 0), $-0.0002$
+  (step 8, $p = 0.69$), $-0.0018$ $[-0.0037, -0.0001]$ (step 32, $p = 0.0040$), $-0.0348$ (step 256),
+  $-0.0794$ (step 1000), $-0.0721$ (step 143000).
+
+**Deliverable changes.** REPORT.md: new Methods run-in paragraph "Graded-ordering onset, and the
+group gap $G_s$" (one new rendered equation, display count 21 → 22); "Pair bank (validation)" now
+states eight checkpoints instead of five; new **Result 14 — "The graded ordering fills in by step
+256, still before any plateau exists"** after Result 13; a new row in the onsets summary table
+("Graded ordering across the divergence range | after step 32, by step 256"); Summary claim 1 and
+claim 2 extended with the step-256 numbers; a new Conclusion sentence replacing "the graded ordering
+… is a later acquisition" with the dated version; `bulk_onset.py` and `plot_bulk.py` added to
+Reproducibility. RESULTS.md: new headline bullet, new onset-table row, the 1,000-pair table grows
+from five to eight checkpoint columns (new: step 256 $\rho = -0.548$, step 1000 $-0.604$, step 8000
+$-0.537$; median $w$ 0.829, 0.750, 0.609), and a new "When the graded ordering arrives" paragraph.
+New figure `plots/bulk_onset.png` embedded as **Figure 14** in both files (A: $\rho$ trajectories for
+the full bank and its middle three quintiles against the simultaneous chance envelope; B: the group
+gap $G_s$ over training; C: the four onset brackets on one timeline). Figure count 13 → 14 in each
+file. Green-free CVD palette; every series also coded by marker and linestyle; envelopes and brackets
+hatched.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (14 embeds / 14 visible captions
+per file; 22 display equations in REPORT.md all render as `js-display-math`).

@@ -523,3 +523,68 @@ ignore any feedback dropped later.
 
 On track? yes — S1–S6 complete plus Results 8–13 beyond the plan (~100% of plan), no blocker; the
 released checkpoint spacing, not budget, bounds any further tightening.
+
+## Iteration 8 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Ran the follow-on iteration 7 flagged: the 1,000-pair bank had no measurement between
+step 32 and step 64000, so "the graded ordering across the middle of the divergence range arrives
+later" was undated. Ran `scan_large.py step256 step1000 step8000` (~5 min/checkpoint on GPU, one
+checkpoint on disk at a time, VRAM fraction 0.225, 2 threads) to take that bank from five to eight
+checkpoints, then wrote `experiments/bulk_onset.py` and `experiments/plot_bulk.py`. New Result 14 /
+Figure 14 in both deliverables, plus a Methods paragraph and a new row in the onsets table.
+
+**What I learned.**
+- **The graded ordering brackets at step 32 → 256**, not at the plateau-shape bracket. The 600
+  middle-range pairs go from $\rho = -0.055$ ($p = 0.34$) to $-0.315$ ($p^{\mathrm{fw}} < 0.0001$)
+  and then do not move for the remaining 142,744 steps. That was the outcome I thought least likely
+  going in — I expected the bulk relation to track the sharpening, since that is where the width
+  variance comes from.
+- **The single most useful number of the iteration is the median width at step 256: 0.829**, against
+  0.831 untrained. The full-bank $\rho$ is $-0.548$ there, i.e. already stronger than its final
+  $-0.486$, while the widths have not moved at all. So the whole divergence axis — not just its top
+  end — is laid down before there is any plateau. This strengthens the report's core claim rather
+  than qualifying it, which is the opposite of what Result 13 did.
+- **How that is possible without sharpening:** at step 256 the top quintile is at median width 0.801
+  and the other four at 0.836. The bank spreads around an unchanged median. I added the group gap
+  $G_s$ = median $w$(Q5) − median $w$(Q1–Q4) to state this without going through a correlation, and
+  it dates both halves of the ordering on its own: $-0.0018$ ($p = 0.0040$) at step 32, $-0.0348$ at
+  step 256, a factor of ~20 apart.
+- **A limit I could not remove:** the step 32 → 256 window contains the step 64 → 128 ranking-lock
+  window (Result 8), so the graded ordering and the ranking lock-in may be a single event. Resolving
+  that needs the large bank at steps 64 and 128 (~10 min of GPU) plus a way to compare $\pi$ across
+  banks; I stated it as a limitation in Result 14 instead of leaving it implicit.
+- The within-top-quintile correlation (200 pairs, $J$ from 0.767 to 0.950) is weak at every
+  checkpoint ($p^{\mathrm{fw}} \ge 0.05$ everywhere). That is range restriction, not evidence, so I
+  computed it, kept it in `results/bulk_onset.json`, and did **not** put it in the deliverables
+  (CLAUDE.md rule 12: a figure/metric no claim needs gets cut).
+
+**Assumptions logged (loop mode, no human to ask).**
+- Chose step 256, 1000 and 8000 as the three new large-bank checkpoints: 256 and 1000 bracket the
+  region where the 60-pair bank shows the ranking locking in and the shape starting, and 8000 gives a
+  post-sharpening anchor. Rejected 64/128 (would have resolved the ordering-vs-ranking ambiguity but
+  left no measurement in the sharpening region, where the alternative hypothesis lived).
+- The onset rule is the primary one verbatim (after the last non-significant checkpoint, by the first
+  of two consecutive significant ones), with significance from the *simultaneous* envelope over the
+  eight large-bank checkpoints under the endpoint-label null — the same null used everywhere else on
+  this bank, so pairs sharing an endpoint token stay dependent.
+- Quintiles are cut at the large bank's own 20/40/60/80th divergence percentiles, identical to
+  `quintile_large.py`, so Result 13 and Result 14 partition the same pairs the same way.
+- Left the five previously reported large-bank CIs and permutation $p$-values as they stand
+  (`large_late.py` / `permtest.py`) and added the three new checkpoints from `bulk_onset.py`. Same
+  estimator and same null, different RNG draw; re-running the old columns would have changed
+  published third decimals for no gain.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–7.
+
+**Next step.** S1–S6 are complete; Results 8–14 go beyond the plan. The one open question I can name
+is whether the graded ordering (step 32 → 256) and the ranking lock-in (step 64 → 128) are one event
+— which would need the 1,000-pair bank at steps 64 and 128 (~10 min GPU) and a cross-bank comparison
+of $\pi$. Everything else I can think of (a second model size, a second training run, checkpoints
+between 8 and 32) is out of scope under this PLAN or impossible from released artefacts. Did not
+write `STOP`: the deliverables are complete, but a premature STOP would make the direction silently
+ignore any feedback dropped later.
+
+On track? yes — S1–S6 complete plus Results 8–14 beyond the plan (~100% of plan), no blocker; the
+released checkpoint spacing, not budget, bounds any further tightening.

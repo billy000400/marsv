@@ -13,6 +13,10 @@ training time, and in the counter-intuitive order**:
   the model has *no plateaus at all* (median transition width 0.827 vs 0.831 untrained, IQR 0.008).
   At that moment the effect is the top of the divergence range separating, not a graded axis:
   deleting the highest-divergence quintile removes it, deleting any other quintile does not.
+- **The rest of the divergence range fills in between step 32 and step 256** — and still before any
+  plateau. At step 256 the 1,000-pair median width is 0.829 (untrained 0.831) while its top
+  divergence quintile sits at 0.801 and the other four at 0.836: the bank separates around an
+  unchanged median.
 - **The per-pair ranking becomes the final one between step 64 and step 128** — a third clock. At
   step 32 the model holds only the divergence-aligned part of the final ordering.
 - **Plateau shape appears between step 1000 and step 2000**, and the single largest sharpening event
@@ -26,13 +30,14 @@ A no-plateau straight line $d(t)=t$ gives $w = 0.8$, $E = 0.184$.
 
 ## Metrics — current best
 
-The scan's primary output is the pair of onset brackets below. Each row names the event, the bracket
+The scan's primary output is the set of onset brackets below. Each row names the event, the bracket
 the prespecified rule returned, the statistic at onset, and what the other phenomenon was doing at
 that moment — the last column is the contribution.
 
 | Event | Onset bracket | Statistic at onset | State of the other phenomena |
 |---|---|---|---|
 | Divergence-selective ordering | after step 8, **by step 32** | $\rho_{32} = -0.428$, simultaneous band $[-0.753, -0.104]$, label-permutation $p^{\mathrm{fw}} = 0.0072$ | no sharpening: median $w = 0.827$ (untrained 0.831), IQR($w$) 0.008, $E = 0.209$ *above* the straight line; ranking not yet final ($\pi = 0.161$) |
+| Graded ordering across the whole divergence range | after step 32, **by step 256** | 600 middle-range pairs of the 1,000-pair bank: $\rho = -0.055$ ($p = 0.34$) → $-0.315$ $[-0.470, -0.157]$, $p^{\mathrm{fw}} < 0.0001$; group gap $G$ $-0.0018 \to -0.0348$ | still no sharpening: 1,000-pair median $w = 0.829$ at step 256 vs 0.831 untrained |
 | Pair ranking becomes final | after step 64, **by step 128** | $\pi = +0.437$ $[+0.202, +0.623]$, $p^{\mathrm{fw}} = 0.0053$, ceiling 0.95 | still no sharpening: median $w = 0.837$, $E = 0.222$ |
 | Global plateau shape | after step 1000, **by step 2000** | median $w = 0.680$ (band $\le 0.732$), $E = 0.117$ (band $\le 0.147$) | ordering established ~2,000 steps earlier; ranking already final ($\pi = 0.82$) |
 | Output-movement concentration | with the shape (step 1000–2000) | $H = 0.824$, fixed-window mass 0.583 at step 2000 | uniform ($H = 1.000$, mass 0.200) at step 32 when ordering appeared |
@@ -56,11 +61,11 @@ divergence-**blind** rather than reversed.
 Validation on the frozen **1,000-pair** bank (123 endpoint tokens, so uncertainty comes from a dyadic
 bootstrap over endpoints, not pairs) reproduces both the ordering and the late reversal.
 
-| 1,000-pair bank | step 0 | step 8 | step 32 | step 64000 | step 143000 |
-|---|---|---|---|---|---|
-| $\rho(J, w)$, endpoint-clustered 95% CI | $-0.008$ $[-0.117, +0.115]$ | $-0.021$ $[-0.132, +0.104]$ | $-0.149$ $[-0.286, -0.011]$ | $-0.563$ $[-0.668, -0.438]$ | $-0.486$ $[-0.617, -0.354]$ |
-| endpoint-label permutation $p$ | 0.87 | 0.64 | **0.0031** | <0.0001 | <0.0001 |
-| median $w$ | 0.831 | 0.830 | 0.828 | 0.537 | 0.555 |
+| 1,000-pair bank | step 0 | step 8 | step 32 | step 256 | step 1000 | step 8000 | step 64000 | step 143000 |
+|---|---|---|---|---|---|---|---|---|
+| $\rho(J, w)$, endpoint-clustered 95% CI | $-0.008$ $[-0.117, +0.115]$ | $-0.021$ $[-0.132, +0.104]$ | $-0.149$ $[-0.286, -0.011]$ | $-0.548$ $[-0.661, -0.428]$ | $-0.604$ $[-0.705, -0.487]$ | $-0.537$ $[-0.650, -0.411]$ | $-0.563$ $[-0.668, -0.438]$ | $-0.486$ $[-0.617, -0.354]$ |
+| endpoint-label permutation $p$ | 0.87 | 0.64 | **0.0031** | <0.0001 | <0.0001 | <0.0001 | <0.0001 | <0.0001 |
+| median $w$ | 0.831 | 0.830 | 0.828 | 0.829 | 0.750 | 0.609 | 0.537 | 0.555 |
 
 The onset bracket replicates: the interval containing zero closes and the interval excluding zero
 opens between the same two checkpoints, step 8 and step 32, on a bank 17× larger. The effect size at
@@ -143,6 +148,20 @@ the range, rules out a power explanation: its 600 middle-range pairs give $\rho 
 ($p = 0.35$) at step 32 and $-0.300$ ($p < 0.0001$) at step 143000. The timing claim stands, but what
 is dated is the separation of the most distinguishable pairs; the graded ordering across the middle
 of the range arrives later.
+
+**When the graded ordering arrives.** Running the 1,000-pair bank at step 256, step 1000 and step
+8000 dates it: the same 600 middle-range pairs go from $\rho = -0.055$ ($p = 0.34$) at step 32 to
+$-0.315$ $[-0.470, -0.157]$ at step 256 ($p^{\mathrm{fw}} < 0.0001$) and then hold that value for the
+remaining 142,744 steps ($-0.379$, $-0.319$, $-0.330$, $-0.300$). The prespecified rule brackets the
+graded ordering at **after step 32, by step 256** — still ~4× before the shape bracket opens. The
+widths have not moved at that checkpoint: 1,000-pair median $w$ is 0.829 against 0.831 untrained,
+because the top divergence quintile has gone to 0.801 while the other four have gone to 0.836. The
+group gap $G$ = median $w$(Q5) − median $w$(Q1–Q4) dates the same two events without a correlation:
+$0.0000$ (step 0), $-0.0002$ (step 8), $-0.0018$ $[-0.0037, -0.0001]$, $p = 0.0040$ (step 32),
+$-0.0348$ (step 256), $-0.0794$ (step 1000). Two caveats: with large-bank checkpoints at 32 and 256
+and no measurement between, "by step 256" is the tightest this bank supports, and that window
+contains the step 64 → 128 ranking bracket, so the graded ordering and the ranking lock-in may be one
+event.
 
 **Quality controls.** All 3,600 curves across the 20-checkpoint scan passed the strict validity
 criteria (valid-curve rate 1.000 at every checkpoint). Endpoint patching reproduces the unpatched
@@ -328,3 +347,19 @@ line at zero; the open square marks Q5, the only quintile that moves. **C** x: $
 1,000-pair bank; y: the same subsets with the pairs each retains. Circles (solid) = step 32, squares
 (dashed) = step 143000; hatched band = 95% envelope of $|\rho|$ under 20,000 endpoint-label
 permutations.
+
+That leaves the graded relation across the rest of the range undated, so Figure 14 tracks it on the
+three checkpoints added between step 32 and step 64000.
+
+![Three panels: correlation trajectories for the full bank and its middle three quintiles, the top-quintile width gap over training, and the four onset brackets on one timeline](plots/bulk_onset.png)
+
+**Figure 14.** The graded ordering completes by step 256, where the widths have not moved. **A** x:
+training step (symmetric-log); y: Spearman $\rho(J, w)$ on the 1,000-pair bank with 95% dyadic
+endpoint-bootstrap bars; solid circles = all 1,000 pairs, dashed squares = the 600 pairs in
+divergence quintiles 2–4. Dotted horizontal band = simultaneous 95% chance envelope for the full
+bank; the two dotted lines are each series' own one-sided simultaneous threshold. Vertical stripes =
+onset brackets, `\\` for the full bank (step 8 → 32) and `xx` for the middle three quintiles
+(step 32 → 256). **B** x: training step (symmetric-log); y: group gap $G$, median $w$ of the top
+divergence quintile minus median $w$ of the other four (symmetric-log scale, 95% bootstrap bars);
+dashed line at 0 = no separation, negative = top quintile sharper. **C** x: training step (log); y:
+the four dated events, each a bar spanning its onset bracket.
