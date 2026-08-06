@@ -555,3 +555,50 @@ by marker and linestyle.
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (16 embeds / 16 visible captions
 per file; 23 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 11: the two 1,000-pair clocks made carrier-sentence-robust (new Result 17 / Figure 17)
+
+**What was missing.** Iteration 10's JOURNAL named one remaining hardening item: every width in this
+direction is a median over three fixed carrier sentences, and Result 12 had checked what happens when
+that median is removed only on the 60-pair bank. The 1,000-pair bank — where the graded-ordering clock
+(Result 14) and the ranking clock (Results 15–16) live — had never been checked, so both large-bank
+timing claims still rested on an average that could have been carried by one sentence frame.
+
+**New runs.** New code `experiments/large_jackknife.py` (CPU only, ~2 min, no GPU touched) reads the
+per-context widths `w_ctx` already saved in the ten `results/assay_large_step*.json` files and re-runs
+both large-bank onset rules verbatim three times, once per carrier sentence, with no median over
+contexts: the graded-ordering rule on $\rho(J, w_c)$ over the 600 middle-divergence pairs with the
+endpoint-label (QAP) permutation and a simultaneous envelope (8,000 permutations), and the ranking
+rule on $\Delta\pi_c(s) = \pi_c(s) - \pi_c(0)$ scored against that same sentence's step-143000 widths
+under the dyadic endpoint bootstrap (1,000 draws) with a simultaneous band. New artefact
+`results/large_jackknife.json`; `experiments/plot_large_jackknife.py` draws it.
+
+**New result (nothing superseded — no previously published number changes).**
+- **Result 17 — both 1,000-pair brackets are identical in all three carrier sentences.** Graded
+  ordering: bracket step 64 → 128 in sentence 1, 2, 3 and the median alike; $\rho$ at step 64 =
+  $-0.153$ / $-0.150$ / $-0.160$ (median $-0.157$), all inside the $\pm 0.17$ simultaneous envelope,
+  and at step 128 = $-0.212$ / $-0.271$ / $-0.252$ (median $-0.257$), family-wise $p = 0.0084$ /
+  $0.0004$ / $0.0011$, all outside it. Ranking: bracket step 32 → 64 in all four; $\Delta\pi$ at
+  step 32 = $+0.137$ / $+0.137$ / $+0.159$ (median $+0.150$) inside a band of half-width 0.207–0.217,
+  at step 64 = $+0.351$ / $+0.377$ / $+0.363$ (median $+0.389$) outside it and outside at every later
+  checkpoint.
+- **Why a single context costs so little on this bank:** mean pairwise rank agreement between the
+  three sentences' 1,000 widths is 0.661 at step 0, 0.856 at step 32, 0.932 at step 64, and 0.80–0.93
+  thereafter — so by the time either clock fires the three sentences already order the pairs nearly
+  identically. On the 60-pair bank the agreement at step 32 is 0.83 and the ranking bracket slips one
+  checkpoint in one sentence (Result 12); the extra 940 pairs recover that margin.
+
+**Deliverable changes.** REPORT.md: new **Result 17 — "Both 1,000-pair clocks hold inside each carrier
+sentence on its own"**, placed after Result 16 and before "Summary of the onsets" (no new equation;
+display count stays 23); the carrier-sentence sentence under the onsets table rewritten to separate
+the 60-pair result (Result 12) from the new 1,000-pair result (Result 17); `large_jackknife.py` and
+`plot_large_jackknife.py` added to Reproducibility. RESULTS.md: new closing paragraph "Neither
+large-bank clock depends on the carrier sentence" with the per-sentence numbers and the context-
+agreement trajectory. New figure `plots/large_jackknife.png` embedded as **Figure 17** in both files
+(A: $\rho$ over the 600 middle pairs per sentence with the permutation envelope and the step 64 → 128
+bracket; B: $\Delta\pi$ per sentence with the bootstrap band and the step 32 → 64 bracket). Figure
+count 16 → 17 in each file. Green-free CVD palette; every series also coded by marker and linestyle;
+envelopes and brackets hatched.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (17 embeds / 17 visible captions
+per file; 23 display equations in REPORT.md all render as `js-display-math`).

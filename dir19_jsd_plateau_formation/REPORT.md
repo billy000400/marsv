@@ -1167,6 +1167,52 @@ under five references on the 60-pair bank and three on the 1,000-pair bank, so t
 divergence-selection → pair ranking → plateau shape does not depend on treating step 143000 as a
 converged model.
 
+### Result 17 — Both 1,000-pair clocks hold inside each carrier sentence on its own
+
+Every width in this report is a median over three fixed carrier sentences (Methods, "Width $w$"), and
+averaging is what makes $w$ stable enough to correlate at a checkpoint where the model has seen 32
+batches. It also hides which sentence carried the signal: if only one frame ordered the pairs, the
+median over three would still show an ordering, and the timing would be a fact about that sentence
+instead of about the model. Result 12 settled this on the 60-pair bank. The 1,000-pair bank — where
+the two early clocks of Results 14–16 actually live — had not been checked, so Figure 17 redoes both
+of those clocks three times, once per sentence, taking $w$ from that single context's curve with no
+median. Both prespecified rules are applied verbatim: the graded-ordering rule to $\rho(J, w_c)$ over
+the 600 middle-divergence pairs under the endpoint-label permutation, and the ranking rule to
+$\Delta\pi_c(s) = \pi_c(s) - \pi_c(0)$, where $\pi_c$ scores that sentence's widths against its own
+step-143000 widths, under the dyadic endpoint bootstrap. A single context is the noisier measurement,
+so a bracket can honestly only move later; the question is whether it moves at all.
+
+![Two panels: graded-ordering and ranking-lock-in trajectories on the 1,000-pair bank computed inside each of the three carrier sentences separately](plots/large_jackknife.png)
+
+**Figure 17.** Both 1,000-pair brackets reproduce in every single carrier sentence. **A** x: training
+step (log scale, step 0 drawn at 0.5); y: $\rho$(corpus JSD, width) over the 600 middle-divergence
+pairs. **B** x: same; y: $\Delta\pi(s) = \pi(s) - \pi(0)$, the rank agreement with that sentence's own
+step-143000 widths that training has added. Series in both panels: sentence 1 (solid circles),
+sentence 2 (dashed squares), sentence 3 (dotted triangles), median of all three (dash-dot diamonds,
+the primary measurement used everywhere else). Dotted horizontal band = the simultaneous 95% envelope
+under the endpoint-label permutation (**A**) and the dyadic endpoint bootstrap (**B**); hatched
+vertical stripe = the bracket the prespecified rule returns, step 64 → 128 in **A** and step 32 → 64
+in **B**.
+
+Both brackets are identical in all four measurements. The graded ordering opens after step 32 and
+closes by step 128 in sentence 1, 2, 3 and the median alike: $\rho$ at step 64 is $-0.153$, $-0.150$,
+$-0.160$ (median $-0.157$), all inside the simultaneous envelope of $\pm 0.17$, and at step 128 is
+$-0.212$, $-0.271$, $-0.252$ (median $-0.257$) with family-wise $p = 0.0084$, $0.0004$, $0.0011$, all
+outside it. The ranking clock opens after step 32 and closes by step 64 in all four: $\Delta\pi$ at
+step 32 is $+0.137$, $+0.137$, $+0.159$ (median $+0.150$), inside a simultaneous band of half-width
+0.207–0.217, and at step 64 is $+0.351$, $+0.377$, $+0.363$ (median $+0.389$), outside it, and it
+stays outside at every later checkpoint.
+
+The reason a single context loses so little here is visible in the same run: the mean pairwise rank
+agreement between the three sentences' 1,000 widths is 0.661 at step 0, 0.856 by step 32, 0.932 by
+step 64 and stays between 0.80 and 0.93 thereafter. By the time either clock fires, the three
+sentences already order the pairs nearly identically, so the median is close to any one of them. The
+60-pair bank is the harder case — three-context agreement there is 0.83 at step 32 and the ranking
+bracket slips one checkpoint in one sentence (Result 12) — and the extra 940 pairs buy back exactly
+that margin. This closes the last robustness gap between the two banks: the ordering
+divergence-selection → pair ranking → plateau shape survives the width definition (Result 10), the
+reference checkpoint (Results 11 and 16), and now the carrier sentence, on both banks.
+
 ### Summary of the onsets
 
 The table below collects the timing verdicts. Each row is an event, the bracket the prespecified rule
@@ -1190,8 +1236,10 @@ unchanged and the shape bracket moves at most one checkpoint earlier, leaving a 
 62×. Under the four alternative reference checkpoints of Result 11 the ranking bracket is unchanged on
 the 60-pair bank, and under the two alternative references of Result 16 it is unchanged on the
 1,000-pair bank.
-Recomputed inside each carrier sentence separately (Result 12), the ordering and shape brackets are
-unchanged in all three and the ranking bracket moves one checkpoint later in one of the three. The
+Recomputed inside each carrier sentence separately, the 60-pair ordering and shape brackets are
+unchanged in all three sentences and the 60-pair ranking bracket moves one checkpoint later in one of
+them (Result 12); on the 1,000-pair bank both the graded-ordering and the ranking bracket are
+identical in all three sentences (Result 17). The
 one qualification the robustness checks do impose is on content rather than timing: by Result 13 the
 first row of this table is carried by the highest-divergence quintile, so "divergence-selective
 ordering" at step 32 means the top of the divergence range separating. By Result 14 the rest of the
@@ -1265,13 +1313,14 @@ produces `results/large_late.json`, `permtest.py` produces `results/permutation.
 `results/sentence_jackknife.json`, `quintile_loo.py` and `quintile_large.py` produce
 `results/quintile_loo.json` and `results/quintile_large.json`, `bulk_onset.py` produces
 `results/bulk_onset.json`, `large_persistence.py` and `large_persistence_ref.py` produce
-`results/large_persistence.json` and `results/large_persistence_ref.json`,
+`results/large_persistence.json` and `results/large_persistence_ref.json`, `large_jackknife.py`
+produces `results/large_jackknife.json`,
 `step16_forensics.py` and `revision_audit.py`
 produce `results/step16_forensics.json` and `results/revision_audit.json` (network only, no GPU and
 nothing written to disk beyond those files), and `plot_formation.py`, `plot_perm.py`,
 `plot_persistence.py`, `plot_persistence_ref.py`, `plot_threshold.py`, `plot_jackknife.py`,
-`plot_quintile.py`, `plot_bulk.py`, `plot_large_persistence.py` and `plot_large_persistence_ref.py`
-produce every figure above. The frozen
+`plot_quintile.py`, `plot_bulk.py`, `plot_large_persistence.py`, `plot_large_persistence_ref.py` and
+`plot_large_jackknife.py` produce every figure above. The frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves

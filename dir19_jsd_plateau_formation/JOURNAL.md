@@ -704,3 +704,55 @@ complete, but a premature STOP would make the direction silently ignore any feed
 
 On track? yes — S1–S6 complete plus Results 8–16 beyond the plan (~100% of plan), no blocker; the
 released checkpoint spacing, not budget, bounds any further tightening.
+
+## Iteration 11 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Executed the single item iteration 10 flagged as remaining: the large-bank analogue of
+Result 12's sentence-frame jackknife. Wrote `experiments/large_jackknife.py` (CPU only, ~2 min — the
+per-context widths `w_ctx` were already saved in the ten `assay_large_step*.json` files, so no GPU and
+no re-scan were needed) plus `plot_large_jackknife.py`. New Result 17 / Figure 17 in both
+deliverables, a rewritten carrier-sentence sentence under the onsets table, and two Reproducibility
+additions.
+
+**What I learned.**
+- **Both 1,000-pair brackets are exactly reproduced in every single carrier sentence** — graded
+  ordering step 64 → 128, ranking step 32 → 64, in sentences 1, 2, 3 and the median alike. I expected
+  at least one slip, because that is what happened on the 60-pair bank.
+- **The reason the slip does not happen is measurable, and it is the interesting part.** Mean pairwise
+  rank agreement between the three sentences' 1,000 widths is 0.661 at step 0, 0.856 at step 32 and
+  0.932 at step 64 — by the time either clock fires, the contexts already agree about which pairs are
+  wide, so dropping to one costs almost nothing. On the 60-pair bank agreement at step 32 is 0.83 and
+  the ranking bracket slips one checkpoint in one sentence. So the jackknife's real content here is a
+  statement about how much of $w$'s noise the extra 940 pairs absorb, and I wrote it that way rather
+  than as a bare "robust ✓".
+- **A robustness check that reuses saved intermediates is nearly free.** The whole result cost ~2 min
+  of CPU because `assay_large_*.json` already stored per-context widths. Worth remembering that the
+  cheapest hardening available is usually whatever the existing artefacts already contain.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Re-ran only the two clocks that live on the 1,000-pair bank (graded ordering, ranking lock-in), not
+  the shape clock: the shape bracket (step 1000 → 2000) is a 60-pair statistic — the large bank has no
+  step-2000 checkpoint — and Result 12 already jackknifed it there.
+- Cut the permutation count 20,000 → 8,000 and the bootstrap 2,000 → 1,000 relative to
+  `bulk_onset.py` / `large_persistence.py`, to fit four passes into the remaining wall clock. Both
+  brackets are decided by margins far wider than the resulting Monte-Carlo error (the closest call is
+  $p^{\mathrm{fw}} = 0.0084$ against 0.05), so the extra resolution would not change a verdict.
+- Scored each sentence's $\pi_c$ against **its own** step-143000 widths, matching Result 12's 60-pair
+  construction, so the comparison is within-context throughout.
+- Imported `wspear` from `large_persistence` so there is one definition of the weighted estimator.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–10.
+
+**Next step.** S1–S6 complete; Results 8–17 go beyond the plan, and every clock is now robust to the
+width definition (Result 10), the reference checkpoint (Results 11, 16) and the carrier sentence
+(Results 12, 17) on both banks. I cannot name a further question answerable from released artefacts:
+no genuine step-16 weights exist (Result 9), there is no released checkpoint in the step 128 → 256
+gap, and a second model size or training run is out of scope under this PLAN. If another iteration
+runs, the deliverables are already current-best and the honest option is a read-through pass rather
+than a new number. Did not write `STOP`: the deliverables are complete, but a premature STOP would
+make the direction silently ignore any feedback dropped later.
+
+On track? yes — S1–S6 complete plus Results 8–17 beyond the plan (~100% of plan), no blocker; the
+released checkpoint spacing, not budget, bounds any further tightening.

@@ -414,3 +414,29 @@ squares), step 143000 (dash-dot diamonds); each omits the point where it scores 
 vertical stripe = the step 32 → 64 bracket; dashed line at 0. **B** x: $\Delta\pi$ with its
 simultaneous 95% band; y: the reference checkpoint. Circles = step 32, squares = step 64; dashed
 vertical line at 0.
+
+Every width above is a median over three fixed carrier sentences, so both large-bank clocks could in
+principle be a property of one lucky context. Figure 17 re-runs each clock inside each sentence
+separately, with no median taken.
+
+![Two panels: graded-ordering and ranking-lock-in trajectories on the 1,000-pair bank computed inside each of the three carrier sentences separately](plots/large_jackknife.png)
+
+**Figure 17.** Both 1,000-pair brackets reproduce in every single carrier sentence. **A** x: training
+step (log scale, step 0 drawn at 0.5); y: $\rho$(corpus JSD, width) over the 600 middle-divergence
+pairs. **B** x: same; y: $\Delta\pi(s) = \pi(s) - \pi(0)$, the rank agreement with that sentence's own
+step-143000 widths that training has added. Series in both panels: sentence 1 (solid circles),
+sentence 2 (dashed squares), sentence 3 (dotted triangles), median of all three (dash-dot diamonds,
+the primary measurement used everywhere else). Dotted horizontal band = the simultaneous 95%
+envelope under the endpoint-label permutation (**A**) and the dyadic endpoint bootstrap (**B**);
+hatched vertical stripe = the bracket the prespecified rule returns, step 64 → 128 in **A** and step
+32 → 64 in **B**.
+
+**Neither large-bank clock depends on the carrier sentence.** The prespecified rules return the
+graded-ordering bracket step 64 → 128 and the ranking bracket step 32 → 64 in all three sentences
+individually and in the median. Sentence-by-sentence, the graded ordering at step 128 is $-0.212$,
+$-0.271$ and $-0.252$ (family-wise $p = 0.0084$, $0.0004$, $0.0011$) against $-0.257$ for the median,
+and $\Delta\pi$ at step 64 is $+0.351$, $+0.377$ and $+0.363$ against a simultaneous band of
+half-width $\approx 0.21$. The three sentences rank the same pairs alike from early on — mean pairwise
+rank agreement between contexts is 0.66 at step 0, 0.86 by step 32 and 0.93 by step 64 — which is why
+a single context is barely noisier than their median here, in contrast to the 60-pair bank, where one
+sentence pushed the ranking bracket one checkpoint later.
