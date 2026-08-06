@@ -399,3 +399,62 @@ any feedback dropped later, and that costs more than leaving the loop open.
 
 On track? yes — S1–S6 complete plus Results 8–11 beyond the plan (~100% of plan), no blocker; the
 released checkpoint spacing, not budget, bounds any further tightening.
+
+---
+
+## Iteration 6 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Ran the item iteration 5 flagged as the smallest useful piece of work left: the
+carrier-sentence jackknife. Every width in this direction is a median over three fixed sentence
+frames, and that averaging is load-bearing in a way the report never tested — a divergence ordering
+present in only one frame would still show up in the median, and would then be published as a fact
+about training rather than about one English sentence. Wrote `experiments/sentence_jackknife.py`
+(CPU only, ~40 s: per-context $w$ and $E$ with no averaging, then all three prespecified onset rules
+re-run per context with their own bootstrap and permutation null) and
+`experiments/plot_jackknife.py`; new Result 12 / Figure 12 in both deliverables.
+
+**What I learned.**
+- The two headline brackets are **frame-invariant**: step 8 → 32 for the ordering and step 1000 →
+  2000 for the shape in every single sentence. The weakest single frame still clears the simultaneous
+  band at step 32 ($\rho = -0.359$ on 60 pairs), so the ~60× separation does not need pooling to be
+  visible — a stronger statement than "the median of three shows it".
+- The third clock is the one that moves, and it moves the way attenuation says it must: sentence 1
+  alone closes at step 256 instead of 128. Worth stating precisely rather than waving at "noise" — at
+  step 128 a single context's reliability ceiling is $\pi_{\max} = 0.871$ against 0.953 for the
+  median of three, and step 64 → 256 is exactly where $\pi$ is climbing through the chance envelope.
+  I checked this number rather than asserting "a third less reliability", which is what I had first
+  written and which was wrong by a factor of four.
+- Per-context agreement $\bar r$ is 0.68–0.70 at steps 0–8, 0.83 at step 32, 0.92 at step 128 and
+  0.82 at the end. The three frames agree *more* about pair widths at step 128 than at the final
+  checkpoint, which I did not expect and which is consistent with the late widening adding
+  context-specific magnitude drift on top of a fixed ranking (Result 11's mechanism).
+
+**Assumptions logged (loop mode, no human to ask).**
+- Jackknifed by dropping to ONE context rather than leave-one-out (median of two). Median of two is
+  a mean of two order statistics and would have muddled "is one frame carrying this?" with a
+  different estimator; one context is the cleanest version of the question and is also the noisiest,
+  i.e. the hardest test.
+- Curve validity stays at the original per-curve rules; 0 of 3,600 single-context widths were NaN, so
+  every context sees all 60 pairs at every checkpoint and the three trajectories are directly
+  comparable.
+- Each context's $\pi$ is scored against **its own** final-checkpoint widths, not against the primary
+  median-of-three final widths. Scoring against the pooled reference would mix the question "does
+  this frame lock in?" with "does this frame agree with the other two?".
+- Reused the three onset rules verbatim, including the two-consecutive-checkpoint requirement, so
+  each frame is judged exactly as the primary analysis was.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–5.
+
+**Next step.** S1–S6 are complete and all three onsets now survive a chance null, a metric-definition
+sweep, a reference sweep and a carrier-sentence jackknife. Everything I can still name — a second
+model size, a second training run, checkpoints between 8 and 32 — is out of scope under this PLAN or
+impossible from released artefacts. If the loop continues, the remaining candidate is a pair-level
+leave-one-quintile-out check on $\rho_{32}$ (does the ordering survive dropping the extreme
+divergence quintile, or is it driven by the tails?), which is cheap and reads from the saved
+trajectories. Did not write `STOP`: the deliverables are complete, but a premature STOP would make
+the direction silently ignore any feedback dropped later.
+
+On track? yes — S1–S6 complete plus Results 8–12 beyond the plan (~100% of plan), no blocker; the
+released checkpoint spacing, not budget, bounds any further tightening.

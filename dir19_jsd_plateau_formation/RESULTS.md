@@ -118,6 +118,16 @@ curve, so the separation is 31× rather than 62× there. Over step 512 → 1000,
 $+0.035$, $+0.142$, $+0.229$, $+0.275$, $+0.312$ — never negative, so the largest sharpening event is
 divergence-blind under every definition.
 
+**Robustness to the carrier sentences.** Every width is a median over three fixed sentence frames,
+which could turn one frame's quirk into an apparent training-time fact. Recomputing each pair's width
+from a single frame, with no averaging, and re-running all three onset rules on each frame separately
+returns the **step 8 → 32 ordering bracket and the step 1000 → 2000 shape bracket in all three**
+($\rho_{32} = -0.363, -0.442, -0.359$, each with a simultaneous band excluding zero; median $w$ at
+step 32 = 0.826, 0.827, 0.828). Two of the three also return the step 64 → 128 ranking bracket
+($\pi_{128} = +0.504$ and $+0.388$); the third closes one checkpoint later at step 256, which is what
+attenuation predicts — a single frame can reach at most $\pi_{\max} = 0.871$ at step 128 against
+0.953 for the median of three. No frame changes the order of the three events.
+
 **Quality controls.** All 3,600 curves across the 20-checkpoint scan passed the strict validity
 criteria (valid-curve rate 1.000 at every checkpoint). Endpoint patching reproduces the unpatched
 logits to a maximum relative error of $4.6\times10^{-5}$. Re-running step 0 reproduced the upstream
@@ -269,3 +279,19 @@ under 20,000 pair relabellings; hatched vertical stripe (`xx`) = the step 64 →
 rank agreement with that row's reference; y: the five references. Filled circles = $\pi$ at step 32,
 filled squares = $\pi$ at step 128, with 95% bootstrap intervals; open triangles = $\pi^{\perp}$ at
 step 32 with $J$ removed; hatched band = the pointwise 95% chance envelope at step 32.
+
+Averaging the three carrier sentences is what makes $w$ reliable enough to correlate at step 32, but
+it could also hide one frame carrying the whole result, so Figure 12 re-runs every onset rule inside
+each frame alone.
+
+![Four panels: correlation, median width, ranking persistence and bracket summary, one series per carrier sentence](plots/sentence_jackknife.png)
+
+**Figure 12.** No single sentence frame is carrying the result. Series in **A**–**C**: sentence 1
+`"The thing was"` (solid circles), sentence 2 `"They said it was"` (dashed squares), sentence 3
+`"I thought it was"` (dotted triangles), and the primary median of all three (dash-dot diamonds).
+**A** x: training step (symmetric-log); y: $\rho(J, w)$; stripe = the step 8 → 32 bracket. **B** y:
+median $w$, dashed line = the straight-line reference 0.8; stripe = the step 1000 → 2000 bracket.
+**C** y: rank agreement $\pi(s)$ with that series' own final ranking; hatched horizontal band =
+pointwise 95% envelope of $|\pi|$ under 20,000 relabellings; stripe = the step 64 → 128 bracket.
+**D** x: training step (log); y: the four width definitions, each row showing all three brackets as
+bars labelled with their opening and closing checkpoint.

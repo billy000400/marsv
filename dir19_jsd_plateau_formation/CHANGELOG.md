@@ -307,3 +307,43 @@ palette; every series also coded by linestyle and marker; bands hatched.
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (11 embeds / 11 visible captions
 per file; 18 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 6: carrier-sentence jackknife (new Result 12 / Figure 12)
+
+**What was missing.** Every width in this direction is a median over three fixed carrier sentences
+(`"The thing was"`, `"They said it was"`, `"I thought it was"`). Averaging is what makes $w$ reliable
+enough to correlate at step 32, but it is also a way for one frame's quirk to reach the deliverables
+as a training-time fact: a correlation present in only one of the three would still survive the
+median. Nothing in the report tested that. New code: `experiments/sentence_jackknife.py` (CPU only,
+~40 s; recomputes per-pair $w$ and $E$ from each single context with no averaging, then re-runs all
+three prespecified onset rules — ordering, shape, ranking — on each trajectory with its own 4,000-draw
+paired bootstrap and 20,000-draw label-permutation null) and `experiments/plot_jackknife.py`. New
+artefact `results/sentence_jackknife.json`.
+
+**New results (nothing superseded; this is a new robustness measurement).**
+- **Ordering bracket: step 8 → 32 in all three sentences**, identical to the primary analysis.
+  $\rho_{32} = -0.363$, $-0.442$, $-0.359$ (primary median-of-three: $-0.428$), each with a
+  simultaneous 95% band excluding zero, and $\rho_8$ non-significant in all three.
+- **Shape bracket: step 1000 → 2000 in all three.** Median $w$ at step 32 is 0.826, 0.827, 0.828 —
+  no plateau in any frame at the moment the ordering appears.
+- **Ranking bracket: step 64 → 128 in two of three.** Sentences 2 and 3 give $\pi_{128} = +0.504$
+  ($p^{\mathrm{fw}} = 0.0006$) and $+0.388$ ($p^{\mathrm{fw}} = 0.024$); sentence 1 closes one
+  checkpoint later, at step 256 ($\pi_{128} = +0.284$, $p^{\mathrm{fw}} = 0.19$; $\pi_{256} = +0.413$,
+  $p^{\mathrm{fw}} = 0.012$). Attenuation accounts for the shift: at step 128 a single context's
+  ceiling is $\pi_{\max} = 0.871$ against 0.953 for the median of three, and step 64 → 256 is where
+  $\pi$ climbs through the chance envelope.
+- Order of the three events unchanged in every frame.
+
+**Deliverable changes.** REPORT.md: new Methods run-in paragraph defining the single-sentence width
+$w^{(c)}$ (one new rendered equation, display count 18 → 19); new **Result 12 — "No single carrier
+sentence is carrying the result"** placed after Result 11 and before the onset summary; one qualifying
+clause added to the Summary's robustness sentence and one to its third-clock paragraph; one sentence
+added under the onsets table; `sentence_jackknife.py` and `plot_jackknife.py` added to
+Reproducibility. RESULTS.md: new "Robustness to the carrier sentences" paragraph. New figure
+`plots/sentence_jackknife.png` embedded as **Figure 12** in both files (A: three $\rho$ trajectories
+plus the median; B: median $w$ against the straight-line reference; C: $\pi$ against the permutation
+envelope; D: all three brackets for all four width definitions). Figure count 11 → 12 in each file.
+Green-free CVD palette; every series also coded by linestyle and marker; bands and stripes hatched.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (12 embeds / 12 visible captions
+per file; 19 display equations in REPORT.md all render as `js-display-math`).

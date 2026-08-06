@@ -38,7 +38,8 @@ quantity it orders is barely varying, and later training sharpens nearly every p
 keeping corpus divergence pointing the same way throughout. Redefining "width" from the 10%/90%
 levels to anything between 10%/90% and 30%/70% leaves the ordering bracket exactly where it is and
 moves the shape bracket by at most one checkpoint, so the separation is a property of the model, not
-of the ruler.
+of the ruler. It is not a property of the three sentence frames either: recomputed inside each frame
+on its own, with no averaging, both brackets land on the same two checkpoints all three times.
 
 A third measurement says how much of the *final* answer the model holds at step 32, and the answer
 is: only the divergence-aligned part of it. The per-pair ranking of widths at step 32 agrees with the
@@ -48,7 +49,8 @@ ranking arrives between step 64 and step 128, a third clock sitting between the 
 not a measurement-noise artefact: the three carrier sentences agree on each pair's width at step 32
 at $\bar r = 0.83$, so $\pi$ could have reached 0.94 had the rankings matched. Nor is it an artefact
 of scoring against the last released checkpoint — the same bracket comes back when the ranking is
-scored against step 8000, 32000, 64000 or 128000 instead.
+scored against step 8000, 32000, 64000 or 128000 instead, and inside two of the three carrier
+sentences taken alone (the third, noisier on its own, closes one checkpoint later).
 
 Because the step-32 ordering sits on such a tiny spread, we
 also check it against chance directly: under 20,000 relabellings it gives $p = 0.0007$, and
@@ -295,6 +297,21 @@ whose straight-line reference is $1 - 2a$ (so $a = 0.1$ recovers $w$ and the 0.8
 trajectory and only the width definition changes. Levels below 0.10 are not used, because validity
 criterion V1 guarantees only $d(0) \le 0.1$ and $d(1) \ge 0.9$, so a 5% level need not be attained at
 all. Result 10 re-runs both onset rules on each definition.
+
+**Single-sentence width, $w^{(c)}$ (robustness).** Every width above is a median over the three fixed
+carrier sentences, which is what makes it reliable enough to correlate at step 32 but also hides
+whether one frame is carrying the result on its own. So we recompute each pair's width from one
+context at a time, with no averaging:
+
+```math
+w^{(c)}_s(i) \;=\; t\bigl(d^{(c)}_{s,i} = 0.9\bigr) \;-\; t\bigl(d^{(c)}_{s,i} = 0.1\bigr), \qquad
+c \in \lbrace 1, 2, 3 \rbrace
+```
+
+and re-run all three onset rules on each of the three resulting trajectories, with its own bootstrap
+and its own permutation null. A single context is a noisier measurement than the median of three, so
+attenuation can only push a bracket *later*; what the check tests is whether any frame disagrees about
+the brackets or their order. Result 12 consumes this.
 
 **Model output divergence.** As a co-developing check, the base-2 JSD between the model's own
 next-token distributions at the two endpoints, $\mathrm{JSD}(\mathrm{softmax}(z_A),
@@ -828,6 +845,46 @@ widening of Result 5 changes the *magnitude* of the widths without reshuffling w
 sharpest — agreement between step 8000 and step 143000 is 0.89 — which is why the choice of reference
 does not reach back to the bracket.
 
+### Result 12 — No single carrier sentence is carrying the result
+
+The three onsets are measured on widths that were averaged over three sentence frames, and averaging
+is a good way to turn one context's quirk into an apparently general fact. If, say, only `"I thought
+it was"` happened to rank the pairs by divergence at step 32, the median of three would still show a
+correlation, and the report would be reading a property of one English sentence as a property of
+training. Figure 12 removes the averaging: each pair's width is recomputed from a single context, and
+all three onset rules are re-run on each of the three trajectories separately.
+
+![Four panels: correlation, median width, ranking persistence and bracket summary, one series per carrier sentence](plots/sentence_jackknife.png)
+
+**Figure 12.** All three onsets reproduce inside each carrier sentence on its own. The series in
+**A**, **B** and **C** are the frames used to build the width — sentence 1 `"The thing was"` (solid
+circles), sentence 2 `"They said it was"` (dashed squares), sentence 3 `"I thought it was"` (dotted
+triangles), and the primary median of all three (dash-dot diamonds). **A** x: training step
+(symmetric-log); y: Spearman $\rho(J, w)$; hatched stripe (`\\`) = the step 8 → 32 ordering bracket.
+**B** x: training step (symmetric-log); y: median transition width $w$; dashed horizontal line = the
+straight-line reference 0.8; hatched stripe (`..`) = the step 1000 → 2000 shape bracket. **C** x:
+training step (symmetric-log); y: rank agreement $\pi(s)$ between the widths at step $s$ and that
+same series' own final widths; hatched horizontal band between the dotted lines = the pointwise 95%
+envelope of $|\pi|$ under 20,000 pair relabellings; hatched stripe (`xx`) = the step 64 → 128 ranking
+bracket. **D** x: training step (log); y: the four width definitions; each row shows the three
+brackets as bars from the opening to the closing checkpoint, labelled with those two steps.
+
+The ordering bracket is **step 8 → 32 in every single sentence**, and so is the shape bracket at
+step 1000 → 2000. The per-sentence correlations at step 32 are $-0.363$, $-0.442$ and $-0.359$
+against $-0.428$ for the median, each with a simultaneous band excluding zero, and the median widths
+at step 32 are 0.826, 0.827 and 0.828 — no plateau in any frame. That the weakest single frame still
+clears the bar on 60 pairs is the useful part: the ~60× separation is not an artefact of pooling
+three contexts, and it does not need pooling to be visible.
+
+The one bracket that moves is the third clock, and it moves in the direction attenuation predicts.
+Sentence 1 alone closes at step 256 rather than 128 ($\pi_{128} = +0.284$, $p^{\mathrm{fw}} = 0.19$;
+$\pi_{256} = +0.413$, $p^{\mathrm{fw}} = 0.012$), while sentences 2 and 3 return step 64 → 128 like
+the primary analysis ($\pi_{128} = +0.504$ and $+0.388$). This is the expected cost of dropping two
+thirds of the measurement: at step 128 a single context can reach at most $\pi_{\max} = 0.871$ against
+0.953 for the median of three, and step 64 to 256 is exactly the stretch where $\pi$ climbs through
+the chance envelope, so a noisier series needs one more checkpoint to clear it. No frame ever reverses the order of the three events, and none places the ranking bracket
+anywhere near either of the other two.
+
 ### Summary of the onsets
 
 The table below collects the timing verdicts. Each row is an event, the bracket the prespecified rule
@@ -848,6 +905,8 @@ reuse: $p = 0.87$ at step 0, $p = 0.64$ at step 8, $p = 0.0031$ at step 32, $p <
 checkpoints. Under the four alternative width definitions of Result 10 the ordering bracket is
 unchanged and the shape bracket moves at most one checkpoint earlier, leaving a separation of 31× to
 62×. Under the four alternative reference checkpoints of Result 11 the ranking bracket is unchanged.
+Recomputed inside each carrier sentence separately (Result 12), the ordering and shape brackets are
+unchanged in all three and the ranking bracket moves one checkpoint later in one of the three.
 
 ---
 
@@ -896,10 +955,12 @@ checkpoint on disk at a time), `run_assay.py` measures one checkpoint, `analyze.
 produces `results/large_late.json`, `permtest.py` produces `results/permutation.json`,
 `persistence.py` produces `results/persistence.json`, `persistence_ref.py` produces
 `results/persistence_ref.json`, `threshold_robustness.py` produces
-`results/threshold_robustness.json`, `step16_forensics.py` and `revision_audit.py`
+`results/threshold_robustness.json`, `sentence_jackknife.py` produces
+`results/sentence_jackknife.json`, `step16_forensics.py` and `revision_audit.py`
 produce `results/step16_forensics.json` and `results/revision_audit.json` (network only, no GPU and
 nothing written to disk beyond those files), and `plot_formation.py`, `plot_perm.py`,
-`plot_persistence.py`, `plot_persistence_ref.py` and `plot_threshold.py` produce every figure above. The frozen
+`plot_persistence.py`, `plot_persistence_ref.py`, `plot_threshold.py` and `plot_jackknife.py`
+produce every figure above. The frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves
