@@ -223,12 +223,17 @@ def large_onset_fig():
 
 
 def qc_fig():
-    """Evidence that the released `step16` artefact is not a step-16 model."""
+    """Evidence that the released `step16` artefact is not a step-16 model, and that it is the
+    only such artefact among the 21 revisions this study uses."""
     q = json.load(open(os.path.join(RESULTS, "ckpt_qc.json")))
+    f = json.load(open(os.path.join(RESULTS, "step16_forensics.json")))
+    au = json.load(open(os.path.join(RESULTS, "revision_audit.json")))
     s = np.array(q["steps"], float)
     L = np.array(q["heldout_loss"])
     bad = s == 16
-    fig, a = plt.subplots(figsize=(6.0, 3.9))
+    fig, ax = plt.subplots(1, 3, figsize=(13.2, 3.9))
+
+    a = ax[0]
     a.plot(s[~bad], L[~bad], ls=LS[0], marker=MK[0], ms=4, color=CVD[0],
            label="released checkpoints (kept)")
     a.plot(s[bad], L[bad], ls="none", marker="X", ms=11, color=CVD[1], mew=1.6,
@@ -238,8 +243,49 @@ def qc_fig():
                arrowprops=dict(arrowstyle="->", color=CVD[1], lw=1.1))
     xaxis(a, s)
     a.set_ylabel("held-out next-token loss (nats)")
-    a.set_title("Checkpoint QC: one released revision is mislabelled")
+    a.set_title("A. One revision breaks the loss trajectory")
     a.legend(fontsize=7.5, loc="upper right")
+
+    # B. byte-level proof, streamed from the Hub: which revisions carry step143000's weights
+    a = ax[1]
+    revs = ["step8", "step16", "step32"]
+    n_s = len(f["sampled_tensors"])
+    hits = [f["per_tensor_match_step143000"][r] for r in revs]
+    same = [f["revisions"][r]["data_sha256"] == f["revisions"]["step143000"]["data_sha256"]
+            for r in revs]
+    for k, (r, h) in enumerate(zip(revs, hits)):
+        a.bar(k, h, width=0.62, color=CVD[k], hatch=["//", "..", "\\\\"][k],
+              edgecolor="0.25", linewidth=0.8)
+        a.text(k, h + 0.25, f"{h}/{n_s} tensors\npayload SHA-256\n"
+               + ("EQUAL" if same[k] else "differs"), ha="center", fontsize=7.5, color=CVD[k])
+    a.set_xticks(range(len(revs)))
+    a.set_xticklabels(revs)
+    a.set_ylim(0, n_s * 1.45)
+    a.set_yticks(range(0, n_s + 1, 2))
+    a.set_ylabel(f"sampled tensors matching step143000\n(of {n_s}, byte-exact SHA-256)")
+    a.set_title("B. 'step16' ships step143000's weights")
+
+    # C. the same test applied to every revision used, without downloading weights
+    a = ax[2]
+    st = np.array([r["step"] for r in au["revisions"].values()], float)
+    hb = np.array([r["header_bytes"] for r in au["revisions"].values()], float)
+    ok = np.array([r["metadata"] is not None for r in au["revisions"].values()])
+    a.plot(st[ok], hb[ok], ls="none", marker=MK[0], ms=5, color=CVD[0],
+           label=f"has __metadata__ (n={int(ok.sum())})")
+    a.plot(st[~ok], hb[~ok], ls="none", marker="X", ms=12, color=CVD[1], mew=1.6,
+           label="no __metadata__ (n=%d)" % int((~ok).sum()))
+    a.annotate("step16: 32 header bytes short", xy=(16, hb[~ok][0]), xytext=(120, 34272),
+               fontsize=7.5, color=CVD[1],
+               arrowprops=dict(arrowstyle="->", color=CVD[1], lw=1.1))
+    a.text(0.03, 0.30, f"the other {len(au['comparable_group'])} revisions share one header\n"
+           f"layout, and all {len(au['comparable_group'])} payload digests are distinct\n"
+           "-> no second duplicated checkpoint",
+           transform=a.transAxes, fontsize=7.5, color=CVD[0])
+    xaxis(a, st)
+    a.set_ylabel("safetensors header length (bytes)")
+    a.set_title("C. Audit of all 21 revisions used")
+    a.legend(fontsize=7.5, loc="center right")
+
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "checkpoint_qc.png"))
     plt.close(fig)

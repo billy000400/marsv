@@ -1,0 +1,35 @@
+[1/3] headers + published digests
+    step8: hdr=34296 n=292 meta={'format': 'pt'} size=2829329920 sha256=416698acf3ac4b1e...
+    step16: hdr=34264 n=292 meta=None size=2829329888 sha256=bb1c73861561a24d...
+    step32: hdr=34296 n=292 meta={'format': 'pt'} size=2829329920 sha256=c380529600a9c7e3...
+    step64: hdr=34296 n=292 meta={'format': 'pt'} size=2829329920 sha256=b760f643a072bba5...
+    step128: hdr=34296 n=292 meta={'format': 'pt'} size=2829329920 sha256=dad8bb567ffc397e...
+    step143000: hdr=34296 n=292 meta={'format': 'pt'} size=2829329920 sha256=d2a47fd49b3a49b8...
+[2/3] streaming sha256 of the tensor-data section
+    step8: 2.63 GiB in 31 s
+    step8: data sha256 = 48c2b6a938716a59a8e0201f4d530e7385b242e1ce8460f00b3780a9769aceb3
+    step16: 2.63 GiB in 30 s
+    step16: data sha256 = fbd54ccec4e0f5eedc029d005b0dad5d886578cc3045e7757c207c36b8a83cb6
+    step32: 2.63 GiB in 31 s
+    step32: data sha256 = 0459bf84719770a87ce11a24e487e74537ec259cb7d200ac0f4fefb60a4a1854
+    step143000: 2.63 GiB in 81 s
+    step143000: data sha256 = fbd54ccec4e0f5eedc029d005b0dad5d886578cc3045e7757c207c36b8a83cb6
+[3/3] per-tensor sha256 on a sample
+    embed_out.weight                                     matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.embed_in.weight                             matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.final_layer_norm.bias                       matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.final_layer_norm.weight                     matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.layers.0.attention.dense.bias               matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.layers.0.attention.dense.weight             matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.layers.11.attention.dense.bias              matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.layers.11.attention.dense.weight            matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.layers.23.attention.dense.bias              matches step143000: step8=False, step16=True, step32=False
+    gpt_neox.layers.23.attention.dense.weight            matches step143000: step8=False, step16=True, step32=False
+verdict: {
+  "step16_data_equals_step143000": true,
+  "step16_data_equals_step8": false,
+  "step16_data_equals_step32": false,
+  "step16_missing_metadata": true,
+  "header_byte_deficit": 32
+}
+wrote /workspacen/marsv_agent_haoyang/dir19_jsd_plateau_formation/results/step16_forensics.json

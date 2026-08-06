@@ -183,3 +183,88 @@ linestyle/marker.
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (9 embeds / 9 visible captions per
 file; 16 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 4: byte-level proof of the `step16` mislabelling, and an audit of all 21 revisions
+
+**Feedback check.** No `human_feedback*.md` / `*REVIEW*` file without `.addressed.md` exists in this
+direction. Proceeded with the plan.
+
+**What was missing.** Result 9 claimed that Hugging Face serves the wrong artefact under revision
+`step16` of `EleutherAI/pythia-1.4b-deduped`, but all three pieces of evidence were behavioural or
+circumstantial (a loss outlier, curves bit-identical to `step143000`, a file 32 bytes smaller). None
+of them excluded a corrupted local download, none said *what* the artefact is, and none said whether
+any other revision in the trajectory is also wrong. New code: `experiments/step16_forensics.py`
+(streams each revision's safetensors tensor payload from the Hugging Face CDN and hashes it, plus
+per-tensor digests over a 10-tensor sample; ~11 GB streamed, nothing written to disk) and
+`experiments/revision_audit.py` (header + published-digest audit of all 21 revisions, ~1 MB of
+traffic). New artefacts `results/step16_forensics.json`, `results/revision_audit.json`.
+
+**New results (nothing superseded; this strengthens Result 9's evidence, no number changed).**
+- The SHA-256 of `step16`'s 2.63 GiB tensor payload **equals `step143000`'s exactly**
+  (`fbd54ccec4e0f5ee…`). `step8` (`48c2b6a93871…`) and `step32` (`0459bf847197…`) differ, as they
+  must. All 10 individually hashed tensors — embeddings, unembedding, final layer norm, and the
+  attention output weight and bias of blocks 0, 11, 23 — match `step143000` byte for byte; 0 of 10
+  match `step8` or `step32`. So the claim moves from "is not a step-16 model" to "**is the final
+  model's parameters**".
+- The 32-byte deficit is explained: `step16`'s header omits the `__metadata__` field
+  (`{"format": "pt"}`) that all 20 other revisions carry — the signature of a file re-serialised by a
+  different tool, detectable with a 34 KB range request.
+- **Audit of all 21 revisions used here:** 20 share one byte-identical header layout (34,296 bytes,
+  292 tensors, identical dtypes/shapes/offsets), so equal weights would force equal file digests; all
+  20 published SHA-256 are distinct and none equals `step143000`'s. `step16` is the only affected
+  revision, and no duplicate hides among the closely spaced late checkpoints where the loss check
+  would not have flagged one.
+- Stated the consequence for the headline: because no genuine step-16 weights are published, the
+  ordering-onset bracket cannot be narrowed below **after step 8, by step 32** from released
+  artefacts. This is a resolution limit, not a bias.
+
+**Deliverable changes.** REPORT.md: new Methods run-in paragraph "Checkpoint provenance check" under
+Data & Model (payload digest + per-tensor digests + the header-layout argument that makes the 21-way
+audit exact); Result 9 rewritten around the byte-level evidence and the audit, with the resolution-limit
+consequence stated; Summary's step16 paragraph upgraded from "is not a step-16 model" to "is the fully
+trained final model" plus the audit; Reproducibility lists the two new scripts. RESULTS.md: the
+data-integrity paragraph rewritten with the payload digest, the per-tensor counts, the packaging
+explanation and the audit. `plots/checkpoint_qc.png` regenerated from 1 panel to 3 (A loss-trajectory
+outlier, unchanged; B sampled-tensor byte matches against `step143000` with whole-payload digest
+verdicts; C header length for all 21 revisions), and its caption rewritten in both files. Figure count
+stays 9 per file. Corrected a stale count in the old caption: 20 checkpoints are kept, not 19.
+Green-free CVD palette; bars carry distinct hatches, series distinct markers.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (9 embeds / 9 visible captions per
+file; 16 display equations in REPORT.md all render as `js-display-math`).
+
+### Same iteration — width-definition robustness (new Result 10 / Figure 10)
+
+**What was missing.** Every headline number rested on one metric, $w = t(0.9) - t(0.1)$, whose levels
+are a convention inherited from upstream rather than a choice the data made. If the ~60× separation
+were an artefact of that convention it would be the most consequential error in the report. New code:
+`experiments/threshold_robustness.py` (CPU only, reads the saved curves; re-runs both prespecified
+onset rules on five width definitions with a paired trajectory bootstrap, B = 4,000) and
+`experiments/plot_threshold.py`. New artefact `results/threshold_robustness.json`.
+
+**New results (nothing superseded; this is a new robustness measurement).**
+- With $w_a = t(1-a) - t(a)$ for $a \in \lbrace 0.10, 0.15, 0.20, 0.25, 0.30 \rbrace$ (straight-line
+  reference $1-2a$; curve validity held at the original 0.1/0.9 rules so the same curves enter every
+  trajectory), the **ordering onset bracket is step 8 → 32 for all five definitions**. $\rho_{32}$
+  ranges only over $-0.428, -0.415, -0.409, -0.391, -0.385$; the interval statistic
+  $\rho(J, \Delta w)$ over step 8 → 32 over $-0.466, -0.461, -0.456, -0.452, -0.452$.
+- The **shape bracket moves one checkpoint earlier** (step 512 → 1000 instead of step 1000 → 2000)
+  for the three wider levels $a \ge 0.20$, which weight only the steep middle of the curve. The
+  separation between the two events is therefore 31× under those definitions and 62× under the two
+  narrower ones — same order of events, no definition brings the brackets within a factor of 30.
+- The Result 3 dissociation holds throughout: over step 512 → 1000, $\rho(J, \Delta w)$ is $+0.035$,
+  $+0.142$, $+0.229$, $+0.275$, $+0.312$ — never negative, so the largest sharpening event is
+  divergence-blind under every definition (mildly favouring low-divergence pairs at wider levels).
+  Flagged in the report that the four alternative values were not permutation-tested.
+
+**Deliverable changes.** REPORT.md: new Methods run-in paragraph defining $w_a$ and its straight-line
+reference (one new rendered equation, display count 16 → 17), new **Result 10 — "The separation is not
+an artefact of how 'width' is defined"**, a qualifying sentence added to the Summary and one under the
+onsets table. RESULTS.md: new "Robustness to the width definition" paragraph. New figure
+`plots/threshold_robustness.png` embedded as **Figure 10** in both files (A: five $\rho$ trajectories;
+B: median $w_a$ divided by its own straight-line reference, putting all five on one scale; C: both
+onset brackets per definition with the separation ratio). Figure count 9 → 10 in each file. Green-free
+CVD palette, every series also coded by linestyle and marker.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (10 embeds / 10 visible captions
+per file; 17 display equations in REPORT.md all render as `js-display-math`).

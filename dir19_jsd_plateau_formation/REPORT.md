@@ -35,7 +35,10 @@ the surprising order:
 
 So the ordering is not a by-product of sharpening: it is laid down first, in a regime where the
 quantity it orders is barely varying, and later training sharpens nearly every pair together while
-keeping corpus divergence pointing the same way throughout.
+keeping corpus divergence pointing the same way throughout. Redefining "width" from the 10%/90%
+levels to anything between 10%/90% and 30%/70% leaves the ordering bracket exactly where it is and
+moves the shape bracket by at most one checkpoint, so the separation is a property of the model, not
+of the ruler.
 
 A third measurement says how much of the *final* answer the model holds at step 32, and the answer
 is: only the divergence-aligned part of it. The per-pair ranking of widths at step 32 agrees with the
@@ -54,9 +57,11 @@ permuting the 123 endpoint labels prices the token reuse into the null, the same
 accounts for reuse of endpoint tokens (median $\Delta w = +0.0158$, 95% CI $[+0.0081, +0.0224]$).
 
 A by-product of the scan: the artefact that Hugging Face serves as revision `step16` of
-`EleutherAI/pythia-1.4b-deduped` **is not a step-16 model**. Its held-out loss is 2.320 nats where
-its neighbours are near 9, and its 9,000 measured curve values are bit-identical to the final
-checkpoint's. Anyone using Pythia's early checkpoints should check this.
+`EleutherAI/pythia-1.4b-deduped` **is not a step-16 model — it is the fully trained final model**.
+Its held-out loss is 2.320 nats where its neighbours are near 9, and hashing the 2.63 GiB tensor
+payload straight from the Hub gives the same SHA-256 as `step143000`. Auditing all 21 revisions we
+touched shows it is the only one affected. Anyone using Pythia's early checkpoints should check this;
+it costs one 34 KB range request per revision.
 
 ---
 
@@ -108,6 +113,19 @@ backslides by more than 0.02, and crosses each of the 0.1 and 0.9 levels exactly
 curves passed** at every checkpoint, so no result below is affected by curve rejection. Patching at
 $t=0$ and $t=1$ reproduces the unpatched endpoint logits to a maximum relative error of
 $4.6 \times 10^{-5}$ across the entire scan.
+
+**Checkpoint provenance check.** A timing study is only as good as the labels on its checkpoints, and
+one of these revisions turned out to be mislabelled (Result 9). Behavioural evidence — a loss outlier,
+duplicated curves — shows that *something* is wrong but not *what*, and it cannot rule out a corrupted
+local download. So we verify the artefacts at the source, byte by byte, without loading a model. For a
+revision $R$, `model.safetensors` begins with an 8-byte header length followed by a JSON header giving
+each tensor's dtype, shape and byte range; everything after it is the tensor payload. We stream that
+payload straight from the Hugging Face CDN and hash it, $\mathrm{SHA256}(\text{payload}(R))$, and
+separately hash each of 10 sampled tensors' byte ranges so a match can be localised rather than resting
+on one whole-file digest. Two revisions carry identical weights exactly when their payload digests
+agree. We then audit all 21 revisions cheaply, using only the ~34 KB header and the SHA-256 that the
+Hub publishes for each file: 20 of them share one byte-identical header layout, so for those, equal
+weights would force equal file digests, and all-distinct file digests prove all-distinct weights.
 
 ### Metrics
 
@@ -246,6 +264,22 @@ median we actually use:
 $\pi_{\max}$ is the largest $\pi$ attainable even if the underlying rankings were identical. Result 8
 reports it next to the observed $\pi$, so a low value can be read as a real disagreement rather than
 as measurement noise.
+
+**Width at other levels, $w_a$ (robustness).** The 10%/90% levels in $w$ are a convention inherited
+from the upstream work, not something the data chose, and they are load-bearing: a wider band gives
+weight to the flat ends, a narrower one only to the steep middle, so the two could in principle place
+the onsets differently. To check that the timing is a property of the model rather than of the
+convention, we recompute everything with
+
+```math
+w_a \;=\; t(d = 1-a) \;-\; t(d = a), \qquad a \in \{0.10,\, 0.15,\, 0.20,\, 0.25,\, 0.30\}
+```
+
+whose straight-line reference is $1 - 2a$ (so $a = 0.1$ recovers $w$ and the 0.8 reference). Curve
+*validity* stays pinned to the original 0.1/0.9 rules, so exactly the same curves enter every
+trajectory and only the width definition changes. Levels below 0.10 are not used, because validity
+criterion V1 guarantees only $d(0) \le 0.1$ and $d(1) \ge 0.9$, so a 5% level need not be attained at
+all. Result 10 re-runs both onset rules on each definition.
 
 **Model output divergence.** As a co-developing check, the base-2 JSD between the model's own
 next-token distributions at the two endpoints, $\mathrm{JSD}(\mathrm{softmax}(z_A),
@@ -651,22 +685,93 @@ component of the final ordering to appear, ahead of the pair-specific detail tha
 
 The scan surfaced a data-integrity problem that anyone studying Pythia's early checkpoints should
 know about. We report it because it would silently corrupt exactly the kind of early-training
-analysis this report performs; Figure 9 shows how it stands out.
+analysis this report performs, and because it is cheap to check and nobody appears to check it.
+Figure 9 shows how the revision stands out behaviourally, what its weights actually are, and that no
+other revision shares the defect.
 
-![Held-out loss against training step with step16 marked as an excluded outlier](plots/checkpoint_qc.png)
+![Three panels: loss trajectory outlier, byte-level tensor match, and header audit of all revisions](plots/checkpoint_qc.png)
 
-**Figure 9.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
-y: held-out next-token loss in nats on the frozen 256-row sample. The connected circles are the 19
-checkpoints we keep; the large cross is revision `step16`.
+**Figure 9.** Revision `step16` ships the final model's weights, and it is the only revision that
+does. **A** x: training step (symmetric-log); y: held-out next-token loss in nats on the frozen
+256-row sample; connected circles are the 20 checkpoints kept, the large cross is `step16`. **B**
+x: the revision compared against `step143000`; y: how many of 10 sampled tensors have byte-identical
+contents (embeddings, unembedding, final layer norm, and the attention output weight and bias of
+blocks 0, 11 and 23); the label above each bar reports whether the *whole* 2.63 GiB payload digest
+matches. **C** x: training step (symmetric-log); y: length in bytes of the safetensors JSON header
+for each of the 21 revisions; circles have a `__metadata__` field, the cross does not.
 
-The evidence is threefold. Its held-out loss is 2.320 nats, while step 8 gives 9.889 and step 32
-gives 8.824 — a 6.5-nat improvement and 6.5-nat regression inside 24 steps at a learning rate of
-$2\times10^{-6}$, which no optimiser trajectory produces. Its 60 pairs × 3 sentences × 50 positions
-= 9,000 measured $d(t)$ values are **bit-identical** to those of `step143000` (maximum absolute
-difference exactly $0$), as are its 8,820 movement values. And its `model.safetensors` is 2,829,329,888
-bytes where all 19 other revisions we queried are 2,829,329,920. The artefact served under `step16`
-is the final model. We excluded it from every trajectory in this report; its assay output is retained
-in `results/assay_step16.json` and the checks in `results/ckpt_qc.json`.
+The behavioural evidence came first. `step16`'s held-out loss is 2.320 nats where step 8 gives 9.889
+and step 32 gives 8.824 — a 6.5-nat improvement and 6.5-nat regression inside 24 steps at a learning
+rate of $2\times10^{-6}$, which no optimiser trajectory produces (Figure 9A). Its 60 pairs × 3
+sentences × 50 positions = 9,000 measured $d(t)$ values are bit-identical to `step143000`'s (maximum
+absolute difference exactly $0$), as are its 8,820 movement values.
+
+The byte-level check settles what it is. Streaming each revision's tensor payload from the Hugging
+Face CDN and hashing it gives, for `step16` and `step143000`, the *same* SHA-256 over all 2.63 GiB:
+`fbd54ccec4e0f5ee…`. Its two neighbours differ from the final model, as they must (`step8`
+`48c2b6a93871…`, `step32` `0459bf847197…`). All 10 individually hashed tensors match `step143000`
+byte for byte and none match `step8` or `step32` (Figure 9B). The revision does not merely behave
+like the final model — it *is* the final model's parameters, served under an early-checkpoint name.
+
+What differs is only packaging: `step16`'s header omits the `__metadata__` field
+(`{"format": "pt"}`) that all 20 other revisions carry, making its header 32 bytes shorter and its
+file 2,829,329,888 bytes against 2,829,329,920 elsewhere (Figure 9C). That is the signature of a
+file re-serialised by a different tool, and it is a 34 KB range request away — a check anyone can run
+before spending GPU hours on a checkpoint.
+
+The audit says the damage is contained. Across all 21 revisions this study touches, the other 20
+share one byte-identical header layout (34,296 bytes, 292 tensors, identical dtypes, shapes and
+offsets), so for them equal weights would force equal file digests; their 20 published SHA-256 digests
+are all distinct, and none equals `step143000`'s. There is no second duplicated checkpoint hiding
+where our loss check would not have flagged it — for instance among the closely spaced late
+checkpoints, where two adjacent models genuinely do look alike.
+
+The cost to this report is a resolution limit, not a bias: `step16` is excluded from every trajectory
+here, and because no genuine step-16 weights exist in this repository, the ordering-onset bracket
+cannot be narrowed below **after step 8, by step 32** from released artefacts. Its assay output is
+retained in `results/assay_step16.json`, the behavioural checks in `results/ckpt_qc.json`, and the
+byte-level evidence in `results/step16_forensics.json` and `results/revision_audit.json`.
+
+### Result 10 — The separation is not an artefact of how "width" is defined
+
+Every number above flows from one metric, $w = t(0.9) - t(0.1)$, with levels fixed by convention. If
+the ~60× separation were an artefact of that choice it would be the most consequential error in the
+report, so we re-ran both prespecified onset rules on all five width definitions $w_a$ from Methods
+(Figure 10).
+
+![Three panels: correlation trajectories, sharpening curves, and onset brackets for five width definitions](plots/threshold_robustness.png)
+
+**Figure 10.** Both onsets, and the gap between them, survive every width definition. The series in
+panels A and B are the five level pairs defining $w_a$: 10%/90% (solid circles), 15%/85% (dashed
+squares), 20%/80% (dotted up-triangles), 25%/75% (dash-dot diamonds), 30%/70% (long-dash
+down-triangles). **A** x: training step (symmetric-log); y: Spearman $\rho$ between corpus
+divergence $J$ and $w_a$; the hatched vertical stripe is the step 8 → 32 bracket. **B** x: training
+step (symmetric-log); y: median $w_a$ divided by its own straight-line reference $1 - 2a$, which puts
+all five definitions on one scale — 1.0 is the no-plateau value and the dashed line marks it.
+**C** x: training step (log); y: the five definitions. Each row shows the divergence-ordering bracket
+(left bar) and the plateau-shape bracket (right bar), with the dotted arrow and the label giving the
+ratio between the two closing checkpoints.
+
+The ordering onset is completely insensitive to the definition: **all five give the same bracket,
+after step 8 and by step 32**, and the correlation at step 32 moves only from $-0.428$ to $-0.385$
+across the whole range. The interval statistic is steadier still — $\rho^{\Delta}$ over step 8 → 32
+is $-0.466$, $-0.461$, $-0.456$, $-0.452$, $-0.452$ at the five levels. The early divergence
+selectivity is a property of the curves, not of where we place the ruler's tick marks.
+
+The shape onset does move, and in the direction one would predict: the three wider levels
+($a \ge 0.20$), which only look at the steep middle of the curve, detect sharpening one checkpoint
+earlier, giving **after step 512, by step 1000** instead of after step 1000, by step 2000. The
+separation between the two events is therefore 31× rather than 62× under those definitions — smaller,
+but the same phenomenon and the same order of events. No definition brings the two brackets within a
+factor of 30 of each other.
+
+The dissociation of Result 3 also holds throughout: over step 512 → 1000, the largest sharpening
+event, $\rho^{\Delta}$ is $+0.035$, $+0.142$, $+0.229$, $+0.275$, $+0.312$ at the five levels — never
+negative, so that interval is never divergence-selective under any definition, and at the wider levels
+it mildly favours the *low*-divergence pairs. (Those four alternative values were not permutation-tested;
+at the primary definition the permutation $p$ is 0.78.) Figure 10B shows why the wider definitions are
+more sensitive rather than differently behaved: all five curves sit at or above their own straight-line
+value until step 512, then fall together, with the wider bands simply falling faster.
 
 ### Summary of the onsets
 
@@ -685,7 +790,9 @@ separated, and they run in the order divergence-selection → pair ranking → p
 
 The same bracket on the 1,000-pair bank, under the endpoint-label null that prices in its token
 reuse: $p = 0.87$ at step 0, $p = 0.64$ at step 8, $p = 0.0031$ at step 32, $p < 0.001$ at both late
-checkpoints.
+checkpoints. Under the four alternative width definitions of Result 10 the ordering bracket is
+unchanged and the shape bracket moves at most one checkpoint earlier, leaving a separation of 31× to
+62×.
 
 ---
 
@@ -732,8 +839,11 @@ identical curves, and it should be described that way.
 checkpoint on disk at a time), `run_assay.py` measures one checkpoint, `analyze.py` produces
 `results/checkpoint_metrics.json`, `ckpt_qc.py` produces `results/ckpt_qc.json`, `large_late.py`
 produces `results/large_late.json`, `permtest.py` produces `results/permutation.json`,
-`persistence.py` produces `results/persistence.json`, and `plot_formation.py`, `plot_perm.py` and
-`plot_persistence.py` produce every figure above. The frozen
+`persistence.py` produces `results/persistence.json`, `threshold_robustness.py` produces
+`results/threshold_robustness.json`, `step16_forensics.py` and `revision_audit.py`
+produce `results/step16_forensics.json` and `results/revision_audit.json` (network only, no GPU and
+nothing written to disk beyond those files), and `plot_formation.py`, `plot_perm.py` and
+`plot_persistence.py` and `plot_threshold.py` produce every figure above. The frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves

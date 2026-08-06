@@ -233,3 +233,108 @@ any feedback dropped later, and that costs more than leaving the loop open.
 
 On track? yes — S1–S6 complete plus a new in-scope result (~100% of plan), no blocker; the released
 checkpoint spacing, not budget, bounds any further tightening.
+
+---
+
+## Iteration 4 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** The plan's S1–S6 are complete, so I looked for the weakest *evidence* in the
+deliverables rather than a missing measurement. It was Result 9. The report asserts that Hugging Face
+serves the wrong artefact under revision `step16` of `EleutherAI/pythia-1.4b-deduped` — a claim about
+someone else's published data — on three pieces of circumstantial evidence: a loss outlier, curves
+bit-identical to `step143000`, and a file 32 bytes smaller. None of that excludes a corrupted local
+download, and none of it says what the artefact actually is. Wrote `experiments/step16_forensics.py`
+(streams each revision's safetensors tensor payload straight from the Hugging Face CDN and hashes it,
+plus per-tensor SHA-256 over a 10-tensor sample; ~11 GB streamed, nothing written to disk) and
+`experiments/revision_audit.py` (header + published-digest audit of all 21 revisions, ~1 MB).
+
+**What I learned.**
+- The payload SHA-256 of `step16` **equals `step143000`'s exactly** (`fbd54ccec4e0f5ee…`), over all
+  2.63 GiB; `step8` and `step32` differ. All 10 sampled tensors match `step143000` byte for byte and
+  0 of 10 match either neighbour. The claim is now "it *is* the final model's parameters", not "it is
+  not a step-16 model" — a stronger and much harder statement to argue with.
+- The 32-byte deficit had a mundane explanation worth publishing: `step16`'s header omits the
+  `__metadata__` field (`{"format": "pt"}`) every other revision carries. That makes the defect
+  detectable with a **34 KB range request** — no download, no GPU. This is the part of the finding
+  most useful to other people.
+- The audit is exact and nearly free, which I did not expect. Because the other 20 revisions share a
+  byte-identical header layout, equal weights would force equal file digests, so the Hub's published
+  SHA-256 alone proves all 20 are distinct checkpoints. That closes the question a reader would ask
+  next — is anything else duplicated, e.g. among the closely spaced late checkpoints where a
+  loss-outlier check would not fire? — without streaming another 56 GB.
+- Consequence for the headline, now stated in both deliverables: since no genuine step-16 weights are
+  published, the ordering bracket **cannot** be narrowed below step 8 → 32 from released artefacts.
+  That converts a nagging "why didn't you use step 16?" into a documented resolution limit.
+- Method note for the future: verify claims about third-party artefacts at the source. The local
+  cache had been consistent with the behavioural evidence all along, but so would a bad download.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Streamed the full payload for `step8`, `step16`, `step32`, `step143000` only (~11 GB). Rejected
+  streaming all 21 (~56 GB, ~35 min): the header-layout argument makes the remaining 17 exact from
+  published digests alone, so the extra bandwidth would buy nothing.
+- The 10 sampled tensors are the embeddings, the unembedding, the final layer norm, and the attention
+  output weight and bias of blocks 0, 11 and 23 — chosen to span the depth of the network, so a
+  partial match (e.g. only early blocks copied) would have shown up. The whole-payload digest makes
+  the sample redundant as proof; it is there so the match can be localised and read off a figure.
+- Compared payload (post-header) digests rather than whole-file digests, because `step16`'s header
+  legitimately differs. Using whole-file digests would have hidden the result — the published file
+  digests already differ, which is exactly why this needed streaming.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2 and 3.
+
+**Next step.** Running a metric-definition robustness check: every headline number rests on
+$w = t(0.9) - t(0.1)$, and a reader should know the three onsets are not an artefact of the 10/90
+threshold choice. Recomputing $\rho_s$, the onset brackets and median width at alternative thresholds
+from the already-saved curves (CPU only). Did not write `STOP` — deliverables are complete, but a
+premature STOP would make the direction silently ignore feedback dropped later.
+
+On track? yes — S1–S6 complete plus a hardened Result 9 (~100% of plan), no blocker; the released
+checkpoint spacing, now proven irreparable at step 16, bounds any further tightening.
+
+### Addendum — same iteration
+
+Ran the width-definition robustness check flagged as the next step above. Wrote
+`experiments/threshold_robustness.py` and `experiments/plot_threshold.py`; new Result 10 / Figure 10
+in both deliverables.
+
+**What I learned.**
+- The ordering onset is *completely* insensitive to the metric convention: the same step 8 → 32
+  bracket at all five level pairs, with $\rho_{32}$ moving only from $-0.428$ to $-0.385$ and the
+  interval statistic from $-0.466$ to $-0.452$. I expected some drift and got almost none, which is
+  the strongest thing this check could have returned for the headline.
+- The shape onset is *not* invariant, and that is the useful half. The three wider levels
+  ($a \ge 0.20$) look only at the steep middle of the curve and therefore detect sharpening one
+  checkpoint earlier, at step 512 → 1000. So "~60×" is really "31× to 62×" depending on where the
+  ruler's ticks go. I qualified the Summary rather than restating the headline: the primary
+  definition is still the one the whole report is computed at, and the order of events never changes.
+- Third-order finding worth keeping: $\rho(J, \Delta w)$ over the biggest sharpening interval
+  (512 → 1000) grows from $+0.035$ to $+0.312$ as the band narrows. It is never negative under any
+  definition, so the dissociation is safe, but at wider levels that interval mildly favours the
+  *low*-divergence pairs. I did not permutation-test the four alternatives and said so, rather than
+  quietly implying the $p = 0.78$ from the primary definition covers them.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Curve validity stays pinned to the original 0.1/0.9 criteria at every level, so only the width
+  definition varies and the same 3,600 curves enter every trajectory. Rejected re-deriving validity
+  per level: it would confound a change of metric with a change of sample.
+- Levels below 0.10 excluded. Validity criterion V1 guarantees only $d(0) \le 0.1$ and
+  $d(1) \ge 0.9$, so a 5% level need not be attained and would produce NaN widths for an unknown,
+  level-dependent subset of curves. At all five levels used, 0 of 1,200 widths were NaN.
+- Reused the prespecified onset rules verbatim (two-consecutive-checkpoint requirement, simultaneous
+  band from the paired trajectory bootstrap) rather than inventing a robustness-specific rule, so
+  each alternative definition is judged exactly as the primary one was.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–3.
+
+**Next step.** Both onsets are now at the resolution limit of this released trajectory (no Pythia
+checkpoint between 8 and 32, 64 and 128, or 1000 and 2000, and `step16` is proven irreparable), and
+the headline survives both a chance null and a metric-definition sweep. The remaining questions —
+a second model size, a second training run — are out of scope under this PLAN. If the loop continues,
+the smallest useful item left is the reference-checkpoint robustness of $\pi$ (score against step
+64000 instead of step 143000), which Figure 8B already suggests will not move the third bracket. Did
+not write `STOP`: the deliverables are complete, but a premature STOP would make the direction
+silently ignore any feedback dropped later.
+
+On track? yes — S1–S6 complete plus a hardened Result 9 and a new Result 10 (~100% of plan), no
+blocker; released checkpoint spacing bounds any further tightening.

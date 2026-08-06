@@ -1,0 +1,152 @@
+{
+  "repo": "EleutherAI/pythia-1.4b-deduped",
+  "revisions": {
+    "step8": {
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "416698acf3ac4b1e7e337d75f352007b83553253647205f0e949f6b11c878fd7",
+      "data_start": 34304,
+      "layout_identical_to_step143000": true,
+      "data_sha256": "48c2b6a938716a59a8e0201f4d530e7385b242e1ce8460f00b3780a9769aceb3",
+      "data_bytes": 2829295616
+    },
+    "step16": {
+      "header_bytes": 34264,
+      "n_tensors": 292,
+      "metadata": null,
+      "file_size": 2829329888,
+      "file_sha256": "bb1c73861561a24dff802c978eeb5ea2db8b5e78ddc5d542f2c65be1a8e84955",
+      "data_start": 34272,
+      "layout_identical_to_step143000": true,
+      "data_sha256": "fbd54ccec4e0f5eedc029d005b0dad5d886578cc3045e7757c207c36b8a83cb6",
+      "data_bytes": 2829295616
+    },
+    "step32": {
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "c380529600a9c7e3cc7549042585d23de5280054534859bed15d6d33f3cf9eb3",
+      "data_start": 34304,
+      "layout_identical_to_step143000": true,
+      "data_sha256": "0459bf84719770a87ce11a24e487e74537ec259cb7d200ac0f4fefb60a4a1854",
+      "data_bytes": 2829295616
+    },
+    "step64": {
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "b760f643a072bba59190759a578120bdc2c0390c5ca84ae05ed37dbc8eabb127",
+      "data_start": 34304,
+      "layout_identical_to_step143000": true
+    },
+    "step128": {
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "dad8bb567ffc397e206fea85354ebf8a11ab1be0e7db9a7d07b786ff1e15276f",
+      "data_start": 34304,
+      "layout_identical_to_step143000": true
+    },
+    "step143000": {
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "d2a47fd49b3a49b86869aaec14f5ab08c7d859d138c9d1366e01e8683a70f44f",
+      "data_start": 34304,
+      "layout_identical_to_step143000": true,
+      "data_sha256": "fbd54ccec4e0f5eedc029d005b0dad5d886578cc3045e7757c207c36b8a83cb6",
+      "data_bytes": 2829295616
+    }
+  },
+  "sampled_tensors": [
+    "embed_out.weight",
+    "gpt_neox.embed_in.weight",
+    "gpt_neox.final_layer_norm.bias",
+    "gpt_neox.final_layer_norm.weight",
+    "gpt_neox.layers.0.attention.dense.bias",
+    "gpt_neox.layers.0.attention.dense.weight",
+    "gpt_neox.layers.11.attention.dense.bias",
+    "gpt_neox.layers.11.attention.dense.weight",
+    "gpt_neox.layers.23.attention.dense.bias",
+    "gpt_neox.layers.23.attention.dense.weight"
+  ],
+  "per_tensor_sha256": {
+    "step8": {
+      "embed_out.weight": "79b65791c1810a7def52897ec6c57cf8d4e5e1bc9ce6c46a2b58e8e13ae5a30f",
+      "gpt_neox.embed_in.weight": "c77a271cd1aa3c759e868251dd2518d65b85313e653541fcde4204b7a12cb7bd",
+      "gpt_neox.final_layer_norm.bias": "708116e5c2bfd7dabd71fb5f7c62f35985bdbe5e0052274229f44f19e2fb69ae",
+      "gpt_neox.final_layer_norm.weight": "9171ed1afa4c23019fc0f55ffe619269cef671a6ec58ee6371e968d1bf6ad67e",
+      "gpt_neox.layers.0.attention.dense.bias": "a4941a365563f58c604c4348db2dcf3748c4d5fa34c1ca14273443b27143124d",
+      "gpt_neox.layers.0.attention.dense.weight": "862dc7259e74582f5ebe6230d8da230294215b70f03c9546c1cbd99193e6fb9c",
+      "gpt_neox.layers.11.attention.dense.bias": "854060ada0a0b7f72c45ce1f19347d96da9fc79c0b923fc6f3dc5c92a29b4209",
+      "gpt_neox.layers.11.attention.dense.weight": "25bbc53e5eb7509f85c35432d0414f3dee128481e2d024ff99fe390ead87c184",
+      "gpt_neox.layers.23.attention.dense.bias": "928347a1fee8c8690a301c9cba1d2d5c6b8e1298d1507c5e4d6cc757eb378e5a",
+      "gpt_neox.layers.23.attention.dense.weight": "c80fa732aa5d54571ec4e6dc02fa950a46765424c4fddcb64054b115b140e73f"
+    },
+    "step16": {
+      "embed_out.weight": "489ae08be17b9644cd41de733a66cd7c2647e8cc61b51f619dfcc2b14ea1bd90",
+      "gpt_neox.embed_in.weight": "f79ba1f472ffc3a94df8281abad5f819de25341865090ac329ec25e88fc0d07d",
+      "gpt_neox.final_layer_norm.bias": "4a0514e08346511a9b78fa4ff2ae92df0bc17ffd221244deb0fa3e94f63786b6",
+      "gpt_neox.final_layer_norm.weight": "c1a2d8e226f0a3c702049e8e7d90d5982c0e75f7c3c90a3cc382f700ce03a929",
+      "gpt_neox.layers.0.attention.dense.bias": "a2faa241ebbc4bb3034c6bf36693ec8af19684e5b02a4c11500a943353cf22f0",
+      "gpt_neox.layers.0.attention.dense.weight": "6ecde5b0ea93d1479fc266ad88da0772b59e66d4ff319278f88899a352403ce0",
+      "gpt_neox.layers.11.attention.dense.bias": "20e39b6f0e9248b1551cfb51d1da3200d038f2d715539e4192373c1a889fbc05",
+      "gpt_neox.layers.11.attention.dense.weight": "4745409db6e3154593b37c3fae62c6f2c1961f7807ccbeea261e64704e8ee62e",
+      "gpt_neox.layers.23.attention.dense.bias": "dde942a36d9da134c8cb5dadc78edb09a85e8be28826cd24bca9cccc1cba4840",
+      "gpt_neox.layers.23.attention.dense.weight": "d8d65bd0a9545cef837f5d95c741b28ba8f0dd287268893ca013b9353e53e602"
+    },
+    "step32": {
+      "embed_out.weight": "a71a187f4f754d0e33b714453bd6ddf570798e54135dc44ee0d3d24d17acc522",
+      "gpt_neox.embed_in.weight": "4e942c7139c212b378c69b01343d0fb8f767fecb7e2d8584996834dc535876ce",
+      "gpt_neox.final_layer_norm.bias": "732e01d2cd36732d80f32b0929e5100fb87afcc4ed5f7ee57086525a9f2c75db",
+      "gpt_neox.final_layer_norm.weight": "9171ed1afa4c23019fc0f55ffe619269cef671a6ec58ee6371e968d1bf6ad67e",
+      "gpt_neox.layers.0.attention.dense.bias": "37c91ce2a8f42ba6021e1ad72e015d4814bb9837558634c43c2ba9dc921ea012",
+      "gpt_neox.layers.0.attention.dense.weight": "5ce73fedb411264374601ff9e50bc620acf0d6e38c9cfb3d9b85599237d5b673",
+      "gpt_neox.layers.11.attention.dense.bias": "5bdd882aa5d0a89acd91170493c93f3a384b06093c02dddc40b53cbda52bd74f",
+      "gpt_neox.layers.11.attention.dense.weight": "ebed7b7cf4a8fbe50aa21cc6894b25938a285a5ed0d72eee99b41e82899ebe09",
+      "gpt_neox.layers.23.attention.dense.bias": "802c7a8ec164a5798b3e73419bf932ac6f65115da11f03af4fb384d7b4b5152d",
+      "gpt_neox.layers.23.attention.dense.weight": "81e268e8009b4063997e7f5161f3352719d4a8d8d43733218ebd870a5d9e6b3c"
+    },
+    "step143000": {
+      "embed_out.weight": "489ae08be17b9644cd41de733a66cd7c2647e8cc61b51f619dfcc2b14ea1bd90",
+      "gpt_neox.embed_in.weight": "f79ba1f472ffc3a94df8281abad5f819de25341865090ac329ec25e88fc0d07d",
+      "gpt_neox.final_layer_norm.bias": "4a0514e08346511a9b78fa4ff2ae92df0bc17ffd221244deb0fa3e94f63786b6",
+      "gpt_neox.final_layer_norm.weight": "c1a2d8e226f0a3c702049e8e7d90d5982c0e75f7c3c90a3cc382f700ce03a929",
+      "gpt_neox.layers.0.attention.dense.bias": "a2faa241ebbc4bb3034c6bf36693ec8af19684e5b02a4c11500a943353cf22f0",
+      "gpt_neox.layers.0.attention.dense.weight": "6ecde5b0ea93d1479fc266ad88da0772b59e66d4ff319278f88899a352403ce0",
+      "gpt_neox.layers.11.attention.dense.bias": "20e39b6f0e9248b1551cfb51d1da3200d038f2d715539e4192373c1a889fbc05",
+      "gpt_neox.layers.11.attention.dense.weight": "4745409db6e3154593b37c3fae62c6f2c1961f7807ccbeea261e64704e8ee62e",
+      "gpt_neox.layers.23.attention.dense.bias": "dde942a36d9da134c8cb5dadc78edb09a85e8be28826cd24bca9cccc1cba4840",
+      "gpt_neox.layers.23.attention.dense.weight": "d8d65bd0a9545cef837f5d95c741b28ba8f0dd287268893ca013b9353e53e602"
+    }
+  },
+  "per_tensor_match_step143000": {
+    "step8": 0,
+    "step16": 10,
+    "step32": 0,
+    "step143000": 10
+  },
+  "verdict": {
+    "step16_data_equals_step143000": true,
+    "step16_data_equals_step8": false,
+    "step16_data_equals_step32": false,
+    "step16_missing_metadata": true,
+    "header_byte_deficit": 32
+  }
+}

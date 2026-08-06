@@ -1,0 +1,241 @@
+{
+  "repo": "EleutherAI/pythia-1.4b-deduped",
+  "n_revisions_audited": 21,
+  "revisions": {
+    "step0": {
+      "step": 0,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "c0279e2ae0fc89560dee5c6c6990ef2271e916929a6ead850149abc4c51acacb"
+    },
+    "step1": {
+      "step": 1,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "4daf5d11029721b247ad4976611f48b0732d4e53c3dedd2a18cc220fcdeadedf"
+    },
+    "step2": {
+      "step": 2,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "dacdec8f4461ec20c6eb6760fd50da9826339a456ae962aa51717215635ad5e6"
+    },
+    "step4": {
+      "step": 4,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "793b0de964562a17db55ba043acbefffb024bd1a841be81b0fb3439a4c14b482"
+    },
+    "step8": {
+      "step": 8,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "416698acf3ac4b1e7e337d75f352007b83553253647205f0e949f6b11c878fd7"
+    },
+    "step16": {
+      "step": 16,
+      "header_bytes": 34264,
+      "n_tensors": 292,
+      "metadata": null,
+      "file_size": 2829329888,
+      "file_sha256": "bb1c73861561a24dff802c978eeb5ea2db8b5e78ddc5d542f2c65be1a8e84955"
+    },
+    "step32": {
+      "step": 32,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "c380529600a9c7e3cc7549042585d23de5280054534859bed15d6d33f3cf9eb3"
+    },
+    "step64": {
+      "step": 64,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "b760f643a072bba59190759a578120bdc2c0390c5ca84ae05ed37dbc8eabb127"
+    },
+    "step128": {
+      "step": 128,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "dad8bb567ffc397e206fea85354ebf8a11ab1be0e7db9a7d07b786ff1e15276f"
+    },
+    "step256": {
+      "step": 256,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "a257e1df5f962327b55e2bfa6374bb9851983c79ee4e67e29d7c2ed32f9cfea8"
+    },
+    "step512": {
+      "step": 512,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "5a437919fe0d93015329e1519ff1aa0f9b31e274577ac5dff1dc0c439a46b433"
+    },
+    "step1000": {
+      "step": 1000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "3125249e07e46223b7437a65db1b8e9a9bd04bdc8178f3246ba893017c135ac1"
+    },
+    "step2000": {
+      "step": 2000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "8c733d3d6488fb4c6fefa7e2d703a83bb27c72683b48a976513ffd6d3beb1e8a"
+    },
+    "step4000": {
+      "step": 4000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "189cd3ab431e94de95dbea82940028ce58913f4580a8b2cbe2ba9972af3f8f1d"
+    },
+    "step8000": {
+      "step": 8000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "874f7b52f2c5f9c3deaade40813a329a4f7dc2515c3ce937dd2f3d22cdded265"
+    },
+    "step16000": {
+      "step": 16000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "67dd077802c1008f6716458eb221bf047e3e896fd2d15f8cd1d61f47efdedf00"
+    },
+    "step32000": {
+      "step": 32000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "5c04f04d9aa76cff26d5cf28e862cf33c8050a895b053e35586eda35242b4ae7"
+    },
+    "step64000": {
+      "step": 64000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "e3de0c8119c9e8f1c77d7513e072f866857e134f56817f45cc7e9661e4a70f26"
+    },
+    "step96000": {
+      "step": 96000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "b2803256545730fd77a10d7f042938f3e0dcf730ba1a401f9bffbc502484e40b"
+    },
+    "step128000": {
+      "step": 128000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "669e453ca57eac1b03868a7894332c6612da028fc2053aeffc2cce161d69b604"
+    },
+    "step143000": {
+      "step": 143000,
+      "header_bytes": 34296,
+      "n_tensors": 292,
+      "metadata": {
+        "format": "pt"
+      },
+      "file_size": 2829329920,
+      "file_sha256": "d2a47fd49b3a49b86869aaec14f5ab08c7d859d138c9d1366e01e8683a70f44f"
+    }
+  },
+  "comparable_group": [
+    "step0",
+    "step1",
+    "step2",
+    "step4",
+    "step8",
+    "step32",
+    "step64",
+    "step128",
+    "step256",
+    "step512",
+    "step1000",
+    "step2000",
+    "step4000",
+    "step8000",
+    "step16000",
+    "step32000",
+    "step64000",
+    "step96000",
+    "step128000",
+    "step143000"
+  ],
+  "odd_revisions": [
+    "step16"
+  ],
+  "n_duplicate_digests_in_group": 0,
+  "all_distinct_in_group": true
+}

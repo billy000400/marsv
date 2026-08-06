@@ -89,10 +89,26 @@ carrier sentences agree on each pair's width at step 32 at $\bar r = 0.830$, so 
 reached 0.935.
 
 **Data-integrity finding.** The artefact Hugging Face serves as revision **`step16`** of
-`EleutherAI/pythia-1.4b-deduped` is **not a step-16 model**: held-out loss 2.320 nats against 9.889
-at step 8 and 8.824 at step 32; its 9,000 measured $d(t)$ values are bit-identical to
-`step143000`'s; its `model.safetensors` is 32 bytes smaller than all 19 other revisions queried. It
-is excluded from every trajectory here.
+`EleutherAI/pythia-1.4b-deduped` is **not a step-16 model — it is `step143000`**. Held-out loss is
+2.320 nats against 9.889 at step 8 and 8.824 at step 32; its 9,000 measured $d(t)$ values are
+bit-identical to `step143000`'s; and streaming the 2.63 GiB tensor payload from the Hub gives the
+identical SHA-256 (`fbd54ccec4e0f5ee…`), with all 10 individually hashed tensors matching
+`step143000` byte for byte and none matching `step8` or `step32`. Only the packaging differs: its
+header omits the `__metadata__` field, making it 32 bytes shorter. Auditing all 21 revisions used
+here, the other 20 share one byte-identical header layout and have 20 distinct payload digests, so
+this is the only affected revision. It is excluded from every trajectory here, which is also why the
+ordering bracket cannot be narrowed below step 8 → 32: no genuine step-16 weights are published.
+
+**Robustness to the width definition.** Every number here uses $w = t(0.9) - t(0.1)$, whose levels
+are a convention. Recomputing the whole scan with $w_a = t(1-a) - t(a)$ for
+$a \in \lbrace 0.10, 0.15, 0.20, 0.25, 0.30\rbrace$ (straight-line reference $1-2a$; curve validity
+held fixed at the original rules so the same curves enter every trajectory) leaves the ordering
+bracket at **step 8 → 32 for all five**, with $\rho_{32}$ between $-0.428$ and $-0.385$ and
+$\rho(J, \Delta w)$ over step 8 → 32 between $-0.466$ and $-0.452$. The shape bracket moves one
+checkpoint earlier (step 512 → 1000) for $a \ge 0.20$, which weight only the steep middle of the
+curve, so the separation is 31× rather than 62× there. Over step 512 → 1000, $\rho(J, \Delta w)$ is
+$+0.035$, $+0.142$, $+0.229$, $+0.275$, $+0.312$ — never negative, so the largest sharpening event is
+divergence-blind under every definition.
 
 **Quality controls.** All 3,600 curves across the 20-checkpoint scan passed the strict validity
 criteria (valid-curve rate 1.000 at every checkpoint). Endpoint patching reproduces the unpatched
@@ -206,9 +222,27 @@ with anything later.
 The scan's data-integrity finding needs its own evidence, since it would silently corrupt any
 early-training analysis of this model; Figure 9 is that evidence.
 
-![Held-out loss against training step with step16 marked as an excluded outlier](plots/checkpoint_qc.png)
+![Three panels: loss trajectory outlier, byte-level tensor match, and header audit of all revisions](plots/checkpoint_qc.png)
 
-**Figure 9.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
-y: held-out next-token loss (nats) on the frozen 256-row sample. Connected circles are the 19
-checkpoints kept; the large cross is revision `step16`, whose curves are bit-identical to
-`step143000`'s.
+**Figure 9.** Revision `step16` ships the final model's weights, and it is the only revision that
+does. **A** x: training step (symmetric-log); y: held-out next-token loss (nats) on the frozen
+256-row sample; connected circles are the 20 checkpoints kept, the large cross is `step16`. **B**
+x: the revision compared against `step143000`; y: how many of 10 sampled tensors are byte-identical
+to it (embeddings, unembedding, final layer norm, and the attention output weight and bias of blocks
+0, 11 and 23); the label above each bar says whether the whole 2.63 GiB payload digest matches.
+**C** x: training step (symmetric-log); y: safetensors JSON header length in bytes for each of the
+21 revisions; circles have a `__metadata__` field, the cross does not.
+
+Finally, the whole timing claim rests on one definition of "width", so Figure 10 re-runs both onset
+rules on five of them.
+
+![Three panels: correlation trajectories, sharpening curves, and onset brackets for five width definitions](plots/threshold_robustness.png)
+
+**Figure 10.** The separation survives every width definition. Series in **A** and **B** are the five
+level pairs defining $w_a$: 10%/90% (solid circles), 15%/85% (dashed squares), 20%/80% (dotted
+up-triangles), 25%/75% (dash-dot diamonds), 30%/70% (long-dash down-triangles). **A** x: training step
+(symmetric-log); y: Spearman $\rho(J, w_a)$; hatched stripe = the step 8 → 32 bracket. **B** x:
+training step (symmetric-log); y: median $w_a$ divided by its own straight-line reference $1-2a$, so
+all five share one scale and 1.0 (dashed line) is the no-plateau value. **C** x: training step (log);
+y: the five definitions, each row showing the divergence-ordering bracket (left bar) and the
+plateau-shape bracket (right bar), labelled with the ratio between the two closing checkpoints.
