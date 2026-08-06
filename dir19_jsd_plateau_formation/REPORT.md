@@ -35,7 +35,17 @@ the surprising order:
 
 So the ordering is not a by-product of sharpening: it is laid down first, in a regime where the
 quantity it orders is barely varying, and later training sharpens nearly every pair together while
-largely preserving that early ranking. Because the step-32 ordering sits on such a tiny spread, we
+keeping corpus divergence pointing the same way throughout.
+
+A third measurement says how much of the *final* answer the model holds at step 32, and the answer
+is: only the divergence-aligned part of it. The per-pair ranking of widths at step 32 agrees with the
+final model's ranking at just $\pi = 0.161$ — inside the chance envelope — and once corpus divergence
+is partialled out, the agreement is nothing at all ($-0.082$). The pair-specific detail of the final
+ranking arrives between step 64 and step 128, a third clock sitting between the other two. This is
+not a measurement-noise artefact: the three carrier sentences agree on each pair's width at step 32
+at $\bar r = 0.83$, so $\pi$ could have reached 0.94 had the rankings matched.
+
+Because the step-32 ordering sits on such a tiny spread, we
 also check it against chance directly: under 20,000 relabellings it gives $p = 0.0007$, and
 $p = 0.0072$ after paying for having examined all 19 checkpoints. On the 1,000-pair bank, where
 permuting the 123 endpoint labels prices the token reuse into the null, the same bracket holds
@@ -57,7 +67,7 @@ checkpoint's. Anyone using Pythia's early checkpoints should check this.
 **Model.** `EleutherAI/pythia-1.4b-deduped` (1.4B parameters, GPT-NeoX architecture, 24 blocks,
 hidden size 2048), in `float32`. We use 20 released revisions: steps 0, 1, 2, 4, 8, 32, 64, 128,
 256, 512, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 96000, 128000, 143000. Revision `step16` was
-assayed and then **excluded**; the evidence is in Result 8. The tokenizer for each revision is loaded
+assayed and then **excluded**; the evidence is in Result 9. The tokenizer for each revision is loaded
 from that same revision.
 
 **Hook point.** The final token position of the residual stream immediately after **block 0**. This
@@ -196,6 +206,46 @@ A negative $\rho^{\Delta}$ says that in *that interval* the high-divergence pair
 the low-divergence ones. A $\rho^{\Delta}$ near zero says the interval's sharpening was blind to
 corpus statistics, whatever the cross-sectional correlation looks like. Result 3 is built on this,
 and it is what makes the timing claim more than a restatement of Result 1.
+
+**Ranking persistence $\pi(s)$.** Knowing that corpus divergence ranks the pairs at step 32 still
+leaves open whether that ranking is the one the trained model ends up with. It could be a
+divergence-shaped ordering the model later discards and re-derives. So we score the per-pair width
+ranking at checkpoint $s$ against the final model's ranking directly:
+
+```math
+\pi(s) \;=\; \mathrm{Spearman}\bigl(w_s,\; w_{143000}\bigr)
+```
+
+$\pi = 1$ means the model already ranks the 60 pairs exactly as it finally will; $\pi = 0$ means the
+current ranking tells you nothing about the final one. Because $J$ correlates with both ends, some
+agreement is guaranteed by the ordering itself, so we also report the part that is *not* explained by
+corpus divergence — the partial Spearman, computed by ranking $w_s$, $w_{143000}$ and $J$, regressing
+the first two on $\mathrm{rank}(J)$, and correlating the residuals:
+
+```math
+\pi^{\perp}(s) \;=\; \mathrm{Spearman}\bigl(w_s,\; w_{143000} \;\big|\; J\bigr)
+```
+
+$\pi^{\perp}$ asks whether the early widths carry pair-specific information about the final ranking
+beyond what $J$ already supplies. Result 8 consumes both, under the same paired bootstrap and the same
+single-permutation-per-trajectory null defined below (relabelling the 60 pairs of $w_s$ against
+$w_{143000}$).
+
+**Reliability of $w$, and the ceiling it puts on $\pi$.** A near-zero $\pi$ early in training has a
+boring explanation: at step 32 the entire spread of $w$ is 0.006, so $w$ might simply be too noisy
+there to correlate with anything. The three carrier sentences are three independent measurements of
+the same pair, so their agreement measures that noise. With $\bar r$ the mean pairwise Spearman
+between per-sentence widths, the Spearman–Brown formula gives the reliability of the 3-sentence
+median we actually use:
+
+```math
+\mathrm{rel}(s) \;=\; \frac{3\,\bar r_s}{1 + 2\,\bar r_s}, \qquad
+\pi_{\max}(s) \;=\; \sqrt{\mathrm{rel}(s)\cdot \mathrm{rel}(143000)}
+```
+
+$\pi_{\max}$ is the largest $\pi$ attainable even if the underlying rankings were identical. Result 8
+reports it next to the observed $\pi$, so a low value can be read as a real disagreement rather than
+as measurement noise.
 
 **Model output divergence.** As a co-developing check, the base-2 JSD between the model's own
 next-token distributions at the two endpoints, $\mathrm{JSD}(\mathrm{softmax}(z_A),
@@ -337,6 +387,8 @@ $J$, spanning 0.0057 in total. A rank statistic is the right tool for exactly th
 honest reading is that the ordering is real and reliable while the thing being ordered is, at step 32,
 a set of near-identical curves. What Result 3 adds is that this tiny early ordering is not a
 coincidence of the ranking: the *change* in width during that interval is itself divergence-ordered.
+Result 8 adds the complementary limit — the step-32 ranking is not yet the final ranking in detail,
+only in its divergence-aligned part.
 
 ### Result 2 — Global plateau shape appears between step 1000 and step 2000, ~60× later
 
@@ -538,15 +590,72 @@ $p < 0.001$. The bracket that Result 6 established with a clustered bootstrap th
 second, independent form of inference that makes no distributional assumption at all — which matters
 because $-0.149$ was the weakest number in this report.
 
-### Result 8 — The released `step16` revision of Pythia-1.4B-deduped is not a step-16 model
+### Result 8 — At step 32 the model holds only the divergence-aligned part of the final ranking
+
+Results 1 and 7 establish that corpus divergence orders the pairs at step 32. They do not establish
+that this is the *same* ordering the trained model ends up with, and a reader should not assume it:
+the step-32 widths span 0.006, and an ordering that fine could be discarded and re-derived later
+without leaving a trace in $\rho_s$. Figure 8 tests it directly, by scoring every checkpoint's
+per-pair ranking against the final model's.
+
+![Two panels: persistence of the width ranking against training step, and the checkpoint-by-checkpoint agreement matrix](plots/ranking_persistence.png)
+
+**Figure 8.** The width ranking locks in between step 64 and step 128 — after the ordering, before
+the shape. **A** x: training step (symmetric-log). y: rank agreement with the final checkpoint's
+ranking of the 60 pairs. Solid circles are $\pi(s)$, dashed squares are the partial version
+$\pi^{\perp}(s)$ with corpus divergence $J$ removed, both with pointwise 95% bootstrap bars; the
+hatched band between dotted lines is the pointwise 95% envelope of $|\pi|$ under 20,000 pair
+relabellings; the dash-dot gray line is the attenuation ceiling $\pi_{\max}$ set by the reliability
+of $w$. The left vertical stripe (`\\` hatch) is the step 8 → 32 divergence-ordering bracket, the
+right one (`xx` hatch) the step 64 → 128 ranking bracket. **B** x and y: the 20 checkpoints in
+training order (index spacing, not to scale); colour: Spearman $\rho$ between the per-pair widths at
+those two checkpoints, on the `cividis` scale at right. The dashed white lines mark step 128.
+
+Persistence is flat and inside the chance envelope for every checkpoint through step 64:
+$\pi = +0.109$ $[-0.169, +0.373]$ at step 0, $+0.121$ at step 8, $+0.161$ $[-0.089, +0.405]$ at step
+32 ($p = 0.21$), $+0.207$ at step 64 ($p = 0.11$). It then jumps to $+0.437$ $[+0.202, +0.623]$ at
+step 128 — the first checkpoint outside the envelope, $p = 0.0007$ and $p^{\mathrm{fw}} = 0.0053$
+across all 19 checkpoints — and climbs steadily after that: $0.532$ at 256, $0.696$ at 512, $0.788$
+at 1000, and above $0.85$ from step 4000 on.
+
+The partial version is what makes this a statement about the *ordering* rather than about widths in
+general. At step 32, $\pi^{\perp} = -0.082$ $[-0.317, +0.177]$, $p = 0.53$: once corpus divergence is
+removed, the step-32 ranking and the final ranking have nothing in common. The observed $\pi = 0.161$
+is close to the $(-0.428)\times(-0.525) = 0.225$ that the two divergence correlations alone imply. So
+the model at step 32 holds the divergence-aligned component of the final ordering and no more.
+Pair-specific detail beyond $J$ first clears the family-wise bar at step 256
+($\pi^{\perp} = +0.380$, $p^{\mathrm{fw}} = 0.0275$; at step 128 it is $+0.238$ with
+$p^{\mathrm{fw}} = 0.39$).
+
+The obvious objection is attenuation — that $w$ at step 32 is too noisy to agree with anything — and
+it does not hold. Across three unrelated carrier sentences, per-pair widths agree at
+$\bar r = 0.830$ at step 32, giving a reliability of 0.936 and a ceiling of $\pi_{\max} = 0.935$.
+Width at step 32 is a reliable measurement of a stable pair property, it correlates with corpus
+divergence at $-0.428$, and it still shares only 0.161 of its ranking with the final model. The same
+holds at step 0, where reliability is already 0.872: even the untrained network ranks the pairs
+consistently across sentences, and that ranking is not the final one.
+
+Figure 8B shows the same thing as structure rather than as a trajectory. Checkpoints from step 0
+through step 64 form a block that agrees with itself ($\rho(w_0, w_{32}) = 0.435$) and disagrees with
+everything later; from step 128 on, every checkpoint agrees with every later one, with the agreement
+rising smoothly towards the diagonal. Step 128 is where the model stops rearranging which pairs are
+sharp relative to each other.
+
+This adds a third clock, and it tightens rather than weakens the report's main claim. The three
+events are ordered: divergence starts selecting pairs (step 8 → 32), the pair ranking becomes the
+final one (step 64 → 128), and only much later do the transitions actually become plateaus
+(step 1000 → 2000). Corpus divergence is not merely present before the shape — it is the *first*
+component of the final ordering to appear, ahead of the pair-specific detail that fills in around it.
+
+### Result 9 — The released `step16` revision of Pythia-1.4B-deduped is not a step-16 model
 
 The scan surfaced a data-integrity problem that anyone studying Pythia's early checkpoints should
 know about. We report it because it would silently corrupt exactly the kind of early-training
-analysis this report performs; Figure 8 shows how it stands out.
+analysis this report performs; Figure 9 shows how it stands out.
 
 ![Held-out loss against training step with step16 marked as an excluded outlier](plots/checkpoint_qc.png)
 
-**Figure 8.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
+**Figure 9.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
 y: held-out next-token loss in nats on the frozen 256-row sample. The connected circles are the 19
 checkpoints we keep; the large cross is revision `step16`.
 
@@ -559,16 +668,18 @@ bytes where all 19 other revisions we queried are 2,829,329,920. The artefact se
 is the final model. We excluded it from every trajectory in this report; its assay output is retained
 in `results/assay_step16.json` and the checks in `results/ckpt_qc.json`.
 
-### Summary of the two onsets
+### Summary of the onsets
 
 The table below collects the timing verdicts. Each row is an event, the bracket the prespecified rule
-returned, the statistic that moved, and what the *other* phenomenon was doing at the same moment —
-which is the comparison the whole report turns on.
+returned, the statistic that moved, and what the *other* phenomena were doing at the same moment —
+which is the comparison the whole report turns on. Read down the first column: the three onsets are
+separated, and they run in the order divergence-selection → pair ranking → plateau shape.
 
-| Event | Onset bracket | Statistic at onset | State of the other phenomenon |
+| Event | Onset bracket | Statistic at onset | State of the other phenomena |
 |---|---|---|---|
-| Divergence-selective ordering | after step 8, by step 32 | $\rho_{32} = -0.428$ $[-0.753, -0.104]$, permutation $p^{\mathrm{fw}} = 0.0072$; interval $\rho^{\Delta}_{8\to32} = -0.466$ $[-0.663, -0.223]$, $p^{\mathrm{fw}} = 0.0035$ | no sharpening: median $w = 0.827$ vs 0.831 untrained, IQR 0.008, $E = 0.209$ above the straight line |
-| Global plateau shape | after step 1000, by step 2000 | median $w = 0.680$ $[\text{band} \le 0.732]$, $E = 0.117$ $[\text{band} \le 0.147]$ | ordering already 2,000 steps old and near its final value |
+| Divergence-selective ordering | after step 8, by step 32 | $\rho_{32} = -0.428$ $[-0.753, -0.104]$, permutation $p^{\mathrm{fw}} = 0.0072$; interval $\rho^{\Delta}_{8\to32} = -0.466$ $[-0.663, -0.223]$, $p^{\mathrm{fw}} = 0.0035$ | no sharpening: median $w = 0.827$ vs 0.831 untrained, IQR 0.008, $E = 0.209$ above the straight line; ranking not yet final ($\pi = 0.161$) |
+| Pair ranking becomes final | after step 64, by step 128 | $\pi = +0.437$ $[+0.202, +0.623]$, $p^{\mathrm{fw}} = 0.0053$, against a ceiling of 0.95 | still no sharpening: median $w = 0.837$, $E = 0.222$, both above the straight-line reference |
+| Global plateau shape | after step 1000, by step 2000 | median $w = 0.680$ $[\text{band} \le 0.732]$, $E = 0.117$ $[\text{band} \le 0.147]$ | ordering already 2,000 steps old and near its final value; ranking already at $\pi = 0.82$ |
 | Movement concentration | with the shape (step 1000–2000) | $H = 0.824$, window mass 0.583 at step 2000 | uniform ($H = 1.000$, mass 0.200) at step 32 when ordering appeared |
 | Late widening | step 64000 → 143000 | 60-pair $+0.0121$ $[+0.0016, +0.0259]$; 1,000-pair $+0.0158$ $[+0.0081, +0.0224]$ | ordering persists ($\rho = -0.525$) |
 
@@ -589,11 +700,18 @@ full output movement onto the boundary arrives with it, reaching 90% of movement
 path by the end of training. The interval that does the most sharpening (step 512 → 1000) sorts
 pairs by corpus divergence not at all.
 
+Between those two events sits a third. The per-pair ranking of widths only becomes the final ranking
+between step 64 and step 128; at step 32 it agrees with the final model at $\pi = 0.161$, and at
+nothing once corpus divergence is partialled out. So the order of assembly is: corpus divergence
+selects first, pair-specific detail fills in around it, and the geometry that makes any of it visible
+as a plateau comes last.
+
 Read together, these say the corpus-divergence correlate reported upstream is not a side effect of
-plateaus forming. It is present before there is anything to be a side effect of, and it survives a
-sharpening process that is itself largely indifferent to it. For interpretability practice, the
-useful consequence is that the *ranking* of which pairs will end up with sharp boundaries is
-available very early in training, while the *magnitude* of the boundary is not — so an intervention
+plateaus forming. It is present before there is anything to be a side effect of, it is the first part
+of the final ordering to appear, and it survives a sharpening process that is itself largely
+indifferent to it. For interpretability practice, the useful consequence is that the *ranking* of
+which pairs will end up with sharp boundaries is available very early in training — by step 128, a
+thousandth of the way through — while the *magnitude* of the boundary is not, so an intervention
 budget aimed at plateau structure can be targeted long before the structure exists.
 
 **What this does not show.** (i) One training run of one model. An onset bracket measured here is not
@@ -613,8 +731,9 @@ identical curves, and it should be described that way.
 **Reproducibility.** All code is in `experiments/`; `scan.py` drives the checkpoint scan (one
 checkpoint on disk at a time), `run_assay.py` measures one checkpoint, `analyze.py` produces
 `results/checkpoint_metrics.json`, `ckpt_qc.py` produces `results/ckpt_qc.json`, `large_late.py`
-produces `results/large_late.json`, `permtest.py` produces `results/permutation.json`, and
-`plot_formation.py` with `plot_perm.py` produce every figure above. The frozen
+produces `results/large_late.json`, `permtest.py` produces `results/permutation.json`,
+`persistence.py` produces `results/persistence.json`, and `plot_formation.py`, `plot_perm.py` and
+`plot_persistence.py` produce every figure above. The frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves

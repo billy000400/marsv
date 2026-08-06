@@ -6,18 +6,21 @@
 ## Headline
 
 Scanning 20 released checkpoints of **Pythia-1.4B-deduped** (steps 0 → 143000) with one frozen
-60-pair bank at the post-block-0 residual stream, the two phenomena are **separated by ~60× in
+60-pair bank at the post-block-0 residual stream, the phenomena are **separated by ~60× in
 training time, and in the counter-intuitive order**:
 
 - **Corpus next-token divergence starts ranking pairs by sharpness between step 8 and step 32**, when
   the model has *no plateaus at all* (median transition width 0.827 vs 0.831 untrained, IQR 0.008).
+- **The per-pair ranking becomes the final one between step 64 and step 128** — a third clock. At
+  step 32 the model holds only the divergence-aligned part of the final ordering.
 - **Plateau shape appears between step 1000 and step 2000**, and the single largest sharpening event
   (step 512 → 1000) is completely blind to corpus divergence.
 
 Notation: $J$ = corpus next-token Jensen–Shannon divergence of a token pair (bits, held-out split);
 $w$ = transition width, $t(d{=}0.9) - t(d{=}0.1)$, **smaller = sharper**; $E$ = edge drift, **smaller
 = flatter ends**; $\rho$ = Spearman rank correlation, **negative = higher divergence gives sharper
-boundaries**. A no-plateau straight line $d(t)=t$ gives $w = 0.8$, $E = 0.184$.
+boundaries**; $\pi$ = rank agreement of a checkpoint's per-pair widths with the final checkpoint's.
+A no-plateau straight line $d(t)=t$ gives $w = 0.8$, $E = 0.184$.
 
 ## Metrics — current best
 
@@ -25,10 +28,11 @@ The scan's primary output is the pair of onset brackets below. Each row names th
 the prespecified rule returned, the statistic at onset, and what the other phenomenon was doing at
 that moment — the last column is the contribution.
 
-| Event | Onset bracket | Statistic at onset | State of the other phenomenon |
+| Event | Onset bracket | Statistic at onset | State of the other phenomena |
 |---|---|---|---|
-| Divergence-selective ordering | after step 8, **by step 32** | $\rho_{32} = -0.428$, simultaneous band $[-0.753, -0.104]$, label-permutation $p^{\mathrm{fw}} = 0.0072$ | no sharpening: median $w = 0.827$ (untrained 0.831), IQR($w$) 0.008, $E = 0.209$ *above* the straight line |
-| Global plateau shape | after step 1000, **by step 2000** | median $w = 0.680$ (band $\le 0.732$), $E = 0.117$ (band $\le 0.147$) | ordering already established ~2,000 steps earlier, near its final value |
+| Divergence-selective ordering | after step 8, **by step 32** | $\rho_{32} = -0.428$, simultaneous band $[-0.753, -0.104]$, label-permutation $p^{\mathrm{fw}} = 0.0072$ | no sharpening: median $w = 0.827$ (untrained 0.831), IQR($w$) 0.008, $E = 0.209$ *above* the straight line; ranking not yet final ($\pi = 0.161$) |
+| Pair ranking becomes final | after step 64, **by step 128** | $\pi = +0.437$ $[+0.202, +0.623]$, $p^{\mathrm{fw}} = 0.0053$, ceiling 0.95 | still no sharpening: median $w = 0.837$, $E = 0.222$ |
+| Global plateau shape | after step 1000, **by step 2000** | median $w = 0.680$ (band $\le 0.732$), $E = 0.117$ (band $\le 0.147$) | ordering established ~2,000 steps earlier; ranking already final ($\pi = 0.82$) |
 | Output-movement concentration | with the shape (step 1000–2000) | $H = 0.824$, fixed-window mass 0.583 at step 2000 | uniform ($H = 1.000$, mass 0.200) at step 32 when ordering appeared |
 | Late widening (reversal) | step 64000 → 143000 | 60-pair median $\Delta w = +0.0121$ $[+0.0016, +0.0259]$ | ordering persists, $\rho = -0.525$ |
 
@@ -66,6 +70,23 @@ from the controlled one.
 Paired across those last two checkpoints, the 1,000-pair bank gives median $\Delta w = +0.0158$
 $[+0.0081, +0.0224]$ with 65.1% of pairs blunter (95% CI 57.6% to 71.8%) — the same direction as the
 60-pair set, with a tighter interval.
+
+**How much of the final answer is present at step 32?** Only its divergence-aligned part. Rank
+agreement between a checkpoint's per-pair widths and the final checkpoint's, $\pi$, stays inside the
+chance envelope through step 64 and jumps at step 128.
+
+| Persistence | step 0 | step 8 | step 32 | step 64 | step 128 | step 256 | step 1000 |
+|---|---|---|---|---|---|---|---|
+| $\pi$ (agreement with final ranking) | $+0.109$ | $+0.121$ | $+0.161$ | $+0.207$ | $\mathbf{+0.437}$ | $+0.532$ | $+0.788$ |
+| permutation $p$ / $p^{\mathrm{fw}}$ | 0.40 / 0.97 | 0.35 / 0.95 | 0.21 / 0.80 | 0.11 / 0.55 | **0.0007 / 0.0053** | <0.0001 / 0.0001 | <0.0001 / <0.0001 |
+| $\pi^{\perp}$, corpus divergence removed | $+0.094$ | $+0.105$ | $-0.082$ | $-0.023$ | $+0.238$ | $+0.380$ | $+0.698$ |
+| reliability ceiling $\pi_{\max}$ | 0.902 | 0.898 | 0.935 | 0.955 | 0.953 | 0.941 | 0.951 |
+
+At step 32 the ranking shares nothing with the final ranking once $J$ is partialled out
+($\pi^{\perp} = -0.082$, $p = 0.53$), and the observed $\pi = 0.161$ is what the two divergence
+correlations alone imply ($(-0.428)\times(-0.525) = 0.225$). This is not measurement noise: the three
+carrier sentences agree on each pair's width at step 32 at $\bar r = 0.830$, so $\pi$ could have
+reached 0.935.
 
 **Data-integrity finding.** The artefact Hugging Face serves as revision **`step16`** of
 `EleutherAI/pythia-1.4b-deduped` is **not a step-16 model**: held-out loss 2.320 nats against 9.889
@@ -166,12 +187,28 @@ $|\rho| = 0.09$ — half again the 0.062 that 1,000 independent pairs would give
 token reuse into the null and still leaves step 32 significant. That matters because $-0.149$ was the
 weakest number in this report.
 
+A correlation with $J$ at step 32 does not mean the model already ranks the pairs the way it finally
+will, so Figure 8 scores every checkpoint's ranking against the final one.
+
+![Two panels: persistence of the width ranking against training step, and the checkpoint-by-checkpoint agreement matrix](plots/ranking_persistence.png)
+
+**Figure 8.** The ranking locks in between step 64 and step 128 — after the divergence ordering,
+before the shape. **A** x: training step (symmetric-log); y: rank agreement with the final ranking.
+Solid circles = $\pi(s)$, dashed squares = the partial $\pi^{\perp}(s)$ with $J$ removed, both with
+95% bootstrap bars; hatched band between dotted lines = pointwise 95% envelope of $|\pi|$ under
+20,000 pair relabellings; dash-dot gray = the attenuation ceiling $\pi_{\max}$ from the reliability of
+$w$. Left vertical stripe (`\\`) = the step 8 → 32 ordering bracket, right stripe (`xx`) = the step
+64 → 128 ranking bracket. **B** x and y: the 20 checkpoints in training order (index spacing, not to
+scale); colour (`cividis`): Spearman $\rho$ between per-pair widths at those two checkpoints. Dashed
+white lines mark step 128; checkpoints up to step 64 form a block that agrees with itself and not
+with anything later.
+
 The scan's data-integrity finding needs its own evidence, since it would silently corrupt any
-early-training analysis of this model; Figure 8 is that evidence.
+early-training analysis of this model; Figure 9 is that evidence.
 
 ![Held-out loss against training step with step16 marked as an excluded outlier](plots/checkpoint_qc.png)
 
-**Figure 8.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
+**Figure 9.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
 y: held-out next-token loss (nats) on the frozen 256-row sample. Connected circles are the 19
 checkpoints kept; the large cross is revision `step16`, whose curves are bit-identical to
 `step143000`'s.

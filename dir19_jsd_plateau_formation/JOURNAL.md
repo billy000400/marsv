@@ -169,3 +169,67 @@ any feedback dropped later.
 
 On track? yes — S1–S6 complete including the last prespecified S5 inference (~100% of plan), no
 blocker; the direction's own resolution limit, not budget, bounds any further tightening.
+
+---
+
+## Iteration 3 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** The plan's S1–S6 and every prespecified validation were already complete, so I looked
+for the strongest question the deliverables left open rather than for a plan checkbox. It was this:
+the report showed corpus divergence ranks the pairs by step 32, but never checked whether that
+step-32 ranking is the ranking the trained model ends up with. Wrote `experiments/persistence.py`
+(CPU only, reads the saved per-pair trajectories — no GPU, no re-assay) computing
+π(s) = Spearman(w_s, w_final), its partial version with J removed, the 20×20 checkpoint-agreement
+matrix, a paired bootstrap, and a 20,000-draw label-permutation null; plus `plot_persistence.py`.
+
+**What I learned.**
+- There are **three** clocks, not two. The per-pair ranking only becomes the final ranking between
+  step 64 and step 128 (π = 0.207 → 0.437, p_fw = 0.0053), which sits between the divergence-ordering
+  onset (8 → 32) and the shape onset (1000 → 2000). I did not expect a third bracket to be this clean.
+- The partial correlation is what makes the result interpretable, and it is the number I would keep
+  if I could keep only one: π⊥ = −0.082 at step 32. Everything the step-32 ranking shares with the
+  final ranking is the divergence-aligned component; there is no pair-specific agreement at all yet.
+  That *tightens* the report's claim rather than denting it — corpus divergence is not merely present
+  before the plateau shape, it is the first component of the final ordering to appear.
+- Running the attenuation control before writing anything was the right call. "π is low because w is
+  measured on a 0.006-wide spread" is the obvious objection and it would have been fatal if true. The
+  three carrier sentences agree at r̄ = 0.830 at step 32 (reliability 0.936, ceiling π_max = 0.935),
+  so the disagreement with the final ranking is real. Note the reverse reading is also informative:
+  even at step 0 reliability is 0.872, so the untrained network ranks pairs consistently — that
+  ranking is simply not the final one.
+- One Summary sentence had to be walked back: "later training ... largely preserving that early
+  ranking". π = 0.161 does not support "largely preserving". What is preserved is the divergence
+  alignment, not the ranking. Fixed in both deliverables; no number moved.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Reference checkpoint for π is step 143000 (the final model). Rejected step 64000, which has the
+  narrowest median width: "final" is the model anyone would actually deploy or interpret, and the
+  late-widening result (Result 5) means the two are not interchangeable. The agreement matrix in
+  Figure 8B shows the whole picture either way, so the choice only sets which column is read as 1.0.
+- The permutation null relabels the 60 pairs of w_s against w_final, one permutation reused across
+  the whole trajectory (same convention as `permtest.py`) so the family-wise statement respects
+  across-checkpoint dependence. The reference checkpoint correlates with itself by construction and
+  is excluded from the null summaries and from the family-wise maximum; including it would have
+  pinned the null envelope at 1.0 and made every p-value meaningless.
+- Reliability from the 3 carrier sentences, Spearman–Brown corrected to k = 3. Rejected a split-half
+  over interpolation positions (the 50 positions of one curve are not independent measurements of the
+  same quantity, so it would overstate reliability).
+- Placed the new result as Result 8, before the step16 data-integrity finding, rather than after
+  Result 3 where it belongs thematically. Reason: it uses Result 7's permutation machinery, and
+  inserting it earlier would have renumbered six results and six figures for no reader benefit.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iteration 2.
+
+**Next step.** Nothing in the plan is outstanding and both onset brackets are at the resolution limit
+of this released trajectory (no Pythia checkpoint exists between 8 and 32, 64 and 128, or 1000 and
+2000). The remaining questions all need a second training run or a second model size, which this
+PLAN puts out of scope. If the loop continues, the most useful in-scope work left is a robustness
+check of the third clock against the reference choice — recomputing π against step 64000 instead of
+step 143000 — which the agreement matrix already suggests will not move the bracket. Did not write
+`STOP`: the deliverables are complete, but a premature STOP would make the direction silently ignore
+any feedback dropped later, and that costs more than leaving the loop open.
+
+On track? yes — S1–S6 complete plus a new in-scope result (~100% of plan), no blocker; the released
+checkpoint spacing, not budget, bounds any further tightening.

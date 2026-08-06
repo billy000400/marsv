@@ -132,3 +132,54 @@ both files is now cited by number at least once.
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (8 embeds / 8 visible captions per
 file; 13 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 3: ranking persistence (is the step-32 ordering the FINAL ordering?)
+
+**Feedback check.** No `human_feedback*.md` / `*REVIEW*` file without `.addressed.md` exists in this
+direction. Proceeded with the plan.
+
+**What was missing.** The deliverables showed that corpus divergence $J$ ranks the pairs by step 32,
+and that the curves are still straight lines there. They never asked whether that step-32 ranking is
+the ranking the trained model ends up with — a divergence-shaped ordering could in principle be
+discarded and re-derived later without ever showing up in the cross-sectional $\rho_s$ trajectory.
+New code: `experiments/persistence.py` (CPU only, reads `results/per_pair_trajectories.npz`; 4,000
+paired bootstraps + 20,000 label permutations, the permutation null in closed form over centred rank
+vectors) and `experiments/plot_persistence.py`; new artefact `results/persistence.json`.
+
+**New results (nothing superseded; this is a new measurement).**
+- Ranking persistence π(s) = Spearman(w_s, w_final) is inside the chance envelope (|π| ≤ 0.253)
+  through step 64: +0.109 (step 0), +0.121 (step 8), +0.161 (step 32, p = 0.21), +0.207 (step 64,
+  p = 0.11). It jumps to **+0.437 [+0.202, +0.623] at step 128** (p = 0.0007, p_fw = 0.0053 over all
+  19 checkpoints), then 0.532 / 0.696 / 0.788 at steps 256 / 512 / 1000. **New onset bracket: the
+  per-pair ranking becomes final after step 64, by step 128** — a third clock between the ordering
+  onset (8 → 32) and the shape onset (1000 → 2000).
+- Partial persistence with J removed: π⊥ = **−0.082** at step 32 (p = 0.53) — once corpus divergence
+  is partialled out, the step-32 ranking and the final ranking have nothing in common. Observed
+  π = 0.161 is close to the (−0.428)×(−0.525) = 0.225 the two divergence correlations alone imply.
+  Pair-specific detail beyond J first clears the family-wise bar at step 256 (π⊥ = +0.380,
+  p_fw = 0.0275; step 128 is +0.238, p_fw = 0.39).
+- Attenuation control (rules out the boring explanation): per-pair widths agree across the three
+  carrier sentences at r̄ = 0.830 at step 32 → Spearman-Brown reliability 0.936 → ceiling
+  π_max = 0.935. So the low π is a real disagreement, not noise on a 0.006-wide spread. Reliability
+  is ≥ 0.865 at every checkpoint, including 0.872 at step 0.
+
+**One claim corrected (old → new).** The Summary said later training "sharpens nearly every pair
+together while **largely preserving that early ranking**". That is not supported: the step-32 ranking
+agrees with the final one at only π = 0.161. Both deliverables now say what is preserved is the
+divergence *alignment* (ρ stays negative throughout), while the pair-specific ranking is set later, at
+step 64 → 128. No numerical result changed.
+
+**Deliverable changes.** REPORT.md: two new Methods run-in paragraphs (ranking persistence π and π⊥;
+reliability of w and the ceiling it puts on π) with three new rendered equations; new **Result 8 —
+"At step 32 the model holds only the divergence-aligned part of the final ranking"**; the step16
+data-integrity result renumbered 8 → 9 (and its cross-reference in Data & Model); a new row in the
+onsets table, which is retitled from "the two onsets" to "the onsets"; Summary and Conclusion rewritten
+to carry three clocks instead of two. RESULTS.md: new persistence table (π, p/p_fw, π⊥, ceiling), new
+row in the onset table, headline bullet added. New figure `plots/ranking_persistence.png` embedded as
+**Figure 8** in both files (checkpoint-QC figure renumbered 8 → 9); figure count 8 → 9 in each. Panel
+A is a trajectory with the null envelope and the reliability ceiling, panel B the 20×20
+checkpoint-agreement matrix on `cividis`; green-free palette, every series also coded by
+linestyle/marker.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (9 embeds / 9 visible captions per
+file; 16 display equations in REPORT.md all render as `js-display-math`).
