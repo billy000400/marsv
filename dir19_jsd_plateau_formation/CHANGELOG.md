@@ -84,3 +84,51 @@ each file).
 Housekeeping: `results/INHERITED_HASHES.txt` now lists only the 22 artefacts frozen from dir18 (all
 re-verified byte-identical to upstream with `cmp`); the full 97-file inventory moved to
 `results/ALL_ARTIFACT_HASHES.txt`. No reported number changed.
+
+## 2026-08-06 — iteration 2: permutation inference (PLAN S5 "endpoint-label permutation")
+
+**Feedback check.** No `human_feedback*.md` / `*REVIEW*` file without `.addressed.md` exists in this
+direction. Proceeded with the plan.
+
+**What was missing.** Every interval in the deliverables was a bootstrap. PLAN's S5 also asks for an
+**endpoint-label permutation** on the 1,000-pair bank, and nothing in the direction implemented one.
+This iteration adds it, plus the matching label-permutation null on the 60-pair bank. New code:
+`experiments/permtest.py` (20,000 permutations, CPU only, reads saved curves) and
+`experiments/plot_perm.py`; new artefact `results/permutation.json`.
+
+**New results (nothing superseded; these are additional inference on existing statistics).**
+- 60-pair cross-sectional ρ: null |ρ| reaches 0.26 pointwise and **0.353 simultaneously** over the 19
+  kept checkpoints. Observed p = 0.67 / 0.67 / 0.67 / 0.60 / 0.65 at steps 0, 1, 2, 4, 8, then
+  **p = 0.0007 at step 32** with family-wise **p_fw = 0.0072**. Every later checkpoint p_fw ≤ 0.013.
+- 60-pair interval ρ(J, Δw): step 8 → 32 p = 0.0003, **p_fw = 0.0035** over all 18 intervals; step
+  512 → 1000 p = 0.78 (p_fw = 1.00). The dissociation survives multiplicity correction.
+- 1,000-pair endpoint-label (QAP) permutation over its 123 endpoint tokens: chance |ρ| reaches
+  **0.09** (vs ~0.062 for 1,000 independent pairs), which prices the token reuse into the null.
+  p = 0.87 (step 0), 0.64 (step 8), **0.0031 (step 32, p_fw = 0.0082)**, < 0.001 (steps 64000,
+  143000). The onset bracket therefore holds under a second, assumption-free form of inference —
+  ρ = −0.149 at step 32 was the weakest number in the report.
+- Verification recorded in code: the 123×123 held-out JSD matrix reproduces each pair's stored
+  `jsd_B` to 5.0e−7, and ρ computed from the matrix equals ρ from `jsd_B` to 6 decimals at all five
+  large-bank checkpoints.
+
+**One reading corrected (old → new).** The step 4000 → 8000 interval was described as
+"ρ(J, Δw) = +0.258 [+0.002, +0.483] — large sharpening, not divergence-selective", a bootstrap
+interval that just excludes zero. Its permutation p = 0.045 does **not** survive the 18-interval
+correction (p_fw = 0.55), so both deliverables now describe that interval as divergence-**blind**
+rather than as reversed selectivity. No other number changed.
+
+**Deliverable changes.** REPORT.md: two new Methods paragraphs (label-permutation null; endpoint-label
+permutation) with three new rendered equations; new **Result 7 — "Chance never produces this ordering,
+on either bank"**; the step16 data-integrity result renumbered 7 → 8; permutation p-values added to
+the Summary and to the two-onset table. RESULTS.md: permutation p / p_fw column added to the interval
+table, an endpoint-label permutation p row added to the 1,000-pair table, and p_fw added to the
+ordering-onset row. New figure `plots/permutation_null.png` embedded as **Figure 7** in both files
+(checkpoint-QC figure renumbered 7 → 8); figure count 7 → 8 in each. CVD-safe palette, no red/green,
+every series also coded by linestyle/marker.
+
+Also fixed a rule-12 gap that predated this iteration: Figures 4–8 (REPORT.md) and Figures 1–8
+(RESULTS.md) were embedded and captioned but never cited by number in the body prose. Every figure in
+both files is now cited by number at least once.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (8 embeds / 8 visible captions per
+file; 13 display equations in REPORT.md all render as `js-display-math`).

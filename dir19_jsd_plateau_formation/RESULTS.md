@@ -27,7 +27,7 @@ that moment — the last column is the contribution.
 
 | Event | Onset bracket | Statistic at onset | State of the other phenomenon |
 |---|---|---|---|
-| Divergence-selective ordering | after step 8, **by step 32** | $\rho_{32} = -0.428$, simultaneous band $[-0.753, -0.104]$ | no sharpening: median $w = 0.827$ (untrained 0.831), IQR($w$) 0.008, $E = 0.209$ *above* the straight line |
+| Divergence-selective ordering | after step 8, **by step 32** | $\rho_{32} = -0.428$, simultaneous band $[-0.753, -0.104]$, label-permutation $p^{\mathrm{fw}} = 0.0072$ | no sharpening: median $w = 0.827$ (untrained 0.831), IQR($w$) 0.008, $E = 0.209$ *above* the straight line |
 | Global plateau shape | after step 1000, **by step 2000** | median $w = 0.680$ (band $\le 0.732$), $E = 0.117$ (band $\le 0.147$) | ordering already established ~2,000 steps earlier, near its final value |
 | Output-movement concentration | with the shape (step 1000–2000) | $H = 0.824$, fixed-window mass 0.583 at step 2000 | uniform ($H = 1.000$, mass 0.200) at step 32 when ordering appeared |
 | Late widening (reversal) | step 64000 → 143000 | 60-pair median $\Delta w = +0.0121$ $[+0.0016, +0.0259]$ | ordering persists, $\rho = -0.525$ |
@@ -35,12 +35,17 @@ that moment — the last column is the contribution.
 The interval test separates *creating* the ordering from *inheriting* it, and it is what makes the
 timing claim more than a restatement of the cross-sectional correlation.
 
-| Interval | median $\Delta w$ (change in width) | $\rho(J, \Delta w)$ | reading |
-|---|---|---|---|
-| step 8 → 32 | $-0.0011$ | $-0.466$ $[-0.663, -0.223]$ | almost no sharpening, but strongly divergence-selective |
-| step 512 → 1000 | $-0.0618$ $[-0.0721, -0.0537]$ | $+0.035$ $[-0.241, +0.307]$ | the largest sharpening event, entirely divergence-blind |
-| step 4000 → 8000 | $-0.0328$ | $+0.258$ $[+0.002, +0.483]$ | large sharpening, not divergence-selective |
-| step 32000 → 64000 | $-0.0358$ | $-0.540$ $[-0.697, -0.332]$ | selectivity does reappear later |
+| Interval | median $\Delta w$ (change in width) | $\rho(J, \Delta w)$ | permutation $p$ / $p^{\mathrm{fw}}$ | reading |
+|---|---|---|---|---|
+| step 8 → 32 | $-0.0011$ | $-0.466$ $[-0.663, -0.223]$ | 0.0003 / 0.0035 | almost no sharpening, but strongly divergence-selective |
+| step 512 → 1000 | $-0.0618$ $[-0.0721, -0.0537]$ | $+0.035$ $[-0.241, +0.307]$ | 0.78 / 1.00 | the largest sharpening event, entirely divergence-blind |
+| step 4000 → 8000 | $-0.0328$ | $+0.258$ $[+0.002, +0.483]$ | 0.045 / 0.55 | large sharpening; does not survive the 18-interval correction |
+| step 32000 → 64000 | $-0.0358$ | $-0.540$ $[-0.697, -0.332]$ | <0.0001 / 0.0001 | selectivity does reappear later |
+
+$p^{\mathrm{fw}}$ is the family-wise permutation $p$-value, which pays for having examined all 18
+intervals. It changes one reading: the positive $\rho$ at step 4000 → 8000 has a bootstrap interval
+that just excludes zero but is not distinguishable from a random relabelling, so that interval is
+divergence-**blind** rather than reversed.
 
 Validation on the frozen **1,000-pair** bank (123 endpoint tokens, so uncertainty comes from a dyadic
 bootstrap over endpoints, not pairs) reproduces both the ordering and the late reversal.
@@ -48,6 +53,7 @@ bootstrap over endpoints, not pairs) reproduces both the ordering and the late r
 | 1,000-pair bank | step 0 | step 8 | step 32 | step 64000 | step 143000 |
 |---|---|---|---|---|---|
 | $\rho(J, w)$, endpoint-clustered 95% CI | $-0.008$ $[-0.117, +0.115]$ | $-0.021$ $[-0.132, +0.104]$ | $-0.149$ $[-0.286, -0.011]$ | $-0.563$ $[-0.668, -0.438]$ | $-0.486$ $[-0.617, -0.354]$ |
+| endpoint-label permutation $p$ | 0.87 | 0.64 | **0.0031** | <0.0001 | <0.0001 |
 | median $w$ | 0.831 | 0.830 | 0.828 | 0.537 | 0.555 |
 
 The onset bracket replicates: the interval containing zero closes and the interval excluding zero
@@ -75,7 +81,7 @@ decimals. No path had total output movement below the $10^{-8}$ bit floor.
 
 ## Figures
 
-To locate both onsets on one time axis, we plot the cross-sectional correlation with its
+To locate both onsets on one time axis, Figure 1 plots the cross-sectional correlation with its
 simultaneous 95% band next to the two global shape metrics.
 
 ![Three panels: correlation, width and edge drift against training step](plots/formation_overview.png)
@@ -88,7 +94,7 @@ band, dotted triangles are IQR($w$), dashed line is the straight-line reference 
 edge drift $E$ (dashed squares, with band) against its straight-line reference 0.184.
 
 A cross-sectional correlation cannot distinguish an ordering being created from one being carried
-forward, so we also correlate divergence with the width change produced inside each interval.
+forward, so Figure 2 also correlates divergence with the width change produced inside each interval.
 
 ![Three panels: width by divergence quintile, interval correlations, cumulative correlations](plots/interval_sharpening.png)
 
@@ -99,8 +105,8 @@ $\rho(J, \Delta w)$ for the interval ending at that step, pointwise 95% bars, da
 **C** y: $\rho$ of $J$ with the cumulative change since step 0 (solid circles) and with the model's
 own endpoint output divergence (dashed squares).
 
-Narrow $d(t)$ could be an artefact of the distance summary, so we check whether the model's full
-next-token distribution really stops moving away from the boundary.
+Narrow $d(t)$ could be an artefact of the distance summary, so Figure 3 checks whether the model's
+full next-token distribution really stops moving away from the boundary.
 
 ![Three panels: movement entropy, window mass, total movement and loss](plots/output_movement_formation.png)
 
@@ -111,7 +117,7 @@ window centred on the $d = 0.5$ crossing (dashed squares, with band); dashed lin
 uniform expectation. **C** left y (solid circles, log): median total movement $T$ in bits; right y
 (dotted triangles): held-out next-token loss in nats.
 
-The profile itself is the most direct picture of what "plateau" means for the full output.
+The profile itself, in Figure 4, is the most direct picture of what "plateau" means for the full output.
 
 ![Median movement profile against position relative to the d=0.5 crossing, at five checkpoints](plots/movement_profiles.png)
 
@@ -122,7 +128,7 @@ Series are checkpoints — step 0 (solid circles), 128 (dashed squares), 1000 (d
 step at the crossing carries 0.17 of all movement.
 
 A median over 60 pairs is easy to move by chance, so the late reversal was re-tested on the frozen
-1,000-pair bank with endpoint-clustered inference.
+1,000-pair bank with endpoint-clustered inference (Figure 5).
 
 ![Two panels: median width at two checkpoints for both banks, and the paired change with CIs](plots/large_bank_confirmation.png)
 
@@ -132,7 +138,7 @@ $\Delta w$ from step 64000 to 143000 with 95% intervals, positive = blunter at t
 vertical line at zero; y names each bank and its resampling unit.
 
 The onset itself rests on 60 pairs, so the two checkpoints defining the bracket were re-run on the
-1,000-pair bank as well.
+1,000-pair bank as well, which Figure 6 compares against the controlled bank.
 
 ![Correlation with 95% intervals at five checkpoints for both banks](plots/large_bank_onset.png)
 
@@ -141,12 +147,31 @@ measured on both banks; y: Spearman $\rho(J, w)$ with 95% intervals. Circles = 1
 (dyadic bootstrap over its 123 endpoint tokens); squares = 60-pair controlled set (bootstrap over
 pairs). Hatched stripe = the onset bracket; dashed line = zero.
 
+Bootstrap intervals measure wobble, not chance, and the step-32 ordering lives on a width spread of
+0.006 — so we also ask what a random relabelling of this design produces (Figure 7).
+
+![Three panels: observed correlations against permutation null envelopes for both banks](plots/permutation_null.png)
+
+**Figure 7.** The observed ordering lies outside the chance envelope; the divergence-blind intervals
+lie inside it. x in all panels: training step (symmetric-log). y in **A** and **C**: Spearman
+$\rho(J, w)$; y in **B**: $\rho(J, \Delta w)$, plotted at the interval's end step. Hatched band
+between dotted lines = pointwise 95% envelope of $|\rho|$ under 20,000 label permutations; solid
+circles = observed. **A** (60-pair bank) adds dashed lines at $\pm 0.353$, the *simultaneous* null
+envelope covering all 19 checkpoints. Hatched vertical stripe in A and C = the step 8 → 32 bracket;
+**C** (1,000-pair bank, endpoint-label null) is annotated with each checkpoint's two-sided $p$.
+
+Chance labellings of the 60-pair bank reach $|\rho| = 0.26$ pointwise and 0.35 simultaneously against
+the observed 0.428 at step 32. On the 1,000-pair bank, relabelling its 123 endpoint tokens reaches
+$|\rho| = 0.09$ — half again the 0.062 that 1,000 independent pairs would give — which prices the
+token reuse into the null and still leaves step 32 significant. That matters because $-0.149$ was the
+weakest number in this report.
+
 The scan's data-integrity finding needs its own evidence, since it would silently corrupt any
-early-training analysis of this model.
+early-training analysis of this model; Figure 8 is that evidence.
 
 ![Held-out loss against training step with step16 marked as an excluded outlier](plots/checkpoint_qc.png)
 
-**Figure 7.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
+**Figure 8.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
 y: held-out next-token loss (nats) on the frozen 256-row sample. Connected circles are the 19
 checkpoints kept; the large cross is revision `step16`, whose curves are bit-identical to
 `step143000`'s.

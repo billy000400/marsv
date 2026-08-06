@@ -35,7 +35,11 @@ the surprising order:
 
 So the ordering is not a by-product of sharpening: it is laid down first, in a regime where the
 quantity it orders is barely varying, and later training sharpens nearly every pair together while
-largely preserving that early ranking. We also confirm a **late reversal** — transitions get
+largely preserving that early ranking. Because the step-32 ordering sits on such a tiny spread, we
+also check it against chance directly: under 20,000 relabellings it gives $p = 0.0007$, and
+$p = 0.0072$ after paying for having examined all 19 checkpoints. On the 1,000-pair bank, where
+permuting the 123 endpoint labels prices the token reuse into the null, the same bracket holds
+($p = 0.64$ at step 8, $p = 0.0031$ at step 32). We also confirm a **late reversal** — transitions get
 *blunter* over the last third of training — on an independent 1,000-pair bank with inference that
 accounts for reuse of endpoint tokens (median $\Delta w = +0.0158$, 95% CI $[+0.0081, +0.0224]$).
 
@@ -53,7 +57,7 @@ checkpoint's. Anyone using Pythia's early checkpoints should check this.
 **Model.** `EleutherAI/pythia-1.4b-deduped` (1.4B parameters, GPT-NeoX architecture, 24 blocks,
 hidden size 2048), in `float32`. We use 20 released revisions: steps 0, 1, 2, 4, 8, 32, 64, 128,
 256, 512, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 96000, 128000, 143000. Revision `step16` was
-assayed and then **excluded**; the evidence is in Result 7. The tokenizer for each revision is loaded
+assayed and then **excluded**; the evidence is in Result 8. The tokenizer for each revision is loaded
 from that same revision.
 
 **Hook point.** The final token position of the residual stream immediately after **block 0**. This
@@ -240,6 +244,49 @@ a bootstrap over pairs would understate uncertainty. We resample the **123 endpo
 replacement and weight each pair by the product of its two endpoints' multiplicities (a dyadic
 bootstrap), then take weighted medians and weighted Spearman correlations. Results 5 and 6 use this.
 
+**Label-permutation null (chance reference).** Every interval above is a bootstrap: it asks how much
+the statistic would wobble if we redrew the pairs. That leaves the sceptic's question unanswered at
+the earliest checkpoints, where the entire ordered spread in width is 0.006 — how large a $|\rho|$
+does this design produce when corpus divergence carries *no* information about width at all? A
+permutation test answers exactly that, by destroying the link between divergence and width while
+keeping every measured curve intact. On the 60-pair bank the pairs are endpoint-disjoint, so the
+exact null relabels pairs: draw $\pi$ uniformly from the permutations of the 60 pairs and recompute
+
+```math
+\rho^{\pi}_s \;=\; \mathrm{Spearman}\bigl(J_{\pi(i)},\; w_{s,i}\bigr)
+```
+
+over $B = 20{,}000$ draws. The two-sided $p$-value counts how often chance beats the observation, with
+the usual $+1$ so it can never be exactly zero:
+
+```math
+p_s \;=\; \frac{1 + \bigl|\{\, b \,:\, |\rho^{\pi_b}_s| \ge |\rho_s| \,\}\bigr|}{1 + B}
+```
+
+The same $\pi$ is applied at *every* checkpoint, so the null trajectory keeps
+the across-checkpoint dependence of the real one, and the maximum of $|\rho^{\pi}_s|$ over checkpoints
+gives a family-wise $p$-value that already pays for having looked at 19 of them:
+
+```math
+p^{\mathrm{fw}}_s \;=\; \Pr\Bigl(\max_{s'}\bigl|\rho^{\pi}_{s'}\bigr| \;\ge\; |\rho_s|\Bigr)
+```
+
+The same permutations, applied to $\Delta w$, test the interval statistic across the 18 intervals.
+
+**Endpoint-label permutation for the 1,000-pair bank.** Permuting pairs there would be invalid,
+because its 1,000 pairs are built from only 123 endpoint tokens and pairs sharing a token are
+dependent. Instead we permute the **endpoint labels**: draw $\sigma$ over the 123 tokens and look each
+pair's divergence up in the frozen $123 \times 123$ held-out divergence matrix at the relabelled
+position, leaving its measured width, the pairing graph and the per-endpoint use counts untouched:
+
+```math
+\rho^{\sigma} \;=\; \mathrm{Spearman}\Bigl(J\bigl[\sigma(u_p),\, \sigma(v_p)\bigr],\; w_p\Bigr)
+```
+
+Only the correspondence between token identity and divergence is broken, so the null inherits the
+bank's clustering. This is the standard quadratic-assignment permutation for dyadic data. Result 7
+consumes both nulls.
+
 **Onset rules (fixed before reading the trajectories).** The *ordering onset* bracket opens after the
 last checkpoint whose simultaneous band contains zero and closes at the first of **two consecutive**
 checkpoints whose band lies entirely below zero. The *shape onset* bracket uses the same two-in-a-row
@@ -330,7 +377,8 @@ The dissociation appears at the other end. The single largest global sharpening 
 512 and step 1000 — median $\Delta w = -0.0618$ $[-0.0721, -0.0537]$, Wilcoxon $p = 1.9\times10^{-11}$,
 a change 56× larger than the step 8 → 32 interval produced — and in that interval corpus divergence
 predicts nothing: $\rho^{\Delta} = +0.035$ $[-0.241, +0.307]$. The same pattern holds for step
-4000 → 8000 ($\rho^{\Delta} = +0.258$, median $\Delta w = -0.033$) and step 16000 → 32000
+4000 → 8000 ($\rho^{\Delta} = +0.258$, median $\Delta w = -0.033$; not distinguishable from chance
+once all 18 intervals are accounted for, see Result 7) and step 16000 → 32000
 ($\rho^{\Delta} = +0.119$, median $\Delta w = -0.024$). Selectivity does reappear in some later
 intervals — step 256 → 512 ($-0.439$), step 1000 → 2000 ($-0.267$), step 32000 → 64000 ($-0.540$) —
 so the process is not confined to the first 32 steps, but the bulk sharpening events themselves are
@@ -375,7 +423,7 @@ orders of magnitude, from 0.0016 bits at step 0 to 0.135 bits at the end. The mo
 further and does it in a much smaller region. The held-out loss on the same axis falls monotonically
 from 11.010 to 2.245 nats and gives the training-progress context for every timing claim here.
 
-The shape of the profile itself is the most direct picture of the phenomenon.
+The shape of the profile itself, in Figure 4, is the most direct picture of the phenomenon.
 
 ![Median movement profile against position relative to the d=0.5 crossing, at five checkpoints](plots/movement_profiles.png)
 
@@ -391,7 +439,7 @@ carries 0.17 of the total movement, roughly 8× the uniform value.
 Median width does not decrease monotonically to the end: it bottoms out at 0.512 at step 64000 and
 rises to 0.517, 0.528 and 0.541 at steps 96000, 128000 and 143000. A median over 60 pairs is easy to
 move by chance, so this was flagged upstream as possibly noise. We re-test it on the frozen
-1,000-pair bank, with inference that accounts for the reuse of endpoint tokens.
+1,000-pair bank (Figure 5), with inference that accounts for the reuse of endpoint tokens.
 
 ![Two panels: median width at two checkpoints for both banks, and the paired change with CIs](plots/large_bank_confirmation.png)
 
@@ -418,7 +466,7 @@ something a single training run can answer.
 
 The onset in Result 1 rests on 60 pairs, so the plan required re-running the two checkpoints that
 *define* the bracket on the larger bank. We assayed all 1,000 pairs at step 8 and step 32 and applied
-the same endpoint-clustered bootstrap.
+the same endpoint-clustered bootstrap; Figure 6 puts both banks on one axis.
 
 ![Correlation with 95% intervals at five checkpoints for both banks](plots/large_bank_onset.png)
 
@@ -441,15 +489,64 @@ fills the crowded middle of the divergence range, so it is the harder test and i
 early signal. The bracket replicates; the *magnitude* of the step-32 ordering should be read from the
 controlled bank, with the large bank establishing that the timing is not an artefact of 60 pairs.
 
-### Result 7 — The released `step16` revision of Pythia-1.4B-deduped is not a step-16 model
+### Result 7 — Chance never produces this ordering, on either bank
+
+Every interval so far is a bootstrap, which measures wobble rather than chance. The claim that most
+needs a chance reference is the earliest one: at step 32 the ordering lives on a width spread of
+0.006, and a reader is entitled to ask whether rank structure that fine is simply what *any* labelling
+of 60 pairs would give. We therefore recomputed each statistic under 20,000 label permutations, and
+under the endpoint-label permutation for the clustered bank; Figure 7 shows both nulls.
+
+![Three panels: observed correlations against permutation null envelopes for both banks](plots/permutation_null.png)
+
+**Figure 7.** The observed ordering sits far outside what relabelling produces, and the two
+divergence-blind intervals sit inside it. x in all panels: training step (symmetric-log). y in **A**
+and **C**: Spearman $\rho$ between corpus divergence $J$ and transition width $w$; y in **B**:
+$\rho$ between $J$ and the within-interval width change $\Delta w$, plotted at the interval's end
+step. In every panel the hatched band bounded by dotted lines is the pointwise 95% envelope of
+$|\rho|$ under the null, and the solid-circle series is the observed value. **A** (60-pair bank) adds
+the dashed horizontal lines at $\pm 0.353$: the *simultaneous* null envelope covering all 19
+checkpoints at once. The vertical hatched stripe in A and C marks the step 8 → 32 onset bracket;
+**C** (1,000-pair bank, endpoint-label null) is annotated with each checkpoint's two-sided $p$.
+
+The onset survives the strictest form of the test. Through step 8 the observed correlation lies well
+inside the null envelope ($p = 0.67$, $0.67$, $0.67$, $0.60$, $0.65$ at steps 0, 1, 2, 4, 8); at step
+32 it is outside it, $p = 0.0007$, and the family-wise value that pays for all 19 checkpoints at once
+is $p^{\mathrm{fw}} = 0.0072$. Every later checkpoint has $p^{\mathrm{fw}} \le 0.013$. Chance
+labellings of 60 pairs reach $|\rho| = 0.26$ pointwise and $0.35$ simultaneously, against an observed
+$0.428$ — so the step-32 ordering is not what fine-grained noise looks like, even though the curves it
+orders are nearly identical.
+
+The interval statistic separates the two regimes just as sharply, and this is the test the
+dissociation rests on. Step 8 → 32 gives $\rho^{\Delta} = -0.466$ with $p = 0.0003$ and
+$p^{\mathrm{fw}} = 0.0035$ across all 18 intervals, while the largest sharpening event, step
+512 → 1000, gives $p = 0.78$ — indistinguishable from a random relabelling. The interval that moves
+width the most is, by this test, exactly as divergence-selective as chance.
+
+The permutation also corrects one reading of Result 3. The positive $\rho^{\Delta} = +0.258$ at step
+4000 → 8000 has a bootstrap interval that just excludes zero, but its permutation $p = 0.045$ does not
+survive the 18-interval correction ($p^{\mathrm{fw}} = 0.55$). That interval is best described as
+divergence-blind rather than as reversed selectivity; the four intervals that do survive correction
+are step 8 → 32, 256 → 512, 1000 → 2000 and 32000 → 64000, all negative.
+
+On the 1,000-pair bank the endpoint-label null does something the bootstrap could not: it prices the
+clustering directly. Because those 1,000 pairs come from only 123 tokens, relabelling produces
+$|\rho|$ up to 0.09 by chance — half again the 0.062 that 1,000 genuinely independent pairs would
+give. Measured against that inflated bar, step 0 ($p = 0.87$) and step 8 ($p = 0.64$) are null, step
+32 is not ($\rho = -0.149$, $p = 0.0031$, $p^{\mathrm{fw}} = 0.0082$), and both late checkpoints have
+$p < 0.001$. The bracket that Result 6 established with a clustered bootstrap therefore holds under a
+second, independent form of inference that makes no distributional assumption at all — which matters
+because $-0.149$ was the weakest number in this report.
+
+### Result 8 — The released `step16` revision of Pythia-1.4B-deduped is not a step-16 model
 
 The scan surfaced a data-integrity problem that anyone studying Pythia's early checkpoints should
 know about. We report it because it would silently corrupt exactly the kind of early-training
-analysis this report performs.
+analysis this report performs; Figure 8 shows how it stands out.
 
 ![Held-out loss against training step with step16 marked as an excluded outlier](plots/checkpoint_qc.png)
 
-**Figure 7.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
+**Figure 8.** One released revision breaks the loss trajectory. x: training step (symmetric-log);
 y: held-out next-token loss in nats on the frozen 256-row sample. The connected circles are the 19
 checkpoints we keep; the large cross is revision `step16`.
 
@@ -470,10 +567,14 @@ which is the comparison the whole report turns on.
 
 | Event | Onset bracket | Statistic at onset | State of the other phenomenon |
 |---|---|---|---|
-| Divergence-selective ordering | after step 8, by step 32 | $\rho_{32} = -0.428$ $[-0.753, -0.104]$; interval $\rho^{\Delta}_{8\to32} = -0.466$ $[-0.663, -0.223]$ | no sharpening: median $w = 0.827$ vs 0.831 untrained, IQR 0.008, $E = 0.209$ above the straight line |
+| Divergence-selective ordering | after step 8, by step 32 | $\rho_{32} = -0.428$ $[-0.753, -0.104]$, permutation $p^{\mathrm{fw}} = 0.0072$; interval $\rho^{\Delta}_{8\to32} = -0.466$ $[-0.663, -0.223]$, $p^{\mathrm{fw}} = 0.0035$ | no sharpening: median $w = 0.827$ vs 0.831 untrained, IQR 0.008, $E = 0.209$ above the straight line |
 | Global plateau shape | after step 1000, by step 2000 | median $w = 0.680$ $[\text{band} \le 0.732]$, $E = 0.117$ $[\text{band} \le 0.147]$ | ordering already 2,000 steps old and near its final value |
 | Movement concentration | with the shape (step 1000–2000) | $H = 0.824$, window mass 0.583 at step 2000 | uniform ($H = 1.000$, mass 0.200) at step 32 when ordering appeared |
 | Late widening | step 64000 → 143000 | 60-pair $+0.0121$ $[+0.0016, +0.0259]$; 1,000-pair $+0.0158$ $[+0.0081, +0.0224]$ | ordering persists ($\rho = -0.525$) |
+
+The same bracket on the 1,000-pair bank, under the endpoint-label null that prices in its token
+reuse: $p = 0.87$ at step 0, $p = 0.64$ at step 8, $p = 0.0031$ at step 32, $p < 0.001$ at both late
+checkpoints.
 
 ---
 
@@ -505,13 +606,15 @@ order is not causality. The model's own output divergence catches up to corpus d
 shape timescale, but we do not claim it mediates anything. (iv) The corpus divergence is an
 immediate-next-token, context-averaged quantity, and it is not measured along the interpolation path;
 it does not license the claim that each plateau corresponds to one continuation distribution.
-(v) The step-32 ordering, though statistically solid, sits on a width spread of 0.006 — a real rank
-effect on nearly identical curves, and it should be described that way.
+(v) The step-32 ordering, though it clears both a simultaneous bootstrap band and a family-wise
+permutation test on both banks, sits on a width spread of 0.006 — a real rank effect on nearly
+identical curves, and it should be described that way.
 
 **Reproducibility.** All code is in `experiments/`; `scan.py` drives the checkpoint scan (one
 checkpoint on disk at a time), `run_assay.py` measures one checkpoint, `analyze.py` produces
 `results/checkpoint_metrics.json`, `ckpt_qc.py` produces `results/ckpt_qc.json`, `large_late.py`
-produces `results/large_late.json`, and `plot_formation.py` produces every figure above. The frozen
+produces `results/large_late.json`, `permtest.py` produces `results/permutation.json`, and
+`plot_formation.py` with `plot_perm.py` produce every figure above. The frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves

@@ -102,3 +102,70 @@ hashes of the frozen upstream inputs specifically). Restored it to the 22 files 
 and moved the full inventory to `results/ALL_ARTIFACT_HASHES.txt`. Also re-verified with `cmp` that
 all 22 inherited files are still byte-identical to their dir18 originals — they are, so nothing in
 the read-only upstream was touched.
+
+---
+
+## Iteration 2 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Grepped the whole direction for "permut" and found nothing — so PLAN's S5 requirement
+of an "endpoint-label permutation" on the 1,000-pair bank was the one prespecified analysis never
+implemented. Every interval in the deliverables was a bootstrap. Wrote `experiments/permtest.py`
+(20,000 permutations, CPU only, reads already-saved curves — no GPU, no re-assay) covering three
+tests, plus `experiments/plot_perm.py` for the figure.
+
+**What I learned.**
+- The test I most wanted turned out to be the one that pays off. ρ = −0.149 at step 32 on the
+  1,000-pair bank was the weakest number in the report — a clustered bootstrap CI of
+  [−0.286, −0.011] that barely excluded zero. Under the endpoint-label (QAP) null it gives
+  p = 0.0031, and p = 0.0082 even after paying for all five checkpoints.
+- The QAP null also *quantifies* the clustering penalty, which the bootstrap could only assert:
+  relabelling the 123 endpoint tokens produces |ρ| up to 0.09 by chance, against ~0.062 for 1,000
+  genuinely independent pairs. So the bank behaves like ~450 effective independent pairs. That number
+  is more informative than the CI it corroborates, and it is now in the report.
+- The dissociation claim survives multiplicity in the strongest form available: ρ(J, Δw) at step
+  8 → 32 has family-wise p = 0.0035 across all 18 intervals, while the largest sharpening event
+  (512 → 1000) sits at p = 0.78. Applying ONE permutation across the whole trajectory (rather than an
+  independent permutation per checkpoint) is what makes a family-wise statement legitimate here — it
+  preserves the across-checkpoint dependence of the real trajectory.
+- One reading had to be walked back, which is the point of running the test: step 4000 → 8000 had
+  ρ = +0.258 with a bootstrap CI [+0.002, +0.483] that just excluded zero. Permutation p = 0.045,
+  family-wise p = 0.55 — indistinguishable from a relabelling. Both deliverables now call that
+  interval divergence-blind rather than reversed. No headline number moved.
+
+**Assumptions logged (loop mode, no human to ask).**
+- QAP null draws each pair's divergence from the *whole* 123×123 matrix, whereas the observed pairs
+  were stratified into selection-split JSD quintiles, so the null's marginal J distribution is
+  slightly broader than the observed one. Rejected the alternative of permuting only within strata:
+  it would leave much of the endpoint→width association intact and make the test anti-conservative.
+  Spearman is rank-based, so a marginal shift is second-order; the null envelope (0.09) is if
+  anything conservative. Stated in Methods as a quadratic-assignment permutation.
+- Scored observed and null ρ on the large bank from the same source (the stored JSD matrix) so that
+  the JSON's rounding cannot differ between them; verified matrix-based ρ equals `jsd_B`-based ρ to
+  6 decimals at all five checkpoints, and the matrix reproduces `jsd_B` to 5.0e−7.
+- B = 20,000 permutations. Enough to resolve p down to 5e−5, which is below every p reported; a
+  larger B would only sharpen the "<0.001" entries, which no claim depends on.
+- Interval step 0 → 1 is degenerate (bit-identical curves, Δw ≡ 0, no rank correlation exists). It is
+  marked degenerate and excluded from the family-wise maximum rather than being assigned ρ = 0, which
+  would have deflated the null envelope.
+- Did NOT edit `PLAN.md`: it declares itself operator-owned and read-only, which overrides the generic
+  loop instruction to tick its checkboxes. Progress is recorded here and in CHANGELOG.md instead.
+
+**Incidental fix.** Every figure in both deliverables was embedded with a visible caption, but
+Figures 4–8 (REPORT.md) and 1–8 (RESULTS.md) were never cited by number in the body prose, which
+rule 12 requires. Added a by-number citation to the motivating sentence that precedes each figure.
+
+**Next step.** The plan's S1–S6 measurements and every prespecified validation are now done, and both
+inference methods agree. Remaining optional work, in priority order: (a) nothing can tighten either
+bracket — Pythia released no checkpoint between step 8 and 32, nor between 1000 and 2000, so the
+resolution is at the limit of this trajectory and the honest brackets are the ones reported;
+(b) a second Pythia size (e.g. 410M) would test whether the ~60× separation is model-specific, but
+that is a new direction under this PLAN's "out of scope" note on generalising beyond this run;
+(c) nothing else in the plan is outstanding. Did not write `STOP` — the deliverables are complete,
+but leaving the loop open costs nothing and a premature STOP would make the direction silently ignore
+any feedback dropped later.
+
+On track? yes — S1–S6 complete including the last prespecified S5 inference (~100% of plan), no
+blocker; the direction's own resolution limit, not budget, bounds any further tightening.
