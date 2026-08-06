@@ -338,3 +338,64 @@ silently ignore any feedback dropped later.
 
 On track? yes — S1–S6 complete plus a hardened Result 9 and a new Result 10 (~100% of plan), no
 blocker; released checkpoint spacing bounds any further tightening.
+
+---
+
+## Iteration 5 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Ran the item the previous iteration flagged as the smallest useful piece of work
+left: the reference-checkpoint robustness of the third clock. Result 8 measures rank agreement
+between each checkpoint's per-pair widths and *step 143000's*, and concludes the ranking locks in
+between step 64 and step 128. Step 143000 is where the released trajectory stops, not a point where
+the model has demonstrably stopped moving — and this report's own Result 5 shows the widths still
+change late (median $\Delta w = +0.0158$ over step 64000 → 143000). Wrote
+`experiments/persistence_ref.py` (CPU only, ~9 s: recomputes $\pi$, $\pi^{\perp}$, a 4,000-draw
+paired bootstrap and a 20,000-draw label-permutation null against five references) and
+`experiments/plot_persistence_ref.py`.
+
+**What I learned.**
+- The bracket is **identical under all five references** (8000, 32000, 64000, 128000, 143000):
+  after step 64, by step 128. $\pi_{128}$ spans only $+0.394$ to $+0.447$, all family-wise
+  significant ($p^{\mathrm{fw}} \le 0.018$), and step 64 is non-significant under every reference
+  ($p^{\mathrm{fw}} \ge 0.47$). Figure 8B had suggested this and it held exactly.
+- The more interesting half is the step-32 row. $\pi_{32}$ ranges $+0.077$ to $+0.200$ and stays
+  inside the chance envelope for every reference, with $\pi^{\perp}_{32} \le 0$ throughout. So the
+  claim "at step 32 the model holds the divergence-aligned component of its mature ordering and
+  nothing more" is about the mature model in general, not about the last checkpoint. That is a
+  genuinely stronger statement than the one Result 8 could make alone.
+- The reason the reference does not matter is worth stating and now is: the late widening rescales
+  $w$ without reshuffling the pair order, so $\pi(w_{8000}, w_{143000}) = 0.89$ and the five
+  trajectories sit on top of each other from step 128 on. Magnitude drifts late, ranking does not.
+- Cheapest check in the direction so far in evidence-per-second, because everything reads from
+  `per_pair_trajectories.npz`; vectorising the bootstrap ranks (`rankdata(..., axis=1)`) instead of
+  looping `spearmanr` made 5 references cost less than the original single-reference run.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Five references, chosen as the mature checkpoints spanning the last two decades of training
+  (8000 → 143000). Rejected adding early ones (step 256, 1000): scoring the ranking against a
+  checkpoint that is itself inside the formation window tests a different question and would make
+  the bracket search range collapse.
+- Used a family-wise permutation rule with the same two-consecutive-checkpoints requirement as the
+  other two prespecified onset rules, searched only over checkpoints strictly before the reference.
+  At the 143000 reference it reproduces Result 8's published bracket, which is the check that the
+  rule is not doing something new.
+- The bootstrap CI at step 128 under the 143000 reference comes out $[+0.231, +0.630]$ here against
+  $[+0.202, +0.623]$ in `persistence.json` — a different RNG stream, not a different method. The
+  deliverables keep quoting the primary run's interval for that number and use this script's numbers
+  only for the four alternative references, so no published figure is silently replaced.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–4.
+
+**Next step.** The plan's S1–S6 are complete and all three onsets now survive a chance null, a
+metric-definition sweep and a reference sweep. Every remaining question I can name (a second model
+size, a second training run, checkpoints between 8 and 32) is either out of scope under this PLAN or
+impossible from released artefacts. If the loop continues, the next candidate is a carrier-sentence
+jackknife — recomputing $\rho_s$ and both brackets from each single sentence frame — which would test
+whether the ordering onset depends on the three particular frames inherited from dir18. Did not write
+`STOP`: the deliverables are complete, but a premature STOP would make the direction silently ignore
+any feedback dropped later, and that costs more than leaving the loop open.
+
+On track? yes — S1–S6 complete plus Results 8–11 beyond the plan (~100% of plan), no blocker; the
+released checkpoint spacing, not budget, bounds any further tightening.

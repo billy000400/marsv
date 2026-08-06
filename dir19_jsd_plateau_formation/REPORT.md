@@ -46,7 +46,9 @@ final model's ranking at just $\pi = 0.161$ — inside the chance envelope — a
 is partialled out, the agreement is nothing at all ($-0.082$). The pair-specific detail of the final
 ranking arrives between step 64 and step 128, a third clock sitting between the other two. This is
 not a measurement-noise artefact: the three carrier sentences agree on each pair's width at step 32
-at $\bar r = 0.83$, so $\pi$ could have reached 0.94 had the rankings matched.
+at $\bar r = 0.83$, so $\pi$ could have reached 0.94 had the rankings matched. Nor is it an artefact
+of scoring against the last released checkpoint — the same bracket comes back when the ranking is
+scored against step 8000, 32000, 64000 or 128000 instead.
 
 Because the step-32 ordering sits on such a tiny spread, we
 also check it against chance directly: under 20,000 relabellings it gives $p = 0.0007$, and
@@ -264,6 +266,19 @@ median we actually use:
 $\pi_{\max}$ is the largest $\pi$ attainable even if the underlying rankings were identical. Result 8
 reports it next to the observed $\pi$, so a low value can be read as a real disagreement rather than
 as measurement noise.
+
+**Persistence against other references, $\pi_{\mathrm{ref}}$ (robustness).** Calling step 143000 "the
+final ranking" is a choice about where to stop, not something the model marks. If the ordering kept
+drifting late in training, the step 64 → 128 bracket could be an artefact of that choice, so we
+recompute the same statistic against four earlier mature checkpoints as well:
+
+```math
+\pi_{\mathrm{ref}}(s) \;=\; \mathrm{Spearman}\bigl(w_s,\; w_{\mathrm{ref}}\bigr), \qquad
+\mathrm{ref} \in \lbrace 8000,\; 32000,\; 64000,\; 128000,\; 143000 \rbrace
+```
+
+Each reference gets its own bootstrap, its own permutation null and its own application of the onset
+rule, searched only over checkpoints strictly before that reference. Result 11 consumes this.
 
 **Width at other levels, $w_a$ (robustness).** The 10%/90% levels in $w$ are a convention inherited
 from the upstream work, not something the data chose, and they are load-bearing: a wider band gives
@@ -773,6 +788,46 @@ at the primary definition the permutation $p$ is 0.78.) Figure 10B shows why the
 more sensitive rather than differently behaved: all five curves sit at or above their own straight-line
 value until step 512, then fall together, with the wider bands simply falling faster.
 
+### Result 11 — The third clock does not depend on which checkpoint we call "final"
+
+Result 8's bracket is defined against step 143000, the last released checkpoint. That reference is a
+choice about where training stopped being published, not a property of the model: if the ranking kept
+drifting through the last third of training, "the ranking locks in at step 128" would really mean
+"step 128 is where the model starts to resemble what it happens to look like at step 143000". Since
+Result 5 shows the widths *do* still move late — transitions get blunter between step 64000 and the
+end — this is a live worry rather than a formality. Figure 11 re-runs the whole persistence analysis
+against five references, applying the same two-in-a-row family-wise rule to each.
+
+![Two panels: persistence trajectories under five reference checkpoints, and the bracket checkpoints per reference](plots/reference_robustness.png)
+
+**Figure 11.** The step 64 → 128 bracket is the same under every reference. **A** x: training step
+(symmetric-log). y: rank agreement $\pi_{\mathrm{ref}}(s)$ between the widths at step $s$ and the
+widths at the reference checkpoint. The five series are the references: step 8000 (solid circles),
+32000 (dashed squares), 64000 (dotted up-triangles), 128000 (dash-dot diamonds), 143000 (long-dash
+down-triangles); each series omits the point where it would score against itself. The hatched
+horizontal band between the dotted lines is the pointwise 95% envelope of $|\pi|$ under 20,000 pair
+relabellings; the hatched vertical stripe (`xx`) is the step 64 → 128 bracket. **B** x: rank
+agreement with that row's reference; y: the five reference checkpoints. Filled circles are $\pi$ at
+step 32, filled squares $\pi$ at step 128, both with 95% bootstrap intervals; open triangles are
+$\pi^{\perp}$ at step 32, with corpus divergence removed. The hatched vertical band is the pointwise
+95% chance envelope at step 32.
+
+Every reference returns **after step 64, by step 128** — the identical bracket. At step 128 the
+agreement is $+0.447$, $+0.394$, $+0.430$, $+0.410$, $+0.437$ against the five references, with
+family-wise $p$ of 0.0045, 0.018, 0.0059, 0.012 and 0.0050; at step 64 no reference comes close
+($p^{\mathrm{fw}}$ between 0.47 and 0.89). The step-32 reading is equally stable: $\pi$ there is
+$+0.077$, $+0.163$, $+0.200$, $+0.174$, $+0.161$, inside the chance envelope in every case
+($p \ge 0.13$), and the divergence-free part $\pi^{\perp}$ is at or below zero for all five ($-0.147$,
+$-0.015$, $-0.098$, $-0.062$, $-0.082$). The claim that at step 32 the model holds the
+divergence-aligned component of its mature ordering and nothing more is therefore a statement about
+the mature model generally, not about the last checkpoint in particular.
+
+Figure 11A also shows why: the five trajectories are nearly on top of each other from step 128
+onward, separating only above step 8000 where each curve bends up towards its own reference. The late
+widening of Result 5 changes the *magnitude* of the widths without reshuffling which pairs are
+sharpest — agreement between step 8000 and step 143000 is 0.89 — which is why the choice of reference
+does not reach back to the bracket.
+
 ### Summary of the onsets
 
 The table below collects the timing verdicts. Each row is an event, the bracket the prespecified rule
@@ -792,7 +847,7 @@ The same bracket on the 1,000-pair bank, under the endpoint-label null that pric
 reuse: $p = 0.87$ at step 0, $p = 0.64$ at step 8, $p = 0.0031$ at step 32, $p < 0.001$ at both late
 checkpoints. Under the four alternative width definitions of Result 10 the ordering bracket is
 unchanged and the shape bracket moves at most one checkpoint earlier, leaving a separation of 31× to
-62×.
+62×. Under the four alternative reference checkpoints of Result 11 the ranking bracket is unchanged.
 
 ---
 
@@ -839,11 +894,12 @@ identical curves, and it should be described that way.
 checkpoint on disk at a time), `run_assay.py` measures one checkpoint, `analyze.py` produces
 `results/checkpoint_metrics.json`, `ckpt_qc.py` produces `results/ckpt_qc.json`, `large_late.py`
 produces `results/large_late.json`, `permtest.py` produces `results/permutation.json`,
-`persistence.py` produces `results/persistence.json`, `threshold_robustness.py` produces
+`persistence.py` produces `results/persistence.json`, `persistence_ref.py` produces
+`results/persistence_ref.json`, `threshold_robustness.py` produces
 `results/threshold_robustness.json`, `step16_forensics.py` and `revision_audit.py`
 produce `results/step16_forensics.json` and `results/revision_audit.json` (network only, no GPU and
-nothing written to disk beyond those files), and `plot_formation.py`, `plot_perm.py` and
-`plot_persistence.py` and `plot_threshold.py` produce every figure above. The frozen
+nothing written to disk beyond those files), and `plot_formation.py`, `plot_perm.py`,
+`plot_persistence.py`, `plot_persistence_ref.py` and `plot_threshold.py` produce every figure above. The frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves

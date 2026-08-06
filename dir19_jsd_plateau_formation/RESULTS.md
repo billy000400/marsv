@@ -88,6 +88,14 @@ correlations alone imply ($(-0.428)\times(-0.525) = 0.225$). This is not measure
 carrier sentences agree on each pair's width at step 32 at $\bar r = 0.830$, so $\pi$ could have
 reached 0.935.
 
+**Robustness to the reference checkpoint.** "Final" here means step 143000, which is where the
+released trajectory stops rather than where the model settles — and Result 5 shows the widths still
+move late. Rescoring the whole persistence analysis against step 8000, 32000, 64000 and 128000
+returns the **same step 64 → 128 bracket in every case**: $\pi_{128}$ is $+0.447$, $+0.394$, $+0.430$,
+$+0.410$ against those four references (family-wise $p$ 0.0045 to 0.018) while step 64 stays
+non-significant ($p^{\mathrm{fw}}$ 0.47 to 0.89), and $\pi_{32}$ stays inside the chance envelope
+($+0.077$ to $+0.200$, $p \ge 0.13$) with $\pi^{\perp}_{32} \le 0$ throughout.
+
 **Data-integrity finding.** The artefact Hugging Face serves as revision **`step16`** of
 `EleutherAI/pythia-1.4b-deduped` is **not a step-16 model — it is `step143000`**. Held-out loss is
 2.320 nats against 9.889 at step 8 and 8.824 at step 32; its 9,000 measured $d(t)$ values are
@@ -246,3 +254,18 @@ training step (symmetric-log); y: median $w_a$ divided by its own straight-line 
 all five share one scale and 1.0 (dashed line) is the no-plateau value. **C** x: training step (log);
 y: the five definitions, each row showing the divergence-ordering bracket (left bar) and the
 plateau-shape bracket (right bar), labelled with the ratio between the two closing checkpoints.
+
+The third clock is scored against one arbitrary endpoint — the last released checkpoint — so Figure 11
+asks whether the bracket survives scoring against four earlier mature checkpoints instead.
+
+![Two panels: persistence trajectories under five reference checkpoints, and the bracket checkpoints per reference](plots/reference_robustness.png)
+
+**Figure 11.** The step 64 → 128 bracket is the same under every reference. **A** x: training step
+(symmetric-log); y: rank agreement $\pi_{\mathrm{ref}}(s)$ between the widths at step $s$ and at the
+reference. Series are the references — step 8000 (solid circles), 32000 (dashed squares), 64000
+(dotted up-triangles), 128000 (dash-dot diamonds), 143000 (long-dash down-triangles); each omits the
+point where it scores against itself. Hatched horizontal band = pointwise 95% envelope of $|\pi|$
+under 20,000 pair relabellings; hatched vertical stripe (`xx`) = the step 64 → 128 bracket. **B** x:
+rank agreement with that row's reference; y: the five references. Filled circles = $\pi$ at step 32,
+filled squares = $\pi$ at step 128, with 95% bootstrap intervals; open triangles = $\pi^{\perp}$ at
+step 32 with $J$ removed; hatched band = the pointwise 95% chance envelope at step 32.

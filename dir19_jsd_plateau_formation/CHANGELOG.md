@@ -268,3 +268,42 @@ CVD palette, every series also coded by linestyle and marker.
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (10 embeds / 10 visible captions
 per file; 17 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 5: reference robustness of the third clock (new Result 11 / Figure 11)
+
+**What was missing.** Result 8's "the pair ranking becomes final between step 64 and step 128" was
+measured against a single reference, step 143000 — the last *released* checkpoint, not a point at
+which the model demonstrably stops changing. Result 5 shows the widths still move over the last third
+of training (median $\Delta w = +0.0158$ from step 64000 to the end), so the bracket could in
+principle have been an artefact of scoring against that particular endpoint. New code:
+`experiments/persistence_ref.py` (CPU only, reads the saved per-pair width trajectories; recomputes
+$\pi$, $\pi^{\perp}$, a paired bootstrap over pairs with B = 4,000, and a 20,000-draw
+one-permutation-per-trajectory label null, for five reference checkpoints) and
+`experiments/plot_persistence_ref.py`. New artefact `results/persistence_ref.json`.
+
+**New results (nothing superseded; this is a new robustness measurement).**
+- Scoring against **step 8000, 32000, 64000, 128000 and 143000** returns the **identical bracket,
+  after step 64 and by step 128, for all five**. At step 128, $\pi = +0.447, +0.394, +0.430, +0.410,
+  +0.437$ with family-wise permutation $p = 0.0045, 0.018, 0.0059, 0.012, 0.0050$; at step 64 no
+  reference is significant ($p^{\mathrm{fw}}$ between 0.47 and 0.89).
+- The step-32 reading is equally stable: $\pi_{32} = +0.077, +0.163, +0.200, +0.174, +0.161$, inside
+  the chance envelope for every reference ($p \ge 0.13$), with the divergence-free part
+  $\pi^{\perp}_{32} = -0.147, -0.015, -0.098, -0.062, -0.082$ — at or below zero throughout.
+- Mechanism for the insensitivity, now stated: the late widening changes the magnitude of $w$ without
+  reshuffling which pairs are sharpest, so $\pi(w_{8000}, w_{143000}) = 0.89$ and the five
+  trajectories coincide from step 128 onward.
+
+**Deliverable changes.** REPORT.md: new Methods run-in paragraph "Persistence against other
+references, $\pi_{\mathrm{ref}}$" with one new rendered equation (display count 17 → 18); new
+**Result 11 — "The third clock does not depend on which checkpoint we call 'final'"** placed after
+Result 10 and before the onset summary; one qualifying sentence added to the Summary's third-clock
+paragraph and one to the note under the onsets table; `persistence_ref.py` and
+`plot_persistence_ref.py` added to Reproducibility. RESULTS.md: new "Robustness to the reference
+checkpoint" paragraph under the persistence table. New figure `plots/reference_robustness.png`
+embedded as **Figure 11** in both files (A: five $\pi_{\mathrm{ref}}$ trajectories against the
+permutation envelope with the bracket stripe; B: $\pi$ at step 32 and step 128 plus $\pi^{\perp}$ at
+step 32, per reference, with 95% intervals). Figure count 10 → 11 in each file. Green-free CVD
+palette; every series also coded by linestyle and marker; bands hatched.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (11 embeds / 11 visible captions
+per file; 18 display equations in REPORT.md all render as `js-display-math`).
