@@ -602,3 +602,34 @@ envelopes and brackets hatched.
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (17 embeds / 17 visible captions
 per file; 23 display equations in REPORT.md all render as `js-display-math`).
+
+## Iteration 12 — 2026-08-06 — final verification pass; no result superseded
+
+**Feedback check.** No `human_feedback*.md` / `*REVIEW*` file lacking `.addressed.md` in the direction
+root. Proceeded with the plan.
+
+**What changed.** Nothing numeric. This iteration added a standing correctness check rather than a new
+finding, because the released checkpoint spacing — not budget — bounds any further tightening of the
+three clocks (JOURNAL iterations 9–11).
+
+**New code.** `experiments/final_audit.py` (CPU only, <1 s, no GPU): re-derives 18 headline numbers
+directly from `results/checkpoint_metrics.json` and `results/large_persistence_ref.json` — $\rho$ at
+steps 8, 32 and 143000; median $w$ at steps 0, 32, 512, 1000, 2000, 64000 and 143000; edge drift and
+movement entropy at step 1000; and $\Delta\pi$ at steps 32 and 64 against all three large-bank
+reference checkpoints — then asserts each value appears verbatim in `REPORT.md`. **All 18 match; 0
+stale.** REPORT.md is the canonical deliverable and is required to quote each value; RESULTS.md is a
+shorter summary, so its coverage (12 of 18) is reported, not required.
+
+**Deliverable changes.** REPORT.md: `final_audit.py` and its result added to the Reproducibility
+paragraph. RESULTS.md: one closing sentence recording that all 18 audited numbers re-derive from
+`results/`. No number, figure, equation, result or section was changed, added or removed; figure count
+stays 17 in each file and the display-equation count stays 23 in REPORT.md.
+
+**Checks re-run after the edits.** `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0
+(REPORT.md 23 display eqs / 17 embeds; RESULTS.md 17 embeds; every embed followed by a visible
+`**Figure N.**` caption). Separately confirmed all 17 figures are numbered sequentially in reading
+order and each is cited by number in the prose beyond its own caption, in both files.
+
+**STOP.** Written this iteration: S1–S6 are complete, Results 1–17 are current-best, and no unaddressed
+feedback file exists (CLAUDE.md rule 11's two conditions both hold; PLAN.md's success criterion asks
+for `STOP` when complete). If feedback is dropped here later, delete `STOP` before addressing it.

@@ -1320,7 +1320,10 @@ produce `results/step16_forensics.json` and `results/revision_audit.json` (netwo
 nothing written to disk beyond those files), and `plot_formation.py`, `plot_perm.py`,
 `plot_persistence.py`, `plot_persistence_ref.py`, `plot_threshold.py`, `plot_jackknife.py`,
 `plot_quintile.py`, `plot_bulk.py`, `plot_large_persistence.py`, `plot_large_persistence_ref.py` and
-`plot_large_jackknife.py` produce every figure above. The frozen
+`plot_large_jackknife.py` produce every figure above. `final_audit.py` re-derives 18 of the headline
+numbers quoted in this report straight from `results/*.json` and checks that each appears verbatim in
+the text, so a re-run cannot silently leave a stale figure behind; it currently passes on all 18. The
+frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves

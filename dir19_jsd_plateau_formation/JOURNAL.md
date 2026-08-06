@@ -756,3 +756,50 @@ make the direction silently ignore any feedback dropped later.
 
 On track? yes — S1–S6 complete plus Results 8–17 beyond the plan (~100% of plan), no blocker; the
 released checkpoint spacing, not budget, bounds any further tightening.
+
+## Iteration 12 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Iterations 9–11 each ended by saying the remaining honest option was a read-through
+rather than a new number, so I did the version of that which can actually fail: wrote
+`experiments/final_audit.py`, which re-derives 18 headline numbers straight from `results/*.json` and
+asserts each appears verbatim in `REPORT.md`. Also audited figure numbering and prose citation of every
+figure in both deliverables, and re-ran `check_render.py`. Two one-sentence deliverable edits (a
+Reproducibility mention in REPORT.md, a closing line in RESULTS.md); no number touched. Wrote `STOP`.
+
+**What I learned.**
+- **All 18 audited numbers match the artefacts exactly** — $\rho_8 = -0.060$, $\rho_{32} = -0.428$,
+  $\rho_{143000} = -0.525$; median $w$ at steps 0/32/512/1000/2000/64000/143000; edge drift 0.153 and
+  movement entropy 0.917 at step 1000; and all six large-bank $\Delta\pi$ values across the three
+  reference checkpoints. Eleven iterations of re-runs (including the one that changed step 32's
+  endpoint-label $p$ from 0.0031 to 0.0019) left nothing stale behind.
+- **My first audit criterion was wrong, and the failure was informative.** Requiring every value in
+  *both* deliverables flagged 5 "stale" numbers that were simply not quoted in the shorter RESULTS.md.
+  Asymmetric roles need an asymmetric check: REPORT.md must quote each value, RESULTS.md's coverage
+  (12 of 18) is reported, not required.
+- **A grep for figure citations needs to allow panel suffixes.** `grep -E "Figure 1\b"` misses
+  "Figure 1B", which made Figures 1–3 look uncited when the prose does cite them. Corrected pattern
+  `Figure N([^0-9]|$)`: all 17 figures are cited beyond their captions in both files.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Did not add a plot for this iteration: the audit is a QA check on already-published numbers, not a
+  new quantitative result, so under rule 12 it has nothing to visualise and does not enter the
+  deliverables as a result.
+- Wrote `STOP`. Rule 11's two conditions both hold (plan complete, zero unaddressed feedback) and
+  PLAN.md's success criterion asks for it when complete. Iterations 9–11 deferred it to keep the
+  direction responsive to late feedback; I judged that the wrapper's clock ends this run regardless,
+  so deferring buys nothing. Rejected alternative: leave it unwritten and burn a further iteration
+  re-confirming the same complete state. Re-entry rule recorded in CHANGELOG: delete `STOP` first if
+  feedback arrives later.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–11.
+
+**Next step.** None outstanding. S1–S6 complete; Results 1–17 current-best and now machine-verified
+against the artefacts; both deliverables pass `check_render.py`. Any genuine extension needs something
+this PLAN puts out of scope or the released checkpoints do not contain: a second model size, a second
+training run, real step-16 weights (Result 9 shows the released revision is not one), or a checkpoint
+inside the step 128 → 256 gap.
+
+On track? yes — S1–S6 complete plus Results 8–17 beyond the plan (100% of plan), deliverables verified
+and `STOP` written, no blocker.

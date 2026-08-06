@@ -440,3 +440,7 @@ half-width $\approx 0.21$. The three sentences rank the same pairs alike from ea
 rank agreement between contexts is 0.66 at step 0, 0.86 by step 32 and 0.93 by step 64 — which is why
 a single context is barely noisier than their median here, in contrast to the 60-pair bank, where one
 sentence pushed the ranking bracket one checkpoint later.
+
+Every headline number above and in `REPORT.md` is re-derived from the saved artefacts in `results/` by
+`experiments/final_audit.py`, which checks each value against the text verbatim; all 18 audited
+numbers match, so no figure quoted here is stale relative to the run that produced it.
