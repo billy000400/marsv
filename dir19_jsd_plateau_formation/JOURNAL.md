@@ -654,3 +654,53 @@ silently ignore any feedback dropped later.
 
 On track? yes — S1–S6 complete plus Results 8–15 beyond the plan (~100% of plan), no blocker; the
 released checkpoint spacing, not budget, bounds any further tightening.
+
+## Iteration 10 — 2026-08-06
+
+**Feedback check (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` and
+`*REVIEW*` lacking the `.addressed.md` suffix: **none present**. Proceeded with the plan.
+
+**What I did.** Executed the one item iteration 9 flagged as highest-value remaining: a large-bank
+version of Result 11's reference sweep. Wrote `experiments/large_persistence_ref.py`, which re-runs
+`large_persistence.py`'s $\pi_{\mathrm{L}}$ / $\pi^{\perp}_{\mathrm{L}}$ / $\Delta\pi$ construction
+with the reference set to step 8000, 64000 and 143000 in turn (CPU only, ~4 min, no GPU touched), plus
+`plot_large_persistence_ref.py`. New Result 16 / Figure 16 in both deliverables, one Methods sentence,
+and an updated robustness paragraph under the onsets table.
+
+**What I learned.**
+- **The step 32 → 64 bracket is reference-invariant on the large bank.** $\Delta\pi$ at step 32 is
+  $+0.148$ / $+0.155$ / $+0.150$ against the three references with simultaneous half-widths
+  0.201–0.206 (all covering zero) and at step 64 is $+0.391$ / $+0.365$ / $+0.389$ (all excluding it).
+  The three $\pi_{\mathrm{L,ref}}$ trajectories are nearly superimposed below step 1000 and separate
+  only afterwards — the reference choice matters exactly where the timing claim does not live.
+- **The sweep found one thing worth reporting against my expectation:** it was supposed to be a pure
+  confirmation, but $\pi^{\perp}_{\mathrm{L}}$ at step 64 against the step-64000 reference is $+0.135$
+  $[-0.033, +0.283]$ — covering zero, where the other two references exclude it. That is a real
+  qualification of Result 15's secondary reading (pair-specific structure, not just the divergence
+  axis), so I wrote it into both deliverables rather than reporting only the three-of-three bracket.
+  The bracket rests on $\Delta\pi$, which is unaffected.
+- **Reusing the bootstrap draws is what makes a robustness sweep cheap and honest.** Generating the
+  2,000 endpoint multinomials once, before the reference loop, means the step-143000 column
+  *reproduces* `large_persistence.json` bit-for-bit instead of redrawing published third decimals. I
+  imported `N_BOOT`, `STEPS`, `wspear`, `wpartial` and `partial` straight from `large_persistence` so
+  there is one definition of each estimator, not two.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Used three references (8000, 64000, 143000) rather than Result 11's five: steps 32000 and 128000
+  were never run on the 1,000-pair bank, and adding them would have cost ~10 min of GPU to answer a
+  question the three available references already answer identically.
+- Kept the simultaneous band per reference over the checkpoints at or before that reference (so the
+  ref-8000 band covers eight checkpoints, not ten) and searched the bracket strictly before the
+  reference — the same scoping Result 11 used on the 60-pair bank.
+- Did NOT edit `PLAN.md` (operator-owned, declares itself read-only), same as iterations 2–9.
+
+**Next step.** S1–S6 complete; Results 8–16 go beyond the plan, and every clock is now
+reference-robust on both banks. I cannot name a further question answerable from released artefacts:
+no genuine step-16 weights exist (Result 9), there is no released checkpoint in the step 128 → 256
+gap, and a second model size or training run is out of scope under this PLAN. If another iteration
+runs, the only remaining item I would pick is a large-bank sentence-frame jackknife (the analogue of
+Result 12), which would harden rather than extend. Did not write `STOP`: the deliverables are
+complete, but a premature STOP would make the direction silently ignore any feedback dropped later.
+
+On track? yes — S1–S6 complete plus Results 8–16 beyond the plan (~100% of plan), no blocker; the
+released checkpoint spacing, not budget, bounds any further tightening.

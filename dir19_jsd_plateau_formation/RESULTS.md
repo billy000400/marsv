@@ -175,6 +175,16 @@ pair-specific structure being acquired, not the divergence axis being inherited 
 Result above, reproduced on 17× more pairs and one checkpoint earlier. Both clocks therefore run
 inside step 32 → 128, at median widths of 0.826 and 0.832 against 0.831 untrained.
 
+**Robustness to the reference checkpoint, on the large bank too.** Rescoring the 1,000-pair ranking
+against step 8000 and step 64000 instead of step 143000 returns the **same step 32 → 64 bracket in
+all three cases**: $\Delta\pi$ at step 32 is $+0.148$, $+0.155$, $+0.150$ with simultaneous bands of
+half-width 0.201–0.206 covering zero, and at step 64 it is $+0.391$, $+0.365$, $+0.389$, excluding
+zero. One qualification: the divergence-independent part at step 64,
+$\pi^{\perp}_{\mathrm{L}} = +0.202$ $[+0.043, +0.345]$ against step 8000 and $+0.184$
+$[+0.028, +0.329]$ against step 143000, is $+0.135$ $[-0.033, +0.283]$ against step 64000 — the
+"pair-specific structure, not just the divergence axis" reading holds against two of three references,
+while the bracket itself holds against all three.
+
 **Quality controls.** All 3,600 curves across the 20-checkpoint scan passed the strict validity
 criteria (valid-curve rate 1.000 at every checkpoint). Endpoint patching reproduces the unpatched
 logits to a maximum relative error of $4.6\times10^{-5}$. Re-running step 0 reproduced the upstream
@@ -391,3 +401,16 @@ checkpoints; dashed line at 0. **C** x: training step (symmetric-log); y: each c
 its own step-143000 value — graded ordering $\rho(J, w)$ over the middle 600 pairs (dashed squares)
 and ranking $\Delta\pi$ (dash-dot diamonds). Dotted vertical stripe = the step 32 → 64 ranking
 bracket; `xx` stripe in **C** = the step 64 → 128 graded-ordering bracket.
+
+That bracket is scored against one arbitrary endpoint — the last released checkpoint, at which the
+widths are still moving — so Figure 16 rebuilds it against two earlier mature references.
+
+![Two panels: ranking-agreement trajectories on the 1,000-pair bank under three reference checkpoints, and the acquired agreement at the two bracket checkpoints for each reference](plots/large_persistence_ref.png)
+
+**Figure 16.** The step 32 → 64 bracket survives every reference. **A** x: training step
+(symmetric-log); y: rank agreement $\pi_{\mathrm{L,ref}}(s)$ between the 1,000 per-pair widths at step
+$s$ and at the reference. Series are the references — step 8000 (solid circles), step 64000 (dashed
+squares), step 143000 (dash-dot diamonds); each omits the point where it scores against itself. Dotted
+vertical stripe = the step 32 → 64 bracket; dashed line at 0. **B** x: $\Delta\pi$ with its
+simultaneous 95% band; y: the reference checkpoint. Circles = step 32, squares = step 64; dashed
+vertical line at 0.

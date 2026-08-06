@@ -511,3 +511,47 @@ Green-free CVD palette; every series also coded by marker and linestyle; bands a
 
 `python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (15 embeds / 15 visible captions
 per file; 23 display equations in REPORT.md all render as `js-display-math`).
+
+## 2026-08-06 — iteration 10: the 1,000-pair ranking clock made reference-robust (new Result 16 / Figure 16)
+
+**What was missing.** Iteration 9's JOURNAL named one remaining hardening item: Result 15 dates the
+ranking lock-in on the 1,000-pair bank by scoring every checkpoint against step 143000, the last
+released checkpoint — but Result 5 shows the widths still move between step 64000 and step 143000, so
+that reference is not a settled model. Result 11 had already run this sweep on the 60-pair bank; the
+bank where Result 15 lives had never been checked.
+
+**New runs.** New code `experiments/large_persistence_ref.py` (CPU, ~4 min) re-runs the whole
+$\pi_{\mathrm{L}}$ / $\pi^{\perp}_{\mathrm{L}}$ / $\Delta\pi$ construction of `large_persistence.py`
+with the reference set to step 8000, step 64000 and step 143000 in turn, reusing the same 2,000
+resampled endpoint draws so the step-143000 column reproduces `results/large_persistence.json`
+exactly rather than redrawing it. Simultaneous band taken over the checkpoints at or before each
+reference; bracket searched strictly before it. New artefact `results/large_persistence_ref.json`;
+`experiments/plot_large_persistence_ref.py` draws it.
+
+**New result (nothing superseded — no previously published number changes).**
+- **Result 16 — the step 32 → 64 bracket is not an artefact of the reference checkpoint.** The
+  prespecified rule returns **after step 32, by step 64 under all three references**. $\Delta\pi$ at
+  step 32 = $+0.148$ / $+0.155$ / $+0.150$ (references 8000 / 64000 / 143000), simultaneous band
+  half-widths 0.201 / 0.206 / 0.202, all covering zero; at step 64 = $+0.391$ / $+0.365$ / $+0.389$,
+  all excluding zero, and outside the band at every later checkpoint.
+- **One honest qualification recorded, not smoothed over:** $\pi^{\perp}_{\mathrm{L}}$ at step 64 is
+  $+0.202$ $[+0.043, +0.345]$ (ref 8000) and $+0.184$ $[+0.028, +0.329]$ (ref 143000) but $+0.135$
+  $[-0.033, +0.283]$ (ref 64000), whose interval covers zero. So Result 15's "pair-specific structure
+  is being acquired" reading holds against two of three references; the bracket, which rests on
+  $\Delta\pi$, holds against all three.
+
+**Deliverable changes.** REPORT.md: the "$\Delta\pi(s)$" Methods run-in paragraph gains a sentence
+defining $\pi_{\mathrm{L,ref}}$ and the per-reference band/bracket scope (no new equation; display
+count stays 23); new **Result 16 — "The 1,000-pair ranking bracket is not an artefact of the reference
+checkpoint"** placed after Result 15 and before "Summary of the onsets"; the paragraph under the
+onsets table now separates the 60-pair (five references, Result 11) from the 1,000-pair (three
+references, Result 16) reference robustness; `large_persistence_ref.py` and
+`plot_large_persistence_ref.py` added to Reproducibility. RESULTS.md: new "Robustness to the reference
+checkpoint, on the large bank too" paragraph after the one-event paragraph, plus the new figure. New
+figure `plots/large_persistence_ref.png` embedded as **Figure 16** in both files (A: three
+$\pi_{\mathrm{L,ref}}$ trajectories; B: $\Delta\pi$ at steps 32 and 64 per reference with its
+simultaneous band). Figure count 15 → 16 in each file. Green-free CVD palette; every series also coded
+by marker and linestyle.
+
+`python3 experiments/check_render.py REPORT.md RESULTS.md` exits 0 (16 embeds / 16 visible captions
+per file; 23 display equations in REPORT.md all render as `js-display-math`).

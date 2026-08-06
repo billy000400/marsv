@@ -316,7 +316,11 @@ bank, with the same resampled endpoints at every checkpoint so a simultaneous ba
 measured checkpoints follows from the maximum deviation rule. A label permutation is deliberately not
 used here: both variables in $\pi_{\mathrm{L}}$ are widths, so there is no label to relabel. The onset
 rule is otherwise the primary one. Result 15 consumes this, together with $\pi^{\perp}_{\mathrm{L}}$,
-the same statistic with $\mathrm{rank}(J)$ partialled out of both widths.
+the same statistic with $\mathrm{rank}(J)$ partialled out of both widths. Result 16 re-runs the whole
+construction with $w_{143000}$ replaced in turn by $w_{8000}$ and $w_{64000}$ — written
+$\pi_{\mathrm{L,ref}}$ — so that the bracket does not rest on the assumption that the last released
+checkpoint is where the ranking has settled; the simultaneous band is then taken over the checkpoints
+at or before that reference and the bracket is searched strictly before it.
 
 **Width at other levels, $w_a$ (robustness).** The 10%/90% levels in $w$ are a convention inherited
 from the upstream work, not something the data chose, and they are load-bearing: a wider band gives
@@ -1121,6 +1125,48 @@ we do not claim a causal order within it. What the episode does not include is a
 step 64 and step 128 the 1,000-pair median width (0.826 and 0.832) is that of the untrained model
 (0.831).
 
+### Result 16 — The 1,000-pair ranking bracket is not an artefact of the reference checkpoint
+
+Result 15 scores every checkpoint against step 143000, which is where the released trajectory stops
+rather than where the model settles — and Result 5 shows the widths are still moving between step
+64000 and step 143000. If the ranking kept drifting late, some of the "agreement with the final
+ranking" that appears at step 64 could be an accident of that one endpoint, and the third clock would
+be a property of the reference rather than of the model. Result 11 answered this on the 60-pair bank;
+Figure 16 answers it on the bank where Result 15 lives, by rebuilding the whole analysis against
+step 8000 and step 64000 as well.
+
+![Two panels: ranking-agreement trajectories on the 1,000-pair bank under three reference checkpoints, and the acquired agreement at the two bracket checkpoints for each reference](plots/large_persistence_ref.png)
+
+**Figure 16.** The step 32 → 64 bracket is the same under every reference. **A** x: training step
+(symmetric-log); y: rank agreement $\pi_{\mathrm{L,ref}}(s)$ between the 1,000 per-pair widths at step
+$s$ and at the reference. Series are the references — step 8000 (solid circles), step 64000 (dashed
+squares), step 143000 (dash-dot diamonds); each series omits the point where it would score against
+itself. Dotted vertical stripe = the step 32 → 64 bracket; dashed line at 0. **B** x: $\Delta\pi$ with
+its simultaneous 95% band (dyadic endpoint bootstrap, 2,000 resamples of the 123 endpoint tokens); y:
+the reference checkpoint. Circles = $\Delta\pi$ at step 32, squares = $\Delta\pi$ at step 64; dashed
+vertical line at 0.
+
+The prespecified rule returns **after step 32, by step 64 under all three references**. At step 32
+$\Delta\pi$ is $+0.148$, $+0.155$ and $+0.150$ against step 8000, 64000 and 143000, with simultaneous
+bands of half-width 0.201–0.206 that cover zero in every case; at step 64 it is $+0.391$, $+0.365$ and
+$+0.389$, excluding zero in every case, and it stays outside the band at every later checkpoint. The
+three trajectories in Figure 16A are nearly superimposed below step 1000 and only separate afterwards,
+where the reference choice starts to matter for how much of the *late* drift a checkpoint has
+absorbed — which is exactly the region the timing claim does not depend on.
+
+The divergence-independent part is the one place the picture is not uniform. $\pi^{\perp}_{\mathrm{L}}$
+at step 64 is $+0.202$ $[+0.043, +0.345]$ against step 8000 and $+0.184$ $[+0.028, +0.329]$ against
+step 143000, but $+0.135$ $[-0.033, +0.283]$ against step 64000, whose interval just covers zero. So
+the claim that pair-specific structure — not merely more of the divergence axis — is acquired at step
+64 holds against two of the three references and is suggestive but not significant against the third.
+The bracket itself, which is what the onset table reports, is unaffected: it rests on $\Delta\pi$,
+which excludes zero under all three.
+
+Together with Result 11, this makes all three clocks reference-robust: the ranking bracket is the same
+under five references on the 60-pair bank and three on the 1,000-pair bank, so the ordering
+divergence-selection → pair ranking → plateau shape does not depend on treating step 143000 as a
+converged model.
+
 ### Summary of the onsets
 
 The table below collects the timing verdicts. Each row is an event, the bracket the prespecified rule
@@ -1141,7 +1187,9 @@ The same bracket on the 1,000-pair bank, under the endpoint-label null that pric
 reuse: $p = 0.87$ at step 0, $p = 0.64$ at step 8, $p = 0.0031$ at step 32, $p < 0.001$ at both late
 checkpoints. Under the four alternative width definitions of Result 10 the ordering bracket is
 unchanged and the shape bracket moves at most one checkpoint earlier, leaving a separation of 31× to
-62×. Under the four alternative reference checkpoints of Result 11 the ranking bracket is unchanged.
+62×. Under the four alternative reference checkpoints of Result 11 the ranking bracket is unchanged on
+the 60-pair bank, and under the two alternative references of Result 16 it is unchanged on the
+1,000-pair bank.
 Recomputed inside each carrier sentence separately (Result 12), the ordering and shape brackets are
 unchanged in all three and the ranking bracket moves one checkpoint later in one of the three. The
 one qualification the robustness checks do impose is on content rather than timing: by Result 13 the
@@ -1216,12 +1264,14 @@ produces `results/large_late.json`, `permtest.py` produces `results/permutation.
 `results/threshold_robustness.json`, `sentence_jackknife.py` produces
 `results/sentence_jackknife.json`, `quintile_loo.py` and `quintile_large.py` produce
 `results/quintile_loo.json` and `results/quintile_large.json`, `bulk_onset.py` produces
-`results/bulk_onset.json`, `large_persistence.py` produces `results/large_persistence.json`,
+`results/bulk_onset.json`, `large_persistence.py` and `large_persistence_ref.py` produce
+`results/large_persistence.json` and `results/large_persistence_ref.json`,
 `step16_forensics.py` and `revision_audit.py`
 produce `results/step16_forensics.json` and `results/revision_audit.json` (network only, no GPU and
 nothing written to disk beyond those files), and `plot_formation.py`, `plot_perm.py`,
 `plot_persistence.py`, `plot_persistence_ref.py`, `plot_threshold.py`, `plot_jackknife.py`,
-`plot_quintile.py`, `plot_bulk.py` and `plot_large_persistence.py` produce every figure above. The frozen
+`plot_quintile.py`, `plot_bulk.py`, `plot_large_persistence.py` and `plot_large_persistence_ref.py`
+produce every figure above. The frozen
 pair manifests, corpus manifests and inherited upstream results were copied unmodified from
 `dir18_continuation_jsd_plateau` and their SHA-256 hashes are recorded in
 `results/INHERITED_HASHES.txt`. Re-running the assay at step 0 reproduced the upstream curves
