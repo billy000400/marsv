@@ -126,3 +126,58 @@ that the competition is resolved by the layers below the patch; Table 4 refines 
 compression scales with depth, but *which* pairs compress more is already decided in the last three
 blocks of gpt2-medium. The limitation "we did not run it" was replaced by the model-depth caveat
 (both models have 24 blocks) and the unattributed 82% vs 48% prevalence gap.
+
+## 2026-08-10 — S6: third model family (OPT-350m); the inverted association replicates 3/3
+
+**What changed.** Added `facebook/opt-350m` (331M, 24 blocks, $d_{model}$=1024) as a third model
+family and re-ran every experiment on it: the 5 hand-picked pairs (S1+S2), the 200-pair mined bank at
+block 0, and the same bank at blocks 12 and 20 (S5). This answers the open question the previous
+REPORT.md listed as a limitation — whether the cross-model plateau-prevalence gap is a tokenizer
+effect — because OPT's vocabulary is exactly GPT-2's 50257 token strings plus 8 specials and segments
+our prompts identically, while pythia-410m uses the GPT-NeoX vocabulary. Code: `common.py` gained the
+model entry + `m.model.decoder.layers` in `blocks()`; `run_interp.py` and `mine_pairs.py` take a model
+list on argv and `run_interp.py` now merges into `results/summary.json` instead of overwriting it (so
+the gpt2/pythia numbers are byte-identical to before, not re-run); `analyze*.py` iterate over three
+models; `analyze_bank.py` gained `jsd_matched()` and the ceiling-subset $w_{10-90}$ correlation.
+
+**Nothing superseded.** Every gpt2-medium and pythia-410m number in both deliverables is unchanged.
+The counts that aggregate over models moved with the added cells: hand-picked cells 10 -> 15, total
+sweeps 1210 -> 1815 (endpoint identity error still <= 4e-4, worst case 3.5e-4), "9 of 10 cells below
+the linear baseline" -> "13 of 15", and the smallest detectable correlation for the hand-picked set
+rho_min 0.75 (n=10) -> 0.51 (n=15).
+
+**New results (opt-350m).**
+- *Hand-picked pairs*: JSD / w10-90 / w_TV — `Mary`/`her` 0.038 / 0.734 / 0.356; `four`/`4`
+  0.027 / 0.907 / 0.680; `four`/`Four` 0.472 / 0.530 / 0.293; `Au`/`79` 0.296 / 0.705 / 0.177;
+  control `big`/`in` 0.646 / 0.143 / 0.068. The control is the sharpest of the five — the most vivid
+  single instance of the inversion in the report.
+- *Mined bank, block 0*: 61.0% of pairs sharp, median w_TV 0.221, median w10-90 0.511, 41.0%
+  monotonic, JSD range 0.000–0.693 (35.5% at/above 0.65).
+- *Association*: rho(JSD, w_TV) = -0.39 [-0.55,-0.21], p=1.3e-8; rho(JSD, w10-90) = -0.43
+  [-0.56,-0.27], p=3.5e-10; rho(JSD, PF) = +0.43 [+0.28,+0.56], p=3.4e-10. Below the ln 2 ceiling
+  (n=129): rho(w_TV) = -0.57 (p=1.3e-12), rho(w10-90) = -0.59 (p=3.1e-13). Partial rho controlling
+  for the block-0 angle Omega: -0.44 (raw -0.39).
+- *Depth*: median w_TV / % sharp at 23 / 11 / 3 blocks below the patch: 0.221 / 61.0% ->
+  0.307 / 36.5% -> 0.420 / 1.0%; monotonic 41.0% -> 77.5% -> 99.5%; ceiling-corrected rho flat at
+  -0.57 / -0.54 / -0.55 (all p <= 6.5e-11), matching gpt2-medium rather than pythia-410m.
+- *Ceiling-subset w10-90 correlation added for the older models too* (new column in the Table 4 /
+  ceiling table): gpt2-medium -0.54 (p=4.9e-12), pythia-410m -0.47 (p=2.3e-8).
+
+**New experiment: divergence-matched cross-model comparison.** Median w_TV per model inside fixed JSD
+bins, so the models are compared at equal endpoint divergence. gpt2-medium / opt-350m / pythia-410m —
+bin 0.00–0.20: 0.263 / 0.496 / 0.421; 0.20–0.40: 0.103 / 0.317 / 0.276; 0.40–0.65: 0.043 / 0.147 /
+0.220; 0.65–0.69: 0.047 / 0.166 / 0.274. gpt2-medium is sharpest in all four bins, so the prevalence
+gap is a model property and not an artifact of bank composition; opt-350m shares gpt2-medium's
+tokenizer yet plateaus 21 points less often and swaps rank with pythia-410m across the range, so the
+tokenizer does not explain the gap. The previous limitation "the prevalence gap ... is not attributed
+here to tokenizer or architecture" is replaced by "tokenizer ruled out; architecture, corpus and
+pretraining length remain confounded".
+
+**Figures.** Added `plots/jsd_matched.png` as **Figure 3** (median w_TV per JSD bin, three models),
+embedded with a visible caption in both deliverables. Figures 1, 2, 4 (was 3), 5 (was 4) and 6 (was 5)
+regenerated with a third model column/series; the old Figures 3–5 keep their content and are renumbered
+in reading order. All six embedded in both files; `check_render.py` passes on both.
+
+**Framing.** No re-frame. The headline claim is unchanged and now rests on three model families instead
+of two, and the Summary/Conclusion were rewritten to say so, plus a new Conclusion corollary that the
+calibration must be redone per model (Table 2).

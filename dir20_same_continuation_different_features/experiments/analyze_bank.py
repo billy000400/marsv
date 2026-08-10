@@ -19,7 +19,7 @@ from common import PAIRS, PLOTS, RESULTS
 
 CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00"]
 plt.rcParams["axes.prop_cycle"] = plt.cycler(color=CVD)
-MODELS = ["gpt2-medium", "pythia-410m"]
+MODELS = ["gpt2-medium", "pythia-410m", "opt-350m"]
 MK = ["o", "s", "^", "D", "v"]
 NBOOT = 2000
 LIN = {"w": 0.8, "wtv": 0.5}          # linear-response value of each statistic
@@ -72,6 +72,20 @@ def binned(rows, stat, nb=5):
     return out
 
 
+JSD_BINS = [0.0, 0.2, 0.4, 0.65, np.log(2) + 1e-9]
+
+
+def jsd_matched(rows):
+    """Median w_TV and % sharp within fixed JSD bins, so models are compared at equal divergence."""
+    out = []
+    for lo, hi in zip(JSD_BINS[:-1], JSD_BINS[1:]):
+        v = np.array([r["wtv"] for r in rows if lo <= r["jsd"] < hi])
+        out.append(dict(lo=lo, hi=hi, n=len(v),
+                        median_wtv=None if not len(v) else float(np.median(v)),
+                        frac_sharp=None if not len(v) else float(np.mean(v < THR["wtv"]))))
+    return out
+
+
 def main():
     rng = np.random.default_rng(0)
     bank = {m: json.load(open(os.path.join(RESULTS, f"bank_{m}.json"))) for m in MODELS}
@@ -115,7 +129,10 @@ def main():
         unsat = [r for r in rows if r["jsd"] < 0.65]
         ent["unsat"] = dict(n=len(unsat), rho_wtv=rho_of(unsat, "wtv"),
                             p=float(spearmanr([r["jsd"] for r in unsat],
-                                              [r["wtv"] for r in unsat])[1]))
+                                              [r["wtv"] for r in unsat])[1]),
+                            rho_w=rho_of(unsat, "w"),
+                            p_w=float(spearmanr([r["jsd"] for r in unsat],
+                                                [r["w"] for r in unsat])[1]))
         # Is the association just endpoint geometry? Partial Spearman controlling for the
         # block-0 angle Omega between the two patched activations.
         ent["omega"] = dict(
@@ -123,10 +140,11 @@ def main():
             rho_wtv=float(spearmanr([r["omega"] for r in rows], [r["wtv"] for r in rows])[0]),
             partial_jsd_wtv=partial_spearman([r["jsd"] for r in rows], [r["wtv"] for r in rows],
                                              [r["omega"] for r in rows]))
+        ent["jsd_matched"] = jsd_matched(rows)
         stats[m] = ent
 
     # ---- Figure: how common is a plateau in the bank? -------------------------------------
-    fig, ax = plt.subplots(1, 2, figsize=(10, 4.4), sharey=True)
+    fig, ax = plt.subplots(1, len(MODELS), figsize=(14, 4.4), sharey=True)
     ymax = max(np.histogram([r["wtv"] for r in bank[m]], bins=np.linspace(0, 0.6, 31))[0].max()
                for m in MODELS)
     for c, m in enumerate(MODELS):
@@ -159,8 +177,32 @@ def main():
     fig.savefig(os.path.join(PLOTS, "bank_prevalence.png"), dpi=140)
     plt.close(fig)
 
+    # ---- Figure: is the cross-model prevalence gap just a difference in JSD spread? --------
+    fig, ax = plt.subplots(figsize=(6.4, 4.4))
+    xs = np.arange(len(JSD_BINS) - 1)
+    for i, m in enumerate(MODELS):
+        b = stats[m]["jsd_matched"]
+        ax.plot(xs, [q["median_wtv"] for q in b], color=CVD[i], ls=["-", "--", ":"][i],
+                marker=MK[i], ms=9, lw=2, mec="k", mew=0.6, label=m)
+    ax.axhline(LIN["wtv"], color="0.35", ls=(0, (4, 3)), lw=1.4)
+    ax.text(0.02, LIN["wtv"] + 0.008, "linear response (0.5)", fontsize=7.5, color="0.3")
+    ax.axhline(THR["wtv"], color="0.1", ls=":", lw=1.4)
+    ax.text(0.02, THR["wtv"] - 0.01, "sharp threshold (0.25)", fontsize=7.5, color="0.1", va="top")
+    ax.set_xticks(xs)
+    ax.set_xticklabels(["%.2f-%.2f\n(n=%s)" % (
+        q["lo"], q["hi"], "/".join(str(stats[m]["jsd_matched"][k]["n"]) for m in MODELS))
+        for k, q in enumerate(stats[MODELS[0]]["jsd_matched"])], fontsize=7.5)
+    ax.set_xlabel("endpoint JSD bin (nats); n per bin = gpt2-medium / pythia-410m / opt-350m")
+    ax.set_ylabel("median $w_{\\mathrm{TV}}$ at final logits")
+    ax.set_ylim(0, 0.56)
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(os.path.join(PLOTS, "jsd_matched.png"), dpi=140)
+    plt.close(fig)
+
     # ---- Figure: the powered association test ---------------------------------------------
-    fig, ax = plt.subplots(2, 2, figsize=(10, 8), sharex=True)
+    fig, ax = plt.subplots(2, len(MODELS), figsize=(14, 8), sharex=True)
     for r, st in enumerate(["w", "wtv"]):
         for c, m in enumerate(MODELS):
             a = ax[r, c]

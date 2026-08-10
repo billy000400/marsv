@@ -163,3 +163,61 @@ deliverables end to end for newcomer readability and confirm every figure is cit
 
 On track? yes — PLAN.md S1–S5 all complete, ~100% of the plan done, no blocker; remaining work is an
 optional third-model generalization check.
+
+---
+## 2026-08-10 — iteration 4 (S6: third model family, OPT-350m)
+
+**Feedback check:** listed the direction root for `human_feedback*.md` / `*REVIEW*` without the
+`.addressed.md` suffix — none present. Proceeded with the plan's stated next step.
+
+**What I did.** Ran iteration 3's stated next step: added a third model family to settle the one
+question the report named and did not answer (is the 82% vs 48% block-0 prevalence gap a tokenizer
+effect?).
+- Downloaded `facebook/opt-350m` (`HF_HUB_DISABLE_XET=1`, as for gpt2-medium in iteration 1).
+- `common.py`: model entry + `m.model.decoder.layers` branch in `blocks()`. `run_interp.py` and
+  `mine_pairs.py`: model list from argv; `run_interp.py` merges into `summary.json` rather than
+  overwriting, so the two existing models' numbers were reused untouched instead of re-run.
+- Ran the 5 hand-picked pairs plus the 200-pair mined bank at blocks 0, 12 and 20 for opt-350m
+  (605 sweeps, ~9 min on the shared GPU).
+- `analyze_bank.py`: new `jsd_matched()` (median w_TV inside fixed JSD bins) + `plots/jsd_matched.png`,
+  and the ceiling-subset w10-90 correlation that Table 4 was quoting for two models only.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. Chose OPT-350m over the alternatives because it is matched to both existing models on the two
+   structural quantities Experiment 4 shows to matter (24 blocks, d_model 1024) *and* shares
+   gpt2-medium's exact tokenizer — so it can falsify the tokenizer explanation. Rejected: gpt2-large
+   (cached, but 36 blocks — confounds depth with family) and pythia-1.4b-deduped (cached, but same
+   tokenizer *and* architecture as pythia-410m, so it tests width, not the open question).
+2. Ran all three patch sites for opt-350m rather than only blocks 0 and 20 as PLAN.md suggested: the
+   middle point costs ~3 min and keeps Figure 6 comparable across the three series.
+3. Compared models inside fixed JSD bins rather than reweighting one bank to another's JSD
+   distribution. Binning is transparent and shows the within-model trend at the same time; rejected
+   propensity-style reweighting as unnecessary machinery for a 4-bin comparison.
+
+**What I learned.**
+- The headline finding replicates in a third family: below the ln 2 ceiling, rho(JSD, w_TV) = -0.57
+  (n=129, p=1.3e-12) in opt-350m, between gpt2-medium's -0.61 and pythia-410m's -0.45. The inverted
+  association is now 3/3 models, on both width statistics and PF.
+- The depth result also replicates, and opt-350m patterns with gpt2-medium rather than pythia-410m:
+  61% -> 36.5% -> 1.0% sharp as depth is removed, with the divergence correlation flat (-0.57 / -0.54 /
+  -0.55) even at 1% prevalence. pythia's rho collapse at block 20 really is a floor effect of its
+  response having gone fully linear, not a general depth law.
+- **The tokenizer explanation is dead.** opt-350m's vocabulary is exactly gpt2-medium's 50257 token
+  strings plus 8 specials and it segments the prompts identically, yet it plateaus 21 points less
+  often, and at matched divergence gpt2-medium is the sharpest model in all four JSD bins (by 2-4x on
+  the median). The gap is a model property; architecture, corpus and pretraining length stay
+  confounded, which is the honest statement now in the limitations.
+- Nice presentational bonus: in opt-350m the dissimilar *control* is the sharpest of its five
+  hand-picked cells (w_TV 0.068, a near-step), which makes the report's central warning legible in a
+  single panel of Figure 1.
+
+**Next step.** PLAN.md S1-S6 are complete and the last named open question is answered as far as three
+models can answer it. The remaining work is finalization: nothing in the deliverables is stale, both
+pass `check_render.py`, all six figures are embedded with visible captions and cited by number. If a
+further iteration runs, the highest-value additions are (a) a depth-mismatched model (e.g. a 12-block
+or 36-block checkpoint) to test whether the depth curve of Figure 6 is about absolute block count or
+fraction of the stack, and (b) pairs that differ at an earlier position rather than the final token.
+Neither is required by PLAN.md.
+
+On track? yes — PLAN.md S1-S5 complete plus the unplanned S6 third-model generalization; ~100% of the
+plan done, no blocker; the direction's three headline claims now each rest on three model families.

@@ -11,6 +11,7 @@ PLOTS = os.path.join(ROOT, "plots")
 MODELS = {
     "gpt2-medium": dict(name="gpt2-medium", revision=None),
     "pythia-410m": dict(name="EleutherAI/pythia-410m-deduped", revision="step143000"),
+    "opt-350m": dict(name="facebook/opt-350m", revision=None),
 }
 
 # (key, label, prefix, final token A, final token B, is_control)
@@ -48,7 +49,9 @@ def blocks(m):
     """The transformer blocks; each block's output[0] is that block's resid_post."""
     if hasattr(m, "transformer"):          # GPT-2
         return m.transformer.h
-    return m.gpt_neox.layers               # Pythia / GPT-NeoX
+    if hasattr(m, "gpt_neox"):             # Pythia / GPT-NeoX
+        return m.gpt_neox.layers
+    return m.model.decoder.layers          # OPT
 
 
 def tokenize_pair(tok, prefix, a_str, b_str):

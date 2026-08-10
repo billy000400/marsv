@@ -43,11 +43,11 @@ def get_prefixes(tok, rng):
     return out
 
 
-def main(layer=0):
+def main(layer=0, model_keys=("gpt2-medium", "pythia-410m", "opt-350m")):
     alphas = np.linspace(0, 1, N_ALPHA)
     suf = "" if layer == 0 else f"_L{layer}"
 
-    for mkey in ["gpt2-medium", "pythia-410m"]:
+    for mkey in model_keys:
         tok, m = load(mkey)
         dev = next(m.parameters()).device
         rng = np.random.default_rng(SEED)                 # same prefixes/ranks for both models
@@ -98,4 +98,5 @@ def main(layer=0):
 
 
 if __name__ == "__main__":
-    main(layer=int(sys.argv[1]) if len(sys.argv) > 1 else 0)
+    main(layer=int(sys.argv[1]) if len(sys.argv) > 1 else 0,
+         model_keys=sys.argv[2:] or ("gpt2-medium", "pythia-410m", "opt-350m"))

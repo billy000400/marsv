@@ -4,6 +4,7 @@ Writes results/<model>.npz (per-pair d-curves) and results/summary.json.
 """
 import json
 import os
+import sys
 
 import numpy as np
 import torch
@@ -117,13 +118,14 @@ def jsd(pa, pb):
     return 0.5 * kl(pa, m) + 0.5 * kl(pb, m)
 
 
-def main():
+def main(model_keys=("gpt2-medium", "pythia-410m", "opt-350m")):
     os.makedirs(RESULTS, exist_ok=True)
     os.makedirs(PLOTS, exist_ok=True)
     alphas = np.linspace(0, 1, N_ALPHA)
-    summary = {}
+    path = os.path.join(RESULTS, "summary.json")
+    summary = json.load(open(path)) if os.path.exists(path) else {}
 
-    for mk_ in ["gpt2-medium", "pythia-410m"]:
+    for mk_ in model_keys:
         tok, m = load(mk_)
         curves, meta = {}, {}
         for key, label, prefix, a_str, b_str, is_ctrl in PAIRS:
@@ -176,10 +178,10 @@ def main():
         del m
         torch.cuda.empty_cache()
 
-    with open(os.path.join(RESULTS, "summary.json"), "w") as f:
+    with open(path, "w") as f:
         json.dump(summary, f, indent=2)
-    print("wrote", os.path.join(RESULTS, "summary.json"))
+    print("wrote", path)
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:] or ("gpt2-medium", "pythia-410m", "opt-350m"))

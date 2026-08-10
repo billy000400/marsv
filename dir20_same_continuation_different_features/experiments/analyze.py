@@ -12,7 +12,7 @@ from common import PAIRS, PLOTS, RESULTS
 
 CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00"]
 plt.rcParams["axes.prop_cycle"] = plt.cycler(color=CVD)
-MODELS = ["gpt2-medium", "pythia-410m"]
+MODELS = ["gpt2-medium", "pythia-410m", "opt-350m"]
 LS = ["-", "--", ":", "-.", (0, (3, 1, 1, 1, 1, 1))]
 MK = ["o", "s", "^", "D", "v"]
 
@@ -42,7 +42,7 @@ def main():
     ctrl = {p[0]: p[5] for p in PAIRS}
 
     # ---- Figure 1: raw final-logit curves -------------------------------------------------
-    fig, ax = plt.subplots(len(keys), 2, figsize=(8.5, 13), sharex=True, sharey=True)
+    fig, ax = plt.subplots(len(keys), len(MODELS), figsize=(12.5, 13), sharex=True, sharey=True)
     for r, k in enumerate(keys):
         for c, m in enumerate(MODELS):
             a = ax[r, c]
@@ -70,7 +70,7 @@ def main():
     plt.close(fig)
 
     # ---- Figure 2: layerwise widths -------------------------------------------------------
-    fig, ax = plt.subplots(1, 2, figsize=(10, 4), sharey=True)
+    fig, ax = plt.subplots(1, len(MODELS), figsize=(14, 4), sharey=True)
     for c, m in enumerate(MODELS):
         for i, k in enumerate(keys):
             e = S[m][k]
@@ -103,7 +103,7 @@ def main():
 
     METS = [("w", "$w_{10\\text{-}90}$ at final logits", 0.8, 0.5),
             ("wtv", "$w_{\\mathrm{TV}}$ at final logits", 0.5, 0.25)]
-    fig, ax = plt.subplots(2, 2, figsize=(10, 8), sharex=True)
+    fig, ax = plt.subplots(2, len(MODELS), figsize=(14, 8), sharex=True)
     for r, (mt, ylab, lin, thr) in enumerate(METS):
         for c, m in enumerate(MODELS):
             sub = [x for x in rows if x["model"] == m]

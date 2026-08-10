@@ -18,10 +18,12 @@ from common import PLOTS, RESULTS
 
 CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00"]
 plt.rcParams["axes.prop_cycle"] = plt.cycler(color=CVD)
-MODELS = ["gpt2-medium", "pythia-410m"]
+MODELS = ["gpt2-medium", "pythia-410m", "opt-350m"]
 LAYERS = [0, 12, 20]
 STYLE = {"gpt2-medium": dict(color=CVD[0], ls="-", marker="o"),
-         "pythia-410m": dict(color=CVD[1], ls="--", marker="s")}
+         "pythia-410m": dict(color=CVD[1], ls="--", marker="s"),
+         "opt-350m": dict(color=CVD[2], ls=":", marker="^")}
+HATCH = {"gpt2-medium": "//", "pythia-410m": "\\\\", "opt-350m": ".."}
 
 
 def load_bank(m, layer):
@@ -71,7 +73,7 @@ def main():
                    label=m, **st)
         ax[0].fill_between(LAYERS, [q["q1_wtv"] for q in s], [q["q3_wtv"] for q in s],
                            color=st["color"], alpha=0.16,
-                           hatch="//" if m == MODELS[0] else "\\\\", edgecolor=st["color"],
+                           hatch=HATCH[m], edgecolor=st["color"],
                            linewidth=0.0)
         ax[1].errorbar(LAYERS, [q["rho_wtv_unsat"] for q in s],
                        yerr=[[q["rho_wtv_unsat"] - q["ci_unsat"][0] for q in s],
