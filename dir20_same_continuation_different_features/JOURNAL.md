@@ -361,3 +361,72 @@ take n from 38 to a few hundred at the same cost.
 On track? yes — all five feedback points addressed with new experiments rather than text edits alone;
 both deliverables rewritten and passing `check_render.py`; no unaddressed feedback remains and no STOP
 written (the hypothesis test is open work).
+
+---
+
+## 2026-08-10 (iteration: finish S9 curation, run S10 head ablation)
+
+**Feedback check.** Listed the direction root: the only matching file is
+`human_feedback.txt.addressed.md`, already suffixed. Nothing unaddressed, so no STOP is blocked by
+feedback — and none was written, because S9/S10 opened further work.
+
+**What I found on entry.** The previous iteration had been cut off mid-curation. `circuit_features.py`
+and its plots were written at 20:46 and REPORT.md's Results section had been updated at 20:49, but
+RESULTS.md, CHANGELOG.md, JOURNAL.md and PLAN.md were all still at ~19:50, and REPORT.md's own
+Conclusion still reported the superseded n=38 IRD test that its Results section had just replaced.
+Two sweep totals were also wrong (Methods said 4765, Results said 3645; the true count is 4750, which
+I recomputed from the stored result files rather than trusting either). First half of the iteration
+was making the deliverables internally consistent again.
+
+**What I did.**
+- Recomputed the endpoint identity bound over every stored sweep (bank JSONs + low-JSD rows): worst
+  case 3.53e-4, so the report's "<= 4e-4" is now stated as "<= 3.6e-4" in RESULTS and "<= 3.5e-4" for
+  the ablation runs.
+- Rewrote RESULTS.md end to end at current-best, dropping the IRD-vs-IPW experiment in favour of the
+  feature-level version, and rewrote REPORT.md's Conclusion and Limitations.
+- Wrote `experiments/ablate_heads.py` and ran the S10 intervention: 3 doses x 2 models x ~380 low-JSD
+  pairs, ~14 min of GPU wall-clock.
+- Added the numbered figure citation to the motivating sentence of every figure in both files (five
+  figures in each were previously named only inside their own caption).
+
+**What I learned.**
+- The intervention worked, and much more strongly than the pilot suggested. My n=40 pilots showed
+  nothing and no dose trend; at full n the gpt2-large effect is enormous (median w_TV 0.198 -> 0.358 at
+  3% of heads, -> 0.484 at 10%, p ~ 1e-43). I nearly took the pilot as the answer, and the lesson is
+  that the pilot was under-powered for a paired comparison with a heavy-tailed DV, not that the effect
+  was absent. Running the pre-specified dose sweep at full n rather than picking a dose from the pilot
+  was the right call for a second reason: the dose-response is itself the strongest part of the
+  evidence.
+- The size of a correlation was a poor guide to the size of an intervention. gpt2-medium has the
+  *stronger* HCD correlation (-0.36 vs -0.29) and the *weaker* intervention effect by a factor of 15.
+  Worth saying out loud in the report, because the tempting move — inferring causal importance from
+  correlation strength — would have got the ranking backwards.
+- The matched control is what carries the claim. My first control construction drew from the low-delta
+  half of the heads and removed 35% less write magnitude than the treatment (340 vs 221), which would
+  have made any effect uninterpretable. Matching each treated head to its 24 nearest neighbours by
+  |c^A| + |c^B| and taking the lowest-delta one brought the ratio to 1.01-1.12.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. Operationalised "the circuit that differs" as the top-k heads by delta_h, HCD's own per-head
+   numerator term. Rejected: path patching (needs a per-pair circuit search, out of budget) and
+   ablating SAE features (public SAEs exist for gpt2-small only, which Experiment 7 does not cover).
+   The consequence is stated in the report: this shows the measured construct is load-bearing, not
+   that an independently-discovered circuit is.
+2. Mean-ablation (head output held at its mean over 100 bank prompts) rather than zero-ablation, at
+   the final token only. Zeroing is further off-distribution, and ablating at every position would
+   change the prefix computation and therefore both endpoints for reasons unrelated to the switch.
+3. Re-ran both endpoints inside each ablation condition so d(0)=0 and d(1)=1 hold within condition.
+   The alternative — measuring d against the unablated endpoints — would confound "the switch moved"
+   with "the endpoints moved".
+4. Three doses fixed before looking (3/6/10%). Rejected: choosing one dose after the pilot, which
+   would have been selection on the outcome.
+
+**Next step.** Two candidates, in order. (a) Localise: the differential heads are currently a per-pair
+top-k list; check whether the same heads recur across pairs in gpt2-large, which would turn "a
+pair-specific set" into a named circuit and explain the 15-fold gpt2-medium gap. (b) Explain the model
+gap directly by running the same intervention in gpt2-small and one non-GPT-2 model, which would say
+whether the effect tracks relative depth (Experiment 5) or the family.
+
+On track? yes — deliverables are internally consistent again, both pass `check_render.py` with all ten
+figures embedded and captioned, and the iteration added a causal result rather than only repairing
+text; no unaddressed feedback and no STOP (S10 opened the localisation question above).

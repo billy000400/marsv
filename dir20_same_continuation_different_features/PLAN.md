@@ -66,8 +66,14 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
 - [x] S8 (operator feedback, `human_feedback.txt`) - Reproduce in GPT-2 Large (Matthew's model), add
   his smooth comparison pair `big`/`large`, correct the prevalence counts to the predefined criterion,
   soften the depth claim, and give the advisor's actual hypothesis its first direct test.
-- [ ] S9 (open) - Sharper hypothesis test: replace the IRD proxy with a feature-level measurement
-  (SAE feature sets or path patching) and mine specifically for low-JSD pairs to raise power.
+- [x] S9 - Sharper hypothesis test: replace the IRD proxy with feature-level measurements (SAE feature
+  sets in gpt2-small; attention-head and MLP-neuron sets in three models) and mine specifically for
+  low-JSD pairs, taking n from 38 to 365/399/356.
+- [x] S10 (added) - Make the circuit-difference result causal: mean-ablate the differentially-engaged
+  heads against an engagement-matched control set, at three pre-specified doses, in gpt2-medium and
+  gpt2-large.
+- [ ] S11 (open) - Localise the differential heads: do the same heads recur across pairs in
+  gpt2-large, and does the intervention effect track relative depth or model family?
 
 ## Required outputs
 
@@ -85,11 +91,12 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S8 complete (2026-08-10); S9 open. The success criterion is met and exceeded.** All 5 hand-picked
-pairs validate in all three 24-block models (gpt2-medium, pythia-410m, opt-350m), a 200-pair-per-model
-corpus-mined bank carries the association test in five models, that bank has been re-run at three
-patch sites in the 24-block models and at four/five sites in the depth-mismatched GPT-2 models
-— 3645 sweeps in total, endpoint identity error <= 3.5e-4 throughout.
+**S1-S10 complete (2026-08-10); S11 open. The success criterion is met and exceeded.** All 6
+hand-picked pairs validate in all five models, a 200-pair-per-model corpus-mined bank carries the
+association test in five models, that bank has been re-run at three patch sites in the 24-block models
+and at four/five sites in the depth-mismatched GPT-2 models, a dedicated low-JSD bank (365/399/356
+pairs) carries the hypothesis test, and that bank has been re-swept under six ablation conditions in
+two models — 9280 sweeps in total, endpoint identity error <= 3.6e-4 throughout.
 
 **Verdict.** Matthew's contrast reproduces in his own model (gpt2-large) and not in gpt2-medium;
 relative depth governs plateau strength; the base rate of plateaus among arbitrary pairs is high
@@ -130,17 +137,26 @@ opt-350m / pythia-410m. Depth is now stated as necessary but not sufficient (big
 with 35 blocks below the patch). The JSD-vs-width correlation is demoted to a descriptive regularity
 that does not test the advisor's hypothesis.
 
-**S8 hypothesis test.** First direct test of "holding output JSD low, different circuits/features may
-occupy different plateaus": JSD held < 0.1, IRD (internal representational distance) as IV, IPW
-(intermediate-plateau width) as DV. Null in both models — gpt2-large rho = +0.17 (p=0.31, n=38, with
-0.0% of pairs showing any intermediate plateau), gpt2-medium rho = -0.00 (p=0.99, n=32). Under-powered
-(rho_min = 0.32 at n=38) and proxy-based, so this is a first datapoint, not a refutation.
+**S9 outcome (supersedes the S8 hypothesis test).** With feature-level instruments (SAE feature sets,
+attention-head sets and contributions, MLP neuron sets) on banks mined specifically for JSD < 0.1, the
+hypothesis splits. The intermediate-plateau reading fails with power: 14/14 instrument-model tests give
+rho in [-0.11, +0.12] against IPW, nothing survives Holm correction, rho_min = 0.10 at n ~ 370, and
+only 2.0% of gpt2-large's low-JSD pairs pause anywhere in the middle. The endpoint-plateau reading
+holds: 14/14 tests against w_TV are negative (to -0.36), and the head-level instruments beat the old
+IRD proxy roughly threefold (-0.36 vs -0.13 in gpt2-medium).
+
+**S10 outcome.** The endpoint-plateau association is causal in gpt2-large. Mean-ablating the top-3% of
+heads by differential engagement moves median w_TV 0.198 -> 0.358 (+81%); 6% -> 0.441; 10% -> 0.484,
+within 3% of the linear response. The engagement-matched control set does nothing (0.198 -> 0.200).
+Paired deltas +0.097/+0.145/+0.199, all CIs excluding zero, p ~ 1e-43 to 1e-48, 83-87% of pairs.
+gpt2-medium replicates the sign at every dose (+0.009/+0.009/+0.010, p <= 0.019) but ~15x smaller,
+even though its correlation was the stronger of the two.
 
 ## Next step
 
-S9: the sharper hypothesis test. Replace IRD with a feature-level measurement of circuit difference
-(SAE feature sets on GPT-2 Large residuals, or path patching over attention heads for a subset of
-low-JSD pairs) and mine specifically for low-JSD pairs to take n from 38 to a few hundred. Secondary,
-still open from before: pairs differing at an *earlier* position rather than the final token. Both
-deliverables are current, pass `experiments/check_render.py`, and embed all eight figures with visible
-captions cited by number.
+S11: localise. The differential heads are currently a per-pair top-k list; check whether the same heads
+recur across pairs in gpt2-large, which would turn "a pair-specific set" into a named circuit, and run
+the same intervention in gpt2-small and one non-GPT-2 model to see whether the 15-fold gpt2-medium gap
+tracks relative depth or model family. Secondary, still open: pairs differing at an *earlier* position
+rather than the final token. Both deliverables are current, pass `experiments/check_render.py`, and
+embed all ten figures with visible captions cited by number.

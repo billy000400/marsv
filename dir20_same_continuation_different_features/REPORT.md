@@ -1,4 +1,4 @@
-# Activation-interpolation plateaus: what reproduces, what depth explains, and what the hypothesis still needs
+# Activation-interpolation plateaus: what reproduces, what depth explains, and which heads cause the switch
 
 > Final, presentable, current-best only (history is in CHANGELOG.md).
 
@@ -45,6 +45,14 @@ sharper transitions, in every model and on every instrument we built ($\rho$ fro
 14 of 14 negative). Measuring the machinery rather than the geometry is what surfaces this — the
 residual-stream proxy used before gives $\rho = -0.13$ in GPT-2 Medium where the head-level measurement
 gives $-0.36$.
+
+**And in GPT-2 Large that second reading is causal.** Mean-ablating the 3% of attention heads that
+write most differently for the two prompts widens the median transition by 81% ($w_{TV}$ $0.198 \to
+0.358$); at 10% of heads the model stops switching altogether and responds proportionally
+($0.484$ against the linear response's $0.5$). Deleting an equal-sized set of heads matched on how much
+they write, but chosen to write *similarly* for the two prompts, changes nothing ($0.198 \to 0.200$).
+So the sharp switch in the model where this phenomenon was reported is produced by a small,
+pair-specific set of heads — identifiable in advance from the two clean forward passes.
 
 ## Methods
 
@@ -116,6 +124,17 @@ same runs and cannot be told apart. To separate them we mine a fresh 200-pair ba
 other: blocks 0/6/8/10 for the 12-block model and blocks 0/12/18/24/31 for the 36-block model, against
 blocks 0/12/20 for the 24-block model.
 
+**Head-ablation intervention (Experiment 7).** Experiment 6 is correlational, so it cannot say whether
+the differentially-engaged heads *make* the switch sharp. Experiment 7 removes them and looks. For each
+low-JSD pair in GPT-2 Medium and GPT-2 Large we mean-ablate a set of attention heads at the final token
+only, then re-run the entire sweep — both endpoints and all 101 interpolation points — with the
+ablation active, so $d(0)=0$ and $d(1)=1$ still hold and $w_{TV}$ describes the ablated model's own
+switch. Ablating at the final token only keeps every earlier position, and therefore the whole prefix
+computation, untouched. The replacement value for an ablated head is its mean output over the final
+tokens of 100 bank prompts, which keeps the model on-distribution in a way zeroing does not. Three
+doses are run — 3%, 6% and 10% of all heads (12/23/38 of GPT-2 Medium's 384; 22/43/72 of GPT-2 Large's
+720) — because a single dose cannot distinguish "no effect" from "too small an intervention".
+
 **Validity check.** For the hand-written pairs we require, per model, that the two prompts tokenize to
 an identical prefix and exactly one differing single final token. All 6 pairs passed in all five models
 (prefix lengths 3–14 tokens), so all 30 model-pair cells are reported and no multi-token interpolation
@@ -127,11 +146,12 @@ the prefix is identical and attention is causal, every earlier position is bit-i
 two prompts, so one forward pass per interpolation point fully determines the run. For the hand-picked
 pairs, downstream `resid_post` is also recorded at the final token of every later block plus the final
 logits; for the mined bank only the final logits are recorded. Every sweep uses 101 evenly spaced
-interpolation values on $[0,1]$, under `torch.no_grad()` with fixed seeds. That comes to 4765 sweeps:
+interpolation values on $[0,1]$, under `torch.no_grad()` with fixed seeds. That comes to 4750 sweeps:
 30 hand-picked model-pair cells, 1000 mined-bank sweeps at block 0 across five models, 1200 more at
 blocks 12 and 20 in the three 24-block models, 1400 at the extra Experiment 5 sites, and 1120 on the
 low-JSD banks of Experiment 6 (365 pairs from 102 prefixes in GPT-2 Small, 399 from 119 in GPT-2
-Medium, 356 from 113 in GPT-2 Large).
+Medium, 356 from 113 in GPT-2 Large). Experiment 7 re-runs 755 of those low-JSD sweeps under six
+ablation conditions each, for 4530 more.
 
 ### Metrics
 
@@ -329,6 +349,26 @@ plateau and the interpolation snaps between them — which is a narrow transitio
 here with output divergence held low so it is not the Table 3 regularity in disguise. Both readings are
 tested against every instrument.
 
+**Differential engagement $\delta_h$, and the control it defines** — which heads Experiment 7 removes,
+and what it removes instead. HCD asks how differently the heads write *on average*; to intervene we
+need the same question per head, so $\delta_h$ is simply HCD's own numerator term for head $h$, large
+when the head writes a lot and writes in different directions for the two prompts. Writing
+$m_h = \lVert c_h^A\rVert + \lVert c_h^B\rVert$ for how much head $h$ writes in total:
+
+```math
+\delta_h \;=\; m_h\Big(1 - \frac{c_h^A \cdot c_h^B}{\lVert c_h^A\rVert\,\lVert c_h^B\rVert}\Big)
+```
+
+The **differential** condition ablates the $k$ heads with the largest $\delta_h$. Removing those heads
+also removes a chunk of ordinary attention output, and that alone could change the curve, so the
+**matched-control** condition removes an equal-sized set chosen for the same $m_h$ and the smallest
+$\delta_h$: for each differential head we take the 24 heads whose $m_h$ is closest to it and keep the
+one that writes most similarly for the two prompts. The two conditions therefore delete about the same
+amount of head output and differ in whether that output was prompt-discriminating. Results reports the
+achieved ratio of removed $\sum_h m_h$ as a check on the matching, and the drop in HCD as the
+manipulation check: an ablated head writes the identical mean vector for both prompts, so it can no
+longer contribute any circuit difference.
+
 **Association tests.** All correlations are Spearman rank correlations, because the predictions are
 about ordering and the relationships need not be linear. Pairs that share a prefix are not independent,
 so confidence intervals come from a **cluster bootstrap**: resample the prefixes with replacement, take
@@ -352,7 +392,7 @@ activation edit:
 d(\alpha) = \alpha \quad\Longrightarrow\quad w_{10\text{-}90} = 0.8,\quad w_{TV} = 0.5,\quad \mathrm{PF} = 0.2,\quad \mathrm{IPW} = 0.10
 ```
 
-It appears as the gray dashed diagonal in Figure 1 and a gray dashed line in Figures 2–8.
+It appears as the gray dashed diagonal in Figure 1 and a gray dashed line in Figures 2–10.
 
 **Matthew's smooth case as the negative example** — `The house was` + ` big` / ` large`, run through
 identical machinery. This is the pair reported as *not* plateauing, so it is the reference for what a
@@ -370,9 +410,16 @@ two-sided test at $\alpha = 0.05$ using the Fisher $z$ transform:
 ```
 
 This is $0.14$ at $n=200$ (the mined bank) and $0.10$ at $n \approx 370$ (Experiment 6's low-JSD
-banks), so Experiment 6's null covers everything but small associations. An earlier version of that
-experiment, filtering the general bank instead of mining for low divergence, had $n = 38$ and
-$\rho_{\min} = 0.32$ — it could only have detected effects three times larger.
+banks), so Experiment 6's null covers everything but small associations. Filtering the general bank down
+to low divergence, instead of mining for it, would have left roughly 35 pairs per model and
+$\rho_{\min} = 0.32$ — three times coarser, which is why the dedicated bank is worth its cost.
+
+**Engagement-matched head ablation** — the baseline the causal claim of Experiment 7 rests on. Deleting
+the differential heads must be compared against deleting *something*, or any change is just the cost of
+losing attention output. The control condition removes the same number of heads with the same total
+write magnitude $\sum_h m_h$ (achieved ratio $1.01$–$1.12$), chosen for the smallest $\delta_h$, so it
+holds everything fixed except whether the removed heads discriminated between the two prompts. Its
+effect on $w_{TV}$ is the null against which the differential condition is read.
 
 **Harness identity check** — patching $h_0$ and $h_1$ must reproduce the unpatched runs, giving
 $d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error.
@@ -380,9 +427,9 @@ $d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error
 ## Results
 
 **The harness is correct.** All 6 hand-written pairs tokenized validly in all five models, and across
-all 3645 sweeps the patched runs at the endpoints reproduced the clean forward passes to
-$|d(0)| \le 4 \times 10^{-4}$ and $|d(1) - 1| \le 4 \times 10^{-4}$. The numbers below are about the
-models, not about patching artifacts.
+all 4750 sweeps the patched runs at the endpoints reproduced the clean forward passes to
+$|d(0)| \le 3.6 \times 10^{-4}$ and $|d(1) - 1| \le 3.6 \times 10^{-4}$. The numbers below are about
+the models, not about patching artifacts.
 
 ### The reported contrast reproduces in GPT-2 Large and fails in GPT-2 Medium
 
@@ -457,7 +504,8 @@ Large panel and drifts toward the diagonal as depth falls; row 6 stays near the 
 
 ### For an arbitrary prompt pair, a plateau is the common case
 
-A single pair's plateau means little without a base rate. The mined bank supplies one.
+A single pair's plateau means little without a base rate. The mined bank supplies one, and Figure 2
+shows where the hand-picked pairs fall inside it.
 
 ![Distribution of transition sharpness over 200 mined prompt pairs per model, with the hand-picked pairs marked](plots/bank_prevalence.png)
 
@@ -493,7 +541,7 @@ This section reports a relationship in the mined bank between how differently th
 the next token and how sharp the transition is. It is worth knowing, because anyone sweeping pairs will
 encounter it, and because its direction is the opposite of what one might guess. It is **not** a test
 of the motivating hypothesis, which concerns matched-output pairs and intermediate plateaus; that test
-is Experiment 6.
+is Experiment 6. Figure 3 plots the relationship in all five models.
 
 ![Endpoint divergence against two sharpness statistics for 200 mined pairs per model, with fits](plots/bank_regression.png)
 
@@ -524,8 +572,8 @@ distribution is populated by divergent pairs, so sharpness alone should not be r
 shared continuation. It says nothing about whether two prompts with matched predictions differ
 internally.
 
-The cross-model differences in Table 2 survive matching on divergence, so they are properties of the
-models rather than of how each bank happened to be distributed.
+Figure 4 asks whether the cross-model differences in Table 2 survive matching on divergence. They do,
+so they are properties of the models rather than of how each bank happened to be distributed.
 
 ![Median transition width per endpoint-divergence bin for five models](plots/jsd_matched.png)
 
@@ -538,8 +586,8 @@ bin, and all lines fall from left to right.
 
 ### Depth below the patch is what allows a plateau to form
 
-Sharpness has to originate somewhere. Recomputing the width at every block between the patch site and
-the output locates it.
+Sharpness has to originate somewhere. Figure 5 locates it by recomputing the width at every block
+between the patch site and the output.
 
 ![Transition width versus recording block for six prompt pairs in five models](plots/layerwise_widths.png)
 
@@ -550,7 +598,8 @@ all vary together; see legend); panels are models. Gray dashed = linear response
 plateau threshold (0.5). Every pair starts near 0.8 just after the patch; some narrow steeply with
 depth, and `big`/`large` stays near the top in every model.
 
-Reading out earlier is not the same as computing less, so the causal version moves the patch instead.
+Reading out earlier is not the same as computing less, so the causal version moves the patch instead;
+Figure 6 gives the result.
 
 ![Median transition width and JSD-sharpness correlation against patch site for three models](plots/depth_effect.png)
 
@@ -619,7 +668,7 @@ reading they should behave alike. They do not: median $w_{TV}$ is $0.255$ agains
 3.2, and 47.0% of pairs sharp against 82.0%. Those 23 blocks are almost the whole of the 24-block model
 and two thirds of the 36-block one. At 11 blocks below the disagreement is worse and the ordering
 inverts the absolute reading outright — the 12-block model is the sharpest (0.153) and the 36-block
-model the flattest (0.444).
+model the flattest (0.444). Figure 7 puts the two readings of depth side by side.
 
 ![Median transition width against blocks below the patch and against fraction of the stack below the patch, for three GPT-2 models of different depth](plots/depth_scaling.png)
 
@@ -752,14 +801,14 @@ machinery are not the same quantity, and the earlier proxy was diluting the sign
 of three. In GPT-2 Small the SAE instrument matches the head-level ones ($-0.21$ against $-0.21$),
 which is the reassuring case: two very different ways of asking "are different features involved" agree.
 
-**What the result does not license.** These are rank correlations of $0.2$–$0.4$, so circuit difference
-orders the curves without determining them — it accounts for something like 4–13% of the rank variance
-in $w_{TV}$, against the far larger effect of relative depth in Experiment 5. The instruments are also
-correlated with each other by construction, so fourteen tests are not fourteen independent
-replications; the honest summary is one effect, seen from six angles in three models. And the design is
-correlational: we did not intervene on which heads fire, so "different circuits sharpen the switch"
-remains an association, with an ablation or path-patching intervention the natural way to make it
-causal.
+**What the correlations alone do not license.** These are rank correlations of $0.2$–$0.4$, so circuit
+difference orders the curves without determining them — it accounts for something like 4–13% of the
+rank variance in $w_{TV}$, against the far larger effect of relative depth in Experiment 5. The
+instruments are also correlated with each other by construction, so fourteen tests are not fourteen
+independent replications; the honest summary is one effect, seen from six angles in three models.
+
+Figure 9 puts all fourteen tests on one axis, which is the clearest way to see the two readings of the
+hypothesis come apart.
 
 ![Spearman correlations between six circuit-difference measures and two plateau statistics in three models](plots/circuit_forest.png)
 
@@ -772,6 +821,77 @@ grouped by model (gpt2-small circles, gpt2-medium squares, gpt2-large triangles,
 horizontal rules). The gray band marks $\lvert\rho\rvert < 0.10$, the smallest correlation these
 sample sizes can detect; the dashed vertical line is no association. Large markers with thick edges are
 the three pre-specified primary tests.
+
+### Removing the differentially-engaged heads destroys the sharp switch in GPT-2 Large
+
+An association between circuit difference and sharpness has an obvious innocent explanation: some third
+property of a prompt pair could produce both. The way to rule that out is to delete the machinery and
+see whether the switch survives. Experiment 7 mean-ablates, at the final token only, the $k$ heads that
+write most differently for the two prompts, and compares that against deleting an equal-sized set of
+heads matched on how much they write but chosen to write *similarly* for the two prompts. Both
+conditions remove about the same quantity of attention output — the median ratio of removed
+$\sum_h m_h$ is $1.01$–$1.02$ in GPT-2 Large and $1.08$–$1.12$ in GPT-2 Medium — so the comparison
+isolates the discriminating part. Both endpoints are re-run under the ablation, and the identity check
+still holds ($|d(0)|, |d(1)-1| \le 3.5\times10^{-4}$), so these are the ablated models' own switches.
+
+**Table 9 — the intervention, at three doses.** $k$ is the number of heads ablated. "median $w_{TV}$"
+is over that model's whole low-JSD bank; $\Delta$ is the *paired* median of
+$w_{TV}(\text{differential}) - w_{TV}(\text{control})$ with a 95% cluster bootstrap over prefixes and a
+Wilcoxon signed-rank $p$; "HCD left" is the median head-contribution distance after the differential
+ablation as a fraction of its unablated value, the manipulation check.
+
+| Model | dose ($k$) | median $w_{TV}$: none | control | differential | $\Delta$ | 95% CI | $p$ | pairs with $\Delta>0$ | HCD left |
+|---|---|---|---|---|---|---|---|---|---|
+| gpt2-large | 3% (22) | 0.198 | 0.198 | **0.358** | $+0.097$ | $[+0.054, +0.146]$ | $1.4\times10^{-43}$ | 83% | 0.76 |
+| gpt2-large | 6% (43) | 0.198 | 0.196 | **0.441** | $+0.145$ | $[+0.093, +0.201]$ | $1.8\times10^{-48}$ | 87% | 0.65 |
+| gpt2-large | 10% (72) | 0.198 | 0.200 | **0.484** | $+0.199$ | $[+0.125, +0.268]$ | $3.3\times10^{-47}$ | 87% | 0.54 |
+| gpt2-medium | 3% (12) | 0.257 | 0.251 | 0.264 | $+0.009$ | $[+0.000, +0.014]$ | $0.019$ | 55% | 0.71 |
+| gpt2-medium | 6% (23) | 0.257 | 0.248 | 0.258 | $+0.009$ | $[+0.001, +0.016]$ | $0.010$ | 56% | 0.61 |
+| gpt2-medium | 10% (38) | 0.257 | 0.250 | 0.263 | $+0.010$ | $[+0.002, +0.018]$ | $0.014$ | 56% | 0.52 |
+
+**In GPT-2 Large the sharp switch is caused by these heads.** Deleting 22 of 720 heads — 3% — takes the
+median transition width from $0.198$ to $0.358$, an 81% widening, and 10% of heads takes it to $0.484$,
+which is the linear response ($0.5$) to within 3%: the model has stopped switching and started
+responding proportionally. The matched control does nothing at any dose ($0.198 \to 0.198, 0.196,
+0.200$), so this is not the generic effect of removing attention output. The effect is present in 83–87%
+of individual pairs, it grows monotonically with dose, and it tracks the manipulation check — each dose
+removes more of the measured circuit difference and widens the switch further. Since GPT-2 Large is the
+model in which the phenomenon was reported, this identifies what produces it there: a small, pair-specific
+set of attention heads that write in different directions for the two prompts.
+
+**In GPT-2 Medium the same intervention barely moves the curve.** The effect is real and replicates at
+all three doses ($+0.009$, $+0.009$, $+0.010$, each with an interval excluding zero) but it is roughly
+15 times smaller, and only 55–56% of pairs move in the predicted direction against a 50% coin flip. The
+manipulation was not weaker there — it removed *more* of the circuit difference than in GPT-2 Large
+(HCD down to 0.52 against 0.54 at the top dose). Notably, GPT-2 Medium is the model with the *stronger*
+correlation in Experiment 6 ($\rho = -0.36$ for HCD, against $-0.29$ in GPT-2 Large), so the size of an
+association was a poor guide to what an intervention would do — an argument for running the intervention
+rather than inferring it.
+
+Figure 10 shows the dose-response for both models together with the manipulation check.
+
+![Transition width against ablation dose for differential and matched-control head sets in two models, with the paired effect and a manipulation check](plots/ablation_causal.png)
+
+**Figure 10.** Removing the heads that write differently for the two prompts flattens the switch in
+GPT-2 Large and hardly touches GPT-2 Medium. x in all four panels: the ablation dose, as a percentage of
+all attention heads in the model (3%, 6%, 10%). Top row, y: median $w_{TV}$ over that model's whole
+low-JSD bank (smaller = sharper); circles with a solid line = no ablation, squares dashed = matched
+control heads, triangles dotted = differential heads; gray dashed = linear response (0.5), dotted =
+sharp threshold (0.25). The top-left panel is scaled to the same range as the top-right, which is why
+GPT-2 Medium's three conditions nearly coincide — its effect is real but 15 times smaller, and the
+bottom-left panel is where to read it. Bottom left, y (symmetric log scale): the paired median of
+$w_{TV}$(differential) $-$ $w_{TV}$(control), bars = 95% cluster bootstrap over prefixes, gray dashed =
+no effect; gpt2-medium squares dashed, gpt2-large triangles dotted. Bottom right, y: median HCD after
+ablation as a fraction of its unablated value — the manipulation check — with control (squares/blue) and
+differential (triangles/vermillion) sets for both models; gray dashed = no change.
+
+**What this does and does not establish.** The heads are selected per pair by the same quantity that
+defines HCD, so the intervention confirms that the construct Experiment 6 measures is causally load-bearing
+in GPT-2 Large, not that some independently-discovered circuit is. Mean-ablation at one position is also
+a blunt instrument: it holds the head's output at a bank average rather than removing it from the
+computation graph, and a large enough dose would eventually degrade any behavior — which is why the
+matched control, at the identical dose, is the comparison that carries the claim. Finally, the two
+models disagree by a factor of 15, and with two models we can describe that gap but not attribute it.
 
 ## Conclusion
 
@@ -798,17 +918,23 @@ design, and it is the part worth copying. And keep the claim matched to the meas
 A-to-B transition is not evidence about intermediate feature states, which is what the motivating
 hypothesis is about.
 
-That hypothesis remains open. Its first direct test here — holding next-token divergence below 0.1 and
-asking whether internal representational difference predicts intermediate plateaus — returns
-$\rho = +0.17$ ($p = 0.31$) in GPT-2 Large and $\rho = -0.00$ ($p = 0.99$) in GPT-2 Medium, with no
-low-JSD GPT-2 Large pair showing an intermediate plateau at all. That is suggestive but not decisive,
-and the way to settle it is to measure feature difference directly rather than through representation
-geometry.
+On the motivating hypothesis the two readings come apart. The intermediate-plateau reading is dead as
+a large effect: across 1120 low-divergence pairs in three models, no feature- or circuit-level measure
+predicts a resting point between A and B ($\rho$ from $-0.11$ to $+0.12$, nothing surviving Holm
+correction, at sample sizes that would have caught $\lvert\rho\rvert \ge 0.10$), and in GPT-2 Large
+only 2.0% of such pairs pause anywhere in the middle. The endpoint-plateau reading holds, and in GPT-2
+Large it holds causally: with outputs matched, pairs engaging more disjoint heads, neurons or
+sparse-autoencoder features switch more sharply on all 14 instrument-model combinations, and deleting
+3% of heads chosen for writing differently for the two prompts widens the median switch by 81% while an
+engagement-matched control set does nothing. The useful reframing for anyone using this probe is that a
+plateau is two things at once: depth supplies the capacity to compress a change into a small stretch of
+the interpolation, and a handful of prompt-discriminating heads decides whether that capacity is used.
 
-**Limitations.** The hypothesis test is under-powered ($n = 38$ and $32$ pairs, from 19 and 18
-prefixes) and its independent variable is a proxy; a null here constrains large effects only. All
-results are for one patched position, the final token, and one interpolation scheme; pairs differing at
-an earlier position, or in more than one token, are untested. Mined pairs are built by swapping the
+**Limitations.** The intervention's heads are selected per pair by the same statistic that defines HCD,
+so it shows the measured construct is load-bearing rather than validating an independently-discovered
+circuit, and the two models differ 15-fold in how much the intervention does — describable, not
+attributable, with two models. All results are for one patched position, the final token, and one
+interpolation scheme; pairs differing at an earlier position, or in more than one token, are untested. Mined pairs are built by swapping the
 final token for a lower-ranked alternative, so both continuations are ones the model itself considered
 plausible. JSD saturates at $\ln 2$ and a third of mined pairs sit near that ceiling, which is why
 Table 3 restricts to the unsaturated subset. The depth-scaling result rests on one family, where

@@ -309,3 +309,56 @@ models, plus the two Matthew pairs in gpt2-large as reference curves). Figures 1
 regenerated over six pairs and five models; Figure 3 (bank_regression) and Figure 4 (jsd_matched)
 swapped places so the association precedes the model comparison that depends on it. Figures 6 and 7
 unchanged. All eight embedded with visible captions in both deliverables; `check_render.py` passes.
+
+---
+
+## 2026-08-10 (S9 finished + S10) — feature-level hypothesis test lands in both deliverables; head ablation makes the circuit result causal
+
+**Context.** The previous iteration ran S9 (`mine_lowjsd.py`, `circuit_features.py`) and got its
+results into REPORT.md's Results section, but was cut off before finishing the curation: REPORT.md's
+Conclusion still described the superseded n=38 IRD test, its sweep counts were stale, and RESULTS.md
+had not been touched at all. This entry covers both the repair and a new experiment.
+
+**Repair of the S9 curation.**
+- REPORT.md Conclusion rewritten to match its own Results. Removed the superseded paragraph reporting
+  the old under-powered test (rho = +0.17, p = 0.31, n = 38 in gpt2-large; rho = -0.00, p = 0.99,
+  n = 32 in gpt2-medium) — that experiment is replaced, not supplemented, by the low-JSD banks
+  (n = 365/399/356 from 102/119/113 prefixes). Limitations rewritten accordingly.
+- Sweep totals corrected: Methods 4765 -> 4750 (30 hand-picked + 1000 block-0 bank + 1200 depth +
+  1400 Experiment 5 sites + 1120 low-JSD), Results header 3645 -> 4750. Endpoint identity bound
+  recomputed over every stored sweep: 4e-4 -> 3.5e-4 (worst case 3.53e-4, in the mined bank).
+- RESULTS.md rewritten to current-best. Experiment 6 replaced entirely: the IRD-vs-IPW null
+  (Figure 8 = feature_plateau.png) is gone, superseded by the feature-level version with SAE, head and
+  neuron instruments (Figures 8-9 = sae_features.png, circuit_forest.png). `plots/feature_plateau.png`
+  and `plots/jsd_vs_width.png` remain on disk but are no longer embedded in either deliverable.
+
+**S10 (new) — `experiments/ablate_heads.py`, the intervention Experiment 6 called for.** For each
+low-JSD pair, mean-ablate at the final token the k heads with the largest differential engagement
+delta_h = (|c_h^A| + |c_h^B|)(1 - cos(c_h^A, c_h^B)), against a control set of the same size matched
+one-for-one on total engagement but chosen to write similarly for the two prompts. Both endpoints and
+all 101 alpha points are re-run under the ablation (identity check holds, |d(0)|, |d(1)-1| <= 3.5e-4).
+Three pre-specified doses (3%, 6%, 10% of all heads) x 2 models x ~380 pairs = 4530 extra sweeps.
+
+**New result (Experiment 7, Table 9, Figure 10 = `plots/ablation_causal.png`).** In gpt2-large the
+association is causal and large: median w_TV 0.198 (no ablation) -> 0.358 at 3% of heads (+81%),
+0.441 at 6%, 0.484 at 10% — the linear response (0.5) to within 3% — paired deltas +0.097 / +0.145 /
++0.199, 95% cluster-bootstrap CIs [+0.054,+0.146] / [+0.093,+0.201] / [+0.125,+0.268], Wilcoxon
+p = 1.4e-43 / 1.8e-48 / 3.3e-47, 83-87% of pairs. The engagement-matched control does nothing
+(0.198 -> 0.198 / 0.196 / 0.200). In gpt2-medium the same intervention gives +0.009 / +0.009 / +0.010
+(p = 0.019 / 0.010 / 0.014), ~15x smaller, 55-56% of pairs. Manipulation check: the differential
+ablation leaves 0.76/0.65/0.54 (gpt2-large) and 0.71/0.61/0.52 (gpt2-medium) of the unablated HCD,
+while the control leaves 1.02-1.08. Removed-magnitude ratio differential:control is 1.01-1.02
+(gpt2-large) and 1.08-1.12 (gpt2-medium).
+
+**Story change (rule 9b).** Old: "the endpoint-plateau reading of the hypothesis holds as an
+association; an intervention is the natural next step." New: "in the model where the phenomenon was
+reported, a small pair-specific set of attention heads causally produces the sharp switch." REPORT.md
+retitled from "... and what the hypothesis still needs" to "... and which heads cause the switch", and
+the Summary gained a paragraph for the causal result. The framing offered to a user of this probe is
+now that a plateau is two things at once: relative depth supplies the capacity to compress the change,
+and prompt-discriminating heads decide whether that capacity is used.
+
+**Figures.** Added `plots/ablation_causal.png` as **Figure 10** in both deliverables (2x2: median w_TV
+vs dose per model, the paired difference with cluster-bootstrap CIs on a symlog axis, and the HCD
+manipulation check). All ten figures embedded with visible numbered captions in both files, each now
+cited by number in the prose that motivates it. `check_render.py` passes on both.
