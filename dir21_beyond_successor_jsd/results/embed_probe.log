@@ -10,3 +10,4 @@ emb site, frame 'I thought it was' token 0/123
 emb site, frame 'I thought it was' token 60/123
 emb site, frame 'I thought it was' token 120/123
 embedding site: valid curves 0.999
+probe -> w_block0: test rho +0.764 +- 0.045 (null -0.201), test R2 +0.514
