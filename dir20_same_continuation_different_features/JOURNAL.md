@@ -111,3 +111,55 @@ in prevalence (82% vs 48%) is about tokenizer or architecture.
 
 On track? yes — PLAN.md's S1–S3 remain complete and S4 (unplanned, statistical strengthening) is done;
 no blocker; the direction now has a significant positive finding rather than a null.
+
+---
+## 2026-08-10 — iteration 3 (S5: patch-depth intervention)
+
+**Feedback check:** listed the direction root for `human_feedback*.md` / `*REVIEW*` without the
+`.addressed.md` suffix — none present. Proceeded with the plan's stated next step.
+
+**What I did.** Ran S5, the open question from iteration 2: REPORT.md claimed the sharpening is
+produced by the layers below the patch, on read-out evidence only. Turned that into an intervention.
+- `run_interp.py`: `sweep()` gained a `layer=0` argument (patch site and the range of recorded
+  downstream blocks both keyed off it). Default preserves every earlier result exactly.
+- `mine_pairs.py`: patch layer from `argv[1]`, endpoints read at that block, outputs suffixed `_L<n>`.
+- `analyze_depth.py` (new): prevalence + ceiling-corrected Spearman with cluster bootstrap at each
+  patch site, and `plots/depth_effect.png`.
+- Ran the full 200-pair bank per model at block 12 and block 20 (~4 min/sweep set on the shared GPU;
+  800 extra sweeps). JSD ranges came out identical to the block-0 bank (0.002–0.693 / 0.007–0.693),
+  confirming the same pairs were used; endpoint identity error stayed <= 3.5e-4 everywhere.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. Chose blocks 12 and 20 of 24 (11 and 3 blocks below) rather than a full 24-point sweep: three
+   points span the range and cost 800 sweeps instead of ~9600. Rejected alternative: patch every
+   block for a small subsample of pairs — smoother curve, but each point would then have too few
+   pairs to estimate rho with a cluster bootstrap, which is the quantity S5 exists to test.
+2. Figure 5's right panel plots the JSD<0.65 (ceiling-corrected) rho rather than the full-bank rho,
+   because the full-bank number is known to be diluted for pythia-410m and the report already treats
+   the unsaturated subset as the cleaner estimate. Both are in `results/depth_analysis.json`; the
+   full-bank values tell the same story for gpt2 (-0.55 / -0.50 / -0.56).
+
+**What I learned.**
+- The depth claim is confirmed, and more strongly than expected: at block 20, pythia-410m has **zero**
+  sharp pairs out of 200 and a median response (w_TV 0.509, w10-90 0.808) within 2% of the linear
+  baseline. gpt2-medium falls 82% -> 50.5% -> 10% sharp. The plateau is not a property of the prompt
+  pair; it is a property of how much network is left to process the edit.
+- The prediction I expected to confirm alongside it was **wrong**: the negative JSD-sharpness
+  correlation does *not* shrink with depth. In gpt2-medium it is flat (-0.61 / -0.53 / -0.53) even
+  where 90% of pairs no longer plateau. In pythia-410m it only dies at block 20, where there is no
+  transition shape left to modulate. So depth and divergence are separable factors — depth sets how
+  much compression happens, divergence sets which pairs get compressed most, and the latter is
+  resolved close to the output. That refines the report's competition account rather than confirming
+  it wholesale, and it is the honest version of the mechanism paragraph.
+- Non-monotonicity is a deep-stack artifact: monotonic gpt2-medium curves go 7.5% -> 33% -> 72% as
+  depth is removed. Retroactive justification for `w_TV` a third time.
+
+**Next step.** The three headline claims (plateaus ubiquitous, association inverted, depth causal) are
+all now measured, so the direction's substance is complete. The largest remaining unknown is whether
+the 82% vs 48% block-0 prevalence gap between the two models is tokenizer or architecture; a third
+family (e.g. OPT-350m, a different tokenizer with similar depth) at block 0 and block 20 would settle
+it in roughly one iteration's compute. Failing that, the finalization work is: re-read both
+deliverables end to end for newcomer readability and confirm every figure is cited by number.
+
+On track? yes — PLAN.md S1–S5 all complete, ~100% of the plan done, no blocker; remaining work is an
+optional third-model generalization check.

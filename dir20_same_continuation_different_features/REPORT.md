@@ -28,8 +28,14 @@ controlling for how far apart the two patched activations are geometrically.
 Two supporting facts complete the picture. First, plateaus are the *default*: 82% of the mined GPT-2
 medium pairs and 48% of the Pythia pairs cross our sharpness threshold, and a deliberately dissimilar
 hand-picked control pair plateaus as hard as four hand-picked "same continuation, different feature"
-pairs. Second, the sharpening is supplied by depth — one block after the patch every condition still
-responds almost exactly linearly, and the width falls monotonically over the following 23 blocks.
+pairs. Second, the sharpening is supplied by the depth that processes the edit, and we show this
+causally by moving the patch site up the stack. Re-running the same 200 pairs with the interpolated
+vector inserted after block 12 and after block 20 — leaving 11 and 3 blocks below it instead of 23 —
+walks the plateau away: the share of sharp pairs falls from 82% to 50% to 10% in GPT-2 medium and from
+48% to 2.5% to 0% in Pythia, whose median response at block 20 is proportional to the edit to within
+2% of the linear baseline. The divergence effect is separable from this: in GPT-2 medium the
+correlation holds at $-0.61$, $-0.53$, $-0.53$ across the three patch sites, so depth sets how much
+the response is compressed while endpoint divergence sets which pairs compress more.
 
 For practice, this inverts a diagnostic. An observed plateau is not evidence that two prompts share a
 continuation; the sharpest plateaus come from the pairs whose predictions agree least. Any claim
@@ -74,19 +80,29 @@ below spans its whole range by construction. That gives **200 pairs per model** 
 inputs as `prefix_ids + [token_id]` makes the "identical prefix, one differing single final token"
 condition exact by construction.
 
+**Patch-depth replication (Experiment 4).** Reading the interpolation out at an earlier block shows
+where sharpness accumulates but cannot show that the downstream blocks *cause* it, since reading
+earlier is not the same as computing less. To get a causal handle we re-run the entire mined bank —
+the same 200 pairs per model, the same tokens, the same 101 interpolation points — with the patch
+applied after block 12 and after block 20 instead of block 0, so the interpolated vector is processed
+by 11 or 3 remaining blocks rather than 23. The endpoint activations $h_A, h_B$ are then read at that
+same block. Nothing else changes, so any difference in the sharpness statistics is attributable to the
+amount of computation below the patch.
+
 **Validity check (Experiment 1).** For the hand-written pairs we require, per model, that the two
 prompts tokenize to an identical prefix and exactly one differing single final token; a pair failing
 this in a model would be dropped for that model. All 5 pairs passed in both models (prefix lengths
 3–13 tokens), so all 10 model-pair cells are reported and no multi-token interpolation was performed.
 
-**Hook point and sample sizes.** We read and patch `resid_post` after block 0 — the residual stream
-immediately after the first transformer block — at the **final token position only**. Because the
-prefix is identical and attention is causal, every earlier position is bit-identical between the two
-prompts, so one forward pass per interpolation point fully determines the run. For the hand-picked
-pairs, downstream `resid_post` is also recorded at the final token of every later block (blocks 1–23)
-plus the final logits; for the mined bank only the final logits are recorded. Every sweep uses 101
-evenly spaced interpolation values on $[0,1]$, under `torch.no_grad()` with fixed seeds. Total:
-$(5 + 200)$ pairs $\times$ 2 models $\times$ 101 points.
+**Hook point and sample sizes.** The default patch site is `resid_post` after block 0 — the residual
+stream immediately after the first transformer block — at the **final token position only**; Experiment
+4 repeats the bank at blocks 12 and 20. Because the prefix is identical and attention is causal, every
+earlier position is bit-identical between the two prompts, so one forward pass per interpolation point
+fully determines the run. For the hand-picked pairs, downstream `resid_post` is also recorded at the
+final token of every later block (blocks 1–23) plus the final logits; for the mined bank only the final
+logits are recorded. Every sweep uses 101 evenly spaced interpolation values on $[0,1]$, under
+`torch.no_grad()` with fixed seeds. Total: $(5 + 200 \times 3)$ pairs $\times$ 2 models $\times$ 101
+points.
 
 ### Metrics
 
@@ -103,8 +119,8 @@ h_\alpha \;=\; \Big[(1-\alpha)\lVert h_A\rVert + \alpha\lVert h_B\rVert\Big]\cdo
 \frac{\sin\!\big((1-\alpha)\Omega\big)\,\hat h_A + \sin\!\big(\alpha\Omega\big)\,\hat h_B}{\sin\Omega}
 ```
 
-$h_\alpha$ replaces the block-0 output at the final token and is run forward through the rest of the
-model. At $\alpha=0$ and $\alpha=1$ this is the identity, which gives a free correctness check on the
+$h_\alpha$ replaces the patched block's output at the final token and is run forward through the rest
+of the model. At $\alpha=0$ and $\alpha=1$ this is the identity, which gives a free correctness check on the
 harness (reported in Results). The angle $\Omega$ is also recorded per pair and reused later as a
 control variable: it measures how far apart the two endpoints are geometrically, independently of what
 they predict.
@@ -231,7 +247,7 @@ $d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error
 ## Results
 
 **The harness is correct.** All 5 hand-written pairs tokenized validly in both models, and across all
-410 model-pair sweeps the patched runs at the endpoints reproduced the clean forward passes to
+1210 model-pair sweeps the patched runs at the endpoints reproduced the clean forward passes to
 $|d(0)| \le 4 \times 10^{-4}$ and $|d(1) - 1| \le 4 \times 10^{-4}$. The numbers below are therefore
 about the model, not about patching artifacts.
 
@@ -386,12 +402,65 @@ One block after the patch, all ten cells sit at $w_{10-90} \approx 0.79$–$0.81
 still responds almost exactly proportionally to the edit. The width then falls monotonically across the
 following 23 blocks, reaching $0.12$–$0.76$ at the logits. A deep stack of nonlinear layers repeatedly
 compresses an interpolated direction toward whichever endpoint dominates, and it does so for the
-control just as readily as for the test pairs. Read together with Table 3, the most plausible account
-of the sign we measure is that this compression is a competition: when the two endpoints predict
-disjoint token sets, the two candidate outputs are well separated and the winner changes abruptly
-somewhere in the middle of the sweep, whereas two prompts predicting nearly the same token differ only
-in small logit components that the stack carries across smoothly. We measure the sign and its size
-here; testing that mechanism directly (for instance by patching at a middle block) is left open.
+control just as readily as for the test pairs.
+
+### Removing the downstream blocks removes the plateau
+
+Figure 4 is only a description of where sharpness accumulates. Reading the residual stream out at an
+earlier block is not the same as making the model compute less, so it cannot establish that those
+blocks are what *builds* the plateau. The causal version of the experiment moves the patch site: we
+re-run the entire mined bank with the interpolated vector inserted after block 12 and after block 20,
+leaving 11 and 3 blocks below it instead of 23, with the pairs, the tokens and the interpolation grid
+held fixed. If depth is doing the work, sharpness should decay as blocks are taken away.
+
+![Median transition width and JSD-sharpness correlation against patch site for two models](plots/depth_effect.png)
+
+**Figure 5.** Removing downstream blocks removes the plateau, but not the divergence effect in
+gpt2-medium. x (both panels): the patch site — the block whose `resid_post` at the final token is
+replaced by the interpolated vector — labelled with the number of blocks remaining below it. Left y:
+median $w_{TV}$ at the final logits over the 200 mined pairs (smaller = sharper), shaded band =
+interquartile range, gray dashed = linear response ($0.5$), dotted = sharp threshold ($0.25$). Right y:
+Spearman $\rho$ between endpoint JSD and $w_{TV}$ over pairs below the $\ln 2$ ceiling (JSD $< 0.65$;
+$n = 142$ gpt2-medium, $n = 127$ pythia-410m), error bars = 95% cluster bootstrap over the 40 prefixes,
+gray dashed = no association. gpt2-medium = circles with a solid line; pythia-410m = squares with a
+dashed line.
+
+**Table 4 — plateau strength and the divergence association at three patch sites**, same 200 mined
+pairs per model in every row. "% sharp" is the share of pairs with $w_{TV} < 0.25$; "monotonic" is the
+share of $d(\alpha)$ curves that never decrease.
+
+| Model | patch site | blocks below | median $w_{TV}$ | % sharp | median $w_{10-90}$ | monotonic | $\rho$(JSD, $w_{TV}$), JSD $<0.65$ | 95% CI | $p$ |
+|---|---|---|---|---|---|---|---|---|---|
+| gpt2-medium | block 0 | 23 | 0.080 | 82.0% | 0.241 | 7.5% | $-0.61$ | $[-0.70,-0.46]$ | $1.5\times10^{-15}$ |
+| gpt2-medium | block 12 | 11 | 0.250 | 50.5% | 0.556 | 33% | $-0.53$ | $[-0.64,-0.39]$ | $1.1\times10^{-11}$ |
+| gpt2-medium | block 20 | 3 | 0.383 | 10.0% | 0.701 | 72% | $-0.53$ | $[-0.66,-0.38]$ | $8.2\times10^{-12}$ |
+| pythia-410m | block 0 | 23 | 0.266 | 47.5% | 0.593 | 98% | $-0.45$ | $[-0.63,-0.24]$ | $9.0\times10^{-8}$ |
+| pythia-410m | block 12 | 11 | 0.419 | 2.5% | 0.749 | 100% | $-0.44$ | $[-0.62,-0.23]$ | $2.4\times10^{-7}$ |
+| pythia-410m | block 20 | 3 | 0.509 | 0.0% | 0.808 | 100% | $+0.04$ | $[-0.11,+0.22]$ | $0.62$ |
+
+Depth is what makes the plateau. Sharpness decays monotonically as blocks are removed, in both models
+and on both width statistics, and the endpoint of that decay is the linear baseline itself: with 3
+blocks below the patch, pythia-410m has median $w_{TV} = 0.509$ and median $w_{10-90} = 0.808$ against
+the linear response's $0.5$ and $0.8$, and **not one of its 200 pairs is sharp**. gpt2-medium resists
+longer — 10% of pairs are still sharp with 3 blocks left — but travels the same path, 82% to 50% to
+10%. The non-monotonic wiggles that made $w_{TV}$ necessary are a deep-stack product too: the share of
+monotonic gpt2-medium curves rises from 7.5% to 72% as depth is removed. This is the strongest form of
+the report's central warning: an experimenter who patches early and sees a plateau is looking at a
+property of the 23 blocks below the patch, which are the same 23 blocks whatever the two prompts were.
+
+The divergence effect is not the same phenomenon wearing a different hat. If more divergent pairs were
+sharper only because a deep stack compresses them harder, the correlation should fade along with the
+plateau. In gpt2-medium it does not move at all — $\rho = -0.61$, $-0.53$, $-0.53$ at 23, 11 and 3
+remaining blocks, flat within the bootstrap intervals even where 90% of pairs no longer plateau. In
+pythia-410m it holds at $-0.45$ and $-0.44$ and then vanishes ($+0.04$, $p = 0.62$) exactly at the
+patch site where the response has gone linear and there is no transition shape left to modulate. The
+two effects are therefore separable: the depth below the patch sets *how much* the response is
+compressed, while endpoint divergence sets *which* pairs compress more, and in gpt2-medium the latter
+is already fully expressed by the last three blocks. That is consistent with the competition account —
+when the two endpoints predict disjoint token sets the two candidate outputs are well separated and the
+winner flips abruptly, whereas near-identical predictions differ only in small logit components that
+get carried across smoothly — with the refinement that the competition is resolved close to the output,
+not accumulated over the whole stack.
 
 ## Conclusion
 
@@ -408,17 +477,21 @@ For anyone using interpolation as an interpretability probe, the actionable poin
 needs calibration before it can be evidence for anything. Report an interpolation between prompts of
 known dissimilarity alongside the pair of interest and treat the difference as the signal; reading a
 sharp plateau as "these two prompts share a continuation" gets the sign backwards, since in our bank
-the sharp end of the distribution is where the *most* divergent pairs live. Figure 4 explains why the
-bar is that high: the sharpening is supplied by the 23 blocks downstream of the patch, which are the
-same 23 blocks in every condition.
+the sharp end of the distribution is where the *most* divergent pairs live. Figures 4 and 5 explain why
+the bar is that high: the sharpening is supplied by the blocks downstream of the patch, which are the
+same blocks in every condition, and taking those blocks away by patching at block 20 removes the
+plateau outright — 0% of pythia-410m's pairs stay sharp, at a median response within 2% of the linear
+baseline. The corollary for experimental design is that the patch depth is itself a knob: a plateau
+seen with a late patch is far more informative than the same plateau seen with an early one.
 
 **Limitations.** The pairs are constructed by swapping the final token for a lower-ranked alternative,
 which spans endpoint divergence well but leaves the two prompts differing only at one position and only
 in a way the model itself considered plausible; pairs differing in earlier tokens, or in more than one,
 are untested. JSD saturates at $\ln 2$ and 29–37% of mined pairs sit near that ceiling, so the
 full-bank correlations in Table 2 understate the effect and Table 3 is the cleaner estimate. All
-results are for one patch site (block 0) at one position (the final token) in two models of similar
-size; whether patching deeper changes the picture is exactly the experiment the mechanism paragraph
-above would need, and we did not run it. Finally, $d(\alpha)$ measures movement in raw logit space, so
+results are for one patched position (the final token) in two models of similar size and depth
+(24 blocks each), at three patch sites; a 5-block model or a 60-block model could sit anywhere on the
+depth curve of Figure 5, and the prevalence gap between the two models (82% vs 48% at block 0) is not
+attributed here to tokenizer or architecture. Finally, $d(\alpha)$ measures movement in raw logit space, so
 a pair could hold its logit vector still while reordering low-probability tokens and this metric would
 not see it.

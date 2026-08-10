@@ -4,20 +4,24 @@
 
 ## Headline
 
-Interpolating a **single token's** block-0 activation between two prompts produces a flat-then-abrupt
-("plateau") logit response for most prompt pairs — 82% of 200 corpus-mined pairs in gpt2-medium, 48%
-in pythia-410m, and 9 of 10 hand-picked model-pair cells including a deliberately dissimilar control.
-Endpoint next-token similarity predicts plateau sharpness with the sign **opposite** to the
-hypothesis: over the mined bank, Spearman $\rho$(JSD, $w_{TV}$) $= -0.55$ in gpt2-medium
+Interpolating a **single token's** early-layer activation between two prompts produces a
+flat-then-abrupt ("plateau") logit response for most prompt pairs — 82% of 200 corpus-mined pairs in
+gpt2-medium, 48% in pythia-410m, and 9 of 10 hand-picked model-pair cells including a deliberately
+dissimilar control. Endpoint next-token similarity predicts plateau sharpness with the sign **opposite**
+to the hypothesis: over the mined bank, Spearman $\rho$(JSD, $w_{TV}$) $= -0.55$ in gpt2-medium
 (95% CI $[-0.66,-0.41]$, $p = 6\times10^{-17}$, $n=200$), i.e. the *more* differently the two prompts
 predict the next token, the *sharper* the transition. Excluding pairs at the $\ln 2$ divergence
 ceiling, both models agree: $\rho = -0.61$ (gpt2-medium, $n=142$) and $-0.45$ (pythia-410m, $n=127$),
-both $p<10^{-7}$. A plateau here is therefore not evidence that two prompts share a continuation.
+both $p<10^{-7}$. Moving the patch site up the stack shows where the shape comes from: with only 3
+blocks left below the patch, the median pair is no longer sharp in gpt2-medium (10% sharp, down from
+82%) and pythia-410m has returned exactly to the linear response (0% sharp). A plateau here is
+therefore not evidence that two prompts share a continuation — it is mostly a product of the depth
+that processes the edit.
 
 ## Experiment 1 — five hand-picked pairs with a dissimilar control
 
 All 5 pairs tokenized validly in both models (identical prefix, exactly one differing single final
-token). Across all 410 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
+token). Across all 1210 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
 clean runs to $|d| \le 4\times10^{-4}$, so the interpolation harness is correct. Lower $w_{10-90}$ and
 $w_{TV}$ mean a sharper transition; higher PF (plateau fraction) means more of the sweep sits at an
 endpoint value. The linear-response reference is $w_{10-90}=0.8$, $w_{TV}=0.5$, $\mathrm{PF}=0.2$.
@@ -124,7 +128,7 @@ patched vectors, the partial Spearman correlation of JSD with $w_{TV}$ is $-0.55
 $\rho(\Omega,\mathrm{JSD}) = 0.31$). $\Omega$ itself correlates only weakly with sharpness
 ($\rho = 0.16$ in both).
 
-## Experiment 3 — where the sharpness comes from
+## Experiment 3 — where the sharpness accumulates
 
 Sharpness has to originate somewhere in the network. Recomputing the same width at every block's
 residual stream between the patch site and the output locates it.
@@ -142,3 +146,48 @@ One block after the patch every cell sits at $w_{10-90} \approx 0.79$–$0.81$ �
 proportional response — and the width then falls monotonically over the following 23 blocks to
 $0.12$–$0.76$ at the logits. The shape is supplied by the depth downstream of the patch, in every
 condition alike, which is why it cannot by itself carry information about the prompt pair.
+
+## Experiment 4 — take depth away and the plateau goes with it
+
+Figure 4 only shows *where* sharpness accumulates; it cannot show that the downstream blocks *cause*
+it, because reading out earlier is not the same as computing less. The causal version moves the patch
+site instead: re-running the identical 200-pair bank with the interpolated vector inserted after block
+12 and after block 20 leaves 11 and 3 blocks to process it instead of 23, with everything else fixed.
+
+![Median transition width and JSD-sharpness correlation against patch site for two models](plots/depth_effect.png)
+
+**Figure 5.** Removing downstream blocks removes the plateau, but not the divergence effect in
+gpt2-medium. x (both panels): the patch site — the block whose `resid_post` at the final token is
+replaced by the interpolated vector — labelled with the number of blocks remaining below it.
+Left y: median $w_{TV}$ at the final logits over the 200 mined pairs (smaller = sharper), shaded band
+= interquartile range, gray dashed = linear response (0.5), dotted = sharp threshold (0.25).
+Right y: Spearman $\rho$ between endpoint JSD and $w_{TV}$ over the pairs below the $\ln 2$ ceiling
+(JSD $< 0.65$; $n=142$ gpt2-medium, $n=127$ pythia-410m), error bars = 95% cluster bootstrap over the
+40 prefixes, gray dashed = no association. gpt2-medium = circles, solid; pythia-410m = squares, dashed.
+
+| Model | patch site | blocks below | median $w_{TV}$ | % sharp | median $w_{10-90}$ | monotonic | $\rho$(JSD, $w_{TV}$), JSD $<0.65$ | 95% CI | $p$ |
+|---|---|---|---|---|---|---|---|---|---|
+| gpt2-medium | block 0 | 23 | 0.080 | 82.0% | 0.241 | 7.5% | $-0.61$ | $[-0.70,-0.46]$ | $1.5\times10^{-15}$ |
+| gpt2-medium | block 12 | 11 | 0.250 | 50.5% | 0.556 | 33% | $-0.53$ | $[-0.64,-0.39]$ | $1.1\times10^{-11}$ |
+| gpt2-medium | block 20 | 3 | 0.383 | 10.0% | 0.701 | 72% | $-0.53$ | $[-0.66,-0.38]$ | $8.2\times10^{-12}$ |
+| pythia-410m | block 0 | 23 | 0.266 | 47.5% | 0.593 | 98% | $-0.45$ | $[-0.63,-0.24]$ | $9.0\times10^{-8}$ |
+| pythia-410m | block 12 | 11 | 0.419 | 2.5% | 0.749 | 100% | $-0.44$ | $[-0.62,-0.23]$ | $2.4\times10^{-7}$ |
+| pythia-410m | block 20 | 3 | 0.509 | 0.0% | 0.808 | 100% | $+0.04$ | $[-0.11,+0.22]$ | $0.62$ |
+
+**The plateau is manufactured by the layers below the patch.** Sharpness falls off monotonically as
+depth is removed, in both models and on both width statistics. The clearest single number is
+pythia-410m at block 20: median $w_{TV} = 0.509$ and median $w_{10-90} = 0.808$, against the linear
+response's $0.5$ and $0.8$ — with 3 blocks left, not one of its 200 pairs is sharp and the average
+response is proportional to the edit to within 2%. gpt2-medium is more resistant (10% of pairs still
+sharp with 3 blocks below) but moves the same way, from 82% to 10%. The non-monotonic wiggles that
+motivated $w_{TV}$ are also a deep-stack product: the fraction of monotonic gpt2-medium curves rises
+from 7.5% to 72% as depth is removed.
+
+**The divergence effect is not simply the same thing.** If more divergent pairs were sharper only
+because deep stacks compress them harder, the correlation should decay along with the plateau. In
+gpt2-medium it does not: $\rho$ is $-0.61$, $-0.53$, $-0.53$ at 23, 11 and 3 remaining blocks, flat
+within the bootstrap intervals even where 90% of pairs no longer plateau. In pythia-410m it holds at
+$-0.45$ and $-0.44$ and then disappears ($+0.04$, $p=0.62$) precisely at the site where the response
+has become linear and there is no transition shape left to modulate. So the two findings are
+separable: depth sets *how much* the response is compressed, while endpoint divergence sets *which*
+pairs compress more, and the latter is already present in the last three blocks of gpt2-medium.

@@ -53,7 +53,7 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
 - [x] S3 - Compare prompt pairs and models; write the verdict in `RESULTS.md`.
 - [x] S4 (added) - Mine 200 corpus-derived pairs per model spanning the JSD range; re-run the same
   sweep and replace the 5-point scatter with a powered regression.
-- [ ] S5 (added, optional) - Repeat the mined-bank sweep with the patch at a middle and a late block,
+- [x] S5 (added, optional) - Repeat the mined-bank sweep with the patch at a middle and a late block,
   to test the winner-take-all/depth mechanism directly.
 
 ## Required outputs
@@ -72,23 +72,30 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S4 complete (2026-08-10); the success criterion is met and exceeded.** All 5 hand-picked pairs
-validate in both models, and a 200-pair-per-model corpus-mined bank now carries the association test.
+**S1-S5 all complete (2026-08-10); the success criterion is met and exceeded.** All 5 hand-picked
+pairs validate in both models, a 200-pair-per-model corpus-mined bank carries the association test,
+and that bank has been re-run at three patch sites.
 
-**Verdict: plateaus yes, hypothesis inverted.** Plateaus are the default response — 82% (gpt2-medium)
-/ 48% (pythia-410m) of arbitrary mined pairs are sharp, and the dissimilar-continuation control
-plateaus as hard as the test pairs. At n=200 the association is significant with the sign *opposite*
-to the hypothesis: Spearman rho(JSD, `w_TV`) = -0.55 (p=6.2e-17) in gpt2-medium, and -0.61 / -0.45
-(p<1e-7) in the two models once pairs at the ln 2 JSD ceiling are excluded. More divergent
-continuations give sharper plateaus. The iteration-1 null (rho=-0.37, p=0.29, n=10) was underpowered.
-`w_TV` and `PF` were added beyond the planned measurements because most curves are non-monotonic
-(only 7.5% monotonic in gpt2-medium's bank); `w10-90` remains primary and agrees.
+**Verdict: plateaus yes, hypothesis inverted, shape caused by depth.** Plateaus are the default
+response — 82% (gpt2-medium) / 48% (pythia-410m) of arbitrary mined pairs are sharp, and the
+dissimilar-continuation control plateaus as hard as the test pairs. At n=200 the association is
+significant with the sign *opposite* to the hypothesis: Spearman rho(JSD, `w_TV`) = -0.55 (p=6.2e-17)
+in gpt2-medium, and -0.61 / -0.45 (p<1e-7) in the two models once pairs at the ln 2 JSD ceiling are
+excluded. More divergent continuations give sharper plateaus. The iteration-1 null (rho=-0.37, p=0.29,
+n=10) was underpowered. `w_TV` and `PF` were added beyond the planned measurements because most curves
+are non-monotonic (only 7.5% monotonic in gpt2-medium's bank); `w10-90` remains primary and agrees.
+
+**S5 outcome.** Moving the patch from block 0 to 12 to 20 (23 / 11 / 3 blocks below) walks the plateau
+away: % of pairs sharp 82 -> 50.5 -> 10 (gpt2-medium) and 47.5 -> 2.5 -> 0 (pythia-410m), the latter
+landing on the linear baseline (median w_TV 0.509 vs 0.5). The depth mechanism is therefore causal,
+not just correlational. The second half of the prediction failed: the JSD-sharpness correlation does
+*not* decay with depth (gpt2-medium -0.61 / -0.53 / -0.53), so depth sets how much the response is
+compressed while endpoint divergence sets which pairs compress more.
 
 ## Next step
 
-S5, the only substantive open question: REPORT.md's mechanism paragraph claims the sharpening is a
-winner-take-all competition resolved by the layers below the patch. Test it by adding a patch-layer
-argument to `mine_pairs.py` and re-running the mined bank with the patch at a middle block (12) and a
-late block (20): the plateau should weaken and the negative JSD-sharpness correlation should shrink as
-fewer downstream layers remain. Secondary: a third model family, to see whether the 82% vs 48%
-prevalence gap is tokenizer or architecture.
+The plan is complete; what remains is optional generalization. Highest value: a third model family
+with a different tokenizer and similar depth (e.g. OPT-350m) at block 0 and block 20, to test whether
+the 82% vs 48% block-0 prevalence gap is tokenizer or architecture — the one open question the report
+names and does not answer. Otherwise finalize: re-read both deliverables for newcomer readability and
+confirm every figure is cited by number in the prose.

@@ -51,11 +51,11 @@ def slerp_lerp_norm(ha, hb, alphas):
     return ((1 - a) * na + a * nb) * d, float(om), float(cos)
 
 
-def sweep(m, ids_a, vecs):
-    """Patch block-0 last-token resid_post with each row of `vecs`; record downstream + logits."""
+def sweep(m, ids_a, vecs, layer=0):
+    """Patch block-`layer` last-token resid_post with each row of `vecs`; record downstream + logits."""
     dev = next(m.parameters()).device
     nb = len(blocks(m))
-    outs = {i: [] for i in range(1, nb)}
+    outs = {i: [] for i in range(layer + 1, nb)}
     logit_rows = []
     state = {}
 
@@ -72,8 +72,8 @@ def sweep(m, ids_a, vecs):
         return hook
 
     bl = blocks(m)
-    hs = [bl[0].register_forward_hook(patch)]
-    for i in range(1, nb):
+    hs = [bl[layer].register_forward_hook(patch)]
+    for i in range(layer + 1, nb):
         hs.append(bl[i].register_forward_hook(mk(i)))
 
     for s in range(0, vecs.shape[0], CHUNK):
@@ -84,7 +84,7 @@ def sweep(m, ids_a, vecs):
         with torch.no_grad():
             lg = m(inp, use_cache=False).logits[:, -1, :].float().cpu()
         logit_rows.append(lg)
-        for i in range(1, nb):
+        for i in range(layer + 1, nb):
             outs[i].append(state["rec"][i].cpu())
     for h in hs:
         h.remove()

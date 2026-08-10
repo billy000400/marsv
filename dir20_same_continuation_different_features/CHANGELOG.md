@@ -86,3 +86,43 @@ the test pairs, and the sharpening is supplied by depth downstream of the patch 
 REPORT.md's title and Summary were rewritten to match; Methods gained the mining procedure, the
 cluster bootstrap, the partial Spearman, the ln 2 ceiling, and the detectable-rho reference
 rho_min(n) = tanh(1.96/sqrt(n-3)) (0.75 at n=10, 0.14 at n=200).
+
+## 2026-08-10 — S5: patch-depth replication turns the depth claim from descriptive to causal
+
+**What changed.** Added Experiment 4: the entire 200-pair mined bank re-run per model with the patch
+applied after **block 12** and after **block 20** instead of block 0 (11 and 3 remaining blocks below
+the patch instead of 23), everything else held fixed — same prefixes, same token pairs, same 101-point
+grid. Code: `experiments/run_interp.py` `sweep()` gained a `layer=` argument (default 0, so all prior
+behavior is unchanged), `experiments/mine_pairs.py` takes the patch layer as `argv[1]` and writes
+`results/bank_<model>_L<layer>.json|npz`; new `experiments/analyze_depth.py` writes
+`results/depth_analysis.json` and `plots/depth_effect.png`.
+
+**Nothing superseded.** Experiments 1–3 keep their numbers; this is a new experiment answering the
+question REPORT.md previously listed as untested ("whether patching deeper changes the picture … we did
+not run it"). The harness identity check now covers 1210 sweeps instead of 410, still at
+|d(0)| <= 4e-4 and |d(1)-1| <= 4e-4 (worst case 3.5e-4).
+
+**New results.**
+- *Plateau strength vs patch depth* (median w_TV / % of pairs sharp, at 23 / 11 / 3 blocks below):
+  gpt2-medium 0.080 / 82.0% -> 0.250 / 50.5% -> 0.383 / 10.0%; pythia-410m 0.266 / 47.5% ->
+  0.419 / 2.5% -> 0.509 / 0.0%. Median w10-90 over the same sites: 0.241 -> 0.556 -> 0.701 and
+  0.593 -> 0.749 -> 0.808. At block 20 pythia-410m is at the linear baseline (0.5 / 0.8) to within 2%
+  and has zero sharp pairs.
+- *Non-monotonicity is also depth-made*: share of monotonic gpt2-medium curves 7.5% -> 33% -> 72%.
+- *The divergence association is separable from depth.* Spearman rho(JSD, w_TV) on the JSD<0.65 subset
+  at 23 / 11 / 3 blocks below: gpt2-medium -0.61 [-0.70,-0.46] -> -0.53 [-0.64,-0.39] ->
+  -0.53 [-0.66,-0.38] (all p <= 1.1e-11), i.e. flat; pythia-410m -0.45 [-0.63,-0.24] ->
+  -0.44 [-0.62,-0.23] -> +0.04 [-0.11,+0.22] (p=0.62), vanishing exactly where the response became
+  linear. CIs are 95% cluster bootstrap over the 40 prefixes.
+
+**Figure.** Added `plots/depth_effect.png` as **Figure 5** (median w_TV and the ceiling-corrected rho,
+both against patch site), embedded with a visible caption in RESULTS.md and REPORT.md. Figures 1–4
+unchanged and still in reading order.
+
+**Framing.** No re-frame: the headline finding is unchanged and this strengthens the mechanism section
+from "sharpness accumulates with depth (read-out evidence)" to "removing the blocks below the patch
+removes the plateau (intervention evidence)". REPORT.md's mechanism paragraph previously speculated
+that the competition is resolved by the layers below the patch; Table 4 refines that — the *amount* of
+compression scales with depth, but *which* pairs compress more is already decided in the last three
+blocks of gpt2-medium. The limitation "we did not run it" was replaced by the model-depth caveat
+(both models have 24 blocks) and the unattributed 82% vs 48% prevalence gap.

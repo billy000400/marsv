@@ -9,6 +9,7 @@ Writes results/bank_<model>.npz (d-curves) and results/bank_<model>.json (per-pa
 """
 import json
 import os
+import sys
 
 import numpy as np
 import torch
@@ -42,9 +43,9 @@ def get_prefixes(tok, rng):
     return out
 
 
-def main():
-    rng_global = np.random.default_rng(SEED)
+def main(layer=0):
     alphas = np.linspace(0, 1, N_ALPHA)
+    suf = "" if layer == 0 else f"_L{layer}"
 
     for mkey in ["gpt2-medium", "pythia-410m"]:
         tok, m = load(mkey)
@@ -69,8 +70,8 @@ def main():
                 reca, lga = clean_run(m, ida)
                 recb, lgb = clean_run(m, idb)
                 pa, pb = torch.softmax(lga, -1), torch.softmax(lgb, -1)
-                vecs, omega, cos = slerp_lerp_norm(reca[0], recb[0], alphas)
-                _, lgs = sweep(m, ida, vecs)
+                vecs, omega, cos = slerp_lerp_norm(reca[layer], recb[layer], alphas)
+                _, lgs = sweep(m, ida, vecs, layer=layer)
                 d = rel_dist(lgs, lga.cpu().unsqueeze(0), lgb.cpu().unsqueeze(0))
                 w = width_10_90(alphas, d)
                 key = f"p{pi}_r{int(r)}"
@@ -86,8 +87,8 @@ def main():
             if pi % 10 == 0:
                 print(f"  prefix {pi}: {len(rows)} pairs so far")
 
-        np.savez(os.path.join(RESULTS, f"bank_{mkey}.npz"), alphas=alphas, **curves)
-        with open(os.path.join(RESULTS, f"bank_{mkey}.json"), "w") as f:
+        np.savez(os.path.join(RESULTS, f"bank_{mkey}{suf}.npz"), alphas=alphas, **curves)
+        with open(os.path.join(RESULTS, f"bank_{mkey}{suf}.json"), "w") as f:
             json.dump(rows, f, indent=1)
         js = np.array([r["jsd"] for r in rows])
         print(f"{mkey}: n={len(rows)} JSD range {js.min():.3f}-{js.max():.3f} "
@@ -97,4 +98,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(layer=int(sys.argv[1]) if len(sys.argv) > 1 else 0)
