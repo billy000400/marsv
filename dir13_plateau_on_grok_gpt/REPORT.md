@@ -555,22 +555,33 @@ harness time budget ended this one run at step 27,143 rather than 30,000, which 
 result.
 
 **Seed replication of the comparisons that carry the argument.** A gap between two runs is only
-informative next to the spread between two runs that differ *only* by their initialization, so three
+informative next to the spread between two runs that differ *only* by their initialization, so five
 conditions are retrained from a second model seed (2024), with the corpus, split, data order,
 optimizer, schedule, batch size, checkpoint grid and freeze mask all unchanged. The narrow run and
 frozen-early are the 12-trainable-block and 8-trainable-block ends of the depth comparison. Frozen-deep
-is the third, because the one remaining sub-claim resting on a single pair of runs is the *position*
-term — five trainable blocks beside the readout (frozen-deep) coming out sharper than five at the
-bottom of the stack (frozen-mirror) — whose 0.068 gap is only about 1.7 times the seed spread the first
-two replicates measured. The prediction recorded in `PLAN.md` before the frozen-deep replicate was
-launched: it lands within the measured seed spread of frozen-deep's 0.558 and therefore clearly below
-frozen-mirror's 0.626; a replicate at or above 0.626, or shifted by more than the ≈0.04 spread,
-falsifies the position term. Each replicate is scored by the identical rule, on the same 150 pairs, at
-its own $k_{\mathrm{match}}$ and at its final checkpoint. Three statistics are then read off: the
-paired per-pair shift between the two seeds of one condition (how much of a difference in median width
-is seed noise), a rank test across the six matched-accuracy runs of the depth comparison treating each
-*run's* median width as one observation, and — for the position term — whether *both* frozen-deep seeds
-fall below frozen-mirror (Figure 24).
+is the third, because the *position* term — five trainable blocks beside the readout (frozen-deep)
+coming out sharper than five at the bottom of the stack (frozen-mirror) — rested on a single pair of
+runs whose 0.068 gap is only about 1.7 times the seed spread the first two replicates measured. The
+prediction recorded in `PLAN.md` before the frozen-deep replicate was launched: it lands within the
+measured seed spread of frozen-deep's 0.558 and therefore clearly below frozen-mirror's 0.626; a
+replicate at or above 0.626, or shifted by more than the ≈0.04 spread, falsifies the position term.
+
+The last two replicates close the two remaining single-seed runs that carry a load-bearing comparison,
+and both predictions were recorded in `PLAN.md` while the runs were still training and before either
+was scored. **Frozen-high** (blocks 6–10 trainable) is the sharpest network in the study and supplies
+the claim that a network with 58.0% of its parameters frozen at initialization is sharper than the
+untouched 12-block reference; its replicate had to land within ≈0.04 of 0.342 and stay clearly below
+the reference's 0.443, with a value at or above 0.443 retracting that claim. **Frozen-mirror** is the
+blunt end of the position contrast; its replicate had to land within ≈0.04 of 0.629 and above *both*
+frozen-deep seeds (0.559 and 0.590), with a value at or below 0.590 retracting the ordering.
+
+Each replicate is scored by the identical rule, on the same 150 pairs, at its own $k_{\mathrm{match}}$
+and at its final checkpoint. Four statistics are then read off: the paired per-pair shift between the
+two seeds of one condition (how much of a difference in median width is seed noise), the largest such
+spread over all five twice-trained conditions (the error bar every reported gap must clear), a rank
+test across the six matched-accuracy runs of the depth comparison treating each *run's* median width as
+one observation, and — for the position term — whether *every* frozen-deep seed falls below *every*
+frozen-mirror seed (Figures 24 and 25).
 
 ### Spherical interpolation and patching
 
@@ -1797,11 +1808,11 @@ character natural prefixes rather than one short shared context.)* With interpol
 recording at final logits, 14 of 40 pairs meet the strict frozen rule (IDs 0, 4, 5, 6, 7, 9, 14, 20,
 21, 22, 28, 34, 36, 37); 24/40 have $w \le 0.35$; only 2/40 are near-straight (#10, #19, $w \ge 0.6$);
 0/40 are non-monotone. Median width is 0.309 (range [0.110, 0.773]) against the straight line's 0.8.
-The structure is visible pair by pair, with no averaging involved (Figure 25).
+The structure is visible pair by pair, with no averaging involved (Figure 26).
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 25.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
+**Figure 26.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
 final-logit space, one panel per frozen pair; panel titles give the pair ID, the two endpoint
 characters, and the transition width $w$. Gray dashed = the straight-line reference $d = t$. Most
 curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) track the straight line.
@@ -1810,11 +1821,11 @@ curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) trac
 and recording $d(t)$ at each later block's final-position residual, median width falls strictly
 monotonically from 0.777 (block 1) to 0.445 (block 11) and 0.309 at the logits; the strict rule is
 passed only at the logits (14 pairs), never at intermediate residuals. The plateau is *formed* by the
-downstream stack, not present in the interpolated activation itself (Figure 26).
+downstream stack, not present in the interpolated activation itself (Figure 27).
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 26.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
+**Figure 27.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
 frozen before inspection): $d(t)$ (y) vs interpolation position $t$ (x). Thin lines are the recording
 blocks, shaded on the cividis scale from block 1 (dark) to block 11 (light) per the colour bar; the
 thick black line is the final logits and the gray dashed line the straight-line reference. Early-block
@@ -1823,11 +1834,11 @@ curves are near-straight and progressively sharpen into plateau–boundary–pla
 **Later interpolation kills the plateau — the predicted control.** If downstream layers create the
 plateau, interpolating later (fewer layers left) must weaken it. It does, monotonically: median
 $w_{10\to 90}$ = 0.309, 0.564, 0.647, 0.733, 0.757, 0.802 for interpolation blocks 0, 2, 4, 6, 8, 10 —
-reaching the straight-line reference 0.8 when only one block remains (Figure 27).
+reaching the straight-line reference 0.8 when only one block remains (Figure 28).
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 27.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
+**Figure 28.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
 per interpolation block, shaded on the cividis scale from block 0 (dark) to block 10 (light) as given
 in the legend; the block-0 curve is strongly sigmoid and later blocks collapse onto the gray dashed
 straight line. Right: median transition width $w_{10\to90}$ (y; bars = inter-quartile range across the

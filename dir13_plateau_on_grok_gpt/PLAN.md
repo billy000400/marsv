@@ -875,6 +875,23 @@ load-bearing comparison. Deliberately NOT a third fitted geometric rule — two 
 first test each. Figure note: a seventh five-block run breaks the three-panel depth split in
 Figure 23; the next division would have to be by window size, not position.
 
+**S23 PRE-REGISTRATION (written 2026-08-10 while both runs were still training, before any assay).**
+Both replicates use model seed 2024 with the corpus, split, data order, optimizer, schedule, batch
+size, checkpoint grid and freeze mask identical to their seed-1337 originals, and are scored by the
+same rule on the same 150 pairs at their own `k_match` and at step 30,000.
+- **`frozen_high_s2`** (freeze 0-5 and 11; trainable 6-10). Prediction: median `w` at matched accuracy
+  within the ~0.04 seed spread already measured on other conditions of seed 1337's **0.342**, and
+  clearly below the untouched 12-block reference's **0.443** at its own matched checkpoint. A
+  replicate at or above 0.443 **retracts** the claim that blocks 6-10 alone are sharper than the
+  untouched reference; a replicate more than 0.04 from 0.342 makes the seed spread on this condition
+  larger than any measured so far and forces the "sharpest network in the study" superlative to be
+  restated as a range.
+- **`frozen_mirror_s2`** (freeze 5-11; trainable 0-4). Prediction: median `w` at matched accuracy
+  within ~0.04 of seed 1337's **0.629**, and above **both** frozen-deep seeds (0.559 and 0.590), so
+  that the position contrast (five trainable blocks by the readout beat five at the bottom) survives
+  with two seeds a side. A replicate at or below 0.590 **retracts** that ordering, leaving the
+  mid-stack-vs-end comparisons — which are 0.17-0.26 wide — as the only positional claims.
+
 **S16 IS DONE (2026-08-03) — every claim the depth/position reading rests on now has a measured seed
 spread under it.** Depth step: 12-trainable-block runs (0.397-0.443) disjoint from 8-block runs
 (0.476-0.500), two seeds a side. Position term: both frozen-deep seeds (0.559, 0.590 at matched

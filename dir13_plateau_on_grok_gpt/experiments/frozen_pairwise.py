@@ -114,7 +114,28 @@ PAIRS = [("frozen_two_last", "frozen_deep_last"),
          ("frozen_high_last", "frozen_mid_last"),
          ("frozen_high_last", "frozen_mid_low_last"),
          ("frozen_high_last", "frozen_mirror_last"),
-         ("frozen_high_last", "ref_trained")]
+         ("frozen_high_last", "ref_trained"),
+         # second seed of blocks 6-10 (freeze 0-5 and 11): the study's sharpest network carries the
+         # "training fewer blocks can sharpen the plateau" fact on both axes from ONE initialization
+         ("frozen_high_s2_matched", "frozen_high_matched"),
+         ("frozen_high_s2_matched", "ref_matched_step"),
+         ("frozen_high_s2_matched", "frozen_mid_matched"),
+         ("frozen_high_s2_matched", "frozen_mid_low_matched"),
+         ("frozen_high_s2_matched", "frozen_mirror_matched"),
+         ("frozen_high_s2_last", "frozen_high_last"),
+         ("frozen_high_s2_last", "ref_trained"),
+         ("frozen_high_s2_last", "frozen_mirror_last"),
+         # second seed of frozen 5-11 (trainable 0-4): the blunt end of the position contrast, the
+         # last single-seed run under a load-bearing comparison
+         ("frozen_mirror_s2_matched", "frozen_mirror_matched"),
+         ("frozen_mirror_s2_matched", "frozen_deep_matched"),
+         ("frozen_mirror_s2_matched", "frozen_deep_s2_matched"),
+         ("frozen_mirror_s2_matched", "frozen_mid_matched"),
+         ("frozen_mirror_s2_matched", "ref_matched_step"),
+         ("frozen_mirror_s2_last", "frozen_mirror_last"),
+         ("frozen_mirror_s2_last", "frozen_deep_last"),
+         ("frozen_mirror_s2_last", "frozen_mid_last"),
+         ("frozen_mirror_s2_last", "ref_trained")]
 
 raw = np.load(os.path.join(RES, "frozen_assay_raw.npz"))
 out = {}
@@ -162,9 +183,13 @@ if "frozen_deep_s2_matched" in C:
     for which in ("matched", "last"):
         d1 = C[f"frozen_deep_{which}"]["median_w"]
         d2 = C[f"frozen_deep_s2_{which}"]["median_w"]
-        m = C[f"frozen_mirror_{which}"]["median_w"]
+        mirrors = [C[f"frozen_mirror_{which}"]["median_w"]]
+        if f"frozen_mirror_s2_{which}" in C:
+            mirrors.append(C[f"frozen_mirror_s2_{which}"]["median_w"])
+        m = min(mirrors)  # the sharpest mirror seed -- the conservative end of the contrast
         out[f"position_contrast_{which}"] = {
-            "frozen_deep_medians": [d1, d2], "frozen_mirror_median": m,
+            "frozen_deep_medians": [d1, d2], "frozen_mirror_medians": mirrors,
+            "frozen_mirror_median": m,
             "frozen_deep_seed_spread": round(abs(d1 - d2), 4),
             "both_deep_seeds_below_mirror": bool(max(d1, d2) < m),
             "gap_worst_deep_seed_to_mirror": round(m - max(d1, d2), 4)}
@@ -208,6 +233,23 @@ if have_i and have_e:
         "frozen_mid_low_median": have_e.get("frozen_mid_low_matched"),
         "mid_low_joins_end_group": (None if "frozen_mid_low_matched" not in have_e else
                                     bool(have_e["frozen_mid_low_matched"] > max(have_i.values())))}
+
+# Every condition run from two initializations, in one place: the across-seed spread is the error bar
+# the positional gaps have to clear, so it is reported as a single measured quantity rather than being
+# re-derived per claim.
+SEEDED = ["narrow192", "frozen_early", "frozen_deep", "frozen_high", "frozen_mirror"]
+spread = {}
+for cond in SEEDED:
+    for which in ("matched", "last"):
+        a, b = f"{cond}_{which}", f"{cond}_s2_{which}"
+        if a in C and b in C:
+            spread[f"{cond}_{which}"] = {
+                "medians": [C[a]["median_w"], C[b]["median_w"]],
+                "spread": round(abs(C[a]["median_w"] - C[b]["median_w"]), 4)}
+if spread:
+    out["seed_spread"] = {"per_condition": spread,
+                          "max_spread": max(v["spread"] for v in spread.values()),
+                          "n_conditions_with_two_seeds": len(set(k.rsplit("_", 1)[0] for k in spread))}
 
 print(json.dumps(out, indent=2))
 with open(os.path.join(RES, "frozen_pairwise.json"), "w") as f:
