@@ -177,16 +177,36 @@ output separation the model has already learned.
 
 ## 4. What the score does not capture
 
-**Flatness and width are nearly the same measurement here.**
+**Flatness and width are the same measurement here — because every transition is centred.** Flat ends
+and a narrow transition are different properties in principle: the same width-$w$ move parked in the
+middle of the path leaves both ends flat, and parked near an end it does not. (It cannot instead be "a
+steeper straight line": $d(0) = 0$ and $d(1) = 1$ exactly, so the one available straight line is
+$d(t) = t$, with slope fixed at 1 and $w$ fixed at 0.8.) We measure endpoint flatness with **edge
+drift** $E$ — how far $d$ moves away from its endpoint values inside the outer 20% of the path, 0 =
+perfectly flat ends — and the **transition midpoint** $m = t(d = 0.5)$, which says where along the path
+the move happens.
 
-![Left: histogram of edge drift at three model settings against the no-transition reference. Right: edge drift against transition width.](plots/edge_drift.png)
+![Four panels: edge-drift histograms, three equal-width curves with different edge drift, edge drift against width with each pair's placement range, and transition-midpoint histograms.](plots/edge_drift.png)
 
-**Figure 7.** The trained curves do have flat ends, but flatness adds almost nothing beyond width.
-*Left:* x = edge drift $E$ (mean movement of $d$ away from its endpoint values inside the outer 20% of
-the path; 0 = perfectly flat ends), y = number of pairs. `//`-hatched = trained 1.4B (median 0.076),
-`\\`-hatched = untrained step 0 (0.213), `..`-hatched = 410M (0.109); dashed vertical = the
-no-transition reference $E = 0.184$ for a straight line. *Right:* x = $w$, y = $E$; round markers =
-trained 1.4B, square markers = step 0. Spearman between them is $+0.971$, so this experiment cannot
+**Figure 7.** Trained curves have flat ends, and flatness adds nothing beyond width because the
+transitions all sit in the middle of the path. *(a)* x = $E$, y = number of pairs; `//`-hatched =
+trained 1.4B (median 0.076), `\\`-hatched = untrained step 0 (0.213), `..`-hatched = 410M (0.109);
+dashed vertical = the no-transition reference $E = 0.184$ for the straight line $d(t) = t$. *(b)* x =
+$t$, y = $d(t)$; all three curves have width $w = 0.541$ (the trained median). Solid/round = the
+reference transition centred ($E = 0.080$); dashed/square = the same transition parked late
+($E = 0.220$); dash-dotted/triangle = a measured trained curve ($E = 0.070$); dotted diagonal = the
+straight line. Gray bands = the outer-20% edge windows $E$ scores. *(c)* x = $w$, y = $E$; each gray
+vertical segment is one trained pair's **placement range**, the $E$ values a transition of that width
+could have taken; round markers = trained 1.4B as run, square = step 0 as run. *(d)* x = $m$, y =
+number of pairs, settings and hatches as in (a); dashed vertical at $m = 0.5$.
+
+At the median trained width, sliding the same transition along the path swings $E$ from 0.080 to 0.220
+— a factor of 2.7, wider than the whole trained-to-untrained gap in $E$ (0.076 against 0.213). The
+model never uses that freedom: median midpoint $m = 0.505$ (interquartile range 0.047), 96.7% of the 60
+controlled pairs and 97.6% of the 1,000 within 0.1 of the middle, so 96.7% of pairs sit at the bottom
+of their own placement range. Hence $\rho(w, E) = +0.971$ (60 pairs) and $+0.978$ (1,000 pairs), and
+edge drift adds nothing about corpus JSD once width is known: $\rho(J, E) = -0.520$ alone but partial
+$\rho(J, E \mid w) = -0.008$ [−0.332, +0.328] (1,000 pairs: −0.009). This experiment therefore cannot
 tell "flatter ends" apart from "narrower transitions"; the claim made is the second, weaker one.
 
 **The trend is distributional, not pair-by-pair.**
@@ -257,9 +277,11 @@ following $u$ and following $v$, and the model's outputs at the two ends and alo
 continuation distribution was measured at any intermediate point, so nothing here says a flat stretch
 corresponds to one continuation distribution, or that continuation distributions jump anywhere.
 
-**`w` and edge drift are almost the same measurement** ($\rho = +0.971$), so the association cannot be
-attributed to flatness specifically. A flat $d(t)$ means this one relative distance score changes
-slowly; it does not establish that the logits or the output distribution are stationary.
+**`w` and edge drift are almost the same measurement here** ($\rho = +0.971$), so the association
+cannot be attributed to flatness specifically. They are distinct properties in principle, but every
+measured transition is centred ($m = 0.505$), which collapses them onto each other. A flat $d(t)$ means
+this one relative distance score changes slowly; it does not establish that the logits or the output
+distribution are stationary.
 
 **The untrained baseline is a restricted-range control**: step-0 widths span an interquartile range of
 0.006 just under 0.8.

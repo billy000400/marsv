@@ -530,3 +530,53 @@ more feedback arrives, the wrapper's next entry should delete `STOP` first (rule
 
 On track? yes — S1–S3 complete, S4 (correspondence-only report) delivered this iteration; operator
 feedback #6 fully addressed, no blocker.
+
+---
+
+## 2026-08-10 — feedback #7: fixing a wrong justification for the flatness caveat
+
+**What I did.** `human_feedback_7.txt` was sitting unaddressed (a `.txt`, not `.md`, but plainly an
+operator feedback file, so I treated it under Part C). It objected to one sentence in the Methods
+paragraph that introduces edge drift `E`: "A narrow transition could mean flat ends with a quick move
+in the middle, or just a steeper straight line" — asking how a narrow transition could be a steeper
+straight line with no quick move in the middle.
+
+The operator is right and the sentence was simply wrong. `d(t)` is a *relative* distance, so `d(0) = 0`
+and `d(1) = 1` hold exactly for every curve we run. A straight line through both endpoints therefore
+has slope exactly 1 and width exactly 0.8 — there is no steeper straight line to have. I had written
+the standard "sharp step vs. shallow ramp" dichotomy without noticing that the endpoint pinning already
+rules out one half of it.
+
+Rather than delete the sentence, I worked out what `E` genuinely adds over `w` and measured it
+(`experiments/edge_geometry.py`, CPU only, reads the committed curves): `w` is a width and says nothing
+about **where** the move sits, and where it sits is exactly what decides endpoint flatness. Sweeping
+the same width-`w` transition across 201 starting positions gives a *placement range* of `E`; at the
+median trained width the range is 0.080 (centred) to 0.220 (parked late), a factor of 2.7 and wider
+than the entire trained-to-untrained gap in `E`. So the near-perfect `w`–`E` agreement is not an
+algebraic identity — it is an empirical fact about these curves: the transition midpoint is
+`m = 0.505` (IQR 0.047), 96.7% of controlled pairs and 97.6% of the 1,000 within 0.1 of the middle, so
+every curve sits at the flattest placement available to it.
+
+Figure 7 went from 2 to 4 panels to show this: equal-width curves with different `E`, per-pair
+placement ranges, and midpoint histograms. Added the partial correlation that makes the redundancy
+concrete: `rho(J, E) = -0.520` alone, `rho(J, E | w) = -0.008` [−0.332, +0.328].
+
+**Assumptions logged** (loop mode, no one to ask). (i) The placement family is the piecewise-linear
+three-segment curve through `(0,0), (A,0.1), (A+w,0.9), (1,1)`. I first tried sliding the *measured*
+curve itself, but that re-anchors `E` to the shifted endpoint values (the shifted curve no longer ends
+at 1) and understated the range; the constructed family keeps `d(0) = 0`, `d(1) = 1` and is a curve the
+experiment could genuinely have produced. Rejected alternative: a full min/max optimisation over all
+monotone curves of a given width — more general but its extremes are degenerate limits, and the
+three-segment family already makes the point with an honest, reproducible construction. (ii) I did not
+rerun any GPU experiment; nothing about the main association changed.
+
+**What I learned.** A metric caveat can be *true* for the wrong reason, and the wrong reason is worse
+than no reason: the caveat "flatness and width are the same measurement" survived, but its stated
+justification was geometrically impossible. The corrected version is also more informative — it names
+the property that would have to change (off-centre transitions) for the two to separate.
+
+**Next step.** None outstanding: PLAN.md S4 is delivered and feedback #7 is addressed and renamed
+`human_feedback_7.addressed.md`, so `STOP` is written again. If more feedback arrives, delete `STOP`
+first (rule 11).
+
+On track? yes — S1–S3 complete, S4 delivered, feedback #7 fully addressed, no blocker.

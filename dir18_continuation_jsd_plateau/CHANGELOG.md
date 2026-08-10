@@ -426,3 +426,44 @@ mapped to the new vocabulary in the caption instead.
 8 reference_curves, 9 house_reference; REPORT.md adds 10 bank_comparison and 11 block_scan in
 Appendix B. `check_render.py` passes on both files (REPORT.md: 12 display equations, 11 embeds,
 11 captions; RESULTS.md: 9 embeds, 9 captions; 0 problems).
+
+## 2026-08-10 — operator feedback #7: the flatness-vs-width claim was justified by a wrong dichotomy
+
+`human_feedback_7.txt` (renamed `human_feedback_7.addressed.md`) challenged the sentence introducing
+edge drift: *"A narrow transition could mean flat ends with a quick move in the middle, or just a
+steeper straight line"* — asking why a narrow transition could ever be a steeper straight line with no
+quick move in the middle. **It cannot, and the sentence was wrong.** `d(0) = 0` and `d(1) = 1` hold
+exactly by construction, so the only straight line available is `d(t) = t`: slope fixed at 1, width
+fixed at `w = 0.800`, edge drift fixed at `E = 0.184`. Any `w < 0.8` already means the score moves
+faster in some part of the path than in others.
+
+**New analysis** (`experiments/edge_geometry.py`, no GPU, reads the committed curves;
+`results/edge_geometry.json`). The property `E` actually adds over `w` is *where* the move sits, not
+how steep it is. For a given width we build the monotone reference curve through `(0,0)`, `(A,0.1)`,
+`(A+w,0.9)`, `(1,1)` and sweep the starting position `A` over 201 placements (width preserved to
+within 0.007 on the 50-point grid) — the **placement range** of `E`. New quantity: the **transition
+midpoint** `m = t(d = 0.5)`.
+
+- At the median trained width `w = 0.541`, placement swings `E` from **0.080** (centred) to **0.220**
+  (parked late) — a factor of 2.7, wider than the whole trained-to-untrained gap in `E`
+  (0.076 → 0.213). So `E` is *not* implied by `w`.
+- Every measured transition is centred: `m = 0.505`, interquartile range 0.047, **96.7%** of the 60
+  controlled pairs and **97.6%** of the 1,000 within 0.1 of the middle; 96.7% of pairs sit at (or
+  below) the bottom of their own placement range. That, not an algebraic identity, is why
+  `rho(w, E) = +0.971` (60 pairs) and `+0.978` (1,000 pairs).
+- New number quantifying the redundancy: `rho(J, E) = -0.520` alone, but partial
+  `rho(J, E | w) = -0.008` [−0.332, +0.328] on the controlled set and `-0.009` on the 1,000 pairs.
+
+**Deliverable changes.** REPORT.md Methods: the wrong dichotomy replaced by the pinned-endpoint
+argument plus the placement/position explanation; `m` and the placement range defined. REPORT.md §4
+and RESULTS.md §4 rewritten around the corrected mechanism ("flatness and width are the same
+measurement *because every transition is centred*"), with the new numbers; the Summary's second
+bounding sentence and both files' limitation bullets updated to give the corrected reason. No result
+about the main JSD-width association changed.
+
+**Figure 7 regenerated** (`plots/edge_drift.png`), 2 panels → 4: (a) edge-drift histograms as before;
+(b) three curves of identical width `w = 0.541` — centred (`E = 0.080`), parked late (`E = 0.220`),
+and a measured curve (`E = 0.070`) — against the straight line; (c) `E` vs `w` with each pair's
+placement range drawn as a gray segment; (d) transition-midpoint histograms. Panels (b)–(d) are new.
+`check_render.py` passes on both files (REPORT.md: 13 display equations, 11 embeds; RESULTS.md: 9
+embeds; 0 problems).

@@ -1,0 +1,81 @@
+{
+ "edge_drift_linear_reference": 0.18367346938775514,
+ "settings": {
+  "step143000_t256": {
+   "label": "trained 1.4B",
+   "n": 60,
+   "median_w": 0.5411863691925352,
+   "median_E": 0.07594616075471095,
+   "spearman_w_E": 0.9711030841900531,
+   "median_midpoint": 0.5052284649209418,
+   "iqr_midpoint": 0.04713360956944124,
+   "frac_centred_within_0p1": 0.9666666666666667,
+   "median_abs_offset": 0.02186227532015128,
+   "median_E_min_over_placements": 0.0800722781331411,
+   "median_E_max_over_placements": 0.21956261840721086,
+   "median_ratio_Emax_over_E": 2.9745976419319944,
+   "frac_at_placement_minimum_within_0p01": 0.9666666666666667,
+   "spearman_J_E": -0.5195332036676856
+  },
+  "step0_t256": {
+   "label": "untrained step 0",
+   "n": 60,
+   "median_w": 0.8312273294395396,
+   "median_E": 0.2126566425399574,
+   "spearman_w_E": 0.9947763267574329,
+   "median_midpoint": 0.5018339745641096,
+   "iqr_midpoint": 0.016674460051120776,
+   "frac_centred_within_0p1": 1.0,
+   "median_abs_offset": 0.00893742814872217,
+   "median_E_min_over_placements": 0.20464260569697446,
+   "median_E_max_over_placements": 0.2240568474239518,
+   "median_ratio_Emax_over_E": 1.0535299068345974,
+   "frac_at_placement_minimum_within_0p01": 0.8333333333333334,
+   "spearman_J_E": -0.0449569324812448
+  },
+  "step143000_410m_t256": {
+   "label": "410M trained",
+   "n": 60,
+   "median_w": 0.6398758152399362,
+   "median_E": 0.10932029710129426,
+   "spearman_w_E": 0.9585440400111144,
+   "median_midpoint": 0.5041468956665391,
+   "iqr_midpoint": 0.07306480804095067,
+   "frac_centred_within_0p1": 0.9,
+   "median_abs_offset": 0.03796971513829078,
+   "median_E_min_over_placements": 0.10262605475007902,
+   "median_E_max_over_placements": 0.2108100370355998,
+   "median_ratio_Emax_over_E": 1.915959898288094,
+   "frac_at_placement_minimum_within_0p01": 0.85,
+   "spearman_J_E": -0.5396499027507642
+  }
+ },
+ "partial_J_E_given_w": {
+  "rho": -0.008446790775215339,
+  "lo": -0.3317327237777964,
+  "hi": 0.3275678071005151,
+  "n": 60
+ },
+ "partial_J_w_given_E": {
+  "rho": -0.16888024451236455,
+  "lo": -0.4472760493040441,
+  "hi": 0.15822240339991078,
+  "n": 60
+ },
+ "large_1000": {
+  "n": 1000,
+  "spearman_w_E": 0.9776727536727536,
+  "median_midpoint": 0.5033109112692129,
+  "frac_centred_within_0p1": 0.976,
+  "partial_J_E_given_w": -0.008680136680136681
+ },
+ "width_fidelity_of_constructed_curves": 0.007272894404250607,
+ "band_at_median_w": {
+  "w": 0.5411863691925352,
+  "E_min": 0.08006452165098442,
+  "E_max": 0.219552833579908,
+  "A_at_E_min": 0.2294068154037324,
+  "A_at_E_max": 0.4384054675421587,
+  "E_measured_median": 0.07594616075471095
+ }
+}

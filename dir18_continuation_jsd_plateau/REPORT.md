@@ -43,8 +43,9 @@ output difference between the two tokens even more strongly ($\rho = +0.751$), a
 that model-output difference together with all five measured pair properties, the remaining
 association is $-0.204$ with $p = 0.119$ — no longer significant at n = 60. The overall association is
 strong; an independent contribution over and above what the model already encodes is not something
-this design can demonstrate. Second, `w` and our separate flatness measure agree at $\rho = +0.971$
-across pairs, so this experiment measures one thing, not two.
+this design can demonstrate. Second, every measured transition sits in the middle of the interpolation
+path, which forces our separate flatness measure to agree with `w` ($\rho = +0.971$ across pairs), so
+this experiment measures one thing, not two.
 
 The honest statement of the finding is therefore:
 
@@ -197,8 +198,12 @@ two valid frames is dropped entirely. Figure 4 shows the curves this audits.
 
 ### Three quantities that tell us what `w` is and is not measuring
 
-A narrow transition could mean the score is flat at both ends and moves quickly in the middle, or it
-could simply mean the whole curve is a steeper straight line. To tell those apart we measure how far
+$w$ is a width, so it says nothing about *where* on the path the move happens — and where it happens
+is what decides whether the curve has flat ends. (A narrower transition cannot instead mean "a steeper
+straight line": $d(0) = 0$ and $d(1) = 1$ hold exactly, so the only straight line available is
+$d(t) = t$, whose slope is fixed at 1 and whose width is fixed at $w = 0.8$. Any $w < 0.8$ already
+means the score moves faster in some part of the path than in others.) The same transition centred at
+$t = 0.5$ leaves both ends flat; parked against either end it does not. To measure that, we ask how far
 $d$ drifts from its endpoint values inside the outer 20% of the path:
 
 ```math
@@ -210,6 +215,21 @@ E \;=\; \frac{1}{|T_0|}\sum_{t \in T_0}\big(d(t) - d(0)\big)
 $E = 0$ means perfectly flat ends; the straight line $d(t) = t$ gives $E = 0.184$ on our grid, which is
 the **no-transition reference**. Figure 7 reports $E$ and shows how much independent information it
 adds over $w$.
+
+Two further quantities let Figure 7 say *why* $E$ and $w$ turn out to agree. The **transition
+midpoint** is where the score is halfway across,
+
+```math
+m \;=\; t(d = 0.5),
+```
+
+linearly interpolated on the same grid; $m = 0.5$ means the move sits in the middle of the path. And to
+see how much freedom $E$ has at a fixed width, we build, for a given $w$ and starting position $A$, the
+monotone reference curve through the knots $(0,0)$, $(A, 0.1)$, $(A+w, 0.9)$, $(1,1)$ — the same
+transition parked at different points of the path, sweeping $A$ over the 201 positions that fit inside
+$[0,1]$. Every member has the same $w$ (to within 0.007 on the 50-point grid) and its own $E$; the
+spread of $E$ across the sweep is the **placement range**, the set of edge-drift values a curve of that
+width could have had.
 
 $d(t)$ is normalised to run from 0 to 1 however little the output actually changes, which makes it
 uninformative for a pair whose two outputs are nearly identical to begin with. For the two named
@@ -481,23 +501,47 @@ cannot distinguish them.
 
 ### 4. What the score does not capture
 
-**Flatness and width are nearly the same measurement here.** A narrow transition could mean flat ends
-with a quick move in the middle, or just a steeper straight line. Figure 7 measures endpoint flatness
-separately and shows how much independent information it carries.
+**Flatness and width turn out to be the same measurement here — because every transition is centred.**
+Endpoint flatness is a separate property of a curve from transition width: a width-$w$ transition
+parked in the middle of the path leaves both ends flat, and the very same transition pushed towards an
+end does not. Figure 7 measures the two separately, shows how much room $E$ had to disagree with $w$,
+and shows why it did not.
 
-![Left: histogram of edge drift at three model settings against the no-transition reference. Right: edge drift against transition width.](plots/edge_drift.png)
+![Four panels: edge-drift histograms, three curves of equal width with different edge drift, edge drift against width with the placement range of each pair, and transition-midpoint histograms.](plots/edge_drift.png)
 
-**Figure 7.** The trained curves do have flat ends, but flatness adds almost nothing beyond width.
-*Left:* x = edge drift $E$ (mean movement of $d$ away from its endpoint values inside the outer 20% of
-the path; 0 = perfectly flat ends), y = number of pairs. `//`-hatched = trained 1.4B (median 0.076),
-`\\`-hatched = untrained step 0 (0.213), `..`-hatched = 410M (0.109); the dashed vertical is the
-no-transition reference $E = 0.184$ for a straight line. Every trained pair sits well below the
-reference; the untrained ones sit slightly above it. *Right:* x = $w$, y = $E$; round markers = trained
-1.4B, square markers = step 0. Spearman between them is $+0.971$.
+**Figure 7.** Trained curves have flat ends, and flatness adds nothing beyond width because the
+transitions all sit in the middle of the path. *(a)* x = edge drift $E$ (mean movement of $d$ away from
+its endpoint values inside the outer 20% of the path; 0 = perfectly flat ends), y = number of pairs.
+`//`-hatched = trained 1.4B (median 0.076), `\\`-hatched = untrained step 0 (0.213), `..`-hatched =
+410M (0.109); the dashed vertical is the no-transition reference $E = 0.184$ for the straight line
+$d(t) = t$. Every trained pair sits well below the reference; the untrained ones sit slightly above it.
+*(b)* x = interpolation position $t$, y = $d(t)$; all three drawn curves have the same width
+$w = 0.541$ (the trained median). Solid with round markers = the reference transition centred
+($E = 0.080$); dashed with square markers = the same transition parked late ($E = 0.220$); dash-dotted
+with triangles = a measured trained curve of that width ($E = 0.070$); dotted diagonal = the straight
+line ($w = 0.800$, $E = 0.184$). Gray bands mark the outer-20% edge windows that $E$ scores.
+*(c)* x = $w$, y = $E$. Each gray vertical segment is one trained pair's placement range — the $E$
+values a transition of that pair's width could have taken. Round markers = trained 1.4B as run, square
+markers = step 0 as run. Spearman $w$ vs $E$ is $+0.971$ trained and $+0.995$ untrained. *(d)* x =
+transition midpoint $m = t(d = 0.5)$, y = number of pairs, same three settings and hatches as (a);
+dashed vertical at $m = 0.5$.
 
-Because $w$ and $E$ agree at $+0.971$ across pairs, this experiment cannot tell "more divergent tokens
-have flatter ends" apart from "more divergent tokens have narrower transitions". The claim we make is
-the second one, and it is the weaker of the two.
+Panel (b) sizes the freedom $E$ had: at the median trained width, moving the same transition along the
+path swings $E$ from 0.080 to 0.220, a factor of 2.7 and wider than the entire trained-to-untrained gap
+in $E$ (0.076 versus 0.213). Panel (d) shows the model never used that freedom — the median midpoint is
+$m = 0.505$ with an interquartile range of 0.047, and 96.7% of the 60 controlled pairs (97.6% of the
+1,000) transition within 0.1 of the middle of the path. With the move always centred, the flattest
+placement is the one that occurs, and panel (c) shows 96.7% of pairs sitting at (or below) the bottom
+of their own placement range. That is the mechanism behind $\rho(w, E) = +0.971$ on the controlled set
+and $+0.978$ on the 1,000 pairs.
+
+The consequence for the main result is a limit on interpretation. Edge drift on its own tracks corpus
+JSD about as well as width does ($\rho(J, E) = -0.520$), but once width is accounted for it adds
+nothing: partial $\rho(J, E \mid w) = -0.008$, 95% interval $[-0.332, +0.328]$ on the controlled set and
+$-0.009$ on the 1,000 pairs. So this experiment cannot tell "more divergent tokens have flatter ends"
+apart from "more divergent tokens have narrower transitions". The claim we make is the second one, and
+it is the weaker of the two. Separating the two would need a setting in which transitions are not
+always centred; in this one they are.
 
 **The trend is distributional, not pair-by-pair.** Figure 8 draws the raw curves of the three
 lowest-JSD and three highest-JSD pairs of the controlled set, which is the clearest available picture
@@ -583,10 +627,12 @@ the two ends and along the interpolation. We never measured continuation distrib
 points of the path. This report therefore makes no claim that a flat stretch corresponds to one
 continuation distribution, and none that continuation distributions jump anywhere along the path.
 
-**`w` and edge drift are almost the same measurement** ($\rho = +0.971$ across pairs), so the
-association cannot be attributed to flatness specifically. Related: a flat $d(t)$ means this one
-relative distance score changes slowly, and does not establish that the logits or the output
-distribution are stationary.
+**`w` and edge drift are almost the same measurement here** ($\rho = +0.971$ across pairs), so the
+association cannot be attributed to flatness specifically. The two are distinct properties in
+principle — at the median width, moving the transition along the path changes $E$ by a factor of 2.7 —
+but every measured transition is centred ($m = 0.505$, 96.7% within 0.1 of the middle), which collapses
+them onto each other. Related: a flat $d(t)$ means this one relative distance score changes slowly, and
+does not establish that the logits or the output distribution are stationary.
 
 **The untrained baseline is a restricted-range control.** Step-0 widths span an interquartile range of
 0.006 just under 0.8, so its null correlation partly reflects having almost no variation to explain.
