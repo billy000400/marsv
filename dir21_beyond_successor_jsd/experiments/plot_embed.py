@@ -24,7 +24,11 @@ def main():
     y0 = np.array([w0[s] for s in names])
     yp = np.array([d["probe_pred"][s] for s in names])
 
-    fig, ax = plt.subplots(1, 3, figsize=(12.4, 3.8))
+    fw = json.load(open(f"{RESULTS}/embed_forward.json"))
+    fwd_rows = [r for r in json.load(open(f"{RESULTS}/forward.json"))["rows"]
+                if r["n_valid"] == 3 and r["out_jsd_min"] >= 0.2]
+
+    fig, ax = plt.subplots(1, 4, figsize=(16.0, 3.8))
 
     ax[0].scatter(y0, ye, s=16, marker="o", color=CVD[0], alpha=.75, edgecolor="none")
     lim = [min(y0.min(), ye.min()) - .01, max(y0.max(), ye.max()) + .01]
@@ -55,14 +59,31 @@ def main():
     ax[2].bar(x + .19, null, .36, yerr=nerr, capsize=3, color=CVD[2], hatch="..",
               edgecolor="white", label="shuffled-target control")
     ax[2].axhline(0, color="0.5", lw=.8)
-    for xi, v in zip(x, real):
-        ax[2].annotate(f"{v:+.2f}", (xi - .19, v), fontsize=7, ha="center",
+    for xi, v, e in zip(x, real, rerr):
+        ax[2].annotate(f"{v:+.2f}", (xi - .19, v + e), fontsize=7, ha="center",
                        xytext=(0, 4), textcoords="offset points")
     ax[2].set_xticks(x)
     ax[2].set_xticklabels(lab, fontsize=8)
     ax[2].set_ylabel(r"held-out Spearman $\rho$ (43 test tokens)")
     ax[2].set_title(f"Probe from $W_E$ row, {d['n_split']} random splits", fontsize=9)
-    ax[2].legend(fontsize=7, loc="upper right")
+    ax[2].axhline(fw_norm := fw["probe_norm_only"]["rho_mean"], ls=":", color="0.35", lw=1.2)
+    ax[2].annotate(f"embedding norm only ({fw_norm:+.2f})", (0.52, fw_norm), fontsize=6.5,
+                   ha="center", va="bottom", color="0.25")
+    ax[2].legend(fontsize=7, loc="lower left")
+
+    obs = np.array([r["w"] for r in fwd_rows])
+    pred = np.array([fw["beta0"] + fw["beta1"] * (fw["w_lookup"][r["a"]] + fw["w_lookup"][r["b"]])
+                     for r in fwd_rows])
+    ax[3].scatter(pred, obs, s=9, marker="^", color=CVD[3], alpha=.55, edgecolor="none")
+    lim = [min(pred.min(), obs.min()) - .02, max(pred.max(), obs.max()) + .02]
+    ax[3].plot(lim, lim, ls="--", color="0.5", lw=.9)
+    ax[3].set_xlim(lim)
+    ax[3].set_ylim(lim)
+    ax[3].set_xlabel(r"$\hat w$ from static embeddings only (no forward pass)")
+    ax[3].set_ylabel("observed transition width $w$ of the unseen pair")
+    ax[3].set_title(f"{fw['n_scored']} pairs of {fw['n_new_tokens']} unseen tokens\n"
+                    fr"$R^2 = {fw['r2_forward']:.2f}$, $\rho = {fw['rho_forward'][0]:+.2f}$ "
+                    f"(measured screen {fw['measured_screen']['r2']:.2f})", fontsize=9)
 
     fig.tight_layout(w_pad=2.0)
     fig.savefig(os.path.join(PLOTS, "embed_probe.png"), bbox_inches="tight")

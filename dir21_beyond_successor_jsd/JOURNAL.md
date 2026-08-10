@@ -163,3 +163,146 @@ budget went to a coherence pass rather than a sixth experiment.
 
 On track? yes — S1-S5 complete, five experiments run and reported, deliverables current-best and
 render-checked, no blocker.
+
+## 2026-08-10 — iteration 2: finished the embedding probe and made the screen a lookup
+
+**Did.** Feedback check first: no `human_feedback*` / `*REVIEW*` files in this direction. Found that
+the previous session died right after `embed_probe.py` wrote `results/embed.json` — the experiment had
+run but was never plotted or reported, so this iteration completed it rather than starting anything
+new. Plotted it (`plot_embed.py`, Figure 10), added the norm-only baseline, and wrote
+`experiments/embed_forward.py`: fit the probe on the 123 bank tokens, look up w_hat for the 40
+forward-screen tokens from their embedding rows, and score the same 718 gated pairs with bank-frozen
+coefficients. Folded everything into both deliverables; `check_render.py` passes.
+
+**Learned.**
+1. **The trait is in the embedding.** A ridge probe on W_E[u] predicts a held-out token's measured
+   anchor width at rho = +0.76 (R^2 = 0.51), 50/50 splits positive. Measuring the same quantity with
+   the interpolation site moved *below* block 0 agrees with block 0 at rho = +0.79. Combined with last
+   iteration's layer sweep, the picture is now sharp at both ends: the ranking is present in the input
+   embedding and unchanged by 18 blocks of computation, while the sharpness itself is manufactured by
+   the blocks below the interpolation site.
+2. **It is not just embedding norm.** Norm alone gives rho = +0.60 under the same splits — a large
+   share, and the honest way to report it, since norm tracks frequency in Pythia. The full embedding
+   adds a clear increment (0.76 vs 0.60), and shuffled targets give -0.20, so the probe is not fitting
+   noise with 2048 features on 80 points.
+3. **The end-to-end lookup works but loses half the R^2**: 0.213 vs the measured screen's 0.397 on the
+   same 718 unseen pairs (rho +0.53 vs +0.66). The mechanism is visible in Figure 10 far right — ridge
+   shrinks the predicted range, so the lookup under-disperses. I reported this as a two-tier screen (free
+   table for triage, 18 curves per token when accuracy matters) rather than presenting the lookup as a
+   replacement.
+
+**Assumptions logged (loop mode).** (a) The pair-level mapping for the lookup screen is re-estimated on
+bank pairs using *out-of-fold* probe features rather than reusing the measured-width slope — the two
+feature scales differ because of shrinkage, and reusing the old slope would have miscalibrated the
+lookup; no information from the 40 new tokens enters either way. (b) The norm-only baseline was moved
+out of `embed_probe.py` into `embed_forward.py` after the rerun proved too slow (six 2048-feature ridge
+probes, >15 min under 4-way CPU contention); rejected the alternative of leaving the number
+uncomputed, since "is the probe just reading frequency off the norm?" is the first question a reader
+asks. (c) Kept the whole embedding story in one 4-panel figure instead of adding two — the report
+already carries ten figures and the direction asks for a concise exploratory report.
+
+**Next step.** Test the lookup outside the curated pool: apply the probe to all 50,304 embedding rows,
+take ~30 tokens spanning the predicted range including subword fragments, punctuation, numerals and
+capitalised names, and measure their anchor widths at block 0. Everything reported so far uses
+`dir18`'s common-alphabetic-word pool, so this decides whether the vocabulary-wide table is publishable
+as an auditing artifact or whether the screen's scope is common English words.
+
+On track? yes — S1-S5 complete, six experiments run and reported, deliverables current-best and
+render-checked, no blocker.
+
+## 2026-08-10 — iteration 2, second step: the lookup outside the curated pool
+
+**Did.** Ran the experiment the first step recommended (`vocab_probe.py` + `plot_vocab.py`, Figure 11):
+probe applied to all 50,304 embedding rows, 32 tokens selected from four classes the pool excludes
+(ordinary words outside the pool, subword fragments, punctuation/numerals, capitalised names), anchor
+widths measured at block 0. Folded into both deliverables; `check_render.py` passes.
+
+**Learned.** The ranking survives leaving the pool: rho = +0.60 (p = 3.0e-4) over the 32 tokens,
+MAE 0.046, no class inverting the relation (per-class rho +0.24 to +0.83, but n = 8 each, so those are
+indicative). Two things worth carrying forward: (1) the classes sit at systematically different levels
+— rarer words wider (0.632), capitalised names and punctuation narrower (~0.53) — so a vocabulary table
+would be predicting a real spread, not a constant; (2) measured widths outside the pool span
+0.367-0.686, essentially the pool's own range, which is the argument that the table is useful rather
+than merely correlated. Shrinkage is confirmed as the lookup's main weakness (predicted sd 0.047 vs
+measured 0.073).
+
+**Assumption logged.** Eight tokens per class spaced over each class's own predicted quantiles, rather
+than 32 tokens spaced over the global predicted range — the latter would have been dominated by
+whichever class occupies the extremes and could not have shown per-class behaviour at all. The cost is
+that each per-class correlation rests on 8 points, stated in the report rather than glossed.
+
+**Next step.** The frame-shape control: every measurement in this direction uses three short
+declarative frames ending in `was`, with the token final. Re-measure anchor widths for the 123 tokens
+in structurally different contexts (mid-sentence continuation, interrogative, list, code-like) and
+correlate each context's ranking with the current one. That decides whether w_hat_u is a token property
+or a token-in-this-slot property, which is the largest remaining scope caveat on the screen.
+
+On track? yes — S1-S5 complete, seven experiments run and reported, deliverables current-best and
+render-checked, no blocker.
+
+## 2026-08-10 — iteration 2, third step: the frame-shape control
+
+**Did.** Ran the experiment the second step recommended (`frame_control.py` + `plot_frames.py`,
+Figure 12): anchor widths for the 123 tokens re-measured in four contexts of different shape
+(mid-sentence continuation, interrogative, colon-list, code prefix), each context's ranking correlated
+with the original, and — the part that makes the numbers interpretable — the agreement among the three
+original frames computed the same way as a reference. Folded into both deliverables; `check_render.py`
+passes.
+
+**Learned.** The cleanest generalisation result in the direction so far. rho with the original ranking:
++0.844 (mid-sentence), +0.770 (question), +0.735 (list), +0.501 (code), against +0.822 for two frames
+of the original shape. So in a nearby context the measurement transfers with no measurable loss, and it
+degrades gracefully with contextual distance rather than collapsing. Meanwhile the level moves a lot
+(median 0.530 list -> 0.705 code) and code compresses the token spread fivefold (IQR 0.049 vs
+0.107-0.123). The same rank-survives / level-moves split now appears three times — across anchor sets,
+across depth, across context — which is a stronger statement about what w_hat_u is than any single one
+of them: the ordering is carried by the token, the scale by whatever else is in the picture.
+
+**Assumption logged.** Compared each new context against the 3-frame median ranking, using the
+frame-to-frame agreement of the original three as the reference ceiling, rather than comparing single
+frame to single frame throughout — the 3-frame median is the quantity the screen actually uses, and the
+reference is reported alongside so the comparison is not read as if 1.0 were achievable. Rejected
+adding more contexts: four shapes at 123 tokens each already cost ~7 min of GPU and the pattern was
+unambiguous.
+
+**Next step.** The first causal test: take the probe's weight vector, add +-epsilon times its unit
+direction to a token's embedding row, re-measure that token's anchor width, and compare against a
+matched-norm random direction, over ~20 tokens at three step sizes. Everything in the direction so far
+is correlational; this asks whether the embedding direction the probe found is a handle on transition
+sharpness. ~20 min of GPU.
+
+On track? yes — S1-S5 complete, eight experiments run and reported, deliverables current-best and
+render-checked, no blocker.
+
+## 2026-08-10 — iteration 2, fourth step: the embedding intervention (null)
+
+**Did.** Ran the causal test the third step recommended (`embed_intervene.py` + `plot_intervene.py`,
+Figure 13): edited 16 tokens' embedding rows along the probe's prediction gradient by steps sized to
+move the probe's own prediction by +-0.025 and +-0.05 width units, re-measured each token's anchor
+width, and compared against matched-norm random directions. Folded into both deliverables;
+`check_render.py` passes.
+
+**Learned.** A clean null, and I reported it as one. Measured width moved by 0.0027 on average against
+0.0375 requested, with slope -0.023 and sign agreement 0.39 — no effect, and if anything slightly
+against the probe. Random directions moved it by 0.0008. I checked one salvage reading (that the
+perturbation compresses width toward the middle rather than translating it) and dropped it: the
+per-token response slope is unrelated to the token's base width (rho = -0.115, p = 0.67). The
+diagnostic that matters for what comes next is the output shift: 0.0001 bits at a 5%-of-row-norm step,
+so the edit was functionally invisible to the model and the null is at least partly a step-size null.
+That is stated in the report rather than buried, and it defines the follow-up.
+
+**Assumption logged.** Sized the steps by the probe's own prediction (delta = Delta g / ||g||^2) rather
+than by a fixed fraction of the embedding norm — that makes "the probe says +0.05, the model gives
++0.003" a directly interpretable statement, which a norm-based step would not be. The cost is that the
+resulting steps turned out to be behaviourally tiny; the fix is the next experiment's
+behaviour-calibrated step, not a reinterpretation of this one.
+
+**Next step.** Repeat the intervention with the step grown along the probe direction until the token's
+next-token distribution moves by 0.05 / 0.1 / 0.2 bits (the basin sweep's thresholds), keeping the
+matched-norm random control. If width then moves along the probe direction and not the random one, the
+direction is a lever and this iteration's null is a step-size artifact; if both move width, no single
+embedding direction carries the trait and the search moves to block 0's attention pattern and MLP
+response, which the layer sweep says is where the ordering is already fixed.
+
+On track? yes — S1-S5 complete, nine experiments run and reported (two of them nulls, both reported as
+such), deliverables current-best and render-checked, no blocker.

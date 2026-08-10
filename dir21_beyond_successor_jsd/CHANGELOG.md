@@ -152,3 +152,144 @@ static embedding to w_hat_u on 80 tokens, test on 43). RESULTS.md: layer-sweep t
 new next-experiment section.
 
 No earlier number superseded. `check_render.py` passes (15 display eqs, 9 embeds + captions per file).
+
+## 2026-08-10 (iteration 2) — the embedding probe: the per-token number can be looked up, not measured
+
+The previous iteration's session ended immediately after `experiments/embed_probe.py` wrote
+`results/embed.json` (21:55), so that experiment had never been plotted or folded into the
+deliverables. This iteration completed it and added the lookup's forward test.
+
+- **Embedding site.** Anchor widths measured with the interpolation site at the *input embedding*
+  (below block 0; 123 tokens x 3 frames x 6 anchors, 99.9% curve validity) agree with the block-0
+  values at rho = +0.79 (p = 2.0e-27) and with the fitted token effect at rho = +0.60.
+- **Probe.** A ridge probe from the static embedding row W_E[u] to the block-0 anchor width, fitted on
+  80 of the 123 tokens and tested on 43 over 50 random splits: held-out rho = +0.764 +- 0.045,
+  R^2 = 0.514 +- 0.073, positive in 50/50 splits. Shuffled-target control rho = -0.201. Probe to the
+  fitted effect a_u: rho = +0.505.
+- **New baseline run this iteration** (`experiments/embed_forward.py`): embedding norm alone, same
+  splits, rho = +0.597 +- 0.071, R^2 = 0.190. So norm (a frequency proxy) carries a large part of the
+  probe's signal and the rest of the embedding carries more. A first attempt added this baseline inside
+  `embed_probe.py`, but re-running that script means redoing six 2048-feature ridge probes (>15 min
+  under 4-way CPU contention), so the baseline was moved into `embed_forward.py`, which already loads
+  the embedding matrix; `embed_probe.py` is back to its original form and `results/embed.json` is the
+  file it wrote at 21:55, unmodified.
+- **Zero-forward-pass screen** (`experiments/embed_forward.py`, new): probe fitted on the 123 bank
+  tokens, applied to the 40 tokens outside the bank (their measured anchor widths recovered at
+  rho = +0.66, p = 3.4e-6), pair-level slope/intercept re-estimated on bank pairs from out-of-fold probe
+  features and frozen (w = -0.1019 + 0.5977 * (w_u + w_v)). On the same 718 gated pairs as the measured
+  screen: R^2 = 0.213, rho = +0.526, MAE 0.055, tercile medians 0.508 / 0.567 / 0.610 — against the
+  measured screen's 0.397 / +0.656 / 0.047. The gap is ridge shrinkage of the predicted range; the
+  lookup still ranks unseen pairs about as well as model-output JSD (rho = -0.51) with no forward pass.
+
+**Deliverable changes.** REPORT.md: new Methods subsection "The embedding probe: can the per-token
+number be looked up instead of measured?" (probe equation, the two controls, the lookup screen); new
+Results pattern 10 with **Figure 10** (`plots/embed_probe.png`, 4 panels); old patterns 10-12 renumbered
+11-13 with all cross-references updated; a new Summary paragraph and Conclusion paragraph on the
+lookup; forward-pass count 900k -> ~1M; Limitations gained the pool-scope caveat (every token used
+anywhere here is a common single-token alphabetic word) and "four sites" -> "five sites". Recommended
+next experiment changed from the embedding probe (now run) to **testing the lookup on the vocabulary at
+large** (~30 tokens spanning the probe's predicted range, including subword fragments, punctuation,
+numerals, capitalised names). RESULTS.md: headline paragraph, two new tables (probe vs its baselines;
+measured screen vs lookup screen), Figure 10, and the new next-experiment section.
+
+No earlier number superseded. `check_render.py` passes (16 display eqs, 10 embeds + captions per file).
+
+## 2026-08-10 (iteration 2, second step) — the lookup tested on the vocabulary at large
+
+Ran the experiment the first step recommended (`experiments/vocab_probe.py`): the probe fitted on the
+123 bank tokens applied to all 50,304 embedding rows, then 32 tokens selected from four classes
+`dir18`'s pool excludes or under-samples — ordinary words outside the pool, subword fragments,
+punctuation/numerals, capitalised names — eight per class, spaced evenly over that class's predicted
+range, and their anchor widths measured at block 0 (same six anchors, same three frames, 576/576 curves
+valid).
+
+| class (8 tokens each) | rho(predicted, measured) | median measured w_hat |
+|---|---|---|
+| all 32 together | +0.60 (p = 3.0e-4) | - |
+| ordinary words outside the pool | +0.57 | 0.632 |
+| subword fragments | +0.31 | 0.569 |
+| punctuation and numerals | +0.24 | 0.529 |
+| capitalised names | +0.83 | 0.527 |
+| (reference: the 123 pool tokens) | - | 0.549 |
+
+MAE 0.046; measured widths span 0.367-0.686 against the pool's 0.361-0.660; predicted sd 0.047 vs
+measured sd 0.073 (ridge shrinkage, same as pattern 10). The ranking transfers outside the pool and no
+class inverts it, though per-class estimates at n = 8 are indicative only.
+
+**Deliverable changes.** REPORT.md: new Methods subsection "The vocabulary-wide test"; new Results
+pattern 11 with **Figure 11** (`plots/vocab_probe.png`); old patterns 11-13 renumbered 12-14 with
+cross-references updated; Conclusion paragraph extended with the vocabulary check; Limitations reworded
+(the "validated only on common alphabetic words" caveat is replaced by the weaker, accurate "eight
+tokens per class, indicative"); forward-pass accounting extended. Recommended next experiment changed
+from the vocabulary test (now run) to **re-measuring anchor widths in structurally different contexts**
+(mid-sentence, interrogative, list, code-like), since every result so far shares one frame shape.
+RESULTS.md: vocabulary table, Figure 11, headline sentence, and the new next-experiment section.
+
+No earlier number superseded. `check_render.py` passes (16 display eqs, 11 embeds + captions per file).
+
+## 2026-08-10 (iteration 2, third step) — frame-shape control: the ranking is the token's, the level is the context's
+
+Ran the experiment the second step recommended (`experiments/frame_control.py`): the anchor-width
+measurement for the same 123 tokens and the same six anchors repeated in four contexts of deliberately
+different shape, and each context's token ranking correlated with the original one. The reference is
+the agreement among the three ORIGINAL frames, each summarised the same way (median over 6 anchors
+within one frame), which is what two measurements of the same shape achieve.
+
+| context | rho with the original ranking | median w_hat | IQR | curve validity |
+|---|---|---|---|---|
+| (reference: two of the three original frames) | +0.822 | 0.549 | 0.102 | - |
+| `She kept walking because everything felt` | +0.844 | 0.599 | 0.123 | 1.000 |
+| `Is it really` | +0.770 | 0.623 | 0.107 | 0.996 |
+| `The report mentions the following:` | +0.735 | 0.530 | 0.118 | 1.000 |
+| `def solve(x): / return` (code) | +0.501 | 0.705 | 0.049 | 1.000 |
+
+The nearest context matches the within-shape reference (+0.844 vs +0.822), and even the code prefix
+stays above the two-disjoint-anchor-set agreement (+0.46). The level moves a lot (median 0.530-0.705),
+and the code context also compresses the token spread (IQR 0.049). Mean agreement among the four new
+contexts: +0.624.
+
+**Deliverable changes.** REPORT.md: new Methods subsection "The frame-shape control"; new Results
+pattern 12 with **Figure 12** (`plots/frame_control.png`); old patterns 12-14 renumbered 13-15 with
+cross-references updated; new Summary paragraph; Conclusion extended; **Limitations rewritten** — the
+"three sentence frames shared by every measurement" caveat is now narrowed to the pair-level results,
+since the per-token measurement has been checked in four other context shapes. Forward-pass accounting
+1M -> 1.1M. Recommended next experiment changed from the frame-shape control (now run) to an
+**embedding-space intervention**: add +-epsilon times the probe's unit direction to a token's embedding
+row, re-measure its anchor width, with a matched-norm random-direction control — the first test of
+whether the probe direction is causal rather than correlational. RESULTS.md: frame-control table,
+Figure 12, headline paragraph, setting line, and the new next-experiment section.
+
+No earlier number superseded. `check_render.py` passes (16 display eqs, 12 embeds + captions per file).
+
+## 2026-08-10 (iteration 2, fourth step) — the embedding intervention: a null, and the first causal test
+
+Ran the experiment the third step recommended (`experiments/embed_intervene.py`). The probe's gradient
+with respect to the raw embedding row, g_j = beta_j / sd_j, gives a step delta = (Delta / ||g||^2) g
+that changes the probe's OWN prediction by exactly Delta. For 16 tokens spread over the measured-width
+range, that step was added to the token's embedding row for Delta in {-0.05, -0.025, +0.025, +0.05}
+width units, the token's anchor width re-measured, the row restored; controls were a random direction
+of the same step norm and the JSD shift of the token's next-token distribution.
+
+| edit along | slope of measured vs requested dw | mean abs dw | sign agreement | output shift |
+|---|---|---|---|---|
+| (a causal direction would give) | 1.0 | 0.0375 | 1.00 | - |
+| probe direction | -0.023 | 0.0027 | 0.39 | 0.0001 bits |
+| random direction, same norm | +0.000 | 0.0008 | 0.50 | 0.0000 bits |
+
+Per-token slopes scatter from -0.13 to +0.15 with no relation to the token's base width
+(rho = -0.115, p = 0.67), so the "perturbation compresses width toward the middle" reading was checked
+and is not supported either. Step norm 0.053 against a median embedding-row norm of 0.984 (~5%).
+**Conclusion reported:** the embedding direction that predicts width does not set it — but the edits
+shifted the model's output by only 0.0001 bits, so this establishes that the probe direction is not an
+efficient lever, not that no lever exists.
+
+**Deliverable changes.** REPORT.md: new Methods subsection "The embedding intervention" (with the step
+equation); new Results pattern 13 with **Figure 13** (`plots/intervene.png`); old patterns 13-15
+renumbered 14-16 with cross-references updated; Conclusion extended with the null and its caveat;
+forward-pass accounting 1.1M -> 1.2M. Recommended next experiment changed from the intervention (now
+run) to **repeating it with the step calibrated on the model's behaviour** (grow the step until the
+token's output moves 0.05 / 0.1 / 0.2 bits), with the fallback target named (block 0's attention and
+MLP response) if both directions then move width equally. RESULTS.md: intervention table, Figure 13,
+setting line, and the new next-experiment section.
+
+No earlier number superseded. `check_render.py` passes (17 display eqs, 13 embeds + captions per file).

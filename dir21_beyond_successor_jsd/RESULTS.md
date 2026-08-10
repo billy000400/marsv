@@ -4,8 +4,9 @@
 
 **Setting.** `pythia-1.4b-deduped` @ `step143000`, residual stream after block 0 at the final token
 position, 1,000 token pairs from 123 endpoint tokens × 3 sentence frames × 50 interpolation steps
-(pair artifacts inherited from `dir18`; the per-token probes, the forward screen and the anchor-set swap
-are new inference on the same model and hook point, ~600k forward passes). Transition width `w` = fraction of the path over
+(pair artifacts inherited from `dir18`; the per-token probes, the forward screen, the anchor-set swap,
+the layer sweep, the embedding probe, the vocabulary test, the frame-shape control and the embedding
+intervention are new inference on the same model and hook point, ~1.2M forward passes). Transition width `w` = fraction of the path over
 which the output-distance score `d(t)` climbs from 0.1 to 0.9; smaller = narrower. Analyses run on the
 **929 pairs** whose endpoint output movement is at least 0.2 bits in every frame.
 
@@ -26,6 +27,19 @@ bank, predicting all 780 of their pairs from anchor widths alone — slope and i
 bank, nothing fitted on the new tokens — gives $R^2 = 0.397$, $\rho = +0.66$, mean absolute error 0.047
 on the 718 pairs that pass the gate, beating the model's own endpoint output difference on the same
 pairs ($\rho = -0.51$).
+
+**And the per-token number is largely readable from the static embedding.** A ridge probe on the
+token's 2048-dimensional embedding row predicts its held-out measured width at $\rho = +0.76$
+($R^2 = 0.51$), against $+0.60$ for embedding norm alone and $-0.20$ for shuffled targets; a screen
+built from embeddings alone predicts the same 718 unseen pairs at $R^2 = 0.213$, $\rho = +0.53$ with
+**no forward pass at any point**. The lookup also holds outside the curated token pool: on 32 tokens
+spanning subword fragments, punctuation, numerals, capitalised names and rarer words, predicted and
+measured widths correlate at $\rho = +0.60$ ($p = 3.0\times10^{-4}$).
+
+**The ranking is a token property; the level is the context's.** Measured in four differently shaped
+contexts (mid-sentence, interrogative, list, code), the token ranking holds at $\rho = +0.84$, $+0.77$,
+$+0.74$ and $+0.50$ — the first matching the $+0.82$ that two original frames achieve with each other —
+while the median width moves from 0.53 to 0.71.
 
 **The trait is real; the measuring stick is not neutral.** Swapping the six anchors for six function
 words or six rare content words still recovers the fitted token effect ($\rho = +0.57$ and $+0.61$),
@@ -97,6 +111,73 @@ sharpening is done by the blocks below the site.
 | block 6 | $+0.92$ | $+0.59$ | 0.621 | 0.086 | 0.284 |
 | block 12 | $+0.84$ | $+0.52$ | 0.728 | 0.065 | 0.214 |
 | block 18 | $+0.72$ | $+0.35$ | 0.800 | 0.020 | 0.146 |
+
+Embedding probe — whether the per-token number has to be measured at all. A ridge probe from the
+static embedding row, fitted on 80 tokens and tested on 43 over 50 random splits, recovers most of the
+ranking, and beats the obvious deflationary explanation that it is reading token frequency off the
+embedding norm.
+
+| predictor of a held-out token's measured width $\hat w_u$ | held-out $\rho$ | held-out $R^2$ |
+|---|---|---|
+| **ridge probe on the static embedding row $W_E[u]$** | $+0.764 \pm 0.045$ | $0.514 \pm 0.073$ |
+| embedding norm $\lVert W_E[u]\rVert$ alone | $+0.597 \pm 0.071$ | $0.190$ |
+| same probe, shuffled targets (control) | $-0.201 \pm 0.095$ | $-0.037$ |
+| probe target = fitted token effect $a_u$ instead | $+0.505 \pm 0.102$ | $0.270$ |
+| anchor width measured at the input embedding instead of block 0 | $+0.79$ vs block 0 | \- |
+
+The lookup replaces the measurement end to end: fitted on the 123 bank tokens and applied to the 40
+tokens the analysis never saw, it predicts their 718 pairs with no forward pass anywhere.
+
+| screen for the 718 unseen pairs | $R^2$ | $\rho$ | MAE | terciles of observed `w` |
+|---|---|---|---|---|
+| measured anchor widths (18 curves per token) | 0.397 | $+0.66$ | 0.047 | 0.50 / 0.57 / 0.62 |
+| **static-embedding lookup (no forward pass)** | **0.213** | $+0.53$ | 0.055 | 0.51 / 0.57 / 0.61 |
+| model-output JSD (needs both endpoints of each pair) | \- | $-0.51$ | \- | \- |
+
+Vocabulary-wide check — the lookup applied to 32 tokens from four classes the curated pool excludes,
+eight per class, spaced over the probe's predicted range. The ranking holds outside the pool, and the
+widths found there cover the pool's own range, so the extremes an auditor looks for are present.
+
+| token class (8 tokens each, outside the pool) | $\rho$(predicted, measured) | median measured $\hat w_u$ |
+|---|---|---|
+| **all 32 together** | $+0.60$ ($p = 3.0\times10^{-4}$) | \- |
+| ordinary words the pool excludes | $+0.57$ | 0.632 |
+| subword fragments | $+0.31$ | 0.569 |
+| punctuation and numerals | $+0.24$ | 0.529 |
+| capitalised names | $+0.83$ | 0.527 |
+| *reference: the 123 pool tokens* | \- | *0.549* |
+
+MAE 0.046 width units; 576/576 curves valid; measured widths span 0.367–0.686 against the pool's
+0.361–0.660. The lookup under-disperses (sd 0.047 predicted vs 0.073 measured) — ridge shrinkage.
+
+Frame-shape control — the per-token measurement repeated in four contexts of different shape. The
+ranking is a token property; the level is set by the context, so a threshold calibrated in one context
+does not carry to another.
+
+| context the anchor width is measured in | $\rho$ with the original ranking | median $\hat w_u$ | IQR |
+|---|---|---|---|
+| *reference: two of the three original frames* | *$+0.82$* | *0.549* | *0.102* |
+| `She kept walking because everything felt` (mid-sentence) | $+0.844$ | 0.599 | 0.123 |
+| `Is it really` (interrogative) | $+0.770$ | 0.623 | 0.107 |
+| `The report mentions the following:` (list) | $+0.735$ | 0.530 | 0.118 |
+| `def solve(x): … return` (code) | $+0.501$ | 0.705 | 0.049 |
+
+Curve validity 99.6–100%; all $p \le 3.7\times10^{-9}$. For scale, two disjoint anchor sets agree at
+$\rho = +0.46$.
+
+Embedding intervention — the one causal test, and a null. Editing a token's embedding row along the
+probe's direction by a step the probe says should change width by a given amount leaves the measured
+width essentially where it was, with no consistent sign.
+
+| edit along … | slope of measured vs requested $\Delta\hat w_u$ | mean \|$\Delta\hat w_u$\| | sign agreement | output shift |
+|---|---|---|---|---|
+| *what a causal direction would give* | *1.0* | *0.0375* | *1.00* | \- |
+| **probe direction** | $-0.023$ | 0.0027 | 0.39 | 0.0001 bits |
+| random direction, same step norm | $+0.000$ | 0.0008 | 0.50 | 0.0000 bits |
+
+16 tokens × 4 requested changes ($\pm 0.025$, $\pm 0.05$ width units); step norm 0.053 against a median
+embedding-row norm of 0.984. The edits barely disturb the model (0.0001 bits), so this shows the probe
+direction is not an *efficient* lever, not that no lever exists.
 
 Supporting quantities. The first block says how strong the inherited association is on this subset,
 the second says the leftover is neither noise nor a normalisation artifact, and the third says the
@@ -201,9 +282,55 @@ effect $a_u$. Right, same x-axis: median anchor width (solid, circles), held-out
 pair widths (dashed, diamonds), and the interquartile range of $\hat w_u$ across tokens (dotted,
 triangles); the dash-dotted line is $w = 0.8$, a perfectly proportional response.
 
+Can the screen be a lookup instead of a measurement, and what does that cost?
+
+![Anchor width at the embedding site, a ridge probe from the static embedding, its controls, and the resulting zero-forward-pass screen](plots/embed_probe.png)
+
+**Figure 10.** Far left: $\hat w_u$ measured at the input embedding (y) against $\hat w_u$ measured
+after block 0 (x). Centre left: block-0 $\hat w_u$ (y) against the out-of-fold prediction from the
+token's static embedding (x). Centre right: mean held-out Spearman $\rho$ on 43 test tokens (y) over 50
+random splits for three targets (x); hatched = probe, dotted = shuffled-target control, dotted
+horizontal line = embedding-norm baseline; error bars $\pm 1$ sd across splits. Far right: observed `w`
+(y) of the 718 unseen pairs against the width predicted from static embeddings alone (x); the narrow
+x-range is ridge shrinkage. Dashed lines are $y = x$.
+
+Does the lookup survive contact with token types the pool excludes?
+
+![Predicted versus measured anchor width for 32 tokens outside the curated pool, and the measured width of each token class](plots/vocab_probe.png)
+
+**Figure 11.** Left: measured $\hat w_u$ at block 0 (y) against the width predicted from the static
+embedding (x) for 32 tokens outside the pool — circles: ordinary words, squares: subword fragments,
+triangles: punctuation and numerals, diamonds: capitalised names; dashed line $y = x$, shaded band =
+the range of measured widths over the 123 pool tokens. Right: measured $\hat w_u$ (y) by token class
+(x) with the pool as reference; boxes are median, quartiles and 1.5 IQR whiskers, hatched distinctly,
+individual tokens overplotted; the dash-dotted line is $w = 0.8$, a proportional response.
+
+Is the per-token measurement about the token, or about the slot it sits in?
+
+![Rank agreement of anchor widths measured in four new contexts with the original ranking, and the widths themselves](plots/frame_control.png)
+
+**Figure 12.** Left: Spearman $\rho$ between each new context's token ranking and the original (y) for
+the four contexts (x), bars hatched distinctly; dashed line = mean agreement among the three original
+frames ($+0.82$), dotted line = agreement between two disjoint anchor sets ($+0.46$). Right:
+$\hat w_u$ measured in each new context (y) against $\hat w_u$ in the original frames (x), one marker
+per token per context, markers matching the left panel; dashed line $y = x$. The clouds sit off the
+diagonal (level shifts) while keeping their order (rank preserved).
+
+Does editing the embedding along the probe's direction change how sharply the model transitions?
+
+![Measured width change against the width change requested along the probe direction, and per-token response slopes](plots/intervene.png)
+
+**Figure 13.** Left: measured $\Delta\hat w_u$ (y) against the change requested from the probe (x), 16
+tokens × 4 step sizes; circles = probe direction, squares = random direction of the same step norm
+(jittered). Dashed line = what a causal direction would give ($y = x$). Right: per-token slope of
+measured against requested change (y) for the two directions (x), one marker per token, thick bar =
+mean, dashed line at 1.0 = the probe's own prediction. Both directions sit at zero.
+
 ## Next experiment
 
-**Is the trait in the embedding?** Measure anchor widths with the interpolation site at the input
-embedding, and fit a linear probe from a token's static embedding to its $\hat w_u$ on 80 of the 123
-tokens, testing on the rest. If the probe recovers the ranking, the screen costs a lookup instead of a
-forward pass; if not, the trait lives in how frame and token combine at block 0. Under half an hour.
+**Was the null a step-size null?** The intervention's edits moved the model's output by only 0.0001
+bits, so they never reached a regime where behaviour changed. Repeat it with the step calibrated on the
+model rather than on the probe: grow the step along the probe direction until the token's next-token
+distribution moves 0.05, 0.1 and 0.2 bits, measure width at each, keep the matched-norm random
+direction as control. Width moving along the probe direction and not the random one makes it a lever;
+both moving equally sends the search to block 0's attention and MLP response. Under an hour of GPU.

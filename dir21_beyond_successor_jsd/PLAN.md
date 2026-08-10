@@ -70,9 +70,35 @@ The layer sweep has since been run: the token ranking survives moving the interp
 across tokens collapses fivefold. Which tokens are narrow is set early; the sharpening is produced by
 the blocks below the site.
 
-**Next step:** the embedding-level probe — measure anchor widths with the site at the input embedding,
-and fit a linear probe from a token's static embedding to w_hat_u on 80 of the 123 tokens, testing on
-43. A positive result turns the screen into a lookup with no forward pass.
+The embedding probe has since been run: the trait is already in the static embedding. Anchor widths
+measured at the input embedding agree with block 0 at rho = +0.79, and a ridge probe from W_E[u]
+predicts a held-out token's measured width at **rho = +0.764 +- 0.045, R^2 = 0.514** (embedding-norm
+baseline +0.597, shuffled-target control -0.201). End to end, a screen built from embeddings alone
+predicts the 718 unseen pairs at **R^2 = 0.213, rho = +0.53** with no forward pass, against 0.397 for
+the measured screen — a two-tier screen: free table for triage, measured widths when accuracy matters.
+
+The vocabulary-wide test has since been run: the probe applied to all 50,304 embedding rows and 32
+tokens measured from four classes the pool excludes (ordinary words outside the pool, subword
+fragments, punctuation/numerals, capitalised names) give rho = +0.60 (p = 3.0e-4) between predicted and
+measured width, MAE 0.046, with measured widths spanning 0.367-0.686 against the pool's 0.361-0.660.
+The lookup is not confined to the token class it was built on.
+
+The frame-shape control has since been run: the same measurement in four differently shaped contexts
+keeps the token ranking at rho = +0.844 (mid-sentence), +0.770 (question), +0.735 (list) and +0.501
+(code) against the original, where two frames of the ORIGINAL shape agree at +0.822. The level moves
+(median w_hat 0.530 -> 0.705). The ordering is carried by the token; the scale is set by the context.
+
+The embedding intervention has since been run, and is a NULL: editing a token's embedding row along the
+probe's gradient by a step the probe says should move width by +-0.05 moves the measured width by
+0.0027 on average (slope -0.023, sign agreement 0.39); a matched-norm random direction moves it 0.0008.
+The direction that predicts width does not set it. Caveat that defines the follow-up: the edits shifted
+the model's output by only 0.0001 bits, so the test never reached a behaviourally meaningful regime.
+
+**Next step:** repeat the intervention with the step calibrated on the MODEL — grow it along the probe
+direction until the token's next-token distribution moves 0.05 / 0.1 / 0.2 bits, measure width at each,
+keep the matched-norm random control. Width moving along the probe direction only => a lever, and this
+null was a step-size artifact. Both moving equally => no single embedding direction carries the trait,
+and the search moves to block 0's attention pattern and MLP response.
 
 ## Stages
 
