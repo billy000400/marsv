@@ -1,0 +1,61 @@
+{
+ "n_tokens": 120,
+ "n_pairs": 929,
+ "anchors": [
+  "\u0120and",
+  "\u0120significant",
+  "\u0120close",
+  "\u0120playing",
+  "\u0120bigger",
+  "\u0120buried"
+ ],
+ "anchor_width_valid_rate": 1.0,
+ "token_corr": {
+  "anchor_width": [
+   0.7013473157858183,
+   4.646093003476995e-19
+  ],
+  "basin_radius_anchor": [
+   0.3901312591152163,
+   1.0588890395718828e-05
+  ],
+  "basin_radius_random": [
+   -0.015501076463643307,
+   0.8665529694031379
+  ],
+  "output_entropy": [
+   -0.2990068754774637,
+   0.0009085748714655345
+  ],
+  "logit_norm": [
+   -0.23258559622195982,
+   0.010578035104760772
+  ]
+ },
+ "token_partial": {
+  "anchor_width_given_entropy": [
+   0.6693867629696506,
+   6.394491181310872e-17
+  ],
+  "basin_radius_given_entropy": [
+   0.32877283144662817,
+   0.00024609187215911184
+  ]
+ },
+ "cv_r2": {
+  "anchor_sum": 0.35008105884788165,
+  "anchor_sum_plus_jsd": 0.45205787699747035,
+  "basin_radius_sum_plus_jsd": 0.2989218327123795,
+  "output_entropy_sum_plus_jsd": 0.23682724273340572,
+  "anchor_sum_plus_radius_plus_jsd": 0.46401811752543765
+ },
+ "rho_anchor_sum_pair_w": [
+  0.5710489977501613,
+  1.642674947256509e-81
+ ],
+ "anchor_width_pct": [
+  0.4429251057700235,
+  0.5527384673254664,
+  0.6482922353891585
+ ]
+}
