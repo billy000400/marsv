@@ -120,3 +120,5 @@
 [ref_pos] step  29250 lr 1.01e-04 train 0.528 val 2.299 acc 0.556 [24.7m]
 [ref_pos] step  29500 lr 1.01e-04 train 0.517 val 2.335 acc 0.553 [24.9m]
 [ref_pos] step  29750 lr 1.00e-04 train 0.505 val 2.358 acc 0.551 [25.1m]
+[ref_pos] step  30000 lr 1.00e-04 train 0.520 val 2.359 acc 0.550 [25.3m]
+[ref_pos] DONE step=30000 val_acc=0.5502 best=0.5730 matched={'step': 2500, 'val_acc': 0.5522216796875, 'val_loss': 1.5041541755199432}
