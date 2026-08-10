@@ -5,20 +5,22 @@
 ## Headline
 
 Interpolating a **single token's** block-0 activation between two prompts produces a flat-then-abrupt
-("plateau") logit response in **every** case we tested — including the control pair whose two
-continuations are the most different of all. Endpoint next-token similarity does **not** predict how
-sharp the plateau is (pooled Spearman $\rho = -0.37$, $p = 0.29$, $n = 10$; the sign even flips
-between models and between sharpness statistics). A plateau in this kind of interpolation is
-therefore the default response of the network, not evidence that two prompts share a continuation
-while differing in an internal feature.
+("plateau") logit response for most prompt pairs — 82% of 200 corpus-mined pairs in gpt2-medium, 48%
+in pythia-410m, and 9 of 10 hand-picked model-pair cells including a deliberately dissimilar control.
+Endpoint next-token similarity predicts plateau sharpness with the sign **opposite** to the
+hypothesis: over the mined bank, Spearman $\rho$(JSD, $w_{TV}$) $= -0.55$ in gpt2-medium
+(95% CI $[-0.66,-0.41]$, $p = 6\times10^{-17}$, $n=200$), i.e. the *more* differently the two prompts
+predict the next token, the *sharper* the transition. Excluding pairs at the $\ln 2$ divergence
+ceiling, both models agree: $\rho = -0.61$ (gpt2-medium, $n=142$) and $-0.45$ (pythia-410m, $n=127$),
+both $p<10^{-7}$. A plateau here is therefore not evidence that two prompts share a continuation.
 
-## Metrics
+## Experiment 1 — five hand-picked pairs with a dissimilar control
 
-All 5 prompt pairs tokenized validly in both models: identical prefix, exactly one differing
-single final token. Patching at $\alpha=0$ and $\alpha=1$ reproduced the clean runs to
-$|d| \le 10^{-4}$, so the interpolation harness is correct. Lower $w_{10-90}$ and $w_{TV}$ mean a
-sharper transition; higher PF (plateau fraction) means more of the sweep sits at an endpoint value.
-The linear-response reference is $w_{10-90}=0.8$, $w_{TV}=0.5$, $\mathrm{PF}=0.2$.
+All 5 pairs tokenized validly in both models (identical prefix, exactly one differing single final
+token). Across all 410 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
+clean runs to $|d| \le 4\times10^{-4}$, so the interpolation harness is correct. Lower $w_{10-90}$ and
+$w_{TV}$ mean a sharper transition; higher PF (plateau fraction) means more of the sweep sits at an
+endpoint value. The linear-response reference is $w_{10-90}=0.8$, $w_{TV}=0.5$, $\mathrm{PF}=0.2$.
 
 | Model | Prompt pair (final tokens) | endpoint JSD (nats) | $w_{10-90}$ | $w_{TV}$ | PF | monotonic |
 |---|---|---|---|---|---|---|
@@ -33,38 +35,13 @@ The linear-response reference is $w_{10-90}=0.8$, $w_{TV}=0.5$, $\mathrm{PF}=0.2
 | pythia-410m | clue identify? ` Au` / ` 79` | 0.385 | 0.598 | 0.254 | 0.41 | yes |
 | pythia-410m | *control:* The house was ` big` / ` in` | 0.665 | 0.425 | 0.137 | 0.57 | yes |
 
-The two pairs the plan expected to plateau most strongly — the ones with the *smallest* endpoint
-divergence (`Mary`/`her` at 0.033–0.068 nats, `four`/`4` at 0.056–0.138 nats) — give the
-**widest**, most nearly linear transitions in the table. The sharpest cell is `four`/`Four`, a pair
-with 5× that divergence. The control, at the largest divergence of all, is sharper than both
-low-JSD pairs in gpt2-medium on $w_{TV}$ and sharper than three of the four test pairs in
-pythia-410m.
-
-The rank correlations between endpoint JSD and each sharpness statistic contradict one another,
-which is what an absent relationship looks like: pooled over all 10 model-pair cells,
-$\rho = -0.37$ ($p=0.29$) for $w_{10-90}$, $-0.15$ ($p=0.68$) for $w_{TV}$, and $+0.32$ ($p=0.37$)
-for PF. Within gpt2-medium alone the $w_{TV}$ correlation is $+0.30$; within pythia-410m it is
-$-0.60$. No cell reaches significance at $n=5$ or $n=10$.
-
-The next table lists the top-3 next-token predictions at each endpoint, which are the distributions
-the JSD column compares. They make the low-JSD pairs concrete: after ` Mary` and after ` her`,
-pythia-410m predicts the same three tokens in the same order, and these are exactly the two cells
-that produced the widest, most linear transitions in the table above.
-
-| Model | Pair | top-3 after A | top-3 after B |
-|---|---|---|---|
-| gpt2-medium | ` Mary` / ` her` | ` and`, `,`, `.` | ` and`, `,`, `.` |
-| gpt2-medium | ` four` / ` 4` | `,`, ` plus`, `.` | `.`, `,`, ` +` |
-| gpt2-medium | ` four` / ` Four` | `fold`, `-`, `.` | `.`, `teen`, `,` |
-| gpt2-medium | ` Au` / ` 79` | `?`, `,`, `.` | `.`, `%`, `\n` |
-| gpt2-medium | *control* ` big` / ` in` | ` enough`, `,`, ` and` | ` a`, ` the`, ` good` |
-| pythia-410m | ` Mary` / ` her` | `.`, `,`, ` and` | `.`, `,`, ` and` |
-| pythia-410m | ` four` / ` 4` | `.`, `,`, ` plus` | `.`, `,`, ` plus` |
-| pythia-410m | ` four` / ` Four` | `.`, `,`, `:` | `.`, `-`, `,` |
-| pythia-410m | ` Au` / ` 79` | `?`, `,`, `(` | `.`, `\n`, `%` |
-| pythia-410m | *control* ` big` / ` in` | ` and`, ` enough`, `,` | ` a`, ` the`, ` ruins` |
-
-## Figures
+Nine of ten cells beat the linear baseline on the threshold-free statistic ($w_{TV} \le 0.27$ vs 0.5),
+so plateaus are real. The two pairs the plan expected to plateau most strongly — the smallest endpoint
+divergences, `Mary`/`her` at 0.033–0.068 nats and `four`/`4` at 0.056–0.138 nats — give the widest,
+most nearly linear transitions in the table. The control, at the largest divergence measured, is
+sharper than both of them in gpt2-medium on $w_{TV}$ and sharper than three of four test pairs in
+pythia-410m. At $n=10$ cells only $|\rho| \ge 0.75$ would have been detectable, so these five pairs
+motivate the powered test below rather than settling it.
 
 The verdict rests first on the shape of the raw sweeps, so we show all ten before any summary
 statistic. If plateaus tracked continuation similarity, the top two rows (lowest JSD) would be the
@@ -79,28 +56,89 @@ reference $d=\alpha$. Rows are prompt pairs, columns are models; the bottom row 
 control pair, whose continuations differ most. Every panel except pythia-410m `four`/`4` bends well
 away from the diagonal into a flat-then-jump shape, and the control bends as much as the test pairs.
 
-Figure 1 shows plateaus are present everywhere; the question the direction actually asks is whether
-their sharpness is explained by how similar the two continuations are. Figure 2 puts the two
-quantities on the same axes.
+## Experiment 2 — 200 corpus-mined pairs per model
 
-![Endpoint divergence plotted against two transition-sharpness statistics](plots/jsd_vs_width.png)
+Each mined pair is a WikiText-103 prefix (40 prefixes, 10–40 tokens) plus the model's own top-1 next
+token versus a token at rank $r$, with $r$ log-uniform in $[1,5000]$, so endpoint JSD spans its whole
+range (0.002–0.693 nats in gpt2-medium, 0.007–0.693 in pythia-410m). To ask how much information a
+plateau carries at all, we first measure how often an arbitrary pair plateaus and where the
+hand-picked pairs land inside that distribution.
 
-**Figure 2.** Endpoint divergence does not predict transition sharpness. x (both rows): endpoint JSD
-in nats — larger means the two prompts predict more different next tokens. y: $w_{10-90}$ (top row)
-and $w_{TV}$ (bottom row), both at the final logits, smaller = sharper. Columns are models; each
-marker is one prompt pair (shape and color per the legend; the control has a thick black edge).
-Gray dashed = linear-response value, dotted = the plateau threshold. Under the hypothesis, points
-would rise from left to right; they do not, and the control (rightmost marker) sits at or below the
-threshold in three of the four panels.
+![Distribution of transition sharpness over 200 mined prompt pairs per model, with the five hand-picked pairs marked](plots/bank_prevalence.png)
 
-Sharpness has to come from somewhere. To locate it we recompute the same width at every block's
-residual stream, which shows the response starting linear and sharpening with depth.
+**Figure 2.** Plateaus are the norm for arbitrary prompt pairs. x: $w_{TV}$ at the final logits
+(smaller = sharper); y: number of mined pairs per bin (gray hatched histogram, $n=200$ per model).
+Gray dashed = linear response (0.5), dotted = sharpness threshold (0.25). The five markers on the
+strip above each histogram are the hand-picked pairs of Table 1 at their $w_{TV}$ values (shape and
+color per the legend, control with a thick black edge); their y position carries no meaning.
+
+Median $w_{TV}$ is 0.080 in gpt2-medium (82% of pairs sharp) and 0.266 in pythia-410m (48% sharp);
+median $w_{10-90}$ is 0.241 and 0.593. Every hand-picked pair sits inside the bulk of its model's
+distribution, so a plateau observed for one chosen pair in gpt2-medium is close to uninformative —
+four in five random pairs do the same.
+
+With $n=200$ the association test detects $|\rho| \ge 0.14$, and it finds a clear effect running
+against the hypothesis.
+
+![Endpoint divergence against two sharpness statistics for 200 mined pairs per model, with fits](plots/bank_regression.png)
+
+**Figure 3.** Endpoint divergence predicts sharpness, with the sign opposite to the hypothesis.
+x (all panels): endpoint JSD in nats (larger = more different next-token predictions); the dash-dot
+vertical line is the $\ln 2$ ceiling JSD attains for disjoint predictions. y: $w_{10-90}$ (top) and
+$w_{TV}$ (bottom) at the final logits, smaller = sharper. Columns are models. Light circles = the 200
+mined pairs; solid line = OLS fit; dashed line with squares = quintile means of JSD with $\pm1$ SE;
+stars = the five hand-picked pairs (thick black edge = control). Gray dashed = linear response, dotted
+= plateau threshold. Both models trend downward; pythia-410m's last two quintile means turn back up,
+and both sit at the JSD ceiling.
+
+Negative $\rho$ for a width and positive $\rho$ for PF both mean "more divergent endpoints → sharper
+plateau", the opposite of what the hypothesis predicts. Intervals are 95% cluster bootstrap over the
+40 prefixes.
+
+| Model | statistic | $\rho$ | 95% CI | $p$ | OLS slope (per nat) |
+|---|---|---|---|---|---|
+| gpt2-medium | $w_{10-90}$ | $-0.47$ | $[-0.59, -0.33]$ | $1.4\times10^{-12}$ | $-0.64\ [-0.78, -0.49]$ |
+| gpt2-medium | $w_{TV}$ | $-0.55$ | $[-0.66, -0.41]$ | $6.2\times10^{-17}$ | $-0.42\ [-0.54, -0.31]$ |
+| gpt2-medium | PF | $+0.44$ | $[+0.31, +0.56]$ | $5.7\times10^{-11}$ | — |
+| pythia-410m | $w_{10-90}$ | $-0.12$ | $[-0.30, +0.05]$ | $0.090$ | $-0.24\ [-0.35, -0.11]$ |
+| pythia-410m | $w_{TV}$ | $-0.11$ | $[-0.30, +0.07]$ | $0.123$ | $-0.20\ [-0.31, -0.07]$ |
+| pythia-410m | PF | $+0.12$ | $[-0.06, +0.31]$ | $0.090$ | — |
+
+All three statistics agree on the direction in both models. In gpt2-medium the size is substantial:
+going from identical to disjoint next-token predictions ($0 \to 0.69$ nats) shortens the transition by
+$0.29$ of the sweep on $w_{TV}$, and the quintile means fall monotonically
+($0.35 \to 0.13 \to 0.09 \to 0.07 \to 0.08$).
+
+Pythia-410m looks weak above because 37% of its mined pairs sit at or above JSD 0.65, essentially at
+the $\ln 2$ ceiling where JSD can no longer order them. Restricted to pairs below that ceiling, both
+models show the effect strongly:
+
+| Model | $n$ | $\rho$ ($w_{TV}$) | $p$ | $\rho$ ($w_{10-90}$) | $p$ |
+|---|---|---|---|---|---|
+| gpt2-medium | 142 | $-0.61$ | $1.5\times10^{-15}$ | $-0.54$ | $4.9\times10^{-12}$ |
+| pythia-410m | 127 | $-0.45$ | $9.0\times10^{-8}$ | $-0.47$ | $2.3\times10^{-8}$ |
+
+**Not explained by activation geometry.** Controlling for the block-0 angle $\Omega$ between the two
+patched vectors, the partial Spearman correlation of JSD with $w_{TV}$ is $-0.55$ in gpt2-medium
+(raw $-0.55$; $\rho(\Omega,\mathrm{JSD}) = 0.03$) and $-0.16$ in pythia-410m (raw $-0.11$;
+$\rho(\Omega,\mathrm{JSD}) = 0.31$). $\Omega$ itself correlates only weakly with sharpness
+($\rho = 0.16$ in both).
+
+## Experiment 3 — where the sharpness comes from
+
+Sharpness has to originate somewhere in the network. Recomputing the same width at every block's
+residual stream between the patch site and the output locates it.
 
 ![Transition width versus recording block for five prompt pairs in two models](plots/layerwise_widths.png)
 
-**Figure 3.** The plateau is built up gradually across depth, not created at the patch site.
-x: block whose `resid_post` is read out (patch is applied after block 0; the last x value is the
-final logits); y: $w_{10-90}$ at that read-out point. One line per prompt pair (color, line style and
-marker all vary together; see legend). Gray dashed = linear response (0.8), dotted = plateau
-threshold (0.5). Every pair starts near 0.8 just after the patch and narrows monotonically with
-depth in both models; the control (triangles, dash-dot) is among the fastest to sharpen.
+**Figure 4.** The plateau is built up gradually across depth, not created at the patch site.
+x: block whose `resid_post` is read out (patch is applied after block 0; the last x value is the final
+logits); y: $w_{10-90}$ at that read-out point. One line per prompt pair (color, line style and marker
+all vary together; see legend). Gray dashed = linear response (0.8), dotted = plateau threshold (0.5).
+Every pair starts near 0.8 just after the patch and narrows monotonically with depth in both models;
+the control (triangles, dash-dot) is among the fastest to sharpen.
+
+One block after the patch every cell sits at $w_{10-90} \approx 0.79$–$0.81$ — an almost exactly
+proportional response — and the width then falls monotonically over the following 23 blocks to
+$0.12$–$0.76$ at the logits. The shape is supplied by the depth downstream of the patch, in every
+condition alike, which is why it cannot by itself carry information about the prompt pair.

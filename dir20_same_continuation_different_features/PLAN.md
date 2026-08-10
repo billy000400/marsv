@@ -51,6 +51,10 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
 - [x] S1 - Validate tokenization; compute endpoint predictions and inference JSD.
 - [x] S2 - Run interpolation; save final-logit curves and layerwise transition widths.
 - [x] S3 - Compare prompt pairs and models; write the verdict in `RESULTS.md`.
+- [x] S4 (added) - Mine 200 corpus-derived pairs per model spanning the JSD range; re-run the same
+  sweep and replace the 5-point scatter with a powered regression.
+- [ ] S5 (added, optional) - Repeat the mined-bank sweep with the patch at a middle and a late block,
+  to test the winner-take-all/depth mechanism directly.
 
 ## Required outputs
 
@@ -68,19 +72,23 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S3 complete (2026-08-10); the success criterion is met.** All 5 pairs (4 test + 1 control)
-validate in both models; endpoint JSD, final-logit `w10-90`, layerwise widths, all three required
-plots, and the verdict are in `RESULTS.md` / `REPORT.md`.
+**S1-S4 complete (2026-08-10); the success criterion is met and exceeded.** All 5 hand-picked pairs
+validate in both models, and a 200-pair-per-model corpus-mined bank now carries the association test.
 
-**Verdict: plateaus yes, hypothesis no.** 9/10 model-pair cells plateau (`w_TV` <= 0.27 vs 0.5 for a
-linear response), but endpoint similarity does not predict sharpness (pooled Spearman
-rho = -0.37, p = 0.29, n = 10; sign flips across models and statistics), and the dissimilar-continuation
-control plateaus as sharply as the test pairs. `w_TV` and `PF` were added beyond the measurements
-above because 4/10 curves are non-monotonic; `w10-90` remains primary.
+**Verdict: plateaus yes, hypothesis inverted.** Plateaus are the default response — 82% (gpt2-medium)
+/ 48% (pythia-410m) of arbitrary mined pairs are sharp, and the dissimilar-continuation control
+plateaus as hard as the test pairs. At n=200 the association is significant with the sign *opposite*
+to the hypothesis: Spearman rho(JSD, `w_TV`) = -0.55 (p=6.2e-17) in gpt2-medium, and -0.61 / -0.45
+(p<1e-7) in the two models once pairs at the ln 2 JSD ceiling are excluded. More divergent
+continuations give sharper plateaus. The iteration-1 null (rho=-0.37, p=0.29, n=10) was underpowered.
+`w_TV` and `PF` were added beyond the planned measurements because most curves are non-monotonic
+(only 7.5% monotonic in gpt2-medium's bank); `w10-90` remains primary and agrees.
 
 ## Next step
 
-Optional strengthening only — the plan itself is finished. Highest value: mine ~100-200 prompt pairs
-programmatically (shared prefix, one differing final token) spanning a wide JSD range and re-run the
-same pipeline, replacing Figure 2's 5-point scatter with a powered regression. Secondary: repeat the
-sweep with the patch at a middle block to test the depth explanation directly.
+S5, the only substantive open question: REPORT.md's mechanism paragraph claims the sharpening is a
+winner-take-all competition resolved by the layers below the patch. Test it by adding a patch-layer
+argument to `mine_pairs.py` and re-running the mined bank with the patch at a middle block (12) and a
+late block (20): the plateau should weaken and the negative JSD-sharpness correlation should shrink as
+fewer downstream layers remain. Secondary: a third model family, to see whether the 82% vs 48%
+prevalence gap is tokenizer or architecture.

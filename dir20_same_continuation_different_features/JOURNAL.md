@@ -54,3 +54,60 @@ repeat the sweep with the patch at a middle block to check the depth explanation
 
 On track? yes — S1/S2/S3 all complete, ~100% of PLAN.md done, no blocker; remaining work is
 optional statistical strengthening of an already-complete null result.
+
+---
+## 2026-08-10 — iteration 2 (S4: mined pair bank, powered association test)
+
+**Feedback check:** listed the direction root for `human_feedback*.md` / `*REVIEW*` without the
+`.addressed.md` suffix — none present. Proceeded with the plan's stated next step.
+
+**What I did.** Executed iteration 1's stated next step: replaced the 5-point scatter with a properly
+powered regression over corpus-mined pairs.
+- `experiments/mine_pairs.py` — mines 200 pairs/model from WikiText-103 validation (cached locally at
+  `$HF_HOME/datasets`, run with `HF_DATASETS_OFFLINE=1`): 40 paragraphs >= 400 chars, truncated to a
+  prefix of 10–40 tokens; final token A = the model's own top-1 next token, final token B = the
+  rank-r token with r log-uniform in [1,5000], 5 partners per prefix. Builds `input_ids` as
+  `prefix_ids + [token_id]`, which makes the "identical prefix, one differing single final token"
+  validity condition exact rather than something to check. Reuses `run_interp.py`'s sweep unchanged.
+- `experiments/analyze_bank.py` — prevalence stats, Spearman rho with 95% **cluster bootstrap** over
+  prefixes (pairs sharing a prefix are not independent), OLS slopes, quintile means, a JSD-ceiling
+  robustness split, and a partial Spearman controlling for the block-0 angle Omega. Two new figures.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. Mined pairs are built by swapping the final token for a lower-ranked alternative *at the same
+   position*, rather than by finding naturally occurring minimal pairs in the corpus. Rejected
+   alternative: mine real minimal pairs by string matching — far fewer hits, no control over the JSD
+   range, and no guarantee of single-token differences. The cost is logged as a limitation in
+   REPORT.md: both continuations are ones the model itself considered plausible.
+2. Used the same 40 prefixes and the same rank draws for both models (tokens differ, since each
+   model's top-1 differs). Keeps the two columns comparable; rejected re-drawing per model.
+3. Reported both the full-bank and the JSD<0.65 correlations rather than only the cleaner subset.
+   Pre-registering the ceiling split was not possible, so showing both is the honest option.
+
+**What I learned.**
+- The n=10 null was underpowered, not a true null. At n=200 the association is real and its sign is
+  the **opposite** of the direction's hypothesis: rho(JSD, w_TV) = -0.55 in gpt2-medium
+  (p=6.2e-17), i.e. pairs whose continuations diverge more give *sharper* plateaus.
+- pythia-410m's full-bank rho is only -0.11 because 37% of its mined pairs sit at the ln 2 JSD
+  ceiling, where the independent variable stops discriminating. Below the ceiling both models agree:
+  -0.61 (n=142) and -0.45 (n=127), p<1e-7. This ceiling effect is the single most useful thing I
+  learned this iteration — without the split I would have written up a spurious model disagreement.
+- The effect is not endpoint geometry: partial rho controlling for the block-0 angle Omega is -0.55
+  (gpt2) and -0.16 (pythia), and Omega correlates with sharpness at only 0.16.
+- Plateaus are the default response: 82% (gpt2) / 48% (pythia) of arbitrary mined pairs are sharp, and
+  all five hand-picked pairs sit inside the bulk of their model's distribution.
+- Only 7.5% of gpt2-medium's mined curves are monotonic (98% for pythia), which retroactively
+  vindicates adding w_TV in iteration 1.
+- Second re-framing under rule 9b (old -> new story recorded in CHANGELOG.md): from "no detectable
+  association" to "the association is real and inverted".
+
+**Next step.** The mechanism paragraph in REPORT.md now makes a testable claim I have not tested: that
+the sharpening is a winner-take-all competition between two well-separated output modes. The direct
+test is to re-run the mined-bank sweep with the patch at a middle block (e.g. block 12) and at a late
+block, and check whether (a) the plateau survives fewer downstream layers and (b) the negative
+JSD-sharpness correlation weakens with fewer layers left to compress. `mine_pairs.py` needs only a
+patch-layer argument for this. Secondary: a third model family to test whether the gpt2 vs pythia gap
+in prevalence (82% vs 48%) is about tokenizer or architecture.
+
+On track? yes — PLAN.md's S1–S3 remain complete and S4 (unplanned, statistical strengthening) is done;
+no blocker; the direction now has a significant positive finding rather than a null.
