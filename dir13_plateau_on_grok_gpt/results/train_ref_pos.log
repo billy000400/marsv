@@ -43,3 +43,4 @@
 [ref_pos] step  10000 lr 7.78e-04 train 0.926 val 1.677 acc 0.565 [10.1m]
 [ref_pos] step  10250 lr 7.67e-04 train 0.921 val 1.688 acc 0.565 [10.3m]
 [ref_pos] step  10500 lr 7.57e-04 train 0.924 val 1.707 acc 0.562 [10.5m]
+[ref_pos] step  10750 lr 7.46e-04 train 0.857 val 1.699 acc 0.564 [10.7m]
