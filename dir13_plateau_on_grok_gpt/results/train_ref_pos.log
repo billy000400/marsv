@@ -99,3 +99,4 @@
 [ref_pos] step  24000 lr 1.86e-04 train 0.581 val 2.215 acc 0.553 [20.7m]
 [ref_pos] step  24250 lr 1.80e-04 train 0.570 val 2.235 acc 0.553 [20.9m]
 [ref_pos] step  24500 lr 1.73e-04 train 0.555 val 2.252 acc 0.553 [21.1m]
+[ref_pos] step  24750 lr 1.67e-04 train 0.549 val 2.252 acc 0.552 [21.3m]
