@@ -49,3 +49,4 @@
 [ref_pos] step  11500 lr 7.14e-04 train 0.869 val 1.740 acc 0.561 [11.3m]
 [ref_pos] step  11750 lr 7.03e-04 train 0.879 val 1.757 acc 0.562 [11.5m]
 [ref_pos] step  12000 lr 6.92e-04 train 0.850 val 1.755 acc 0.561 [11.6m]
+[ref_pos] step  12250 lr 6.80e-04 train 0.831 val 1.760 acc 0.562 [11.8m]
