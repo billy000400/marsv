@@ -1,0 +1,169 @@
+{
+  "rows": [
+    {
+      "model": "gpt2-medium",
+      "pair": "book_to",
+      "label": "gave a book to Mary / her",
+      "control": false,
+      "jsd": 0.06764770299196243,
+      "w": 0.5864890672639013,
+      "wtv": 0.1136462437033463,
+      "pf": 0.504950495049505,
+      "mono": false,
+      "cos": 0.8899240493774414
+    },
+    {
+      "model": "gpt2-medium",
+      "pair": "two_plus_two",
+      "label": "Two plus two is four / 4",
+      "control": false,
+      "jsd": 0.1379266493022442,
+      "w": 0.4538873188197613,
+      "wtv": 0.23211803154730531,
+      "pf": 0.5445544554455446,
+      "mono": true,
+      "cos": 0.9652228355407715
+    },
+    {
+      "model": "gpt2-medium",
+      "pair": "answer_case",
+      "label": "The answer is four / Four",
+      "control": false,
+      "jsd": 0.37651269137859344,
+      "w": 0.11976103305816654,
+      "wtv": 0.057787550891258754,
+      "pf": 0.8811881188118812,
+      "mono": false,
+      "cos": 0.9787074327468872
+    },
+    {
+      "model": "gpt2-medium",
+      "pair": "element_au",
+      "label": "clue identify? Au / 79",
+      "control": false,
+      "jsd": 0.34161025285720825,
+      "w": 0.357952393591404,
+      "wtv": 0.11742889937780954,
+      "pf": 0.6435643564356436,
+      "mono": false,
+      "cos": 0.8155831098556519
+    },
+    {
+      "model": "gpt2-medium",
+      "pair": "house_control",
+      "label": "The house was big / in (control)",
+      "control": true,
+      "jsd": 0.6589696407318115,
+      "w": 0.5158612240850926,
+      "wtv": 0.27161705759975413,
+      "pf": 0.49504950495049505,
+      "mono": false,
+      "cos": 0.9284718036651611
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "book_to",
+      "label": "gave a book to Mary / her",
+      "control": false,
+      "jsd": 0.03289569169282913,
+      "w": 0.5821982562541961,
+      "wtv": 0.2678632726464672,
+      "pf": 0.42574257425742573,
+      "mono": true,
+      "cos": 0.3116653561592102
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "two_plus_two",
+      "label": "Two plus two is four / 4",
+      "control": false,
+      "jsd": 0.05550812557339668,
+      "w": 0.7581294347345829,
+      "wtv": 0.4514105622865975,
+      "pf": 0.24752475247524752,
+      "mono": true,
+      "cos": 0.8046640157699585
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "answer_case",
+      "label": "The answer is four / Four",
+      "control": false,
+      "jsd": 0.27086973190307617,
+      "w": 0.3395595014095306,
+      "wtv": 0.1347044225323768,
+      "pf": 0.6633663366336634,
+      "mono": true,
+      "cos": 0.8809816837310791
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "element_au",
+      "label": "clue identify? Au / 79",
+      "control": false,
+      "jsd": 0.3850417733192444,
+      "w": 0.5983568018674851,
+      "wtv": 0.254260956993141,
+      "pf": 0.40594059405940597,
+      "mono": true,
+      "cos": 0.38682904839515686
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "house_control",
+      "label": "The house was big / in (control)",
+      "control": true,
+      "jsd": 0.6645490527153015,
+      "w": 0.4253229828178883,
+      "wtv": 0.1367343260530649,
+      "pf": 0.5742574257425742,
+      "mono": true,
+      "cos": 0.41016921401023865
+    }
+  ],
+  "per_model": {
+    "gpt2-medium": {
+      "w": {
+        "rho": -0.39999999999999997,
+        "p": 0.5046315754686912
+      },
+      "wtv": {
+        "rho": 0.3,
+        "p": 0.623837664781073
+      },
+      "pf": {
+        "rho": 0.0,
+        "p": 1.0
+      }
+    },
+    "pythia-410m": {
+      "w": {
+        "rho": -0.3,
+        "p": 0.623837664781073
+      },
+      "wtv": {
+        "rho": -0.6,
+        "p": 0.28475697986529386
+      },
+      "pf": {
+        "rho": 0.3,
+        "p": 0.623837664781073
+      }
+    }
+  },
+  "pooled_jsd_vs_w": {
+    "rho": -0.3696969696969697,
+    "p": 0.29305007529282234,
+    "n": 10
+  },
+  "pooled_jsd_vs_wtv": {
+    "rho": -0.1515151515151515,
+    "p": 0.6760651759978539,
+    "n": 10
+  },
+  "pooled_jsd_vs_pf": {
+    "rho": 0.32121212121212117,
+    "p": 0.36546831043867045,
+    "n": 10
+  }
+}
