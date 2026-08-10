@@ -134,6 +134,8 @@ PAIRS = [("frozen_two_last", "frozen_deep_last"),
          ("frozen_mirror_s2_matched", "ref_matched_step"),
          ("frozen_mirror_s2_last", "frozen_mirror_last"),
          ("frozen_mirror_s2_last", "frozen_deep_last"),
+         # tightest cell of the position contrast: worst deep seed against best mirror seed
+         ("frozen_mirror_s2_last", "frozen_deep_s2_last"),
          ("frozen_mirror_s2_last", "frozen_mid_last"),
          ("frozen_mirror_s2_last", "ref_trained")]
 

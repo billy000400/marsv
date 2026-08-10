@@ -1192,6 +1192,182 @@
      "10": 0.8061,
      "11": 0.8062
     }
+   },
+   "frozen_high_s2_matched": {
+    "kind": "frozen",
+    "step": 3750,
+    "frozen_blocks": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     11
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5530192057291666,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_high_s2/ckpt_matched.pt",
+    "median_w": 0.3439,
+    "mean_w": 0.3588,
+    "iqr_w": [
+     0.2783,
+     0.4175
+    ],
+    "strict_frac": 0.18,
+    "median_t_star": 0.4657,
+    "frac_endpoints_differ": 0.88,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0482,
+    "median_max_p": 0.0145,
+    "rho_w_vs_max_p": -0.2899,
+    "partial_rho_w_vs_max_p_given_sep": -0.5656,
+    "median_paired_dw_vs_ref_trained": -0.0056,
+    "frac_w_increased_vs_ref_trained": 0.4533,
+    "median_paired_dw_vs_ref_matched_step": -0.0709,
+    "frac_w_increased_vs_ref_matched_step": 0.18,
+    "median_paired_dw_vs_ref_init": -0.4614,
+    "frac_w_increased_vs_ref_init": 0.0,
+    "depth_median_w": {
+     "0": 0.3439,
+     "2": 0.3557,
+     "4": 0.3654,
+     "8": 0.7215,
+     "10": 0.8207,
+     "11": 0.8207
+    }
+   },
+   "frozen_high_s2_last": {
+    "kind": "frozen",
+    "step": 30000,
+    "frozen_blocks": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     11
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5730224609375,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_high_s2/ckpt_last.pt",
+    "median_w": 0.3347,
+    "mean_w": 0.3441,
+    "iqr_w": [
+     0.2692,
+     0.4159
+    ],
+    "strict_frac": 0.2067,
+    "median_t_star": 0.4798,
+    "frac_endpoints_differ": 0.8933,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0507,
+    "median_max_p": 0.0145,
+    "rho_w_vs_max_p": -0.4396,
+    "partial_rho_w_vs_max_p_given_sep": -0.6722,
+    "median_paired_dw_vs_ref_trained": -0.0206,
+    "frac_w_increased_vs_ref_trained": 0.3733,
+    "median_paired_dw_vs_ref_matched_step": -0.0891,
+    "frac_w_increased_vs_ref_matched_step": 0.1267,
+    "median_paired_dw_vs_ref_init": -0.4653,
+    "frac_w_increased_vs_ref_init": 0.0,
+    "depth_median_w": {
+     "0": 0.3346,
+     "2": 0.3395,
+     "4": 0.345,
+     "8": 0.7408,
+     "10": 0.805,
+     "11": 0.8048
+    }
+   },
+   "frozen_mirror_s2_matched": {
+    "kind": "frozen",
+    "step": 2750,
+    "frozen_blocks": [
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5504150390625,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_mirror_s2/ckpt_matched.pt",
+    "median_w": 0.6235,
+    "mean_w": 0.6128,
+    "iqr_w": [
+     0.5306,
+     0.7027
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4971,
+    "frac_endpoints_differ": 0.8867,
+    "median_n_argmax": 2.0,
+    "median_abs_tstar_minus_tflip": 0.12,
+    "median_max_p": 0.0128,
+    "rho_w_vs_max_p": -0.2821,
+    "partial_rho_w_vs_max_p_given_sep": -0.5444,
+    "median_paired_dw_vs_ref_trained": 0.2523,
+    "frac_w_increased_vs_ref_trained": 0.9933,
+    "median_paired_dw_vs_ref_matched_step": 0.1625,
+    "frac_w_increased_vs_ref_matched_step": 0.9867,
+    "median_paired_dw_vs_ref_init": -0.1819,
+    "frac_w_increased_vs_ref_init": 0.06,
+    "depth_median_w": {
+     "0": 0.6235,
+     "2": 0.7476,
+     "4": 0.8234,
+     "8": 0.8236,
+     "10": 0.8237,
+     "11": 0.8236
+    }
+   },
+   "frozen_mirror_s2_last": {
+    "kind": "frozen",
+    "step": 30000,
+    "frozen_blocks": [
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5749755859375,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_mirror_s2/ckpt_last.pt",
+    "median_w": 0.5896,
+    "mean_w": 0.5889,
+    "iqr_w": [
+     0.5258,
+     0.6648
+    ],
+    "strict_frac": 0.0,
+    "median_t_star": 0.4918,
+    "frac_endpoints_differ": 0.86,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0958,
+    "median_max_p": 0.0146,
+    "rho_w_vs_max_p": -0.3599,
+    "partial_rho_w_vs_max_p_given_sep": -0.6048,
+    "median_paired_dw_vs_ref_trained": 0.2359,
+    "frac_w_increased_vs_ref_trained": 0.9933,
+    "median_paired_dw_vs_ref_matched_step": 0.1503,
+    "frac_w_increased_vs_ref_matched_step": 0.94,
+    "median_paired_dw_vs_ref_init": -0.2118,
+    "frac_w_increased_vs_ref_init": 0.0133,
+    "depth_median_w": {
+     "0": 0.5895,
+     "2": 0.7678,
+     "4": 0.8104,
+     "8": 0.8103,
+     "10": 0.8102,
+     "11": 0.8103
+    }
    }
   }
  },

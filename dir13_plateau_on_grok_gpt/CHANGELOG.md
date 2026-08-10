@@ -1426,3 +1426,62 @@ PLAN.md and REPORT.md Methods before it was scored.
   caption lines in the new file.
 - **No `STOP`**: the iteration ended with the plan's own next step (the two seed replications) still
   open.
+
+## 2026-08-10 — S23: the last two single-seed runs replicated; new Figure 25 (seed replication)
+
+- **Two new training runs** (`experiments/train_frozen.py`, model seed 2024, everything else identical
+  to their seed-1337 originals — corpus, split, data order, optimizer, cosine schedule, batch size,
+  checkpoint grid, freeze mask), scored by `experiments/narrow_assay.py` on the same 150 character
+  pairs at interpolation block 0: `frozen_high_s2` (freeze 0–5 and 11, i.e. blocks 6–10 trainable) and
+  `frozen_mirror_s2` (freeze 5–11, i.e. blocks 0–4 trainable). Both predictions were pre-registered in
+  PLAN.md while the runs were still training, and **both held**.
+- **New numbers in RESULTS.md and REPORT.md** (nothing superseded — these are new rows):
+  - blocks 6–10, seed 2024: median `w` **0.344** (IQR 0.278–0.418) at matched accuracy (step 3,750,
+    val 0.5530) against seed 1337's **0.342** — across-seed spread **0.002**, the smallest in the study
+    (paired Δw +0.007, 53% of pairs wider, p = 0.65) — and **0.335** against **0.328** at step 30,000
+    (spread 0.007, p = 0.068). Against the untouched 12-block reference: **−0.071** at matched accuracy
+    (18.0% of pairs wider, p = 1.9e-16) and **−0.021** at step 30,000 (37.3%, p = 7.5e-4). Strict
+    plateau rate 18.0% / 20.7%; relocation and geometry reproduce the first seed.
+  - blocks 0–4, seed 2024: **0.624** at matched accuracy (step 2,750, val 0.5504) against **0.629**
+    (spread 0.006, p = 0.35) and **0.590** against **0.626** at step 30,000 (spread 0.036, p = 1.2e-4).
+    All four deep-versus-mirror seed pairings preserve the ordering: **+0.031** (p = 3.4e-10) and
+    **+0.053** (p = 1.8e-16) at matched accuracy, **+0.038** (p = 6.0e-9) and **+0.022** (p = 3.1e-3)
+    at step 30,000.
+  - across-seed spread over the five twice-trained conditions and nine condition-by-checkpoint pairs:
+    **0.002–0.040** (max = the narrow run's 0.397 vs 0.437 at matched accuracy), sharper on the second
+    seed in four of nine pairs and blunter in five.
+- **Claim narrowed (statement changed, no number retracted).** The near-readout-versus-bottom position
+  ordering was previously reported with the two frozen-deep seeds below frozen-mirror's single run.
+  With two seeds a side its direction survives at both checkpoints, but its closest median pairing is
+  **0.033** at matched accuracy and **0.010** at the end of training — at or inside the 0.040 seed
+  spread — so both deliverables now state that this ordering rests on the paired per-pair tests rather
+  than on a median gap that clears seed noise by itself. Limitation 7 in REPORT.md rewritten
+  accordingly (old: "the ordering of the two ends rests on one run each"; also corrected there: the
+  frozen-block series uses **ten** frozen groups, not eight, and **four** of them now carry a second
+  seed).
+- **New figure, embedded with a visible caption in BOTH deliverables:** `plots/seed_replication.png`
+  (**Figure 25**, `experiments/plot_seeds.py`) — left panel, the two seeds of each twice-trained
+  condition at matched accuracy and at step 30,000; right panel, the six load-bearing gaps against the
+  largest measured seed spread, with the two that do not exceed it hatched. Figure numbering is now
+  contiguous 1–28 in both files (the exploratory figures had already been renumbered 26–28 in
+  anticipation of this insert).
+- **Figure 24 (`plots/capacity_vs_depth.png`) re-rendered** with the two new second-seed markers
+  (fourteen frozen runs now, up from twelve) and with the six five-block conditions' labels moved into
+  free space on leader lines — nine markers now share that column and the labels no longer fit beside
+  them. Its caption updated: fourteen frozen runs, two seeds each of frozen 1–4, 1–7, 0–5&11 and 5–11,
+  and the seed spreads at x = 5 now read 0.590 vs 0.559, 0.342 vs 0.344 and 0.629 vs 0.624.
+- **Prose updated where it named these runs as future work:** RESULTS.md's "What this settles" no
+  longer points at the two replications as the next runs (they are done); REPORT.md's Summary now says
+  five conditions carry a second seed and bounds the spread at 0.040; REPORT.md's Conclusion replaces
+  the "next tests would be seed replications" sentence with what the replications found and what
+  remains open (the mechanism).
+- **Code:** `experiments/plot_seeds.py` (new figure; legend and label placement fixed so no marker is
+  covered), `experiments/frozen_pairwise.py` (+1 comparison: the tightest cell of the position
+  contrast, `frozen_mirror_s2_last` vs `frozen_deep_s2_last`), `experiments/plot_capacity.py` (leader
+  lines). New data: `results/frozen_assay_summary.json` and `results/frozen_assay_raw.npz` gained four
+  rows; `results/frozen_pairwise.json` regenerated; `results/train_{hist,meta}_frozen_{high,mirror}_s2.json`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md REPORT_followup.md` →
+  **ALL CHECKS PASS** (REPORT 29 display / 602 inline equations / 28 embedded figures; RESULTS 28
+  figures; REPORT_followup 4 display / 60 inline / 4 figures; 0 problems).
+- **No `STOP`**: zero unaddressed feedback, but the plan's remaining candidates (the mechanism probe,
+  the PLAN 5.5 freeze-and-retrain prediction) are open.

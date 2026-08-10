@@ -1740,3 +1740,69 @@ On track? yes — feedback #5 addressed in full and renamed to `.addressed.md`, 
 deliverable written and render-verified, and the one ask that could not be run as literally stated
 (a fresh both-directions run) answered exactly from the stored control with the reason recorded;
 blocker: none.
+
+## 2026-08-10 (iteration: S23 — both seed replications land, both pre-registered predictions hold)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: six `human_feedback*` files,
+all six ending in `.addressed.md`. Zero unaddressed feedback, so this iteration advanced the plan.
+
+**What I walked into.** The previous iteration had launched the S23 chain (two concurrent
+`train_frozen.py` runs at seed 2024, chained to two `narrow_assay.py` calls) and then run out of time
+mid-curation: it had written `plot_seeds.py`, produced `plots/seed_replication.png` from the three
+conditions that already had two seeds, prepared `frozen_pairwise.py`/`plot_capacity.py` for the new
+tags, and **renumbered the exploratory figures 25→26, 26→27, 27→28 to make room for a Figure 25 that
+was never inserted** — so both deliverables had a numbering gap and an unembedded PNG, and no
+CHANGELOG/JOURNAL entry existed for that work. Picking the chain up rather than restarting it was the
+obvious call: it was 12 minutes into a ~57-minute pair of runs.
+
+**Waiting was most of the iteration.** The two trainers shared the GPU with another agent's job and
+took ~57 minutes to reach step 30,000 (rate drifting 680 → 530 steps/min as the box filled up), then
+~2 minutes for both assays. I spent the wait reading the regions of both deliverables the results
+would touch, so the curation itself was quick once the numbers landed.
+
+**The results.** Both predictions, written into PLAN.md before either run was scored, held.
+- *Blocks 6–10* (`frozen_high_s2`): 0.344 at matched accuracy against seed 1337's 0.342 — an 0.002
+  spread, the smallest measured anywhere in this study — and 0.335 vs 0.328 at step 30,000. Against the
+  untouched reference, −0.071 (p = 1.9e-16) and −0.021 (p = 7.5e-4). The study's headline frozen fact
+  (58.0% of parameters never moved from init, yet sharper than the untouched 12-block network) is not
+  an initialization artefact.
+- *Blocks 0–4* (`frozen_mirror_s2`): 0.624 at matched accuracy against 0.629, and 0.590 against 0.626
+  at step 30,000. All four deep-versus-mirror seed pairings preserve the ordering at both checkpoints.
+
+**The one thing I had to narrow, and why I did it rather than report the win.** The position ordering's
+*direction* replicated, but its *margin* did not stay comfortably outside seed noise: the closest
+median pairing is 0.033 at matched accuracy and only 0.010 at step 30,000, against a largest measured
+seed spread of 0.040 (the narrow run's 0.397 vs 0.437). The paired per-pair tests are still strong
+(p = 3.1e-3 at the tightest cell, p ≤ 3.4e-10 elsewhere), so the claim stands — but stating it on the
+strength of the medians alone would have been wrong. Both deliverables now say explicitly that this
+ordering rests on the per-pair tests, and Figure 25's right panel hatches the two gaps that do not
+exceed the spread instead of hiding them. That is CLAUDE.md rule 9c step 2 (narrow the claim) rather
+than step 7 (discuss the limitation), because the evidence still supports the narrower statement.
+
+**Figure work.** Two problems, both from adding markers to crowded figures. (a) `plot_seeds.py`'s
+legend covered the sharpest condition once I moved it out of the way of the spread labels; fixed by
+adding y-headroom and staggering the two checkpoints' annotations vertically. (b) Figure 24's
+five-block column now holds **nine** markers (six conditions, three of them with two seeds), so
+per-marker labels no longer fit: the six five-block labels are now parked in empty parts of each panel
+and joined to their marker by a thin gray leader line. Both figures were re-rendered and read back as
+images to confirm nothing sits on top of anything else.
+
+**Verification.** `check_render.py REPORT.md RESULTS.md REPORT_followup.md` → **ALL CHECKS PASS**
+(REPORT 29 display / 602 inline / 28 figures; RESULTS 28 figures; REPORT_followup 4/60/4; 0 problems).
+Figure numbering is contiguous 1–28 in both files again, and Figure 25 is cited by number in the prose
+of both.
+
+**What I learned that changes the plan.** The seed queue is empty: nothing in either deliverable now
+rests on a single initialization except conditions whose gaps are 0.14–0.26, three to six times the
+spread. So S24 is not another freeze — the standing gap is *what the trainable blocks compute*, which
+five excluded mechanisms have not touched in six iterations.
+
+**Next step.** S24 as written in PLAN: (1) a probe of the computation itself, (2) interpolation at
+non-final token positions (the one Matthew-assay control never run here), (3) anything needing a longer
+run or a second model. I first wrote (2) as the PLAN 5.5 freeze-and-retrain prediction and corrected it
+while updating PLAN — S10's `frozen_early` already is that experiment, and it was refuted.
+No `STOP` written (the plan has open candidates and the loop should stay available for feedback).
+
+On track? yes — S23 done, both pre-registered predictions held, the one claim whose margin shrank was
+narrowed in both deliverables the same iteration, and the figure gap left by the previous iteration is
+closed; blocker: none.

@@ -1,0 +1,94 @@
+self_test OK: step w=0.089 detected, line w=0.800 rejected
+{
+  "frozen_high_s2_matched": {
+    "kind": "frozen",
+    "step": 3750,
+    "frozen_blocks": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      11
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5530192057291666,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_high_s2/ckpt_matched.pt",
+    "median_w": 0.3439,
+    "mean_w": 0.3588,
+    "iqr_w": [
+      0.2783,
+      0.4175
+    ],
+    "strict_frac": 0.18,
+    "median_t_star": 0.4657,
+    "frac_endpoints_differ": 0.88,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0482,
+    "median_max_p": 0.0145,
+    "rho_w_vs_max_p": -0.2899,
+    "partial_rho_w_vs_max_p_given_sep": -0.5656,
+    "median_paired_dw_vs_ref_trained": -0.0056,
+    "frac_w_increased_vs_ref_trained": 0.4533,
+    "median_paired_dw_vs_ref_matched_step": -0.0709,
+    "frac_w_increased_vs_ref_matched_step": 0.18,
+    "median_paired_dw_vs_ref_init": -0.4614,
+    "frac_w_increased_vs_ref_init": 0.0,
+    "depth_median_w": {
+      "0": 0.3439,
+      "2": 0.3557,
+      "4": 0.3654,
+      "8": 0.7215,
+      "10": 0.8207,
+      "11": 0.8207
+    }
+  }
+}
+{
+  "frozen_high_s2_last": {
+    "kind": "frozen",
+    "step": 30000,
+    "frozen_blocks": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      11
+    ],
+    "n_embd": 240,
+    "val_acc": 0.5730224609375,
+    "ckpt": "/tmp/dir13_frozen/checkpoints_frozen_high_s2/ckpt_last.pt",
+    "median_w": 0.3347,
+    "mean_w": 0.3441,
+    "iqr_w": [
+      0.2692,
+      0.4159
+    ],
+    "strict_frac": 0.2067,
+    "median_t_star": 0.4798,
+    "frac_endpoints_differ": 0.8933,
+    "median_n_argmax": 3.0,
+    "median_abs_tstar_minus_tflip": 0.0507,
+    "median_max_p": 0.0145,
+    "rho_w_vs_max_p": -0.4396,
+    "partial_rho_w_vs_max_p_given_sep": -0.6722,
+    "median_paired_dw_vs_ref_trained": -0.0206,
+    "frac_w_increased_vs_ref_trained": 0.3733,
+    "median_paired_dw_vs_ref_matched_step": -0.0891,
+    "frac_w_increased_vs_ref_matched_step": 0.1267,
+    "median_paired_dw_vs_ref_init": -0.4653,
+    "frac_w_increased_vs_ref_init": 0.0,
+    "depth_median_w": {
+      "0": 0.3346,
+      "2": 0.3395,
+      "4": 0.345,
+      "8": 0.7408,
+      "10": 0.805,
+      "11": 0.8048
+    }
+  }
+}
+merged into frozen_assay_summary.json / frozen_assay_raw.npz

@@ -58,6 +58,20 @@ RUNS = [("ref_matched_step",      "reference\n(240 wide)",  12, TOTAL,          
 RUNS = [r for r in RUNS if r[0] in C]
 
 untrained = C["ref_init"]["median_w"]
+# Parked label positions (data coords) for the six five-block conditions, whose markers occupy one
+# x on the block axis and one x on the parameter axis. Keyed by the panel's x-variable index.
+LEADERS = {2: {"frozen_mid_matched":     (6.45, 0.400),
+               "frozen_high_matched":    (5.35, 0.500),
+               "frozen_mid_low_matched": (4.85, 0.565),
+               "frozen_mid_off_matched": (4.60, 0.285),
+               "frozen_deep_matched":    (6.55, 0.700),
+               "frozen_mirror_matched":  (3.60, 0.700)},
+           3: {"frozen_mid_matched":     (7.30, 0.400),
+               "frozen_high_matched":    (7.30, 0.330),
+               "frozen_mid_low_matched": (7.30, 0.262),
+               "frozen_mid_off_matched": (2.55, 0.310),
+               "frozen_deep_matched":    (2.15, 0.660),
+               "frozen_mirror_matched":  (1.95, 0.560)}}
 fig, axes = plt.subplots(1, 2, figsize=(11.4, 4.7))
 
 for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
@@ -94,6 +108,14 @@ for ax, xi, xlabel in ((axes[0], 2, "trainable transformer blocks (of 12)"),
                     zorder=1)
             ax.plot([x + dx], [trained["median_w"]], color=st["color"], marker="s", ms=5.5,
                     mfc="white", mew=1.4, lw=0, zorder=3)
+        # Nine markers share the five-block position on both axes, so their labels no longer fit
+        # beside them: those are parked in the empty part of the panel and joined to their marker by
+        # a thin gray leader line. Everything else keeps a plain offset label.
+        if key in LEADERS[xi] and key not in SECOND_SEED:
+            lx, ly = LEADERS[xi][key]
+            ax.annotate(lab, xy=(x, med), xytext=(lx, ly), ha="center", va="center", fontsize=8,
+                        arrowprops=dict(arrowstyle="-", color="0.6", lw=0.7, shrinkA=1, shrinkB=6))
+            continue
         # Label each CONDITION once, not each run: the two two-seed conditions are drawn as adjacent
         # markers and share one label placed between them (the second-seed rows carry no label).
         # Offsets are per key because the runs bunch together on both axes.

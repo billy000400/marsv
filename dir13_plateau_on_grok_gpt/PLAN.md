@@ -427,7 +427,22 @@ Null results are complete when the validity gates pass. When complete, write an 
       weakness, stated in Limitation 7: frozen-mirror is still one run, so the position gap has a seed
       spread under one side only. Figure 24 in both deliverables.
 
-- [ ] **S20 - The interior/end split's own test: a five-block window at blocks 1-5.** Not yet run.
+- [x] **S23 - Seed replication of the last two single-seed load-bearing runs.** DONE 2026-08-10, both
+      pre-registered predictions HELD. `train_frozen.py --freeze 0,1,2,3,4,5,11 --tag frozen_high_s2
+      --seed 2024` (blocks 6-10 trainable) and `--freeze 5,6,7,8,9,10,11 --tag frozen_mirror_s2 --seed
+      2024` (blocks 0-4 trainable), trained concurrently to step 30,000 and scored by `narrow_assay.py`
+      on the same 150 pairs. **Blocks 6-10:** 0.344 at matched accuracy (step 3,750, val 0.5530) vs
+      seed 1337's 0.342 - a 0.002 spread, the smallest in the study - and 0.335 vs 0.328 at step 30,000;
+      vs the untouched reference -0.071 (18.0% of pairs wider, p = 1.9e-16) and -0.021 (37.3%,
+      p = 7.5e-4). **Blocks 0-4:** 0.624 at matched accuracy (step 2,750, val 0.5504) vs 0.629, and
+      0.590 vs 0.626 at step 30,000; all four deep-vs-mirror seed pairings keep the near-readout window
+      sharper (+0.031, +0.053 at matched accuracy; +0.038, +0.022 at step 30,000). Honest qualification
+      now in both deliverables: the closest median pairing of that ordering is 0.033 (matched) and 0.010
+      (final), at or inside the 0.040 largest seed spread, so it rests on the paired per-pair tests.
+      New **Figure 25** (`plots/seed_replication.png`) in both deliverables; Figure 24 re-rendered with
+      the two extra seed markers and leader-line labels.
+
+- [x] **S20 - The interior/end split's own test: a five-block window at blocks 1-5.** DONE 2026-08-03; the prediction below was FALSIFIED (it landed at 0.363, with the sharp group) and the split was withdrawn from both deliverables.
       `train_frozen.py --freeze 0,6,7,8,9,10,11 --tag frozen_mid_low` freezes the same *seven* blocks
       (58.0%) and leaves five trainable, one block *down* from S19's sharp 2-6 window, so the usable
       window touches block 1 - the first block after the patched activation. **Prediction on record
@@ -527,6 +542,25 @@ Prioritize in this order: Figure 9 validity gate, BPE training/validation, Matth
 End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker if any>`.
 
 ## Current status
+
+**S23 DONE 2026-08-10 — the two remaining single-seed runs were replicated and both pre-registered
+predictions held.** Zero unaddressed feedback files (all six `human_feedback*` end in `.addressed.md`),
+so this iteration advanced the plan. `frozen_high_s2` (blocks 6-10 trainable) and `frozen_mirror_s2`
+(blocks 0-4 trainable) were trained concurrently from model seed 2024 to step 30,000 with every other
+setting identical to their seed-1337 originals, then scored on the same 150 pairs at their own matched
+accuracy checkpoint and at step 30,000. Blocks 6-10 repeats at **0.344 / 0.335** against **0.342 /
+0.328** (spread 0.002 and 0.007, the smallest measured anywhere here), so the study's sharpest network
+- 58.0% of its parameters never moved from initialization, and sharper than the untouched 12-block
+reference - is not an initialization artefact. Blocks 0-4 repeats at **0.624 / 0.590** against **0.629
+/ 0.626**, and all four deep-versus-mirror seed pairings keep five trainable blocks beside the readout
+sharper than five at the bottom, at both checkpoints. The one thing the replicate changes is the size
+of that last ordering: its closest median pairing is 0.033 at matched accuracy and 0.010 at the end of
+training, at or inside the 0.040 largest seed spread, so both deliverables now say it rests on the
+paired per-pair tests rather than on the median gap. Five conditions now carry two seeds; the spread
+over all nine condition-by-checkpoint pairs is 0.002-0.040 with no consistent sign. New **Figure 25**
+(`plots/seed_replication.png`) in RESULTS.md and REPORT.md; Figure 24 re-rendered with the two extra
+seed markers and with the crowded five-block labels moved onto leader lines.
+`check_render.py REPORT.md RESULTS.md REPORT_followup.md` → ALL CHECKS PASS. No `STOP` written.
 
 **RE-OPENED 2026-08-10 — operator feedback #5 arrived, `STOP` is gone, and the feedback is now
 addressed.** `human_feedback_5.txt` asked for four analyses to be written into a **new** companion
@@ -862,35 +896,42 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
-**S23 — the two seed replications, in this order (2026-08-10, loop re-opened, no `STOP` present).**
-One caveat for whoever runs them: `results/checkpoints*` are symlinks into `/tmp` and have been wiped,
-so (a) `/tmp/tinyshakespeare.txt` must be re-downloaded first (SHA-256
-`86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed`, already verified today), and (b)
-the reference and prior frozen rows must be read from `results/frozen_assay_summary.json` rather than
-re-assayed, since their checkpoints are gone. Feedback #5 is fully addressed
-(`REPORT_followup.md`), so nothing blocks this. The queue is unchanged and in this order: (1) a second seed at **blocks 6–10**,
-the study's sharpest network and the one carrying a two-network fact at both matched accuracy and
-step 30,000; (2) a second seed at **frozen-mirror**, the one remaining single-seed run under a
-load-bearing comparison. Deliberately NOT a third fitted geometric rule — two have died on their
-first test each. Figure note: a seventh five-block run breaks the three-panel depth split in
-Figure 23; the next division would have to be by window size, not position.
+**S24 — nothing in the seed queue remains; the open questions all need new compute or a new model.**
+S23 closed the last two single-seed runs under load-bearing comparisons (2026-08-10), so no claim in
+either deliverable now rests on a single initialization except the six conditions whose gaps are
+0.14–0.26 wide, three to six times the measured 0.040 spread. Candidates, in the order they would be
+worth running:
 
-**S23 PRE-REGISTRATION (written 2026-08-10 while both runs were still training, before any assay).**
-Both replicates use model seed 2024 with the corpus, split, data order, optimizer, schedule, batch
-size, checkpoint grid and freeze mask identical to their seed-1337 originals, and are scored by the
-same rule on the same 150 pairs at their own `k_match` and at step 30,000.
-- **`frozen_high_s2`** (freeze 0-5 and 11; trainable 6-10). Prediction: median `w` at matched accuracy
-  within the ~0.04 seed spread already measured on other conditions of seed 1337's **0.342**, and
-  clearly below the untouched 12-block reference's **0.443** at its own matched checkpoint. A
-  replicate at or above 0.443 **retracts** the claim that blocks 6-10 alone are sharper than the
-  untouched reference; a replicate more than 0.04 from 0.342 makes the seed spread on this condition
-  larger than any measured so far and forces the "sharpest network in the study" superlative to be
-  restated as a range.
-- **`frozen_mirror_s2`** (freeze 5-11; trainable 0-4). Prediction: median `w` at matched accuracy
-  within ~0.04 of seed 1337's **0.629**, and above **both** frozen-deep seeds (0.559 and 0.590), so
-  that the position contrast (five trainable blocks by the readout beat five at the bottom) survives
-  with two seeds a side. A replicate at or below 0.590 **retracts** that ordering, leaving the
-  mid-stack-vs-end comparisons — which are 0.17-0.26 wide — as the only positional claims.
+1. **What the trainable blocks compute.** Five candidate mechanisms have been excluded in turn (the
+   next-character decision, endpoint plausibility, the specific weights of blocks 1–4, any particular
+   depth, and trainable parameter count), and the gap has not moved in six iterations: nothing here
+   characterises the computation that bends the path, only where it can live and how much of it
+   survives. This is the direction's real open problem and it needs a new probe, not another freeze.
+2. **Interpolation at positions other than the final token**, the one control Matthew's assay leaves
+   untested here — every number in this report patches the final sequence position only. It needs a
+   trained character checkpoint on disk (the reference run's are gone from `/tmp`), so ~21 min of
+   retraining plus one assay. Note the PLAN 5.5 freeze-and-retrain prediction is *not* open: S10's
+   `frozen_early` is exactly that experiment, and it was refuted — the sharpening relocated to blocks
+   5–8 rather than disappearing.
+3. **A longer character run whose second local-complexity descent separates from initial fit**, the
+   denser Figure-9 grid on the pilot run's local maximum, interpolation at non-final positions, or a
+   second model/tokenizer — each needs materially more compute than one 30,000-step frozen run.
+
+Practical notes for whoever picks this up: `results/checkpoints*` are symlinks into `/tmp` and do not
+survive a pod reset, so re-download the corpus to `/tmp/tinyshakespeare.txt` (SHA-256
+`86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed`, asserted by
+`allpairs_sweep.load_vocab`) before running anything, and read reference rows from
+`results/frozen_assay_summary.json` / `frozen_assay_raw.npz` rather than re-assaying vanished
+checkpoints. On the figures: a seventh five-block run would break the three-panel depth split in
+Figure 23, and the next division would have to be by window size rather than position.
+
+**S23's pre-registration and outcome (kept for the record).** Both replicates used model seed 2024 with
+corpus, split, data order, optimizer, schedule, batch size, checkpoint grid and freeze mask identical
+to their seed-1337 originals. `frozen_high_s2` had to land within ~0.04 of 0.342 and clearly below the
+reference's 0.443 → **0.344**, spread 0.002 (**held**). `frozen_mirror_s2` had to land within ~0.04 of
+0.629 and above both frozen-deep seeds (0.559, 0.590) → **0.624**, spread 0.006 (**held**); at step
+30,000 it gives 0.590 against the deep seeds' 0.558 and 0.579, so the ordering survives there too but
+with a 0.010 margin.
 
 **S16 IS DONE (2026-08-03) — every claim the depth/position reading rests on now has a measured seed
 spread under it.** Depth step: 12-trainable-block runs (0.397-0.443) disjoint from 8-block runs

@@ -63,7 +63,9 @@ fig, axes = plt.subplots(1, 2, figsize=(12.6, 4.9),
 ax = axes[0]
 xs = np.arange(len(SEEDED), dtype=float)
 for i, (stem, _) in enumerate(SEEDED):
-    for dx, which, mk, col in ((-0.16, "matched", "o", CVD[0]), (0.16, "last", "s", CVD[1])):
+    # the two axes are staggered vertically as well as horizontally so their spread labels never collide
+    for dx, dy, which, mk, col in ((-0.16, 0.012, "matched", "o", CVD[0]),
+                                   (0.16, 0.034, "last", "s", CVD[1])):
         a, b = f"{stem}_{which}", f"{stem}_s2_{which}"
         if a not in C or b not in C:
             continue
@@ -72,7 +74,7 @@ for i, (stem, _) in enumerate(SEEDED):
         ax.plot([xs[i] + dx], [v1], marker=mk, ms=9, color=col, mfc=col, ls="none", zorder=3)
         ax.plot([xs[i] + dx], [v2], marker=mk, ms=9, color=col, mfc="white", mew=1.8, ls="none",
                 zorder=3)
-        ax.annotate(f"{abs(v1 - v2):.3f}", (xs[i] + dx, max(v1, v2) + 0.012), ha="center",
+        ax.annotate(f"{abs(v1 - v2):.3f}", (xs[i] + dx, max(v1, v2) + dy), ha="center",
                     fontsize=7.5, color="0.3")
 seed_handles = [
     plt.Line2D([], [], marker="o", ms=9, color=CVD[0], mfc=CVD[0], ls="none",
@@ -86,7 +88,7 @@ seed_handles = [
 ax.set_xticks(xs)
 ax.set_xticklabels([lab for _, lab in SEEDED], fontsize=8)
 ax.set_ylabel("median transition width $w_{10\\to90}$\n(lower = sharper plateau)")
-ax.set_ylim(0.26, 0.72)
+ax.set_ylim(0.26, 0.86)  # headroom so the legend never sits on the sharpest condition
 ax.grid(alpha=0.3, axis="y")
 ax.set_title(f"Retraining from a second init moves $w$ by at most {max_spread:.3f}", fontsize=10)
 ax.legend(handles=seed_handles, fontsize=7.5, loc="upper left", ncol=1, framealpha=0.95)
