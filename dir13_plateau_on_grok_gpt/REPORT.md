@@ -112,6 +112,16 @@ that fit the first eight runs was refuted by the ninth.
 MLPs. Qualified further because we tested a reconstruction rather than the paper's exact checkpoint,
 and because the sharpness is graded rather than step-like.
 
+**Companion report.** `REPORT_followup.md` re-analyses the same 2,080-pair sweep along two axes this
+report does not use — each character's training frequency and its linguistic class. Its three results:
+transition width falls monotonically with training frequency (Spearman $\rho = -0.78$ over 65
+characters), so dropping the 12 characters seen fewer than 1,000 times moves the median width from
+0.355 to 0.320 and removes most of the near-linear tail; the individual curves are strongly asymmetric,
+with the contextually plausible endpoint holding most of the interpolation path; and the width from a
+letter to a partner is ordered by the partner's character class, consistently across all 43 well-trained
+letters (Kendall $W = 0.42$; $W = 0.27$ after removing the frequency confound). It also tabulates the
+prompt context and per-cell sample count behind every character-level figure below.
+
 ## Methods
 
 ### Data & Model

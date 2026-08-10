@@ -528,7 +528,22 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**FINALIZED 2026-08-03 — time budget exhausted; `STOP` written.** Zero unaddressed feedback files (all
+**RE-OPENED 2026-08-10 — operator feedback #5 arrived, `STOP` is gone, and the feedback is now
+addressed.** `human_feedback_5.txt` asked for four analyses to be written into a **new** companion
+deliverable `REPORT_followup.md` (frequency-filtered pairwise matrix + trends; example `d(t)` curves
+for well-trained endpoints as a visual asymmetry check; the prompt context and per-cell sample count
+stated on the character-level figures; and one well-trained letter against the others checked for
+semantic grouping). All four are done, the file is written and render-verified, and the feedback file
+is renamed `human_feedback_5.txt.addressed.md`. Headline new numbers: median width **0.320** over the
+1,378 well-trained pairs vs **0.482** over the 702 pairs touching a character seen < 1000 times
+(p = 4.0e-159); width vs log training frequency Spearman **ρ = −0.78** (n = 65), **−0.66** within the
+53 kept; partner-class ordering concordant across 43 letters (Kendall **W = 0.42**, and 0.27 with the
+frequency confound removed). No training and no new forward pass — the scratch checkpoints have been
+wiped, which is also why the both-directions re-run was answered from the stored exact-symmetry
+control instead. `check_render.py REPORT.md RESULTS.md REPORT_followup.md` → ALL CHECKS PASS. No
+`STOP` written: the plan's own next step (S23) is still open.
+
+**FINALIZED 2026-08-03 — time budget exhausted; `STOP` was written (and has since been removed).** Zero unaddressed feedback files (all
 five `human_feedback*` end in `.addressed.md`). Both deliverables were re-read and verified as
 current-best at S22's state: `check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS** (REPORT 29
 display / 581 inline equations / 27 embedded figures with 27 visible captions; RESULTS 27 figures / 27
@@ -847,9 +862,13 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
-**NONE — this direction is finalized and `STOP` is written (2026-08-03).** If the loop is ever
-re-entered (e.g. new operator feedback arrives, in which case `STOP` must be deleted first per
-CLAUDE.md rule 11), the queue is unchanged and in this order: (1) a second seed at **blocks 6–10**,
+**S23 — the two seed replications, in this order (2026-08-10, loop re-opened, no `STOP` present).**
+One caveat for whoever runs them: `results/checkpoints*` are symlinks into `/tmp` and have been wiped,
+so (a) `/tmp/tinyshakespeare.txt` must be re-downloaded first (SHA-256
+`86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed`, already verified today), and (b)
+the reference and prior frozen rows must be read from `results/frozen_assay_summary.json` rather than
+re-assayed, since their checkpoints are gone. Feedback #5 is fully addressed
+(`REPORT_followup.md`), so nothing blocks this. The queue is unchanged and in this order: (1) a second seed at **blocks 6–10**,
 the study's sharpest network and the one carrying a two-network fact at both matched accuracy and
 step 30,000; (2) a second seed at **frozen-mirror**, the one remaining single-seed run under a
 load-bearing comparison. Deliberately NOT a third fitted geometric rule — two have died on their

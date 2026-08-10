@@ -1670,3 +1670,73 @@ blocks 6–10 first, then frozen-mirror.
 On track? yes — finalized cleanly with zero unaddressed feedback, deliverables verified current-best
 and fully rendered, and the one unrun experiment recorded as a limitation rather than a promise;
 blocker: none (the seed replications were out of time budget, not blocked).
+
+## 2026-08-10 (iteration: operator feedback #5 — frequency, asymmetry, context/n, semantic groups)
+
+**Feedback check first (CLAUDE.md Part C).** Listed the direction root: six `human_feedback*` files,
+five ending in `.addressed.md` and **one not** — `human_feedback_5.txt`, dropped at 19:12 today. The
+previous iteration's `STOP` was already gone (removed when the feedback landed), so this iteration was
+the feedback, in full, and no `STOP` was written at the end.
+
+**What the operator asked, and what I did.** Four numbered asks (1, 2, 4, 6), all to be written into a
+**new** file `REPORT_followup.md` under REPORT.md's rules. That instruction is what kept REPORT.md and
+RESULTS.md untouched except for one pointer paragraph each — rule 6 says curate them to current-best,
+and the current-best statement of this analysis is that it lives in the companion file the operator
+named.
+
+1. *Pairwise plot with undertrained (< 1000 occurrences) characters removed, look for trends.* 12 of 65
+   characters fall below the cut. The filtered 53×53 matrix is Figure 1; the trend is Figure 2. Median
+   width 0.320 (1,378 well-trained pairs) vs 0.482 (702 pairs touching a rare character), and a clean
+   dose–response, Spearman ρ = −0.78 over all 65 characters, still −0.66 within the kept 53. This is the
+   strongest new result: the near-linear tail of the main report's width distribution is mostly rare
+   characters, and sharpening looks like something bought per character with training updates.
+2. *Example `d(t)` plots between well-trained characters, visual asymmetry check, no metrics.* Figure 3.
+3. *(item 4) Do the character-level figures have context; state it on the plot and give the per-cell n.*
+   They do — `"The house was "` (14 characters) with only the final position patched, everywhere except
+   the context-control figures (9 contexts). I added the statement to the four new figures **and**
+   re-rendered the six all-pairs figures (REPORT.md Figures 14–19) with a footer line naming the context
+   and the sample count behind a cell. Methods carries a table covering every character-level figure.
+4. *(item 6) One well-trained letter against the others, after the frequency filter — semantic groups?*
+   Yes, and it replicates: Figure 4. `e`'s row alone gives Kruskal–Wallis p = 9.2e-3; the aggregate over
+   43 well-trained letters gives Friedman p = 3.8e-18, Kendall W = 0.42, and W = 0.27 after regressing
+   partner frequency out of the ranks.
+
+**A decision that shaped item 2.** The scratch checkpoint directories (`results/checkpoints*` are
+symlinks into `/tmp`) have been wiped since the last iteration, and `/tmp/tinyshakespeare.txt` with
+them. I re-downloaded the corpus and verified its SHA-256 against the value the training runs recorded,
+which restored the frequency variable — but the 30,000-step character checkpoint is gone, so no new
+forward pass was possible. I wrote `experiments/followup_asym.py` to re-run six pairs in both endpoint
+orders before discovering this. It was not needed: `slerp_norm(hA,hB,t) = slerp_norm(hB,hA,1−t)`
+exactly, so the reversed curve is exactly `1 − d(1−t)`, and the stored 100-pair swap control already
+measures max |w(A,B) − w(B,A)| = 0.000. So the endpoint-order reading of "asymmetry" has an exact
+answer with no experiment, and the informative reading is the *shape* of one curve about its midpoint —
+which is what Figure 3 plots (curve vs its own mirror), and the asymmetry there is large and tracks
+endpoint plausibility, matching the main report's Figure 17. The alternative I rejected was retraining
+the character GPT (~20 min) to reproduce a checkpoint that would not be bit-identical to the one every
+existing number came from; that would have put two slightly different models inside one report.
+
+**Rejected alternative on placement.** I considered folding the frequency result into REPORT.md's
+all-pairs section instead of the companion file, since it is a genuine finding about the main
+experiment. The operator's instruction was explicit about `REPORT_followup.md`, so the finding lives
+there and both deliverables carry a pointer paragraph naming it — a reader of either file is told the
+follow-up exists and what it found.
+
+**Figure work.** Six character groups exceed the five-hue CVD palette, so hue carries vowel /
+consonant / punctuation (whitespace folded to gray as the tail group, per rule 13) and every group also
+gets its own hatch and marker; the figures stay readable in grayscale and no meaning rides on
+red-vs-green. Three rounds of layout fixes were needed for collisions (legend over data points, group
+labels into the title, threshold labels on their own lines).
+
+**Verification.** `check_render.py REPORT.md RESULTS.md REPORT_followup.md` → ALL CHECKS PASS
+(REPORT 29 display / 584 inline / 27 figures; RESULTS 27 figures; REPORT_followup 4 display / 60 inline
+/ 4 figures; 0 problems), and 4 embeds / 4 visible `**Figure` captions in the new file.
+
+**Next step.** The plan's own next step is unchanged and still open: S23, the two seed replications
+(blocks 6–10 first, then frozen-mirror), ~21 min of training plus ~70 s of assay each. Note for whoever
+picks it up: the checkpoints are gone from scratch, so the *reference* rows must be taken from
+`results/frozen_assay_summary.json` rather than re-assayed. No `STOP` written.
+
+On track? yes — feedback #5 addressed in full and renamed to `.addressed.md`, a new companion
+deliverable written and render-verified, and the one ask that could not be run as literally stated
+(a fresh both-directions run) answered exactly from the stored control with the reason recorded;
+blocker: none.

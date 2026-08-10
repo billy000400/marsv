@@ -1,0 +1,141 @@
+{
+ "freq_min": 1000,
+ "n_kept": 53,
+ "n_dropped": 12,
+ "dropped": [
+  {
+   "char": "$",
+   "freq": 1
+  },
+  {
+   "char": "&",
+   "freq": 3
+  },
+  {
+   "char": "3",
+   "freq": 27
+  },
+  {
+   "char": "J",
+   "freq": 312
+  },
+  {
+   "char": "Q",
+   "freq": 230
+  },
+  {
+   "char": "V",
+   "freq": 746
+  },
+  {
+   "char": "X",
+   "freq": 112
+  },
+  {
+   "char": "Z",
+   "freq": 161
+  },
+  {
+   "char": "j",
+   "freq": 588
+  },
+  {
+   "char": "q",
+   "freq": 563
+  },
+  {
+   "char": "x",
+   "freq": 480
+  },
+  {
+   "char": "z",
+   "freq": 320
+  }
+ ],
+ "context": "The house was ",
+ "n_t": 50,
+ "item1": {
+  "median_w_all_pairs": 0.3549,
+  "n_all": 2080,
+  "median_w_kept_pairs": 0.3202,
+  "n_kept_pairs": 1378,
+  "median_w_pairs_with_undertrained": 0.4819,
+  "n_low_pairs": 702,
+  "mannwhitney_p": 4.012447804301117e-159,
+  "spearman_medw_vs_log_freq_all65": [
+   -0.7847465034965034,
+   1.0335562994594257e-14
+  ],
+  "spearman_medw_vs_log_freq_kept53": [
+   -0.6615868408321238,
+   6.913630935760052e-08
+  ],
+  "strict_frac_all": 0.0875,
+  "strict_frac_kept": 0.11756168359941944
+ },
+ "item6": {
+  "focus_letter": "e",
+  "n_partners": 52,
+  "focus_group_medians": {
+   "lower vowel": 0.30225,
+   "lower cons.": 0.2618,
+   "upper vowel": 0.3328,
+   "upper cons.": 0.27664999999999995,
+   "punct. & digits": 0.31205000000000005,
+   "space / \\n": 0.31725000000000003
+  },
+  "focus_group_n": {
+   "lower vowel": 4,
+   "lower cons.": 17,
+   "upper vowel": 5,
+   "upper cons.": 16,
+   "punct. & digits": 8,
+   "space / \\n": 2
+  },
+  "focus_kruskal_p": 0.009215518180284514,
+  "groups": [
+   "lower vowel",
+   "lower cons.",
+   "upper vowel",
+   "upper cons.",
+   "punct. & digits",
+   "space / \\n"
+  ],
+  "concordance_raw": {
+   "mean_rank": [
+    1.7906976744186047,
+    3.8372093023255816,
+    3.558139534883721,
+    4.976744186046512,
+    4.465116279069767,
+    2.372093023255814
+   ],
+   "kendall_w": 0.4241829560380128,
+   "friedman_chi2": 91.19933554817283,
+   "friedman_p": 3.7612172021059666e-18,
+   "n_letters": 43
+  },
+  "concordance_freq_residualized": {
+   "mean_rank": [
+    2.13953488372093,
+    4.372093023255814,
+    2.7209302325581395,
+    4.627906976744186,
+    3.86046511627907,
+    3.2790697674418605
+   ],
+   "kendall_w": 0.26681603955806227,
+   "friedman_chi2": 57.36544850498342,
+   "friedman_p": 4.251609883644681e-11,
+   "n_letters": 43
+  },
+  "mean_group_median_over_letters": [
+   0.2695046511627907,
+   0.320396511627907,
+   0.3158302325581397,
+   0.3561906976744186,
+   0.3307813953488372,
+   0.28591976744186043
+  ]
+ }
+}

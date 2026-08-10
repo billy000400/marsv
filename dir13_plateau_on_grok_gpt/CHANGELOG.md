@@ -1373,3 +1373,56 @@ PLAN.md and REPORT.md Methods before it was scored.
   Figure embeds 27 and visible `**Figure` captions 27 in each file; `grep -nE '\(plots/[^)]+\.png\)'`
   returns no un-embedded bare path in either file.
 - **`STOP` written** — plan complete for the available budget and zero unaddressed feedback.
+
+## 2026-08-10 — operator feedback #5 addressed: new companion deliverable `REPORT_followup.md`
+
+- **Feedback file.** `human_feedback_5.txt` (four asks, numbered 1/2/4/6 by the operator) was the whole
+  of this iteration; it is now `human_feedback_5.txt.addressed.md`. The operator asked explicitly that
+  the answers go into a **new** file, `REPORT_followup.md`, written under the same rules as REPORT.md —
+  so REPORT.md and RESULTS.md keep their existing current-best content and gain only a pointer
+  paragraph each (see below). No previously reported number changed; nothing was superseded.
+- **New deliverable `REPORT_followup.md`** (Summary → Methods → Results → Conclusion; 4 display
+  equations, 4 embedded figures, each with a visible numbered caption). New numbers it reports, all
+  from re-analysis of the stored 2,080-pair sweep — **no training and no new forward pass**:
+  - item 1 — pairwise width matrix with undertrained characters (< 1000 occurrences in the training
+    split) removed: 12 characters dropped (`$ & 3 X Z Q J z x q j V`), 53 kept. Median
+    $w_{10\to90}$ **0.355 over all 2,080 pairs → 0.320 over the 1,378 well-trained pairs**, against
+    **0.482** for the 702 pairs touching an undertrained character (one-sided Mann–Whitney
+    p = 4.0e-159); strict-plateau rate **8.8% → 11.8%**. Trend: per-character median width vs
+    log training frequency, Spearman **ρ = −0.78** (p = 1.0e-14, n = 65) and **ρ = −0.66**
+    (p = 6.9e-8) within the 53 kept characters.
+  - item 2 — example `d(t)` curves for six pairs with both endpoints well trained, each drawn against
+    its own mirror image; no metrics reported, per the request. Recorded alongside them: the endpoint
+    *order* is exactly symmetric (stored 100-pair swap control, max |w(A,B) − w(B,A)| = 0.000), so the
+    live question is curve shape, which is markedly asymmetric and follows endpoint plausibility.
+  - item 4 — context/sample-count audit. Every character-level interpolation figure uses a real prompt
+    context (all-pairs, comma and intervention figures: `"The house was "`, 14 characters, final
+    position patched; context-control figures: 9 contexts). A table in Methods gives the context and
+    the per-cell sample count for every character-level figure of REPORT.md.
+  - item 6 — widths from the letter `e` to all 52 other well-trained characters, grouped by character
+    class: groups differ (Kruskal–Wallis p = 9.2e-3), and the same group ordering (lower-case vowels
+    0.270 < whitespace 0.286 < upper-case vowels 0.316 < lower-case consonants 0.320 < punctuation
+    0.331 < upper-case consonants 0.356) repeats across all **43** well-trained letters (Friedman
+    p = 3.8e-18, Kendall **W = 0.42**), surviving removal of the partner-frequency confound
+    (**W = 0.27**, p = 4.3e-11).
+- **New figures** (all CVD-safe, hue + hatch/marker, no red-green contrast), embedded in
+  REPORT_followup.md as rendered images with visible captions: `plots/followup_width_matrix_trained.png`
+  (Figure 1), `plots/followup_width_vs_freq.png` (Figure 2), `plots/followup_asymmetry_examples.png`
+  (Figure 3), `plots/followup_letter_groups.png` (Figure 4).
+- **Six existing REPORT.md figures re-rendered** (Figures 14–19, `plots/allpairs_*.png`) with one added
+  footer line each stating the prompt context and the sample count behind a cell/point — feedback item
+  4's "state that in the plot". No data, axis, series or caption changed, so the existing captions and
+  numbers in REPORT.md and RESULTS.md remain exact.
+- **Pointer paragraphs added** to REPORT.md (end of Summary) and RESULTS.md (head of the all-pairs
+  section) naming `REPORT_followup.md` and its three findings, so neither deliverable hides the
+  follow-up from a reader.
+- **New code:** `experiments/followup_freq.py` (frequency + group analysis and all four figures) and
+  `experiments/followup_asym.py` (both-direction re-run of six pairs; kept for reproducibility but not
+  runnable this iteration — see JOURNAL). New data: `results/followup_summary.json`,
+  `results/char_freq.json`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md REPORT_followup.md` →
+  **ALL CHECKS PASS** (REPORT 29 display / 584 inline / 27 figures; RESULTS 27 figures;
+  REPORT_followup 4 display / 60 inline / 4 figures; 0 problems). 4 embeds and 4 visible `**Figure`
+  caption lines in the new file.
+- **No `STOP`**: the iteration ended with the plan's own next step (the two seed replications) still
+  open.

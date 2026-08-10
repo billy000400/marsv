@@ -439,6 +439,13 @@ position only, `d(t)` read in final-logit space, at interpolation block 0 of the
 checkpoint. Raw curves and the per-`t` prediction trace are in `results/allpairs_raw.npz`; every
 statistic below is in `results/allpairs_summary.json`.
 
+**Companion analyses of this same sweep live in `REPORT_followup.md`** (operator feedback #5): width
+against each character's training frequency (Spearman ρ = −0.78 over 65 characters; median width 0.320
+for the 1,378 pairs of well-trained characters vs 0.482 for the 702 pairs touching a character seen
+fewer than 1,000 times), the shape asymmetry of individual curves, the ordering of width by the
+partner's character class (Kendall W = 0.42 across 43 letters), and a table of the prompt context and
+per-cell sample count behind every character-level figure.
+
 **All diagnostics pass and the sweep is exactly symmetric.** No pair is dropped: the largest `d(0)`
 over all 2,080 pairs is 3e-6, the smallest `d(1)` is 0.999998, the largest endpoint-reproduction error
 is 1.7e-5, prefix activations of the two endpoints match exactly (error 0.0), and **every** curve is
