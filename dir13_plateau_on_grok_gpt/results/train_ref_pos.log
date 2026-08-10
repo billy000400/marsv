@@ -39,3 +39,4 @@
 [ref_pos] step   9000 lr 8.17e-04 train 0.910 val 1.631 acc 0.566 [9.4m]
 [ref_pos] step   9250 lr 8.08e-04 train 0.947 val 1.649 acc 0.566 [9.6m]
 [ref_pos] step   9500 lr 7.98e-04 train 0.925 val 1.650 acc 0.565 [9.8m]
+[ref_pos] step   9750 lr 7.88e-04 train 0.938 val 1.650 acc 0.565 [9.9m]
