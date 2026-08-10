@@ -30,3 +30,4 @@
 [ref_pos] step   6750 lr 8.95e-04 train 1.066 val 1.532 acc 0.569 [7.7m]
 [ref_pos] step   7000 lr 8.87e-04 train 1.047 val 1.552 acc 0.568 [7.9m]
 [ref_pos] step   7250 lr 8.79e-04 train 1.025 val 1.535 acc 0.573 [8.1m]
+[ref_pos] step   7500 lr 8.71e-04 train 1.027 val 1.561 acc 0.569 [8.2m]
