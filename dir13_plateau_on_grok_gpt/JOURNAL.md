@@ -1806,3 +1806,26 @@ No `STOP` written (the plan has open candidates and the loop should stay availab
 On track? yes — S23 done, both pre-registered predictions held, the one claim whose margin shrank was
 narrowed in both deliverables the same iteration, and the figure gap left by the previous iteration is
 closed; blocker: none.
+
+## 2026-08-10 — finalization iteration (2 min wall-clock remaining)
+
+**What I did.** Checked Part C first: listed the direction root for `human_feedback*.md` / `*REVIEW*`
+without the `.addressed.md` suffix — none (all six are addressed). With ~2 minutes of budget left the
+instructions call for finalization only, so I ran no new experiment. I read the tails of CHANGELOG.md,
+JOURNAL.md and the PLAN status/next-step sections and confirmed that RESULTS.md and REPORT.md were
+already curated to current-best in this morning's S23 iteration (fourteen frozen runs; the two former
+single-seed conditions replicated at seed 2024; seed spread bounded at 0.040) and that the last
+`check_render.py` run over REPORT.md, RESULTS.md and REPORT_followup.md passed all checks with zero
+problems. Since no result was superseded, rewriting either deliverable would only have churned them,
+so I left them untouched and recorded the close-out state in CHANGELOG.md instead.
+
+**What I learned.** The finalization step is cheap when the loop has kept the deliverables curated
+every iteration — there was nothing to reconcile at the end, which is the intended payoff of rule 6.
+
+**Next step.** None inside this budget. PLAN.md "Next step" (S24) carries the three open candidates:
+probe what the trainable blocks compute, interpolate at non-final token positions, and replicate on a
+second model. `STOP` written — plan candidates remain open but the wall-clock budget is exhausted and
+zero unaddressed feedback files exist, so stopping is permitted under rule 11. If feedback is dropped
+here later, delete `STOP`, address it, and re-write `STOP` only when clean again.
+
+On track? yes — deliverables final, all render checks passing, zero unaddressed feedback; blocker: wall-clock budget exhausted.

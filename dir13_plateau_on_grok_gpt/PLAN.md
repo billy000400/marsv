@@ -543,6 +543,11 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**FINALIZED 2026-08-10 — wall-clock budget exhausted, `STOP` written.** Zero unaddressed feedback
+files; RESULTS.md and REPORT.md stand at current-best from S23 (below) and pass `check_render.py`
+with zero problems. The S24 candidates in "Next step" are open but unstarted. If new feedback lands,
+delete `STOP`, address it, and re-write `STOP` only when clean again.
+
 **S23 DONE 2026-08-10 — the two remaining single-seed runs were replicated and both pre-registered
 predictions held.** Zero unaddressed feedback files (all six `human_feedback*` end in `.addressed.md`),
 so this iteration advanced the plan. `frozen_high_s2` (blocks 6-10 trainable) and `frozen_mirror_s2`

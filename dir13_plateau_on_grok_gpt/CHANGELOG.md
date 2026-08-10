@@ -1485,3 +1485,19 @@ PLAN.md and REPORT.md Methods before it was scored.
   figures; REPORT_followup 4 display / 60 inline / 4 figures; 0 problems).
 - **No `STOP`**: zero unaddressed feedback, but the plan's remaining candidates (the mechanism probe,
   the PLAN 5.5 freeze-and-retrain prediction) are open.
+
+## 2026-08-10 — finalization pass (no new experiment; budget exhausted)
+
+- **No content change to RESULTS.md or REPORT.md.** Both were curated to current-best in the S23
+  iteration earlier today (fourteen frozen runs, five conditions with a second seed, seed spread
+  bounded at 0.040) and re-verified there; nothing in this pass supersedes a number, so per rule 6
+  the deliverables were left exactly as they stand rather than churned.
+- **Deliverable state at close:** REPORT.md — Summary → Methods → Results → Conclusion, 29 display
+  equations, 602 inline, 28 embedded figures each with a visible bold `**Figure N.**` caption line and
+  a prose citation by number; RESULTS.md — the same 28 figures, current-best only; REPORT_followup.md —
+  4 display / 60 inline / 4 figures. Last `experiments/check_render.py REPORT.md RESULTS.md
+  REPORT_followup.md` run: **ALL CHECKS PASS, 0 problems** (rules 8a–8d, 9a, 9d, 12).
+- **Feedback:** zero unaddressed files — all six `human_feedback*` are `.addressed.md`.
+- **`STOP` written** this iteration: wall-clock budget is exhausted and no unaddressed feedback file
+  exists (rule 11). Open work is recorded in PLAN.md "Next step" (S24: probe what the trainable blocks
+  compute; non-final-token interpolation; a second model) for whoever picks this up.
