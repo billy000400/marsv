@@ -1,0 +1,12 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:16,  1.09s/it]Loading weights:   1%|          | 2/292 [00:01<02:56,  1.64it/s]Loading weights:  21%|██        | 62/292 [00:01<00:03, 68.68it/s]Loading weights:  27%|██▋       | 79/292 [00:01<00:02, 78.29it/s]Loading weights:  32%|███▏      | 94/292 [00:01<00:02, 74.29it/s]Loading weights:  36%|███▋      | 106/292 [00:02<00:02, 70.09it/s]Loading weights:  40%|███▉      | 116/292 [00:02<00:02, 72.08it/s]Loading weights:  43%|████▎     | 126/292 [00:02<00:02, 61.21it/s]Loading weights:  48%|████▊     | 140/292 [00:02<00:02, 73.75it/s]Loading weights:  51%|█████▏    | 150/292 [00:02<00:02, 63.61it/s]Loading weights:  54%|█████▍    | 158/292 [00:02<00:02, 64.43it/s]Loading weights:  58%|█████▊    | 168/292 [00:03<00:01, 67.56it/s]Loading weights:  60%|██████    | 176/292 [00:03<00:01, 64.19it/s]Loading weights:  64%|██████▍   | 188/292 [00:03<00:01, 74.75it/s]Loading weights:  67%|██████▋   | 197/292 [00:03<00:01, 65.40it/s]Loading weights:  70%|███████   | 205/292 [00:03<00:01, 65.96it/s]Loading weights:  73%|███████▎  | 213/292 [00:03<00:01, 67.61it/s]Loading weights:  77%|███████▋  | 224/292 [00:03<00:01, 61.41it/s]Loading weights:  79%|███████▉  | 231/292 [00:04<00:01, 60.61it/s]Loading weights:  83%|████████▎ | 242/292 [00:04<00:00, 68.31it/s]Loading weights:  87%|████████▋ | 254/292 [00:04<00:00, 54.49it/s]Loading weights:  93%|█████████▎| 272/292 [00:04<00:00, 69.52it/s]Loading weights:  99%|█████████▊| 288/292 [00:04<00:00, 78.91it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 60.92it/s]
+emb site, frame 'The thing was' token 0/123
+emb site, frame 'The thing was' token 60/123
+emb site, frame 'The thing was' token 120/123
+emb site, frame 'They said it was' token 0/123
+emb site, frame 'They said it was' token 60/123
+emb site, frame 'They said it was' token 120/123
+emb site, frame 'I thought it was' token 0/123
+emb site, frame 'I thought it was' token 60/123
+emb site, frame 'I thought it was' token 120/123
+embedding site: valid curves 0.999

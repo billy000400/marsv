@@ -28,10 +28,14 @@ torch.cuda.set_per_process_memory_fraction(0.225)
 
 
 class Patcher:
-    """Replace the final-position hidden state emitted by block `layer` (same hook as dir18)."""
+    """Replace the final-position hidden state emitted by block `layer` (same hook as dir18).
+
+    `layer="emb"` moves the site to the input embedding, before any block runs.
+    """
 
     def __init__(self, model, layer=0):
-        self.h = model.gpt_neox.layers[layer].register_forward_hook(self._hook)
+        site = model.gpt_neox.embed_in if layer == "emb" else model.gpt_neox.layers[layer]
+        self.h = site.register_forward_hook(self._hook)
         self.bank = None
         self.captured = None
 
