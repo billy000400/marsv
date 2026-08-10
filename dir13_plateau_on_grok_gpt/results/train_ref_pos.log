@@ -25,3 +25,4 @@
 [ref_pos] step   5500 lr 9.29e-04 train 1.108 val 1.506 acc 0.571 [6.7m]
 [ref_pos] step   5750 lr 9.23e-04 train 1.110 val 1.518 acc 0.568 [6.9m]
 [ref_pos] step   6000 lr 9.16e-04 train 1.100 val 1.533 acc 0.567 [7.1m]
+[ref_pos] step   6250 lr 9.09e-04 train 1.117 val 1.558 acc 0.567 [7.3m]
