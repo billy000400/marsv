@@ -66,3 +66,4 @@
 [ref_pos] step  15750 lr 5.17e-04 train 0.738 val 1.919 acc 0.558 [14.5m]
 [ref_pos] step  16000 lr 5.05e-04 train 0.755 val 1.959 acc 0.555 [14.7m]
 [ref_pos] step  16250 lr 4.93e-04 train 0.715 val 1.916 acc 0.560 [14.9m]
+[ref_pos] step  16500 lr 4.82e-04 train 0.706 val 1.926 acc 0.560 [15.0m]
