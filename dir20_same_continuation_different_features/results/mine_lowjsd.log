@@ -1,0 +1,46 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8858.72it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-small: 200 prefixes
+  prefix 40: 52 pairs so far
+  prefix 50: 65 pairs so far
+  prefix 70: 123 pairs so far
+  prefix 100: 186 pairs so far
+  prefix 120: 208 pairs so far
+  prefix 170: 289 pairs so far
+  prefix 180: 316 pairs so far
+  prefix 190: 349 pairs so far
+gpt2-small: n=365 prefixes=102 JSD max 0.0999 median 0.0350 max endpoint err 1.55e-04
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  20%|█▉        | 58/292 [00:00<00:00, 555.36it/s]Loading weights:  46%|████▌     | 135/292 [00:00<00:00, 640.58it/s]Loading weights:  70%|██████▉   | 204/292 [00:00<00:00, 645.97it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 700.03it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-medium: 200 prefixes
+  prefix 10: 21 pairs so far
+  prefix 40: 76 pairs so far
+  prefix 50: 89 pairs so far
+  prefix 70: 149 pairs so far
+  prefix 80: 168 pairs so far
+  prefix 90: 181 pairs so far
+  prefix 100: 217 pairs so far
+  prefix 110: 227 pairs so far
+  prefix 130: 253 pairs so far
+  prefix 170: 339 pairs so far
+  prefix 180: 366 pairs so far
+gpt2-medium: n=399 prefixes=119 JSD max 0.0996 median 0.0353 max endpoint err 2.05e-04
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  18%|█▊        | 78/436 [00:00<00:00, 709.77it/s]Loading weights:  36%|███▌      | 155/436 [00:00<00:00, 739.26it/s]Loading weights:  56%|█████▌    | 245/436 [00:00<00:00, 782.08it/s]Loading weights:  74%|███████▍  | 324/436 [00:00<00:00, 728.67it/s]Loading weights:  94%|█████████▍| 410/436 [00:00<00:00, 755.88it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 776.93it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-large: 200 prefixes
+  prefix 20: 28 pairs so far
+  prefix 40: 63 pairs so far
+  prefix 50: 73 pairs so far
+  prefix 70: 130 pairs so far
+  prefix 90: 158 pairs so far
+  prefix 130: 220 pairs so far
+  prefix 150: 250 pairs so far
+  prefix 170: 300 pairs so far
+  prefix 180: 320 pairs so far
+  prefix 190: 347 pairs so far
+gpt2-large: n=356 prefixes=113 JSD max 0.0998 median 0.0390 max endpoint err 2.66e-05

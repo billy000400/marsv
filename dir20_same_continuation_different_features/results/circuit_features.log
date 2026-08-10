@@ -1,0 +1,43 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:  33%|███▎      | 49/148 [00:00<00:00, 429.17it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 732.69it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-small {"n": 365, "n_prefix": 102, "jsd_max": 0.09991748631000519, "jsd_median": 0.03502009529620409, "median_ipw": 0.13000000000000003, "frac_intermediate": 0.4, "median_wtv": 0.31508931570063564, "frac_sharp": 0.3150684931506849, "rho_min": 0.10265244834057685, "sae_l0": [19.7, 25.0, 30.4, 40.1, 52.8, 60.3, 65.7, 72.8, 76.9, 58.8, 61.7, 68.7], "sae_fve": [0.908, 0.901, 0.881, 0.861, 0.851, 0.841, 0.829, 0.818, 0.81, 0.779, 0.773, 0.818], "iv_spread": {"sfd": [0.5245033112582782, 0.629861982434128, 0.7070063694267517], "sfc": [0.3405279517173767, 0.48172640800476074, 0.6385087370872498], "hcd": [0.021611256524920464, 0.03248223289847374, 0.04696810245513916], "hsd": [0.0714285714285714, 0.1428571428571429, 0.2142857142857143], "nsd": [0.5830258302583026, 0.6701298701298701, 0.7295285359801489], "ird": [0.09185993174711864, 0.13017142315705618, 0.18167867263158163]}}
+   sfd_ipw   rho=+0.081 p=0.122 CI=[-0.037,+0.197] partial=+0.085 (p=0.103)
+   sfd_wtv   rho=-0.209 p=5.7e-05 CI=[-0.335,-0.068] partial=-0.172 (p=0.000974)
+   sfc_ipw   rho=+0.035 p=0.509 CI=[-0.089,+0.159] partial=+0.024 (p=0.646)
+   sfc_wtv   rho=-0.123 p=0.0186 CI=[-0.248,+0.015] partial=-0.042 (p=0.424)
+   hcd_ipw   rho=+0.073 p=0.165 CI=[-0.054,+0.194] partial=+0.071 (p=0.176)
+   hcd_wtv   rho=-0.214 p=3.91e-05 CI=[-0.340,-0.083] partial=-0.206 (p=7.5e-05)
+   hsd_ipw   rho=+0.002 p=0.97 CI=[-0.122,+0.136] partial=-0.016 (p=0.756)
+   hsd_wtv   rho=-0.184 p=0.000409 CI=[-0.307,-0.052] partial=-0.132 (p=0.0114)
+   nsd_ipw   rho=+0.119 p=0.0228 CI=[-0.002,+0.238] partial=+0.158 (p=0.00253)
+   nsd_wtv   rho=-0.200 p=0.000123 CI=[-0.319,-0.075] partial=-0.157 (p=0.00262)
+   ird_ipw   rho=+0.101 p=0.0543 CI=[-0.026,+0.232] partial=+0.149 (p=0.00422)
+   ird_wtv   rho=-0.171 p=0.001 CI=[-0.300,-0.039] partial=-0.151 (p=0.00384)
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  21%|██        | 60/292 [00:00<00:00, 545.95it/s]Loading weights:  39%|███▉      | 115/292 [00:00<00:00, 537.52it/s]Loading weights:  65%|██████▍   | 189/292 [00:00<00:00, 610.47it/s]Loading weights:  90%|█████████ | 264/292 [00:00<00:00, 630.04it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 652.76it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-medium {"n": 399, "n_prefix": 119, "jsd_max": 0.09962204098701477, "jsd_median": 0.03532947227358818, "median_ipw": 0.13, "frac_intermediate": 0.37343358395989973, "median_wtv": 0.2568364485609809, "frac_sharp": 0.47117794486215536, "rho_min": 0.09817644081001564, "iv_spread": {"hcd": [0.02112518809735775, 0.03370138257741928, 0.05446720868349075], "hsd": [0.10526315789473684, 0.1578947368421053, 0.21052631578947367], "nsd": [0.6045877090794747, 0.689419795221843, 0.7657693852952994], "ird": [0.04593455667297046, 0.07356812804937363, 0.10644748931129774]}}
+   hcd_ipw   rho=-0.103 p=0.0406 CI=[-0.222,+0.014] partial=-0.187 (p=0.000179)
+   hcd_wtv   rho=-0.362 p=7.81e-14 CI=[-0.467,-0.254] partial=-0.428 (p=3.54e-19)
+   hsd_ipw   rho=-0.043 p=0.395 CI=[-0.169,+0.080] partial=-0.105 (p=0.0364)
+   hsd_wtv   rho=-0.226 p=5.34e-06 CI=[-0.342,-0.090] partial=-0.249 (p=4.49e-07)
+   nsd_ipw   rho=+0.025 p=0.62 CI=[-0.088,+0.142] partial=-0.060 (p=0.231)
+   nsd_wtv   rho=-0.227 p=4.69e-06 CI=[-0.354,-0.097] partial=-0.317 (p=9.18e-11)
+   ird_ipw   rho=+0.049 p=0.331 CI=[-0.071,+0.172] partial=-0.095 (p=0.0574)
+   ird_wtv   rho=-0.133 p=0.00762 CI=[-0.262,+0.001] partial=-0.275 (p=2.3e-08)
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  13%|█▎        | 58/436 [00:00<00:00, 538.10it/s]Loading weights:  29%|██▉       | 126/436 [00:00<00:00, 617.18it/s]Loading weights:  43%|████▎     | 188/436 [00:00<00:00, 588.09it/s]Loading weights:  60%|██████    | 263/436 [00:00<00:00, 615.01it/s]Loading weights:  76%|███████▌  | 330/436 [00:00<00:00, 618.03it/s]Loading weights:  90%|████████▉ | 392/436 [00:00<00:00, 588.33it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 632.38it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-large {"n": 356, "n_prefix": 113, "jsd_max": 0.0997973084449768, "jsd_median": 0.03901715483516455, "median_ipw": 0.10999999999999999, "frac_intermediate": 0.019662921348314606, "median_wtv": 0.1984008961378286, "frac_sharp": 0.6404494382022472, "rho_min": 0.10394348458487665, "iv_spread": {"hcd": [0.04451174661517143, 0.06734541058540344, 0.09648202545940876], "hsd": [0.1527777777777778, 0.2152777777777778, 0.29166666666666663], "nsd": [0.6388968230549819, 0.7408104344647014, 0.8133650789188289], "ird": [0.1112893157535129, 0.1744520283407635, 0.24757179535097545]}}
+   hcd_ipw   rho=-0.026 p=0.63 CI=[-0.194,+0.127] partial=-0.180 (p=0.000638)
+   hcd_wtv   rho=-0.288 p=3.02e-08 CI=[-0.438,-0.124] partial=-0.376 (p=2e-13)
+   hsd_ipw   rho=-0.107 p=0.0445 CI=[-0.260,+0.041] partial=-0.149 (p=0.00489)
+   hsd_wtv   rho=-0.312 p=1.72e-09 CI=[-0.449,-0.168] partial=-0.276 (p=1.15e-07)
+   nsd_ipw   rho=-0.029 p=0.582 CI=[-0.186,+0.126] partial=-0.199 (p=0.000158)
+   nsd_wtv   rho=-0.258 p=8.36e-07 CI=[-0.416,-0.086] partial=-0.337 (p=6.69e-11)
+   ird_ipw   rho=+0.097 p=0.0688 CI=[-0.056,+0.242] partial=-0.089 (p=0.0955)
+   ird_wtv   rho=-0.114 p=0.0313 CI=[-0.293,+0.067] partial=-0.193 (p=0.000255)
+wrote plots/sae_features.png + plots/circuit_forest.png
