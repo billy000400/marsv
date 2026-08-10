@@ -12,3 +12,6 @@ emb site, frame 'I thought it was' token 120/123
 embedding site: valid curves 0.999
 probe -> w_block0: test rho +0.764 +- 0.045 (null -0.201), test R2 +0.514
 probe -> w_emb_site: test rho +0.533 +- 0.093 (null -0.044), test R2 +0.337
+probe -> token_effect: test rho +0.505 +- 0.102 (null -0.152), test R2 +0.270
+pair-level: {'measured_w0': 0.35, 'emb_site_w': 0.211, 'probe_lookup': 0.179, 'probe_lookup_plus_J': 0.323, 'measured_w0_plus_J': 0.452, 'n_pairs': 929}
+wrote results/embed.json
