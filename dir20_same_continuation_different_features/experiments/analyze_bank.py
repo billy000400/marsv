@@ -17,10 +17,10 @@ from scipy.stats import spearmanr
 
 from common import PAIRS, PLOTS, RESULTS
 
-CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00"]
+CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00", "#555555"]
 plt.rcParams["axes.prop_cycle"] = plt.cycler(color=CVD)
-MODELS = ["gpt2-medium", "pythia-410m", "opt-350m"]
-MK = ["o", "s", "^", "D", "v"]
+MODELS = ["gpt2-large", "gpt2-medium", "gpt2-small", "opt-350m", "pythia-410m"]
+MK = ["o", "s", "^", "D", "v", "P"]
 NBOOT = 2000
 LIN = {"w": 0.8, "wtv": 0.5}          # linear-response value of each statistic
 THR = {"w": 0.5, "wtv": 0.25}         # plateau threshold
@@ -144,7 +144,7 @@ def main():
         stats[m] = ent
 
     # ---- Figure: how common is a plateau in the bank? -------------------------------------
-    fig, ax = plt.subplots(1, len(MODELS), figsize=(14, 4.4), sharey=True)
+    fig, ax = plt.subplots(1, len(MODELS), figsize=(19, 4.4), sharey=True)
     ymax = max(np.histogram([r["wtv"] for r in bank[m]], bins=np.linspace(0, 0.6, 31))[0].max()
                for m in MODELS)
     for c, m in enumerate(MODELS):
@@ -178,11 +178,11 @@ def main():
     plt.close(fig)
 
     # ---- Figure: is the cross-model prevalence gap just a difference in JSD spread? --------
-    fig, ax = plt.subplots(figsize=(6.4, 4.4))
+    fig, ax = plt.subplots(figsize=(7.6, 4.6))
     xs = np.arange(len(JSD_BINS) - 1)
     for i, m in enumerate(MODELS):
         b = stats[m]["jsd_matched"]
-        ax.plot(xs, [q["median_wtv"] for q in b], color=CVD[i], ls=["-", "--", ":"][i],
+        ax.plot(xs, [q["median_wtv"] for q in b], color=CVD[i], ls=["-", "--", ":", "-.", (0, (3, 1, 1, 1))][i],
                 marker=MK[i], ms=9, lw=2, mec="k", mew=0.6, label=m)
     ax.axhline(LIN["wtv"], color="0.35", ls=(0, (4, 3)), lw=1.4)
     ax.text(0.02, LIN["wtv"] + 0.008, "linear response (0.5)", fontsize=7.5, color="0.3")
@@ -192,7 +192,7 @@ def main():
     ax.set_xticklabels(["%.2f-%.2f\n(n=%s)" % (
         q["lo"], q["hi"], "/".join(str(stats[m]["jsd_matched"][k]["n"]) for m in MODELS))
         for k, q in enumerate(stats[MODELS[0]]["jsd_matched"])], fontsize=7.5)
-    ax.set_xlabel("endpoint JSD bin (nats); n per bin = gpt2-medium / pythia-410m / opt-350m")
+    ax.set_xlabel("endpoint JSD bin (nats); n per bin = " + " / ".join(MODELS))
     ax.set_ylabel("median $w_{\\mathrm{TV}}$ at final logits")
     ax.set_ylim(0, 0.56)
     ax.grid(alpha=0.3)
@@ -202,7 +202,7 @@ def main():
     plt.close(fig)
 
     # ---- Figure: the powered association test ---------------------------------------------
-    fig, ax = plt.subplots(2, len(MODELS), figsize=(14, 8), sharex=True)
+    fig, ax = plt.subplots(2, len(MODELS), figsize=(19, 8), sharex=True)
     for r, st in enumerate(["w", "wtv"]):
         for c, m in enumerate(MODELS):
             a = ax[r, c]

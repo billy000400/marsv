@@ -12,7 +12,13 @@ MODELS = {
     "gpt2-medium": dict(name="gpt2-medium", revision=None),
     "pythia-410m": dict(name="EleutherAI/pythia-410m-deduped", revision="step143000"),
     "opt-350m": dict(name="facebook/opt-350m", revision=None),
+    # S7: depth-mismatched members of the same family (12 and 36 blocks vs gpt2-medium's 24).
+    "gpt2-small": dict(name="gpt2", revision=None),
+    "gpt2-large": dict(name="gpt2-large", revision=None),
 }
+
+N_BLOCKS = {"gpt2-medium": 24, "pythia-410m": 24, "opt-350m": 24,
+            "gpt2-small": 12, "gpt2-large": 36}
 
 # (key, label, prefix, final token A, final token B, is_control)
 PAIRS = [
@@ -24,8 +30,12 @@ PAIRS = [
      "The answer is", " four", " Four", False),
     ("element_au", "clue identify? Au / 79",
      "Which chemical element does this clue identify?", " Au", " 79", False),
-    ("house_control", "The house was big / in (control)",
+    # Matthew's own pair: his POSITIVE plateau example (not a negative control).
+    ("house_big_in", "The house was big / in (M. plateau case)",
      "The house was", " big", " in", True),
+    # Matthew's smooth comparison: two adjectives, no plateau reported.
+    ("house_big_large", "The house was big / large (M. smooth case)",
+     "The house was", " big", " large", True),
 ]
 
 # Shared-box budget (1 of 4 agents on a 31.9 GB card).

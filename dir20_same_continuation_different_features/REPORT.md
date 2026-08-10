@@ -1,4 +1,4 @@
-# A plateau in a single-token activation interpolation signals *dissimilar* continuations, not shared ones
+# Activation-interpolation plateaus: what reproduces, what depth explains, and what the hypothesis still needs
 
 > Final, presentable, current-best only (history is in CHANGELOG.md).
 
@@ -7,116 +7,123 @@
 A common move in interpretability is to take the internal activation vector a language model computes
 for prompt A, the one it computes for prompt B, and walk continuously from one to the other, watching
 how the model's output changes. When the output stays put for a while and then switches abruptly — a
-**plateau** followed by a jump — it is tempting to read that as a discrete internal feature flipping
-state, and in particular as a sign that the two prompts share a continuation while differing in some
-hidden property. This report tests that reading directly: if two prompts differ in one final token
-but predict *nearly the same next token*, does interpolating that token's activation give a sharper
-plateau?
+**plateau** followed by a jump — it is tempting to read that as a discrete internal state flipping.
+Matthew reports exactly this in GPT-2 Large for the prompt `The house was` completed with ` big`
+versus ` in`, and reports a smooth response for ` big` versus ` large`. This report asks three things:
+does that contrast reproduce, what controls it, and does it support the hypothesis it is being used to
+motivate?
 
-It gives a **wider** one, in every model we tried. Working in three model families — GPT-2 medium
-(355M), OPT-350m (331M) and Pythia-410m-deduped, each 24 blocks deep with a 1024-dimensional residual
-stream — with a bank of 200 prompt pairs per model mined from WikiText-103, the rank correlation
-between how differently the two prompts predict the next token and how sharp the transition is comes
-out negative and strongly significant in all three. Away from the divergence ceiling, where the
-divergence measure can still order pairs, Spearman $\rho = -0.61$ (GPT-2 medium, $n = 142$),
-$-0.57$ (OPT-350m, $n = 129$) and $-0.45$ (Pythia-410m, $n = 127$), all $p < 10^{-7}$. More divergent
-endpoints give sharper plateaus. Three separate sharpness statistics agree on the sign, and the effect
-survives controlling for how far apart the two patched activations are geometrically.
+**It reproduces, in his model.** Interpolating the final token's block-0 activation in GPT-2 Large
+gives a near-perfect step for `big`/`in` — the output moves through 80% of the gap in 4% of the sweep
+— and a near-linear response for `big`/`large`. **It does not reproduce in GPT-2 Medium**, where
+`big`/`in` gives a transition width of 0.516, above the plateau criterion, and in GPT-2 Small it is
+wider still. A study that swaps GPT-2 Large for GPT-2 Medium is not testing the same phenomenon.
 
-Two supporting facts complete the picture. First, plateaus are the *default*: 82% of the mined GPT-2
-medium pairs, 61% of the OPT pairs and 48% of the Pythia pairs cross our sharpness threshold, and a
-deliberately dissimilar hand-picked control pair plateaus as hard as four hand-picked "same
-continuation, different feature" pairs — in OPT-350m the control is the sharpest of the five. Second,
-the sharpening is supplied by the depth that processes the edit, and we show this causally by moving
-the patch site up the stack. Re-running the same 200 pairs with the interpolated vector inserted after
-block 12 and after block 20 — leaving 11 and 3 blocks below it instead of 23 — walks the plateau away:
-the share of sharp pairs falls from 82% to 50% to 10% in GPT-2 medium, from 61% to 37% to 1% in OPT,
-and from 48% to 2.5% to 0% in Pythia, whose median response at block 20 is proportional to the edit to
-within 2% of the linear baseline. The divergence effect is separable from this: in GPT-2 medium the
-correlation holds at $-0.61$, $-0.53$, $-0.53$ across the three patch sites and in OPT at $-0.57$,
-$-0.54$, $-0.55$, so depth sets how much the response is compressed while endpoint divergence sets
-which pairs compress more.
+**What controls it is relative depth.** Moving the patch site up the stack removes the plateau, and the
+variable that governs how much is removed is the *fraction* of the network below the patch, not the
+number of blocks. GPT-2 Large patched at block 12 and GPT-2 Medium patched at block 0 both have 23
+blocks below the patch and differ 3.2-fold in median transition width; plotted against the fraction,
+three GPT-2 models of 12, 24 and 36 blocks nearly superimpose. Depth is necessary but not sufficient:
+`big`/`large` has 35 blocks below the patch in GPT-2 Large and still does not sharpen, so whether a
+given interpolation sharpens depends on the pair as well as on the depth available to process it.
 
-For practice, this inverts a diagnostic. An observed plateau is not evidence that two prompts share a
-continuation; the sharpest plateaus come from the pairs whose predictions agree least. Any claim
-resting on plateau shape needs an interpolation between prompts of known dissimilarity to calibrate
-against, and the *difference* between the two, not the absolute sharpness, is the only part that
-carries information.
+**The base rate is the practical caution.** In a bank of 200 corpus-mined pairs per model, 83.5% of
+GPT-2 Large pairs and 73.0% of GPT-2 Medium pairs plateau under the predefined criterion. A plateau
+observed for one chosen pair is therefore weak evidence by itself; what carries information is where
+that pair sits relative to the distribution.
+
+**The hypothesis is still open.** The motivating claim is that *holding output divergence low,
+different circuits or features may occupy different plateaus*. That is a claim about intermediate
+resting points at matched outputs, and it is not tested by correlating output divergence with
+transition width — which is what an earlier version of this work did. Experiment 6 gives it a first
+direct test: among pairs whose next-token predictions are nearly identical, how differently the two
+prompts are represented internally does not predict whether the interpolation rests at an intermediate
+level (Spearman $\rho = +0.17$, $p = 0.31$, $n = 38$ in GPT-2 Large; $\rho = -0.00$, $p = 0.99$,
+$n = 32$ in GPT-2 Medium). The test is under-powered and uses a proxy for "different features", so it
+is a first negative datapoint rather than a refutation.
 
 ## Methods
 
 ### Data & Model
 
-**Models.** Three final pretrained checkpoints, all frozen and in evaluation mode, float32, no
-sampling: `gpt2-medium` (355M parameters, 24 blocks, $d_{model}=1024$),
-`EleutherAI/pythia-410m-deduped` at `revision="step143000"` (24 blocks, $d_{model}=1024$) and
-`facebook/opt-350m` (331M parameters, 24 blocks, $d_{model}=1024$). The three are matched on the two
-structural quantities that the depth experiment below shows to matter — number of blocks and residual
-width — and differ in tokenizer, architecture details and training corpus. OPT-350m is the informative
-third point because its vocabulary is exactly GPT-2's 50257 token strings plus 8 special tokens and it
-segments our prompts identically, while Pythia uses the GPT-NeoX vocabulary; a quantity that tracks
-the tokenizer should put OPT with GPT-2.
+**Models.** Five final pretrained checkpoints, all frozen and in evaluation mode, float32, no sampling:
+`gpt2-large` (774M parameters, 36 blocks, $d_{model}=1280$), `gpt2-medium` (355M, 24 blocks,
+$d_{model}=1024$), `gpt2` (124M, 12 blocks, $d_{model}=768$), `facebook/opt-350m` (331M, 24 blocks,
+$d_{model}=1024$) and `EleutherAI/pythia-410m-deduped` at `revision="step143000"` (24 blocks,
+$d_{model}=1024$). GPT-2 Large is the model in which the phenomenon was originally reported, so it is
+the primary model here. The three GPT-2 checkpoints share a tokenizer, architecture and pretraining
+corpus and differ in depth, which is what makes the depth-scaling comparison of Experiment 5
+interpretable; their residual width rises with depth, a confound we state rather than remove. OPT-350m
+and Pythia-410m are other families at the same depth as GPT-2 Medium: OPT's vocabulary is exactly
+GPT-2's 50257 token strings plus 8 specials and it segments our prompts identically, while Pythia uses
+the GPT-NeoX vocabulary.
 
-**Hand-picked pairs (Experiment 1).** Five hand-written prompt pairs, each a shared prefix plus one
-differing final token. Four are test pairs, chosen so the two versions of the sentence plausibly
-continue the same way while differing in some internal property (identity vs. pronoun, word-form vs.
-numeral, lower vs. upper case, chemical symbol vs. atomic number):
+**Hand-picked pairs (Experiment 1).** Six prompt pairs, each a shared prefix plus one differing final
+token. Two are Matthew's own, and their roles are asymmetric:
 
-1. `Mary and John went to the store. John gave a book to` + ` Mary` / ` her`
-2. `Two plus two is` + ` four` / ` 4`
-3. `The answer is` + ` four` / ` Four`
-4. `Which chemical element does this clue identify?` + ` Au` / ` 79`
+1. `The house was` + ` big` / ` in` — his **plateau case**, the pair he reports as showing a sharp
+   transition. It is a positive example, not a negative control.
+2. `The house was` + ` big` / ` large` — his **smooth case**, the comparison pair he reports as *not*
+   plateauing.
 
-The fifth is the **control**: `The house was` + ` big` / ` in`, an adjective against a preposition,
-whose continuations are genuinely different. It plays the role of a negative example — under the
-hypothesis it should be the one pair that does *not* plateau.
+The other four are ours, chosen so the two versions of the sentence plausibly continue the same way
+while differing in some internal property (identity vs. pronoun, word-form vs. numeral, lower vs. upper
+case, chemical symbol vs. atomic number):
 
-**Mined pair bank (Experiment 2).** Five hand-written pairs cannot measure an association: the 15
-model-pair cells they produce only have the power to detect a correlation above about $\rho = 0.51$.
-We therefore mine a bank of pairs automatically. We take the first 40 paragraphs of at least 400
+3. `Mary and John went to the store. John gave a book to` + ` Mary` / ` her`
+4. `Two plus two is` + ` four` / ` 4`
+5. `The answer is` + ` four` / ` Four`
+6. `Which chemical element does this clue identify?` + ` Au` / ` 79`
+
+**Mined pair bank (Experiments 2, 3, 5, 6).** Six hand-written pairs cannot measure a base rate or an
+association, so we mine a bank automatically. We take the first 40 paragraphs of at least 400
 characters from the WikiText-103 validation split (natural English, not written by us), truncate each
 to a prefix of $L$ tokens with $L$ drawn uniformly from $[10, 40]$, and run the model on the prefix.
 Final token A is always the model's **top-1** next token; final token B is the token at rank $r$, with
 five values of $r$ drawn log-uniformly from $[1, 5000]$ per prefix. A rank-1 partner produces a
-near-tie between two plausible continuations, a rank-5000 partner an implausible one, so the endpoint
-divergence defined below spans its whole range by construction. That gives **200 pairs per model**
-from 40 prefixes (the same prefixes and ranks in all three models; the tokens themselves are each
-model's own). Building the inputs as `prefix_ids + [token_id]` makes the "identical prefix, one
-differing single final token" condition exact by construction.
+near-tie between two plausible continuations, a rank-5000 partner an implausible one, so endpoint
+divergence spans its whole range by construction. That gives **200 pairs per model** from 40 prefixes
+(the same prefixes and rank draws in every model; the tokens are each model's own). Building the inputs
+as `prefix_ids + [token_id]` makes the "identical prefix, one differing single final token" condition
+exact rather than something to check.
 
-**Patch-depth replication (Experiment 4).** Reading the interpolation out at an earlier block shows
+**Patch-depth intervention (Experiment 4).** Reading the interpolation out at an earlier block shows
 where sharpness accumulates but cannot show that the downstream blocks *cause* it, since reading
-earlier is not the same as computing less. To get a causal handle we re-run the entire mined bank —
-the same 200 pairs per model, the same tokens, the same 101 interpolation points — with the patch
-applied after block 12 and after block 20 instead of block 0, so the interpolated vector is processed
-by 11 or 3 remaining blocks rather than 23. The endpoint activations $h_A, h_B$ are then read at that
-same block. Nothing else changes, so any difference in the sharpness statistics is attributable to the
-amount of computation below the patch.
+earlier is not the same as computing less. We therefore re-run the entire mined bank — same pairs, same
+tokens, same 101 interpolation points — with the patch applied after block 12 and after block 20
+instead of block 0, so the interpolated vector is processed by 11 or 3 remaining blocks rather than 23.
+The endpoint activations are then read at that same block.
 
-**Validity check (Experiment 1).** For the hand-written pairs we require, per model, that the two
-prompts tokenize to an identical prefix and exactly one differing single final token; a pair failing
-this in a model would be dropped for that model. All 5 pairs passed in all three models (prefix
-lengths 3–14 tokens), so all 15 model-pair cells are reported and no multi-token interpolation was
-performed.
+**Depth-scaling comparison (Experiment 5).** Experiment 4 moves the patch inside three models that all
+have 24 blocks, so "11 blocks below the patch" and "just under half the stack below the patch" name the
+same runs and cannot be told apart. To separate them we mine a fresh 200-pair bank for `gpt2` and for
+`gpt2-large` and sweep each at sites picked so the three GPT-2 models line up under one reading or the
+other: blocks 0/6/8/10 for the 12-block model and blocks 0/12/18/24/31 for the 36-block model, against
+blocks 0/12/20 for the 24-block model.
+
+**Validity check.** For the hand-written pairs we require, per model, that the two prompts tokenize to
+an identical prefix and exactly one differing single final token. All 6 pairs passed in all five models
+(prefix lengths 3–14 tokens), so all 30 model-pair cells are reported and no multi-token interpolation
+was performed.
 
 **Hook point and sample sizes.** The default patch site is `resid_post` after block 0 — the residual
-stream immediately after the first transformer block — at the **final token position only**; Experiment
-4 repeats the bank at blocks 12 and 20. Because the prefix is identical and attention is causal, every
-earlier position is bit-identical between the two prompts, so one forward pass per interpolation point
-fully determines the run. For the hand-picked pairs, downstream `resid_post` is also recorded at the
-final token of every later block (blocks 1–23) plus the final logits; for the mined bank only the final
-logits are recorded. Every sweep uses 101 evenly spaced interpolation values on $[0,1]$, under
-`torch.no_grad()` with fixed seeds. Total: $(5 + 200 \times 3)$ pairs $\times$ 3 models $\times$ 101
-points.
+stream immediately after the first transformer block — at the **final token position only**. Because
+the prefix is identical and attention is causal, every earlier position is bit-identical between the
+two prompts, so one forward pass per interpolation point fully determines the run. For the hand-picked
+pairs, downstream `resid_post` is also recorded at the final token of every later block plus the final
+logits; for the mined bank only the final logits are recorded. Every sweep uses 101 evenly spaced
+interpolation values on $[0,1]$, under `torch.no_grad()` with fixed seeds. That comes to 3645 sweeps:
+30 hand-picked model-pair cells, 1000 mined-bank sweeps at block 0 across five models, 1200 more at
+blocks 12 and 20 in the three 24-block models, and 1400 at the extra Experiment 5 sites.
 
 ### Metrics
 
-The whole study depends on making "the model's output moved from A to B" a number, so we start there
-and build up to the sharpness statistics and the association tests that consume them.
+The study depends on making "the model's output moved from A to B" a number, so we start there and
+build up to the sharpness statistics, then to the two quantities Experiment 6 needs.
 
 **Interpolation.** We need a path between the two activation vectors that does not shrink toward zero
-in the middle, as a straight line between two high-dimensional vectors does. We therefore interpolate
-the direction along the sphere (SLERP) and the length linearly. With $h_A, h_B$ the patched-layer
+in the middle, as a straight line between two high-dimensional vectors does. We interpolate the
+direction along the sphere (SLERP) and the length linearly. With $h_A, h_B$ the patched-layer
 activations, $\hat h = h / \lVert h \rVert$ and $\Omega = \arccos(\hat h_A \cdot \hat h_B)$:
 
 ```math
@@ -125,41 +132,23 @@ h_\alpha \;=\; \Big[(1-\alpha)\lVert h_A\rVert + \alpha\lVert h_B\rVert\Big]\cdo
 ```
 
 $h_\alpha$ replaces the patched block's output at the final token and is run forward through the rest
-of the model. At $\alpha=0$ and $\alpha=1$ this is the identity, which gives a free correctness check on the
-harness (reported in Results). The angle $\Omega$ is also recorded per pair and reused later as a
-control variable: it measures how far apart the two endpoints are geometrically, independently of what
-they predict.
-
-**Endpoint divergence (JSD)** — how differently the two complete prompts predict the next token, and
-so the independent variable of the whole study. It is measured at inference from the full-vocabulary
-softmax distributions $P_A, P_B$ at the final position, never from corpus counts. Jensen–Shannon
-divergence is symmetric and stays finite when one distribution puts near-zero mass where the other
-does not, where a plain KL divergence diverges. Units are nats; 0 means identical predictions:
-
-```math
-\mathrm{JSD}(P_A, P_B) \;=\; \tfrac{1}{2} D_{KL}\!\big(P_A \,\Vert\, M\big) + \tfrac{1}{2} D_{KL}\!\big(P_B \,\Vert\, M\big),
-\qquad M = \tfrac{1}{2}\big(P_A + P_B\big)
-```
-
-JSD is bounded above by $\ln 2 \approx 0.693$ nats, attained when the two distributions have disjoint
-support. That ceiling matters for the analysis: pairs that both predict completely different tokens
-all pile up at the same $x$ value and can no longer be ordered, so we report the association both on
-the full bank and on the **unsaturated** subset with $\mathrm{JSD} < 0.65$.
+of the model. At $\alpha=0$ and $\alpha=1$ this is the identity, which gives a free correctness check
+on the harness (reported in Results).
 
 **Relative distance $d(\alpha)$** — where the model's output sits on the way from A to B. A raw
 distance is not comparable across pairs whose endpoints are far apart to different degrees, so we
 normalize by the total: $d=0$ means the output is exactly A's, $d=1$ exactly B's. For a vector
-$x_\alpha$ read at any hook point (a downstream `resid_post`, or the final logit vector):
+$x_\alpha$ read at any hook point:
 
 ```math
 d(\alpha) \;=\; \frac{\lVert x_\alpha - x_A\rVert_2}{\lVert x_\alpha - x_A\rVert_2 + \lVert x_\alpha - x_B\rVert_2}
 ```
 
 This is the quantity plotted in Figure 1. A model that responds proportionally to the input edit gives
-$d(\alpha)=\alpha$, the diagonal; a plateau is any large flat stretch followed by a fast rise.
+$d(\alpha)=\alpha$, the diagonal; a plateau is a large flat stretch followed by a fast rise.
 
-**Transition width $w_{10-90}$** (primary sharpness statistic, fixed by the plan) — how much of the
-sweep the output spends actually moving. It is the $\alpha$-distance between the first upward
+**Transition width $w_{10-90}$** (primary sharpness statistic, fixed by the plan in advance) — how much
+of the sweep the output spends actually moving. It is the $\alpha$-distance between the first upward
 crossings of $d=0.1$ and $d=0.9$, so a small value means the output ignored most of the interpolation
 and then switched:
 
@@ -167,59 +156,103 @@ and then switched:
 w_{10\text{-}90} \;=\; \alpha(d=0.9) - \alpha(d=0.1)
 ```
 
-Crossings are linearly interpolated on the 101-point grid. Following the plan, $w_{10-90} < 0.5$ is
-called a clear plateau, against $0.8$ for the linear response. It drives the verdict column of Table 1
-and the top row of Figure 4, and is the statistic tracked across depth in Figure 5.
+Crossings are linearly interpolated on the 101-point grid. The predefined criterion is
+$w_{10-90} < 0.5$ for a clear plateau, against $0.8$ for the linear response. All prevalence counts in
+Results are quoted under this criterion first.
 
-**Total-variation width $w_{TV}$** (threshold-free sharpness statistic) — the same idea without the
-fixed crossing levels. Non-monotonic curves are common (Table 1; only 7.5% of the mined GPT-2 medium
-curves are monotonic): they dip and re-cross, which pushes the $d=0.1$ crossing far to the left and
-makes a visibly sharp curve score as wide. Let $C(\alpha)$ be the fraction of the curve's total
-variation accumulated by position $\alpha$; then $w_{TV}$ is the $\alpha$-span carrying the middle
-half of all the movement:
+**Total-variation width $w_{TV}$** (threshold-free sharpness statistic) — the same idea without fixed
+crossing levels. Non-monotonic curves are common: they dip and re-cross, which pushes the $d=0.1$
+crossing far to the left and makes a visibly sharp curve score as wide. Let $C(\alpha)$ be the fraction
+of the curve's total variation accumulated by position $\alpha$; then $w_{TV}$ is the $\alpha$-span
+carrying the middle half of all the movement:
 
 ```math
 C(\alpha) = \frac{\int_0^{\alpha} \lvert d'(u)\rvert\,du}{\int_0^{1} \lvert d'(u)\rvert\,du},
 \qquad w_{TV} \;=\; C^{-1}(0.75) - C^{-1}(0.25)
 ```
 
-It is $0.5$ for a linear response and tends to $0$ for a step, so we call $w_{TV} < 0.25$ sharp.
-Because it survives non-monotonicity it is the statistic used for the prevalence count in Figure 2 and
-for the headline correlation.
+It is $0.5$ for a linear response and tends to $0$ for a step; $w_{TV} < 0.25$ is called sharp. It is
+the statistic used for the model comparisons, where non-monotonicity would otherwise dominate.
 
-**Plateau fraction PF** (second robustness statistic) — how much of the sweep sits pinned at an
-endpoint, computed directly from the grid without any crossing logic, so it is immune both to
-non-monotonicity and to the choice of which crossing counts. Over the $N=101$ grid points:
+**Plateau fraction PF** (robustness statistic) — how much of the sweep sits pinned at an endpoint,
+computed directly from the grid without crossing logic. Over the $N=101$ grid points:
 
 ```math
 \mathrm{PF} \;=\; \frac{1}{N}\,\#\big\lbrace \alpha_i : d(\alpha_i) < 0.1 \ \ \text{or} \ \ d(\alpha_i) > 0.9 \big\rbrace
 ```
 
-Higher is more plateau-like; the linear response gives $0.2$. Its role in Results is to check that all
-three sharpness statistics agree on the *sign* of the JSD relationship — with the sign convention
-flipped, since large PF and small $w$ both mean "sharp".
+Higher is more plateau-like; the linear response gives $0.2$.
 
-**Association test.** The hypothesis predicts that low endpoint JSD goes with low width, so we score
-it with the Spearman rank correlation $\rho$ between JSD and each sharpness statistic. Rank
-correlation is used because the prediction is about ordering and the relationship need not be linear.
-Pairs that share a prefix are not independent, so all confidence intervals come from a **cluster
-bootstrap**: resample the 40 prefixes with replacement, take all pairs of the drawn prefixes, and
-report the 2.5th and 97.5th percentiles of $\rho$ over 2000 resamples. We also report the ordinary
-least-squares slope of each width on JSD (units: width per nat) with the same bootstrap, which gives
-the effect an interpretable size.
+**Endpoint divergence (JSD)** — how differently the two complete prompts predict the next token. In
+Experiments 3–5 it is a descriptive variable; in Experiment 6 it is a **control held low**. It is
+measured at inference from the full-vocabulary softmax distributions $P_A, P_B$ at the final position.
+Jensen–Shannon divergence is symmetric and stays finite when one distribution puts near-zero mass where
+the other does not, where a plain KL divergence diverges. Units are nats; 0 means identical
+predictions:
 
-**Divergence-matched model comparison.** The three models plateau at different rates, and a raw
-prevalence count cannot say whether that is a fact about the models or about their banks landing at
-different divergences. To separate the two we cut each bank into four fixed JSD bins
-($[0, 0.2)$, $[0.2, 0.4)$, $[0.4, 0.65)$, $[0.65, \ln 2]$) and compare the median $w_{TV}$ of the
-models within each bin. A gap that persists in every bin is a property of the model. This feeds
-Figure 3 and is what lets us ask whether the sharing of a tokenizer predicts sharing a prevalence.
+```math
+\mathrm{JSD}(P_A, P_B) \;=\; \tfrac{1}{2} D_{KL}\!\big(P_A \,\Vert\, M\big) + \tfrac{1}{2} D_{KL}\!\big(P_B \,\Vert\, M\big),
+\qquad M = \tfrac{1}{2}\big(P_A + P_B\big)
+```
 
-**Partial correlation (confound control).** A pair whose prompts predict different next tokens might
-simply have more distant activations at the patch site, and distance alone could drive sharpness. To
-separate the two we compute the partial Spearman correlation of JSD with $w_{TV}$ controlling for the
-block-0 angle $\Omega$: rank-transform all three variables, linearly regress the JSD and $w_{TV}$ ranks
-on the $\Omega$ ranks, and correlate the residuals.
+JSD is bounded above by $\ln 2 \approx 0.693$ nats, attained when the two distributions have disjoint
+support. Pairs at that ceiling can no longer be ordered, so Experiment 3 reports the association on the
+**unsaturated** subset with $\mathrm{JSD} < 0.65$.
+
+**Relative depth $f$** — the quantity Experiment 5 exists to test. A patch site can be described by how
+many blocks sit below it or by what fraction of the stack sits below it, and the two coincide whenever
+every model has the same depth. With $L$ the 0-indexed block whose output is patched and $N$ the number
+of blocks:
+
+```math
+f \;=\; \frac{N-1-L}{N-1} \;\in\; (0, 1]
+```
+
+$f = 1$ is a patch after block 0, with the whole stack below it. To decide which description governs
+plateau strength, we pick levels at which the three GPT-2 models are matched under one description or
+the other and measure how much they still disagree, using the across-model spread of the median
+$w_{TV}$, written $\tilde w_{TV}(m, \ell)$ for model $m$ at matched level $\ell$:
+
+```math
+S(\ell) \;=\; \max_{m} \tilde w_{TV}(m, \ell) \;-\; \min_{m} \tilde w_{TV}(m, \ell)
+```
+
+A description that captures what drives the plateau makes $S$ small; the wrong description leaves the
+models spread out.
+
+**Internal representational distance IRD** — the independent variable of Experiment 6, and the one the
+hypothesis actually needs. Once output divergence is held low, the question is whether the two prompts
+are nevertheless doing something different inside the model. We measure that from the residual stream
+at the final token, averaged over the whole stack, so that a pair which predicts the same next token by
+a different internal route scores high:
+
+```math
+\mathrm{IRD} \;=\; \frac{1}{N}\sum_{l=1}^{N}\Big(1 - \frac{h_A^l \cdot h_B^l}{\lVert h_A^l\rVert\,\lVert h_B^l\rVert}\Big)
+```
+
+$\mathrm{IRD}=0$ means the two prompts are represented identically at every block; larger means more
+internal difference. This is a proxy: it measures representational distance, not which circuits are
+active, and that limitation is carried into the interpretation.
+
+**Intermediate-plateau width IPW** — the dependent variable of Experiment 6. The hypothesis is about
+different features occupying different *plateaus*, which predicts a resting point partway between A and
+B, not a narrow A-to-B transition. So we score the longest stretch of the sweep over which the output
+holds still at a level that is neither A's nor B's. With $\mathcal{W}$ the set of index intervals
+$[i,j]$ on the $\alpha$ grid whose $d$ values span at most $0.10$ and whose mean level lies in
+$[0.15, 0.85]$:
+
+```math
+\mathrm{IPW} \;=\; \max_{[i,j]\,\in\,\mathcal{W}} \big(\alpha_j - \alpha_i\big)
+```
+
+A linear response $d(\alpha)=\alpha$ gives $\mathrm{IPW} = 0.10$ exactly, because a window spanning
+$0.10$ in $d$ spans $0.10$ in $\alpha$. We therefore call $\mathrm{IPW} > 0.20$ — twice the linear
+baseline — an intermediate plateau. Experiment 6 asks whether IRD predicts IPW among low-JSD pairs.
+
+**Association tests.** All correlations are Spearman rank correlations, because the predictions are
+about ordering and the relationships need not be linear. Pairs that share a prefix are not independent,
+so confidence intervals come from a **cluster bootstrap**: resample the 40 prefixes with replacement,
+take all pairs of the drawn prefixes, and report the 2.5th and 97.5th percentiles over 2000 resamples.
 
 ### Baselines
 
@@ -227,342 +260,395 @@ on the $\Omega$ ranks, and correlate the residuals.
 activation edit:
 
 ```math
-d(\alpha) = \alpha \quad\Longrightarrow\quad w_{10\text{-}90} = 0.8,\quad w_{TV} = 0.5,\quad \mathrm{PF} = 0.2
+d(\alpha) = \alpha \quad\Longrightarrow\quad w_{10\text{-}90} = 0.8,\quad w_{TV} = 0.5,\quad \mathrm{PF} = 0.2,\quad \mathrm{IPW} = 0.10
 ```
 
-It appears as the gray dashed diagonal in Figure 1 and the gray dashed line in Figures 2–6. Any value
-below these is a plateau of some strength.
+It appears as the gray dashed diagonal in Figure 1 and a gray dashed line in Figures 2–8.
 
-**Dissimilar-continuation control** — the `The house was` + ` big` / ` in` pair, run through identical
-machinery. It fixes the value the plateau statistics take when two prompts emphatically do not share a
-continuation, and is drawn with a thick frame in Figure 1 and a thick marker edge in Figures 2 and 4.
+**Matthew's smooth case as the negative example** — `The house was` + ` big` / ` large`, run through
+identical machinery. This is the pair reported as *not* plateauing, so it is the reference for what a
+non-plateau looks like in this setup. It is drawn as the bottom row of Figure 1 and as the dashed curve
+in Figure 8's right panel.
 
-**Mined bank as a null distribution** — the 200 corpus-derived pairs per model give the distribution of
-plateau sharpness for prompt pairs picked with no regard to continuation similarity at all. A
-hand-picked pair is only interesting insofar as it sits away from this distribution; Figure 2 places
-the five of them inside it.
+**Mined bank as a base rate** — the 200 corpus-derived pairs per model give the distribution of plateau
+sharpness for pairs picked with no regard to continuation similarity. A hand-picked pair is only
+informative insofar as it sits away from this distribution.
 
 **Smallest detectable correlation** — the reference against which a null claim is judged. For a
-two-sided test at $\alpha = 0.05$ using the Fisher $z$ transform, the smallest $|\rho|$ that would
-reach significance at sample size $n$ is:
+two-sided test at $\alpha = 0.05$ using the Fisher $z$ transform:
 
 ```math
 \rho_{\min}(n) \;=\; \tanh\!\Big(\frac{1.96}{\sqrt{n-3}}\Big)
 ```
 
-This is $0.51$ at $n=15$ (the hand-picked cells, which is why they can only be suggestive) and $0.14$
-at $n=200$ (the mined bank).
+This is $0.14$ at $n=200$ (the mined bank) and $0.32$ at $n=38$ (Experiment 6's low-JSD subset), which
+is why Experiment 6's null is stated as under-powered.
 
 **Harness identity check** — patching $h_0$ and $h_1$ must reproduce the unpatched runs, giving
-$d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error, reported below.
+$d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error.
 
 ## Results
 
-**The harness is correct.** All 5 hand-written pairs tokenized validly in all three models, and across
-all 1815 model-pair sweeps the patched runs at the endpoints reproduced the clean forward passes to
-$|d(0)| \le 4 \times 10^{-4}$ and $|d(1) - 1| \le 4 \times 10^{-4}$. The numbers below are therefore
-about the model, not about patching artifacts.
+**The harness is correct.** All 6 hand-written pairs tokenized validly in all five models, and across
+all 3645 sweeps the patched runs at the endpoints reproduced the clean forward passes to
+$|d(0)| \le 4 \times 10^{-4}$ and $|d(1) - 1| \le 4 \times 10^{-4}$. The numbers below are about the
+models, not about patching artifacts.
 
-### Plateaus appear everywhere, including where they should not
+### The reported contrast reproduces in GPT-2 Large and fails in GPT-2 Medium
 
-**Table 1 — endpoint divergence and plateau strength for the five hand-picked pairs.** Reading the
-table: JSD is the independent variable (small = the two prompts predict nearly the same next token);
-$w_{10-90}$ and $w_{TV}$ are smaller when the transition is sharper; PF is larger when more of the
-sweep is pinned at an endpoint. Bold marks the sharpest cell per model. The hypothesis predicts the
-small-JSD rows should carry the small widths.
+**Table 1 — endpoint divergence and plateau strength for the six hand-picked pairs in five models.**
+Reading the table: $w_{10-90}$ and $w_{TV}$ are smaller when the transition is sharper; PF is larger
+when more of the sweep is pinned at an endpoint. The "plateau?" column applies the predefined criterion
+$w_{10-90} < 0.5$. Bold marks the sharpest test-pair cell per model. Models are ordered by depth.
 
-| Model | Prompt pair (final tokens) | endpoint JSD (nats) | $w_{10-90}$ | $w_{TV}$ | PF | monotonic |
+| Model | Prompt pair (final tokens) | endpoint JSD (nats) | $w_{10-90}$ | $w_{TV}$ | PF | plateau? |
 |---|---|---|---|---|---|---|
+| gpt2-large | *M. plateau case:* The house was ` big` / ` in` | 0.663 | 0.044 | 0.012 | 0.95 | yes |
+| gpt2-large | *M. smooth case:* The house was ` big` / ` large` | 0.053 | 0.592 | 0.292 | 0.42 | no |
+| gpt2-large | The answer is ` four` / ` Four` | 0.283 | **0.133** | **0.020** | 0.86 | yes |
+| gpt2-large | gave a book to ` Mary` / ` her` | 0.051 | 0.288 | 0.144 | 0.71 | yes |
+| gpt2-large | clue identify? ` Au` / ` 79` | 0.312 | 0.448 | 0.139 | 0.55 | yes |
+| gpt2-large | Two plus two is ` four` / ` 4` | 0.048 | 0.485 | 0.216 | 0.52 | yes |
+| gpt2-medium | *M. plateau case:* The house was ` big` / ` in` | 0.659 | 0.516 | 0.272 | 0.50 | no |
+| gpt2-medium | *M. smooth case:* The house was ` big` / ` large` | 0.042 | 0.719 | 0.398 | 0.29 | no |
+| gpt2-medium | The answer is ` four` / ` Four` | 0.377 | **0.120** | **0.058** | 0.88 | yes |
 | gpt2-medium | gave a book to ` Mary` / ` her` | 0.068 | 0.586 | 0.114 | 0.51 | no |
+| gpt2-medium | clue identify? ` Au` / ` 79` | 0.342 | 0.358 | 0.117 | 0.64 | yes |
 | gpt2-medium | Two plus two is ` four` / ` 4` | 0.138 | 0.454 | 0.232 | 0.55 | yes |
-| gpt2-medium | The answer is ` four` / ` Four` | 0.377 | **0.120** | **0.058** | 0.88 | no |
-| gpt2-medium | clue identify? ` Au` / ` 79` | 0.342 | 0.358 | 0.117 | 0.64 | no |
-| gpt2-medium | *control:* The house was ` big` / ` in` | 0.659 | 0.516 | 0.272 | 0.50 | no |
-| opt-350m | gave a book to ` Mary` / ` her` | 0.038 | 0.734 | 0.356 | 0.28 | no |
-| opt-350m | Two plus two is ` four` / ` 4` | 0.027 | 0.907 | 0.680 | 0.11 | yes |
+| gpt2-small | *M. plateau case:* The house was ` big` / ` in` | 0.658 | 0.691 | 0.254 | 0.32 | no |
+| gpt2-small | *M. smooth case:* The house was ` big` / ` large` | 0.053 | 0.760 | 0.456 | 0.25 | no |
+| gpt2-small | The answer is ` four` / ` Four` | 0.358 | **0.548** | **0.225** | 0.46 | no |
+| gpt2-small | gave a book to ` Mary` / ` her` | 0.030 | 0.556 | 0.276 | 0.45 | no |
+| gpt2-small | clue identify? ` Au` / ` 79` | 0.355 | 0.906 | 0.781 | 0.10 | no |
+| gpt2-small | Two plus two is ` four` / ` 4` | 0.173 | 0.607 | 0.352 | 0.40 | no |
+| opt-350m | *M. plateau case:* The house was ` big` / ` in` | 0.646 | 0.143 | 0.068 | 0.85 | yes |
+| opt-350m | *M. smooth case:* The house was ` big` / ` large` | 0.042 | 0.831 | 0.598 | 0.18 | no |
 | opt-350m | The answer is ` four` / ` Four` | 0.472 | 0.530 | 0.293 | 0.48 | no |
-| opt-350m | clue identify? ` Au` / ` 79` | 0.296 | 0.705 | 0.177 | 0.31 | no |
-| opt-350m | *control:* The house was ` big` / ` in` | 0.646 | **0.143** | **0.068** | 0.85 | no |
-| pythia-410m | gave a book to ` Mary` / ` her` | 0.033 | 0.582 | 0.268 | 0.43 | yes |
-| pythia-410m | Two plus two is ` four` / ` 4` | 0.056 | 0.758 | 0.451 | 0.25 | yes |
+| opt-350m | gave a book to ` Mary` / ` her` | 0.038 | 0.734 | 0.356 | 0.28 | no |
+| opt-350m | clue identify? ` Au` / ` 79` | 0.296 | **0.705** | **0.177** | 0.31 | no |
+| opt-350m | Two plus two is ` four` / ` 4` | 0.027 | 0.907 | 0.680 | 0.11 | no |
+| pythia-410m | *M. plateau case:* The house was ` big` / ` in` | 0.665 | 0.425 | 0.137 | 0.57 | yes |
+| pythia-410m | *M. smooth case:* The house was ` big` / ` large` | 0.042 | 0.802 | 0.505 | 0.21 | no |
 | pythia-410m | The answer is ` four` / ` Four` | 0.271 | **0.340** | **0.135** | 0.66 | yes |
-| pythia-410m | clue identify? ` Au` / ` 79` | 0.385 | 0.598 | 0.254 | 0.41 | yes |
-| pythia-410m | *control:* The house was ` big` / ` in` | 0.665 | 0.425 | 0.137 | 0.57 | yes |
+| pythia-410m | gave a book to ` Mary` / ` her` | 0.033 | 0.582 | 0.268 | 0.43 | no |
+| pythia-410m | clue identify? ` Au` / ` 79` | 0.385 | 0.598 | 0.254 | 0.41 | no |
+| pythia-410m | Two plus two is ` four` / ` 4` | 0.056 | 0.758 | 0.451 | 0.25 | no |
 
-Thirteen of the fifteen cells land below the linear-response value of $w_{TV} = 0.5$ and eight cross
-the sharp threshold of $0.25$, so this style of single-token interpolation does induce plateaus, at
-strengths from mild to near-step (gpt2-medium `four`/`Four` moves through 80% of the gap in $0.12$ of
-the sweep). The two exceptions are both `four`/`4`, one of the two *most* similar pairs in the study.
-The control — an adjective against a preposition, at the largest divergence measured — is sharper than
-both low-JSD pairs in gpt2-medium, sharper than three of four test pairs in pythia-410m, and in
-opt-350m it is the sharpest cell of all five at $w_{TV} = 0.068$, a near-step. A diagnostic that fires
-hardest on its own negative control is not yet measuring what it was supposed to measure.
+In GPT-2 Large the reported contrast comes out clean and large. `big`/`in` moves through 80% of the gap
+in 4% of the sweep, with 95% of the grid pinned at one endpoint or the other — about as close to a step
+function as a 101-point sweep can show. `big`/`large` takes 59% of the sweep and tracks the diagonal.
+The ratio between the two widths is 13-fold, so this is not a marginal difference that a different
+statistic would erase: $w_{TV}$ gives $0.012$ against $0.292$ and PF gives $0.95$ against $0.42$.
 
-The verdict rests first on the shape of the raw sweeps, so we show all fifteen before any summary
-statistic. If plateaus tracked continuation similarity, the top two rows (lowest JSD) would be the
-flattest and the bottom row of each model (the control) the most linear.
+The same `big`/`in` pair in GPT-2 Medium gives $w_{10-90} = 0.516$ — it fails the predefined criterion
+— and in GPT-2 Small $0.691$. The pair is not intrinsically a plateau pair; it is a plateau pair in a
+36-block model. Any conclusion drawn from its curve in a 24-block model is about a different
+phenomenon, and the depth results below say why.
 
-![Relative distance versus interpolation position for five prompt pairs in three models](plots/final_logit_curves.png)
+`big`/`large` is the useful fixed point in the other direction: it is the widest or second-widest
+transition in **every** model, from $0.592$ in GPT-2 Large to $0.831$ in OPT-350m. GPT-2 Large has more
+blocks below the patch than any other model here and still does not sharpen this pair.
 
-**Figure 1.** Final-logit response to interpolating one token's block-0 activation. x: interpolation
-position $\alpha$ from prompt A (0) to prompt B (1); y: relative distance $d$ (0 = at A's logits,
-1 = at B's logits). Solid curve with circles = measured $d(\alpha)$; gray dashed = the linear reference
-$d = \alpha$. Rows are prompt pairs, columns are models; the bottom row (thick frame) is the control
-pair, whose continuations differ most. Most panels bend well away from the diagonal into a
-flat-then-jump shape, the `four`/`4` panels stay closest to it, and the control bends at least as much
-as the test pairs in every model. The wiggles in the gpt2-medium and opt-350m columns are the
-non-monotonicity flagged in Table 1 and are why $w_{TV}$ exists.
+Under the predefined criterion, **11 of the 30** model-pair cells plateau (14 of 30 under
+$w_{TV} < 0.25$) — a minority, concentrated in the deeper models: 5/6 in GPT-2 Large, 3/6 in GPT-2
+Medium, 2/6 in Pythia-410m, 1/6 in OPT-350m, 0/6 in GPT-2 Small. Statistics summarise; the shapes are
+what the claim rests on, so Figure 1 shows all thirty sweeps.
 
-### In a corpus-mined bank, the plateau is the default response
+![Relative distance versus interpolation position for six prompt pairs in five models](plots/final_logit_curves.png)
 
-Five pairs cannot say whether a plateau is rare enough to be informative. To find out we ask how often
-an arbitrary prompt pair plateaus, using the 200 WikiText-derived pairs per model, and where the
-hand-picked pairs fall inside that distribution.
+**Figure 1.** The `big`/`in` versus `big`/`large` contrast reproduces in GPT-2 Large and weakens as
+model depth falls. x: interpolation position $\alpha$ from prompt A (0) to prompt B (1); y: relative
+distance $d$ (0 = at A's logits, 1 = at B's logits). Solid curve with circles = measured $d(\alpha)$;
+gray dashed = the linear reference $d=\alpha$. Columns are models, ordered by depth (GPT-2 Large, 36
+blocks, leftmost). Rows are prompt pairs; the two bottom rows (thick frames) are Matthew's pair — row 5
+his plateau case `big`/`in`, row 6 his smooth case `big`/`large`. Panel titles give that cell's
+endpoint JSD and $w_{10-90}$, and flag non-monotonic curves. Row 5 is a near-vertical step in the GPT-2
+Large panel and drifts toward the diagonal as depth falls; row 6 stays near the diagonal everywhere.
 
-![Distribution of transition sharpness over 200 mined prompt pairs per model, with the five hand-picked pairs marked](plots/bank_prevalence.png)
+### For an arbitrary prompt pair, a plateau is the common case
 
-**Figure 2.** Plateaus are the norm for arbitrary prompt pairs. x: $w_{TV}$ at the final logits
-(smaller = sharper); y: number of mined pairs in each bin (gray hatched histogram, $n=200$ per model).
-Gray dashed = the linear-response value ($0.5$), dotted = our sharpness threshold ($0.25$). The five
-markers in the strip above each histogram are the hand-picked pairs of Table 1 at their $w_{TV}$
-values (marker shape and color per the legend; the control has a thick black edge) — they are placed
-on a separate strip because their y position carries no meaning. In gpt2-medium the mined mass piles
-up near zero; in opt-350m and pythia-410m it centers near the threshold.
+A single pair's plateau means little without a base rate. The mined bank supplies one.
 
-In gpt2-medium, **82% of arbitrary mined pairs are sharp** by our threshold (median $w_{TV} = 0.080$,
-median $w_{10-90} = 0.241$); in opt-350m 61% are ($0.221$, $0.511$) and in pythia-410m 48% are
-($0.266$, $0.593$). Every one of the hand-picked pairs sits inside the bulk of its model's
-distribution — none is an outlier in the sharp direction. Observing a plateau for a hand-chosen pair
-in gpt2-medium therefore carries almost no information: four in five random pairs do the same thing.
+![Distribution of transition sharpness over 200 mined prompt pairs per model, with the hand-picked pairs marked](plots/bank_prevalence.png)
 
-### The prevalence gap between models is real, and it does not follow the tokenizer
+**Figure 2.** Plateaus are common for arbitrary prompt pairs, increasingly so in deeper models. x:
+$w_{TV}$ at the final logits (smaller = sharper); y: number of mined pairs per bin (gray hatched
+histogram, $n=200$ per model). Gray dashed = linear response (0.5), dotted = sharpness threshold
+(0.25). The markers on the strip above each histogram are the hand-picked pairs of Table 1 at their
+$w_{TV}$ values (shape and color per the legend, Matthew's pairs with a thick black edge); their y
+position carries no meaning.
 
-The three models sit 21 and 13 percentage points apart on that prevalence, which raises two questions
-a practitioner would want answered before transferring any of this between models. Is the gap merely
-an artifact of the three banks landing at different endpoint divergences, given that divergence is
-about to be shown to drive sharpness? And does it track the tokenizer, since OPT-350m and GPT-2 medium
-share a vocabulary while Pythia does not? Comparing the models inside fixed JSD bins answers both.
+**Table 2 — how often an arbitrary mined pair plateaus, under both criteria.**
 
-![Median transition width per endpoint-divergence bin for three models](plots/jsd_matched.png)
-
-**Figure 3.** The prevalence gap between models survives matching on endpoint divergence, and it does
-not follow the tokenizer. x: endpoint JSD bin in nats (the last bin is the $\ln 2$ ceiling), annotated
-with the number of mined pairs per model in that bin; y: median $w_{TV}$ at the final logits over the
-pairs in the bin (smaller = sharper). gpt2-medium = circles with a solid line; pythia-410m = squares
-with a dashed line; opt-350m = triangles with a dotted line. Gray dashed = linear response ($0.5$),
-dotted = sharp threshold ($0.25$).
-
-**Table 2 — median $w_{TV}$ per model within fixed endpoint-divergence bins**, with the number of
-mined pairs each model contributes to the bin.
-
-| JSD bin (nats) | median $w_{TV}$ gpt2-medium | opt-350m | pythia-410m | $n$ per model |
+| Model (blocks) | % with $w_{10-90}<0.5$ (predefined) | % with $w_{TV}<0.25$ | median $w_{10-90}$ | median $w_{TV}$ |
 |---|---|---|---|---|
-| 0.00–0.20 | 0.263 | 0.496 | 0.421 | 44 / 43 / 23 |
-| 0.20–0.40 | 0.103 | 0.317 | 0.276 | 23 / 15 / 22 |
-| 0.40–0.65 | 0.043 | 0.147 | 0.220 | 75 / 71 / 82 |
-| 0.65–0.69 | 0.047 | 0.166 | 0.274 | 58 / 71 / 73 |
+| gpt2-large (36) | 83.5% | 89.5% | 0.155 | 0.047 |
+| gpt2-medium (24) | 73.0% | 82.0% | 0.241 | 0.080 |
+| gpt2-small (12) | 60.5% | 74.0% | 0.417 | 0.153 |
+| opt-350m (24) | 47.0% | 61.0% | 0.511 | 0.221 |
+| pythia-410m (24) | 30.0% | 47.5% | 0.593 | 0.266 |
 
-gpt2-medium is the sharpest of the three in all four bins, by a factor of 2–4 on the median, so its
-higher prevalence is a property of the model and not of how its bank happened to be distributed. The
-tokenizer explanation fails: opt-350m tokenizes our prompts exactly as gpt2-medium does and still
-plateaus 21 points less often, and its ordering against pythia-410m flips across the range — wider at
-low divergence, sharper at high. What a practitioner should take from this is that the *rate* at which
-plateaus appear has to be measured per model, while the *direction* of the divergence effect, which
-every line in Figure 3 shows by falling from left to right, transfers across all three.
+In GPT-2 Large, five random pairs in six plateau. That is the number to hold in mind when a single
+chosen pair plateaus: the observation is consistent with the pair being special and equally consistent
+with it being typical. What carries information is the pair's position in this distribution, or better,
+a matched comparison pair run through the same machinery — which is exactly the role `big`/`large`
+plays for `big`/`in`, and why reporting the two together is the right design.
 
-### Sharper plateaus go with *less* similar continuations
+The hand-picked set runs the other way: only 11/30 of those cells plateau, so our four test pairs are
+*smoother* than random pairs. Hand-chosen prompts are not a neutral sample.
 
-With $n=200$ per model the association test finally has power: it can detect $|\rho| \ge 0.14$, where
-the 15 hand-picked cells could only have detected $|\rho| \ge 0.51$. Figure 4 plots every mined pair.
+### Endpoint divergence tracks transition width — a descriptive regularity, not a test of the hypothesis
+
+This section reports a relationship in the mined bank between how differently the two prompts predict
+the next token and how sharp the transition is. It is worth knowing, because anyone sweeping pairs will
+encounter it, and because its direction is the opposite of what one might guess. It is **not** a test
+of the motivating hypothesis, which concerns matched-output pairs and intermediate plateaus; that test
+is Experiment 6.
 
 ![Endpoint divergence against two sharpness statistics for 200 mined pairs per model, with fits](plots/bank_regression.png)
 
-**Figure 4.** Endpoint divergence predicts sharpness — with the sign opposite to the hypothesis.
-x (all panels): endpoint JSD in nats, larger = the two prompts predict more different next tokens;
-the dash-dot vertical line is the $\ln 2$ ceiling that JSD attains for disjoint predictions.
-y: $w_{10-90}$ (top row) and $w_{TV}$ (bottom row) at the final logits, smaller = sharper. Columns are
-models. Light circles are the 200 mined pairs, the solid line is the OLS fit, the dashed line with
-squares joins quintile means of JSD with $\pm 1$ standard error, and the stars are the five
-hand-picked pairs (thick black edge = control). Gray dashed = linear response, dotted = plateau
-threshold. All three models trend downward; pythia-410m's quintile means turn back up in the last two
-quintiles, which sit at the JSD ceiling.
+**Figure 3.** Across mined pairs, more divergent endpoints go with sharper transitions in all five
+models. x (all panels): endpoint JSD in nats; the dash-dot vertical line is the $\ln 2$ ceiling JSD
+attains for disjoint predictions. y: $w_{10-90}$ (top) and $w_{TV}$ (bottom) at the final logits,
+smaller = sharper. Columns are models. Light circles = the 200 mined pairs; solid line = OLS fit;
+dashed line with squares = quintile means of JSD with $\pm1$ SE; stars = the hand-picked pairs (thick
+black edge = Matthew's pairs). Gray dashed = linear response, dotted = plateau threshold.
 
-The correlations are collected below. All are Spearman $\rho$ between endpoint JSD and the named
-statistic, with 95% cluster-bootstrap intervals over the 40 prefixes. Remember the sign convention:
-negative $\rho$ for a width and positive $\rho$ for PF both mean "more divergent endpoints, sharper
-plateau" — the *opposite* of the hypothesis, which predicts positive $\rho$ for widths.
-
-**Table 3 — association between endpoint divergence and plateau sharpness, mined bank.**
-
-| Model | statistic | $\rho$ | 95% CI | $p$ | OLS slope (per nat) |
-|---|---|---|---|---|---|
-| gpt2-medium | $w_{10-90}$ | $-0.47$ | $[-0.59, -0.33]$ | $1.4\times10^{-12}$ | $-0.64\ [-0.78, -0.49]$ |
-| gpt2-medium | $w_{TV}$ | $-0.55$ | $[-0.66, -0.41]$ | $6.2\times10^{-17}$ | $-0.42\ [-0.54, -0.31]$ |
-| gpt2-medium | PF | $+0.44$ | $[+0.31, +0.56]$ | $5.7\times10^{-11}$ | — |
-| opt-350m | $w_{10-90}$ | $-0.43$ | $[-0.56, -0.27]$ | $3.5\times10^{-10}$ | $-0.53\ [-0.66, -0.39]$ |
-| opt-350m | $w_{TV}$ | $-0.39$ | $[-0.55, -0.21]$ | $1.3\times10^{-8}$ | $-0.41\ [-0.55, -0.26]$ |
-| opt-350m | PF | $+0.43$ | $[+0.28, +0.56]$ | $3.4\times10^{-10}$ | — |
-| pythia-410m | $w_{10-90}$ | $-0.12$ | $[-0.30, +0.05]$ | $0.090$ | $-0.24\ [-0.35, -0.11]$ |
-| pythia-410m | $w_{TV}$ | $-0.11$ | $[-0.30, +0.07]$ | $0.123$ | $-0.20\ [-0.31, -0.07]$ |
-| pythia-410m | PF | $+0.12$ | $[-0.06, +0.31]$ | $0.090$ | — |
-
-In gpt2-medium the effect is large and unambiguous, and its size is easy to read off the slope: moving
-from two prompts that predict the same token to two that predict disjoint tokens ($0 \to 0.69$ nats)
-shortens the transition by $0.29$ of the sweep on $w_{TV}$ — more than half of the $0.5$ that a linear
-response would spend. The quintile means in Figure 4 fall monotonically ($w_{TV}$: $0.35 \to 0.13 \to
-0.09 \to 0.07 \to 0.08$), so this is not one extreme group doing the work. All three sharpness
-statistics agree on the direction in all three models, which is what separates a real effect from the
-noise-driven sign disagreement five hand-picked pairs produce.
-
-Pythia-410m looks weak in Table 3, and the reason is visible in Figure 4: 36.5% of its mined pairs sit
-at or above JSD $0.65$, essentially at the $\ln 2$ ceiling, where the divergence measure can no longer
-order them and they contribute a vertical stripe of noise (29.0% of gpt2-medium's pairs and 35.5% of
-opt-350m's are similarly saturated). Removing the saturated pairs sharpens all three models and brings
-them into agreement:
-
-**Table 4 — the same test restricted to pairs below the JSD ceiling ($\mathrm{JSD} < 0.65$).**
+**Table 3 — rank correlation between endpoint divergence and sharpness, unsaturated pairs only**
+($\mathrm{JSD} < 0.65$, where JSD can still order pairs). Negative means more divergent endpoints give
+sharper transitions.
 
 | Model | $n$ | $\rho$ ($w_{TV}$) | $p$ | $\rho$ ($w_{10-90}$) | $p$ |
 |---|---|---|---|---|---|
+| gpt2-large | 137 | $-0.64$ | $6.1\times10^{-17}$ | $-0.61$ | $2.3\times10^{-15}$ |
 | gpt2-medium | 142 | $-0.61$ | $1.5\times10^{-15}$ | $-0.54$ | $4.9\times10^{-12}$ |
 | opt-350m | 129 | $-0.57$ | $1.3\times10^{-12}$ | $-0.59$ | $3.1\times10^{-13}$ |
 | pythia-410m | 127 | $-0.45$ | $9.0\times10^{-8}$ | $-0.47$ | $2.3\times10^{-8}$ |
+| gpt2-small | 147 | $-0.44$ | $2.7\times10^{-8}$ | $-0.36$ | $7.8\times10^{-6}$ |
 
-All three models show a moderate-to-strong negative association at $p < 10^{-7}$ on both width
-statistics. The finding is therefore not a GPT-2 idiosyncrasy, and it is not confined to one tokenizer
-or one architecture family: in the regime where the independent variable is measurable at all, prompts
-that predict more different continuations produce sharper plateaus everywhere we looked.
+The effect is consistent across five models and two statistics. A plausible mechanism is competition
+between two well-separated output modes: when the endpoints predict disjoint token sets the winner
+flips abruptly, whereas near-identical predictions differ only in small logit components that get
+carried across smoothly. Note what this does and does not license. It says the sharp end of the width
+distribution is populated by divergent pairs, so sharpness alone should not be read as evidence of
+shared continuation. It says nothing about whether two prompts with matched predictions differ
+internally.
 
-**The effect is not just endpoint geometry.** Pairs that disagree about the next token might simply
-have activations further apart at the patch site, and larger separation might mechanically produce a
-sharper crossover. Controlling for the block-0 angle $\Omega$ between the two patched vectors leaves
-the association intact or strengthens it: partial $\rho = -0.55$ in gpt2-medium against a raw $-0.55$
-(there $\Omega$ barely tracks JSD, $\rho = 0.03$), $-0.44$ against $-0.39$ in opt-350m, and $-0.16$
-against $-0.11$ in pythia-410m, the last two with $\rho(\Omega, \mathrm{JSD}) \approx 0.30$. In all
-three models $\Omega$ correlates only weakly with sharpness ($\rho = 0.13$–$0.16$). Whatever produces
-the effect is carried by what the prompts predict, not by how far apart their activations start.
+The cross-model differences in Table 2 survive matching on divergence, so they are properties of the
+models rather than of how each bank happened to be distributed.
 
-### Depth, not prompt content, manufactures the plateau shape
+![Median transition width per endpoint-divergence bin for five models](plots/jsd_matched.png)
 
-If sharpness is not evidence about shared continuations, it needs an explanation of its own. To locate
-where it arises we recompute $w_{10-90}$ at every block's residual stream between the patch site and
-the output, for the five hand-picked pairs.
+**Figure 4.** The cross-model sharpness ordering survives matching on endpoint divergence. x: endpoint
+JSD bin in nats (the last bin is the $\ln 2$ ceiling), annotated with the number of mined pairs per
+model in that bin; y: median $w_{TV}$ at the final logits over the pairs in the bin (smaller = sharper).
+One line per model, each with its own color, line style and marker (see legend). Gray dashed = linear
+response (0.5), dotted = sharp threshold (0.25). The two deepest GPT-2 models are sharpest in every
+bin, and all lines fall from left to right.
 
-![Transition width versus recording block for five prompt pairs in three models](plots/layerwise_widths.png)
+### Depth below the patch is what allows a plateau to form
 
-**Figure 5.** The plateau is built up gradually across depth, not created at the patch site. x: the
-block whose `resid_post` is read out at the final token (the patch is applied after block 0; the last
-x value is the final logits); y: $w_{10-90}$ at that read-out point. One line per prompt pair, with
-color, line style and marker all varying together (see legend). Gray dashed = linear response (0.8),
-dotted = plateau threshold (0.5). Every pair starts near 0.8 immediately after the patch and narrows
-with depth in all three models; the control (triangles, dash-dot) is among the fastest to sharpen, and
-in opt-350m most of the sharpening arrives in the last two blocks.
+Sharpness has to originate somewhere. Recomputing the width at every block between the patch site and
+the output locates it.
 
-One block after the patch, all fifteen cells sit at $w_{10-90} = 0.78$–$0.83$: the residual stream
-still responds almost exactly proportionally to the edit. The width then falls across the following 23
-blocks, reaching $0.12$–$0.91$ at the logits. A deep stack of nonlinear layers repeatedly compresses an
-interpolated direction toward whichever endpoint dominates, and it does so for the control just as
-readily as for the test pairs.
+![Transition width versus recording block for six prompt pairs in five models](plots/layerwise_widths.png)
 
-### Removing the downstream blocks removes the plateau
+**Figure 5.** The plateau is built up gradually across depth, not created at the patch site. x: block
+whose `resid_post` is read out (the patch is applied after block 0; the last x value is the final
+logits); y: $w_{10-90}$ at that read-out point. One line per prompt pair (color, line style and marker
+all vary together; see legend); panels are models. Gray dashed = linear response (0.8), dotted =
+plateau threshold (0.5). Every pair starts near 0.8 just after the patch; some narrow steeply with
+depth, and `big`/`large` stays near the top in every model.
 
-Figure 5 is only a description of where sharpness accumulates. Reading the residual stream out at an
-earlier block is not the same as making the model compute less, so it cannot establish that those
-blocks are what *builds* the plateau. The causal version of the experiment moves the patch site: we
-re-run the entire mined bank with the interpolated vector inserted after block 12 and after block 20,
-leaving 11 and 3 blocks below it instead of 23, with the pairs, the tokens and the interpolation grid
-held fixed. If depth is doing the work, sharpness should decay as blocks are taken away.
+Reading out earlier is not the same as computing less, so the causal version moves the patch instead.
 
 ![Median transition width and JSD-sharpness correlation against patch site for three models](plots/depth_effect.png)
 
-**Figure 6.** Removing downstream blocks removes the plateau, but not the divergence effect in
-gpt2-medium or opt-350m. x (both panels): the patch site — the block whose `resid_post` at the final
-token is replaced by the interpolated vector — labelled with the number of blocks remaining below it.
-Left y: median $w_{TV}$ at the final logits over the 200 mined pairs (smaller = sharper), shaded band =
-interquartile range, gray dashed = linear response ($0.5$), dotted = sharp threshold ($0.25$). Right y:
-Spearman $\rho$ between endpoint JSD and $w_{TV}$ over pairs below the $\ln 2$ ceiling (JSD $< 0.65$;
-$n = 142$ gpt2-medium, $129$ opt-350m, $127$ pythia-410m), error bars = 95% cluster bootstrap over the
-40 prefixes, gray dashed = no association. gpt2-medium = circles with a solid line; pythia-410m =
-squares with a dashed line; opt-350m = triangles with a dotted line.
+**Figure 6.** Removing downstream blocks removes the plateau. x (both panels): the patch site — the
+block whose `resid_post` at the final token is replaced by the interpolated vector — labelled with the
+number of blocks remaining below it. Left y: median $w_{TV}$ at the final logits over the 200 mined
+pairs (smaller = sharper), shaded band = interquartile range, gray dashed = linear response (0.5),
+dotted = sharp threshold (0.25). Right y: Spearman $\rho$ between endpoint JSD and $w_{TV}$ over the
+pairs below the $\ln 2$ ceiling, error bars = 95% cluster bootstrap over the 40 prefixes, gray dashed =
+no association. gpt2-medium = circles, solid; pythia-410m = squares, dashed; opt-350m = triangles,
+dotted.
 
-**Table 5 — plateau strength and the divergence association at three patch sites**, same 200 mined
-pairs per model in every row. "% sharp" is the share of pairs with $w_{TV} < 0.25$; "monotonic" is the
-share of $d(\alpha)$ curves that never decrease.
+**Table 4 — plateau strength at three patch sites**, same 200 mined pairs per model in every row.
 
-| Model | patch site | blocks below | median $w_{TV}$ | % sharp | median $w_{10-90}$ | monotonic | $\rho$(JSD, $w_{TV}$), JSD $<0.65$ | 95% CI | $p$ |
-|---|---|---|---|---|---|---|---|---|---|
-| gpt2-medium | block 0 | 23 | 0.080 | 82.0% | 0.241 | 7.5% | $-0.61$ | $[-0.70,-0.46]$ | $1.5\times10^{-15}$ |
-| gpt2-medium | block 12 | 11 | 0.250 | 50.5% | 0.556 | 33.0% | $-0.53$ | $[-0.64,-0.39]$ | $1.1\times10^{-11}$ |
-| gpt2-medium | block 20 | 3 | 0.383 | 10.0% | 0.701 | 72.0% | $-0.53$ | $[-0.66,-0.38]$ | $8.2\times10^{-12}$ |
-| opt-350m | block 0 | 23 | 0.221 | 61.0% | 0.511 | 41.0% | $-0.57$ | $[-0.72,-0.37]$ | $1.3\times10^{-12}$ |
-| opt-350m | block 12 | 11 | 0.307 | 36.5% | 0.641 | 77.5% | $-0.54$ | $[-0.67,-0.37]$ | $6.5\times10^{-11}$ |
-| opt-350m | block 20 | 3 | 0.420 | 1.0% | 0.741 | 99.5% | $-0.55$ | $[-0.67,-0.39]$ | $1.6\times10^{-11}$ |
-| pythia-410m | block 0 | 23 | 0.266 | 47.5% | 0.593 | 98.0% | $-0.45$ | $[-0.63,-0.24]$ | $9.0\times10^{-8}$ |
-| pythia-410m | block 12 | 11 | 0.419 | 2.5% | 0.749 | 100% | $-0.44$ | $[-0.62,-0.23]$ | $2.4\times10^{-7}$ |
-| pythia-410m | block 20 | 3 | 0.509 | 0.0% | 0.808 | 100% | $+0.04$ | $[-0.11,+0.22]$ | $0.62$ |
+| Model | patch site | blocks below | median $w_{TV}$ | % sharp | median $w_{10-90}$ |
+|---|---|---|---|---|---|
+| gpt2-medium | block 0 | 23 | 0.080 | 82.0% | 0.241 |
+| gpt2-medium | block 12 | 11 | 0.250 | 50.5% | 0.556 |
+| gpt2-medium | block 20 | 3 | 0.383 | 10.0% | 0.701 |
+| opt-350m | block 0 | 23 | 0.221 | 61.0% | 0.511 |
+| opt-350m | block 12 | 11 | 0.307 | 36.5% | 0.641 |
+| opt-350m | block 20 | 3 | 0.420 | 1.0% | 0.741 |
+| pythia-410m | block 0 | 23 | 0.266 | 47.5% | 0.593 |
+| pythia-410m | block 12 | 11 | 0.419 | 2.5% | 0.749 |
+| pythia-410m | block 20 | 3 | 0.509 | 0.0% | 0.808 |
 
-Depth is what makes the plateau. Sharpness decays monotonically as blocks are removed, in all three
-models and on both width statistics, and the endpoint of that decay is the linear baseline itself:
-with 3 blocks below the patch, pythia-410m has median $w_{TV} = 0.509$ and median $w_{10-90} = 0.808$
-against the linear response's $0.5$ and $0.8$, and **not one of its 200 pairs is sharp**. opt-350m
-reaches 1% sharp at the same site and gpt2-medium resists longest at 10%, but all three travel the same
-path. The non-monotonic wiggles that made $w_{TV}$ necessary are a deep-stack product too: the share of
-monotonic curves rises from 7.5% to 72.0% in gpt2-medium and from 41.0% to 99.5% in opt-350m as depth
-is removed. This is the strongest form of the report's central warning: an experimenter who patches
-early and sees a plateau is looking at a property of the 23 blocks below the patch, which are the same
-23 blocks whatever the two prompts were.
+Sharpness decays monotonically as depth is removed, in all three models, and the endpoint of that decay
+is the linear baseline itself: with 3 blocks below the patch, Pythia-410m has median $w_{TV} = 0.509$
+against $0.5$, and **not one of its 200 pairs is sharp**.
 
-The divergence effect is not the same phenomenon wearing a different hat. If more divergent pairs were
-sharper only because a deep stack compresses them harder, the correlation should fade along with the
-plateau. In gpt2-medium it does not move at all — $\rho = -0.61$, $-0.53$, $-0.53$ at 23, 11 and 3
-remaining blocks, flat within the bootstrap intervals even where 90% of pairs no longer plateau — and
-opt-350m behaves identically ($-0.57$, $-0.54$, $-0.55$) even where 99% no longer plateau. In
-pythia-410m it holds at $-0.45$ and $-0.44$ and then vanishes ($+0.04$, $p = 0.62$) exactly at the
-patch site where the response has gone linear and there is no transition shape left to modulate. The
-two effects are therefore separable: the depth below the patch sets *how much* the response is
-compressed, while endpoint divergence sets *which* pairs compress more, and in two of the three models
-the latter is already fully expressed by the last three blocks. That is consistent with the competition
-account — when the two endpoints predict disjoint token sets the two candidate outputs are well
-separated and the winner flips abruptly, whereas near-identical predictions differ only in small logit
-components that get carried across smoothly — with the refinement that the competition is resolved
-close to the output, not accumulated over the whole stack.
+The right statement of this result is that downstream depth is *necessary* for the plateau, not that it
+is sufficient. Table 1 supplies the counterexample: `big`/`large` has 35 blocks below the patch in
+GPT-2 Large — more than any condition in Table 4 — and stays at $w_{10-90} = 0.592$. Depth sets how
+sharp a transition *can* become; which pairs actually sharpen depends on the interpolation path.
+
+### The depth that matters is relative depth
+
+Table 4 is ambiguous about units in a way that matters for anyone applying it. All three models there
+have 24 blocks, so "11 blocks below the patch" and "just under half the stack below the patch" pick out
+the same runs, and the two readings give opposite advice about any other model. Experiment 5 separates
+them inside the GPT-2 family, where tokenizer, architecture and corpus are fixed and only depth
+changes.
+
+**Table 5 — plateau strength at every patch site in three GPT-2 models of different depth.** Rows with
+the same "blocks below" are matched under the absolute reading; rows with the same $f$ under the
+relative reading.
+
+| Model (blocks) | patch site | blocks below | $f$ | median $w_{TV}$ | % sharp | median $w_{10-90}$ |
+|---|---|---|---|---|---|---|
+| gpt2-small (12) | block 0 | 11 | 1.000 | 0.153 | 74.0% | 0.417 |
+| gpt2-small (12) | block 6 | 5 | 0.455 | 0.289 | 35.5% | 0.632 |
+| gpt2-small (12) | block 8 | 3 | 0.273 | 0.363 | 12.0% | 0.703 |
+| gpt2-small (12) | block 10 | 1 | 0.091 | 0.456 | 3.5% | 0.768 |
+| gpt2-medium (24) | block 0 | 23 | 1.000 | 0.080 | 82.0% | 0.241 |
+| gpt2-medium (24) | block 12 | 11 | 0.478 | 0.250 | 50.5% | 0.556 |
+| gpt2-medium (24) | block 20 | 3 | 0.130 | 0.383 | 10.0% | 0.701 |
+| gpt2-large (36) | block 0 | 35 | 1.000 | 0.047 | 89.5% | 0.155 |
+| gpt2-large (36) | block 12 | 23 | 0.657 | 0.255 | 47.0% | 0.570 |
+| gpt2-large (36) | block 18 | 17 | 0.486 | 0.342 | 22.5% | 0.673 |
+| gpt2-large (36) | block 24 | 11 | 0.314 | 0.444 | 1.5% | 0.754 |
+| gpt2-large (36) | block 31 | 4 | 0.114 | 0.495 | 0.0% | 0.796 |
+
+**One comparison settles it.** GPT-2 Large patched at block 12 and GPT-2 Medium patched at block 0 have
+exactly 23 blocks below the patch, the same tokenizer and the same training corpus. Under the absolute
+reading they should behave alike. They do not: median $w_{TV}$ is $0.255$ against $0.080$, a factor of
+3.2, and 47.0% of pairs sharp against 82.0%. Those 23 blocks are almost the whole of the 24-block model
+and two thirds of the 36-block one. At 11 blocks below the disagreement is worse and the ordering
+inverts the absolute reading outright — the 12-block model is the sharpest (0.153) and the 36-block
+model the flattest (0.444).
+
+![Median transition width against blocks below the patch and against fraction of the stack below the patch, for three GPT-2 models of different depth](plots/depth_scaling.png)
+
+**Figure 7.** Relative depth, not absolute depth, organises the plateau. Both panels: y = median
+$w_{TV}$ at the final logits over that model's 200 mined pairs (smaller = sharper); gray dashed =
+linear response (0.5), dotted = sharp threshold (0.25). x, left panel: number of blocks below the patch
+site; x, right panel: the same runs against the relative depth $f$ defined in Methods. gpt2-small =
+circles, solid; gpt2-medium = squares, dashed; gpt2-large = triangles, dotted. The annotation in each
+panel is the mean across-model spread $S$ at matched levels (Table 6); smaller means the three models
+agree better under that reading. On the left the curves are separated and ordered by model size; on the
+right they nearly superimpose.
+
+**Table 6 — how far apart the three models stay once matched, under each reading.** The spread column
+is $S(\ell)$, the range of median $w_{TV}$ across the three models at that level.
+
+| Matched on | level | gpt2-small | gpt2-medium | gpt2-large | spread $S$ |
+|---|---|---|---|---|---|
+| blocks below | 11 blocks | 0.153 | 0.250 | 0.444 | **0.291** |
+| blocks below | 3–4 blocks | 0.363 | 0.383 | 0.495 | **0.133** |
+| relative depth $f$ | $f=1.00$ | 0.153 | 0.080 | 0.047 | **0.106** |
+| relative depth $f$ | $f=0.46$–$0.49$ | 0.289 | 0.250 | 0.342 | **0.093** |
+| relative depth $f$ | $f=0.09$–$0.13$ | 0.456 | 0.383 | 0.495 | **0.112** |
+
+Averaged over levels, matching on relative depth halves the residual disagreement, $S = 0.212$ against
+$0.104$. The leftover spread has a readable sign: at matched $f$ the deeper model is somewhat sharper
+($0.153 \to 0.080 \to 0.047$ at $f=1$), so absolute depth contributes a second-order effect. Since
+depth and width rise together in this family, that second-order term could be either.
+
+This is what makes the depth result portable. An experimenter can estimate how much plateau a patch
+site will manufacture in an untested model from $f$ alone, and a patch site quoted as "block 20" is not
+comparable across models — it is near-linear in a 24-block model and a strong plateau in a 60-block
+one. It also explains Table 1: the same `big`/`in` pair plateaus in a 36-block model and not in a
+24-block one because $f = 1$ buys more compression when the stack is longer.
+
+### A first test of the motivating hypothesis, and it comes out null
+
+The hypothesis is that *holding output JSD low, different circuits or features may occupy different
+plateaus*. Two things follow for how it must be tested. Output divergence is a **control to be held
+low**, not a variable to correlate against — so Table 3 does not bear on it. And the prediction is about
+**intermediate resting points**, a curve that pauses partway between A and B, not about how narrow the
+A-to-B transition is — so the width statistics do not bear on it either. Experiment 6 supplies the two
+missing pieces: IRD as the independent variable, IPW as the dependent one, both defined in Methods.
+
+![Internal representational distance against intermediate-plateau width for low-JSD pairs, and the two Matthew pairs in GPT-2 Large](plots/feature_plateau.png)
+
+**Figure 8.** No detectable link between internal representational difference and intermediate
+plateaus. Left and middle panels: one point per mined pair with $\mathrm{JSD} < 0.1$ (GPT-2 Large
+$n=38$, GPT-2 Medium $n=32$); x = IRD, y = IPW; dashed line = the linear-response value of IPW (0.10),
+dotted = the intermediate-plateau threshold (0.20). The two panels use different y ranges. Right panel:
+the two pairs Matthew contrasts, in his model — x = interpolation position $\alpha$, y = relative
+distance $d$; solid with circles = `big`/`in`, dashed with squares = `big`/`large`, gray dashed =
+linear $d=\alpha$.
+
+**Table 7 — the hypothesis test, restricted to pairs whose next-token predictions nearly agree.**
+
+| Model | $n$ ($\mathrm{JSD}<0.1$) | prefixes | median IRD | median IPW | % with intermediate plateau | $\rho$(IRD, IPW) | $p$ |
+|---|---|---|---|---|---|---|---|
+| gpt2-large | 38 | 19 | 0.205 | 0.120 | 0.0% | $+0.17$ | 0.31 |
+| gpt2-medium | 32 | 18 | 0.086 | 0.155 | 40.6% | $-0.00$ | 0.99 |
+
+The result is null in both models: pairs whose internal representations differ more do not rest at
+intermediate levels more often. In GPT-2 Large — the model where the phenomenon is strongest and where
+89.5% of mined pairs plateau — **no** low-JSD pair reaches the intermediate-plateau threshold. Its
+curves go from A to B without pausing anywhere in between, which is the shape the right panel of Figure
+8 shows for `big`/`in`: one step, not a staircase. In GPT-2 Medium 41% of low-JSD pairs do show an
+intermediate rest, but IRD does not predict which ones, and GPT-2 Medium's curves are predominantly
+non-monotonic, so some of those rests are dips rather than stable states.
+
+The honest reading is that this is one negative datapoint against a hypothesis that has not previously
+been tested at all, not a refutation. At $n = 38$ only $|\rho| \ge 0.32$ would have been detectable, so
+a modest association would be missed. More importantly, IRD is a proxy: it measures how far apart the
+two residual streams are, not which circuits are active, and two prompts could route through genuinely
+different features while landing at a similar representation distance. A sharper test would identify
+the features directly — sparse-autoencoder feature sets, or path patching to find which heads matter
+for each prompt — and use the *disjointness of those feature sets* as the independent variable. That
+experiment is the natural next step, and it is what the hypothesis actually calls for.
 
 ## Conclusion
 
-Interpolating a single token's early-layer activation between two prompts reliably produces a
-plateau-then-jump logit response — in 82% (gpt2-medium), 61% (opt-350m) and 48% (pythia-410m) of 200
-corpus-mined prompt pairs, and in 13 of 15 hand-picked model-pair cells. The plateau does not indicate
-that the two prompts predict the same continuation. Across the mined bank the relationship runs the
-other way and is statistically strong in all three model families: $\rho = -0.61$, $-0.57$ and $-0.45$
-once pairs at the JSD ceiling are excluded, all with $p < 10^{-7}$, agreeing across three sharpness
-statistics and surviving a control for activation geometry. The hand-picked negative control, chosen so
-its two continuations clearly differ, plateaus as sharply as the four test pairs — and in opt-350m more
-sharply than all of them.
+The reported plateau is real in the model it was reported in. In GPT-2 Large, interpolating one token's
+block-0 activation gives `The house was big`/`in` a near-step response ($w_{10-90} = 0.044$, 95% of the
+sweep pinned at an endpoint) and `big`/`large` a near-linear one ($0.592$), a 13-fold difference that
+holds across three sharpness statistics. In GPT-2 Medium the same pair does not plateau under the
+predefined criterion, so model depth is not a free choice when reproducing this effect.
 
-For anyone using interpolation as an interpretability probe, the actionable point is that plateau shape
-needs calibration before it can be evidence for anything. Report an interpolation between prompts of
-known dissimilarity alongside the pair of interest and treat the difference as the signal; reading a
-sharp plateau as "these two prompts share a continuation" gets the sign backwards, since in our banks
-the sharp end of the distribution is where the *most* divergent pairs live. Figures 5 and 6 explain why
-the bar is that high: the sharpening is supplied by the blocks downstream of the patch, which are the
-same blocks in every condition, and taking those blocks away by patching at block 20 removes the
-plateau outright — 0% of pythia-410m's pairs and 1% of opt-350m's stay sharp, at a median response
-within 2% of the linear baseline for pythia. Two corollaries for experimental design follow. The patch
-depth is itself a knob: a plateau seen with a late patch is far more informative than the same plateau
-seen with an early one. And the calibration has to be redone per model: at matched endpoint divergence
-gpt2-medium plateaus 2–4 times more sharply than the other two (Table 2), a gap that persists in every
-divergence bin and does not follow the tokenizer, since opt-350m tokenizes identically to gpt2-medium
-and behaves less like it than pythia-410m does in some bins.
+What governs the effect is how much of the network sits below the patch, measured as a fraction rather
+than a count. Three GPT-2 models of 12, 24 and 36 blocks nearly superimpose when plotted against the
+fraction below the patch and separate by up to $0.29$ in median $w_{TV}$ when plotted against the block
+count; GPT-2 Large at block 12 and GPT-2 Medium at block 0 share 23 blocks below and differ 3.2-fold.
+Removing that depth removes the plateau — Pythia-410m with 3 blocks below the patch has zero sharp
+pairs out of 200 and a median response within 2% of proportional. But depth only sets the ceiling:
+`big`/`large` has 35 blocks below it in GPT-2 Large and stays smooth, so the interpolation path decides
+whether that ceiling is reached.
 
-**Limitations.** The pairs are constructed by swapping the final token for a lower-ranked alternative,
-which spans endpoint divergence well but leaves the two prompts differing only at one position and only
-in a way the model itself considered plausible; pairs differing in earlier tokens, or in more than one,
-are untested. JSD saturates at $\ln 2$ and 29–37% of mined pairs sit near that ceiling, so the
-full-bank correlations in Table 3 understate the effect and Table 4 is the cleaner estimate. All
-results are for one patched position (the final token) in three models of similar size and identical
-depth and width (24 blocks, $d_{model} = 1024$), at three patch sites; a 5-block model or a 60-block
-model could sit anywhere on the depth curve of Figure 6. Table 2 rules the tokenizer out as the
-explanation of the cross-model prevalence gap but does not identify what does explain it —
-architecture, training corpus and pretraining length remain confounded across our three models.
-Finally, $d(\alpha)$ measures movement in raw logit space, so a pair could hold its logit vector still
-while reordering low-probability tokens and this metric would not see it.
+Three things follow for anyone using interpolation as a probe. Report the patch site as a fraction of
+the stack, since a block number is not comparable across models. Report a base rate or a matched
+comparison pair, since 83.5% of arbitrary GPT-2 Large pairs plateau under the predefined criterion and
+a single sharp curve is therefore weak evidence — pairing `big`/`in` with `big`/`large` is the right
+design, and it is the part worth copying. And keep the claim matched to the measurement: a narrow
+A-to-B transition is not evidence about intermediate feature states, which is what the motivating
+hypothesis is about.
+
+That hypothesis remains open. Its first direct test here — holding next-token divergence below 0.1 and
+asking whether internal representational difference predicts intermediate plateaus — returns
+$\rho = +0.17$ ($p = 0.31$) in GPT-2 Large and $\rho = -0.00$ ($p = 0.99$) in GPT-2 Medium, with no
+low-JSD GPT-2 Large pair showing an intermediate plateau at all. That is suggestive but not decisive,
+and the way to settle it is to measure feature difference directly rather than through representation
+geometry.
+
+**Limitations.** The hypothesis test is under-powered ($n = 38$ and $32$ pairs, from 19 and 18
+prefixes) and its independent variable is a proxy; a null here constrains large effects only. All
+results are for one patched position, the final token, and one interpolation scheme; pairs differing at
+an earlier position, or in more than one token, are untested. Mined pairs are built by swapping the
+final token for a lower-ranked alternative, so both continuations are ones the model itself considered
+plausible. JSD saturates at $\ln 2$ and a third of mined pairs sit near that ceiling, which is why
+Table 3 restricts to the unsaturated subset. The depth-scaling result rests on one family, where
+residual width rises with depth (768, 1024, 1280), so the residual spread in Table 6 cannot be assigned
+to depth or width separately, and relative depth has not been checked outside GPT-2 or outside the
+12–36 block range. The cross-model differences in Table 2 are not attributed: architecture, corpus and
+pretraining length are confounded across families. Finally, $d(\alpha)$ measures movement in raw logit
+space, so a pair could hold its logit vector still while reordering low-probability tokens and this
+metric would not see it.

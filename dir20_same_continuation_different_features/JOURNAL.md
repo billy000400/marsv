@@ -221,3 +221,143 @@ Neither is required by PLAN.md.
 
 On track? yes — PLAN.md S1-S5 complete plus the unplanned S6 third-model generalization; ~100% of the
 plan done, no blocker; the direction's three headline claims now each rest on three model families.
+
+---
+## 2026-08-10 — iteration 5 (S7: depth-mismatched models, relative vs absolute depth)
+
+**Feedback check:** listed the direction root for `human_feedback*.md` / `*REVIEW*` without the
+`.addressed.md` suffix — none present. Proceeded with the plan's stated next step (option (a) from
+iteration 4: a depth-mismatched model to test whether Figure 6's curve is about absolute block count
+or fraction of the stack).
+
+**What I did.** Ran the experiment that decides the units of "depth" in Experiment 4.
+- `common.py`: added `gpt2-small` (12 blocks) and `gpt2-large` (36 blocks) plus an `N_BLOCKS` map.
+  Both were already in the local HF cache. No change to `mine_pairs.py` / `run_interp.py` — the
+  patch-layer argument added in iteration 3 already covered everything this needed.
+- `analyze_scaling.py` (new): per-site stats for the three GPT-2 depths, the matched-level spread
+  statistic under each reading, and `plots/depth_scaling.png` (two panels, same 12 runs, one x-axis
+  each).
+- Ran 200-pair banks at blocks 0/6/8/10 for gpt2-small (~1 min per site) and blocks 0/12/18/24/31 for
+  gpt2-large (~11 min per site) — 1800 sweeps, ~55 min wall-clock, well inside the GPU budget
+  (peak 4.3 GB of the 7.2 GB share).
+
+**Assumptions logged (loop mode, no human to ask).**
+1. Tested depth *within* the GPT-2 family rather than by adding another family. Holding tokenizer,
+   architecture and corpus fixed is what makes the comparison interpretable; the cost is that
+   residual width rises with depth (768/1024/1280), which I state as a limitation instead of trying
+   to remove. Rejected alternative: pythia-1.4b-deduped (cached) — different width *and* different
+   family, so a null would have been unattributable.
+2. Chose patch sites to hit both matchings rather than sweeping every block: gpt2-large at block 12
+   gives exactly 23 blocks below (matching gpt2-medium at block 0) and block 24 gives 11, while
+   blocks 0/18/31 match the fractions. Five sites instead of 36 costs 1000 sweeps instead of 7200 and
+   still lands the decisive comparison.
+3. Quantified "which reading organises the data" with the across-model range of median w_TV at
+   matched levels, averaged over levels. Rejected fitting a two-parameter model of sharpness in
+   (blocks, fraction) — with three models and twelve runs that would over-claim; the range is
+   transparent and the figure shows the raw curves anyway.
+
+**What I learned.**
+- The answer is relative depth, and it is not close. gpt2-large at block 12 and gpt2-medium at block 0
+  have the *same 23 blocks* below the patch and differ by a factor of 3.2 in median w_TV
+  (0.255 vs 0.080), 47% vs 82% sharp. Matching on the fraction halves the mean across-model spread
+  (0.212 -> 0.104). The prediction I would have made from Figure 6 alone — absolute block count —
+  was wrong.
+- At 11 blocks below the patch the ordering actually *inverts* the absolute reading: the 12-block
+  model is the sharpest (0.153) and the 36-block model the flattest (0.444). More blocks below the
+  patch, less plateau, because those blocks are a smaller share of the network.
+- This makes the depth result portable, which is the practical payoff: an experimenter can estimate
+  how much plateau a patch site manufactures in an untested model from f alone.
+- The inverted JSD association replicates in both new models (-0.44 and -0.64 at block 0), so it is
+  now 5/5 models over three families, 124M-774M params, 12-36 blocks. gpt2-large's -0.64 is the
+  strongest value in the study.
+- Both new models *narrow* an earlier claim rather than confirming it. REPORT.md said the divergence
+  effect is "already fully expressed by the last three blocks"; in gpt2-small (1 block below) rho goes
+  to +0.04 and in gpt2-large (4 below) to -0.19, both at ~0% sharp. That matches pythia-410m and
+  supports the floor-effect reading — the correlation needs some transition shape left to modulate —
+  so the claim now applies only to the models that still plateau at that depth. Edited the Results
+  and Summary accordingly.
+- Process note: my draft numbered the two new tables 5 and 6, colliding with the existing Table 5, and
+  three references in the new section pointed at Table 4 when they meant the depth table. Caught by
+  grepping `Table [0-9]` across the file, not by `check_render.py`, which does not check numbering.
+
+**Next step.** PLAN.md S1-S7 are complete and both open questions from iteration 4 are now one for
+one: (a) is answered here. The single remaining item from that list is (b) pairs that differ at an
+*earlier* position rather than the final token, which is the last untested generalization of the
+setup and would need a modest change to `mine_pairs.py` (patch the differing position instead of the
+last one, and record whether the difference propagates). Failing that, the deliverables are current,
+pass `check_render.py`, and embed all seven figures with visible captions cited by number.
+
+On track? yes — PLAN.md S1-S6 complete plus the unplanned S7 depth-scaling test; ~100% of the plan
+done, no blocker; the depth finding is now stated in units that transfer to models we did not run.
+
+---
+## 2026-08-10 — iteration 5b (operator feedback: reproduction, reframing, and the real hypothesis)
+
+**Feedback check:** `human_feedback.txt` appeared in the direction root *during* this iteration (it was
+not present at the start, when I checked and found nothing). Per CLAUDE.md Part C it became the
+iteration's work. Read in full, addressed all five points, renamed to
+`human_feedback.txt.addressed.md`.
+
+**What I did.** Ran the experiments the feedback demanded, then rewrote both deliverables around what
+they showed.
+- `common.py`: added `The house was big / large` as a sixth pair and relabelled the two `The house was`
+  pairs as Matthew's plateau case and smooth case. Ran `run_interp.py` over all five models (30
+  model-pair cells).
+- `analyze.py` / `analyze_bank.py`: extended to five models and six pairs (6th series in gray, distinct
+  linestyle+marker, no red/green).
+- `feature_plateau.py` (new): the first direct test of the advisor's hypothesis — output JSD held below
+  0.1, IRD (mean over blocks of 1-cos between the two clean residual streams) as the independent
+  variable, IPW (longest alpha span resting at a level in [0.15,0.85] within a 0.10 band) as the
+  dependent variable, with the linear response giving IPW = 0.10 by construction.
+- Rewrote RESULTS.md end to end and REPORT.md end to end, including a new title.
+
+**What I learned — and where I was wrong.**
+- The feedback's central point is correct and my previous framing was wrong in a way that mattered.
+  `big`/`in` is Matthew's *positive* example; I had been treating it as a dissimilar-continuation
+  negative control, which inverted the meaning of every sentence built on it. With `big`/`large` added,
+  his actual contrast reproduces cleanly in his actual model: gpt2-large gives w10-90 = 0.044 vs 0.592,
+  a 13-fold gap, and big/large is the widest or second-widest transition in all five models.
+- GPT-2 Medium really is not a reproduction: the same big/in pair scores 0.516 there, failing the
+  predefined criterion. My earlier "the control plateaus as hard as the test pairs" observation was an
+  artifact of running the wrong model and mislabelling the pair. The S7 relative-depth result explains
+  why (f = 1 buys more compression in a longer stack), which is a satisfying consistency check between
+  this iteration's two halves.
+- The prevalence overstatement was real. I had been quoting "13 of 15 cells" using w_TV < 0.5, which
+  only means "better than linear", not the plan's predefined w10-90 < 0.5. Under the predefined
+  criterion it is 11 of 30. The mined-bank claim survives the stricter criterion (83.5% in gpt2-large),
+  so the base-rate argument stands, but the hand-picked claim did not.
+- "Depth produces the plateau" was too strong, and the counterexample was already in my own data once
+  big/large was run: 35 blocks below the patch in gpt2-large and still smooth. Necessary, not
+  sufficient.
+- The hypothesis test came out null in both models (rho = +0.17, p=0.31, n=38; rho = -0.00, p=0.99,
+  n=32), and notably **zero** low-JSD gpt2-large pairs show any intermediate plateau — its curves step
+  once rather than pausing. I am deliberately not calling this a refutation: rho_min at n=38 is 0.32,
+  and IRD is representation geometry, not a feature measurement.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. Operationalised "different circuits/features" as IRD, mean cosine distance between the two clean
+   residual streams across the stack. Rejected alternatives: SAE feature sets (no trained SAE available
+   offline for these checkpoints within budget) and path patching (needs a per-pair circuit search,
+   far beyond the remaining time). The proxy is named as a limitation and the SAE/path-patching version
+   is written into the report as the next step.
+2. Operationalised "different plateaus" as an intermediate resting level (IPW), not as transition
+   width. This is the reading that makes the hypothesis distinguishable from what Experiments 3-5
+   already measure. Rejected: counting inflection points, which non-monotonic curves make meaningless.
+3. Kept the JSD-vs-width correlation in the report rather than deleting it, but demoted it with an
+   explicit scope note. Rejected deleting it: it is a real, five-model regularity that a reader of this
+   method will hit, and hiding it would be its own distortion. Rejected keeping it as the headline: the
+   feedback is right that it tests a different claim.
+4. Renamed the feedback file to `human_feedback.txt.addressed.md` rather than
+   `human_feedback.addressed.md`, so the original name is preserved intact while the suffix rule is
+   satisfied.
+
+**Next step.** The hypothesis now has a stated, testable form and a first null. The highest-value next
+iteration is the sharper version of Experiment 6: get a feature-level measurement of circuit difference
+(a trained SAE on GPT-2 Large residuals, or path patching over attention heads for a subset of low-JSD
+pairs) and re-run the IRD leg with feature-set disjointness as the independent variable. Secondary:
+raise power by mining specifically for low-JSD pairs rather than filtering a general bank, which would
+take n from 38 to a few hundred at the same cost.
+
+On track? yes — all five feedback points addressed with new experiments rather than text edits alone;
+both deliverables rewritten and passing `check_render.py`; no unaddressed feedback remains and no STOP
+written (the hypothesis test is open work).

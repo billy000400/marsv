@@ -1,6 +1,78 @@
 {
   "rows": [
     {
+      "model": "gpt2-large",
+      "pair": "book_to",
+      "label": "gave a book to Mary / her",
+      "control": false,
+      "jsd": 0.05142205208539963,
+      "w": 0.28793606698513036,
+      "wtv": 0.14354492128653584,
+      "pf": 0.7128712871287128,
+      "mono": true,
+      "cos": 0.5568340420722961
+    },
+    {
+      "model": "gpt2-large",
+      "pair": "two_plus_two",
+      "label": "Two plus two is four / 4",
+      "control": false,
+      "jsd": 0.047578755766153336,
+      "w": 0.48539098404347897,
+      "wtv": 0.21590902426700137,
+      "pf": 0.5148514851485149,
+      "mono": true,
+      "cos": 0.8033046722412109
+    },
+    {
+      "model": "gpt2-large",
+      "pair": "answer_case",
+      "label": "The answer is four / Four",
+      "control": false,
+      "jsd": 0.28313133120536804,
+      "w": 0.13252221703529365,
+      "wtv": 0.019594369790774446,
+      "pf": 0.8613861386138614,
+      "mono": true,
+      "cos": 0.8743240237236023
+    },
+    {
+      "model": "gpt2-large",
+      "pair": "element_au",
+      "label": "clue identify? Au / 79",
+      "control": false,
+      "jsd": 0.3121240437030792,
+      "w": 0.4480949444230646,
+      "wtv": 0.13912087447169708,
+      "pf": 0.5544554455445545,
+      "mono": true,
+      "cos": 0.2604978084564209
+    },
+    {
+      "model": "gpt2-large",
+      "pair": "house_big_in",
+      "label": "The house was big / in (M. plateau case)",
+      "control": true,
+      "jsd": 0.6625694632530212,
+      "w": 0.043702277094125774,
+      "wtv": 0.012299555744530177,
+      "pf": 0.9504950495049505,
+      "mono": true,
+      "cos": 0.616078794002533
+    },
+    {
+      "model": "gpt2-large",
+      "pair": "house_big_large",
+      "label": "The house was big / large (M. smooth case)",
+      "control": true,
+      "jsd": 0.05250447057187557,
+      "w": 0.5916624322533608,
+      "wtv": 0.29238497546986786,
+      "pf": 0.4158415841584158,
+      "mono": true,
+      "cos": 0.7338873147964478
+    },
+    {
       "model": "gpt2-medium",
       "pair": "book_to",
       "label": "gave a book to Mary / her",
@@ -50,8 +122,8 @@
     },
     {
       "model": "gpt2-medium",
-      "pair": "house_control",
-      "label": "The house was big / in (control)",
+      "pair": "house_big_in",
+      "label": "The house was big / in (M. plateau case)",
       "control": true,
       "jsd": 0.6589696407318115,
       "w": 0.5158612240850926,
@@ -61,64 +133,88 @@
       "cos": 0.9284718036651611
     },
     {
-      "model": "pythia-410m",
+      "model": "gpt2-medium",
+      "pair": "house_big_large",
+      "label": "The house was big / large (M. smooth case)",
+      "control": true,
+      "jsd": 0.04164953716099262,
+      "w": 0.7192488425970077,
+      "wtv": 0.398495436083484,
+      "pf": 0.2871287128712871,
+      "mono": true,
+      "cos": 0.9403927326202393
+    },
+    {
+      "model": "gpt2-small",
       "pair": "book_to",
       "label": "gave a book to Mary / her",
       "control": false,
-      "jsd": 0.03289569169282913,
-      "w": 0.5821982562541961,
-      "wtv": 0.2678632726464672,
-      "pf": 0.42574257425742573,
-      "mono": true,
-      "cos": 0.3116653561592102
+      "jsd": 0.030440010130405426,
+      "w": 0.555674397945404,
+      "wtv": 0.27593334198269304,
+      "pf": 0.44554455445544555,
+      "mono": false,
+      "cos": 0.753821611404419
     },
     {
-      "model": "pythia-410m",
+      "model": "gpt2-small",
       "pair": "two_plus_two",
       "label": "Two plus two is four / 4",
       "control": false,
-      "jsd": 0.05550812557339668,
-      "w": 0.7581294347345829,
-      "wtv": 0.4514105622865975,
-      "pf": 0.24752475247524752,
+      "jsd": 0.17320388555526733,
+      "w": 0.606997416317463,
+      "wtv": 0.3519269409152822,
+      "pf": 0.39603960396039606,
       "mono": true,
-      "cos": 0.8046640157699585
+      "cos": 0.9234853982925415
     },
     {
-      "model": "pythia-410m",
+      "model": "gpt2-small",
       "pair": "answer_case",
       "label": "The answer is four / Four",
       "control": false,
-      "jsd": 0.27086973190307617,
-      "w": 0.3395595014095306,
-      "wtv": 0.1347044225323768,
-      "pf": 0.6633663366336634,
+      "jsd": 0.3579176217317581,
+      "w": 0.5478467863798142,
+      "wtv": 0.2253363796332874,
+      "pf": 0.45544554455445546,
       "mono": true,
-      "cos": 0.8809816837310791
+      "cos": 0.9446343183517456
     },
     {
-      "model": "pythia-410m",
+      "model": "gpt2-small",
       "pair": "element_au",
       "label": "clue identify? Au / 79",
       "control": false,
-      "jsd": 0.3850417733192444,
-      "w": 0.5983568018674851,
-      "wtv": 0.254260956993141,
-      "pf": 0.40594059405940597,
+      "jsd": 0.3550664931535721,
+      "w": 0.9059659420885146,
+      "wtv": 0.7813099885106013,
+      "pf": 0.09900990099009901,
       "mono": true,
-      "cos": 0.38682904839515686
+      "cos": 0.6647812128067017
     },
     {
-      "model": "pythia-410m",
-      "pair": "house_control",
-      "label": "The house was big / in (control)",
+      "model": "gpt2-small",
+      "pair": "house_big_in",
+      "label": "The house was big / in (M. plateau case)",
       "control": true,
-      "jsd": 0.6645490527153015,
-      "w": 0.4253229828178883,
-      "wtv": 0.1367343260530649,
-      "pf": 0.5742574257425742,
+      "jsd": 0.658125251531601,
+      "w": 0.691478400528431,
+      "wtv": 0.25422641125863643,
+      "pf": 0.31683168316831684,
+      "mono": false,
+      "cos": 0.7860133051872253
+    },
+    {
+      "model": "gpt2-small",
+      "pair": "house_big_large",
+      "label": "The house was big / large (M. smooth case)",
+      "control": true,
+      "jsd": 0.052545247599482536,
+      "w": 0.7599512153863907,
+      "wtv": 0.4563191783714739,
+      "pf": 0.24752475247524752,
       "mono": true,
-      "cos": 0.41016921401023865
+      "cos": 0.8867307901382446
     },
     {
       "model": "opt-350m",
@@ -170,8 +266,8 @@
     },
     {
       "model": "opt-350m",
-      "pair": "house_control",
-      "label": "The house was big / in (control)",
+      "pair": "house_big_in",
+      "label": "The house was big / in (M. plateau case)",
       "control": true,
       "jsd": 0.6464939117431641,
       "w": 0.1430663844943046,
@@ -179,65 +275,177 @@
       "pf": 0.8514851485148515,
       "mono": false,
       "cos": 0.4079461097717285
+    },
+    {
+      "model": "opt-350m",
+      "pair": "house_big_large",
+      "label": "The house was big / large (M. smooth case)",
+      "control": true,
+      "jsd": 0.04173366725444794,
+      "w": 0.8305662897229196,
+      "wtv": 0.5979195906535565,
+      "pf": 0.1782178217821782,
+      "mono": true,
+      "cos": 0.7534446716308594
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "book_to",
+      "label": "gave a book to Mary / her",
+      "control": false,
+      "jsd": 0.03289569169282913,
+      "w": 0.5821982562541961,
+      "wtv": 0.2678632726464672,
+      "pf": 0.42574257425742573,
+      "mono": true,
+      "cos": 0.3116653561592102
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "two_plus_two",
+      "label": "Two plus two is four / 4",
+      "control": false,
+      "jsd": 0.05550812557339668,
+      "w": 0.7581294347345829,
+      "wtv": 0.4514105622865975,
+      "pf": 0.24752475247524752,
+      "mono": true,
+      "cos": 0.8046640157699585
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "answer_case",
+      "label": "The answer is four / Four",
+      "control": false,
+      "jsd": 0.27086973190307617,
+      "w": 0.3395595014095306,
+      "wtv": 0.1347044225323768,
+      "pf": 0.6633663366336634,
+      "mono": true,
+      "cos": 0.8809816837310791
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "element_au",
+      "label": "clue identify? Au / 79",
+      "control": false,
+      "jsd": 0.3850417733192444,
+      "w": 0.5983568018674851,
+      "wtv": 0.254260956993141,
+      "pf": 0.40594059405940597,
+      "mono": true,
+      "cos": 0.38682904839515686
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "house_big_in",
+      "label": "The house was big / in (M. plateau case)",
+      "control": true,
+      "jsd": 0.6645490527153015,
+      "w": 0.4253229828178883,
+      "wtv": 0.1367343260530649,
+      "pf": 0.5742574257425742,
+      "mono": true,
+      "cos": 0.41016921401023865
+    },
+    {
+      "model": "pythia-410m",
+      "pair": "house_big_large",
+      "label": "The house was big / large (M. smooth case)",
+      "control": true,
+      "jsd": 0.041842347010970116,
+      "w": 0.8018318314477801,
+      "wtv": 0.5045038413597595,
+      "pf": 0.2079207920792079,
+      "mono": true,
+      "cos": 0.6921192407608032
     }
   ],
   "per_model": {
-    "gpt2-medium": {
+    "gpt2-large": {
       "w": {
-        "rho": -0.39999999999999997,
-        "p": 0.5046315754686912
+        "rho": -0.6,
+        "p": 0.208
       },
       "wtv": {
-        "rho": 0.3,
-        "p": 0.623837664781073
+        "rho": -0.7714285714285715,
+        "p": 0.07239650145772594
       },
       "pf": {
-        "rho": 0.0,
-        "p": 1.0
+        "rho": 0.6,
+        "p": 0.208
       }
     },
-    "pythia-410m": {
+    "gpt2-medium": {
       "w": {
-        "rho": -0.3,
-        "p": 0.623837664781073
+        "rho": -0.6571428571428573,
+        "p": 0.1561749271137024
       },
       "wtv": {
-        "rho": -0.6,
-        "p": 0.28475697986529386
+        "rho": -0.2571428571428572,
+        "p": 0.6227871720116619
       },
       "pf": {
-        "rho": 0.3,
-        "p": 0.623837664781073
+        "rho": 0.4285714285714286,
+        "p": 0.3965014577259473
+      }
+    },
+    "gpt2-small": {
+      "w": {
+        "rho": 0.028571428571428574,
+        "p": 0.9571545189504373
+      },
+      "wtv": {
+        "rho": -0.4285714285714286,
+        "p": 0.3965014577259473
+      },
+      "pf": {
+        "rho": -0.028571428571428574,
+        "p": 0.9571545189504373
       }
     },
     "opt-350m": {
       "w": {
-        "rho": -0.9999999999999999,
-        "p": 1.4042654220543602e-24
+        "rho": -0.942857142857143,
+        "p": 0.004804664723032055
       },
       "wtv": {
-        "rho": -0.8999999999999998,
-        "p": 0.03738607346849874
+        "rho": -0.8857142857142858,
+        "p": 0.01884548104956266
       },
       "pf": {
-        "rho": 0.9999999999999999,
-        "p": 1.4042654220543602e-24
+        "rho": 0.942857142857143,
+        "p": 0.004804664723032055
+      }
+    },
+    "pythia-410m": {
+      "w": {
+        "rho": -0.4285714285714286,
+        "p": 0.3965014577259473
+      },
+      "wtv": {
+        "rho": -0.6571428571428573,
+        "p": 0.1561749271137024
+      },
+      "pf": {
+        "rho": 0.4285714285714286,
+        "p": 0.3965014577259473
       }
     }
   },
   "pooled_jsd_vs_w": {
-    "rho": -0.5964285714285712,
-    "p": 0.01893192468786518,
-    "n": 15
+    "rho": -0.4883203559510568,
+    "p": 0.006185153240696981,
+    "n": 30
   },
   "pooled_jsd_vs_wtv": {
-    "rho": -0.41785714285714276,
-    "p": 0.12117253602187843,
-    "n": 15
+    "rho": -0.5101223581757508,
+    "p": 0.003977862072292742,
+    "n": 30
   },
   "pooled_jsd_vs_pf": {
-    "rho": 0.5499999999999999,
-    "p": 0.033655357815007024,
-    "n": 15
+    "rho": 0.4725775977624251,
+    "p": 0.008362581366314136,
+    "n": 30
   }
 }

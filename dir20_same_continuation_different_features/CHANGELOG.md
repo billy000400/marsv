@@ -181,3 +181,131 @@ in reading order. All six embedded in both files; `check_render.py` passes on bo
 **Framing.** No re-frame. The headline claim is unchanged and now rests on three model families instead
 of two, and the Summary/Conclusion were rewritten to say so, plus a new Conclusion corollary that the
 calibration must be redone per model (Table 2).
+
+## 2026-08-10 — S7: depth-mismatched models; the plateau tracks RELATIVE depth, not block count
+
+**What changed.** Added a fifth experiment answering the question the previous REPORT.md listed as a
+limitation ("a 5-block model or a 60-block model could sit anywhere on the depth curve of Figure 6").
+Experiment 4 moved the patch inside three models that all have 24 blocks, so "11 blocks below the
+patch" and "just under half the stack below the patch" named the same runs. S7 separates the two
+readings inside the GPT-2 family, where tokenizer, architecture and pretraining corpus are fixed and
+only depth changes: `gpt2` (124M, 12 blocks, d_model 768) and `gpt2-large` (774M, 36 blocks, d_model
+1280) alongside the existing `gpt2-medium` (24 blocks). Code: `common.py` gained the two model entries
+and an `N_BLOCKS` map; `analyze_scaling.py` is new. `mine_pairs.py` and `run_interp.py` were not
+touched — the existing patch-layer argument already covered this. 1800 new sweeps (200 mined pairs at
+4 sites in gpt2-small and 5 sites in gpt2-large), ~50 min on the shared GPU; endpoint identity error
+1.4e-4 (gpt2-small) and 1.4e-5 (gpt2-large), inside the report's existing <= 4e-4 bound.
+
+**Nothing superseded.** Every gpt2-medium, pythia-410m and opt-350m number in both deliverables is
+unchanged; the two new models are additions, and their banks are freshly mined (same 40 WikiText
+prefixes and same rank draws, each model's own top-1 token). Counts that aggregate over runs moved:
+total sweeps 1815 -> 3615. The hand-picked set stays at 15 cells in 3 models — the new models were run
+on the mined bank only, and Table 1 / Figure 1 are unchanged.
+
+**New results (Experiment 5).** Median w_TV / % sharp / median w10-90 per patch site:
+- *gpt2-small (12 blocks)*: block 0 (11 below, f=1.000) 0.153 / 74.0% / 0.417; block 6 (5, f=0.455)
+  0.289 / 35.5% / 0.632; block 8 (3, f=0.273) 0.363 / 12.0% / 0.703; block 10 (1, f=0.091)
+  0.456 / 3.5% / 0.768.
+- *gpt2-large (36 blocks)*: block 0 (35, f=1.000) 0.047 / 89.5% / 0.155; block 12 (23, f=0.657)
+  0.255 / 47.0% / 0.570; block 18 (17, f=0.486) 0.342 / 22.5% / 0.673; block 24 (11, f=0.314)
+  0.444 / 1.5% / 0.754; block 31 (4, f=0.114) 0.495 / 0.0% / 0.796.
+
+**The headline of the new experiment.** The absolute reading is refuted by a direct comparison:
+gpt2-large at block 12 and gpt2-medium at block 0 both have 23 blocks below the patch and give median
+w_TV 0.255 vs 0.080 (factor 3.2) and 47.0% vs 82.0% sharp. Matching on the fraction f = (N-1-L)/(N-1)
+instead halves the mean across-model spread of median w_TV, 0.212 -> 0.104, and is the only reading
+under which the three models stay consistently ordered. Residual: at matched f the deeper model is
+somewhat sharper (0.153 / 0.080 / 0.047 at f=1), a second-order effect that depth and width cannot be
+told apart on inside this family.
+
+**Association replicates 5/5 models.** Below the ln 2 ceiling at block 0, rho(JSD, w_TV) = -0.44
+(gpt2-small, n=147, p=2.7e-8) and -0.64 (gpt2-large, n=137, p=6.1e-17, the strongest in the study).
+Both new models follow pythia-410m rather than gpt2-medium on how rho behaves with depth: it survives
+until the response goes linear and then collapses (+0.04, p=0.64 for gpt2-small with 1 block below;
+-0.19 for gpt2-large with 4). This *narrows* an earlier claim: REPORT.md previously said the
+divergence effect "is already fully expressed by the last three blocks"; that now holds only for the
+two models that still produce a plateau there, and the floor-effect explanation given for pythia-410m
+is supported rather than being special pleading.
+
+**Figures.** Added `plots/depth_scaling.png` as **Figure 7** (median w_TV vs blocks-below and vs
+fraction-below, three GPT-2 depths, with the mean across-model spread annotated in each panel),
+embedded with a visible caption in both deliverables. Figures 1-6 are unchanged. Tables: the new
+per-site table is **Table 6** and the matched-level spread table is **Table 7**; a draft numbering
+collision with the existing Table 5 was corrected before commit, and three stale "Table 4" references
+in the new section were repointed to Table 5.
+
+**Limitations changed.** Removed "a 5-block model or a 60-block model could sit anywhere on the depth
+curve of Figure 6" (now answered). Replaced with: the depth-scaling result rests on one family, where
+residual width rises with depth (768/1024/1280), so the residual spread in Table 7 cannot be assigned
+to depth or width separately, and relative depth has not been checked outside GPT-2 or outside the
+12-36 block range.
+
+**Framing.** No re-frame. The central claim is unchanged; the new experiment makes the depth half of
+it portable to untested models and adds a third design corollary to the Conclusion (patch sites must
+be quoted as a fraction of the stack, not a block number).
+
+## 2026-08-10 — Operator feedback (human_feedback.txt): reproduction in GPT-2 Large, corrected framing, first test of the actual hypothesis
+
+Addressed every point in `human_feedback.txt` (renamed `human_feedback.txt.addressed.md`). Both
+deliverables were substantially restructured; REPORT.md was retitled.
+
+**Point 1 — "GPT-2 Medium is not a reproduction of a GPT-2 Large result."** Accepted and acted on.
+GPT-2 Large is now the primary model. Ran the full hand-picked set in `gpt2-large` and `gpt2-small` as
+well as the three 24-block models (30 model-pair cells, up from 15). The point is confirmed: `big`/`in`
+gives w10-90 = 0.044 in gpt2-large (near-step, PF 0.95) but 0.516 in gpt2-medium — above the plateau
+criterion — and 0.691 in gpt2-small. REPORT.md now states plainly that a study swapping GPT-2 Large for
+GPT-2 Medium is not testing the same phenomenon.
+
+**Point 2 — "big/in is Matthew's positive plateau example, not a negative control; his non-plateau
+comparison is big/large."** Accepted; this was a framing error throughout the previous report. Added
+`The house was big / large` as a sixth pair in all five models, relabelled `big`/`in` as "M. plateau
+case" and `big`/`large` as "M. smooth case" in `common.py`, Table 1 and every figure, and removed all
+"dissimilar control" language. New numbers for big/large (JSD / w10-90 / w_TV): gpt2-large
+0.053 / 0.592 / 0.292; gpt2-medium 0.042 / 0.719 / 0.398; gpt2-small 0.053 / 0.760 / 0.456; opt-350m
+0.042 / 0.831 / 0.598; pythia-410m 0.042 / 0.802 / 0.505. It is the widest or second-widest transition
+in every model, so Matthew's contrast reproduces in his model and his smooth case is smooth everywhere.
+
+**Point 3 — "the hypothesis was changed; correlating JSD with transition width tests the wrong claim;
+the missing independent variable is a measurement of circuit/feature difference."** Accepted. The
+JSD-vs-width correlation is demoted to a clearly-labelled descriptive regularity with an explicit
+statement that it does not bear on the hypothesis, and the report no longer claims it falsifies
+anything. Added **Experiment 6**, the first direct test: output JSD is held LOW (< 0.1) instead of
+varied; the independent variable is **IRD**, internal representational distance (mean over blocks of
+1 - cos(h_A, h_B) at the final token); the dependent variable is **IPW**, intermediate-plateau width
+(longest alpha span over which d stays within 0.10 of a level in [0.15, 0.85]; a linear response gives
+0.10 by construction, so > 0.20 counts as an intermediate plateau). Result is null in both models:
+gpt2-large rho(IRD, IPW) = +0.17 (p=0.31, n=38, 0.0% of pairs with an intermediate plateau);
+gpt2-medium rho = -0.00 (p=0.99, n=32, 40.6%). Stated as under-powered (rho_min = 0.32 at n=38) and
+proxy-based, with SAE/path-patching named as the sharper test.
+
+**Point 4 — "'depth, not prompt content, produces the plateau' is too strong."** Accepted. The claim is
+now "downstream depth is necessary, not sufficient", with big/large in gpt2-large as the direct
+counterexample: 35 blocks below the patch — more than any condition in the depth table — and
+w10-90 = 0.592.
+
+**Point 5 — "the 'plateaus everywhere' claim is numerically overstated."** Accepted; the previous
+"13 of 15 cells" used w_TV < 0.5, which is merely "better than linear", not the predefined criterion.
+Corrected to the plan's predefined criterion throughout: **11 of 30** hand-picked cells have
+w10-90 < 0.5 (14 of 30 under w_TV < 0.25), by model 5/6 gpt2-large, 3/6 gpt2-medium, 2/6 pythia-410m,
+1/6 opt-350m, 0/6 gpt2-small. Table 2 now reports mined-bank prevalence under BOTH criteria: % with
+w10-90 < 0.5 is 83.5 / 73.0 / 60.5 / 47.0 / 30.0 for gpt2-large / gpt2-medium / gpt2-small / opt-350m /
+pythia-410m (previously only the w_TV numbers 89.5 / 82.0 / 74.0 / 61.0 / 47.5 were quoted).
+
+**Re-framing (rule 9b).** Old story: "a plateau signals dissimilar continuations, not shared ones",
+carried by the JSD-width correlation. New story: "the contrast reproduces in GPT-2 Large, relative
+depth governs it, the base rate is the practical caution, and the hypothesis is still open". The
+evidence that forced it is the operator's point 3 (the correlation tests a different claim) plus the
+new gpt2-large runs. REPORT.md retitled from "A plateau in a single-token activation interpolation
+signals *dissimilar* continuations, not shared ones" to "Activation-interpolation plateaus: what
+reproduces, what depth explains, and what the hypothesis still needs".
+
+**Superseded numbers.** Total sweeps 3615 -> 3645 (six pairs x five models replaces five x three).
+Hand-picked cells 15 -> 30. Bank statistics for gpt2-small and gpt2-large added to Tables 2 and 3:
+unsaturated rho(JSD, w_TV) = -0.44 (n=147) and -0.64 (n=137). No previously reported gpt2-medium,
+opt-350m or pythia-410m bank number changed.
+
+**Figures.** Added `plots/feature_plateau.png` as **Figure 8** (IRD vs IPW for low-JSD pairs in two
+models, plus the two Matthew pairs in gpt2-large as reference curves). Figures 1, 2, 3, 4 and 5
+regenerated over six pairs and five models; Figure 3 (bank_regression) and Figure 4 (jsd_matched)
+swapped places so the association precedes the model comparison that depends on it. Figures 6 and 7
+unchanged. All eight embedded with visible captions in both deliverables; `check_render.py` passes.
