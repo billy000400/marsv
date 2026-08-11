@@ -111,7 +111,8 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S17 complete (2026-08-11). The success criterion is met and exceeded.** All 6
+**FINALIZED 2026-08-11 — S1-S17 complete, deliverables frozen, `STOP` written. The success criterion
+is met and exceeded.** All 6
 hand-picked pairs validate in all five models, a 200-pair-per-model corpus-mined bank carries the
 association test in five models, that bank has been re-run at three patch sites in the 24-block models
 and at four/five sites in the depth-mismatched GPT-2 models, a dedicated low-JSD bank (365/399/356
@@ -248,7 +249,12 @@ quantity. Front-loading is now three models on two banks, always monotone and al
 
 ## Next step
 
-The untouched design question is pairs that differ at an *earlier*
+**None — this direction is finished and `STOP` is written** (plan complete, zero unaddressed operator
+feedback: the only feedback file is `human_feedback.txt.addressed.md`). Both deliverables are curated to
+current-best and pass `experiments/check_render.py` with sixteen embedded, numbered, captioned figures
+each. The items below are recorded for anyone who resumes the direction, not pending work.
+
+Open item 1: the untouched design question is pairs that differ at an *earlier*
 position rather than the final token (S13 moved the readout downstream but kept the differing token
 last). The longer-suffix extension of S13 stays blocked on conditioning,
 not GPU: past s ~ 4 the endpoints are too close for d(alpha) to be well defined and it needs a different

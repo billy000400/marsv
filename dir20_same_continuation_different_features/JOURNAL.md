@@ -800,3 +800,39 @@ and would need the full 200-pair banks to settle.
 On track? yes — S17 closed the three-model gap in Experiment 13 and retired a stated limitation that
 was false; both deliverables are curated to current-best with sixteen captioned figures and pass
 `check_render.py`; no unaddressed feedback and no STOP written.
+
+---
+## 2026-08-11 (Finalization)
+
+**Feedback check.** Listed the direction root: the only match is `human_feedback.txt.addressed.md`,
+already suffixed. Nothing unaddressed, so `STOP` is permitted (CLAUDE.md rule 11).
+
+**What I did.** ~20 minutes of wall clock remained, so per the operator's finalization rule I ran no new
+experiment and instead verified and froze the deliverables. Confirmed RESULTS.md and REPORT.md already
+hold the S17 current-best state (21634 sweeps; wide-bank C(4) = 16.9 / 17.7 / 24.4% for Large / Medium /
+Small; endpoint-identity bound 3.6e-4). Ran `experiments/check_render.py` on both: 0 problems, 16
+embedded figures each with visible numbered captions, Figures 1-16 in reading order. Made one
+presentation fix — the last Results heading was the only one named after a stage number ("Experiment 13
+— ...") rather than stating its claim; rewrote it to match the other thirteen. Re-ran the render check
+after the edit; still clean.
+
+**What I learned.** The deliverables needed nothing substantive, which is the intended end state of the
+curate-every-iteration rule: because RESULTS.md and REPORT.md were rewritten to current-best at each of
+S8-S17 rather than logged into, finalization was a verification pass instead of a rewrite. The one
+defect that survived seventeen stages was stylistic and came from a section added late (the stage number
+leaked into the heading), which suggests checking heading consistency whenever a new Results section is
+appended rather than at the end.
+
+**State of the direction.** S1-S17 complete; the success criterion in PLAN.md (all pairs x models with
+endpoint JSD, transition width, plots and a verdict) is met and exceeded by a large margin. Two open
+items are recorded in PLAN.md for anyone continuing: (1) pairs differing at an *earlier* position rather
+than the final token — S13 moved the readout downstream but kept the differing token last; (2) the
+residual 7-point wide-bank C(4) gap (Small 24.4% vs 16.9-17.7%), unresolved at 60 pairs and needing the
+full 200-pair banks. The longer-suffix extension of S13 stays blocked on conditioning, not GPU: past
+s ~ 4 the endpoints coincide too closely for d(alpha) to be defined and it needs a KL-to-endpoint readout.
+
+**Next step.** None in this direction — `STOP` written.
+
+On track? yes — finished: both deliverables are curated to current-best, pass `check_render.py` with
+sixteen captioned figures each, all history is in CHANGELOG.md, no unaddressed feedback remains, and
+STOP is written.

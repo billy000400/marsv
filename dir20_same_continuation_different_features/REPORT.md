@@ -1409,7 +1409,7 @@ and 9; $C(b)$ is a ratio of medians, and while the sign of the between-model ord
 Small-vs-Large gap is not resolved at this sample size. The three models differ in depth, width and
 training run simultaneously, so the GPT-2 Medium result is a description, not an attribution.
 
-### Experiment 13 — the shallow rate belongs to the pair population, not to GPT-2 Medium
+### The rate at which the top blocks build the plateau belongs to the pair population as much as to the model
 
 Experiment 12's banks are mined per model under the same JSD < 0.1 filter, so "GPT-2 Medium closes only
 18.6% of its headroom" is confounded with "GPT-2 Medium's low-divergence pairs are different pairs".

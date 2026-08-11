@@ -660,3 +660,19 @@ embedded with visible numbered captions in both files; `experiments/check_render
 - **Figure 16** (`plots/bank_depth.png`) regenerated with the GPT-2 Small series (blue circles,
   dash-dotted) in both panels; caption updated in both deliverables. Sixteen figures embedded with
   visible numbered captions in each; `experiments/check_render.py` passes on both (0 problems).
+
+## 2026-08-11 — Finalization: deliverables frozen at current-best (S1–S17)
+
+- **No new experiment.** Time budget reserved for finalization. Verified that both deliverables already
+  carry the S17 current-best state: 21634 sweeps, wide-bank $C(4)$ = 16.9% / 17.7% / 24.4%
+  (Large / Medium / Small), endpoint-identity bound $3.6\times10^{-4}$ (2.1e-3 in Experiment 10 only).
+- **REPORT.md heading normalised** — "Experiment 13 — the shallow rate belongs to the pair population,
+  not to GPT-2 Medium" → "The rate at which the top blocks build the plateau belongs to the pair
+  population as much as to the model", so every Results heading states a claim rather than a stage
+  number, matching the other thirteen. No number, table, figure or claim changed.
+- **Verification.** `experiments/check_render.py REPORT.md RESULTS.md` passes with 0 problems: REPORT.md
+  22 display equations / 718 inline / 16 embedded figures, RESULTS.md 2 / 574 / 16; every figure carries
+  a visible numbered caption, Figures 1–16 appear in reading order in both files, and no `plots/*.png`
+  path appears unembedded.
+- **Feedback state.** The direction's only operator feedback file is `human_feedback.txt.addressed.md`
+  (addressed in S8). Zero unaddressed files, so `STOP` is written.
