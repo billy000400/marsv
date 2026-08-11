@@ -1,0 +1,68 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:16,  1.09s/it]Loading weights:  15%|█▌        | 44/292 [00:01<00:04, 49.89it/s]Loading weights:  23%|██▎       | 66/292 [00:01<00:03, 59.74it/s]Loading weights:  28%|██▊       | 82/292 [00:01<00:03, 66.06it/s]Loading weights:  33%|███▎      | 95/292 [00:01<00:02, 74.74it/s]Loading weights:  37%|███▋      | 108/292 [00:02<00:02, 66.96it/s]Loading weights:  41%|████      | 120/292 [00:02<00:02, 64.46it/s]Loading weights:  46%|████▌     | 134/292 [00:02<00:02, 67.46it/s]Loading weights:  49%|████▉     | 144/292 [00:02<00:02, 65.61it/s]Loading weights:  52%|█████▏    | 152/292 [00:02<00:02, 67.46it/s]Loading weights:  56%|█████▌    | 164/292 [00:02<00:01, 76.86it/s]Loading weights:  59%|█████▉    | 173/292 [00:02<00:01, 76.98it/s]Loading weights:  62%|██████▏   | 182/292 [00:03<00:01, 70.47it/s]Loading weights:  66%|██████▋   | 194/292 [00:03<00:01, 70.92it/s]Loading weights:  71%|███████   | 206/292 [00:03<00:01, 81.55it/s]Loading weights:  74%|███████▎  | 215/292 [00:03<00:00, 77.42it/s]Loading weights:  77%|███████▋  | 224/292 [00:03<00:00, 73.07it/s]Loading weights:  82%|████████▏ | 240/292 [00:03<00:00, 84.04it/s]Loading weights:  86%|████████▋ | 252/292 [00:03<00:00, 83.53it/s]Loading weights:  91%|█████████ | 266/292 [00:04<00:00, 72.87it/s]Loading weights:  99%|█████████▊| 288/292 [00:04<00:00, 95.61it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 68.38it/s]
+  norm 0.15: quiet 0.000b->+0.002 loud 0.000b->+0.008 random 0.000b->+0.008
+  norm 0.40: quiet 0.000b->+0.022 loud 0.001b->+0.035 random 0.001b->+0.038
+  norm 0.90: quiet 0.003b->+0.096 loud 0.014b->+0.152 random 0.008b->+0.140
+  norm 1.80: quiet 0.047b->+0.231 loud 0.539b->+0.292 random 0.271b->+0.302
+[1/12] ' the' base w 0.361 done
+  norm 0.15: quiet 0.000b->+0.002 loud 0.000b->+0.003 random 0.000b->+0.001
+  norm 0.40: quiet 0.000b->+0.017 loud 0.002b->+0.012 random 0.001b->+0.010
+  norm 0.90: quiet 0.003b->+0.094 loud 0.017b->+0.119 random 0.011b->+0.085
+  norm 1.80: quiet 0.062b->+0.166 loud 0.422b->+0.205 random 0.422b->+0.205
+[2/12] ' actually' base w 0.461 done
+  norm 0.15: quiet 0.000b->-0.000 loud 0.000b->+0.000 random 0.000b->+0.003
+  norm 0.40: quiet 0.001b->+0.030 loud 0.002b->+0.024 random 0.001b->+0.019
+  norm 0.90: quiet 0.006b->+0.047 loud 0.024b->+0.074 random 0.015b->+0.085
+  norm 1.80: quiet 0.050b->+0.115 loud 0.181b->+0.198 random 0.131b->+0.168
+[3/12] ' really' base w 0.489 done
+  norm 0.15: quiet 0.000b->+0.002 loud 0.000b->+0.004 random 0.000b->+0.005
+  norm 0.40: quiet 0.000b->+0.004 loud 0.001b->+0.019 random 0.000b->+0.011
+  norm 0.90: quiet 0.002b->+0.017 loud 0.008b->+0.070 random 0.002b->+0.050
+  norm 1.80: quiet 0.032b->+0.124 loud 0.404b->+0.215 random 0.075b->+0.159
+[4/12] ' because' base w 0.505 done
+  norm 0.15: quiet 0.000b->+0.001 loud 0.000b->+0.004 random 0.000b->-0.001
+  norm 0.40: quiet 0.000b->+0.004 loud 0.002b->+0.025 random 0.001b->+0.006
+  norm 0.90: quiet 0.004b->+0.071 loud 0.016b->+0.112 random 0.006b->+0.056
+  norm 1.80: quiet 0.047b->+0.145 loud 0.303b->+0.184 random 0.047b->+0.145
+[5/12] ' just' base w 0.521 done
+  norm 0.15: quiet 0.000b->+0.006 loud 0.001b->+0.007 random 0.001b->+0.001
+  norm 0.40: quiet 0.001b->+0.012 loud 0.007b->+0.028 random 0.006b->+0.018
+  norm 0.90: quiet 0.011b->+0.054 loud 0.050b->+0.114 random 0.039b->+0.089
+  norm 1.80: quiet 0.116b->+0.115 loud 0.633b->+0.160 random 0.340b->+0.128
+[6/12] ' quite' base w 0.537 done
+  norm 0.15: quiet 0.000b->-0.001 loud 0.000b->+0.004 random 0.000b->+0.001
+  norm 0.40: quiet 0.001b->+0.011 loud 0.004b->+0.039 random 0.002b->+0.018
+  norm 0.90: quiet 0.013b->+0.081 loud 0.065b->+0.086 random 0.030b->+0.089
+  norm 1.80: quiet 0.275b->+0.100 loud 0.597b->+0.097 random 0.396b->+0.129
+[7/12] ' never' base w 0.562 done
+  norm 0.15: quiet 0.000b->+0.002 loud 0.000b->+0.004 random 0.000b->+0.005
+  norm 0.40: quiet 0.001b->+0.004 loud 0.006b->+0.015 random 0.005b->+0.019
+  norm 0.90: quiet 0.010b->+0.017 loud 0.109b->+0.032 random 0.109b->+0.032
+  norm 1.80: quiet 0.112b->+0.073 loud 0.400b->+0.115 random 0.359b->+0.069
+[8/12] ' well' base w 0.583 done
+  norm 0.15: quiet 0.000b->-0.001 loud 0.000b->+0.007 random 0.000b->-0.000
+  norm 0.40: quiet 0.001b->-0.001 loud 0.003b->+0.020 random 0.001b->+0.001
+  norm 0.90: quiet 0.003b->+0.022 loud 0.019b->+0.029 random 0.007b->+0.017
+  norm 1.80: quiet 0.028b->+0.083 loud 0.159b->+0.059 random 0.050b->+0.073
+[9/12] ' strange' base w 0.598 done
+  norm 0.15: quiet 0.000b->+0.003 loud 0.001b->+0.000 random 0.000b->+0.001
+  norm 0.40: quiet 0.001b->+0.008 loud 0.011b->+0.010 random 0.001b->+0.010
+  norm 0.90: quiet 0.009b->+0.032 loud 0.068b->+0.061 random 0.009b->+0.045
+  norm 1.80: quiet 0.063b->+0.091 loud 0.478b->+0.077 random 0.269b->+0.083
+[10/12] ' happening' base w 0.611 done
+  norm 0.15: quiet 0.000b->+0.001 loud 0.001b->+0.000 random 0.000b->-0.001
+  norm 0.40: quiet 0.001b->+0.002 loud 0.004b->+0.001 random 0.001b->+0.000
+  norm 0.90: quiet 0.006b->+0.003 loud 0.030b->+0.048 random 0.009b->+0.024
+  norm 1.80: quiet 0.030b->+0.065 loud 0.186b->+0.073 random 0.092b->+0.037
+[11/12] ' nice' base w 0.626 done
+  norm 0.15: quiet 0.000b->-0.001 loud 0.000b->-0.003 random 0.000b->-0.001
+  norm 0.40: quiet 0.001b->-0.003 loud 0.002b->-0.001 random 0.001b->-0.003
+  norm 0.90: quiet 0.005b->+0.020 loud 0.020b->+0.025 random 0.005b->+0.020
+  norm 1.80: quiet 0.045b->+0.054 loud 0.236b->+0.003 random 0.078b->+0.062
+[12/12] ' gone' base w 0.660 done
+
+before any edit: mean w 0.543, sd across tokens 0.083
+norm 0.15: quiet 0.000b w 0.544+-0.082  loud 0.000b w 0.546+-0.081  random 0.000b w 0.545+-0.081 | quiet-vs-loud p=0.09 rho(bits,dw)=+0.15
+norm 0.40: quiet 0.001b w 0.552+-0.076  loud 0.003b w 0.562+-0.076  random 0.001b w 0.555+-0.074 | quiet-vs-loud p=0.02 rho(bits,dw)=+0.20
+norm 0.90: quiet 0.005b w 0.589+-0.062  loud 0.022b w 0.620+-0.052  random 0.009b w 0.604+-0.054 | quiet-vs-loud p=0.00 rho(bits,dw)=+0.29
+norm 1.80: quiet 0.049b w 0.656+-0.038  loud 0.402b w 0.683+-0.022  random 0.200b w 0.673+-0.020 | quiet-vs-loud p=0.09 rho(bits,dw)=+0.28

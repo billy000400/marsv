@@ -93,10 +93,13 @@ width — by 0.10 to 0.15 width units — but a random direction matched on that
 it just as much, and all 144 edits widen even though the probe predicts opposite signs for opposite
 steps. Instead of sliding tokens along a width axis, every edit lands them near a common width of 0.68,
 with the spread across tokens collapsing from 0.083 to 0.02 and the narrowest tokens moving furthest.
-Holding the displacement norm fixed and varying how loudly the model responds to the direction does not
-change where the tokens land either. Narrow transitions are a fragile property of the exact embedding
-that training produced; width is measurable, transferable and cheap to screen for well before it is
-understood.
+A displacement ladder then says what is doing the destroying, and the answer is behaviour rather than
+geometry: at a fixed displacement of norm 1.8, an edit chosen to move the token's output as little as
+possible (0.049 bits) leaves the ordering of the twelve tokens intact ($\rho = +0.94$), while an edit
+of the same size chosen to move it as much as possible (0.402 bits) leaves nothing of it
+($\rho = +0.08$). Narrow transitions are a fragile property, but the property is behavioural — which is
+what makes the vocabulary-wide lookup a reading of what a token does to the model rather than of where
+its embedding row happens to sit.
 
 We also ruled out the most deflationary explanation. Because `w` is a *fraction* of the path, a
 transition of fixed absolute size would look narrower on a longer path. If that were the mechanism,
@@ -126,8 +129,8 @@ all 780 pairs among them × 3 frames × 50 steps) and the anchor-set swap (123 t
 18, and once more at the input embedding) and the vocabulary-wide test (32 tokens from outside the pool
 × 3 frames × 6 anchors × 50 steps), the frame-shape control (123 tokens × 4 new contexts × 6 anchors ×
 50 steps) and the two embedding interventions (16 tokens × 9 edits and 12 tokens × 13 edits, each edit
-re-measured over 3 frames × 6 anchors × 50 steps) and the fixed-displacement test (12 tokens × 48
-probed directions plus 3 re-measurements each) — about 1.4 million forward passes in total, roughly
+re-measured over 3 frames × 6 anchors × 50 steps) and the displacement-norm ladder (12 tokens × 4 rungs
+× 24 probed directions plus 3 re-measurements each) — about 1.5 million forward passes in total, roughly
 four hours on one GPU shared with three other jobs.
 
 **Corpus.** `EleutherAI/pile-deduped-pythia-preshuffled`, the tokenised stream Pythia was trained on.
@@ -477,30 +480,40 @@ three budgets $B$ trace out a dose–response curve, so a small effect at 0.05 b
 is distinguishable from no effect. We run 12 tokens spread over the measured-width range, giving
 12 tokens × 2 directions × 2 signs × 3 budgets = 144 re-measurements. Figure 14 reports the result.
 
-### The fixed-displacement test: is the collapse about the move or about the model's response?
+### The displacement-norm ladder: is the collapse about the move or about the model's response?
 
-The calibrated intervention varies the step norm and the output movement together, so it cannot say
+The calibrated intervention grows the step norm and the output movement together, so it cannot say
 which of the two the collapse follows. Is width tied to *where* the embedding sits, so that any large
 displacement erases it, or to the *behaviour* the embedding induces, so that only displacements the
-model responds to erase it? To separate them we hold the displacement norm fixed at the value that
-token's 0.2-bit edit needed and vary how loudly the model responds to the direction taken.
+model responds to erase it? The two readings have opposite consequences for the screen: if the trait is
+positional, the vocabulary-wide lookup is reading a geometric accident of where training happened to
+place each row; if it is behavioural, the lookup is reading something about what the token makes the
+model do.
 
-We build the two extreme directions from the model's local response. For each token we probe $N = 48$
-random unit directions $u_j$ at a small step ($\varepsilon = 0.05$, the size the first intervention
-used, where the response is still linear) and stack the resulting logit changes, concatenated over the
-three frames, into a response matrix $A$ with rows
+To separate them we compare, **at the same displacement norm**, a direction the model barely responds
+to against one it responds to strongly. For each token $u$ and each rung $c$ of the ladder
+$c \in \lbrace 0.15,\, 0.4,\, 0.9,\, 1.8 \rbrace$ — against a median embedding-row norm of 0.98 — we
+draw $N = 24$ random unit directions $u_j$ and measure what each one actually does to the token's
+next-token distribution **at that norm**, averaged over the three frames:
 
 ```math
-A_j \;=\; z\big(W_E[u] + \varepsilon\, u_j\big) - z\big(W_E[u]\big) .
+B_j(c) \;=\; \tfrac{1}{3}\sum_{f=1}^{3} \mathrm{JSD}\big(p_f^{\text{base}},\;
+p_f^{\,W_E[u] + c\, u_j}\big) \quad \text{bits}.
 ```
 
-The left singular vectors of $A$ give the combinations of those 48 directions the model responds to
-most and least: taking $A = U\Sigma V^{\top}$, the **loudest** direction is $\sum_j U_{j1} u_j$ and the
-**quietest** is $\sum_j U_{jN} u_j$, both renormalised to unit length. We then step along the quietest,
-the loudest and one plain random direction by the same fixed norm, record the output movement each
-actually produced, and re-measure anchor width. If width follows behaviour, the quiet direction should
-leave it alone and $\Delta\hat w_u$ should rise with the output movement achieved; if width follows
-displacement, all three should collapse alike. Figure 15 reports the result.
+The **quiet** direction at rung $c$ is $\arg\min_j B_j(c)$ and the **loud** one is $\arg\max_j B_j(c)$;
+a fixed $u_1$ serves as a plain random control. Selecting by measured response at the rung itself is
+what makes the contrast real: the earlier version of this test built the two directions from the
+model's *linear* response at a step of 0.05 and extrapolated, and at a displacement of 1.8 the
+extrapolation had failed badly enough that the "quiet" direction was no quieter than a random one. We
+then re-measure anchor width at each of the three directions and every rung, giving 12 tokens × 4 rungs
+× 3 directions = 144 re-measurements.
+
+Two quantities separate the readings. The **level**, mean $\hat w_u$ after the edit, says how far the
+tokens have been pushed toward a generic width. The **ordering**, $\rho$(before, after) across the 12
+tokens, says whether the trait itself — the thing a screen reads — is still there. Positional
+destruction predicts that quiet and loud behave alike at equal norm; behavioural destruction predicts
+the quiet direction preserves the ordering where the loud one does not. Figure 15 reports the result.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -895,37 +908,51 @@ to width. Reaching a given output movement takes a *smaller* step along the prob
 a random one — norm ratio 1.54, 1.66 and 1.76 at the three budgets — so the probe found a direction the
 model is unusually sensitive to. It is a behaviourally special direction that does not carry width.
 
-**15. Holding the displacement fixed, the collapse does not follow the model's response — and no
-direction stays quiet at that displacement.** Pattern 14 leaves the collapse's cause ambiguous, because
-its steps grew in norm and in output movement together. Figure 15 separates them.
+**15. What destroys the trait is behaviour, not displacement: at the same step norm, a quiet direction
+keeps the token ordering and a loud one erases it.** Pattern 14 leaves the collapse's cause ambiguous,
+because its steps grew in norm and in output movement together. The ladder separates them by putting
+directions of very different loudness at identical displacement.
 
-![Width change against the output movement actually produced at a fixed displacement norm, and width after the edit against width before it](plots/quiet.png)
+![Mean anchor width against displacement norm for quiet, loud and random directions, and width after the largest edit against width before it](plots/ladder.png)
 
-**Figure 15.** Twelve tokens, each displaced by the same norm its own 0.2-bit edit required (median
-1.84, against a median embedding-row norm of 0.984), along three directions: the quietest and loudest
-combinations of 48 probed directions and one plain random direction. Left: measured $\Delta\hat w_u$
-(y) against the output movement the edit actually produced (x, bits); marker and colour give the
-direction, the horizontal line is no change. Right: $\hat w_u$ after the edit (y) against $\hat w_u$
-before it (x); dotted line = no change, solid line = least-squares fit through the three-direction mean
-per token.
+**Figure 15.** Twelve tokens edited along the quietest and loudest of 24 random directions, rebuilt at
+each rung from their measured output movement there, plus one plain random direction. Left: mean
+$\hat w_u$ after the edit (y) against the displacement norm of the edit (x, log scale, four rungs
+0.15–1.8 against a median embedding-row norm of 0.98); solid/circles = quiet, dashed/squares = loud,
+dotted/triangles = random, error bars 1 s.e. over the 12 tokens; the dash-dotted line is the unedited
+mean $\hat w_u = 0.543$. Right: $\hat w_u$ after an edit of norm 1.8 (y) against $\hat w_u$ before it
+(x) for the quiet (circles, solid fit) and loud (squares, dashed fit) directions, with the median
+output movement each produced in the legend; dotted line = no change.
 
-Two things follow, and the first is a limitation of the test rather than a result. The construction
-does not deliver a behaviourally quiet direction at this displacement: the "quietest" combination moves
-the output by a median 0.181 bits against the plain random direction's 0.165 and the loudest
-combination's 0.261. The linear response measured at $\varepsilon = 0.05$ simply does not survive to a
-step of norm 1.84 — nearly twice the embedding row itself — so the intended behaviour-preserving
-displacement was not achieved and the clean version of this test needs smaller steps.
+| displacement norm | quiet: bits / mean $\hat w_u$ / $\rho$(before, after) | loud: bits / mean $\hat w_u$ / $\rho$(before, after) | paired $p$ |
+|---|---|---|---|
+| *before any edit* | *— / 0.543 / —* | *— / 0.543 / —* | \- |
+| 0.15 | 0.0001 / 0.544 / $+1.00$ | 0.0003 / 0.546 / $+1.00$ | 0.09 |
+| 0.40 | 0.0006 / 0.552 / $+0.99$ | 0.0027 / 0.562 / $+0.99$ | 0.02 |
+| 0.90 | 0.0053 / 0.589 / $+0.91$ | 0.0221 / 0.620 / $+0.87$ | 0.0005 |
+| **1.80** | **0.0489 / 0.656 / $+0.94$** | **0.4023 / 0.683 / $+0.08$** | 0.09 |
 
-What the run does deliver is the decoupling. Across the 36 edits, all at a fixed per-token displacement
-norm, the width change is flat in the output movement actually produced ($\rho = +0.07$, $p = 0.67$,
-over a range of 0.03 to 0.77 bits). Yet the collapse reproduces exactly: the three directions land at
-mean $\hat w_u$ 0.675, 0.648 and 0.675 with a spread across tokens of 0.019–0.039, against
-$0.543 \pm 0.083$ before. Taken with pattern 14 — where the probe's smaller displacements landed at the
-same width as the random direction's larger ones — the reading is that the landing width is
-strikingly insensitive to *what* the edit does to the model, over a wide range of output movements, and
-what matters is that a displacement of this size happened at all. Some ordering survives here too
-($\rho = +0.62$, $p = 0.03$, between original and post-edit widths averaged over the three
-directions), so the trait is compressed rather than erased.
+The construction now works: selecting by measured response at each rung separates the two directions by
+a factor of 8 in output movement at norm 1.8 (0.049 against 0.402 bits), where the previous
+linear-extrapolation version separated them not at all. That is what makes the comparison in the last
+row possible, and it is the row that carries the result. **At one and the same displacement — 1.8,
+nearly twice a median embedding row — the quiet edit leaves the token ordering essentially untouched
+($\rho = +0.94$, $p = 4\times10^{-6}$) and the loud edit leaves nothing of it ($\rho = +0.08$,
+$p = 0.80$).** Geometry cannot distinguish those two edits; only what they do to the model can. The
+paired comparison points the same way at every rung — the quiet direction widens less than the loud one
+in 12 of 12 tokens at norm 0.9 (Wilcoxon $p = 5\times10^{-4}$) and at norm 0.4 ($p = 0.02$) — and the
+two rungs where the paired test only reaches $p = 0.09$ are the ones where nothing happens at all
+(norm 0.15, both directions under 0.0003 bits) and where the loud direction has saturated (norm 1.8).
+
+The *level* of `w` is a different matter, and it does follow the displacement. Every direction, quiet
+included, raises the mean: 0.543 → 0.656 for the quietest direction at norm 1.8, with the spread across
+tokens falling from 0.083 to 0.038 (loud: 0.022). So a large enough edit compresses everything toward
+a generic width whatever it does to the model, but only a behaviourally loud edit scrambles which
+token is which. Read together with pattern 14, where a random direction matched on *output movement*
+moved width as much as the probe direction did, the picture is consistent: width responds to how much
+the edit disturbs the token's behaviour and not to which direction delivers the disturbance. For the
+screen this is the reassuring answer — the vocabulary-wide lookup (pattern 10) is reading a property
+tied to what the token makes the model do, not an accident of where its row happens to sit.
 
 **16. The basin picture is only weakly supported, and not in the direction the simple version
 predicts.** Radius along random directions is unrelated to the token effect ($\rho = -0.02$,
@@ -999,23 +1026,24 @@ width — is **not** supported in its simple form (pattern 16), and we have drop
 The screen generalises across tokens (pattern 7), across the vocabulary (pattern 11), across contexts
 (pattern 12) and down to a free lookup (pattern 10). Three mechanistic stories have now failed — the
 basin of output insensitivity (pattern 16), the probe direction as a lever (pattern 13), and any single
-embedding direction as a lever (pattern 14). What replaced them is the compression result: a
-displacement of the embedding row large enough for the model to feel leaves every token near
-$\hat w_u \approx 0.68$, and pattern 15 shows the landing point barely depends on how much the model's
-output actually moved.
+embedding direction as a lever (pattern 14). What replaced them is the compression result, and pattern
+15 has now pinned down what drives it: at a fixed displacement, an edit the model barely feels keeps
+the token ordering ($\rho = +0.94$ at 0.049 bits) and an edit of the same size that it feels strongly
+does not ($\rho = +0.08$ at 0.402 bits). The trait is behavioural, so the search should move from
+directions in embedding space to **which part of the token's output behaviour carries it**.
 
-Pattern 15 also says why the obvious follow-up is not yet answered: at a displacement of norm 1.84 no
-direction stays behaviourally quiet, because the linear response measured at $\varepsilon = 0.05$ does
-not survive that far. The next experiment should therefore **run the quiet-versus-loud contrast at a
-displacement small enough for the local structure to hold** — a ladder of norms from 0.1 to 1.0, with
-the quietest and loudest 48-direction combinations rebuilt at each — and find the norm at which the two
-separate. The quantity to plot is $\hat w_u$ against displacement norm for the two directions. If the
-quiet direction preserves width to much larger norms than the loud one, width is a function of the
-behaviour the embedding induces, and the search moves to which output modes the token activates; if the
-two curves stay together all the way down, width is tied to the embedding's exact location, and the
-free vocabulary-wide lookup (pattern 10) is reading a geometric accident rather than a behavioural
-property — which matters for anyone using it as an auditing table. About six anchor-width measurements
-per token, roughly an hour.
+The next experiment follows directly. Take the loud direction at norm 1.8 — the edit that destroys the
+ordering — and decompose the change it makes to the token's next-token distribution by successor token,
+splitting the total JSD into the contribution of the token's few highest-mass successors and the
+contribution of the tail. Then build edits restricted to each of those two subspaces of the output, at
+**matched total output movement**, and re-measure $\hat w_u$. If disturbing the high-mass successors is
+what destroys the ordering, the per-token trait is a property of the token's top continuations — the
+same object corpus successor JSD is built from — which would connect the trait back to the statistic
+this direction started from and suggest a cheaper corpus-side estimator. If the tail is what matters,
+the two are separate quantities and the embedding probe is reading something corpus statistics cannot
+see. Either outcome sharpens the auditing story, because it says which measurable property of a token
+a screen should be built on. About 24 anchor-width measurements plus one decomposition per token, for
+12 tokens — roughly an hour, the same scale as the ladder.
 
 ---
 
@@ -1066,12 +1094,14 @@ about the trait's nature: width then moves by 0.10–0.15, fifty times more, yet
 matched on output movement moves it just as much (0.123 against 0.127, $p = 0.47$), and **all 144 edits
 widen** although the probe predicts opposite signs for opposite steps. What the edits do is compress the
 trait: whatever a token's width was, after a 0.2-bit edit it sits near 0.68, with the spread across
-tokens falling from 0.083 to 0.02, and the tokens that started narrowest moving furthest. Holding the
-displacement norm fixed and varying the model's response to the direction taken leaves the landing
-point essentially unchanged, so what erases the trait is the displacement itself rather than what the
-displacement does to the model's output. Narrow transitions are a fragile property of the exact
-embedding training produced — no single direction carries them, and a displacement of this size
-compresses them away in every direction we tried, leaving only a residual ordering. The deflationary explanation,
+tokens falling from 0.083 to 0.02, and the tokens that started narrowest moving furthest. A ladder of
+displacements, with the quietest and loudest of 24 directions rebuilt at each rung from their measured
+effect on the token's output, then separates the two things that grew together in that edit. The level
+follows the displacement — every direction raises the mean width — but the *ordering* follows the
+behaviour: at a displacement of norm 1.8 the quiet direction moves the output by 0.049 bits and keeps
+the ordering at $\rho = +0.94$, while the loud direction at the identical norm moves it by 0.402 bits
+and drops to $\rho = +0.08$. Narrow transitions are fragile, but they are a behavioural property, not a
+positional one: an edit the model does not feel does not take them away. The deflationary explanation,
 that narrow transitions are just fixed-size transitions on long paths, is refuted.
 
 **Limitations.** One model, one hook point (after block 0) and one checkpoint. The pair bank, the
@@ -1090,9 +1120,10 @@ than established. At block 18 the
 interquartile range of $\hat w_u$ is 0.02, so the correlations reported there are attenuated by the
 small dynamic range and should not be read as evidence that the trait has disappeared. Both
 interventions are small: 16 and 12 tokens with one random direction each, so the compression result
-(patterns 14 and 15) rests on 12 tokens and its correlations — including the residual ranking after the
-edit — carry wide intervals; and the fixed-displacement test failed to build a behaviourally quiet
-direction at the norm it used, so it bounds the collapse's insensitivity to output movement over
-0.03–0.77 bits rather than testing a genuinely behaviour-preserving displacement. `w` describes movement along the $z_u \to z_v$ direction only, so a pair whose logits
+(patterns 14 and 15) rests on 12 tokens and its correlations — including the ordering after the edit —
+carry wide intervals. The ladder's quiet direction is the quietest of 24 random draws, not the quietest
+direction that exists, so it bounds how much of the trait a behaviour-preserving edit can keep from
+below; and at norm 1.8 it still moves the output by 0.049 bits, so "quiet" there means 8× quieter than
+the loud direction, not silent. `w` describes movement along the $z_u \to z_v$ direction only, so a pair whose logits
 move sideways would be scored as flat. The 0.2-bit movement gate is a judgement call: it keeps 929 of
 1,000 pairs, and the headline correlation is reported both with and without it.

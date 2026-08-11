@@ -46,7 +46,7 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-11)
+## Current status (2026-08-11, iteration 4)
 
 S1-S5 all have a pass, and the experiment S5 recommended has been run. **Main finding:** the leftover
 after corpus successor JSD is a per-token additive trait — held-out R^2 0.149 (JSD) -> 0.578 (JSD + one
@@ -106,19 +106,22 @@ smaller step for a given output movement) but does not carry width. The compress
 total: the post-edit ranking still agrees with the original at rho = +0.73 / +0.85 after a 0.05-bit
 edit and +0.57 / +0.36 after a 0.2-bit one.
 
-The fixed-displacement test has since been run: at the SAME per-token displacement norm (median 1.84),
-the quietest and loudest of 48 probed direction combinations and a plain random direction all land at
-mean w_hat 0.648-0.675 (sd across tokens 0.019-0.039, against 0.543 +- 0.083 before), and the width
-change is flat in the output movement actually produced (rho = +0.07, p = 0.67, over 0.03-0.77 bits).
-This **withdraws** the earlier inference that the collapse is indexed by output movement. Limitation
-reported: the "quiet" construction is not quiet at that displacement (0.181 vs 0.165 bits for a random
-direction), because the linear response at a 0.05 step does not survive a step of norm 1.84.
+The displacement-norm ladder has since been run, and it settles the question the fixed-displacement
+test could not (that test is superseded: its quiet direction was no quieter than a random one, because
+the linear response at a 0.05 step does not survive a step of norm 1.84). Rebuilding the quiet and loud
+directions at each rung by MEASURING what 24 random directions do at that norm gives an 8x separation
+at norm 1.8 (0.049 vs 0.402 bits), and with a real contrast the earlier reading **reverses**: at the
+same displacement the quiet edit keeps the token ordering (rho(before, after) = +0.94, p = 4e-6) and
+the loud edit erases it (+0.08, p = 0.80); the quiet direction widens less in the paired test at every
+rung (p = 5e-4 at norm 0.9). The level still follows displacement (0.543 -> 0.656 even for the quietest
+direction, sd across tokens 0.083 -> 0.038). Displacement compresses the level; behaviour destroys the
+ordering — so the free vocabulary-wide lookup reads a behavioural property, not a geometric accident.
 
-**Next step:** run the quiet-versus-loud contrast on a ladder of displacement norms (0.1 to 1.0),
-rebuilding both combinations at each norm, and plot w_hat against norm for the two. Separation =>
-width is a function of the behaviour the embedding induces, and the search moves to which output modes
-the token activates. No separation => the trait is tied to the embedding's exact location, and the free
-vocabulary-wide lookup is reading a geometric accident rather than a behavioural property.
+**Next step:** ask which part of the token's output behaviour carries the trait. Decompose the JSD the
+loud edit at norm 1.8 produces by successor token into the token's high-mass successors versus the
+tail, then edit along directions restricted to each subspace at matched total output movement and
+re-measure w_hat. Top-mass-driven ties the trait back to corpus successor JSD and suggests a
+corpus-side estimator; tail-driven says the embedding probe sees what corpus statistics cannot.
 
 ## Stages
 

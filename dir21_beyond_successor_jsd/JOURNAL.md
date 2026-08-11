@@ -395,3 +395,46 @@ auditing table.
 
 On track? yes — S1-S5 complete, eleven experiments run and reported, one earlier claim withdrawn and
 corrected in place, deliverables current-best and render-checked, no blocker.
+
+## 2026-08-11 — iteration 4: the displacement-norm ladder (and a reversal)
+
+**Did.** Ran the experiment the previous iteration recommended, with one design change:
+`experiments/norm_ladder.py` walks four displacement norms (0.15 / 0.4 / 0.9 / 1.8) and rebuilds the
+quiet and loud directions at each rung by **measuring** what 24 random directions actually do to the
+token's output at that norm and taking the argmin / argmax, instead of extrapolating from the SVD of
+linear-regime responses at a step of 0.05. 12 tokens x 4 rungs x 3 directions = 144 anchor-width
+re-measurements, ~11 min on the shared GPU. Plot: `plots/ladder.png` (Figure 15), which replaces
+`plots/quiet.png` in both deliverables.
+
+**Learned.** The design change was the whole experiment. Direct selection separates quiet from loud by
+8x in output movement at norm 1.8 (0.049 vs 0.402 bits) where the SVD construction separated them not
+at all (0.181 vs 0.165) — and with a real contrast the previous conclusion reverses. At *identical*
+displacement of norm 1.8, the quiet edit keeps the token ordering (rho(before, after) = +0.94,
+p = 4e-6) and the loud edit destroys it (+0.08, p = 0.80). The quiet direction also widens less than
+the loud one in the paired test at every rung (p = 5e-4 at norm 0.9, p = 0.02 at 0.4). What does NOT
+reverse: the level. Every direction, quiet included, raises the mean width (0.543 -> 0.656 quiet,
+0.683 loud) and shrinks the spread across tokens (0.083 -> 0.038 / 0.022). So the correct split is
+displacement compresses the level, behaviour destroys the ordering — and since the ordering is what the
+screen consumes, the vocabulary-wide lookup is reading a behavioural property. That closes the caveat
+the previous iteration left open, and in the favourable direction.
+
+**Assumption logged (loop mode).** Chose argmin/argmax over 24 measured directions rather than
+rebuilding the SVD construction at each rung, as PLAN.md's wording implied. Reason: the SVD version is
+the thing that failed, and its failure mode (linear response not surviving to large steps) is exactly
+what a per-rung measurement avoids; direct selection is also cheaper, which paid for the fourth rung.
+Cost: "quietest of 24 draws" is a weaker quiet direction than an optimised one, so the result bounds
+from below how much a behaviour-preserving edit can keep — reported as a limitation. Rejected: 48
+directions with 3 rungs (same cost, less range, and the range is where the effect lives); rejected also
+keeping the superseded fixed-displacement table alongside the ladder, since it is the same experiment
+done worse (rule 6) — its withdrawal and the reversal are recorded in CHANGELOG.md instead.
+
+**Next step.** Ask which part of the token's output behaviour carries the trait. Take the loud
+direction at norm 1.8, decompose the JSD it produces by successor token into the token's high-mass
+successors versus the tail, then edit along directions restricted to each subspace at matched total
+output movement and re-measure w_hat. Top-mass-driven would tie the per-token trait back to corpus
+successor JSD, the statistic this direction started from, and suggest a corpus-side estimator;
+tail-driven would say the embedding probe sees something corpus statistics cannot.
+
+On track? yes — S1-S5 complete, twelve experiments run and reported, one earlier conclusion reversed
+with a stronger instrument and the reversal recorded, deliverables current-best and render-checked, no
+blocker.

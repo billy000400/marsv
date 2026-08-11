@@ -376,3 +376,49 @@ of displacement norms (0.1 to 1.0) with the quiet/loud combinations rebuilt at e
 norm at which the two separate. RESULTS.md: fixed-displacement table, Figure 15, headline paragraph
 and next-experiment section updated the same way. `check_render.py` passes (19 display eqs, 15 embeds
 + captions per file).
+
+## 2026-08-11 (iteration 4) — the displacement-norm ladder: behaviour destroys the trait, displacement only compresses it
+
+Ran `experiments/norm_ladder.py` + `experiments/plot_ladder.py` (Figure 15, `plots/ladder.png`), the
+experiment the previous entry recommended. For each of the same 12 tokens and each rung of a
+displacement ladder (norms 0.15 / 0.4 / 0.9 / 1.8, against a median embedding-row norm of 0.98), 24
+random unit directions were displaced by that norm and their **actual** output movement measured there;
+the argmin became the quiet direction and the argmax the loud one, with a fixed random direction as
+control. Anchor width was re-measured for all three at every rung (144 re-measurements).
+
+| displacement norm | quiet: bits / mean w_hat / rho(before, after) | loud: bits / mean w_hat / rho(before, after) | paired p |
+|---|---|---|---|
+| (before any edit) | - / 0.543 / - | - / 0.543 / - | - |
+| 0.15 | 0.0001 / 0.544 / +1.00 | 0.0003 / 0.546 / +1.00 | 0.09 |
+| 0.40 | 0.0006 / 0.552 / +0.99 | 0.0027 / 0.562 / +0.99 | 0.02 |
+| 0.90 | 0.0053 / 0.589 / +0.91 | 0.0221 / 0.620 / +0.87 | 0.0005 |
+| 1.80 | 0.0489 / 0.656 / +0.94 | 0.4023 / 0.683 / +0.08 | 0.09 |
+
+**Superseded result and reversed conclusion.** This replaces the fixed-displacement test (previous
+entry, `plots/quiet.png`, 12 tokens at per-token norm ~1.84 with quiet/loud built from the SVD of
+linear-regime logit responses), whose reported limitation was that the construction produced no
+genuinely quiet direction there (0.181 bits quiet vs 0.165 random). Selecting by measured response at
+each rung fixes that: 0.049 vs 0.402 bits at norm 1.8, an 8x separation. With a real contrast the
+earlier reading **reverses**. Old: "the width change is flat in output movement (rho = +0.07, p = 0.67)
+... what erases the trait is the displacement itself rather than what the displacement does to the
+model's output." New: at identical displacement the quiet edit preserves the token ordering
+(rho = +0.94, p = 4e-6) and the loud edit erases it (rho = +0.08, p = 0.80); the quiet direction widens
+less than the loud one in the paired test at every rung (p = 0.0005 at norm 0.9, p = 0.02 at 0.4). The
+*level* still follows the displacement (0.543 -> 0.656 even for the quietest direction at norm 1.8, sd
+across tokens 0.083 -> 0.038), so the corrected statement is: displacement compresses the level,
+behaviour destroys the ordering. Consequence for the deliverable's story: the vocabulary-wide lookup
+reads a behavioural property, not a geometric accident — the caveat the previous entry flagged as
+unresolved is resolved in the favourable direction.
+
+**Deliverable changes.** REPORT.md: Methods subsection "The fixed-displacement test" replaced by "The
+displacement-norm ladder" (with the per-rung response equation and the level/ordering split stated as
+the two discriminating quantities); pattern 15 rewritten with the rung table and **Figure 15** now
+`plots/ladder.png` (`plots/quiet.png` retired from both deliverables, PNG kept on disk); Summary and
+Conclusion paragraphs on fragility rewritten from "displacement erases it" to "behaviour erases the
+ordering, displacement compresses the level"; Limitations updated (quiet = quietest of 24 draws, and
+0.049 bits is quiet-relative-to-loud, not silent); forward-pass accounting 1.4M -> 1.5M. Recommended
+next experiment changed from the ladder itself to **decomposing the loud edit's output change by
+successor token** (top-mass successors vs tail, at matched total output movement), which asks which
+part of the token's behaviour carries the trait and whether it reconnects to corpus successor JSD.
+RESULTS.md: headline fragility paragraph, ladder table, Figure 15 and next-experiment section updated
+the same way. `check_render.py` passes (19 display eqs, 15 embeds + captions per file).
