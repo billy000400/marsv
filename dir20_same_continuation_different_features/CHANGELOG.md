@@ -636,3 +636,27 @@ embedded with visible numbered captions in both files; `experiments/check_render
   qualifier ("the rate is a joint property of the model and the pair population"). The direction and
   front-loading claims are unchanged and now hold on two banks.
 - Both deliverables pass `experiments/check_render.py` (16 embedded figures each, 0 problems).
+
+## 2026-08-11 — S17: Experiment 13 extended to GPT-2 Small, closing the three-model comparison
+
+- **Experiment re-run, not new** (`experiments/bank_depth.py`, `MODELS` + `MSTYLE` gained `gpt2-small`):
+  the blocks 0-4 unablated sweep on the S4 corpus-mined wide-JSD bank now covers all three GPT-2
+  models. 300 new sweeps (60 pairs x 5 sites), worst endpoint error 1.4e-4, ~2 min GPU.
+  `results/bank_depth.json` and `plots/bank_depth.png` regenerated.
+- **Table 17 gains two rows; the Experiment 13 claim strengthens.** Wide-bank $C(4)$: GPT-2 Small
+  **24.4%** (new) against Large 16.9% and Medium 17.7%. The cross-model spread in $C(4)$ is 7.5 points
+  on the wide bank against 42 points on the low-JSD banks (60.7 / 18.6 / 51.1). Superseded prose:
+  "the cross-model gap disappears ... GPT-2 Large moves, not GPT-2 Medium" -> "the gap all but
+  disappears; Large *and* Small move (60.7 -> 16.9 and 51.1 -> 24.4), Medium does not (18.6 -> 17.7)".
+  No previously reported number changed value.
+- **Front-loading claim now holds in three models on two banks:** GPT-2 Small's first block removed is
+  15.1 of its 24.4 points on the wide bank.
+- **Limitation removed.** "Only two models are covered here, GPT-2 Small having no wide-divergence bank"
+  was wrong — `results/bank_gpt2-small.json` (200 pairs, S4) existed. Replaced with the residual
+  7-point Small-vs-Large/Medium gap being unresolved at 60 pairs.
+- **Superseded totals.** Sweep count 20734 -> 21634 in both files (the previous total also omitted
+  Experiment 13's own 600 sweeps); REPORT.md Methods now states Experiment 13's protocol and count.
+  Endpoint-identity bound unchanged at 3.6e-4.
+- **Figure 16** (`plots/bank_depth.png`) regenerated with the GPT-2 Small series (blue circles,
+  dash-dotted) in both panels; caption updated in both deliverables. Sixteen figures embedded with
+  visible numbered captions in each; `experiments/check_render.py` passes on both (0 problems).

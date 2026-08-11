@@ -1,0 +1,20 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:  27%|██▋       | 40/148 [00:00<00:00, 388.20it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 834.92it/s]
+gpt2-small: 60 pairs, 12 blocks, sites [0, 1, 2, 3, 4]
+    L0 pair 0/60
+    L0 pair 30/60
+gpt2-small 0 0.15159453546724175
+    L1 pair 0/60
+    L1 pair 30/60
+gpt2-small 1 0.2041063150792497
+    L2 pair 0/60
+    L2 pair 30/60
+gpt2-small 2 0.21034143164697944
+    L3 pair 0/60
+    L3 pair 30/60
+gpt2-small 3 0.21795631198769488
+    L4 pair 0/60
+    L4 pair 30/60
+gpt2-small 4 0.23667288464139935
+wrote plots/bank_depth.png

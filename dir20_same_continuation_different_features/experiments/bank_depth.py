@@ -25,14 +25,15 @@ from common import PLOTS, RESULTS, load
 from depth_gap import run_at
 from mine_pairs import SEED, get_prefixes
 
-MODELS = ["gpt2-medium", "gpt2-large"]
+MODELS = ["gpt2-medium", "gpt2-large", "gpt2-small"]
 SITES = [0, 1, 2, 3, 4]
 N_PAIRS = int(os.environ.get("N_PAIRS", 60))
 N_ALPHA = 101
 CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00"]
 plt.rcParams["axes.prop_cycle"] = plt.cycler(color=CVD)
 MSTYLE = {"gpt2-medium": dict(color=CVD[1], marker="s", ls="--"),
-          "gpt2-large": dict(color=CVD[2], marker="^", ls=":")}
+          "gpt2-large": dict(color=CVD[2], marker="^", ls=":"),
+          "gpt2-small": dict(color=CVD[0], marker="o", ls="-.")}
 
 
 def main():

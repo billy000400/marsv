@@ -759,3 +759,44 @@ so Experiment 13 covers all three models.
 On track? yes — S16 caught and fixed an over-general claim in the previous iteration's headline at a
 cost of 4 GPU-minutes; both deliverables are curated to current-best with sixteen captioned figures and
 pass `check_render.py`; no unaddressed feedback and no STOP written.
+
+---
+## 2026-08-11 (S17: close Experiment 13's three-model gap)
+
+**Feedback check.** Listed the direction root: only `human_feedback.txt.addressed.md`, already
+suffixed. Nothing unaddressed; no STOP.
+
+**What I did.** Took the small item S16 left ("mine a wide-JSD bank for gpt2-small so Experiment 13
+covers all three models") and found it needed no mining at all — `results/bank_gpt2-small.json` has
+existed since S4; `bank_depth.py`'s docstring comment and the Experiment 13 limitation both asserted
+otherwise. Added `gpt2-small` to `MODELS`/`MSTYLE` and re-ran: 300 sweeps, ~2 min GPU, worst endpoint
+error 1.4e-4.
+
+**What I learned.**
+- The result strengthens rather than shifts. Wide-bank C(4) = 16.9 / 17.7 / 24.4% (large / medium /
+  small) against 60.7 / 18.6 / 51.1% on the low-JSD banks: the cross-model spread collapses from 42
+  points to 7.5. S16's claim was written as "medium is not the outlier, large is"; with the third model
+  it is cleaner — *two* models move a long way when the pair population changes and medium does not, so
+  C(b) is a joint model-x-population quantity and not a model constant.
+- gpt2-small on the wide bank front-loads harder than any other cell measured: 15.1 of its 24.4 points
+  come from the single first block removed (62%), matching gpt2-large's low-JSD 62%. That is the
+  strongest form of the front-loading claim so far — three models, two banks, always monotone and
+  always largest at b=1.
+- Cheap lesson: a stated limitation ("Small has no wide bank") was an artifact of not re-listing
+  `results/`. Two minutes of checking retired it. Worth re-verifying limitation sentences that assert
+  missing data before they harden into the report.
+
+**Assumptions logged (loop mode).** (1) 60 evenly spaced pairs for gpt2-small, matching the other two
+models' subsample rule exactly so C(4) is comparable. (2) Unablated readout only, as in S16 — the
+ablation delta was a null at 9/10 model-sites in S15. (3) Kept Experiment 12 in full: its low-JSD
+numbers are correct for their population and Experiment 13 scopes them (rule 6 replacement would apply
+only to a stronger measurement of the same thing).
+
+**Next step.** Unchanged and still the largest open item: pairs that differ at an *earlier* position
+rather than the final token (S13 moved the readout downstream but kept the differing token last). A
+smaller one: the residual 7-point wide-bank gap (Small 24.4% vs 16.9-17.7%) is unresolved at 60 pairs
+and would need the full 200-pair banks to settle.
+
+On track? yes — S17 closed the three-model gap in Experiment 13 and retired a stated limitation that
+was false; both deliverables are curated to current-best with sixteen captioned figures and pass
+`check_render.py`; no unaddressed feedback and no STOP written.

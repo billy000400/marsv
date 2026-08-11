@@ -88,6 +88,9 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
 - [x] S16 - Confound check on S15: re-run the blocks 0-4 unablated sweep on the S4 corpus-mined
   wide-JSD bank, to test whether C(b) is a model property or a property of the low-JSD banks.
 
+- [x] S17 - Extend S16's wide-JSD blocks 0-4 sweep to gpt2-small (its S4 bank already existed), closing
+  the three-model comparison and retiring the "no wide bank for Small" limitation.
+
 - [x] S15 - Does the top-of-stack collapse reproduce outside gpt2-large? Blocks 0-4 in gpt2-small and
   gpt2-medium, with the unablated w_TV curve as the primary readout (the ablation delta is under-powered
   in those models).
@@ -108,7 +111,7 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S16 complete (2026-08-11). The success criterion is met and exceeded.** All 6
+**S1-S17 complete (2026-08-11). The success criterion is met and exceeded.** All 6
 hand-picked pairs validate in all five models, a 200-pair-per-model corpus-mined bank carries the
 association test in five models, that bank has been re-run at three patch sites in the 24-block models
 and at four/five sites in the depth-mismatched GPT-2 models, a dedicated low-JSD bank (365/399/356
@@ -116,7 +119,8 @@ pairs) carries the hypothesis test, that bank has been re-swept under six ablati
 three GPT-2 models, and a held-out fixed head set has been ablated at two patch sites per model on 4836
 more sweeps, a shared-continuation re-sweep at four readout offsets adds 900, and a five-site patch
 curve in gpt2-large adds 1728, and the blocks 0-4 re-run in the two smaller GPT-2 models adds
-1800 — 20734 sweeps in total, endpoint identity error <= 3.6e-4 throughout
+1800, and the same blocks 0-4 sweep on the wide-JSD bank in all three GPT-2 models adds 900 — 21634
+sweeps in total, endpoint identity error <= 3.6e-4 throughout
 except in S13, where the manipulation drives the two endpoints to near-coincidence and the bound is
 2.1e-3.
 
@@ -234,11 +238,21 @@ gpt2-large that moves, not gpt2-medium. High-divergence pairs start much sharper
 (monotone widening) and the front-loading (first block removed is the largest step) hold on both banks
 in both models, so those carry the mechanism claim.
 
+**S17 outcome.** Extending the wide-JSD blocks 0-4 sweep to gpt2-small (its S4 bank already existed;
+the "no wide bank for Small" limitation was false) closes the three-model comparison and strengthens
+S16: wide-bank C(4) = 16.9% / 17.7% / 24.4% (large / medium / small) against 60.7% / 18.6% / 51.1% on
+the low-JSD banks, so the cross-model spread collapses from 42 points to 7.5. Two models move a long
+way with the pair population and gpt2-medium does not, making C(b) a joint model-by-population
+quantity. Front-loading is now three models on two banks, always monotone and always largest at b = 1
+(gpt2-small on the wide bank: 15.1 of its 24.4 points from the first block alone).
+
 ## Next step
 
 The untouched design question is pairs that differ at an *earlier*
 position rather than the final token (S13 moved the readout downstream but kept the differing token
 last). The longer-suffix extension of S13 stays blocked on conditioning,
 not GPU: past s ~ 4 the endpoints are too close for d(alpha) to be well defined and it needs a different
-readout (e.g. KL to each endpoint distribution). Both deliverables are current, pass
-`experiments/check_render.py`, and embed all fourteen figures with visible captions cited by number.
+readout (e.g. KL to each endpoint distribution). A smaller open item from S17: the residual 7-point
+wide-bank C(4) gap (small 24.4% vs 16.9-17.7%) is unresolved at 60 pairs and would need the full
+200-pair banks. Both deliverables are current, pass `experiments/check_render.py`, and embed all
+sixteen figures with visible captions cited by number.

@@ -245,7 +245,8 @@ suffix lengths, 900 more. Experiment 11 sweeps eight patch sites in GPT-2 Large 
 under the same three conditions, on an evenly spaced 72-pair subsample of that model's low-JSD bank
 drawn from 65 distinct prefixes: 1080 more. Experiment 12 repeats that protocol at blocks 0, 1, 2, 3
 and 4 in GPT-2 Small and GPT-2 Medium on 60 evenly spaced pairs from each model's low-JSD bank: 1800
-more — 20734 in total.
+more. Experiment 13 repeats that same blocks 0–4 protocol in all three GPT-2 models on 60 evenly spaced
+pairs from each model's corpus-mined wide-JSD bank instead: 900 more — 21634 in total.
 
 **Shared-continuation prompts (Experiment 10).** Every other experiment puts the differing token last,
 so the interpolated activation sits in the residual stream position that produces the readout. To move
@@ -585,7 +586,7 @@ $d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error
 ## Results
 
 **The harness is correct.** All 6 hand-written pairs tokenized validly in all five models, and across
-all 20734 sweeps the patched runs at the endpoints reproduced the clean forward passes to
+all 21634 sweeps the patched runs at the endpoints reproduced the clean forward passes to
 $|d(0)| \le 3.6 \times 10^{-4}$ and $|d(1) - 1| \le 3.6 \times 10^{-4}$. The numbers below are about
 the models, not about patching artifacts.
 
@@ -1416,15 +1417,16 @@ The confound matters because $C(b)$ is the report's one cross-model comparison o
 population effect would make it uninterpretable as a model property. We therefore re-ran the identical
 blocks 0–4 sweep, unablated, on the corpus-mined bank of Experiment 2, which spans the whole divergence
 range instead of its low tail (median endpoint JSD $0.59$ against $< 0.1$): 60 evenly spaced pairs per
-model, 600 sweeps, worst endpoint reproduction error $8.9\times10^{-5}$.
+model in all three GPT-2 models, 900 sweeps, worst endpoint reproduction error $1.4\times10^{-4}$.
 
-The cross-model gap disappears. On the wide-divergence bank GPT-2 Medium closes 17.7% of its headroom
-after four blocks and GPT-2 Large 16.9% — indistinguishable, where the low-divergence banks put them
-19 points and threefold apart. What changes with the bank is not GPT-2 Medium but GPT-2 Large: its
-$C(4)$ falls from 60.7% to 16.9%, while GPT-2 Medium's barely moves (18.6% → 17.7%). High-divergence
-pairs start far sharper in both models ($\tilde w_{TV} = 0.042$ and $0.094$ at block 0, against $0.189$
-and $0.252$ in the low-divergence banks), so they have more headroom and give up a smaller share of it
-per block removed.
+The cross-model gap all but disappears. On the wide-divergence bank the three models close 16.9%
+(Large), 17.7% (Medium) and 24.4% (Small) of their own headroom after four blocks — a 7.5-point spread,
+where the low-divergence banks spread them over 42 points (60.7% / 18.6% / 51.1%) and put Medium
+threefold below Large. What changes with the bank is not GPT-2 Medium but the other two: Large's $C(4)$
+falls from 60.7% to 16.9% and Small's from 51.1% to 24.4%, while Medium's barely moves (18.6% →
+17.7%). High-divergence pairs start far sharper in every model ($\tilde w_{TV} = 0.042$, $0.094$ and
+$0.152$ at block 0, against $0.189$, $0.252$ and $0.336$ in the low-divergence banks), so they have
+more headroom and give up a smaller share of it per block removed.
 
 | model | bank | median JSD | $\tilde w_{TV}$ at $L=0$ | $L=4$ | $C(1)$ | $C(4)$ |
 |---|---|---|---|---|---|---|
@@ -1432,14 +1434,17 @@ per block removed.
 | GPT-2 Large | wide (Exp. 2) | 0.598 | 0.042 | 0.119 | 5.4% | **16.9%** |
 | GPT-2 Medium | low-JSD (Exp. 12) | $< 0.1$ | 0.252 | 0.298 | 6.8% | **18.6%** |
 | GPT-2 Medium | wide (Exp. 2) | 0.586 | 0.094 | 0.166 | 2.6% | **17.7%** |
+| GPT-2 Small | low-JSD (Exp. 12) | $< 0.1$ | 0.336 | 0.420 | 11.0% | **51.1%** |
+| GPT-2 Small | wide (Exp. 2) | 0.551 | 0.152 | 0.237 | 15.1% | **24.4%** |
 
-**Table 17.** The same blocks 0–4 sweep on two pair populations. $C(b)$ is model-specific only inside
-the low-divergence population; across populations the within-model swing (GPT-2 Large, 60.7% → 16.9%)
-is larger than the between-model gap.
+**Table 17.** The same blocks 0–4 sweep on two pair populations in all three GPT-2 models. $C(b)$ is
+model-specific only inside the low-divergence population; across populations the within-model swing
+(GPT-2 Large, 60.7% → 16.9%) is five times the between-model spread on the wide bank.
 
 Two claims survive intact and one narrows. Surviving: the direction (the switch widens monotonically
 as blocks are removed) and the front-loading (the first block removed is the largest single step) hold
-in both models on both banks, so an interpolation probe is evidence about the blocks immediately below
+in all three models on both banks — on the wide bank GPT-2 Small's first block alone is 15.1 of its
+24.4 points — so an interpolation probe is evidence about the blocks immediately below
 the patch regardless of which pairs it is run on. Narrowed: the *rate* at which the top blocks build
 the plateau is a joint property of the model and the pair population, not a model constant — so
 Experiment 12's between-model ordering should be read as holding at matched endpoint divergence only.
@@ -1449,20 +1454,22 @@ next to the low-divergence ones of Figure 15.
 
 ![Transition width and share of headroom closed across blocks 0-4 on a wide-divergence pair bank, against the low-divergence banks](plots/bank_depth.png)
 
-**Figure 16.** On a pair population spanning the full divergence range, GPT-2 Medium and GPT-2 Large
-close the same share of headroom over the first four blocks, and the Experiment 12 gap between them is
-a property of the low-divergence banks. **A** — x: patch site, the block index $L$ at which the
+**Figure 16.** On a pair population spanning the full divergence range, the three GPT-2 models close
+nearly the same share of headroom over the first four blocks, and the wide Experiment 12 spread between
+them is a property of the low-divergence banks. **A** — x: patch site, the block index $L$ at which the
 interpolated activation is inserted, so each step right removes one more block from the path below the
 patch; y: median unablated transition width $w_{TV}$ over 60 wide-divergence pairs per model, smaller =
 sharper switch; gray dashed horizontal line = the linear response $w_{TV}=0.5$. **B** — same x; y:
 $C(b)$, the percentage of that model's own block-0 headroom closed after removing $b$ blocks; heavy
-dashed/dotted lines with large markers = the wide-divergence bank, faint solid lines with small markers
-= the low-divergence banks of Figure 15. Series in both panels: GPT-2 Medium (vermillion squares,
-dashed), GPT-2 Large (reddish-purple triangles, dotted).
+dashed/dotted/dash-dotted lines with large markers = the wide-divergence bank, faint solid lines with
+small markers = the low-divergence banks of Figure 15. Series in both panels: GPT-2 Medium (vermillion
+squares, dashed), GPT-2 Large (reddish-purple triangles, dotted), GPT-2 Small (blue circles,
+dash-dotted).
 
-Limitations: only two models are covered here, GPT-2 Small having no wide-divergence bank in this
-report; 60 pairs each, and the two banks differ in mining procedure as well as divergence, so "population" here
-means the whole difference between the two banks and not endpoint divergence alone.
+Limitations: 60 pairs per model, and the two banks differ in mining procedure as well as in divergence,
+so "population" here means the whole difference between the two banks and not endpoint divergence alone.
+The residual wide-bank spread (Small 24.4% against 16.9–17.7%) is a 7-point gap on ratios of medians and
+is not resolved at this sample size.
 
 ## Conclusion
 
