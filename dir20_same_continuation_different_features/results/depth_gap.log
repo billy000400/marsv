@@ -1,0 +1,58 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 8918.15it/s]
+gpt2-small: k=4 of 144 heads, 365 pairs, mid block 6 (f=0.455)
+    probe 0/365
+    probe 100/365
+    probe 200/365
+    probe 300/365
+    L0 fold 0 pair 0/166
+    L0 fold 0 pair 50/166
+    L0 fold 0 pair 100/166
+    L0 fold 0 pair 150/166
+    L0 fold 1 pair 0/199
+    L0 fold 1 pair 50/199
+    L0 fold 1 pair 100/199
+    L0 fold 1 pair 150/199
+gpt2-small block0 {"n": 365, "n_prefix": 102, "median_wtv": {"base": 0.31508931570063564, "ctrl": 0.3124118629548438, "glob": 0.3374315455897593}, "median_delta": 0.015112470042757953, "ci_delta": [0.005894217988136846, 0.021058777447700044], "wilcoxon_p": 0.0016259286187966107, "frac_glob_gt_ctrl": 0.6164383561643836, "mean_overlap": 0.586986301369863, "max_endpoint_err": 0.00021243818628136069, "below_share": 1.0}
+    L6 fold 0 pair 0/166
+    L6 fold 0 pair 50/166
+    L6 fold 0 pair 100/166
+    L6 fold 0 pair 150/166
+    L6 fold 1 pair 0/199
+    L6 fold 1 pair 50/199
+    L6 fold 1 pair 100/199
+    L6 fold 1 pair 150/199
+gpt2-small mid {"n": 365, "n_prefix": 102, "median_wtv": {"base": 0.44755099519709285, "ctrl": 0.44527473634495424, "glob": 0.44426584086967585}, "median_delta": 0.0027184477464585743, "ci_delta": [-0.0018805677010503563, 0.007626351995086045], "wilcoxon_p": 0.4318636088209752, "frac_glob_gt_ctrl": 0.5315068493150685, "mean_overlap": 0.586986301369863, "max_endpoint_err": 0.00016606360441073775, "below_share": 1.0}
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  40%|████      | 118/292 [00:00<00:00, 1071.09it/s]Loading weights:  77%|███████▋  | 226/292 [00:00<00:00, 873.73it/s] Loading weights: 100%|██████████| 292/292 [00:00<00:00, 912.55it/s]
+gpt2-medium: k=12 of 384 heads, 399 pairs, mid block 12 (f=0.478)
+    probe 0/399
+    probe 100/399
+    probe 200/399
+    probe 300/399
+    L12 fold 0 pair 0/186
+    L12 fold 0 pair 50/186
+    L12 fold 0 pair 100/186
+    L12 fold 0 pair 150/186
+    L12 fold 1 pair 0/213
+    L12 fold 1 pair 50/213
+    L12 fold 1 pair 100/213
+    L12 fold 1 pair 150/213
+    L12 fold 1 pair 200/213
+gpt2-medium mid {"n": 399, "n_prefix": 119, "median_wtv": {"base": 0.42024649807680753, "ctrl": 0.42038252186986064, "glob": 0.421138372846928}, "median_delta": 0.0016159275357120473, "ci_delta": [-0.0011428004087120358, 0.004513182124249726], "wilcoxon_p": 0.13708813745768414, "frac_glob_gt_ctrl": 0.5238095238095238, "mean_overlap": 0.23600668337510444, "max_endpoint_err": 0.00020562077406793833, "below_share": 0.875}
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  21%|██        | 91/436 [00:00<00:00, 872.18it/s]Loading weights:  41%|████      | 179/436 [00:00<00:00, 833.58it/s]Loading weights:  60%|██████    | 263/436 [00:00<00:00, 822.36it/s]Loading weights:  83%|████████▎ | 361/436 [00:00<00:00, 882.23it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 870.29it/s]
+gpt2-large: k=22 of 720 heads, 356 pairs, mid block 18 (f=0.486)
+    probe 0/356
+    probe 100/356
+    probe 200/356
+    probe 300/356
+    L18 fold 0 pair 0/162
+    L18 fold 0 pair 50/162
+    L18 fold 0 pair 100/162
+    L18 fold 0 pair 150/162
+    L18 fold 1 pair 0/194
+    L18 fold 1 pair 50/194
+    L18 fold 1 pair 100/194
+    L18 fold 1 pair 150/194
+gpt2-large mid {"n": 356, "n_prefix": 113, "median_wtv": {"base": 0.5008949774160589, "ctrl": 0.5010858238456896, "glob": 0.4928494238139406}, "median_delta": -0.002334659766991709, "ci_delta": [-0.004732810884959693, 0.000221345360466918], "wilcoxon_p": 0.0029042505083543974, "frac_glob_gt_ctrl": 0.449438202247191, "mean_overlap": 0.29405005107252297, "max_endpoint_err": 8.894558413885534e-05, "below_share": 1.0}
+wrote plots/depth_gap.png

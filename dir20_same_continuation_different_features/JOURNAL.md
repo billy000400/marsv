@@ -494,3 +494,63 @@ rather than the final token.
 On track? yes — S11 delivered a shared-circuit result and a mechanistic correction to S10's
 interpretation rather than a confirmation; both deliverables are curated to current-best with eleven
 captioned figures and pass `check_render.py`; no unaddressed feedback and no STOP.
+
+---
+## 2026-08-11 (S12: does relative depth explain the cross-model gap?)
+
+**Feedback check.** Listed the direction root first: the only matching file is
+`human_feedback.txt.addressed.md`, already suffixed. Nothing unaddressed; no STOP written (see below).
+
+**What I did.** One script, `experiments/depth_gap.py` (+ a small table printer), ~22 min of GPU. It
+repeats S11's held-out fixed-set ablation with the patch at the middle block of each GPT-2 stack, adds
+the block-0 fixed-set run for gpt2-small that S11 left out, and scores three conditions per pair (no
+ablation, per-pair matched control, held-out fixed set) so the mid-site baseline is measured rather than
+borrowed. 3725 sweeps.
+
+**What I learned — the hypothesis I set out to test was malformed, and the data said so cleanly.**
+- The plan was "if the cross-model gap tracks relative depth it should close at a matched-$f$ site". While
+  writing the analysis I realised the three models were *already* matched on $f$ at the block-0
+  comparison — $f = 1$ for every model — so relative depth could never have been the explanation. I kept
+  the experiment because the second site is still informative, but reframed what it answers, and said in
+  both deliverables why the original attribution is withdrawn.
+- What the second site actually shows is much better than what I went looking for: the head circuit's
+  causal effect is *contingent* on depth below the patch. gpt2-large goes from $+0.187$ to $-0.002$ when
+  the patch moves to block 18, because at block 18 its unablated median $w_{TV}$ is 0.501 — the linear
+  response — so there is no compression left for the heads to supply. The report's two causes multiply
+  rather than add.
+- I nearly reported that as a ceiling artifact and stopped. Adding the headroom-normalised
+  $\hat\Delta = \Delta / (0.5 - w_{ctrl})$ before looking at the mid numbers is what made the result
+  interpretable: gpt2-large covers 62% of the available headroom at block 0 and none at mid, gpt2-small
+  8.1% -> 5.0%, gpt2-medium flat at 2.0%. No cell keeps a large normalised effect, so the collapse is not
+  only a ceiling.
+- Recounting the stored held-out sets to fill in the "heads at or below the patch" column caught a wrong
+  number in both deliverables: gpt2-large's fixed set has **seven** block-0 heads, not the five I wrote
+  last iteration. Corrected in the headline and the Summary.
+- gpt2-large's mid-patch effect is $-0.002$ with $p = 2.9\times10^{-3}$ — significant, opposite in sign,
+  and 1% of the block-0 effect. I flagged it rather than explaining it; with $n = 356$ paired sweeps a
+  trivially small systematic difference reaches significance, which is a reminder that the interesting
+  quantity here is the effect size against the headroom, not the $p$-value.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. "Middle block" = block 6 / 12 / 18, giving $f = 0.455 / 0.478 / 0.486$ (matched to within 0.03) and
+   re-using the exact sites already swept in Experiment 5. Rejected: solving for equal $f$ exactly, which
+   would need a fractional block.
+2. Ran three conditions at the mid site rather than borrowing the base/control from the block-0 run — the
+   baseline changes completely with the patch site, so a borrowed control would have made $\Delta$
+   meaningless. Only gpt2-small's *block-0* base/control are re-used, from `ablate_gpt2-small.json`,
+   where the patch site is identical.
+3. Kept the per-pair engagement-matched control as the comparison for the fixed set, as in S11 (a fixed
+   set cannot be magnitude-matched pair by pair without defeating the point). Still named as a limitation.
+4. Did not sweep intermediate patch sites between $f = 1$ and $f \approx 0.47$; two sites per model
+   answers the contingency question and the sweep would have cost ~3x the GPU time. Stated in Limitations
+   as "where between the two sites the effect disappears is unmeasured".
+
+**Next step.** The remaining untouched question from the plan is pairs that differ at an *earlier*
+position rather than the final token, which is the one design choice the whole report shares and never
+varies. A cheaper alternative, if GPU time is short: sweep two or three intermediate patch sites in
+gpt2-large to locate where the fixed-set effect dies, turning Experiment 9's two points into a curve.
+
+On track? yes — S12 delivered a contingency result that changes the report's framing rather than
+confirming it, plus a corrected count; both deliverables are curated to current-best with twelve
+captioned figures and pass `check_render.py`; no unaddressed feedback, and no STOP because the
+earlier-position question is still open and the loop has time to spend on it.

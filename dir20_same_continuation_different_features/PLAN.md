@@ -74,9 +74,10 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
   gpt2-large.
 - [x] S11 - Localise the differential heads: recurrence statistics, a held-out fixed cross-pair set,
   the same set with block 0 excluded, and the Experiment 7 dose sweep extended to gpt2-small.
-- [ ] S12 (open) - Why is gpt2-large's intervention effect ~10x the other two GPT-2 models', when
-  neither model size nor the block-0 share of the selected heads predicts it? Re-run the held-out
-  fixed-set ablation with the patch at a relative-depth-matched middle block in all three models.
+- [x] S12 - Why is gpt2-large's intervention effect ~10x the other two GPT-2 models', when neither
+  model size nor the block-0 share of the selected heads predicts it? Re-run the held-out fixed-set
+  ablation with the patch at a relative-depth-matched middle block in all three models, and add the
+  block-0 fixed-set run for gpt2-small that S11 skipped.
 
 ## Required outputs
 
@@ -94,13 +95,13 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S11 complete (2026-08-11); S12 open. The success criterion is met and exceeded.** All 6
+**S1-S12 complete (2026-08-11). The success criterion is met and exceeded.** All 6
 hand-picked pairs validate in all five models, a 200-pair-per-model corpus-mined bank carries the
 association test in five models, that bank has been re-run at three patch sites in the 24-block models
 and at four/five sites in the depth-mismatched GPT-2 models, a dedicated low-JSD bank (365/399/356
 pairs) carries the hypothesis test, that bank has been re-swept under six ablation conditions in all
-three GPT-2 models, and a held-out fixed head set has been ablated on 1111 more sweeps — 12581 sweeps
-in total, endpoint identity error <= 3.6e-4 throughout.
+three GPT-2 models, and a held-out fixed head set has been ablated at two patch sites per model on 4836
+more sweeps — 16306 sweeps in total, endpoint identity error <= 3.6e-4 throughout.
 
 **Verdict.** Matthew's contrast reproduces in his own model (gpt2-large) and not in gpt2-medium;
 relative depth governs plateau strength; the base rate of plateaus among arbitrary pairs is high
@@ -168,10 +169,22 @@ the dose sweep to gpt2-small (+0.014 / +0.019 / +0.025) shows the effect is not 
 and is not explained by block-0 share (62.6% in gpt2-small vs 16.7% in gpt2-large), so the cross-model
 gap stays described rather than attributed.
 
+**S12 outcome.** The head circuit's causal effect is contingent on depth below the patch, and the
+relative-depth explanation of the cross-model gap is withdrawn. Repeating the held-out fixed-set
+ablation with the patch at each model's middle block (f = 0.455 / 0.478 / 0.486) takes the paired effect
+from +0.187 to -0.002 (gpt2-large), +0.015 to +0.003 (gpt2-small) and +0.005 to +0.002 (gpt2-medium),
+because the unablated switch is already at the linear response there (median w_TV 0.501 / 0.448 /
+0.420). The headroom-normalised effect rules out a pure ceiling artifact (gpt2-large 61.9% -> none;
+gpt2-small 8.1% -> 5.0%; gpt2-medium 2.0% -> 2.0%). Relative depth cannot explain the cross-model gap
+because all three models were already matched at f = 1 in the block-0 comparison; what is now known is
+that gpt2-large's advantage belongs to that patch site, not to the model. gpt2-small's block-0 fixed-set
+run (+0.015, p = 1.6e-3) completes the three-model comparison, and recounting the stored sets corrected
+gpt2-large's fixed-set block-0 membership from five heads to seven.
+
 ## Next step
 
-S12: explain the cross-model gap. Re-run the held-out fixed-set ablation with the patch at a
-relative-depth-matched middle block in all three GPT-2 models — if the gap tracks relative depth
-(Experiment 5's organising variable) it should close there. Secondary, still open: pairs differing at
-an *earlier* position rather than the final token. Both deliverables are current, pass
-`experiments/check_render.py`, and embed all eleven figures with visible captions cited by number.
+S13: pairs differing at an *earlier* position rather than the final token — the one design choice the
+whole report shares and never varies. Cheaper alternative if GPU time is short: sweep two or three
+intermediate patch sites in gpt2-large to locate where the fixed-set effect dies, turning Experiment 9's
+two points into a curve. Both deliverables are current, pass `experiments/check_render.py`, and embed
+all twelve figures with visible captions cited by number.

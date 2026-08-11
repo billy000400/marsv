@@ -417,3 +417,50 @@ B depth profile of selected heads for three models, C held-out fixed-set ablatio
 block-0-excluded condition, D three-model dose response). Figure 10's caption no longer names series by
 colour (rule 13). All eleven figures are embedded with visible numbered captions in both files and cited
 by number; `experiments/check_render.py` passes on both.
+
+---
+## 2026-08-11 (S12) — the head circuit's causal effect is contingent on depth below the patch
+
+**New experiment.** `experiments/depth_gap.py` (+ `experiments/depth_gap_table.py`): Experiment 8's
+held-out fixed-set ablation repeated with the patch moved to the middle block of each stack (block 6 of
+12, 12 of 24, 18 of 36; $f = 0.455 / 0.478 / 0.486$), plus the block-0 fixed-set run for gpt2-small that
+S11 skipped. Three conditions per pair at the mid site (no ablation, per-pair matched control, held-out
+fixed set), everything else — head selection, prefix-parity folds, 3% dose, matched control — unchanged.
+3725 new sweeps; worst endpoint identity error $2.1\times10^{-4}$, inside the reported
+$3.6\times10^{-4}$.
+
+**New result 1 — the effect collapses when the patch moves (Table 13, Figure 12).** Paired
+$\Delta = w_{TV}$(fixed set) $-$ $w_{TV}$(control), block 0 -> mid block: gpt2-large $+0.187$ ->
+$-0.002$, gpt2-small $+0.015$ -> $+0.003$ (ns), gpt2-medium $+0.005$ -> $+0.002$ (ns). The unablated
+switch is gone at the mid site (median $w_{TV}$ 0.501 / 0.448 / 0.420 against the linear response 0.5),
+so there is no compression left for the heads to supply.
+
+**New result 2 — it is not a ceiling artifact.** The headroom-normalised effect
+$\hat\Delta = \Delta / (0.5 - \tilde w_{TV}(\text{control}))$ goes 61.9% -> undefined (control past the
+linear response) in gpt2-large, 8.1% -> 5.0% in gpt2-small and 2.0% -> 2.0% in gpt2-medium: no cell
+keeps a large normalised effect after the move.
+
+**New result 3 — gpt2-small's block-0 fixed set (new row of Table 13).** $\Delta = +0.015$,
+CI $[+0.006, +0.021]$, $p = 1.6\times10^{-3}$, $n = 365$; recurrence-ranked $k=4$ set, 100% of it in
+block 0. This completes the three-model comparison at the block-0 site, which S11 ran for two models.
+
+**Superseded numbers.** Sweep total 12581 -> 16306 (Methods and the harness-check sentence in both
+files). The fixed set's block-0 membership in gpt2-large was stated as "five heads"; recounting the
+stored held-out sets gives **seven of 22** in both folds (32%) — corrected in RESULTS.md's headline and
+REPORT.md's Summary. Experiment 8's closing "what makes GPT-2 Large special is still open" is now
+qualified: still open, but localised to the $f = 1$ patch site rather than the model.
+
+**Story change (rule 9b).** Old: two sources of sharpness — depth below the patch, and early
+prompt-discriminating heads — presented as separate contributions a curve cannot disentangle. New: they
+multiply. Removing the depth also removes the heads' causal effect, so a head-ablation result of this
+kind is interpretable only at a patch site where the unablated curve plateaus. Added as a Summary
+paragraph, a Conclusion paragraph and the new Results subsection in REPORT.md, and as a headline
+paragraph plus Experiment 9 in RESULTS.md. The claim that relative depth might explain the cross-model
+gap is withdrawn with its reason stated: the three models were already matched at $f = 1$, so a second
+matched-$f$ site cannot equalise them and in fact silences all three.
+
+**Figures.** Added `plots/depth_gap.png` as **Figure 12** in both deliverables (A block-0 patch, B
+mid-stack patch, both as no-ablation / matched-control / fixed-set bars per model; C the paired effect
+against relative depth on a symlog axis with cluster-bootstrap intervals). Twelve figures embedded with
+visible numbered captions in both files, each cited by number; `experiments/check_render.py` passes on
+both.

@@ -57,12 +57,21 @@ heads, identifiable in advance from the two clean forward passes.
 **Those heads are shared across pairs, and they act from above the patch.** A single fixed set of 22
 GPT-2 Large heads, ranked on one half of the prefixes and ablated on the other half, widens the median
 switch to $0.485$ — more than the per-pair sets manage, so tailoring the selection to each pair was
-adding noise rather than precision. But the set does its work through five heads in **block 0**, which
+adding noise rather than precision. But the set does its work through seven heads in **block 0**, which
 sit above the patch site and therefore cannot process the interpolated vector; they can only decide what
 the two interpolated vectors contain. Rebuild the same fixed set from blocks 1–35 and the effect drops
 by 94%, to a small but solid $+0.012$. Interpolation sharpness is thus about the endpoints as much as
 about the depth that processes them — which matters for anyone reading a plateau as evidence about
 downstream mechanism.
+
+**Depth and circuit are not two ingredients but one compound.** Repeating that fixed-set ablation with
+the patch moved to the middle of each stack, everything else identical, takes GPT-2 Large's effect from
+$+0.187$ to $-0.002$ and leaves nothing measurable in the other two models. At the mid-stack site the
+unablated switch has already gone — median $w_{TV} = 0.501$ against the linear response's $0.5$ — so
+there is no compression for the heads to supply. The early heads decide how much difference exists
+between the two interpolated vectors and the blocks below the patch decide whether that difference gets
+compressed into a switch; neither produces a plateau alone. A head-ablation result of this kind is only
+interpretable at a patch site where the unablated curve plateaus in the first place.
 
 ## Methods
 
@@ -158,6 +167,32 @@ repeat the whole construction in GPT-2 Large with block 0 struck from the rankin
 head is downstream of the patch. GPT-2 Small is included in the recurrence counts but not the fixed-set
 ablation, whose $k=4$ is too small for a ranking to mean much.
 
+**Relative-depth control on the cross-model gap (Experiment 9).** Experiment 8 leaves the three GPT-2
+models differing up to tenfold in what the identical intervention does, and neither model size nor
+where the selected heads sit predicts the ordering. Experiment 5's organising variable is relative
+depth $f$, and a block-0 patch puts all three models at $f = 1$ while leaving 11, 23 and 35 blocks
+below it — the same fraction of very different amounts of computation. Experiment 9 therefore repeats
+Experiment 8's protocol with one thing changed: the patch moves to the middle block of each stack
+(block 6 of 12, block 12 of 24, block 18 of 36, giving $f = 0.455$, $0.478$, $0.486$). Head selection,
+the prefix-parity fold split, the 3% dose and the engagement-matched control are all unchanged, and the
+missing block-0 fixed-set run for GPT-2 Small is added, so the design is three models $\times$ two patch
+sites. Because a head at or below the patch can no longer process the interpolated vector, we also
+report the share of each fixed set sitting at or below the patch site.
+
+**Headroom-normalised effect $\hat\Delta$** — the quantity that makes the two patch sites comparable.
+A mid-stack patch already leaves the unablated curve close to the linear response, so an ablation that
+widens the switch has much less room to work with there; comparing raw $\Delta$ across sites would
+confound the size of the effect with the size of the gap available. We therefore also express the
+paired effect as the fraction of the remaining distance to the linear response that the fixed set
+covers, with $\tilde w$ a median over the held-out pairs:
+
+```math
+\hat\Delta \;=\; \frac{\tilde w_{TV}(\text{fixed set}) - \tilde w_{TV}(\text{control})}{0.5 - \tilde w_{TV}(\text{control})}
+```
+
+$\hat\Delta = 1$ means the ablation moved the median pair all the way to proportional response;
+$\hat\Delta = 0$ means it did nothing. It is reported alongside $\Delta$ in Experiment 9.
+
 **Validity check.** For the hand-written pairs we require, per model, that the two prompts tokenize to
 an identical prefix and exactly one differing single final token. All 6 pairs passed in all five models
 (prefix lengths 3–14 tokens), so all 30 model-pair cells are reported and no multi-token interpolation
@@ -174,8 +209,9 @@ sweeps: 30 hand-picked model-pair cells, 1000 mined-bank sweeps at block 0 acros
 more at blocks 12 and 20 in the three 24-block models, 1400 at the extra Experiment 5 sites, and 1120
 on the low-JSD banks of Experiment 6 (365 pairs from 102 prefixes in GPT-2 Small, 399 from 119 in GPT-2
 Medium, 356 from 113 in GPT-2 Large). Experiment 7 re-runs all 1120 low-JSD sweeps under six ablation
-conditions each, for 6720 more, and Experiment 8 adds 1111 held-out fixed-set sweeps — 12581 in
-total.
+conditions each, for 6720 more; Experiment 8 adds 1111 held-out fixed-set sweeps; and Experiment 9 adds
+3725 (365 block-0 sweeps for GPT-2 Small's missing fixed set, plus three conditions over each model's
+whole low-JSD bank at the mid-stack patch) — 16306 in total.
 
 ### Metrics
 
@@ -483,7 +519,7 @@ $d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error
 ## Results
 
 **The harness is correct.** All 6 hand-written pairs tokenized validly in all five models, and across
-all 12581 sweeps the patched runs at the endpoints reproduced the clean forward passes to
+all 16306 sweeps the patched runs at the endpoints reproduced the clean forward passes to
 $|d(0)| \le 3.6 \times 10^{-4}$ and $|d(1) - 1| \le 3.6 \times 10^{-4}$. The numbers below are about
 the models, not about patching artifacts.
 
@@ -1045,9 +1081,81 @@ snaps. Reporting a plateau therefore describes the endpoints as much as the mech
 patch site one block earlier or later changes which of the two you are measuring. Two things remain
 unattributed. The block-0 share does not explain the cross-model gap — GPT-2 Small draws 62.6% of its
 differential heads from block 0 against GPT-2 Large's 16.7%, and its intervention effect is 4–7 times
-smaller — so what makes GPT-2 Large special is still open. And the fixed set is not magnitude-matched
-pair by pair the way Experiment 7's control is, so its claim rests on the per-pair control and on the
-block-0-excluded variant, both run at the identical dose.
+smaller — so what makes GPT-2 Large special is still open, and Experiment 9 takes it up. And the fixed
+set is not magnitude-matched pair by pair the way Experiment 7's control is, so its claim rests on the
+per-pair control and on the block-0-excluded variant, both run at the identical dose.
+
+### The head circuit only causes a switch where there is depth to compress it
+
+The report now has two named causes of a sharp switch: depth below the patch (Experiments 4–5) and a
+small set of early heads that write differently for the two prompts (Experiments 7–8). They could be
+independent contributions that add, or one could be a precondition for the other, and the two readings
+give different advice about when a head-ablation result means anything. Experiment 9 separates them by
+holding the intervention fixed and moving the patch: the same held-out fixed-set ablation, the same 3%
+dose, the same folds, run with the patch at the middle block of each stack instead of block 0. It also
+adds the block-0 fixed-set run for GPT-2 Small that Experiment 8 skipped, so the design is three models
+at two patch sites.
+
+**Table 13 — the same fixed-set ablation at two patch sites in three GPT-2 models.** $\Delta$ is the
+paired median of $w_{TV}$(fixed set) $-$ $w_{TV}$(control), with a 95% cluster bootstrap over prefixes
+and a Wilcoxon signed-rank $p$ against the control; $\hat\Delta$ is that effect as a fraction of the
+headroom remaining to the linear response (Methods), which is what makes the two sites comparable. The
+last column is the share of the fixed set at or below the patch, where a head can act only on the two
+endpoint activations.
+
+| Model | patch site | $f$ | $n$ | median $w_{TV}$: none | control | fixed set | $\Delta$ | 95% CI | $p$ vs control | $\hat\Delta$ | fixed-set heads at or below the patch |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| gpt2-small | block 0 | 1.000 | 365 | 0.315 | 0.312 | 0.337 | $+0.015$ | $[+0.006, +0.021]$ | $1.6\times10^{-3}$ | 8.1% | 100% |
+| gpt2-small | block 6 | 0.455 | 365 | 0.448 | 0.445 | 0.444 | $+0.003$ | $[-0.002, +0.008]$ | $0.43$ | 5.0% | 100% |
+| gpt2-medium | block 0 | 1.000 | 399 | 0.257 | 0.251 | 0.254 | $+0.005$ | $[+0.001, +0.009]$ | $0.033$ | 2.0% | 0% |
+| gpt2-medium | block 12 | 0.478 | 399 | 0.420 | 0.420 | 0.421 | $+0.002$ | $[-0.001, +0.005]$ | $0.14$ | 2.0% | 88% |
+| gpt2-large | block 0 | 1.000 | 356 | 0.198 | 0.198 | **0.485** | $+0.187$ | $[+0.139, +0.249]$ | $4\times10^{-51}$ | 61.9% | 32% |
+| gpt2-large | block 18 | 0.486 | 356 | 0.501 | 0.501 | 0.493 | $-0.002$ | $[-0.005, +0.000]$ | $2.9\times10^{-3}$ | n/a | 100% |
+
+**The causal effect vanishes with the plateau it was acting on.** At the middle block, GPT-2 Large's
+median $w_{TV}$ before any ablation is $0.501$ — the linear response to three decimals. Nothing is being
+compressed, and the intervention that widened the switch by $+0.187$ at block 0 now moves it by
+$-0.002$. The two smaller models say the same an order of magnitude down: $+0.015 \to +0.003$ and
+$+0.005 \to +0.002$, neither distinguishable from its control. The obvious deflationary reading — that
+this is only a ceiling, since a curve already at $0.5$ cannot widen — is what $\hat\Delta$ tests, by
+scoring each cell against the headroom it actually has. GPT-2 Large covers 62% of the available
+distance at block 0 and none of it at the mid patch; GPT-2 Small halves, from 8.1% to 5.0%; GPT-2 Medium
+is unchanged at 2.0%. The collapse in GPT-2 Large is therefore not a ceiling effect, and there is no
+cell where a large normalised effect survives the move.
+
+**The practical consequence is a scope condition on this kind of evidence.** The two causes multiply
+rather than add: the early heads set how much difference exists between the two interpolated vectors,
+and the blocks below the patch set whether that difference is compressed into a switch. Take away
+either and the plateau is gone — Experiment 5 takes away the depth, Experiment 8 takes away the heads,
+and Experiment 9 shows that taking away the depth also takes away what the heads were doing. An
+ablation study of the Experiment 8 kind is interpretable only at a patch site where the unablated curve
+plateaus; run at a mid-stack site it would have returned a clean null in all three models and said
+nothing about the circuit. Figure 12 shows the two sites side by side.
+
+![Median transition width under no ablation, a matched control set and a held-out fixed head set, at a block-0 patch and at a middle-block patch in three GPT-2 models](plots/depth_gap.png)
+
+**Figure 12.** Moving the patch to mid-stack removes the plateau and the head circuit's effect
+together. **A** and **B**, y: median $w_{TV}$ over the held-out low-JSD pairs (smaller = sharper); x:
+model, labelled with its block count; the three bars within each model are no ablation (gray,
+unhatched), the per-pair engagement-matched control set (dotted hatch) and the held-out fixed
+cross-pair set (diagonal hatch); gray dashed = the linear response $w_{TV} = 0.5$. **A** patches after
+block 0 ($f = 1$); **B** after the middle block ($f \approx 0.47$). The one tall hatched bar in **A** is
+GPT-2 Large's fixed-set effect; in **B** every bar sits at the linear response. **C** — x: relative
+depth $f$, drawn from $1$ on the left to $0.4$ on the right so the patch moves deeper into the stack
+left to right; y (symmetric log): the paired median of $w_{TV}$(fixed set) $-$ $w_{TV}$(control), bars =
+95% cluster bootstrap over prefixes, gray dashed = no effect. gpt2-small circles solid, gpt2-medium
+squares dashed, gpt2-large triangles dotted.
+
+**What Experiment 9 does not settle.** The cross-model gap remains described rather than attributed.
+Relative depth cannot be the explanation, because the three models were already matched on $f$ at the
+block-0 comparison — all three sit at $f = 1$ there — and matching them at a second value of $f$
+silences all three instead of equalising them. What Experiment 9 does establish about the gap is that
+GPT-2 Large's advantage belongs to the $f = 1$ patch site rather than to the model as a whole. Two
+smaller points, stated rather than interpreted: GPT-2 Large's mid-patch $-0.002$ is significant
+($p = 2.9\times10^{-3}$, 45% of pairs above control) and runs opposite to the block-0 effect at 1% of
+its size; and at the mid patch every fixed-set head in GPT-2 Large and GPT-2 Small sits at or below the
+patch, so all of them are endpoint-only there — which is not what limits the effect, since the seven
+block-0 heads that carry most of the block-0 result are endpoint-only too.
 
 ## Conclusion
 
@@ -1094,12 +1202,24 @@ prompt-discriminating heads decides how much difference there is to compress. A 
 about both, and the probe cannot tell them apart on its own — moving the patch site is what separates
 them.
 
+Moving it also shows the two are not additive. With the patch at the middle of the stack, where the
+unablated response is already proportional ($w_{TV} = 0.501$ in GPT-2 Large), the identical head
+ablation does nothing in any of the three models — $+0.187$ falls to $-0.002$ — and the collapse
+survives normalising by the headroom each site leaves. The heads matter only where there is depth to
+compress what they wrote. For practice this is a scope condition worth stating plainly: an ablation
+study of this kind is interpretable only at a patch site where the unablated curve plateaus, and the
+same experiment run one third of the way up the stack would have returned a clean null and taught
+nothing about the circuit.
+
 **Limitations.** The intervention's heads are selected per pair by the same statistic that defines HCD,
 so it shows the measured construct is load-bearing rather than validating an independently-discovered
 circuit; Experiment 8's fixed set is derived from the same statistic and is not magnitude-matched pair
 by pair, so it leans on the per-pair control run at the identical dose. The three GPT-2 models differ
-up to 15-fold in how much the intervention does, and the difference is not ordered by size and not
-explained by where the heads sit, so it is described rather than attributed. All results are for one
+up to 15-fold in how much the intervention does; that difference is not ordered by size, not explained
+by where the heads sit, and not explained by relative depth (Experiment 9), so it is described rather
+than attributed — what is now known is that it belongs to the $f = 1$ patch site and not to GPT-2 Large
+as such. Experiment 9 compares two patch sites per model, not a sweep of sites, so where between $f = 1$
+and $f \approx 0.47$ the effect disappears is unmeasured. All results are for one
 patched position, the final token, and one
 interpolation scheme; pairs differing at an earlier position, or in more than one token, are untested. Mined pairs are built by swapping the
 final token for a lower-ranked alternative, so both continuations are ones the model itself considered
