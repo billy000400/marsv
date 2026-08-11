@@ -1,0 +1,50 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 9311.75it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-large: k=22 of 720 heads, 356 pairs
+    probe 0/356
+    probe 100/356
+    probe 200/356
+    probe 300/356
+    fold 0 pair 0/162
+    fold 0 pair 100/162
+    fold 1 pair 0/194
+    fold 1 pair 100/194
+gpt2-large {"n": 356, "n_prefix": 113, "median_wtv": {"base": 0.1984008961378286, "ctrl": 0.1978619344170421, "diff": 0.3582187145751611, "wtv_glob": 0.4847526672085517}, "delta_vs_base": {"ctrl": -1.9606803665583872e-05, "diff": 0.09584597282953736, "wtv_glob": 0.189471825013519}, "ci_vs_base": {"ctrl": [-0.0003353845901509181, 0.0006660969652598214], "diff": [0.04914505624857368, 0.15337484746103847], "wtv_glob": [0.13960347430872247, 0.24874042623004838]}, "p_glob_vs_ctrl": 4.254324756798098e-51, "p_glob_vs_diff": 1.0232873773563664e-17, "mean_overlap": 0.29405005107252297, "max_endpoint_err": 9.191608114633709e-05, "recovery": 1.9768365787313338}
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  31%|███       | 90/292 [00:00<00:00, 862.88it/s]Loading weights:  61%|██████    | 177/292 [00:00<00:00, 825.93it/s]Loading weights:  89%|████████▉ | 260/292 [00:00<00:00, 767.64it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 832.04it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-medium: k=12 of 384 heads, 399 pairs
+    probe 0/399
+    probe 100/399
+    probe 200/399
+    probe 300/399
+    fold 0 pair 0/186
+    fold 0 pair 100/186
+    fold 1 pair 0/213
+    fold 1 pair 100/213
+    fold 1 pair 200/213
+gpt2-medium {"n": 399, "n_prefix": 119, "median_wtv": {"base": 0.2568364485609809, "ctrl": 0.2513820830179406, "diff": 0.26413398403760757, "wtv_glob": 0.2535339224176581}, "delta_vs_base": {"ctrl": -0.0005641659059750781, "diff": 0.005142105689528387, "wtv_glob": 0.003616751702789245}, "ci_vs_base": {"ctrl": [-0.003279815932076778, 0.000789714669891195], "diff": [0.0008897821533253262, 0.010469846356404982], "wtv_glob": [0.00034968720073932924, 0.007146077146299772]}, "p_glob_vs_ctrl": 0.033379911044137366, "p_glob_vs_diff": 0.9595186244633526, "mean_overlap": 0.23600668337510444, "max_endpoint_err": 0.0001735687255859375, "recovery": 0.7033600476463483}
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:  20%|█▉        | 29/148 [00:00<00:00, 254.87it/s]Loading weights:  82%|████████▏ | 122/148 [00:00<00:00, 630.65it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 643.01it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+gpt2-small: dose 3% -> k=4 of 144 heads, 365 pairs
+    pair 0/365
+    pair 100/365
+    pair 200/365
+    pair 300/365
+gpt2-small {"n": 365, "n_prefix": 102, "k_heads": 4, "median_wtv": {"base": 0.31508931570063564, "ctrl": 0.3124118629548438, "diff": 0.3447556829340159}, "median_hcd": {"base": 0.03248223448396429, "ctrl": 0.033039010471363636, "diff": 0.023596503110956114}, "ci_wtv": {"base": [0.2966495655450478, 0.33575737182919474], "ctrl": [0.2943555477411295, 0.3368914848377914], "diff": [0.3213704341687986, 0.37634566134821207]}, "mag_removed": {"diff": 52.732757568359375, "ctrl": 52.64997100830078}, "median_delta": 0.014186970793662712, "ci_delta": [0.00773997553146244, 0.024849545941143247], "wilcoxon_p": 0.0001740050140527573, "frac_diff_gt_ctrl": 0.6246575342465753, "max_endpoint_err": 0.00021243818628136069, "frac": 0.03, "n_heads": 144}
+gpt2-small: dose 6% -> k=9 of 144 heads, 365 pairs
+    pair 0/365
+    pair 100/365
+    pair 200/365
+    pair 300/365
+gpt2-small {"n": 365, "n_prefix": 102, "k_heads": 9, "median_wtv": {"base": 0.31508931570063564, "ctrl": 0.31505201149976814, "diff": 0.32468373583421706}, "median_hcd": {"base": 0.03248223448396429, "ctrl": 0.03378067532192903, "diff": 0.018510054291471716}, "ci_wtv": {"base": [0.2966495655450478, 0.33623053041345874], "ctrl": [0.28907135023507946, 0.34802600247892646], "diff": [0.30752403747173646, 0.3573481108725784]}, "mag_removed": {"diff": 121.46823120117188, "ctrl": 113.27542114257812}, "median_delta": 0.019257451789183422, "ci_delta": [0.006203009859747977, 0.029900336266442538], "wilcoxon_p": 0.0015689119947288246, "frac_diff_gt_ctrl": 0.589041095890411, "max_endpoint_err": 0.00019569687719922513, "frac": 0.06, "n_heads": 144}
+gpt2-small: dose 10% -> k=14 of 144 heads, 365 pairs
+    pair 0/365
+    pair 100/365
+    pair 200/365
+    pair 300/365
+gpt2-small {"n": 365, "n_prefix": 102, "k_heads": 14, "median_wtv": {"base": 0.31508931570063564, "ctrl": 0.3145321786647337, "diff": 0.3501342753827372}, "median_hcd": {"base": 0.03248223448396429, "ctrl": 0.03451292010855887, "diff": 0.015387128614473305}, "ci_wtv": {"base": [0.2966495655450478, 0.3362347389520871], "ctrl": [0.2991985402246424, 0.3337991847438317], "diff": [0.3161865905850408, 0.3942735149544506]}, "mag_removed": {"diff": 190.82601928710938, "ctrl": 175.78997802734375}, "median_delta": 0.024499758849648612, "ci_delta": [0.010313938421891879, 0.04109623513184474], "wilcoxon_p": 0.0006496415112760665, "frac_diff_gt_ctrl": 0.5863013698630137, "max_endpoint_err": 0.00024936802219599485, "frac": 0.1, "n_heads": 144}
+wrote plots/localization.png

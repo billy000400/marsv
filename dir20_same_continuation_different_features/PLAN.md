@@ -72,8 +72,11 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
 - [x] S10 (added) - Make the circuit-difference result causal: mean-ablate the differentially-engaged
   heads against an engagement-matched control set, at three pre-specified doses, in gpt2-medium and
   gpt2-large.
-- [ ] S11 (open) - Localise the differential heads: do the same heads recur across pairs in
-  gpt2-large, and does the intervention effect track relative depth or model family?
+- [x] S11 - Localise the differential heads: recurrence statistics, a held-out fixed cross-pair set,
+  the same set with block 0 excluded, and the Experiment 7 dose sweep extended to gpt2-small.
+- [ ] S12 (open) - Why is gpt2-large's intervention effect ~10x the other two GPT-2 models', when
+  neither model size nor the block-0 share of the selected heads predicts it? Re-run the held-out
+  fixed-set ablation with the patch at a relative-depth-matched middle block in all three models.
 
 ## Required outputs
 
@@ -91,12 +94,13 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S10 complete (2026-08-10); S11 open. The success criterion is met and exceeded.** All 6
+**S1-S11 complete (2026-08-11); S12 open. The success criterion is met and exceeded.** All 6
 hand-picked pairs validate in all five models, a 200-pair-per-model corpus-mined bank carries the
 association test in five models, that bank has been re-run at three patch sites in the 24-block models
 and at four/five sites in the depth-mismatched GPT-2 models, a dedicated low-JSD bank (365/399/356
-pairs) carries the hypothesis test, and that bank has been re-swept under six ablation conditions in
-two models — 9280 sweeps in total, endpoint identity error <= 3.6e-4 throughout.
+pairs) carries the hypothesis test, that bank has been re-swept under six ablation conditions in all
+three GPT-2 models, and a held-out fixed head set has been ablated on 1111 more sweeps — 12581 sweeps
+in total, endpoint identity error <= 3.6e-4 throughout.
 
 **Verdict.** Matthew's contrast reproduces in his own model (gpt2-large) and not in gpt2-medium;
 relative depth governs plateau strength; the base rate of plateaus among arbitrary pairs is high
@@ -152,11 +156,22 @@ Paired deltas +0.097/+0.145/+0.199, all CIs excluding zero, p ~ 1e-43 to 1e-48, 
 gpt2-medium replicates the sign at every dose (+0.009/+0.009/+0.010, p <= 0.019) but ~15x smaller,
 even though its correlation was the stronger of the two.
 
+**S11 outcome.** The differential heads are a shared circuit, and most of their causal effect is
+upstream of the patch. Per-pair sets overlap across prefixes at J = 0.090 / 0.064 / 0.280 (gpt2-large /
+-medium / -small) against a 0.016 random null, and gpt2-large's most-selected head enters 78.9% of
+pairs. A single fixed 22-head set ranked on half the prefixes and ablated on the other half moves
+gpt2-large's median w_TV 0.198 -> 0.485 (p = 4e-51 vs the matched control), beating the per-pair sets'
+0.358 — recovery 198% at 29.4% head overlap; gpt2-medium recovers 70%. But the top heads sit in block 0,
+which the patch overwrites, so they act on the interpolated endpoints, not on the computation below:
+excluding block 0 leaves 0.198 -> 0.217 (+0.012, p = 5e-24 vs control), 6% of the full effect. Extending
+the dose sweep to gpt2-small (+0.014 / +0.019 / +0.025) shows the effect is not ordered by model size
+and is not explained by block-0 share (62.6% in gpt2-small vs 16.7% in gpt2-large), so the cross-model
+gap stays described rather than attributed.
+
 ## Next step
 
-S11: localise. The differential heads are currently a per-pair top-k list; check whether the same heads
-recur across pairs in gpt2-large, which would turn "a pair-specific set" into a named circuit, and run
-the same intervention in gpt2-small and one non-GPT-2 model to see whether the 15-fold gpt2-medium gap
-tracks relative depth or model family. Secondary, still open: pairs differing at an *earlier* position
-rather than the final token. Both deliverables are current, pass `experiments/check_render.py`, and
-embed all ten figures with visible captions cited by number.
+S12: explain the cross-model gap. Re-run the held-out fixed-set ablation with the patch at a
+relative-depth-matched middle block in all three GPT-2 models — if the gap tracks relative depth
+(Experiment 5's organising variable) it should close there. Secondary, still open: pairs differing at
+an *earlier* position rather than the final token. Both deliverables are current, pass
+`experiments/check_render.py`, and embed all eleven figures with visible captions cited by number.

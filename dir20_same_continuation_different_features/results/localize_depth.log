@@ -1,0 +1,34 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  16%|█▋        | 71/436 [00:00<00:00, 588.80it/s]Loading weights:  30%|██▉       | 130/436 [00:00<00:00, 539.70it/s]Loading weights:  45%|████▌     | 197/436 [00:00<00:00, 585.34it/s]Loading weights:  59%|█████▊    | 256/436 [00:00<00:00, 528.07it/s]Loading weights:  75%|███████▍  | 325/436 [00:00<00:00, 576.13it/s]Loading weights:  93%|█████████▎| 407/436 [00:00<00:00, 649.02it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 631.02it/s]
+Using the latest cached version of the dataset since Salesforce/wikitext couldn't be found on the Hugging Face Hub (offline mode is enabled).
+Found the latest cached dataset configuration 'wikitext-103-raw-v1' at /workspace/hf_home/datasets/Salesforce___wikitext/wikitext-103-raw-v1/0.0.0/b08601e04326c79dfdd32d625aee71d232d685c3 (last modified on Sun Jul 26 01:24:28 2026).
+    probe 0/356
+    probe 100/356
+    probe 200/356
+    probe 300/356
+    fold 0 pair 0/162
+    fold 0 pair 100/162
+    fold 1 pair 0/194
+    fold 1 pair 100/194
+{
+ "n": 356,
+ "n_prefix": 113,
+ "k": 22,
+ "median_wtv": {
+  "base": 0.1984008961378286,
+  "ctrl": 0.1978619344170421,
+  "diff": 0.3582187145751611,
+  "wtv_glob": 0.4847526672085517,
+  "wtv_noL0": 0.21741190951353487
+ },
+ "delta_vs_base": 0.012241330321446892,
+ "ci_vs_base": [
+  0.009307150264176266,
+  0.017199850865383958
+ ],
+ "p_vs_ctrl": 4.559250355986427e-24,
+ "block0_share_of_selected": 0.16726251276813076,
+ "max_endpoint_err": 9.191608114633709e-05,
+ "recovery": 0.12771877586571292
+}
+wrote plots/localization.png

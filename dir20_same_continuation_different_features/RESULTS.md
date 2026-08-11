@@ -32,10 +32,19 @@ GPT-2 Large's median transition by 81% ($w_{TV}$ $0.198 \to 0.358$), and at 10% 
 stops switching and responds proportionally ($0.484$ against the linear response's $0.5$); an
 engagement-matched control set of the same size changes nothing ($0.198 \to 0.200$).
 
+Those heads turn out to be **mostly shared across pairs rather than pair-specific**. One fixed set of
+22 GPT-2 Large heads, ranked on half the prefixes and ablated on the other half, widens the median
+switch to $0.485$ — more than the per-pair sets do. But the fixed set does its work through five heads
+in **block 0**, which sit *above* the patch site, so they act by shaping the two activation vectors
+being interpolated rather than by processing them: exclude block 0 and the same construction leaves
+$0.198 \to 0.217$ ($+0.012$, $p = 5\times10^{-24}$ against the control). Interpolation between two
+activations is therefore as much about what got written into those two vectors as about the depth that
+processes them.
+
 ## Experiment 1 — Matthew's two pairs, plus four test pairs, in five models
 
 All 6 pairs tokenized validly in all five models (identical prefix, exactly one differing single final
-token). Across all 4750 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
+token). Across all 12581 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
 clean runs to $|d| \le 3.6\times10^{-4}$, so the interpolation harness is correct.
 
 The two `The house was` pairs are Matthew's own. `big`/`in` is his **positive plateau example**;
@@ -405,8 +414,9 @@ we mean-ablate, at the final token only, the $k$ heads that write most different
 — largest $\delta_h = (\lVert c_h^A\rVert + \lVert c_h^B\rVert)(1 - \cos(c_h^A, c_h^B))$ — and compare
 against deleting $k$ heads matched on how much they write but chosen to write *similarly* for the two
 prompts. Both conditions remove about the same amount of attention output (median ratio of removed
-write magnitude $1.01$–$1.02$ in GPT-2 Large, $1.08$–$1.12$ in GPT-2 Medium). Both endpoints are re-run
-under the ablation, and the identity check still holds ($|d(0)|, |d(1)-1| \le 3.5\times10^{-4}$).
+write magnitude $1.01$–$1.02$ in GPT-2 Large, $1.08$–$1.12$ in GPT-2 Medium, $1.00$–$1.09$ in GPT-2
+Small). Both endpoints are re-run under the ablation, and the identity check still holds
+($|d(0)|, |d(1)-1| \le 3.5\times10^{-4}$).
 
 $\Delta$ is the *paired* median of $w_{TV}$(differential) $-$ $w_{TV}$(control), with a 95% cluster
 bootstrap over prefixes and a Wilcoxon signed-rank $p$. "HCD left" is median head-contribution distance
@@ -420,6 +430,9 @@ after the differential ablation as a fraction of its unablated value — the man
 | gpt2-medium | 3% (12) | 0.257 | 0.251 | 0.264 | $+0.009$ | $[+0.000, +0.014]$ | $0.019$ | 55% | 0.71 |
 | gpt2-medium | 6% (23) | 0.257 | 0.248 | 0.258 | $+0.009$ | $[+0.001, +0.016]$ | $0.010$ | 56% | 0.61 |
 | gpt2-medium | 10% (38) | 0.257 | 0.250 | 0.263 | $+0.010$ | $[+0.002, +0.018]$ | $0.014$ | 56% | 0.52 |
+| gpt2-small | 3% (4) | 0.315 | 0.312 | 0.345 | $+0.014$ | $[+0.008, +0.025]$ | $1.7\times10^{-4}$ | 63% | 0.73 |
+| gpt2-small | 6% (9) | 0.315 | 0.315 | 0.325 | $+0.019$ | $[+0.006, +0.030]$ | $1.6\times10^{-3}$ | 59% | 0.57 |
+| gpt2-small | 10% (14) | 0.315 | 0.315 | 0.350 | $+0.025$ | $[+0.010, +0.041]$ | $6.5\times10^{-4}$ | 59% | 0.47 |
 
 **In GPT-2 Large the sharp switch is caused by these heads.** Deleting 22 of 720 heads takes the median
 transition width from $0.198$ to $0.358$, an 81% widening; 10% of heads takes it to $0.484$, the linear
@@ -427,17 +440,20 @@ response to within 3% — the model has stopped switching and started responding
 matched control does nothing at any dose, so this is not the generic effect of removing attention
 output. The effect appears in 83–87% of individual pairs, grows monotonically with dose, and tracks the
 manipulation check. Since GPT-2 Large is the model in which the phenomenon was reported, this names
-what produces it there: a small, pair-specific set of attention heads, identifiable in advance from the
-two clean forward passes.
+what produces it there: a small set of attention heads, identifiable in advance from the two clean
+forward passes. Experiment 8 shows that set is largely shared across pairs.
 
-**In GPT-2 Medium the same intervention barely moves the curve.** The effect replicates at all three
-doses ($+0.009$, $+0.009$, $+0.010$, intervals excluding zero) but is roughly 15 times smaller, with
-only 55–56% of pairs moving in the predicted direction. The manipulation was not weaker there — it
-removed *more* of the circuit difference than in GPT-2 Large (HCD down to 0.52 against 0.54 at the top
-dose). GPT-2 Medium also had the *stronger* correlation in Experiment 6 ($\rho=-0.36$ against $-0.29$),
-so the size of an association was a poor guide to what the intervention would do.
+**In the two smaller GPT-2 models the same intervention barely moves the curve.** It replicates in
+both — GPT-2 Medium $+0.009$, $+0.009$, $+0.010$ and GPT-2 Small $+0.014$, $+0.019$, $+0.025$, every
+interval excluding zero, every dose ordered as predicted — but it is 4 to 15 times smaller than in
+GPT-2 Large, with 56–63% of pairs moving in the predicted direction rather than 83–87%. The
+manipulation was not weaker in the small models: it removed *more* of the circuit difference (HCD down
+to 0.52 and 0.47 at the top dose, against 0.54 in GPT-2 Large). The effect is also not ordered by model
+size — GPT-2 Small sits above GPT-2 Medium — so the GPT-2 Large result is a property of that model, not
+a trend in depth. GPT-2 Medium also had the *stronger* correlation in Experiment 6 ($\rho=-0.36$ against
+$-0.29$), so the size of an association was a poor guide to what the intervention would do.
 
-Figure 10 shows the dose-response in both models alongside the manipulation check.
+Figure 10 shows the dose-response for the two deeper models alongside the manipulation check.
 
 ![Transition width against ablation dose for differential and matched-control head sets in two models, with the paired effect and a manipulation check](plots/ablation_causal.png)
 
@@ -458,4 +474,96 @@ The heads are selected per pair by the same quantity that defines HCD, so this s
 construct is causally load-bearing in GPT-2 Large rather than validating an independently-discovered
 circuit. Mean-ablation also holds a head's output at a bank average instead of removing it from the
 computation graph, which is why the matched control at the identical dose is the comparison that
-carries the claim.
+carries the claim. GPT-2 Small's dose curve is plotted with the other two in Figure 11D; Experiment 8
+asks whether the per-pair selection was necessary at all, and where in the stack the effect comes from.
+
+## Experiment 8 — one fixed set of heads, and where in the stack it acts
+
+Experiment 7 picks a fresh head set for every pair, so it establishes that a *construct* is
+load-bearing without saying whether there is a circuit to name. Two questions follow. Do the same heads
+keep being selected across pairs? And if a single set works for pairs it was not chosen from, does it
+act on the computation *below* the patch, or on the two activation vectors being interpolated?
+
+The first question is answered by how much per-pair sets overlap. Because pairs sharing a WikiText
+prefix are not independent, the number that matters is the overlap between pairs from *different*
+prefixes, compared against random sets of the same size and against the top-$k$ heads by write
+magnitude — a set that recurs trivially, because the same heads are always the loudest.
+
+| Model | $k$ (3% of heads) | most-selected head, and its rate | Jaccard, different prefixes: differential | by magnitude | random | selections in the top $k$ heads |
+|---|---|---|---|---|---|---|
+| gpt2-large | 22 of 720 | block 0, head 14 — 78.9% | 0.090 | 0.160 | 0.016 | 30.7% |
+| gpt2-medium | 12 of 384 | block 1, head 4 — 46.1% | 0.064 | 0.412 | 0.016 | 24.7% |
+| gpt2-small | 4 of 144 | block 0, head 1 — 85.8% | 0.280 | not run | 0.016 | 58.7% |
+
+**The differential heads recur far above chance, but they are not a fixed list.** Across prefixes the
+overlap runs 4× (GPT-2 Medium), 6× (GPT-2 Large) and 18× (GPT-2 Small) the random rate, and one head in
+GPT-2 Large is selected for four pairs in five. At the same time GPT-2 Large's overlap is well under
+its magnitude-ranked set's, and its 22 most frequently selected heads account for only 30.7% of all
+selections. So there is a recurring core plus a long pair-specific tail, and the core is tighter in the
+smaller model.
+
+The causal version of the question is stronger than the counting version, so we ran it: split the bank
+by prefix parity, rank heads by selection frequency on one half, and ablate that **single fixed set**
+— the same 22 heads for every pair — on the held-out half. This is a real generalisation test; the
+pairs being ablated had no say in which heads were chosen.
+
+| Model | $n$ (held out) | median $w_{TV}$: none | matched control | per-pair set | fixed set | fixed $\Delta$ vs none | 95% CI | $p$ vs control | fraction of the per-pair effect |
+|---|---|---|---|---|---|---|---|---|---|
+| gpt2-large | 356 | 0.198 | 0.198 | 0.358 | **0.485** | $+0.189$ | $[+0.140, +0.249]$ | $4\times10^{-51}$ | 198% |
+| gpt2-medium | 399 | 0.257 | 0.251 | 0.264 | 0.254 | $+0.004$ | $[+0.000, +0.007]$ | $0.033$ | 70% |
+
+**In GPT-2 Large a fixed set is not just as good as per-pair selection — it is better.** Ablating the
+same 22 heads for every held-out pair takes the median transition width to $0.485$, the linear response
+to within 3%, against $0.358$ for sets tailored to each pair ($p = 1\times10^{-17}$ for the
+difference), even though a fixed set shares only 29.4% of its heads with the average pair's own top-22.
+Tailoring per pair adds noise; the shared core is what matters. GPT-2 Medium behaves the same way in
+miniature — the fixed set recovers 70% of its (very small) per-pair effect — so the machinery is shared
+in both models.
+
+That result carries a mechanistic sting, because the most frequently selected heads sit in **block 0**,
+and the interpolated vector replaces the final token's residual stream *after* block 0. A block-0 head
+therefore cannot influence the sweep by processing the interpolated vector; it can only change the two
+endpoint activations that are interpolated. To separate the two channels we rebuilt the fixed set from
+the same held-out ranking with block 0 excluded, so every ablated head is genuinely downstream.
+
+| GPT-2 Large, held-out fixed set | median $w_{TV}$ | $\Delta$ vs none | 95% CI | $p$ vs control | fraction of per-pair effect |
+|---|---|---|---|---|---|
+| all blocks (22 heads) | 0.485 | $+0.189$ | $[+0.140, +0.249]$ | $4\times10^{-51}$ | 198% |
+| block 0 excluded (22 heads) | 0.217 | $+0.012$ | $[+0.009, +0.017]$ | $5\times10^{-24}$ | 13% |
+
+**Most of the effect is upstream of the patch.** Removing block 0 from the fixed set costs 94% of the
+widening. What survives is small but unambiguous — $+0.012$ with an interval far from zero and
+$p = 5\times10^{-24}$ against the matched control — so heads below the patch do contribute, just an
+order of magnitude less than the block-0 heads that decide what the interpolated vector contains in the
+first place. Figure 11 shows the recurrence, the depth profile, the held-out fixed-set ablation and the
+three-model dose response together.
+
+![Head selection frequency, depth profile of selected heads, held-out fixed-set ablation, and dose response in three GPT-2 models](plots/localization.png)
+
+**Figure 11.** The differential heads are a shared core dominated by block 0, and a single fixed set
+transfers to held-out pairs. **A** — x: head rank after sorting all heads by how often they enter a
+pair's top-$k$ differential set (log scale); y: that fraction. Dotted horizontals = the rate expected
+if pairs chose heads at random ($k/H$, $H$ = total heads). gpt2-small circles solid, gpt2-medium
+squares dashed, gpt2-large triangles dotted, throughout the figure. **B** — x: relative depth, the
+block index divided by (blocks $-$ 1), so the three models share an axis; y: the share of all selected
+heads sitting in that block; the legend gives each model's block-0 share. **C** — y: median $w_{TV}$
+over the held-out pairs (smaller = sharper), for no ablation, the per-pair matched control, the fixed
+cross-pair set, the per-pair differential set, and (gpt2-large only) the fixed set with block-0 heads
+excluded; gray dashed = linear response (0.5). **D** — x: ablation dose as a percentage of all heads;
+y (symmetric log): the paired median of $w_{TV}$(differential) $-$ $w_{TV}$(control) from Experiment 7,
+bars = 95% cluster bootstrap over prefixes, gray dashed = no effect. GPT-2 Small sits above GPT-2
+Medium, so the effect is not ordered by model size.
+
+**Why this matters for anyone using interpolation as a probe.** Sharpness has two sources that a curve
+cannot distinguish. Depth below the patch supplies the capacity to compress a change (Experiments 4–5),
+but *what* gets compressed is fixed before the patch: a handful of early heads write the discriminating
+part of the activation, and a sweep between two vectors that differ in that part snaps. So a plateau is
+partly a fact about the model's downstream processing and partly a fact about the geometry of the two
+vectors chosen as endpoints — and the second part is set by the prompts and the patch site, not by the
+mechanism the probe is usually taken to reveal.
+
+**What this does not settle.** The block-0 share does not explain the cross-model gap: GPT-2 Small
+draws 62.6% of its differential heads from block 0 against GPT-2 Large's 16.7%, yet its intervention
+effect is 4–7 times smaller. Whatever makes GPT-2 Large special is still unidentified. The fixed set is
+also not magnitude-matched pair by pair the way the Experiment 7 control is, so its comparison rests on
+the per-pair control and on the block-0-excluded variant, both run at the identical dose.

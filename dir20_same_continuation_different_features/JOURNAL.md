@@ -430,3 +430,67 @@ whether the effect tracks relative depth (Experiment 5) or the family.
 On track? yes — deliverables are internally consistent again, both pass `check_render.py` with all ten
 figures embedded and captioned, and the iteration added a causal result rather than only repairing
 text; no unaddressed feedback and no STOP (S10 opened the localisation question above).
+
+---
+
+## 2026-08-11 (S11: localise the differential heads)
+
+**Feedback check.** Listed the direction root first: the only matching file is
+`human_feedback.txt.addressed.md`, already suffixed. Nothing unaddressed; no STOP written (S11 opened a
+new question, see below).
+
+**What I did.** Three scripts, ~25 min of GPU.
+- `localize_heads.py`: (A) per-pair top-k differential head sets for every low-JSD pair in gpt2-large
+  and gpt2-medium, with pairwise Jaccard overlap split into same-prefix and different-prefix samples
+  plus a random-set null and a magnitude-ranked comparison; (B) split the bank by prefix parity, rank
+  heads by selection frequency on one fold, ablate that single fixed set on the other; (C) the
+  Experiment 7 dose sweep in gpt2-small.
+- `localize_depth.py`: the same held-out fixed-set ablation in gpt2-large with block 0 excluded.
+- `head_depth_share.py`: where gpt2-small's differential heads sit (no sweeps).
+
+**What I learned — including a correction to how I had been reading Experiment 7.**
+- The heads recur. Across different prefixes the per-pair sets overlap 4-18x the random rate, and one
+  gpt2-large head is picked for 79% of pairs. "Pair-specific set", the phrase I used last iteration, was
+  wrong.
+- A fixed set chosen without seeing the pair is *better* than a tailored one: 0.485 vs 0.358 median
+  w_TV in gpt2-large, at only 29.4% head overlap. Per-pair selection was adding noise. I did not expect
+  recovery above 1 and nearly wrote the analysis with recovery clipped at 1 — worth keeping in mind that
+  "how much of the effect does the shared circuit recover" can legitimately exceed 100%.
+- The finding that matters most is the one I went looking for only because the top heads printed as
+  block 0: **the patch overwrites the final token's resid_post after block 0, so a block-0 head cannot
+  process the interpolated vector — it can only change what the interpolated endpoints are.** Excluding
+  block 0 from the fixed set costs 94% of the effect (+0.189 -> +0.012). The causal story from S10 is
+  still true but means something different from what I wrote: this is largely endpoint geometry, not
+  downstream circuitry. The surviving downstream effect is real (p = 5e-24 vs control) but an order of
+  magnitude smaller.
+- The tempting follow-up explanation — "gpt2-large is special because its differential heads include
+  block-0 heads" — is refuted by the third model. gpt2-small draws 62.6% of its heads from block 0,
+  gpt2-large 16.7%, gpt2-medium 0.0%, and the effect sizes are +0.014 / +0.096 / +0.009. Not ordered by
+  size, not explained by depth of selection. I stated that as an open question rather than dressing it
+  up.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. Localisation split by prefix parity rather than a random split, so the two folds share no prefix and
+   the generalisation test is across prefixes, not just across pairs. Rejected: a random pair-level
+   split, which would leak sibling pairs of the same prefix into both folds.
+2. Fixed set sized at the 3% dose only (k = 22 / 12). Rejected running all three doses: the 3% dose is
+   the smallest pre-specified one and already saturates gpt2-large near the linear response, so larger
+   doses cannot separate the conditions.
+3. gpt2-small is included in the recurrence counts but not the fixed-set ablation — k = 4 makes a
+   frequency ranking nearly meaningless. Stated in Methods.
+4. The block-0-excluded set keeps k = 22 rather than dropping the block-0 members and shrinking the
+   set, so dose is held constant and the comparison is like-for-like.
+5. Did not build a per-pair magnitude-matched control for the fixed set (it would need a per-pair
+   rematch, which defeats the point of a fixed set). Named as a limitation in both deliverables; the
+   per-pair control at the same dose and the block-0-excluded variant bound the interpretation.
+
+**Next step.** The open question is now sharply posed: why is gpt2-large's downstream-plus-endpoint
+effect 10x the other two GPT-2 models', when neither model size nor the block-0 share predicts it? The
+cheapest discriminating experiment is to run the held-out fixed-set ablation with the patch moved to a
+middle block (where relative depth is matched across models, per Experiment 5) — if the gap tracks
+relative depth it should close. Secondary, still untouched: pairs differing at an earlier position
+rather than the final token.
+
+On track? yes — S11 delivered a shared-circuit result and a mechanistic correction to S10's
+interpretation rather than a confirmation; both deliverables are curated to current-best with eleven
+captioned figures and pass `check_render.py`; no unaddressed feedback and no STOP.

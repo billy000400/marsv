@@ -362,3 +362,58 @@ and prompt-discriminating heads decide whether that capacity is used.
 vs dose per model, the paired difference with cluster-bootstrap CIs on a symlog axis, and the HCD
 manipulation check). All ten figures embedded with visible numbered captions in both files, each now
 cited by number in the prose that motivates it. `check_render.py` passes on both.
+
+---
+
+## 2026-08-11 (S11) — the differential heads are a shared circuit, and most of their effect comes from above the patch
+
+**New experiments.** `experiments/localize_heads.py` (recurrence + held-out fixed-set ablation in
+gpt2-large and gpt2-medium; the Experiment 7 dose sweep extended to gpt2-small),
+`experiments/localize_depth.py` (the same fixed-set ablation in gpt2-large with block 0 struck from the
+ranking) and `experiments/head_depth_share.py` (where gpt2-small's differential heads sit). 1111 new
+held-out sweeps plus 2190 for gpt2-small's dose sweep.
+
+**New result 1 — recurrence (Table 10).** Per-pair differential head sets overlap across prefixes at
+$J = 0.090$ / $0.064$ / $0.280$ (gpt2-large / -medium / -small) against a random-set null of $0.016$;
+the most-selected head enters 78.9% / 46.1% / 85.8% of pairs. GPT-2 Large's overlap is below its
+magnitude-ranked set's ($0.160$) and its 22 most frequent heads carry 30.7% of all selections, so the
+picture is a recurring core plus a pair-specific tail.
+
+**New result 2 — a fixed cross-pair set beats per-pair selection (Table 11, Figure 11C).** Ranking heads
+on one half of the prefixes and ablating that single 22-head set on the held-out half moves gpt2-large's
+median $w_{TV}$ 0.198 -> 0.485 (paired $\Delta$ +0.189, CI [+0.140,+0.249], $p = 4\times10^{-51}$ vs the
+matched control), against 0.358 for per-pair sets ($p = 1\times10^{-17}$ for the difference), i.e.
+recovery 198% at 29.4% head overlap. gpt2-medium: 0.257 -> 0.254, recovery 70%, $p = 0.033$.
+
+**New result 3 — the effect is mostly upstream of the patch (Table 12).** The most-selected heads sit in
+block 0, which the patch overwrites, so they act on the interpolated endpoints rather than on the
+computation below. Rebuilding the fixed set from blocks 1-35 leaves 0.198 -> 0.217 (+0.012, CI
+[+0.009,+0.017], $p = 5\times10^{-24}$ vs control), 13% of the per-pair effect and 6% of the full fixed
+set's.
+
+**New result 4 — gpt2-small joins Experiment 7 (Table 9).** Paired $\Delta$ = +0.014 / +0.019 / +0.025
+at the 3/6/10% doses ($p = 1.7\times10^{-4}$ / $1.6\times10^{-3}$ / $6.5\times10^{-4}$, 59-63% of 365
+pairs). The intervention effect is therefore NOT ordered by model size (large +0.096 >> small +0.014 >
+medium +0.009), and block-0 share does not explain it either (62.6% in gpt2-small vs 16.7% in
+gpt2-large), so the cross-model gap is now explicitly described-not-attributed.
+
+**Superseded numbers.** Sweep total 4750 -> 12581 (Experiment 7 now covers three models: 4530 -> 6720
+ablated sweeps; Experiment 8 adds 1111). Experiment 7's "pair-specific set of attention heads" claim is
+replaced by "a shared core, mostly upstream of the patch" — the earlier wording is removed from
+RESULTS.md, REPORT.md's Summary, Results and Conclusion. The Experiment 7 paragraph "In GPT-2 Medium the
+same intervention barely moves the curve" is rewritten as "In the two smaller GPT-2 models …" and no
+longer implies a depth trend. Endpoint identity bound unchanged (worst case over the new runs
+$2.5\times10^{-4}$, inside the reported $3.6\times10^{-4}$).
+
+**Story change (rule 9b).** Old: "a small, pair-specific set of attention heads causally produces the
+sharp switch in GPT-2 Large." New: "the set is shared across pairs and can be named once, but it works
+mainly from above the patch site, so a plateau is evidence about the two interpolated endpoints as much
+as about the depth that processes them." The evidence forcing it is the 94% drop when block 0 is
+excluded. REPORT.md's title is unchanged; its Summary gained a paragraph and its Conclusion's final
+reframing paragraph was rewritten.
+
+**Figures.** Added `plots/localization.png` as **Figure 11** in both deliverables (A recurrence curve,
+B depth profile of selected heads for three models, C held-out fixed-set ablation with the
+block-0-excluded condition, D three-model dose response). Figure 10's caption no longer names series by
+colour (rule 13). All eleven figures are embedded with visible numbered captions in both files and cited
+by number; `experiments/check_render.py` passes on both.
