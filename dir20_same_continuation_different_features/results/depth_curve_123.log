@@ -1,0 +1,21 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  22%|██▏       | 94/436 [00:00<00:00, 859.65it/s]Loading weights:  46%|████▌     | 200/436 [00:00<00:00, 890.98it/s]Loading weights:  67%|██████▋   | 290/436 [00:00<00:00, 712.24it/s]Loading weights:  84%|████████▎ | 365/436 [00:00<00:00, 724.40it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 804.77it/s]
+gpt2-large: k=22 of 720 heads, 72 pairs, sites [1, 2, 3]
+    probe 0/72
+    L1 pair 0/72
+    L1 pair 20/72
+    L1 pair 40/72
+    L1 pair 60/72
+1 {"n": 72, "n_prefix": 65, "median_wtv": {"base": 0.2618848997301785, "ctrl": 0.267035943599194, "glob": 0.48839049491806763}, "headroom": 0.23296405640080597, "median_delta": 0.12007583852612827, "ci_delta": [0.07590568443650214, 0.21305015518418197], "norm_delta": 0.5154264584041337, "wilcoxon_p": 7.459215780331679e-10, "frac_glob_gt_ctrl": 0.8194444444444444, "max_endpoint_err": 6.672777089988813e-05, "f": 0.9714285714285714}
+    L2 pair 0/72
+    L2 pair 20/72
+    L2 pair 40/72
+    L2 pair 60/72
+2 {"n": 72, "n_prefix": 65, "median_wtv": {"base": 0.3072638292156217, "ctrl": 0.305982188358507, "glob": 0.47128164897525004}, "headroom": 0.194017811641493, "median_delta": 0.061968870301866236, "ci_delta": [0.033320110080926585, 0.15352541732352526], "norm_delta": 0.3193978417629645, "wilcoxon_p": 1.2439654328431942e-06, "frac_glob_gt_ctrl": 0.7083333333333334, "max_endpoint_err": 6.767794548068196e-05, "f": 0.9428571428571428}
+    L3 pair 0/72
+    L3 pair 20/72
+    L3 pair 40/72
+    L3 pair 60/72
+3 {"n": 72, "n_prefix": 65, "median_wtv": {"base": 0.3495303809865301, "ctrl": 0.3456658401634205, "glob": 0.48146981233654185}, "headroom": 0.1543341598365795, "median_delta": 0.05729556231585886, "ci_delta": [0.02250305384015172, 0.18119829801781828], "norm_delta": 0.3712435560379353, "wilcoxon_p": 5.0594642279433325e-06, "frac_glob_gt_ctrl": 0.6944444444444444, "max_endpoint_err": 6.834328814875335e-05, "f": 0.9142857142857143}
+wrote plots/depth_curve.png

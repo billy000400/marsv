@@ -55,10 +55,19 @@ site the unablated switch is already gone — median $w_{TV} = 0.501$ in GPT-2 L
 response's $0.5$ — so there is no compression left for the heads to supply. GPT-2 Large's outsized
 causal effect is a property of *that model at that patch site*, not of the model.
 
+**And the depth it needs is startlingly little of the stack.** Sweeping eight patch sites in GPT-2 Large
+with the same 22-head set shows the whole phenomenon lives in the top few blocks. Removing a *single*
+block from the post-interpolation path — patching at block 1 instead of block 0, with 34 of 36 blocks
+still downstream — halves the heads' causal effect ($+0.250 \to +0.120$) and widens the unablated switch
+from $w_{TV} = 0.189$ to $0.262$; by block 4 the effect is 93% gone and by block 9 it is
+indistinguishable from zero. So "depth below the patch" is not a quantity that accumulates through the
+network: blocks 1–4 do almost all of the compressing, and the remaining half of the stack contributes
+nothing measurable.
+
 ## Experiment 1 — Matthew's two pairs, plus four test pairs, in five models
 
 All 6 pairs tokenized validly in all five models (identical prefix, exactly one differing single final
-token). Across all 17206 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
+token). Across all 18934 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
 clean runs to $|d| \le 3.6\times10^{-4}$, so the interpolation harness is correct. The one exception is
 Experiment 10, where the two endpoints are deliberately driven to near-coincidence and the bound is
 $2.1\times10^{-3}$; it is discussed there.
@@ -643,7 +652,8 @@ or below the patch, so all of them are endpoint-only there. Endpoint-only action
 effect, though — at block 0 the seven block-0 heads were endpoint-only too and carried 94% of the
 largest effect in the report.
 
-Figure 12 shows the two patch sites side by side and the collapse of the effect between them.
+Figure 12 shows the two patch sites side by side and the collapse of the effect between them;
+Experiment 11 fills in the sites between them and finds that the collapse happens almost immediately.
 
 ![Median transition width under no ablation, a matched control set and a held-out fixed head set, at a block-0 patch and at a middle-block patch in three GPT-2 models](plots/depth_gap.png)
 
@@ -730,3 +740,102 @@ worst error is $2.1\times10^{-3}$ rather than $3.6\times10^{-4}$, because the tw
 come to within $10^{-3}$ of each other and float32 kernels vary with batch shape. The endpoint
 references are computed inside the identical batched path as the swept rows to keep that error two
 orders of magnitude below the signal.
+
+## Experiment 11 — where in the stack the plateau is actually made
+
+Experiment 9 measured the head circuit at two patch sites, $f = 1$ and $f \approx 0.49$, and could only
+say that the effect is present at the first and gone at the second. That leaves the shape of the
+dependence open, and the shape is what tells us *which* blocks do the work: a gradual decay would mean
+the compression accumulates across the whole stack, while a sudden one would mean a few specific blocks
+make the switch and the rest are passengers.
+
+So we swept eight patch sites in GPT-2 Large — blocks 0, 1, 2, 3, 4, 9, 13 and 18, i.e. $f = 1.00$ down
+to $0.49$, with four of them in the top four blocks because that is where the change turned out to
+happen — holding everything else fixed. Crucially the ablated head set is *not* re-selected per
+site: it is the same held-out fixed 22-head set from Experiment 8, ranked on the opposite half of the
+prefixes over the full bank, so the only variable along the curve is where the interpolated vector is
+inserted. Each pair is run under three conditions at every site (no ablation, its engagement-matched
+control set, the fixed set), on a 72-pair evenly spaced subsample of the low-JSD bank (65 distinct
+prefixes; 1728 sweeps). $\hat\Delta$ is reported only where the control condition still has at least
+$0.05$ of headroom to the linear response, because below that it is a small number divided by a small
+number.
+
+| patch site | $f$ | median $w_{TV}$: none | control | fixed set | $\Delta$ | 95% CI | $p$ vs control | $\hat\Delta$ |
+|---|---|---|---|---|---|---|---|---|
+| block 0 | 1.00 | 0.189 | 0.194 | **0.543** | $+0.250$ | $[+0.166, +0.326]$ | $1.1\times10^{-12}$ | 81.6% |
+| block 1 | 0.97 | 0.262 | 0.267 | 0.488 | $+0.120$ | $[+0.076, +0.213]$ | $7.5\times10^{-10}$ | 51.5% |
+| block 2 | 0.94 | 0.307 | 0.306 | 0.471 | $+0.062$ | $[+0.033, +0.154]$ | $1.2\times10^{-6}$ | 31.9% |
+| block 3 | 0.91 | 0.350 | 0.346 | 0.481 | $+0.057$ | $[+0.023, +0.181]$ | $5.1\times10^{-6}$ | 37.1% |
+| block 4 | 0.89 | 0.378 | 0.377 | 0.442 | $+0.017$ | $[-0.004, +0.101]$ | $3.6\times10^{-3}$ | 13.5% |
+| block 9 | 0.74 | 0.450 | 0.445 | 0.459 | $+0.002$ | $[-0.008, +0.020]$ | $0.34$ | 2.8% |
+| block 13 | 0.63 | 0.479 | 0.483 | 0.470 | $+0.003$ | $[-0.008, +0.011]$ | $0.87$ | n/a |
+| block 18 | 0.49 | 0.496 | 0.499 | 0.494 | $+0.000$ | $[-0.008, +0.003]$ | $0.57$ | n/a |
+
+**The plateau is made in the first four blocks below the patch, not by the depth of the stack.** Moving
+the patch from block 0 to block 4 removes just 11% of the network from the post-interpolation path — 31
+of 36 blocks still process the interpolated vector — and that alone takes the unablated switch from
+$w_{TV} = 0.189$ to $0.378$, 62% of the way from the block-0 value to the linear response. The head
+circuit's causal effect falls with it, from $+0.250$ to $+0.017$: 93% of the effect is gone after four
+blocks, and by block 9 the fixed set is indistinguishable from its control ($p = 0.34$, 50% of pairs
+above control, exactly chance). The remaining half of the stack contributes nothing measurable.
+
+**A single block already does half of it.** Because everything interesting was happening before block 4,
+we resolved that range block by block. One block of processing removed — the patch at block 1, with 34
+of 36 blocks still downstream — halves the head circuit's effect ($+0.250 \to +0.120$, $\hat\Delta$
+81.6% → 51.5%) and takes the unablated switch from $0.189$ to $0.262$. Blocks 2 and 3 each remove less
+than the one before ($+0.062$, $+0.057$), and block 4 leaves only $+0.017$. So the decay is graded
+rather than a single-block cliff, but it is concentrated: block 1 alone accounts for 24% of the total
+widening between $f = 1$ and $f = 0.49$, and blocks 1–4 together for 62%.
+
+**This sharpens Experiment 5's relative-depth law rather than contradicting it.** Width is still a
+function of $f$, but the function is steeply concave — 62% of the total widening over the first 11% of
+the stack, and nothing measurable over the last half. Experiment 5 sampled $f$ at three widely spaced
+points and could not see that shape, so "more of the network below the patch gives a sharper switch" was
+a fair summary of those points but the wrong mental picture. The right one is that the interpolated
+activation is resolved almost immediately: whatever nonlinearity turns a linear mixture of two residual
+vectors into a near-binary choice is mostly finished within one block and entirely finished by block 4,
+and the rest of the network transports that choice rather than making it.
+
+**Why that matters for reading any interpolation probe.** The parts of the model this probe gives
+evidence about are the blocks immediately below the patch, not the network as a whole. A sharp curve
+from a block-0 patch in a 36-block model is a statement about roughly four blocks of computation; the
+other 31 could be replaced by an identity map for all this measurement can tell. It also explains the
+Experiment 9 result without any appeal to a ceiling: the head circuit acts at $f = 1$ because that is
+where the compressing blocks are, and its effect disappears as soon as the patch is below them.
+
+$\hat\Delta$ makes the same point on a scale that corrects for the shrinking headroom: the fixed set
+supplies 81.6% of the available compression at block 0, 51.5% one block down, 13.5% at block 4 and
+2.8% at block 9. The
+block-0 row also serves as the harness check for this experiment — on the full 356-pair bank
+Experiment 9 measured $\Delta = +0.187$, CI $[+0.139, +0.249]$; the 72-pair subsample here gives
+$+0.250$, CI $[+0.166, +0.326]$, the same sign and overlapping intervals with the identical protocol.
+Worst endpoint reproduction error across all 1728 sweeps: $6.7\times10^{-5}$.
+
+Figure 14 shows the collapse, both raw and headroom-normalised.
+
+![Median transition width per condition, the paired head-ablation effect, and the headroom-normalised effect against relative depth at eight patch sites in GPT-2 Large](plots/depth_curve.png)
+
+**Figure 14.** Both the plateau and the head circuit's causal effect live in the top few blocks of
+GPT-2 Large. **A** — x: relative depth $f = (N-1-L)/(N-1)$, the fraction of the stack below the patch,
+drawn from $1$ on the left to $0.45$ on the right so the patch moves deeper into the stack left to
+right; y: median $w_{TV}$ over 72 low-JSD pairs, smaller = sharper switch; series are no ablation (gray
+circles, solid), the per-pair engagement-matched control set (blue squares, dashed) and the held-out
+fixed 22-head set (light blue triangles, dotted); gray dashed horizontal line = the linear response
+$w_{TV} = 0.5$. The no-ablation and control series lie on top of each other at every site; the fixed-set
+series separates from them over the first four sites only. **B** —
+same x; y: the paired median of $w_{TV}$(fixed set) $-$ $w_{TV}$(control), bars = 95% cluster bootstrap
+over prefixes, gray dashed = no effect. **C** — x: the same eight patch sites, labelled by block and by
+$f$; y: the headroom-normalised effect $\hat\Delta = \Delta/(0.5 - \tilde w_{TV}(\text{control}))$ as a
+percentage, i.e. the share of the remaining distance to the linear response that the ablation covers;
+the two rightmost sites are marked undefined because their control condition has less than $0.05$ of
+headroom left.
+
+**Caveats.** One model and one head set: the curve is measured in GPT-2 Large only, because it is the
+only model with an effect large enough to trace, and the two smaller models' block-0 effects ($+0.015$
+and $+0.005$) are too small to resolve into a shape at this sample size. The 72-pair subsample is
+one seventh of the low-JSD bank, chosen to fit the compute budget; the block-0 cross-check above shows
+it reproduces the full-bank result. At block 4 the Wilcoxon $p$ is $3.6\times10^{-3}$ while the
+prefix-clustered interval still includes zero, so that point is best read as "much smaller than block 0,
+possibly nonzero" rather than as a confirmed positive. Finally, blocks 1–3 were added after the
+block-0-to-block-4 drop turned out to be the whole story: the numbers at those sites are measurements,
+but the choice to look there is not independent of the block-4 result.

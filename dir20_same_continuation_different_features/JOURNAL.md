@@ -605,3 +605,71 @@ sweeping intermediate patch sites in gpt2-large to turn Experiment 9's two point
 On track? yes — S13 discharged the report's one shared design assumption and demoted the endpoint-
 divergence story with a within-pair manipulation; both deliverables are curated to current-best with
 thirteen captioned figures and pass `check_render.py`; no unaddressed feedback and no STOP.
+
+---
+## 2026-08-11 (S14: where does the fixed-set head effect die?)
+
+**Feedback check.** Listed the direction root first: the only matching file is
+`human_feedback.txt.addressed.md`, already suffixed. Nothing unaddressed; no STOP written (see below).
+
+**What I did.** `experiments/depth_curve.py`, ~5 min of GPU (much cheaper than I budgeted: ~4.5
+sweeps/s on gpt2-large at these prompt lengths). Five patch sites in gpt2-large, three conditions per
+pair, 72 pairs, 1080 sweeps, turning Experiment 9's two points into a curve.
+
+**What I learned.**
+- The answer is much sharper than "somewhere in between". The effect and the plateau are both gone
+  after four blocks: $\Delta = +0.250 \to +0.017$ and unablated $w_{TV} = 0.189 \to 0.378$ when the
+  patch moves from block 0 to block 4, with 31 of 36 blocks still downstream of the patch. By block 9
+  the fixed set is at chance. So depth below the patch is not a resource that accumulates across the
+  stack; the blocks immediately below it resolve the interpolated mixture and the rest transport the
+  result.
+- That reframes Experiment 5 rather than contradicting it. Its three sites were spaced widely enough
+  that a steeply concave curve looked like a gradual one. 79% of the widening between $f = 1$ and
+  $f = 0.49$ happens in the first 11% of the stack.
+- **A metric that was about to lie.** $\hat\Delta$ divides by the headroom $0.5 - \tilde w_{TV}$(control),
+  and at blocks 13 and 18 that denominator is 0.017 and 0.001, so the raw ratio read 19% and 14% —
+  larger than block 9's honest 2.8% and pure noise amplification. I added a guard (report only when
+  headroom $\ge 0.05$) and marked those two sites undefined in the table and in panel C. Worth
+  remembering: a normalised effect size needs a floor on its denominator, and the place it bites is
+  exactly where the effect is smallest.
+- The block-0 site doubles as a harness check for the subsample: $\Delta = +0.250$, CI
+  $[+0.166, +0.326]$ here against the full-bank $+0.187$, CI $[+0.139, +0.249]$ in Experiment 9.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. Held the head set fixed across sites by re-using Experiment 8's stored held-out sets rather than
+   re-ranking at each site. Re-ranking would have confounded "the circuit stops mattering" with "a
+   different circuit gets selected"; the cost is that the set is optimal for block 0, which is the
+   conservative direction for the claim being made.
+2. gpt2-large only. The other two models' block-0 effects are $+0.015$ and $+0.005$, an order of
+   magnitude below the CI width at this sample size, so a five-site curve in them would have been
+   five nulls. Stated as a limitation.
+3. 72 pairs (one seventh of the bank) at five sites rather than the full bank at two, because the
+   shape was the open question and the block-0 cross-check shows the subsample reproduces the full-bank
+   result. Rejected: full bank at three sites, which would have answered less for the same GPU.
+4. Sites 0/4/9/13/18 — the two Experiment 9 endpoints plus three roughly evenly spaced in $f$. With
+   hindsight a site at block 1 or 2 would have been more informative than block 13, since everything
+   interesting happens before block 4.
+
+**Next step.** The obvious follow-up is to resolve blocks 0–4 (patch at blocks 1, 2, 3) and find out
+whether even one block of processing is enough to build the switch; the run costs ~3 min at this rate.
+After that, the untouched design question is pairs that differ at an earlier position rather than the
+final token (Experiment 10 moved the *readout* downstream but kept the differing token where it was).
+
+On track? yes — S14 answered the question Experiment 9 left open and narrowed a mechanism claim
+(the whole phenomenon is built in ~4 of 36 blocks); both deliverables are curated to current-best with
+fourteen captioned figures and pass `check_render.py`; no unaddressed feedback and no STOP.
+
+**S14b (same iteration, ~4 min more GPU).** The curve made the next question obvious and cheap, so I
+ran blocks 1, 2 and 3 as well (648 sweeps). One block of processing removed halves the head circuit's
+effect ($+0.250 \to +0.120$) with 34 of 36 blocks still downstream; blocks 2 and 3 give $+0.062$ and
+$+0.057$. So the decay over blocks 0-4 is graded, not a cliff, and front-loaded. Recomputing the
+concavity number for the new prose caught an arithmetic error in what I had written an hour earlier:
+the widening from $f=1$ to $f=0.49$ that happens over the first four blocks is **62%**, not the 79% in
+the first CHANGELOG entry — corrected in both deliverables with the correction recorded in CHANGELOG
+S14b. Lesson worth keeping: percentages quoted from a curve should be computed in the script that
+produced it, not typed from the table. Also logged a caveat that the four top-of-stack sites were
+chosen after seeing the block-4 drop, so their placement is data-driven.
+
+**Revised next step.** Blocks 0-4 are now resolved, so the open questions are (a) whether the
+one-block halving reproduces in gpt2-small/-medium at their (much smaller) block-0 effects, and (b) the
+untouched design question: pairs that differ at an *earlier* position rather than the final token.

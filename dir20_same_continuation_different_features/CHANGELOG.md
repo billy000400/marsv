@@ -503,3 +503,83 @@ is promoted from an unexamined assumption to a tested and discharged one.
 vs suffix length with bootstrap intervals, B endpoint JSD collapse on a log axis, C mean switch curves
 at $s = 0$ and $s = 4$). Thirteen figures embedded with visible numbered captions in both files, each
 cited by number; `experiments/check_render.py` passes on both.
+
+---
+## 2026-08-11 (S14) — the plateau and the head circuit both live in the top four blocks
+
+**New experiment.** `experiments/depth_curve.py`: the Experiment 8 held-out fixed 22-head set —
+*not* re-selected per site, so the intervention is literally identical everywhere — ablated with the
+block-0 SLERP patch moved to blocks 0, 4, 9, 13 and 18 of gpt2-large ($f = 1.00 / 0.89 / 0.74 / 0.63 /
+0.49$), three conditions per pair (no ablation, per-pair engagement-matched control, fixed set) on a
+72-pair evenly spaced subsample of the low-JSD bank from 65 prefixes. 1080 new sweeps; worst endpoint
+identity error $6.7\times10^{-5}$, inside the report-wide $3.6\times10^{-4}$.
+
+**New result 1 — the collapse is a step at the top of the stack, not a gradual decay (Table 15,
+Figure 14).** Paired $\Delta = w_{TV}$(fixed set) $-$ $w_{TV}$(control) across sites: $+0.250$ (block 0,
+$p = 1.1\times10^{-12}$) → $+0.017$ (block 4, $p = 3.6\times10^{-3}$, CI includes 0) → $+0.002$
+(block 9, $p = 0.34$) → $+0.003$ (block 13) → $+0.000$ (block 18). The unablated switch follows:
+median $w_{TV}$ $0.189 \to 0.378 \to 0.450 \to 0.479 \to 0.496$. Removing 4 of 36 blocks from the
+post-interpolation path removes 93% of the head effect and three quarters of the plateau.
+
+**New result 2 — the relative-depth law is steeply concave.** 79% of the total widening between
+$f = 1$ and $f = 0.49$ happens over the first 11% of the stack. Experiment 5's three widely spaced
+sites supported the ordering but implied a gradual accumulation; the dense sweep shows the interpolated
+mixture is resolved by block 4 and the remaining 31 blocks transport the result. Stated in both
+deliverables as a sharpening of Experiment 5, not a contradiction of it.
+
+**Metric change.** $\hat\Delta$ (headroom-normalised effect) is now reported only where the control
+condition retains $\ge 0.05$ of headroom to the linear response, and marked undefined otherwise; below
+that it is a small number over a small number (blocks 13 and 18 would otherwise have read 19% and 14%
+off headrooms of 0.017 and 0.001). Methods updated accordingly. Values that survive: 81.6% / 13.5% /
+2.8% at blocks 0 / 4 / 9.
+
+**Superseded numbers.** Sweep total 17206 → 18286 (Methods and the harness-check sentence in both
+files). REPORT.md's limitation "where between $f = 1$ and $f \approx 0.47$ the effect disappears is
+unmeasured" is replaced by the measured answer plus its new limit (one model, one seventh of the bank).
+Experiment 9's paragraph now points forward to Experiment 11. No previously reported number changed
+value: the block-0 subsample cross-check gives $\Delta = +0.250$, CI $[+0.166, +0.326]$ against the
+full-bank $+0.187$, CI $[+0.139, +0.249]$ — same protocol, overlapping intervals, reported as the
+harness check for this experiment.
+
+**Story change (rule 9b).** No reversal; a mechanism claim gets narrower and stronger. "Depth below the
+patch supplies the compression" becomes "the first few blocks below the patch supply the compression",
+which changes what an interpolation probe licenses: a sharp curve from a block-0 patch in a 36-block
+model is evidence about roughly four blocks of computation. Added as a Summary paragraph, a Conclusion
+paragraph and the new Results subsection in REPORT.md, and as a headline paragraph plus Experiment 11
+in RESULTS.md.
+
+**Figures.** Added `plots/depth_curve.png` as **Figure 14** in both deliverables (A median $w_{TV}$ per
+condition against relative depth, B the paired effect with cluster-bootstrap intervals, C the
+headroom-normalised effect with the two undefined sites marked). Fourteen figures embedded with visible
+numbered captions in both files, each cited by number; `experiments/check_render.py` passes on both.
+
+---
+## 2026-08-11 (S14b) — blocks 1-3 resolved; one block already halves the effect
+
+**Extension of the entry above, same iteration.** The S14 curve showed everything happening between
+blocks 0 and 4, so `experiments/depth_curve.py` was re-run at blocks 1, 2 and 3 (`D.SITES=[1,2,3]`;
+the script skips sites already stored and merges into the same `results/depth_curve.json`). 648 more
+sweeps, same 72 pairs, same fixed head set, worst endpoint error $6.8\times10^{-5}$.
+
+**New rows of Table 15 / Experiment 11.** Paired $\Delta$: block 1 $+0.120$, CI $[+0.076, +0.213]$,
+$p = 7.5\times10^{-10}$, $\hat\Delta = 51.5\%$; block 2 $+0.062$, CI $[+0.033, +0.154]$,
+$p = 1.2\times10^{-6}$, $31.9\%$; block 3 $+0.057$, CI $[+0.023, +0.181]$, $p = 5.1\times10^{-6}$,
+$37.1\%$. Unablated median $w_{TV}$: $0.262 / 0.307 / 0.350$ against $0.189$ at block 0.
+
+**New claim.** Removing a *single* block from the post-interpolation path halves the head circuit's
+causal effect, with 34 of 36 blocks still downstream. The decay across blocks 0-4 is graded rather than
+a one-block cliff, but front-loaded: block 1 accounts for 24% of the total widening between $f = 1$ and
+$f = 0.49$, blocks 1-4 for 62%. Added to the Summary, Results subsection and Conclusion of REPORT.md
+and to the headline and Experiment 11 of RESULTS.md.
+
+**Corrections to the entry above.** (i) The concavity figure was stated as "79% of the total widening
+happens in the first 11% of the stack"; recomputing from the stored medians
+($0.189 \to 0.378 \to 0.496$) gives **62%**, corrected everywhere in both deliverables. (ii) Sweep total
+18286 -> 18934; experiment size 1080 -> 1728 sweeps at 5 -> 8 patch sites. (iii) A new caveat records
+that the four top-of-stack sites were chosen after seeing the block-4 result, so their placement is
+data-driven even though the numbers at them are not.
+
+**Figures.** `plots/depth_curve.png` (Figure 14) regenerated with all eight sites; its caption now
+states that the no-ablation and control series coincide everywhere and the fixed-set series separates
+only over the first four sites. Fourteen figures embedded with visible numbered captions in both files;
+`experiments/check_render.py` passes on both.
