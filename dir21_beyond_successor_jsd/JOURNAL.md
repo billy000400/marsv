@@ -438,3 +438,45 @@ tail-driven would say the embedding probe sees something corpus statistics canno
 On track? yes — S1-S5 complete, twelve experiments run and reported, one earlier conclusion reversed
 with a stronger instrument and the reversal recorded, deliverables current-best and render-checked, no
 blocker.
+
+## 2026-08-11 — iteration 5: the mode split
+
+**Did.** Wrote and ran `experiments/mode_split.py`: partition each embedding edit's output change by
+successor token and score the share $S$ on the token's top-32 successors, for 24 random directions per
+token at the ladder's top rung (norm 1.8), then rescale the most top-heavy and most tail-heavy of them
+to a matched 0.4 bits and re-measure anchor width. 12 tokens, ~16 min on the shared GPU. Plot:
+`plots/mode_split.png` (Figure 16). Deliverables curated, pattern numbering fixed, render check passes.
+
+**Learned.** Two things, one clean and one bounded. Clean: the damage a large embedding edit does is
+**tail-weighted** — the top 32 successors hold 0.707 of the mass but absorb only 0.389 of the
+divergence, and louder directions are more tail-weighted still (rho = -0.36). So the behaviour whose
+disruption coincides with the trait's collapse is not mainly the behaviour corpus successor JSD scores,
+which is mildly favourable for the claim that the embedding lookup carries information corpus counts do
+not. Bounded: the steering test is a null with a real limit. Random directions span only S = 0.36-0.56,
+never reaching the mass-proportional 0.71, and at matched movement both extremes flatten the ordering
+(rho = -0.08 top-heavy, -0.37 tail-heavy, neither significant at n = 12) and widen every token toward
+~0.66. The one surviving paired difference — top-heavy widens more (+0.124 vs +0.108, p = 0.009) while
+moving the output less — hints that top-mass disturbance inflates the *level* more efficiently, but it
+says nothing about the ordering, which is what a screen consumes.
+
+**Assumption logged (loop mode).** Selected the two contrast directions from 24 random draws rather
+than constructing them from the unembedding rows of the top successors. Reason: construction needs the
+output-logit Jacobian with respect to the embedding row (2048 forward passes per token per frame,
+~40x the time available this iteration), and the draw-and-select design had already worked for the
+ladder. Cost, now visible in the result: random draws barely vary in S, so the causal half is
+underpowered — reported as a limitation and turned into the recommended next experiment rather than
+being presented as a settled null. Rejected: fewer tokens with a bigger direction pool (the pool's
+spread in S is the binding constraint, not the count of draws, and n = 12 is already small for the
+paired test); rejected also running the calibration to 0.2 bits to save time, since 0.4 bits is the
+rung at which the ladder showed the ordering die and matching it keeps the two experiments comparable.
+
+**Next step.** Build the two directions instead of drawing them: project the output response onto the
+span of the top-32 successors' unembedding rows and onto its complement, or search a modest random
+subspace for the combination maximising/minimising S, aiming for S > 0.8 versus S < 0.2 at a matched
+0.4 bits, then re-measure w_hat. A top-heavy edit that preserves the ordering where a tail-heavy one
+destroys it would place the trait in the tail of the next-token distribution and rule out any
+corpus-side estimator built on high-mass successors; both erasing it would say the trait belongs to the
+token's whole output map, making the static-embedding lookup the right level of description.
+
+On track? yes — S1-S5 complete, thirteen experiments run and reported, deliverables current-best and
+render-checked, no unaddressed feedback, no blocker.

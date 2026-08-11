@@ -422,3 +422,37 @@ successor token** (top-mass successors vs tail, at matched total output movement
 part of the token's behaviour carries the trait and whether it reconnects to corpus successor JSD.
 RESULTS.md: headline fragility paragraph, ladder table, Figure 15 and next-experiment section updated
 the same way. `check_render.py` passes (19 display eqs, 15 embeds + captions per file).
+
+## 2026-08-11 — iteration 5: the mode split (which successors a disruptive edit moves)
+
+**New experiment.** `experiments/mode_split.py` (+ `experiments/plot_mode.py`, `results/mode_split.json`,
+`results/mode_split.log`) runs the experiment the previous entry recommended. For the same 12 tokens as
+the ladder, every edit's output change is partitioned by successor token (JSD is a sum of non-negative
+per-successor terms) into the share $S$ landing on the token's 32 most likely successors and the rest.
+24 random directions per token at displacement norm 1.8 give the descriptive half; the most top-heavy
+and most tail-heavy of them, each rescaled by a log-log calibration scan to the same 0.4 bits of output
+movement, give the causal half. 12 tokens x (24 scan directions + 2 calibrated re-measurements).
+
+**New numbers.** Base mass in the top 32 successors 0.707, but the loudest random direction puts only
+**0.389** of its divergence there — the disturbance is tail-weighted relative to mass — and louder
+directions are more tail-weighted still (median-token $\rho(B_j, S_j) = -0.36$). At matched movement:
+top-heavy 0.410 bits, $S = 0.408$, mean $\hat w_u$ 0.666, $\rho$(before, after) $= -0.08$ ($p = 0.81$);
+tail-heavy 0.453 bits, $S = 0.355$, mean $\hat w_u$ 0.651, $\rho = -0.37$ ($p = 0.24$); pre-edit
+0.543 +- 0.083. Both destroy the ordering. One paired difference survives: the top-heavy edit widens
+more (mean $\Delta\hat w_u$ +0.124 vs +0.108, Wilcoxon $p = 0.009$) while moving the output less.
+
+**Nothing superseded.** This is a new result, not a replacement; no earlier number changed. The
+steering half is a null with a stated limit (random directions span only $S = 0.36$–$0.56$ and never
+reach the mass-proportional 0.71), reported as such.
+
+**Deliverable changes.** REPORT.md: new Methods subsection "The mode split: which successors does a
+disruptive edit move?" (per-successor JSD partition and top-mass share $S$ defined in a display
+equation, with the base-mass reference point and the matched-movement rescaling); new Results
+**pattern 16** with **Figure 16** = `plots/mode_split.png`; previous patterns 16/17/18 renumbered to
+17/18/19 and the two "(pattern 16)" cross-references to the basin result updated to "(pattern 17)";
+"Recommended next experiment" rewritten from "decompose the loud edit by successor token" (now done) to
+**constructing** top-heavy and tail-heavy directions from the top successors' unembedding rows or a
+subspace search, since random draws give too little contrast in $S$. RESULTS.md: mode-split table and
+Figure 16 added, headline fragility paragraph extended with the tail-weighting number, next-experiment
+section rewritten to match, forward-pass accounting and setting line updated. `check_render.py` passes
+(REPORT 20 display eqs / 16 embeds, RESULTS 16 embeds, 0 problems).

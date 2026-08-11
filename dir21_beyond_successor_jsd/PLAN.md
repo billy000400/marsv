@@ -46,7 +46,7 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-11, iteration 4)
+## Current status (2026-08-11, iteration 5)
 
 S1-S5 all have a pass, and the experiment S5 recommended has been run. **Main finding:** the leftover
 after corpus successor JSD is a per-token additive trait — held-out R^2 0.149 (JSD) -> 0.578 (JSD + one
@@ -117,11 +117,24 @@ rung (p = 5e-4 at norm 0.9). The level still follows displacement (0.543 -> 0.65
 direction, sd across tokens 0.083 -> 0.038). Displacement compresses the level; behaviour destroys the
 ordering — so the free vocabulary-wide lookup reads a behavioural property, not a geometric accident.
 
-**Next step:** ask which part of the token's output behaviour carries the trait. Decompose the JSD the
-loud edit at norm 1.8 produces by successor token into the token's high-mass successors versus the
-tail, then edit along directions restricted to each subspace at matched total output movement and
-re-measure w_hat. Top-mass-driven ties the trait back to corpus successor JSD and suggests a
-corpus-side estimator; tail-driven says the embedding probe sees what corpus statistics cannot.
+The mode split has since been run. Partitioning each edit's output change by successor token shows the
+damage is **tail-weighted**: the token's 32 most likely successors hold 0.707 of its probability mass
+but absorb only 0.389 of the divergence a loud edit produces, and louder directions are more
+tail-weighted still (rho(bits, top-share) = -0.36). So the behaviour whose disruption coincides with the
+trait's collapse is not mainly what corpus successor JSD scores. The steering half is a bounded null:
+random directions span only S = 0.36-0.56, and at matched output movement (0.410 vs 0.453 bits) the
+most top-heavy and most tail-heavy both flatten the ordering (rho = -0.08 and -0.37, n = 12) and widen
+every token toward ~0.66, with one surviving paired difference (top-heavy widens more, +0.124 vs
++0.108, p = 0.009, while moving the output less).
+
+**Next step:** build the top-heavy and tail-heavy directions instead of drawing them — project the
+output-logit response to an embedding edit onto the span of the top-32 successors' unembedding rows and
+onto its complement, or search a modest random subspace for the combination maximising and minimising
+the top-mass share S, targeting S > 0.8 versus S < 0.2 at a matched 0.4 bits — and re-measure w_hat. A
+top-heavy edit that preserves the token ordering where a tail-heavy one destroys it places the trait in
+the tail of the next-token distribution and rules out corpus-side estimators built on high-mass
+successors; both erasing it says the trait belongs to the token's whole output map and the
+static-embedding lookup is the right level of description.
 
 ## Stages
 

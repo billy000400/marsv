@@ -6,7 +6,7 @@
 position, 1,000 token pairs from 123 endpoint tokens × 3 sentence frames × 50 interpolation steps
 (pair artifacts inherited from `dir18`; the per-token probes, the forward screen, the anchor-set swap,
 the layer sweep, the embedding probe, the vocabulary test, the frame-shape control, the two
-embedding interventions and the displacement-norm ladder are new inference on the same model and hook
+embedding interventions, the displacement-norm ladder and the mode split are new inference on the same model and hook
 point, ~1.5M forward passes). Transition width `w` = fraction of the path over
 which the output-distance score `d(t)` climbs from 0.1 to 0.9; smaller = narrower. Analyses run on the
 **929 pairs** whose endpoint output movement is at least 0.2 bits in every frame.
@@ -52,7 +52,10 @@ rebuilt at each rung separates the two candidate causes: at a **displacement of 
 direction moves the output by 0.049 bits and keeps the token ordering intact ($\rho = +0.94$), while
 the loud direction at the same norm moves it by 0.402 bits and destroys the ordering ($\rho = +0.08$)**.
 The level of `w` follows the displacement; the ordering — the part a screen uses — follows what the
-edit does to the model.
+edit does to the model. Splitting that output change by successor token shows the disruption is
+tail-weighted: the token's 32 most likely successors hold 0.71 of its probability mass but absorb only
+0.389 of the divergence a loud edit produces, so the behaviour whose loss coincides with the trait's
+collapse is not mainly the behaviour corpus successor JSD scores.
 
 **The trait is real; the measuring stick is not neutral.** Swapping the six anchors for six function
 words or six rare content words still recovers the fitted token effect ($\rho = +0.57$ and $+0.61$),
@@ -231,6 +234,24 @@ test that separates "the move erased the trait" from "the model's response to th
 | 0.40 | 0.0006 / 0.552 / $+0.99$ | 0.0027 / 0.562 / $+0.99$ | $p = 0.02$ |
 | 0.90 | 0.0053 / 0.589 / $+0.91$ | 0.0221 / 0.620 / $+0.87$ | $p = 0.0005$ |
 | **1.80** | **0.0489 / 0.656 / $+0.94$** | **0.4023 / 0.683 / $+0.08$** | $p = 0.09$ |
+
+Mode split — which successors a disruptive edit moves. The Jensen–Shannon divergence splits exactly by
+successor token, so every edit's output change can be scored by the share $S$ of it landing on the
+token's 32 most likely successors: the high-mass continuations corpus successor JSD is built from.
+
+| edit at displacement norm 1.8 (12 tokens) | bits | top-mass share $S$ | mean $\hat w_u$ | $\rho$(before, after) |
+|---|---|---|---|---|
+| *before any edit* | \- | \- | *0.543* | \- |
+| loudest of 24 random directions | 0.402 | **0.389** | 0.683 | $+0.08$ |
+| most top-heavy, rescaled to matched movement | 0.410 | 0.408 | 0.666 | $-0.08$ ($p = 0.81$) |
+| most tail-heavy, rescaled to matched movement | 0.453 | 0.355 | 0.651 | $-0.37$ ($p = 0.24$) |
+
+Those 32 successors hold 0.71 of the probability mass yet absorb only 0.389 of the divergence, and
+louder directions are more tail-weighted still ($\rho(B_j, S_j) = -0.36$): the disruption that coincides
+with the trait's collapse is not mainly disruption of what corpus statistics score. The steering half is
+a null with a stated limit — random directions span only $S = 0.36$–$0.56$, and at matched movement both
+extremes flatten the ordering, though the top-heavy edit widens slightly more ($+0.124$ vs $+0.108$,
+paired $p = 0.009$) while moving the output less.
 
 The quiet direction lands below the loud one at every rung (12 tokens, Wilcoxon on $\Delta\hat w_u$),
 and at the top rung — displacement 1.8, nearly twice a median embedding row — the two differ by 8× in
@@ -413,15 +434,28 @@ mean 0.543. Right: $\hat w_u$ after an edit of norm 1.8 (y) against $\hat w_u$ b
 (circles) and loud (squares) with least-squares fits; dotted line = no change. At the same
 displacement, the quiet edit preserves the ordering and the loud edit flattens it.
 
+Where the damage lands, and whether steering it changes anything:
+
+![Where random embedding edits move the output, and anchor width after top-heavy and tail-heavy edits matched on total output movement](plots/mode_split.png)
+
+**Figure 16.** Twelve tokens, the same as Figures 14–15. Left: top-mass share $S$ of the output change
+(y, fraction of the JSD landing on the token's 32 most likely successors) against the edit's total
+output movement (x, bits, log scale); small circles = the 24 random directions per token at
+displacement norm 1.8, triangles = most top-heavy and squares = most tail-heavy after rescaling to
+0.4 bits; dashed line = the mass those 32 successors hold before the edit (0.71). Right: $\hat w_u$
+after the edit (y) against $\hat w_u$ before it (x) for the two selected edits, rank agreement with the
+pre-edit ordering in the legend; dotted line = no change.
+
 ## Next experiment
 
-**Which output modes does the loud direction disturb?** The ladder localises the trait's destruction in
-*behaviour*: at a fixed displacement of 1.8 a 0.049-bit edit leaves the token ordering intact and a
-0.402-bit one erases it. The next step is to ask what part of the output that loud edit moves. Take the
-loud direction at norm 1.8, decompose the change in the token's next-token distribution by successor
-token, and test whether the width collapse tracks disturbance of the token's *top* successors
-specifically or of the distribution's tail. Then edit along directions restricted to each subspace at
-matched total output movement. A tail-driven result would say width is set by the token's high-mass
-continuations — the same quantity corpus successor JSD measures — and would tie the per-token trait
-back to the direction's starting statistic; a top-driven one would separate them. About 24 anchor-width
-measurements plus one decomposition per token.
+**Build the top-heavy and tail-heavy directions instead of drawing them.** The mode split showed the
+damage is tail-weighted but could not steer it: random directions span only $S = 0.36$-$0.56$, so the
+matched-movement comparison had too little contrast to decide anything. Construct the two edits
+directly — project the output-logit response to an embedding edit onto the span of the top-32
+successors' unembedding rows and onto its complement, or search a modest random subspace for the
+combination maximising and minimising $S$ — rescale both to 0.4 bits, and re-measure $\hat w_u$. If a
+genuinely top-heavy edit ($S > 0.8$) preserves the token ordering where a tail-heavy one destroys it,
+the trait lives in the tail of the next-token distribution and no corpus-side estimator built on
+high-mass successors can reach it. If both still erase it, the trait belongs to the token's whole
+output map, and the static-embedding lookup is the right level of description. About 24 anchor-width
+measurements per token for 12 tokens, plus the subspace search.

@@ -1,0 +1,21 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<06:31,  1.34s/it]Loading weights:  23%|██▎       | 68/292 [00:01<00:03, 64.36it/s]Loading weights:  36%|███▌      | 104/292 [00:01<00:02, 69.34it/s]Loading weights:  43%|████▎     | 127/292 [00:02<00:02, 74.03it/s]Loading weights:  50%|████▉     | 145/292 [00:02<00:02, 72.05it/s]Loading weights:  54%|█████▍    | 159/292 [00:02<00:01, 73.77it/s]Loading weights:  59%|█████▊    | 171/292 [00:02<00:01, 75.46it/s]Loading weights:  62%|██████▏   | 182/292 [00:02<00:01, 74.10it/s]Loading weights:  68%|██████▊   | 200/292 [00:03<00:01, 81.81it/s]Loading weights:  72%|███████▏  | 210/292 [00:03<00:00, 83.37it/s]Loading weights:  75%|███████▌  | 220/292 [00:03<00:00, 77.82it/s]Loading weights:  81%|████████  | 236/292 [00:03<00:00, 76.23it/s]Loading weights:  86%|████████▋ | 252/292 [00:03<00:00, 77.98it/s]Loading weights:  89%|████████▉ | 261/292 [00:03<00:00, 76.67it/s]Loading weights:  95%|█████████▍| 276/292 [00:04<00:00, 83.40it/s]Loading weights:  99%|█████████▊| 288/292 [00:04<00:00, 87.21it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 69.91it/s]
+[1/12] ' the' w 0.361 | top-mass 0.381 | loud share 0.200 | top_heavy 0.484b share 0.212 dw +0.299 tail_heavy 0.496b share 0.198 dw +0.300
+[2/12] ' actually' w 0.461 | top-mass 0.583 | loud share 0.451 | top_heavy 0.401b share 0.415 dw +0.235 tail_heavy 0.451b share 0.363 dw +0.220
+[3/12] ' really' w 0.489 | top-mass 0.610 | loud share 0.316 | top_heavy 0.415b share 0.307 dw +0.125 tail_heavy 0.426b share 0.303 dw +0.115
+[4/12] ' because' w 0.505 | top-mass 0.865 | loud share 0.485 | top_heavy 0.477b share 0.425 dw +0.169 tail_heavy 0.586b share 0.488 dw +0.187
+[5/12] ' just' w 0.521 | top-mass 0.668 | loud share 0.421 | top_heavy 0.412b share 0.454 dw +0.164 tail_heavy 0.415b share 0.372 dw +0.140
+[6/12] ' quite' w 0.537 | top-mass 0.553 | loud share 0.248 | top_heavy 0.408b share 0.321 dw +0.114 tail_heavy 0.455b share 0.212 dw +0.109
+[7/12] ' never' w 0.562 | top-mass 0.637 | loud share 0.355 | top_heavy 0.452b share 0.426 dw +0.123 tail_heavy 0.415b share 0.309 dw +0.101
+[8/12] ' well' w 0.583 | top-mass 0.730 | loud share 0.428 | top_heavy 0.398b share 0.435 dw +0.095 tail_heavy 0.493b share 0.407 dw +0.067
+[9/12] ' strange' w 0.598 | top-mass 0.907 | loud share 0.431 | top_heavy 0.279b share 0.561 dw +0.092 tail_heavy 0.483b share 0.435 dw +0.038
+[10/12] ' happening' w 0.611 | top-mass 0.794 | loud share 0.445 | top_heavy 0.412b share 0.479 dw +0.081 tail_heavy 0.404b share 0.413 dw +0.053
+[11/12] ' nice' w 0.626 | top-mass 0.892 | loud share 0.443 | top_heavy 0.314b share 0.468 dw +0.020 tail_heavy 0.461b share 0.385 dw -0.001
+[12/12] ' gone' w 0.660 | top-mass 0.869 | loud share 0.445 | top_heavy 0.366b share 0.396 dw -0.034 tail_heavy 0.421b share 0.379 dw -0.036
+
+base mass in top-32: 0.707; loud direction puts 0.389 of its JSD there
+top-share across 24 random directions (min/med/max, median token): 0.358/0.442/0.564; rho(bits, top-share) = -0.36
+before any edit: w 0.543 +- 0.083
+top_heavy  : 0.410 bits, top-share 0.408, step 2.85, w 0.666+-0.027 (dw +0.124), rho(before, after) = -0.08 (p=0.81)
+tail_heavy : 0.453 bits, top-share 0.355, step 2.32, w 0.651+-0.025 (dw +0.108), rho(before, after) = -0.37 (p=0.24)
+top-heavy vs tail-heavy dw, paired Wilcoxon p = 0.009

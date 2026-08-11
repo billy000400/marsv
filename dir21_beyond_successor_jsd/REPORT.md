@@ -515,6 +515,43 @@ tokens, says whether the trait itself — the thing a screen reads — is still 
 destruction predicts that quiet and loud behave alike at equal norm; behavioural destruction predicts
 the quiet direction preserves the ordering where the loud one does not. Figure 15 reports the result.
 
+### The mode split: which successors does a disruptive edit move?
+
+The ladder says the trait dies when the model's output moves, but the output is a distribution over
+50,304 successors and "it moved" does not say which part of it moved. The distinction matters for the
+whole direction: corpus successor JSD, the statistic this project started from, is dominated by a
+token's few high-mass continuations, so if the width collapse tracks disturbance of *those*, the
+per-token trait is a rediscovery of the same object and a cheaper corpus-side estimator should exist.
+If instead the collapse tracks the tail, the embedding probe is reading something corpus counts cannot
+see, and the two quantities are genuinely separate.
+
+We therefore split every edit's output change by successor token. The Jensen–Shannon divergence is a
+sum of non-negative per-successor terms, so it partitions exactly. With $p_f$ the token's next-token
+distribution in frame $f$ before the edit, $q_f$ the same after it, $m_f = (p_f + q_f)/2$, and
+$T_f$ the set of the $K = 32$ successors with the largest $p_f$, the per-successor term and the
+**top-mass share** of the divergence are:
+
+```math
+J_f(v) \;=\; \tfrac{1}{2}\Big( p_f(v)\log_2\tfrac{p_f(v)}{m_f(v)} \;+\; q_f(v)\log_2\tfrac{q_f(v)}{m_f(v)} \Big),
+\qquad
+S \;=\; \frac{1}{3}\sum_{f=1}^{3} \frac{\sum_{v \in T_f} J_f(v)}{\sum_{v} J_f(v)}.
+```
+
+$S = 1$ means the edit rearranged only the token's top successors; $S = 0$ means it left them alone and
+churned the tail. The reference point is the base mass $\frac{1}{3}\sum_f \sum_{v \in T_f} p_f(v)$: an
+edit that disturbs the distribution in proportion to mass has $S$ near that value, so $S$ below it means
+the damage is tail-weighted.
+
+The experiment reuses the ladder's top rung. For each of the same 12 tokens we draw $N = 24$ random
+unit directions, apply each at norm 1.8, and record both the total movement $B_j$ in bits and the share
+$S_j$. That gives the descriptive half: where the loud direction — the one that erased the ordering —
+actually puts its damage. For the causal half we take the most top-heavy direction $\arg\max_j S_j$ and
+the most tail-heavy $\arg\min_j S_j$, **rescale each by a log-log calibration scan until both move the
+output by the same 0.4 bits**, and re-measure $\hat w_u$. Matching on total movement is what makes the
+comparison about *which* successors moved rather than *how much* moved. Top-heavy edits doing more
+damage to the ordering would tie the trait to high-mass continuations; equal damage says the collapse
+is indifferent to where in the distribution the disturbance lands. Figure 16 reports the result.
+
 ### Is anything left after the additive model, or is it noise?
 
 A held-out $R^2$ below the ceiling could mean either that real structure is missing or that the
@@ -954,7 +991,58 @@ the edit disturbs the token's behaviour and not to which direction delivers the 
 screen this is the reassuring answer — the vocabulary-wide lookup (pattern 10) is reading a property
 tied to what the token makes the model do, not an accident of where its row happens to sit.
 
-**16. The basin picture is only weakly supported, and not in the direction the simple version
+**16. The damage an edit does is tail-weighted, and the ordering dies wherever in the distribution it
+lands.** Pattern 15 says the trait dies when the model's output moves, and the natural follow-up is
+whether "the output" here means the token's few high-mass continuations — the object corpus successor
+JSD is built from — or the rest of the distribution. Figure 16 answers both halves of that: where a
+large embedding edit actually puts its damage, and whether steering the damage toward the top
+successors changes what the edit does to width.
+
+![Where random embedding edits move the output, and anchor width after top-heavy and tail-heavy edits matched on total output movement](plots/mode_split.png)
+
+**Figure 16.** Twelve tokens, the same ones as Figures 14–15. Left: the top-mass share $S$ of the
+output change (y, fraction of the JSD landing on the token's 32 most likely successors) against the
+total output movement of the edit (x, bits, log scale); small circles are the 24 random directions per
+token applied at displacement norm 1.8, triangles the most top-heavy and squares the most tail-heavy
+direction after rescaling to 0.4 bits; the dashed line is the mean probability mass those 32 successors
+hold before any edit (0.71). Right: anchor width $\hat w_u$ after the edit (y) against $\hat w_u$
+before it (x) for the top-heavy (triangles, solid fit) and tail-heavy (squares, dashed fit) edits, with
+each one's rank agreement with the pre-edit ordering in the legend; dotted line = no change.
+
+| edit at displacement norm 1.8 (12 tokens) | output movement (bits) | top-mass share $S$ | mean $\hat w_u$ | sd across tokens | $\rho$(before, after) |
+|---|---|---|---|---|---|
+| *before any edit* | \- | \- | *0.543* | *0.083* | \- |
+| loudest of 24 random directions | 0.402 | **0.389** | 0.683 | 0.022 | $+0.08$ |
+| most top-heavy, rescaled | 0.410 | 0.408 | 0.666 | 0.027 | $-0.08$ ($p = 0.81$) |
+| most tail-heavy, rescaled | 0.453 | 0.355 | 0.651 | 0.025 | $-0.37$ ($p = 0.24$) |
+
+The descriptive half is clear and points away from high-mass continuations. The 32 most likely
+successors carry 0.71 of the token's probability mass, but only **0.389** of the divergence a loud edit
+produces lands on them: relative to mass, the disturbance is concentrated in the tail. That tilt grows
+with the size of the edit — across the 24 random directions per token, louder directions are *more*
+tail-weighted ($\rho(B_j, S_j) = -0.36$, median over tokens). So the behaviour whose disruption
+coincides with the trait's collapse is not mainly the behaviour corpus successor JSD scores.
+
+The causal half is a null with a real limit. Selecting the extreme directions from a random draw buys
+only a narrow contrast — $S$ spans 0.358 to 0.564 across 24 directions for the median token, never
+reaching the mass-proportional 0.71 — and at matched output movement the two extremes do the same
+thing: both widen every token toward a common value (0.666 and 0.651 against a pre-edit 0.543) and both
+leave nothing of the pre-edit ordering ($\rho = -0.08$ and $-0.37$, neither distinguishable from zero
+at $n = 12$). One difference survives the pairing: the top-heavy edit widens slightly more than the
+tail-heavy one (mean $\Delta\hat w_u$ $+0.124$ vs $+0.108$, Wilcoxon $p = 0.009$) even though it moved
+the output *less* (0.410 vs 0.453 bits), a weak hint that top-mass disturbance is the more efficient
+way to inflate the level. It does not extend to the ordering, which is the quantity a screen consumes.
+
+Read with pattern 15, the picture is that any disturbance the model genuinely feels destroys the token
+ordering, and it does not matter much which successors it rearranges. For the direction's central
+question that is a mildly favourable answer: the per-token trait does not reduce to the token's
+high-mass continuations, which is consistent with the embedding lookup carrying information that corpus
+successor JSD does not (patterns 3 and 10). The honest caveat is that random directions are a blunt
+instrument for this question — a direction built from the unembedding rows of the token's top
+successors would give a much larger contrast in $S$, and that is the test that could turn this
+suggestion into a result.
+
+**17. The basin picture is only weakly supported, and not in the direction the simple version
 predicts.** Radius along random directions is unrelated to the token effect ($\rho = -0.02$,
 $p = 0.87$): generic insensitivity of the residual stream explains nothing. Radius along anchor
 directions does correlate ($\rho = +0.39$, $p = 1.1\times10^{-5}$; $+0.33$ with output entropy
@@ -965,14 +1053,14 @@ by-products behave the same way: output entropy $\rho = -0.30$, endpoint logit n
 "how far the state can move before the output moves in absolute terms" is not the quantity behind
 width; what transfers is the *shape* measure itself.
 
-**17. Pair-specific structure survives the additive model.** Residuals of the additive-plus-`J` model,
+**18. Pair-specific structure survives the additive model.** Residuals of the additive-plus-`J` model,
 fitted separately in each sentence frame, correlate across frames at $\bar r = 0.67$ (variance share
 0.86 of what is left) — a large amount of reproducible pair-specific structure. Adding model-output
 JSD and block-0 geometry to the fit lowers that residual agreement to $\bar r = 0.54$, so the endpoint
 arrangement at the interpolation site accounts for part of it and something still unmeasured accounts
 for the rest.
 
-**18. Width is not a fixed absolute transition divided by path length.** Converting `w` into
+**19. Width is not a fixed absolute transition divided by path length.** Converting `w` into
 residual-stream distance units makes the distribution *more* dispersed, not less: coefficient of
 variation 0.158 for `w` against 0.216 for $w_{\mathrm{abs}} = w \cdot d_0$ (median $d_0 = 24.0$). The
 sign is wrong too — longer endpoint separations go with slightly *wider* transitions
@@ -1019,7 +1107,7 @@ discriminating experiment:* hold the token pair fixed and change only the path �
 third state, or use linear interpolation — and see whether `w` tracks the geometry of the new path.
 
 The basin picture we set out to test — a per-token region of output insensitivity whose size sets the
-width — is **not** supported in its simple form (pattern 16), and we have dropped it.
+width — is **not** supported in its simple form (pattern 17), and we have dropped it.
 
 ### Recommended next experiment
 
@@ -1032,18 +1120,24 @@ the token ordering ($\rho = +0.94$ at 0.049 bits) and an edit of the same size t
 does not ($\rho = +0.08$ at 0.402 bits). The trait is behavioural, so the search should move from
 directions in embedding space to **which part of the token's output behaviour carries it**.
 
-The next experiment follows directly. Take the loud direction at norm 1.8 — the edit that destroys the
-ordering — and decompose the change it makes to the token's next-token distribution by successor token,
-splitting the total JSD into the contribution of the token's few highest-mass successors and the
-contribution of the tail. Then build edits restricted to each of those two subspaces of the output, at
-**matched total output movement**, and re-measure $\hat w_u$. If disturbing the high-mass successors is
-what destroys the ordering, the per-token trait is a property of the token's top continuations — the
-same object corpus successor JSD is built from — which would connect the trait back to the statistic
-this direction started from and suggest a cheaper corpus-side estimator. If the tail is what matters,
-the two are separate quantities and the embedding probe is reading something corpus statistics cannot
-see. Either outcome sharpens the auditing story, because it says which measurable property of a token
-a screen should be built on. About 24 anchor-width measurements plus one decomposition per token, for
-12 tokens — roughly an hour, the same scale as the ladder.
+Pattern 16 took the first step and got half an answer. The damage a large edit does is tail-weighted —
+0.389 of the divergence on successors holding 0.71 of the mass — but the top-heavy and tail-heavy
+directions a random draw can supply differ too little in $S$ (0.36 to 0.56) to settle whether steering
+the damage matters, and at matched movement both erase the ordering.
+
+The next experiment closes that gap by building the two directions instead of drawing them. For each
+token, take the unembedding rows of its top-32 successors, project the model's output-logit response to
+an embedding edit onto that span and onto its complement, and construct one edit whose output change is
+concentrated in each. A cheap version needs no Jacobian at all: search within a modest random subspace
+for the combination maximising and minimising $S$, which should reach far wider than the 0.36–0.56 a
+raw draw gives. Rescale both to the same 0.4 bits and re-measure $\hat w_u$. If a genuinely top-heavy
+edit (say $S > 0.8$) leaves the ordering intact where a tail-heavy one destroys it, the trait lives in
+the tail of the token's next-token distribution and a corpus-side estimator built on high-mass
+successors — corpus successor JSD included — cannot reach it. If both still erase the ordering, the
+trait is a property of the token's whole output map and not of any part of the distribution, which
+would make the static-embedding lookup the right level of description and close the mechanistic search
+on a negative. Same cost as pattern 16, about 24 anchor-width measurements per token for 12 tokens,
+plus the subspace search.
 
 ---
 
