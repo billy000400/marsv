@@ -46,7 +46,7 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-11, iteration 6)
+## Current status (2026-08-11, iteration 7)
 
 S1-S5 all have a pass, and the experiment S5 recommended has been run. **Main finding:** the leftover
 after corpus successor JSD is a per-token additive trait — held-out R^2 0.149 (JSD) -> 0.578 (JSD + one
@@ -137,13 +137,20 @@ erase the ordering ($\rho = -0.16$, $-0.28$). The tail-weighting of a large embe
 the step size, not the direction; the top-mass hypothesis is untestable by embedding edits; the trait
 belongs to the token's whole output map.
 
-**Next step:** stop perturbing embeddings and localise the trait in the computation. Mean-ablate one
-attention head or MLP at a time in blocks 0-5, re-measure $\hat w_u$ against the six anchors for the
-same 12 tokens, and score each component by how much of the across-token spread in $\hat w_u$ it
-destroys. The layer sweep already fixes the ordering at the input with sharpening produced below the
-site, so a component whose removal collapses the spread while leaving the output intact would localise
-the trait for the first time; a flat profile closes the mechanistic search on a negative and leaves the
-static-embedding lookup as the practical deliverable.
+The component ablation has since been run, and it is the first positive mechanistic localisation.
+Mean-ablating each of the 102 attention heads and MLPs in blocks 0-5 one at a time leaves the token
+ordering untouched in 101 cases (median rho = +0.99; every head >= +0.97, every MLP above block 0 >=
++0.90). Only the **block-0 MLP** collapses the across-token spread (sd 0.084 -> 0.018), lifts every
+token to w_hat ~ 0.82 and erases the ordering (rho = -0.10). Confound stated in the deliverables: it is
+also the only early component whose removal the model feels (0.451 bits vs <= 0.007 for every other),
+and 0.4 bits is the rung at which the ladder showed any disturbance flattens the ordering.
+
+**Next step:** break that confound with a dose-response. Blend the block-0 MLP's final-position output
+toward its mean with weight alpha = 0.1 ... 1, and at each alpha run a control that perturbs the same
+residual stream with a random vector rescaled to the same output movement in bits; plot rho(before,
+after) against bits for both arms. Separated curves place the trait in the block-0 MLP; coincident
+curves say disturbance as such kills it, closing the mechanistic line and leaving the static-embedding
+lookup as the practical deliverable.
 
 ## Stages
 

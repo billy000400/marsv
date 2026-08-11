@@ -490,3 +490,37 @@ accounting 1.5M -> 1.6M and runtime 4h -> 4.5h. RESULTS.md: headline fragility p
 the constructed-direction result, Figure 17 and its table added, next-experiment section rewritten to
 match, setting line updated. `check_render.py` passes (REPORT 21 display eqs / 17 embeds, RESULTS 17
 embeds, 0 problems).
+
+## 2026-08-11 — iteration 7: component ablation localises the trait to the block-0 MLP (Figure 18)
+
+**What ran.** New `experiments/ablate.py` + `experiments/plot_ablate.py` (outputs `results/ablate.json`,
+`results/ablate_summary.json`, `results/ablate.log`, `plots/ablate.png`) runs the experiment the previous
+entry recommended: the first intervention in this direction that is not an embedding edit. Each of the
+102 early components — the 16 attention heads and the MLP of every block 0–5 — is mean-ablated one at a
+time at the final token position (replacement = that component's mean output at that position over the
+18 endpoint prompts, measured unablated), endpoints and interpolation bank are recomputed with the
+ablation live, and the per-token anchor width is re-measured for the 12 intervention tokens against the
+6 anchors in the first frame. 470 s on one GPU.
+
+**New numbers.** Unablated: mean $\hat w_u$ 0.565, sd across tokens 0.084. **Block-0 MLP ablated: mean
+0.822, sd 0.018, $\rho$(before, after) $= -0.10$, output movement 0.451 bits.** Every other component:
+median $\rho = +0.99$ and median sd 0.084 across the 102; worst of the 96 attention heads $\rho = +0.97$
+(sd 0.076, $\le 0.0004$ bits); worst of the five MLPs above block 0 $\rho = +0.90$ (sd 0.091,
+$\le 0.007$ bits). $\rho$(output movement, $\rho_c$) $= -0.46$ across components.
+
+**Nothing superseded.** New result; no earlier number changed. It is the first positive mechanistic
+localisation in the direction, and it is reported with its confound stated: 0.451 bits is essentially
+the 0.4-bit rung at which pattern 15's ladder showed any disturbance flattens the ordering, so ablation
+alone cannot say whether the block-0 MLP computes the trait or is merely the only early component large
+enough to reach that regime.
+
+**Deliverable changes.** REPORT.md: new Methods subsection "Component ablation: which early computation
+carries the trait?" (mean-ablation protocol, head-slice vs MLP-output hook points, and a display
+equation defining the three per-component scores $\mathrm{sd}_c$, $\rho_c$, $B_c$); new Results
+**pattern 21** with **Figure 18** = `plots/ablate.png` and its table, appended after pattern 20 so
+figure order stays sequential; Summary gains a paragraph on the localisation and its confound;
+"Recommended next experiment" rewritten from component ablation (now done) to the **block-0 MLP
+dose–response curve against an output-movement-matched random control**. RESULTS.md: headline gains the
+localisation paragraph, new ablation table + Figure 18 with the flat-profile reading spelled out, next-
+experiment section rewritten to match. `check_render.py` passes (REPORT 22 display eqs / 18 embeds,
+RESULTS 18 embeds, 0 problems).

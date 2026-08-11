@@ -1,0 +1,106 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:22,  1.11s/it]Loading weights:  19%|█▉        | 56/292 [00:01<00:04, 58.93it/s]Loading weights:  26%|██▌       | 76/292 [00:01<00:03, 70.16it/s]Loading weights:  32%|███▏      | 92/292 [00:01<00:02, 70.37it/s]Loading weights:  36%|███▌      | 105/292 [00:01<00:02, 72.84it/s]Loading weights:  40%|███▉      | 116/292 [00:02<00:02, 71.86it/s]Loading weights:  43%|████▎     | 126/292 [00:02<00:02, 73.05it/s]Loading weights:  46%|████▌     | 135/292 [00:02<00:02, 74.19it/s]Loading weights:  49%|████▉     | 144/292 [00:02<00:02, 66.69it/s]Loading weights:  54%|█████▍    | 158/292 [00:02<00:01, 72.26it/s]Loading weights:  58%|█████▊    | 170/292 [00:02<00:01, 73.75it/s]Loading weights:  62%|██████▏   | 182/292 [00:02<00:01, 80.50it/s]Loading weights:  66%|██████▌   | 192/292 [00:02<00:01, 82.44it/s]Loading weights:  70%|██████▉   | 204/292 [00:03<00:01, 84.41it/s]Loading weights:  74%|███████▍  | 216/292 [00:03<00:00, 83.69it/s]Loading weights:  78%|███████▊  | 228/292 [00:03<00:00, 78.06it/s]Loading weights:  82%|████████▏ | 240/292 [00:03<00:00, 83.81it/s]Loading weights:  85%|████████▌ | 249/292 [00:03<00:00, 80.17it/s]Loading weights:  89%|████████▉ | 260/292 [00:03<00:00, 76.14it/s]Loading weights:  92%|█████████▏| 268/292 [00:03<00:00, 69.38it/s]Loading weights:  95%|█████████▌| 278/292 [00:04<00:00, 64.19it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 70.01it/s]
+baseline mean 0.565 sd 0.084 (3s)
+[1/102] block 0 mlp: mean 0.822 sd 0.018 r -0.31 bits 0.451 (6s)
+[2/102] block 0 head0: mean 0.566 sd 0.083 r +1.00 bits 0.000 (9s)
+[3/102] block 0 head1: mean 0.565 sd 0.085 r +1.00 bits 0.000 (12s)
+[4/102] block 0 head2: mean 0.570 sd 0.080 r +1.00 bits 0.000 (16s)
+[5/102] block 0 head3: mean 0.567 sd 0.083 r +1.00 bits 0.000 (19s)
+[6/102] block 0 head4: mean 0.564 sd 0.085 r +1.00 bits 0.000 (23s)
+[7/102] block 0 head5: mean 0.564 sd 0.085 r +1.00 bits 0.000 (28s)
+[8/102] block 0 head6: mean 0.559 sd 0.088 r +1.00 bits 0.000 (34s)
+[9/102] block 0 head7: mean 0.560 sd 0.086 r +1.00 bits 0.000 (39s)
+[10/102] block 0 head8: mean 0.567 sd 0.082 r +1.00 bits 0.000 (44s)
+[11/102] block 0 head9: mean 0.564 sd 0.084 r +1.00 bits 0.000 (50s)
+[12/102] block 0 head10: mean 0.564 sd 0.085 r +1.00 bits 0.000 (55s)
+[13/102] block 0 head11: mean 0.563 sd 0.085 r +1.00 bits 0.000 (60s)
+[14/102] block 0 head12: mean 0.566 sd 0.085 r +1.00 bits 0.000 (65s)
+[15/102] block 0 head13: mean 0.564 sd 0.084 r +1.00 bits 0.000 (71s)
+[16/102] block 0 head14: mean 0.566 sd 0.083 r +1.00 bits 0.000 (76s)
+[17/102] block 0 head15: mean 0.567 sd 0.083 r +1.00 bits 0.000 (81s)
+[18/102] block 1 mlp: mean 0.600 sd 0.068 r +0.99 bits 0.003 (87s)
+[19/102] block 1 head0: mean 0.563 sd 0.083 r +1.00 bits 0.000 (92s)
+[20/102] block 1 head1: mean 0.565 sd 0.082 r +1.00 bits 0.000 (96s)
+[21/102] block 1 head2: mean 0.565 sd 0.083 r +1.00 bits 0.000 (99s)
+[22/102] block 1 head3: mean 0.564 sd 0.084 r +1.00 bits 0.000 (102s)
+[23/102] block 1 head4: mean 0.567 sd 0.082 r +1.00 bits 0.000 (105s)
+[24/102] block 1 head5: mean 0.571 sd 0.076 r +0.99 bits 0.000 (109s)
+[25/102] block 1 head6: mean 0.563 sd 0.083 r +1.00 bits 0.000 (112s)
+[26/102] block 1 head7: mean 0.565 sd 0.084 r +1.00 bits 0.000 (115s)
+[27/102] block 1 head8: mean 0.565 sd 0.084 r +1.00 bits 0.000 (118s)
+[28/102] block 1 head9: mean 0.566 sd 0.087 r +1.00 bits 0.000 (124s)
+[29/102] block 1 head10: mean 0.566 sd 0.084 r +1.00 bits 0.000 (130s)
+[30/102] block 1 head11: mean 0.565 sd 0.085 r +1.00 bits 0.000 (136s)
+[31/102] block 1 head12: mean 0.565 sd 0.085 r +1.00 bits 0.000 (143s)
+[32/102] block 1 head13: mean 0.563 sd 0.089 r +1.00 bits 0.000 (149s)
+[33/102] block 1 head14: mean 0.555 sd 0.089 r +1.00 bits 0.000 (155s)
+[34/102] block 1 head15: mean 0.569 sd 0.085 r +1.00 bits 0.000 (161s)
+[35/102] block 2 mlp: mean 0.584 sd 0.083 r +0.96 bits 0.007 (165s)
+[36/102] block 2 head0: mean 0.566 sd 0.084 r +1.00 bits 0.000 (169s)
+[37/102] block 2 head1: mean 0.564 sd 0.085 r +1.00 bits 0.000 (172s)
+[38/102] block 2 head2: mean 0.567 sd 0.083 r +1.00 bits 0.000 (175s)
+[39/102] block 2 head3: mean 0.564 sd 0.085 r +1.00 bits 0.000 (178s)
+[40/102] block 2 head4: mean 0.565 sd 0.084 r +1.00 bits 0.000 (181s)
+[41/102] block 2 head5: mean 0.565 sd 0.085 r +1.00 bits 0.000 (185s)
+[42/102] block 2 head6: mean 0.564 sd 0.084 r +1.00 bits 0.000 (191s)
+[43/102] block 2 head7: mean 0.564 sd 0.085 r +1.00 bits 0.000 (201s)
+[44/102] block 2 head8: mean 0.565 sd 0.084 r +1.00 bits 0.000 (211s)
+[45/102] block 2 head9: mean 0.565 sd 0.084 r +1.00 bits 0.000 (220s)
+[46/102] block 2 head10: mean 0.564 sd 0.085 r +1.00 bits 0.000 (230s)
+[47/102] block 2 head11: mean 0.563 sd 0.086 r +1.00 bits 0.000 (240s)
+[48/102] block 2 head12: mean 0.566 sd 0.084 r +1.00 bits 0.000 (250s)
+[49/102] block 2 head13: mean 0.564 sd 0.084 r +1.00 bits 0.000 (259s)
+[50/102] block 2 head14: mean 0.565 sd 0.084 r +1.00 bits 0.000 (269s)
+[51/102] block 2 head15: mean 0.564 sd 0.084 r +1.00 bits 0.000 (279s)
+[52/102] block 3 mlp: mean 0.585 sd 0.091 r +0.95 bits 0.005 (288s)
+[53/102] block 3 head0: mean 0.563 sd 0.084 r +1.00 bits 0.000 (297s)
+[54/102] block 3 head1: mean 0.567 sd 0.085 r +1.00 bits 0.000 (303s)
+[55/102] block 3 head2: mean 0.563 sd 0.085 r +1.00 bits 0.000 (310s)
+[56/102] block 3 head3: mean 0.564 sd 0.080 r +1.00 bits 0.000 (316s)
+[57/102] block 3 head4: mean 0.564 sd 0.085 r +1.00 bits 0.000 (323s)
+[58/102] block 3 head5: mean 0.566 sd 0.083 r +1.00 bits 0.000 (330s)
+[59/102] block 3 head6: mean 0.565 sd 0.084 r +1.00 bits 0.000 (333s)
+[60/102] block 3 head7: mean 0.565 sd 0.084 r +1.00 bits 0.000 (337s)
+[61/102] block 3 head8: mean 0.565 sd 0.084 r +1.00 bits 0.000 (340s)
+[62/102] block 3 head9: mean 0.567 sd 0.083 r +1.00 bits 0.000 (343s)
+[63/102] block 3 head10: mean 0.565 sd 0.084 r +1.00 bits 0.000 (346s)
+[64/102] block 3 head11: mean 0.564 sd 0.085 r +1.00 bits 0.000 (349s)
+[65/102] block 3 head12: mean 0.564 sd 0.084 r +1.00 bits 0.000 (352s)
+[66/102] block 3 head13: mean 0.565 sd 0.085 r +1.00 bits 0.000 (356s)
+[67/102] block 3 head14: mean 0.566 sd 0.084 r +1.00 bits 0.000 (359s)
+[68/102] block 3 head15: mean 0.564 sd 0.082 r +1.00 bits 0.000 (362s)
+[69/102] block 4 mlp: mean 0.576 sd 0.083 r +0.98 bits 0.007 (365s)
+[70/102] block 4 head0: mean 0.565 sd 0.084 r +1.00 bits 0.000 (368s)
+[71/102] block 4 head1: mean 0.566 sd 0.084 r +1.00 bits 0.000 (372s)
+[72/102] block 4 head2: mean 0.566 sd 0.085 r +1.00 bits 0.000 (375s)
+[73/102] block 4 head3: mean 0.567 sd 0.083 r +1.00 bits 0.000 (378s)
+[74/102] block 4 head4: mean 0.568 sd 0.083 r +1.00 bits 0.000 (381s)
+[75/102] block 4 head5: mean 0.564 sd 0.084 r +1.00 bits 0.000 (384s)
+[76/102] block 4 head6: mean 0.565 sd 0.084 r +1.00 bits 0.000 (387s)
+[77/102] block 4 head7: mean 0.566 sd 0.084 r +1.00 bits 0.000 (391s)
+[78/102] block 4 head8: mean 0.563 sd 0.085 r +1.00 bits 0.000 (394s)
+[79/102] block 4 head9: mean 0.563 sd 0.085 r +1.00 bits 0.000 (397s)
+[80/102] block 4 head10: mean 0.563 sd 0.085 r +1.00 bits 0.000 (400s)
+[81/102] block 4 head11: mean 0.568 sd 0.081 r +1.00 bits 0.000 (403s)
+[82/102] block 4 head12: mean 0.566 sd 0.084 r +1.00 bits 0.000 (406s)
+[83/102] block 4 head13: mean 0.566 sd 0.084 r +1.00 bits 0.000 (410s)
+[84/102] block 4 head14: mean 0.563 sd 0.085 r +1.00 bits 0.000 (413s)
+[85/102] block 4 head15: mean 0.565 sd 0.085 r +1.00 bits 0.000 (416s)
+[86/102] block 5 mlp: mean 0.565 sd 0.076 r +0.97 bits 0.005 (419s)
+[87/102] block 5 head0: mean 0.566 sd 0.084 r +1.00 bits 0.000 (422s)
+[88/102] block 5 head1: mean 0.565 sd 0.084 r +1.00 bits 0.000 (425s)
+[89/102] block 5 head2: mean 0.562 sd 0.084 r +1.00 bits 0.000 (429s)
+[90/102] block 5 head3: mean 0.565 sd 0.084 r +1.00 bits 0.000 (432s)
+[91/102] block 5 head4: mean 0.565 sd 0.084 r +1.00 bits 0.000 (435s)
+[92/102] block 5 head5: mean 0.565 sd 0.084 r +1.00 bits 0.000 (438s)
+[93/102] block 5 head6: mean 0.564 sd 0.085 r +1.00 bits 0.000 (441s)
+[94/102] block 5 head7: mean 0.565 sd 0.084 r +1.00 bits 0.000 (444s)
+[95/102] block 5 head8: mean 0.565 sd 0.085 r +1.00 bits 0.000 (448s)
+[96/102] block 5 head9: mean 0.564 sd 0.084 r +1.00 bits 0.000 (451s)
+[97/102] block 5 head10: mean 0.565 sd 0.084 r +1.00 bits 0.000 (454s)
+[98/102] block 5 head11: mean 0.565 sd 0.084 r +1.00 bits 0.000 (457s)
+[99/102] block 5 head12: mean 0.565 sd 0.084 r +1.00 bits 0.000 (460s)
+[100/102] block 5 head13: mean 0.561 sd 0.085 r +1.00 bits 0.000 (464s)
+[101/102] block 5 head14: mean 0.563 sd 0.086 r +1.00 bits 0.000 (467s)
+[102/102] block 5 head15: mean 0.565 sd 0.084 r +1.00 bits 0.000 (470s)
+wrote results/ablate.json

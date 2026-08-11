@@ -527,3 +527,42 @@ lookup as the deliverable.
 On track? yes — S1-S5 complete, fourteen experiments run and reported, the recommended experiment from
 the last iteration executed and answered (negatively, with the instrument validated), deliverables
 current-best and render-checked, no unaddressed feedback, no blocker.
+
+## 2026-08-11 — iteration 7: out of embedding space, into the computation
+
+**Did.** Wrote and ran `experiments/ablate.py`: mean-ablate one early component at a time (16 attention
+heads + the MLP, blocks 0–5 = 102 components) at the final token position, recompute endpoints and the
+interpolation bank with the ablation live, re-measure $\hat w_u$ for the 12 intervention tokens against
+the 6 anchors in frame 1. Replacement vector = the component's mean final-position output over the 18
+endpoint prompts. Scored each component by across-token sd, rank agreement with the unablated ordering,
+and how many bits of output movement the ablation costs. 470 s. Plot `plots/ablate.png` (Figure 18);
+deliverables curated, render check passes.
+
+**Learned.** The profile is flat with exactly one spike. 101 of 102 components leave the ordering
+untouched (median $\rho = +0.99$; every head $\ge +0.97$, every MLP above block 0 $\ge +0.90$). The
+block-0 MLP collapses the spread 0.084 -> 0.018, pushes every token to $\hat w_u \approx 0.82$ and
+leaves $\rho = -0.10$. Two things follow. The negative half is clean and useful: the trait is not spread
+thinly over early attention and is not re-derived layer by layer, which narrows the search from 102
+components to one. The positive half is confounded, and I reported it that way — the block-0 MLP moves
+the output 0.451 bits, sixty times any other component here and almost exactly the rung at which the
+displacement ladder (pattern 15) showed *any* disturbance flattens the ordering. Ablation alone cannot
+tell "this component computes the trait" from "this is the only early component big enough to reach the
+lethal regime".
+
+**Assumption logged (loop mode).** Ran one frame rather than three and 6 anchors rather than the full
+set, to fit 102 components into the time available; the baseline was re-measured under the identical
+1-frame protocol so every comparison is internal. Mean-ablated at the final token position only (a
+query-position ablation) rather than at all positions — cheaper, and the readout is the final position.
+Rejected: ablating whole blocks (too coarse to distinguish head from MLP); rejected restricting to ~40
+components as PLAN.md suggested, since the per-component cost turned out to be ~4.6 s and all 102 fit.
+
+**Next step.** Break the confound with a dose–response: blend the block-0 MLP's final-position output
+toward its mean with weight $\alpha = 0.1 \dots 1$, and at each $\alpha$ run a control that perturbs
+the same residual stream with a random vector rescaled to the same output movement in bits. Plot
+$\rho$(before, after) against bits for both arms. Separated curves = the block-0 MLP computes the
+trait; coincident curves = disturbance as such kills it, the mechanistic line closes on a negative and
+the static-embedding lookup stands as the deliverable.
+
+On track? yes — S1-S5 complete, fifteen experiments run and reported, the recommended experiment from
+the last iteration executed and answered (positively, with its confound stated), deliverables
+current-best and render-checked, no unaddressed feedback, no blocker.

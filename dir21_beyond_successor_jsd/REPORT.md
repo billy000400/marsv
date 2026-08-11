@@ -101,6 +101,14 @@ of the same size chosen to move it as much as possible (0.402 bits) leaves nothi
 what makes the vocabulary-wide lookup a reading of what a token does to the model rather than of where
 its embedding row happens to sit.
 
+Moving the intervention out of embedding space narrows the mechanism to one component. Mean-ablating
+each of the 102 attention heads and MLPs in blocks 0–5 in turn leaves the token ordering untouched in
+101 cases (median $\rho = +0.99$); only the block-0 MLP collapses the spread across tokens (sd
+$0.084 \to 0.018$) and erases the ordering ($\rho = -0.10$). That component is also the only one whose
+removal the model feels (0.451 bits of output movement, against $\le 0.007$ for every other), so it is
+a localisation with a confound attached — and the experiment we recommend is the one that separates
+them.
+
 We also ruled out the most deflationary explanation. Because `w` is a *fraction* of the path, a
 transition of fixed absolute size would look narrower on a longer path. If that were the mechanism,
 converting `w` into residual-stream distance units would make it more homogeneous. It does the
@@ -578,6 +586,38 @@ that combination. Both constructed directions are then rescaled to the same 0.4 
 log-log calibration, and $\hat w_u$ is re-measured. Reporting the predicted $S$ next to the $S$ the
 rescaled edit actually achieves is what makes this a test of the method as well as of the hypothesis.
 Figure 17 reports the result.
+
+### Component ablation: which early computation carries the trait?
+
+Every intervention so far edits the token's embedding, and all of them end the same way — the trait
+dies from disturbance rather than moving where the probe points. The remaining place to look is the
+computation between the embedding and the interpolation site. The layer sweep says which tokens are
+narrow is already fixed at the input while the sharpening is produced by the blocks below the site, so
+if the trait is carried by a small number of components they are early ones.
+
+We therefore **mean-ablate** one component at a time in blocks 0–5: each of the 16 attention heads per
+block (by replacing that head's 128-dimensional slice of the input to the block's output projection)
+and each block's MLP (by replacing its output), always at the final token position only, and always by
+the mean that component produces at that position over the 18 endpoint prompts (12 tokens + 6 anchors)
+run with nothing ablated. Endpoints, interpolation bank and $\hat w_u$ are then recomputed from
+scratch with the ablation in place, so a component below the interpolation site is scored through its
+effect on the endpoint states as well as on the readout. Two numbers score each of the 102 components:
+
+```math
+\mathrm{sd}_c = \sqrt{\frac{1}{n-1}\sum_{u}\bigl(\hat w^{(c)}_u - \overline{\hat w^{(c)}}\bigr)^2},
+\qquad
+\rho_c = \rho\bigl(\hat w^{(0)}_u,\; \hat w^{(c)}_u\bigr),
+\qquad
+B_c = \frac{1}{n}\sum_u \mathrm{JSD}\bigl(p^{(0)}_u \,\Vert\, p^{(c)}_u\bigr)
+```
+
+Here $\hat w^{(c)}_u$ is token $u$'s anchor width with component $c$ ablated, $\hat w^{(0)}_u$ the
+unablated one, and $p^{(c)}_u$ the model's unpatched next-token distribution after token $u$. A
+component that carries the trait shows a small $\mathrm{sd}_c$ (the tokens stop differing) and a low
+$\rho_c$ (the ordering is gone); $B_c$, in bits, says how much of the model's ordinary behaviour the
+ablation destroyed, which is what tells a genuine carrier apart from a component that is merely large.
+Run for the 12 tokens of the intervention experiments against the 6 anchors in the first frame.
+Figure 18 reports the result.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -1146,6 +1186,41 @@ sign is wrong too — longer endpoint separations go with slightly *wider* trans
 angle carries a little independent signal ($\rho(\cos_0, w) = -0.25$, $p = 2.4\times10^{-14}$): more
 nearly parallel endpoint states go with narrower transitions.
 
+**21. Of 102 early components, only the block-0 MLP carries the trait — and it is also the only one the
+model feels.** Mean-ablating each attention head and MLP in blocks 0–5 one at a time leaves the token
+ordering intact in 101 cases (median $\rho = +0.99$ across components; every one of the 96 heads
+$\ge +0.97$, every MLP above block 0 $\ge +0.90$). Removing the block-0 MLP instead collapses the
+across-token spread from sd $0.084$ to $0.018$, lifts every token to $\hat w_u \approx 0.82$ and leaves
+$\rho = -0.10$. Figure 18 shows both panels of that contrast.
+
+| mean-ablated component (12 tokens, 6 anchors, 1 frame) | mean $\hat w_u$ | sd across tokens | $\rho$(before, after) | output movement (bits) |
+|---|---|---|---|---|
+| *nothing ablated* | *0.565* | *0.084* | \- | \- |
+| **block-0 MLP** | **0.822** | **0.018** | $-0.10$ | **0.451** |
+| MLPs of blocks 1–5, worst of the five | 0.585 | 0.091 | $+0.90$ | 0.007 |
+| attention heads, worst of the 96 | 0.563 | 0.076 | $+0.97$ | 0.0004 |
+| *median over all 102 components* | \- | *0.084* | *$+0.99$* | \- |
+
+![Spread and ordering of the per-token width after mean-ablating each early component](plots/ablate.png)
+
+**Figure 18.** Each of the 102 attention heads and MLPs in blocks 0–5 mean-ablated one at a time, for
+the same 12 tokens as Figures 14–17. Left: standard deviation of $\hat w_u$ across the 12 tokens (y)
+against the block containing the ablated component (x, heads jittered horizontally); open circles =
+attention heads, diamonds = MLPs; dash-dotted line = the unablated spread 0.084. Centre: rank agreement
+$\rho$(unablated $\hat w_u$, ablated $\hat w_u$) (y) against the output movement the ablation causes
+(x, bits, log scale), same markers; dash-dotted line = perfect agreement. Right: $\hat w_u$ after the
+ablation (y) against $\hat w_u$ before it (x) for the two extreme components; dotted line = no change.
+Only the block-0 MLP leaves the cluster on either panel.
+
+The negative half is the informative half for the mechanism: the trait is not spread thinly across
+early attention, because no head carries a detectable share of it, and it is not re-derived layer by
+layer, because no MLP above block 0 matters either. The positive half comes with a confound that
+ablation alone cannot remove. The block-0 MLP moves the output by 0.451 bits, sixty times more than
+any other component here and almost exactly the 0.4-bit rung at which pattern 15's displacement ladder
+showed that *any* disturbance flattens the ordering. So either the block-0 MLP computes the per-token
+width trait, or it is merely the only single early component large enough to reach the regime where the
+trait dies. The next experiment is designed to separate those two readings.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -1205,20 +1280,24 @@ land at $S \approx 0.38$ once they are grown to the 0.4 bits at which width resp
 the token ordering. Embedding edits cannot hold the top-mass share apart at a behaviourally meaningful
 size, so no further variant of this experiment will separate the two arms.
 
-The next experiment should therefore stop perturbing the token and start asking **which computation
-downstream reads the trait**. The layer sweep (pattern 9) already shows that which tokens are narrow is
-fixed at the input while the sharpening is produced by the blocks below the interpolation site, so the
-per-token effect must be carried by a small number of components acting on the token's embedding row.
-Concretely: for the same 12 tokens, ablate one attention head or one MLP at a time in blocks 0–5 (with
-mean-ablation over the frames), re-measure $\hat w_u$ against the six anchors, and score each component
-by how much of the across-token spread in $\hat w_u$ it destroys — the same "does the ordering survive"
-statistic used in patterns 15–17, now with a component rather than an edit as the intervention. A
-component whose removal collapses the spread to the post-edit $0.02$ while leaving the model's output
-largely intact would localise the trait mechanistically for the first time; a flat profile across all
-components would say the trait is genuinely distributed and would close the mechanistic search on a
-negative with the static-embedding lookup as the practical deliverable. Cost is the binding constraint:
-12 tokens x 6 anchors x 3 frames per component, so restricting to the ~40 components of blocks 0–5 at
-the coarsest useful granularity is roughly four times pattern 17's budget.
+Pattern 21 moved the intervention out of embedding space and into the computation, and returned a
+single candidate: of 102 attention heads and MLPs in blocks 0–5, only the block-0 MLP destroys the
+per-token ordering. It also returned a single confound, because that component is the only one whose
+removal the model registers at all (0.451 bits against $\le 0.007$ for every other), and 0.4 bits is
+precisely where pattern 15 showed any disturbance flattens the ordering.
+
+The next experiment should separate those two readings by **giving the block-0 MLP a dose–response
+curve against an equally loud control**. Replace that MLP's final-position output by a blend
+$(1-\alpha)$ of itself and $\alpha$ of its mean, for $\alpha$ stepped from 0.1 to 1, and re-measure
+$\hat w_u$ at each step; alongside each $\alpha$, run a control that adds a random vector to the same
+residual stream, rescaled so the model's output moves the same number of bits that ablation level
+produced. Plotting $\rho$(before, after) against output movement for the two arms answers the question
+directly. If the MLP arm loses the ordering at a smaller output movement than the matched control, the
+block-0 MLP is where the trait is computed, and the mechanism has a location for the first time. If the
+two curves coincide, the trait dies from disturbance as such, the sweep's single hit is a size effect,
+and the mechanistic search closes on a negative — leaving the free static-embedding lookup (patterns 10
+and 11) as the practical deliverable. Cost: roughly 20 conditions at the price of one ablation
+component, well inside pattern 21's budget.
 
 ---
 

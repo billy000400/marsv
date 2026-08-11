@@ -61,6 +61,14 @@ successors both land at $S \approx 0.38$ once grown to the 0.4 bits at which wid
 erase the ordering ($\rho = -0.16$ and $-0.28$). The trait belongs to the token's whole output map, not
 to an identifiable slice of its next-token distribution.
 
+**In the computation, the trait localises to one component.** Mean-ablating each of 102 early
+components one at a time — every attention head and MLP in blocks 0–5 — leaves the token ordering
+untouched for 101 of them (median $\rho = +0.99$; every one of the 96 heads $\ge +0.97$). The
+exception is the **block-0 MLP**: removing it collapses the spread across tokens from sd 0.084 to
+0.018, pushes every token to $\hat w_u \approx 0.82$ and leaves $\rho = -0.10$. It is also the only
+early component the model noticeably feels (0.451 bits of output movement, against $\le 0.007$ for
+every other component and $\le 0.0004$ for every head), which is both the finding and its caveat.
+
 **The trait is real; the measuring stick is not neutral.** Swapping the six anchors for six function
 words or six rare content words still recovers the fitted token effect ($\rho = +0.57$ and $+0.61$),
 but the two disjoint sets rank tokens at only $\rho = +0.46$ with each other — so $\hat w_u$ means
@@ -475,16 +483,49 @@ embedding edit is set by the step size, not by the direction. So the top-mass hy
 by embedding edits, and both arms agree on the outcome that matters — any disturbance the model
 registers erases the token ordering wherever in the distribution it lands.
 
+Component ablation — the first intervention that is not an embedding edit. Each of the 102 attention
+heads and MLPs in blocks 0–5 is mean-ablated at the final token position, one at a time, and the
+per-token width is re-measured for the same 12 tokens against the same 6 anchors.
+
+| mean-ablated component (12 tokens, 6 anchors, 1 frame) | mean $\hat w_u$ | sd across tokens | $\rho$(before, after) | output movement |
+|---|---|---|---|---|
+| *nothing ablated* | *0.565* | *0.084* | \- | \- |
+| **block-0 MLP** | **0.822** | **0.018** | $-0.10$ | 0.451 bits |
+| MLPs of blocks 1–5 (worst of the five) | 0.585 | 0.091 | $+0.90$ | 0.007 bits |
+| all 96 attention heads (worst of the 96) | 0.563 | 0.076 | $+0.97$ | 0.0004 bits |
+| *median over all 102 components* | \- | *0.084* | *$+0.99$* | \- |
+
+![Spread and ordering of the per-token width after mean-ablating each early component](plots/ablate.png)
+
+**Figure 18.** Each of the 102 attention heads and MLPs in blocks 0–5 mean-ablated one at a time, for
+the 12 tokens of Figures 14–17. Left: standard deviation of $\hat w_u$ across the 12 tokens (y) against
+the block containing the ablated component (x, heads jittered); open circles = attention heads,
+diamonds = MLPs; dash-dotted line = the unablated spread 0.084. Right of it: rank agreement
+$\rho$(unablated $\hat w_u$, ablated $\hat w_u$) (y) against the output movement the ablation causes
+(x, bits, log scale), same markers; dash-dotted line = perfect agreement. Far right: $\hat w_u$ after
+the ablation (y) against $\hat w_u$ before it (x) for the two extreme components; dotted line = no
+change. Only the block-0 MLP leaves the cluster on either panel.
+
+The profile is flat everywhere except one point, so the trait is not spread thinly over early
+attention: no head carries a detectable share of it, and no MLP above block 0 does either. The block-0
+MLP both destroys it and is the only early component whose removal moves the model by more than
+0.01 bits — 0.451 bits, essentially the 0.4-bit rung at which the displacement ladder showed that *any*
+disturbance flattens the ordering. The two readings cannot be separated by ablation alone: either the
+block-0 MLP computes the trait, or it is simply the only single early component large enough to reach
+the regime where the trait dies. What the sweep does establish is that nothing else in blocks 0–5 is
+load-bearing, which narrows the mechanistic search from 102 components to one.
+
 ## Next experiment
 
-**Ablate components, not embeddings — find which computation reads the trait.** Embedding edits have
-now given all they can: the trait is behavioural (Figure 15), the damage is tail-weighted (Figure 16),
-and the split cannot be steered at a step the model feels (Figure 17). The layer sweep shows which
-tokens are narrow is fixed at the input while the sharpening comes from the blocks below the
-interpolation site, so the per-token effect must be carried by a small number of early components. For
-the same 12 tokens, mean-ablate one attention head or one MLP at a time in blocks 0–5, re-measure
-$\hat w_u$ against the six anchors, and score each component by how much of the across-token spread it
-destroys. A component whose removal collapses the spread while leaving the output largely intact would
-localise the trait mechanistically; a flat profile would say it is genuinely distributed and leave the
-static-embedding lookup as the practical deliverable. Cost: 12 tokens x 6 anchors x 3 frames per
-component, ~40 components — about four times the last experiment's budget.
+**Give the block-0 MLP a dose–response curve, and match it against an equally loud control.** The
+ablation sweep found exactly one candidate (Figure 18) and left exactly one confound: the block-0 MLP
+is both the component whose removal erases the trait and the only early component whose removal the
+model feels at all. Interpolate the ablation — replace the block-0 MLP's final-position output by
+$(1-\alpha)$ of itself plus $\alpha$ of its mean, for $\alpha = 0.1 \dots 1$ — and at each $\alpha$
+build a control that perturbs the same residual stream by a random vector rescaled to the *same* output
+movement in bits. Then plot $\rho$(before, after) against output movement for both. If the MLP arm
+loses the ordering at a smaller output movement than the matched control, the block-0 MLP computes the
+trait; if the two curves lie on top of each other, the trait dies from disturbance as such and the
+sweep's single hit is a size effect, closing the mechanistic line and leaving the static-embedding
+lookup (Figures 10–11) as the deliverable. Cost: ~20 conditions at the price of one ablation
+component, well under the last experiment's budget.
