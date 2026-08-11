@@ -90,7 +90,11 @@ from $w_{TV} = 0.189$ to $0.262$; four blocks down the effect is 93% gone, and b
 chance. Depth below the patch is therefore not a resource that accumulates through the network — the
 handful of blocks immediately below the patch resolve the interpolated mixture into a near-binary
 choice, and the rest of the model transports that choice. An interpolation probe is evidence about those
-few blocks, not about the network as a whole.
+few blocks, not about the network as a whole. Repeating the block-0-to-block-4 sweep in GPT-2
+Small and GPT-2 Medium shows the direction and the front-loading are general — the switch widens
+monotonically as blocks are removed, with the first block always the largest step — while the rate
+is model-specific: four blocks cost GPT-2 Large 60.7% of its available compression and GPT-2 Small
+51.1%, but GPT-2 Medium only 18.6%.
 
 ## Methods
 
@@ -237,7 +241,9 @@ whole low-JSD bank at the mid-stack patch). Experiment 10 re-sweeps a subsample 
 suffix lengths, 900 more. Experiment 11 sweeps eight patch sites in GPT-2 Large (blocks 0, 1, 2, 3, 4,
 9, 13 and 18)
 under the same three conditions, on an evenly spaced 72-pair subsample of that model's low-JSD bank
-drawn from 65 distinct prefixes: 1080 more — 18934 in total.
+drawn from 65 distinct prefixes: 1080 more. Experiment 12 repeats that protocol at blocks 0, 1, 2, 3
+and 4 in GPT-2 Small and GPT-2 Medium on 60 evenly spaced pairs from each model's low-JSD bank: 1800
+more — 20734 in total.
 
 **Shared-continuation prompts (Experiment 10).** Every other experiment puts the differing token last,
 so the interpolated activation sits in the residual stream position that produces the readout. To move
@@ -519,6 +525,20 @@ model (SFD where SAEs exist, its head-level analogue HSD otherwise) against IPW 
 across the three models' primary
 tests. Everything else is exploratory and reported with uncorrected $p$-values.
 
+**share of headroom closed, $C(b)$ (Experiment 12)** — the three GPT-2 models start from different
+block-0 transition widths, so the raw widening caused by removing blocks from below the patch is not
+comparable across them: a model that is already near the linear response has little room left to widen.
+To ask "how much of the compression this model achieves is supplied by its top $b$ blocks?" we express
+the widening as a fraction of each model's own distance from its block-0 width to the linear response:
+
+```math
+C(b) \;=\; \frac{\tilde w_{TV}(L{=}b) - \tilde w_{TV}(L{=}0)}{0.5 - \tilde w_{TV}(L{=}0)}
+```
+
+where $\tilde w_{TV}(L)$ is the median unablated transition width over the model's pair subsample with
+the patch at block $L$. $C$ runs from 0 (removing those blocks changes nothing) to 1 (removing them
+destroys the plateau entirely). Experiment 12 consumes it in Table 16 and Figure 15B.
+
 ### Baselines
 
 **Linear response** — the null shape, the behavior of a model whose output moves in proportion to the
@@ -563,7 +583,7 @@ $d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error
 ## Results
 
 **The harness is correct.** All 6 hand-written pairs tokenized validly in all five models, and across
-all 18934 sweeps the patched runs at the endpoints reproduced the clean forward passes to
+all 20734 sweeps the patched runs at the endpoints reproduced the clean forward passes to
 $|d(0)| \le 3.6 \times 10^{-4}$ and $|d(1) - 1| \le 3.6 \times 10^{-4}$. The numbers below are about
 the models, not about patching artifacts.
 
@@ -1335,6 +1355,56 @@ point has a significant Wilcoxon $p$ but a prefix-clustered interval that still 
 best read as "far smaller than block 0, possibly nonzero". The four top-of-stack sites were added after
 the block-0-to-block-4 drop turned out to be the whole story, so their placement is data-driven: the
 numbers there are measurements, but the choice to look there is not independent of the block-4 result.
+
+### The collapse is general across GPT-2 sizes; its steepness is not
+
+The result above was measured in GPT-2 Large, the model with the largest effects everywhere in this
+report, so it could be a property of that model rather than of interpolation probes. The head-ablation
+readout cannot settle it in the smaller models — their block-0 effects are $+0.015$ and $+0.005$, at or
+below the confidence-interval width at this sample size — but the *unablated* switch is large in every
+model, so it carries this test and the ablation is reported as an under-powered check.
+
+Repeating the protocol at blocks 0–4 in GPT-2 Small (12 blocks) and GPT-2 Medium (24 blocks), 60 pairs
+each, gives the same qualitative answer in all three models and a very different quantitative one. In
+every model the unablated switch widens monotonically as blocks are taken out of the path below the
+patch, and in every model the largest single step is the first block removed. So the general lesson
+holds: a plateau measured with a block-0 patch is in substantial part a statement about the handful of
+blocks immediately below the patch, whatever the model size. But the rate differs three-fold. After
+four blocks GPT-2 Large has given up 60.7% of its headroom and GPT-2 Small 51.1%, while GPT-2 Medium
+has given up only 18.6% — four fifths of its compression survives. "Four blocks build the plateau" is
+therefore a statement about GPT-2 Large, and the safe general claim is the weaker one: the top blocks
+matter most, by an amount that has to be measured per model. The ablation check behaves as expected —
+the only site in the two smaller models whose cluster-bootstrap interval excludes zero is GPT-2 Medium
+at block 0 ($+0.011$, CI $[+0.004, +0.017]$, $p = 0.049$), a re-measurement of the Experiment 9 effect.
+
+| model | blocks | $\tilde w_{TV}$ at $L=0$ | $L=1$ | $L=2$ | $L=3$ | $L=4$ | $C(1)$ | $C(4)$ |
+|---|---|---|---|---|---|---|---|---|
+| GPT-2 Large | 36 | 0.189 | 0.262 | 0.307 | 0.350 | 0.378 | 23.4% | **60.7%** |
+| GPT-2 Medium | 24 | 0.252 | 0.269 | 0.276 | 0.291 | 0.298 | 6.8% | **18.6%** |
+| GPT-2 Small | 12 | 0.336 | 0.354 | 0.386 | 0.403 | 0.420 | 11.0% | **51.1%** |
+
+**Table 16.** Unablated median transition width with the patch moved down one block at a time, and the
+share of each model's own block-0 headroom closed after $b$ blocks. Smaller $w_{TV}$ = sharper switch.
+
+To show that the shape is shared while the rate is not, Figure 15 plots both readouts of the same runs:
+the raw widths, and the same widths as a fraction of each model's headroom.
+
+![Unablated transition width and share of headroom closed against patch block for GPT-2 Small, Medium and Large](plots/depth_models.png)
+
+**Figure 15.** The plateau's dependence on the first few blocks below the patch holds in all three
+GPT-2 models, but GPT-2 Medium's dependence is three times shallower than GPT-2 Large's. **A** — x:
+patch site, the block index $L$ at which the interpolated activation is inserted, so $L=0$ leaves the
+whole stack below the patch and each step right removes one more block from that path; y: median
+unablated transition width $w_{TV}$ over 60 low-JSD pairs per model, smaller = sharper switch; gray
+dashed horizontal line = the linear response $w_{TV}=0.5$. Series: GPT-2 Large (blue triangles,
+dotted), GPT-2 Medium (vermillion squares, dashed), GPT-2 Small (reddish-purple circles, solid).
+**B** — same x; y: $C(b)$, the percentage of that model's own block-0 headroom that has been closed
+after removing $b$ blocks.
+
+Limitations: 60 pairs per model, whose block-0 rows agree with the full-bank numbers of Experiments 6
+and 9; $C(b)$ is a ratio of medians, and while the sign of the between-model ordering is stable, the
+Small-vs-Large gap is not resolved at this sample size. The three models differ in depth, width and
+training run simultaneously, so the GPT-2 Medium result is a description, not an attribution.
 
 ## Conclusion
 

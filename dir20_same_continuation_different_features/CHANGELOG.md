@@ -583,3 +583,40 @@ data-driven even though the numbers at them are not.
 states that the no-ablation and control series coincide everywhere and the fixed-set series separates
 only over the first four sites. Fourteen figures embedded with visible numbered captions in both files;
 `experiments/check_render.py` passes on both.
+
+---
+## 2026-08-11 (S15) — the top-of-stack collapse reproduces in GPT-2 Small and Medium, three times shallower in Medium
+
+**New experiment.** `experiments/depth_curve.py` parameterised by model (`MKEY`, `SITES` env vars;
+gpt2-small's held-out fixed head sets come from `results/depth_gap.json` because `localize_heads.json`
+only stores them for the two larger models) and re-run at blocks 0, 1, 2, 3, 4 in gpt2-small (12
+blocks) and gpt2-medium (24 blocks): 60 evenly spaced low-JSD pairs per model, three conditions per
+pair, 1800 new sweeps, worst endpoint identity error $1.9\times10^{-4}$.
+`experiments/analyze_depth_models.py` builds the cross-model comparison.
+
+**New result (Table 16, Figure 15).** Unablated median $w_{TV}$ with the patch at blocks 0→4:
+gpt2-large $0.189 \to 0.262 \to 0.307 \to 0.350 \to 0.378$; gpt2-medium $0.252 \to 0.269 \to 0.276 \to
+0.291 \to 0.298$; gpt2-small $0.336 \to 0.354 \to 0.386 \to 0.403 \to 0.420$. Expressed as the share of
+each model's own block-0 headroom closed, $C(4) = 60.7\%$ / $18.6\%$ / $51.1\%$ and $C(1) = 23.4\%$ /
+$6.8\%$ / $11.0\%$. The *direction* and the *front-loading* reproduce in all three models; the *rate*
+does not — gpt2-medium keeps four fifths of its compression after four blocks are removed.
+
+**Secondary readout as predicted — a null.** The fixed-set ablation delta has a cluster-bootstrap
+interval spanning zero at every site in both smaller models except gpt2-medium block 0 ($+0.011$, CI
+$[+0.004, +0.017]$, $p = 0.049$), which re-measures the Experiment 9 effect on the subsample. This is
+why the unablated curve, not the ablation, carries the Experiment 12 claim.
+
+**New metric.** $C(b)$, the share of headroom closed, defined in Methods; needed because the three
+models start from different block-0 widths, so raw widening is not comparable across them.
+
+**Superseded numbers.** Sweep total 18934 → 20734 (Methods and the endpoint-identity sentence in both
+files). REPORT.md's Summary claim "the compound is built in about four blocks" is now qualified in
+place: the shape is general, the rate is GPT-2 Large's. No previously reported number changed value.
+
+**Story change (rule 9b).** No reversal; a generality claim gets its scope corrected. Experiment 11's
+"four blocks build the plateau" was written from one model; it is now stated as "the top blocks matter
+most, by an amount that must be measured per model", with the three-model numbers behind it.
+
+**Figures.** Added `plots/depth_models.png` as **Figure 15** in both deliverables (A raw unablated
+$w_{TV}$ per patch block, three models; B the same as share of headroom closed). Fifteen figures
+embedded with visible numbered captions in both files; `experiments/check_render.py` passes on both.

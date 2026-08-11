@@ -85,6 +85,10 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
 - [x] S14 - Turn Experiment 9's two patch sites into a curve: the identical held-out fixed head set
   ablated at five sites in gpt2-large, to locate where the effect (and the plateau) dies.
 
+- [x] S15 - Does the top-of-stack collapse reproduce outside gpt2-large? Blocks 0-4 in gpt2-small and
+  gpt2-medium, with the unablated w_TV curve as the primary readout (the ablation delta is under-powered
+  in those models).
+
 ## Required outputs
 
 - `plots/final_logit_curves.png`: 4 x 2 grid of raw \(d(\alpha)\) curves, plus \(d=\alpha\).
@@ -101,14 +105,15 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S14 complete (2026-08-11). The success criterion is met and exceeded.** All 6
+**S1-S15 complete (2026-08-11). The success criterion is met and exceeded.** All 6
 hand-picked pairs validate in all five models, a 200-pair-per-model corpus-mined bank carries the
 association test in five models, that bank has been re-run at three patch sites in the 24-block models
 and at four/five sites in the depth-mismatched GPT-2 models, a dedicated low-JSD bank (365/399/356
 pairs) carries the hypothesis test, that bank has been re-swept under six ablation conditions in all
 three GPT-2 models, and a held-out fixed head set has been ablated at two patch sites per model on 4836
 more sweeps, a shared-continuation re-sweep at four readout offsets adds 900, and a five-site patch
-curve in gpt2-large adds 1080 — 18286 sweeps in total, endpoint identity error <= 3.6e-4 throughout
+curve in gpt2-large adds 1728, and the blocks 0-4 re-run in the two smaller GPT-2 models adds
+1800 — 20734 sweeps in total, endpoint identity error <= 3.6e-4 throughout
 except in S13, where the manipulation drives the two endpoints to near-coincidence and the bound is
 2.1e-3.
 
@@ -210,12 +215,17 @@ blocks immediately below the patch, not the network. `hat_Delta` is now reported
 retains >= 0.05 of headroom (blocks 13 and 18 otherwise read 19% and 14% off headrooms of 0.017/0.001).
 Caveat logged: the four top-of-stack sites were chosen after seeing the block-4 drop.
 
+**S15 outcome.** The shape generalises, the rate does not. In all three GPT-2 models the unablated switch
+widens monotonically as blocks are removed from below the patch and the first block removed is the
+largest single step, but the share of each model's own block-0 headroom closed after four blocks is
+60.7% (gpt2-large), 51.1% (gpt2-small) and only 18.6% (gpt2-medium). "Four blocks build the plateau" is
+therefore a gpt2-large statement; the general claim is that the top blocks matter most by a model-specific
+amount. The fixed-set ablation delta was a null at 9 of 10 model-sites as predicted (only gpt2-medium
+block 0, +0.011, CI [+0.004, +0.017]), which is why the unablated curve carries the claim.
+
 ## Next step
 
-S15: does the one-block halving reproduce outside gpt2-large? Run blocks 0-4 in gpt2-small and
-gpt2-medium, whose block-0 fixed-set effects are only +0.015 and +0.005 — likely a null at this sample
-size, so use the unablated w_TV curve (which is large in every model) as the primary readout rather than
-the ablation delta. After that, the untouched design question is pairs that differ at an *earlier*
+The untouched design question is pairs that differ at an *earlier*
 position rather than the final token (S13 moved the readout downstream but kept the differing token
 last). The longer-suffix extension of S13 stays blocked on conditioning,
 not GPU: past s ~ 4 the endpoints are too close for d(alpha) to be well defined and it needs a different

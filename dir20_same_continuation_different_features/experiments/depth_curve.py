@@ -27,8 +27,10 @@ from common import PLOTS, RESULTS, load
 from depth_gap import DOSE, per_pair_sets, run_at
 from mine_lowjsd import N_PREFIX, SEED, get_prefixes
 
-MKEY = "gpt2-large"
-SITES = [0, 4, 9, 13, 18]          # f = 1.000 / 0.886 / 0.743 / 0.629 / 0.486 on 36 blocks
+MKEY = os.environ.get("MKEY", "gpt2-large")
+# gpt2-large default: f = 1.000 / 0.886 / 0.743 / 0.629 / 0.486 on 36 blocks. S15 re-runs the
+# top-of-stack part of the curve (blocks 0-4) in the other two GPT-2 models.
+SITES = [int(x) for x in os.environ.get("SITES", "0,4,9,13,18").split(",")]
 N_PAIRS = int(os.environ.get("N_PAIRS", 60))
 N_ALPHA = 101
 CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00"]
@@ -60,7 +62,8 @@ def stats(rows, rng_boot):
 def main():
     alphas = np.linspace(0, 1, N_ALPHA)
     rng_boot = np.random.default_rng(0)
-    path = os.path.join(RESULTS, "depth_curve.json")
+    suffix = "" if MKEY == "gpt2-large" else f"_{MKEY}"
+    path = os.path.join(RESULTS, f"depth_curve{suffix}.json")
     out = json.load(open(path)) if os.path.exists(path) else {}
 
     bank = json.load(open(os.path.join(RESULTS, f"lowjsd_{MKEY}.json")))
@@ -74,9 +77,11 @@ def main():
     k = max(4, int(round(DOSE * nh * n_block)))
 
     # The held-out fixed sets from Experiment 8, ranked on the FULL bank's opposite prefix fold.
-    gsets = {int(f): [int(g) for g in G] for f, G in
-             json.load(open(os.path.join(RESULTS, "localize_heads.json")))[MKEY]
-             ["global_sets"].items()}
+    # gpt2-small's were produced by the Experiment 9 block-0 run instead, so fall back to those.
+    src = json.load(open(os.path.join(RESULTS, "localize_heads.json")))[MKEY].get("global_sets")
+    if src is None:
+        src = json.load(open(os.path.join(RESULTS, "depth_gap.json")))[MKEY]["block0"]["sets"]
+    gsets = {int(f): [int(g) for g in G] for f, G in src.items()}
     print(f"{MKEY}: k={k} of {nh * n_block} heads, {len(rows)} pairs, sites {SITES}", flush=True)
 
     _, ctrl, prefix_of = per_pair_sets(m, rows, prefixes, k, nh)
@@ -122,7 +127,8 @@ def main():
 
     del m
     torch.cuda.empty_cache()
-    figure(out)
+    if MKEY == "gpt2-large":
+        figure(out)
     return out
 
 

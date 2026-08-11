@@ -1,0 +1,25 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  34%|███▍      | 99/292 [00:00<00:00, 978.08it/s]Loading weights:  67%|██████▋   | 197/292 [00:00<00:00, 791.59it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 860.77it/s]
+gpt2-medium: k=12 of 384 heads, 60 pairs, sites [0, 1, 2, 3, 4]
+    probe 0/60
+    L0 pair 0/60
+    L0 pair 20/60
+    L0 pair 40/60
+0 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.2522220231872008, "ctrl": 0.24968706812654723, "glob": 0.2639536823851687}, "headroom": 0.25031293187345277, "median_delta": 0.010625411704551335, "ci_delta": [0.0036288645948232556, 0.01655364041858204], "norm_delta": 0.04244851284760261, "wilcoxon_p": 0.04850586217962796, "frac_glob_gt_ctrl": 0.6666666666666666, "max_endpoint_err": 0.00010907649993896484, "f": 1.0}
+    L1 pair 0/60
+    L1 pair 20/60
+    L1 pair 40/60
+1 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.2690166036341049, "ctrl": 0.2724683590229563, "glob": 0.28397352904129547}, "headroom": 0.2275316409770437, "median_delta": 0.006733831365992871, "ci_delta": [-0.003215601662050094, 0.015311904181851022], "norm_delta": 0.029595142623140776, "wilcoxon_p": 0.1490559154829988, "frac_glob_gt_ctrl": 0.5833333333333334, "max_endpoint_err": 0.00013774633407592773, "f": 0.9565217391304348}
+    L2 pair 0/60
+    L2 pair 20/60
+    L2 pair 40/60
+2 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.27589766155369244, "ctrl": 0.2951545751159397, "glob": 0.30476582200489033}, "headroom": 0.20484542488406032, "median_delta": 0.00721580890058382, "ci_delta": [-0.002436978599974343, 0.022744542688016067], "norm_delta": 0.03522562881093326, "wilcoxon_p": 0.07603895013142359, "frac_glob_gt_ctrl": 0.6, "max_endpoint_err": 0.00013625621795654297, "f": 0.9130434782608695}
+    L3 pair 0/60
+    L3 pair 20/60
+    L3 pair 40/60
+3 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.29096997539305447, "ctrl": 0.3012375370065612, "glob": 0.32006663927286905}, "headroom": 0.1987624629934388, "median_delta": 0.006769682693637452, "ci_delta": [-0.004172376320647597, 0.02397336672990732], "norm_delta": 0.03405916082787182, "wilcoxon_p": 0.26002786989768556, "frac_glob_gt_ctrl": 0.5333333333333333, "max_endpoint_err": 0.00011394693865440786, "f": 0.8695652173913043}
+    L4 pair 0/60
+    L4 pair 20/60
+    L4 pair 40/60
+4 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.29839229327742944, "ctrl": 0.31513784725969934, "glob": 0.3221835233826555}, "headroom": 0.18486215274030066, "median_delta": 0.00776324489321345, "ci_delta": [-0.0023528576287792646, 0.026146133627808016], "norm_delta": 0.04199477707110479, "wilcoxon_p": 0.09616794204602311, "frac_glob_gt_ctrl": 0.6, "max_endpoint_err": 0.00011438131332397461, "f": 0.8260869565217391}

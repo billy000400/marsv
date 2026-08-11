@@ -67,7 +67,7 @@ nothing measurable.
 ## Experiment 1 — Matthew's two pairs, plus four test pairs, in five models
 
 All 6 pairs tokenized validly in all five models (identical prefix, exactly one differing single final
-token). Across all 18934 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
+token). Across all 20734 sweeps in this report, patching at $\alpha=0$ and $\alpha=1$ reproduced the
 clean runs to $|d| \le 3.6\times10^{-4}$, so the interpolation harness is correct. The one exception is
 Experiment 10, where the two endpoints are deliberately driven to near-coincidence and the bound is
 $2.1\times10^{-3}$; it is discussed there.
@@ -839,3 +839,74 @@ prefix-clustered interval still includes zero, so that point is best read as "mu
 possibly nonzero" rather than as a confirmed positive. Finally, blocks 1–3 were added after the
 block-0-to-block-4 drop turned out to be the whole story: the numbers at those sites are measurements,
 but the choice to look there is not independent of the block-4 result.
+
+---
+
+## Experiment 12 — the top-of-stack collapse reproduces, but its steepness does not
+
+Experiment 11 found that removing a single block from below the patch halves the head circuit's causal
+effect in GPT-2 Large, and that four blocks remove most of the plateau. That was measured in one model,
+and GPT-2 Large is the model with the largest effects everywhere in this report, so the obvious worry is
+that the shape belongs to that model rather than to interpolation probes in general. The head-ablation
+readout cannot answer this in the smaller models — their block-0 effects are $+0.015$ and $+0.005$, at
+or below the width of the confidence interval at this sample size. The *unablated* switch, on the other
+hand, is large in every model, so we use it as the primary readout and treat the ablation as a
+secondary, under-powered check.
+
+We re-ran the Experiment 11 protocol unchanged with the patch at blocks 0, 1, 2, 3 and 4 in GPT-2 Small
+(12 blocks) and GPT-2 Medium (24 blocks): 60 evenly spaced pairs from each model's low-JSD bank, three
+conditions per pair, 1800 new sweeps, worst endpoint reproduction error $1.9\times10^{-4}$. Because the
+three models start from different block-0 widths, the comparable quantity is the **share of headroom
+closed** — how much of each model's own distance from its block-0 width to the linear response is given
+up once the first $b$ blocks are taken out of the path below the patch:
+
+```math
+C(b) \;=\; \frac{\tilde w_{TV}(L{=}b) - \tilde w_{TV}(L{=}0)}{0.5 - \tilde w_{TV}(L{=}0)}
+```
+
+Two things reproduce and one does not. The direction reproduces: in all three models the unablated
+switch widens monotonically as blocks are removed, so a plateau measured with a block-0 patch is
+partly a statement about the blocks immediately below it in every GPT-2 model, not only the large one.
+The front-loading reproduces: the single largest step is always the first block removed. What does not
+reproduce is the steepness. Four blocks cost GPT-2 Large 60.7% of its headroom and GPT-2 Small 51.1%,
+but GPT-2 Medium only 18.6% — so "four blocks build the plateau" is a GPT-2 Large statement, and in
+GPT-2 Medium the same four blocks leave four fifths of the compression intact.
+
+| model | blocks | $\tilde w_{TV}$ at $L=0$ | $L=1$ | $L=2$ | $L=3$ | $L=4$ | $C(1)$ | $C(4)$ |
+|---|---|---|---|---|---|---|---|---|
+| GPT-2 Large | 36 | 0.189 | 0.262 | 0.307 | 0.350 | 0.378 | 23.4% | **60.7%** |
+| GPT-2 Medium | 24 | 0.252 | 0.269 | 0.276 | 0.291 | 0.298 | 6.8% | **18.6%** |
+| GPT-2 Small | 12 | 0.336 | 0.354 | 0.386 | 0.403 | 0.420 | 11.0% | **51.1%** |
+
+**Table 16.** Unablated median transition width $\tilde w_{TV}$ (60 low-JSD pairs per model) with the
+SLERP patch moved down one block at a time, and the share $C(b)$ of each model's own block-0 headroom
+closed after $b$ blocks. Smaller $w_{TV}$ = sharper switch; $C$ larger = the top blocks carry more of
+the compression.
+
+The ablation readout behaves as predicted — it is a null almost everywhere in the two smaller models.
+The only site whose cluster-bootstrap interval excludes zero is GPT-2 Medium at block 0 ($+0.011$, CI
+$[+0.004, +0.017]$, $p = 0.049$), which is the Experiment 9 effect re-measured on a subsample; every
+other site in both models has an interval spanning zero. That is the expected result at these effect
+sizes, and it is why the unablated curve carries the claim.
+
+To show that the collapse itself is general while its rate is model-specific, we plot both readouts of
+the same runs side by side — the raw widths, and the same widths expressed as headroom closed.
+
+![Unablated transition width and share of headroom closed against patch block for GPT-2 Small, Medium and Large](plots/depth_models.png)
+
+**Figure 15.** The plateau's dependence on the first few blocks below the patch holds in all three
+GPT-2 models, but GPT-2 Medium's is three times shallower than GPT-2 Large's. **A** — x: patch site,
+the block index $L$ at which the interpolated activation is inserted, so $L=0$ leaves the whole stack
+below the patch and each step to the right removes one more block from that path; y: median unablated
+transition width $w_{TV}$ over 60 low-JSD pairs per model, smaller = sharper switch; gray dashed
+horizontal line = the linear response $w_{TV}=0.5$. Series: GPT-2 Large (blue triangles, dotted),
+GPT-2 Medium (vermillion squares, dashed), GPT-2 Small (reddish-purple circles, solid). **B** — same x;
+y: $C(b)$, the percentage of that model's own block-0 headroom $0.5 - \tilde w_{TV}(L{=}0)$ that has
+been closed after removing $b$ blocks.
+
+**Caveats.** 60 pairs per model, one seventh to one sixth of each bank, as in Experiment 11; the
+block-0 rows agree with the full-bank numbers reported in Experiments 6 and 9. $C(b)$ is a ratio of
+medians and inherits their noise; the between-model ordering at $b = 4$ (Large > Small > Medium) rests
+on gaps of 10–40 points and is stable in sign, but the Small-vs-Large gap is not resolved at this
+sample size. The three models differ in depth, width and training run at once, so "GPT-2 Medium is
+shallower here" is a description, not an attribution.

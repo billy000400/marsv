@@ -1,0 +1,25 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:  53%|█████▎    | 79/148 [00:00<00:00, 727.65it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 997.07it/s]
+gpt2-small: k=4 of 144 heads, 60 pairs, sites [0, 1, 2, 3, 4]
+    probe 0/60
+    L0 pair 0/60
+    L0 pair 20/60
+    L0 pair 40/60
+0 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.33634875067585157, "ctrl": 0.34505000092931776, "glob": 0.3836161534215027}, "headroom": 0.15494999907068224, "median_delta": 0.013579700993196858, "ci_delta": [0.0008002805513815936, 0.02993832285603998], "norm_delta": 0.08763924539942927, "wilcoxon_p": 0.10692037065793744, "frac_glob_gt_ctrl": 0.6333333333333333, "max_endpoint_err": 0.00018324327538721263, "f": 1.0}
+    L1 pair 0/60
+    L1 pair 20/60
+    L1 pair 40/60
+1 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.3543160396843391, "ctrl": 0.36951216798080344, "glob": 0.40485643134411675}, "headroom": 0.13048783201919656, "median_delta": 0.009217042961275596, "ci_delta": [-0.008046679101987558, 0.03632472843793752], "norm_delta": 0.07063526781500701, "wilcoxon_p": 0.2359312319354191, "frac_glob_gt_ctrl": 0.6, "max_endpoint_err": 0.0001541731908218935, "f": 0.9090909090909091}
+    L2 pair 0/60
+    L2 pair 20/60
+    L2 pair 40/60
+2 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.38569312487943147, "ctrl": 0.3970729281178045, "glob": 0.40876502746859283}, "headroom": 0.10292707188219552, "median_delta": 0.017346364088156235, "ci_delta": [0.003961867324467572, 0.04250188205998288], "norm_delta": 0.16853062824919277, "wilcoxon_p": 0.029880345114056753, "frac_glob_gt_ctrl": 0.65, "max_endpoint_err": 0.00019453269487712532, "f": 0.8181818181818182}
+    L3 pair 0/60
+    L3 pair 20/60
+    L3 pair 40/60
+3 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.4029732528546539, "ctrl": 0.41935249673912656, "glob": 0.42624773316140246}, "headroom": 0.08064750326087344, "median_delta": 0.017070752400158706, "ci_delta": [-0.010474325574891913, 0.035513744883530596], "norm_delta": 0.2116711827387801, "wilcoxon_p": 0.22449407931846777, "frac_glob_gt_ctrl": 0.5666666666666667, "max_endpoint_err": 0.00014890838065184653, "f": 0.7272727272727273}
+    L4 pair 0/60
+    L4 pair 20/60
+    L4 pair 40/60
+4 {"n": 60, "n_prefix": 60, "median_wtv": {"base": 0.42003348360661563, "ctrl": 0.4295728786952676, "glob": 0.43944711834709405}, "headroom": 0.07042712130473239, "median_delta": 0.0047656334261225175, "ci_delta": [-0.011501430747356989, 0.029888678866422214], "norm_delta": 0.06766758796660184, "wilcoxon_p": 0.4483042610564597, "frac_glob_gt_ctrl": 0.55, "max_endpoint_err": 0.00012421267456375062, "f": 0.6363636363636364}

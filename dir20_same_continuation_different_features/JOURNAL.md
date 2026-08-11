@@ -673,3 +673,52 @@ chosen after seeing the block-4 drop, so their placement is data-driven.
 **Revised next step.** Blocks 0-4 are now resolved, so the open questions are (a) whether the
 one-block halving reproduces in gpt2-small/-medium at their (much smaller) block-0 effects, and (b) the
 untouched design question: pairs that differ at an *earlier* position rather than the final token.
+
+---
+## 2026-08-11 (S15: does the top-of-stack collapse reproduce outside gpt2-large?)
+
+**Feedback check.** Listed the direction root first: the only matching file is
+`human_feedback.txt.addressed.md`, already suffixed. Nothing unaddressed; no STOP written (see below).
+
+**What I did.** Parameterised `experiments/depth_curve.py` by model (env `MKEY`/`SITES`, per-model
+results file, fixed-head-set fallback to `depth_gap.json` for gpt2-small, figure only for gpt2-large)
+and ran blocks 0-4 in gpt2-small and gpt2-medium — 1800 sweeps, ~7 min of GPU total. Added
+`experiments/analyze_depth_models.py` for the cross-model figure and `C(b)` table.
+
+**What I learned.**
+- The claim from S14 splits cleanly into a part that generalises and a part that does not. Generalises:
+  in all three GPT-2 models the unablated switch widens monotonically as blocks are removed from below
+  the patch, and the first block removed is always the biggest single step. Does not: the rate. Four
+  blocks cost gpt2-large 60.7% of its headroom and gpt2-small 51.1%, but gpt2-medium only 18.6%.
+- Choosing the readout before running mattered. The head-ablation delta was a null at 9 of 10
+  model-sites, exactly as predicted from the $+0.015$/$+0.005$ block-0 effects; had I made it primary,
+  the iteration would have produced nothing. The unablated $w_{TV}$ is large in every model and gave a
+  clean answer at the same GPU cost.
+- Normalising by each model's own headroom is what makes the models comparable at all — gpt2-small
+  starts at $w_{TV} = 0.336$, so it has half gpt2-large's room to widen and its raw widening looks
+  smaller while its *share* is comparable. The raw and normalised panels of Figure 15 disagree in
+  ordering for exactly this reason, which is why both are shown.
+- gpt2-medium being the outlier (not the smallest model) breaks any monotone-in-size reading, and it
+  matches S11's finding that the cross-model ablation effect is not ordered by model size either.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. 60 pairs per model rather than the full 365/399 banks, matching S14's subsample logic; the block-0
+   rows reproduce the full-bank Experiment 6/9 numbers, which is the check that justifies it.
+2. Blocks 0-4 only, not a full-depth curve in each model: S14 showed everything happens there, and the
+   deeper sites in gpt2-large were already at the linear response.
+3. Reused gpt2-small's fixed head sets from the Experiment 9 block-0 run rather than re-ranking, so the
+   fixed-set condition means the same thing as in gpt2-large/-medium. Rejected: re-ranking per model
+   (would confound "different circuit selected" with "circuit stops mattering").
+4. $C(b)$ normalises by $0.5 - \tilde w_{TV}(L{=}0)$, i.e. distance to the linear response, rather than
+   by the raw width; the linear response is the report's fixed reference for "no compression".
+
+**Next step.** The untouched design question is now the only large one left: pairs that differ at an
+*earlier* position rather than the final token (S13 moved the readout downstream but kept the differing
+token last). A cheaper follow-up if GPU is tight: check whether gpt2-medium's shallow rate is a
+property of the model or of its low-JSD bank by re-running its blocks 0-4 on the 200-pair mined bank
+from S4, which has a much wider JSD range.
+
+On track? yes — S15 bounded the generality of S14's mechanism claim in the direction that mattered
+(shape general, rate model-specific) and corrected the Summary's scope; both deliverables are curated
+to current-best with fifteen captioned figures and pass `check_render.py`; no unaddressed feedback and
+no STOP.
