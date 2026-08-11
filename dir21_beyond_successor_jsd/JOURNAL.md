@@ -480,3 +480,50 @@ token's whole output map, making the static-embedding lookup the right level of 
 
 On track? yes — S1-S5 complete, thirteen experiments run and reported, deliverables current-best and
 render-checked, no unaddressed feedback, no blocker.
+
+## 2026-08-11 — iteration 6: constructing the directions the mode split could only draw
+
+**Did.** Wrote and ran `experiments/mode_construct.py`. Instead of picking the most top-heavy and most
+tail-heavy of 24 random directions, I built them: for small displacements the per-successor JSD is
+quadratic in the centred logit response, so within the span of 24 probe directions the top-mass share
+$S$ is a Rayleigh quotient $c'Ac/c'Bc$, and the generalised eigenvectors of $(A,B)$ give the extremes in
+closed form. 24 probe forwards per token at norm 0.6, then both constructed directions rescaled to
+0.4 bits and anchor width re-measured. 12 tokens, ~12 min. Plot: `plots/mode_construct.png`
+(Figure 17). Deliverables curated, patterns renumbered, render check passes.
+
+**Learned.** The construction does exactly what it should in the regime it was derived for — predicted
+$S$ 0.856 vs 0.179, three times the random-draw spread, the top end past the mass-proportional 0.71 —
+and then buys nothing. Rescaled to the 0.4 bits at which width actually responds, both edits land at
+$S = 0.369$ / $0.390$: no separation, both inside the random-direction band, paired difference
+backwards ($p = 0.09$). Both widen every token to $\hat w_u \approx 0.67$ and both erase the ordering
+($\rho = -0.16$, $-0.28$). Two readings, both useful. Mechanistic: the tail-weighting of a large
+embedding edit is a property of the *step size*, not of the direction — the linear picture of an
+embedding edit expires well before the displacement width responds to, the same expiry that made the
+fixed-displacement test misleading in iteration 4. For the direction's question: $S$ cannot be held
+apart at a step the model feels, so the tail-vs-top-mass hypothesis is untestable by embedding edits,
+and both arms agree that any disturbance the model registers erases the ordering wherever it lands. The
+trait is a property of the token's whole output map, which is the reading that makes the
+vocabulary-wide static-embedding lookup the right level of description.
+
+**Assumption logged (loop mode).** Used the subspace-search form of the construction (24 probe
+directions + generalised eigenproblem) rather than the unembedding-row projection PLAN.md also listed.
+Reason: the projection needs the output-logit Jacobian w.r.t. the embedding row (2048 forwards per
+token per frame), ~40x the time available; the eigen form is exact for the quadratic approximation
+within the probed subspace and its predicted-$S$ eigenvalues double as a check that the method worked
+before the step is grown. Cost, now visible: the construction is only valid where the quadratic
+approximation is, and that is precisely the regime the calibrated step leaves — reported as the
+result, not as a defect. Rejected: probing at a larger norm (would make the eigenvalues meaningless
+without making the achieved $S$ any better); rejected also raising the probe subspace to 48 directions
+(the binding constraint is nonlinearity at the calibrated step, not the span).
+
+**Next step.** Stop perturbing embeddings. Ablate one attention head or MLP at a time in blocks 0–5,
+re-measure $\hat w_u$ against the six anchors for the same 12 tokens, and score each component by how
+much of the across-token spread in $\hat w_u$ it destroys. The layer sweep already says the ordering is
+fixed at the input and the sharpening comes from the blocks below the site, so a component whose
+removal collapses the spread while leaving the output intact would localise the trait for the first
+time; a flat profile would close the mechanistic search on a negative and leave the static-embedding
+lookup as the deliverable.
+
+On track? yes — S1-S5 complete, fourteen experiments run and reported, the recommended experiment from
+the last iteration executed and answered (negatively, with the instrument validated), deliverables
+current-best and render-checked, no unaddressed feedback, no blocker.

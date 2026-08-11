@@ -1,0 +1,19 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:56,  1.22s/it]Loading weights:  21%|██        | 60/292 [00:01<00:04, 57.83it/s]Loading weights:  27%|██▋       | 80/292 [00:01<00:03, 64.48it/s]Loading weights:  33%|███▎      | 95/292 [00:01<00:02, 73.47it/s]Loading weights:  37%|███▋      | 109/292 [00:02<00:03, 60.58it/s]Loading weights:  41%|████      | 120/292 [00:02<00:02, 59.66it/s]Loading weights:  46%|████▌     | 134/292 [00:02<00:02, 63.74it/s]Loading weights:  49%|████▉     | 144/292 [00:02<00:02, 66.73it/s]Loading weights:  53%|█████▎    | 156/292 [00:02<00:02, 63.94it/s]Loading weights:  58%|█████▊    | 170/292 [00:02<00:01, 74.40it/s]Loading weights:  62%|██████▏   | 182/292 [00:03<00:01, 72.89it/s]Loading weights:  66%|██████▋   | 194/292 [00:03<00:01, 70.03it/s]Loading weights:  73%|███████▎  | 212/292 [00:03<00:00, 83.35it/s]Loading weights:  76%|███████▌  | 221/292 [00:03<00:00, 79.90it/s]Loading weights:  79%|███████▉  | 230/292 [00:03<00:00, 68.62it/s]Loading weights:  83%|████████▎ | 242/292 [00:03<00:00, 70.98it/s]Loading weights:  87%|████████▋ | 254/292 [00:04<00:00, 68.28it/s]Loading weights:  93%|█████████▎| 272/292 [00:04<00:00, 75.62it/s]Loading weights:  99%|█████████▉| 290/292 [00:04<00:00, 90.45it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 65.65it/s]
+[1/12] ' the' w 0.361 | predicted S 0.71/0.08 | top_heavy 0.549b S 0.209 dw +0.311 tail_heavy 0.534b S 0.207 dw +0.301
+[2/12] ' actually' w 0.461 | predicted S 0.70/0.11 | top_heavy 0.445b S 0.356 dw +0.212 tail_heavy 0.405b S 0.409 dw +0.227
+[3/12] ' really' w 0.489 | predicted S 0.78/0.15 | top_heavy 0.403b S 0.334 dw +0.192 tail_heavy 0.402b S 0.339 dw +0.214
+[4/12] ' because' w 0.505 | predicted S 0.97/0.15 | top_heavy 0.457b S 0.458 dw +0.175 tail_heavy 0.395b S 0.467 dw +0.194
+[5/12] ' just' w 0.521 | predicted S 0.84/0.14 | top_heavy 0.411b S 0.326 dw +0.127 tail_heavy 0.515b S 0.413 dw +0.128
+[6/12] ' quite' w 0.537 | predicted S 0.79/0.14 | top_heavy 0.466b S 0.251 dw +0.087 tail_heavy 0.433b S 0.250 dw +0.134
+[7/12] ' never' w 0.562 | predicted S 0.78/0.22 | top_heavy 0.429b S 0.306 dw +0.101 tail_heavy 0.435b S 0.354 dw +0.102
+[8/12] ' well' w 0.583 | predicted S 0.90/0.22 | top_heavy 0.443b S 0.461 dw +0.103 tail_heavy 0.430b S 0.409 dw +0.100
+[9/12] ' strange' w 0.598 | predicted S 0.95/0.25 | top_heavy 0.406b S 0.432 dw +0.044 tail_heavy 0.408b S 0.458 dw +0.051
+[10/12] ' happening' w 0.611 | predicted S 0.94/0.23 | top_heavy 0.416b S 0.391 dw +0.057 tail_heavy 0.430b S 0.460 dw +0.031
+[11/12] ' nice' w 0.626 | predicted S 0.97/0.24 | top_heavy 0.412b S 0.506 dw +0.084 tail_heavy 0.405b S 0.528 dw +0.050
+[12/12] ' gone' w 0.660 | predicted S 0.95/0.24 | top_heavy 0.409b S 0.404 dw -0.015 tail_heavy 0.393b S 0.386 dw +0.022
+
+before any edit: w 0.543 +- 0.083
+top_heavy  : 0.422 bits, S = 0.369+-0.089, step 2.39, w 0.666+-0.023 (dw +0.123), rho(before, after) = -0.16 (p=0.62)
+tail_heavy : 0.419 bits, S = 0.390+-0.092, step 2.74, w 0.672+-0.020 (dw +0.129), rho(before, after) = -0.28 (p=0.38)
+paired S difference p = 0.0923; paired dw difference p = 0.3804

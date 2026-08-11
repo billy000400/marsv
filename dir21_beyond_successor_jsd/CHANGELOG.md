@@ -456,3 +456,37 @@ subspace search, since random draws give too little contrast in $S$. RESULTS.md:
 Figure 16 added, headline fragility paragraph extended with the tail-weighting number, next-experiment
 section rewritten to match, forward-pass accounting and setting line updated. `check_render.py` passes
 (REPORT 20 display eqs / 16 embeds, RESULTS 16 embeds, 0 problems).
+
+## 2026-08-11 — iteration 6: constructing the top-heavy / tail-heavy directions
+
+**New experiment.** `experiments/mode_construct.py` (+ `experiments/plot_construct.py`,
+`results/mode_construct.json`, `results/mode_construct.log`) runs the experiment the previous entry
+recommended, in its cheap form. For each of the same 12 tokens, 24 random probe directions are applied
+at displacement norm 0.6 and their logit responses are turned into a 24x24 generalised eigenproblem
+whose Rayleigh quotient IS the top-mass share $S$; the extreme eigenvectors give the $S$-maximising and
+$S$-minimising combinations in closed form (no Jacobian, ~40x cheaper than the projection version). Both
+are rescaled to the same 0.4 bits and anchor width is re-measured.
+
+**New numbers.** Predicted $S$ (small-step regime) 0.856 vs 0.179 — a 0.68 separation, 3x what 24 random
+draws span (0.21), with the top-heavy end past the mass-proportional 0.71. Achieved $S$ once rescaled to
+0.4 bits: **0.369 vs 0.390** — indistinguishable, both below the base mass, paired difference
+$p = 0.09$ and in the *wrong* direction. Output movement 0.422 vs 0.419 bits; mean $\hat w_u$ 0.666 vs
+0.672 (pre-edit 0.543 +- 0.083), sd across tokens 0.023 / 0.020; $\rho$(before, after) $= -0.16$
+($p = 0.62$) and $-0.28$ ($p = 0.38$); paired $\Delta\hat w_u$ difference $p = 0.38$.
+
+**Nothing superseded.** New result; no earlier number changed. It converts pattern 16's underpowered
+steering null into a *bounded* one — the instrument now exists and still cannot separate the arms —
+and adds the mechanistic point that the tail-weighting of a large embedding edit is set by the step
+size, not by the direction.
+
+**Deliverable changes.** REPORT.md: new Methods subsection "Can the split be steered on purpose?" (the
+Rayleigh-quotient construction with $A$/$B$ defined in a display equation, probe norm 0.6, predicted-vs-
+achieved $S$ as a test of the method); new Results **pattern 17** with **Figure 17** =
+`plots/mode_construct.png`; previous patterns 17/18/19 renumbered to 18/19/20 and the four cross-
+references updated; "Recommended next experiment" rewritten from "build the two directions" (now done,
+negative) to **component ablation in blocks 0–5** scored by how much of the across-token spread in
+$\hat w_u$ each component destroys — the first intervention that is not an embedding edit; forward-pass
+accounting 1.5M -> 1.6M and runtime 4h -> 4.5h. RESULTS.md: headline fragility paragraph extended with
+the constructed-direction result, Figure 17 and its table added, next-experiment section rewritten to
+match, setting line updated. `check_render.py` passes (REPORT 21 display eqs / 17 embeds, RESULTS 17
+embeds, 0 problems).

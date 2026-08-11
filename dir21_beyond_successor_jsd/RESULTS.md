@@ -6,8 +6,8 @@
 position, 1,000 token pairs from 123 endpoint tokens × 3 sentence frames × 50 interpolation steps
 (pair artifacts inherited from `dir18`; the per-token probes, the forward screen, the anchor-set swap,
 the layer sweep, the embedding probe, the vocabulary test, the frame-shape control, the two
-embedding interventions, the displacement-norm ladder and the mode split are new inference on the same model and hook
-point, ~1.5M forward passes). Transition width `w` = fraction of the path over
+embedding interventions, the displacement-norm ladder and the two mode-split experiments are new inference on the same model and
+hook point, ~1.6M forward passes). Transition width `w` = fraction of the path over
 which the output-distance score `d(t)` climbs from 0.1 to 0.9; smaller = narrower. Analyses run on the
 **929 pairs** whose endpoint output movement is at least 0.2 bits in every frame.
 
@@ -55,7 +55,11 @@ The level of `w` follows the displacement; the ordering — the part a screen us
 edit does to the model. Splitting that output change by successor token shows the disruption is
 tail-weighted: the token's 32 most likely successors hold 0.71 of its probability mass but absorb only
 0.389 of the divergence a loud edit produces, so the behaviour whose loss coincides with the trait's
-collapse is not mainly the behaviour corpus successor JSD scores.
+collapse is not mainly the behaviour corpus successor JSD scores. That tail-weighting cannot be
+steered away: directions **constructed** to put 0.86 versus 0.18 of the divergence on the top
+successors both land at $S \approx 0.38$ once grown to the 0.4 bits at which width responds, and both
+erase the ordering ($\rho = -0.16$ and $-0.28$). The trait belongs to the token's whole output map, not
+to an identifiable slice of its next-token distribution.
 
 **The trait is real; the measuring stick is not neutral.** Swapping the six anchors for six function
 words or six rare content words still recovers the fitted token effect ($\rho = +0.57$ and $+0.61$),
@@ -446,16 +450,41 @@ displacement norm 1.8, triangles = most top-heavy and squares = most tail-heavy 
 after the edit (y) against $\hat w_u$ before it (x) for the two selected edits, rank agreement with the
 pre-edit ordering in the legend; dotted line = no change.
 
+Whether that split can be steered on purpose — directions built from a generalised eigenproblem rather
+than drawn at random:
+
+![Predicted versus achieved top-mass share for constructed top-heavy and tail-heavy edits, and anchor width before versus after each edit](plots/mode_construct.png)
+
+**Figure 17.** Twelve tokens, the same as Figures 14–16. Left: top-mass share $S$ (y, fraction of the
+output change landing on the token's 32 most likely successors) per token (x, token strings); open
+markers = $S$ predicted for a small step (the generalised eigenvalues), filled markers = $S$ actually
+achieved once the same direction is rescaled to 0.4 bits, joined by a dotted line; triangles =
+$S$-maximising ("top-heavy"), squares = $S$-minimising ("tail-heavy"); gray band = the range 24 random
+directions span; dash-dotted line = the mass those 32 successors hold before any edit (0.71). Right:
+$\hat w_u$ after the edit (y) against $\hat w_u$ before it (x); dotted line = no change.
+
+| edit rescaled to 0.4 bits (12 tokens) | predicted $S$ (small step) | achieved $S$ | bits | mean $\hat w_u$ | sd | $\rho$(before, after) |
+|---|---|---|---|---|---|---|
+| *before any edit* | \- | \- | \- | *0.543* | *0.083* | \- |
+| constructed top-heavy | **0.856** | 0.369 | 0.422 | 0.666 | 0.023 | $-0.16$ ($p = 0.62$) |
+| constructed tail-heavy | **0.179** | 0.390 | 0.419 | 0.672 | 0.020 | $-0.28$ ($p = 0.38$) |
+
+The construction reaches a 0.68 separation in predicted $S$, three times what 24 random draws supply,
+and it survives none of the way to a behaviourally meaningful step: the tail-weighting of a large
+embedding edit is set by the step size, not by the direction. So the top-mass hypothesis is untestable
+by embedding edits, and both arms agree on the outcome that matters — any disturbance the model
+registers erases the token ordering wherever in the distribution it lands.
+
 ## Next experiment
 
-**Build the top-heavy and tail-heavy directions instead of drawing them.** The mode split showed the
-damage is tail-weighted but could not steer it: random directions span only $S = 0.36$-$0.56$, so the
-matched-movement comparison had too little contrast to decide anything. Construct the two edits
-directly — project the output-logit response to an embedding edit onto the span of the top-32
-successors' unembedding rows and onto its complement, or search a modest random subspace for the
-combination maximising and minimising $S$ — rescale both to 0.4 bits, and re-measure $\hat w_u$. If a
-genuinely top-heavy edit ($S > 0.8$) preserves the token ordering where a tail-heavy one destroys it,
-the trait lives in the tail of the next-token distribution and no corpus-side estimator built on
-high-mass successors can reach it. If both still erase it, the trait belongs to the token's whole
-output map, and the static-embedding lookup is the right level of description. About 24 anchor-width
-measurements per token for 12 tokens, plus the subspace search.
+**Ablate components, not embeddings — find which computation reads the trait.** Embedding edits have
+now given all they can: the trait is behavioural (Figure 15), the damage is tail-weighted (Figure 16),
+and the split cannot be steered at a step the model feels (Figure 17). The layer sweep shows which
+tokens are narrow is fixed at the input while the sharpening comes from the blocks below the
+interpolation site, so the per-token effect must be carried by a small number of early components. For
+the same 12 tokens, mean-ablate one attention head or one MLP at a time in blocks 0–5, re-measure
+$\hat w_u$ against the six anchors, and score each component by how much of the across-token spread it
+destroys. A component whose removal collapses the spread while leaving the output largely intact would
+localise the trait mechanistically; a flat profile would say it is genuinely distributed and leave the
+static-embedding lookup as the practical deliverable. Cost: 12 tokens x 6 anchors x 3 frames per
+component, ~40 components — about four times the last experiment's budget.
