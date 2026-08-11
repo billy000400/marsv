@@ -558,3 +558,45 @@ noise (+0.74/−0.32, −0.10/−0.76; SE(rho) ≈ 0.3 at n = 12) and are report
 width trait is realised in the block-0 MLP's contribution to the final-position residual stream, and
 level (spread) versus ordering are separate channels — disturbance of any kind compresses the level,
 only the block-0 MLP erases the ordering.
+
+## 2026-08-11 — iteration 9 (final): Conclusion brought up to the current-best story; direction closed
+
+**No new experiment.** Time budget exhausted; this iteration is finalization only. All plan stages
+S1–S5 are complete and every experiment S5 recommended has been run through the block-0 MLP
+dose–response (iteration 8). Zero unaddressed `human_feedback*.md` / `*REVIEW*` files in this
+direction (checked at iteration start), so writing `STOP` is permitted under CLAUDE.md rule 11.
+
+**Deliverable changes (REPORT.md only; RESULTS.md was already current-best and is unchanged).**
+- REPORT.md Conclusion contained a stale claim that iteration 7–8's results had superseded:
+  "What each token carries is the shape of its transition, and we cannot yet say what in the network
+  produces it." The Summary and Results already carried the ablation + dose–response localisation, so
+  the Conclusion contradicted the rest of the report. Old → new: that clause is cut, and a new
+  Conclusion paragraph states the localisation — 101 of 102 early components leave the token ordering
+  intact (median rho = +0.99, every head >= +0.97); only the block-0 MLP collapses the spread
+  (0.084 → 0.018) and erases the ordering (rho = −0.10); the matched-bits dose–response breaks the
+  loudness confound (at 0.014 bits, rho = +0.64 MLP vs +0.91 control; ~3.5x more output movement
+  needed by the control for equal damage), with the across-token spread collapsing identically in both
+  arms. Level and ordering named as separate channels; the probe/transplant follow-up named.
+- REPORT.md Limitations gains the dose–response caveat: 12 tokens, one frame, one random-control seed,
+  and both arms at noise above 0.25 bits (SE(rho) ≈ 0.3 at n = 12), so the localisation rests on the
+  four rungs between 0.007 and 0.103 bits.
+- No figure added or removed; figure count stays 19 in both files, numbering unchanged.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 23 display eqs / 522 inline eqs / 19 embeds / 0 problems; RESULTS 319 inline eqs / 19 embeds /
+0 problems).
+
+**Final state of the deliverable.** Headline chain, current-best: corpus successor JSD explains
+held-out R^2 = 0.149 of transition width against a 0.934 reproducibility ceiling; a per-token additive
+term takes it to 0.578 and alone reaches 0.365; the per-token number is measurable from six unpaired
+anchors (rho = +0.70 with the fitted effect, 2 parameters matching 123); frozen into a screen it
+predicts 718 pairs of 40 unseen tokens at R^2 = 0.397 / rho = +0.66 / MAE 0.047; it is readable from
+the static embedding (probe rho = +0.76, zero-forward-pass screen R^2 = 0.213) and holds outside the
+curated pool (rho = +0.60 on 32 tokens from four excluded classes) and across four context shapes
+(rho +0.84 … +0.50 vs +0.82 for two original frames); the trait is behavioural, not positional
+(quiet vs loud edits at displacement 1.8: rho +0.94 vs +0.08); and it is realised in the block-0 MLP's
+contribution to the final-position residual stream (dose–response vs an output-matched control).
+Negative results retained: basin radius refuted, path-length normalisation refuted, probe direction is
+not a width lever, top-mass steering untestable by embedding edits.
+
+**STOP written.** Plan complete, no unaddressed feedback.

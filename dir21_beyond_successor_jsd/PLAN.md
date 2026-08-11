@@ -46,7 +46,22 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-11, iteration 8)
+## Current status (2026-08-11, iteration 9 — COMPLETE, STOP written)
+
+**The direction is finished.** All stages S1–S5 are done, every required output is delivered, both
+deliverables pass `check_render.py`, and no unaddressed `human_feedback*.md` / `*REVIEW*` file remains.
+Iteration 9 ran no new experiment (time budget exhausted): it repaired REPORT.md's Conclusion, which
+still carried the pre-iteration-7 claim that the network mechanism was unknown, and added the
+dose–response caveat to Limitations. RESULTS.md was already current-best and unchanged.
+
+**Next step (only if reopened):** the experiment both deliverables name — ridge-probe the block-0 MLP's
+final-position output $m_u$ for the measured anchor width (held-out, shuffled-target control) over the
+123 endpoint tokens, and transplant $m_u$ from a narrow token onto a wide token's forward pass. Probe
+beating the embedding probe's $\rho = +0.76$ plus a transplant that moves the recipient toward the donor
+makes the trait a readable vector; both null marks the block-0 MLP a necessary stage rather than the
+store. Cost ~123 forwards + ~12 transplants.
+
+### Record of what was established (iteration 8 status, retained)
 
 S1-S5 all have a pass, and the experiment S5 recommended has been run. **Main finding:** the leftover
 after corpus successor JSD is a per-token additive trait — held-out R^2 0.149 (JSD) -> 0.578 (JSD + one
@@ -156,7 +171,7 @@ LEVEL compression is a pure disturbance effect and only the ORDERING singles out
 positive mechanistic localisation: the trait is realised in the block-0 MLP's contribution to the
 final-position residual stream.
 
-**Next step:** stop destroying, start reading. Fit a ridge probe from the block-0 MLP's final-position
+**Recommended follow-up (carried into the status block above):** stop destroying, start reading. Fit a ridge probe from the block-0 MLP's final-position
 output m_u to the measured anchor width (held-out, shuffled-target control) over the 123 endpoint
 tokens, and transplant m_u from a narrow token onto a wide token's forward pass. Probe beats the
 embedding probe's rho = +0.76 and the transplant moves the recipient toward the donor -> the trait is a

@@ -602,3 +602,58 @@ deliverable.
 On track? yes — S1-S5 complete, sixteen experiments run and reported, the recommended experiment from
 the last iteration executed and answered positively with the confound broken, deliverables current-best
 and render-checked, no unaddressed feedback, no blocker.
+
+## 2026-08-11 — iteration 9 (final): finalization, Conclusion repair, STOP
+
+**Feedback check first (CLAUDE.md Part C).** `ls` of the direction root for `human_feedback*.md` and
+`*REVIEW*` without the `.addressed.md` suffix: none present. So rule 11's bar for writing `STOP` is
+met, and no feedback work was owed this iteration.
+
+**What I did.** ~23 minutes of wall-clock remained at iteration start, which is the finalization band,
+so I ran no new experiment. I read PLAN.md, RESULTS.md and the CHANGELOG tail, then audited both
+deliverables against the current evidence rather than assuming iteration 8 had left them consistent.
+
+RESULTS.md was already current-best end to end — headline, all thirteen result tables, all 19 embedded
+figures with visible numbered captions, and a "Next experiment" section already rewritten to the
+probe/transplant ask. I changed nothing in it, which is the right call under rule 6: curating does not
+mean rewriting a file that is already correct.
+
+REPORT.md was not consistent. Its Summary and Results carried the iteration 7–8 localisation (component
+ablation, then the matched-bits dose–response), but the Conclusion still ended the mechanism discussion
+with "we cannot yet say what in the network produces it" — a sentence that was true through iteration 6
+and false afterwards. A reader who read only the Conclusion would have taken away the opposite of the
+report's strongest finding. I cut that clause, added a Conclusion paragraph carrying the localisation
+with its numbers (101/102 components leave the ordering intact, median rho = +0.99; block-0 MLP alone
+collapses spread 0.084 → 0.018 and ordering to rho = −0.10; dose–response separates carrier from
+loudness at +0.64 vs +0.91 at 0.014 bits, ~3.5x more movement needed by the control), and stated the
+level-vs-ordering split plus the probe/transplant follow-up. I also added the matching caveat to
+Limitations (12 tokens, one frame, one control seed, both arms at noise above 0.25 bits).
+
+**Verification.** `check_render.py REPORT.md RESULTS.md` passes: REPORT 23 display equations, 522
+inline, 19 embeds, 0 problems; RESULTS 319 inline, 19 embeds, 0 problems. That covers rules 8a–8c,
+rule 12's embed check, rule 9a's prose-above-table check and rule 9d's contrast budget.
+
+**What I learned this iteration.** The specific failure mode worth recording: when a direction adds
+results iteration by iteration, the Summary gets updated (it is where the new finding feels like it
+belongs) and the Conclusion silently rots, because nothing forces a diff between them. A stale
+Conclusion is worse than a missing one — it actively contradicts the report. Checking Summary against
+Conclusion for contradictions should be a standing finalization step, not something noticed by luck.
+
+**Final state.** The direction answers its core question. The leftover after corpus successor JSD is
+mostly a per-token additive trait; that trait is measurable from unpaired anchors, transfers to unseen
+tokens as a frozen screen (R^2 = 0.397), is largely readable free from the static embedding
+(R^2 = 0.213, no forward pass), survives changes of token class and context shape in its ordering
+though not its level, is behavioural rather than positional, and is realised in the block-0 MLP.
+Four mechanisms were tested and refuted (basin radius, path-length normalisation, the probe direction
+as a width lever, top-mass steering), which is recorded as evidence rather than dropped.
+
+**Next step if the direction were reopened.** The single experiment named in both deliverables: fit a
+ridge probe from the block-0 MLP's final-position output m_u to the measured anchor width with the
+embedding probe's held-out protocol, and transplant m_u from a narrow token onto a wide token's forward
+pass. Probe beating rho = +0.76 plus a transplant that moves the recipient toward the donor would make
+the trait a readable vector; both null would mark the block-0 MLP a necessary stage rather than the
+store, leaving the static-embedding lookup as the practical deliverable. Cost is ~123 forwards plus
+~12 transplants — cheaper than iteration 8.
+
+**On track?** Yes — complete. All stages S1–S5 done, every required output delivered, deliverables
+verified rendering-clean and mutually consistent, no unaddressed feedback, `STOP` written.

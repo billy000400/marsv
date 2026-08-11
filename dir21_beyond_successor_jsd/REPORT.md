@@ -1419,7 +1419,7 @@ is real but the anchor set is part of the method. A pair-specific remainder surv
 and is partly endpoint geometry. And the mechanism we set out to test — a basin of output insensitivity around each
 token whose size sets the width — does not hold up: radius along random directions is unrelated to the
 token effect, and along anchor directions it points the wrong way. What each token carries is the shape
-of its transition, and we cannot yet say what in the network produces it. Editing a token's embedding
+of its transition. Editing a token's embedding
 along the probe's own direction, by a step the probe says should change width by 0.05, moves the
 measured width by 0.003 with no consistent sign — but that edit shifts the model's output by only
 0.0001 bits, so it says nothing on its own. Re-running the edit with the step grown until the model's
@@ -1437,6 +1437,24 @@ the ordering at $\rho = +0.94$, while the loud direction at the identical norm m
 and drops to $\rho = +0.08$. Narrow transitions are fragile, but they are a behavioural property, not a
 positional one: an edit the model does not feel does not take them away. The deflationary explanation,
 that narrow transitions are just fixed-size transitions on long paths, is refuted.
+
+Leaving embedding space finally locates the trait in the computation. Mean-ablating each of the 102
+attention heads and MLPs in blocks 0–5 one at a time leaves the token ordering intact in 101 cases
+(median $\rho = +0.99$, every head $\ge +0.97$), which narrows the search from 102 candidate components
+to one: the block-0 MLP, whose removal collapses the across-token spread from 0.084 to 0.018 and leaves
+$\rho = -0.10$. Because that is also the only early component the model noticeably feels (0.451 bits
+against $\le 0.007$ for every other), the sweep alone could not separate a carrier from a merely loud
+component, so we softened the ablation into a dose and gave every dose a random perturbation of the
+same residual stream matched bit-for-bit on output movement. At every dose in the survivable band
+0.007–0.103 bits the MLP arm loses more rank agreement than its matched control (at 0.014 bits,
+$\rho = +0.64$ against $+0.91$); the MLP crosses $\rho = 0.6$ at about 0.03 bits and the control only at
+about 0.10, so a random disturbance needs roughly 3.5× more output movement to do the same damage.
+The across-token *spread*, meanwhile, collapses along an identical trajectory in both arms. Level and
+ordering are separate channels: any disturbance flattens the level, and the block-0 MLP specifically
+carries the ordering. This is the direction's one positive mechanistic localisation, and it agrees with
+the layer sweep — the ordering is fixed at the input, and the earliest nonlinear stage is where it is
+realised. The natural next step is to read that component rather than break it: probe the block-0 MLP's
+final-position output for $\hat w_u$, and transplant it from a narrow token onto a wide one.
 
 **Limitations.** One model, one hook point (after block 0) and one checkpoint. The pair bank, the
 fitted token effects and both screens rest on three sentence frames of a single shape, so
@@ -1459,5 +1477,9 @@ carry wide intervals. The ladder's quiet direction is the quietest of 24 random 
 direction that exists, so it bounds how much of the trait a behaviour-preserving edit can keep from
 below; and at norm 1.8 it still moves the output by 0.049 bits, so "quiet" there means 8× quieter than
 the loud direction, not silent. `w` describes movement along the $z_u \to z_v$ direction only, so a pair whose logits
-move sideways would be scored as flat. The 0.2-bit movement gate is a judgement call: it keeps 929 of
+move sideways would be scored as flat. The ablation sweep and the dose–response share those 12 tokens,
+one frame and a single random-control seed, and above 0.25 bits both dose arms sit at noise
+(SE($\rho$) $\approx 0.3$ at $n = 12$), so the localisation rests on the four rungs between 0.007 and
+0.103 bits and should be replicated with more tokens and seeds before it is treated as settled. The
+0.2-bit movement gate is a judgement call: it keeps 929 of
 1,000 pairs, and the headline correlation is reported both with and without it.
