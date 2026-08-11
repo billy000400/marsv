@@ -293,3 +293,86 @@ MLP response) if both directions then move width equally. RESULTS.md: interventi
 setting line, and the new next-experiment section.
 
 No earlier number superseded. `check_render.py` passes (17 display eqs, 13 embeds + captions per file).
+
+## 2026-08-11 (iteration 3) — the behaviour-calibrated intervention: the trait is fragile, not steerable
+
+Ran the experiment the previous iteration recommended (`experiments/embed_intervene2.py`,
+`experiments/plot_intervene2.py`). For 12 tokens spanning the measured-width range, the embedding edit
+is no longer sized by the probe's own prediction but grown along a unit direction until the token's
+next-token distribution has moved a fixed number of bits (0.05 / 0.1 / 0.2), in BOTH signs, with a
+random unit direction calibrated to the SAME output movement as the control — 144 re-measurements.
+Calibration fidelity: achieved / requested output movement median 1.00 (IQR 0.91-1.05).
+
+| edit along | mean abs dw at 0.05/0.1/0.2 bits | signed dw, + / - step (0.05 bits) | median step norm | edits that widen |
+|---|---|---|---|---|
+| probe direction | 0.103 / 0.130 / 0.148 | +0.118 / +0.088 | 1.01 | 72/72 |
+| random, matched on output movement | 0.109 / 0.125 / 0.135 | +0.109 / +0.109 | 1.62 | 72/72 |
+
+Probe vs random on matched edits 0.127 vs 0.123 (Wilcoxon p = 0.47, probe larger in 53%); regression of
+measured on probe-predicted dw: slope -0.002, rho = +0.06 (p = 0.61). After a 0.2-bit edit the 12
+tokens land at mean w_hat 0.691 (probe) / 0.678 (random) with sd across tokens 0.022 / 0.015, against
+mean 0.543 sd 0.083 before; rho(base w_hat, dw) = -0.78 (probe) / -0.94 (random). Reaching a given
+output movement takes a smaller step along the probe direction (norm ratio 1.54 / 1.66 / 1.76), and the
+larger random displacements (median edited row norm 1.90 vs 1.40) still land at the same width, so the
+collapse is indexed by output movement rather than by how far the row moved.
+
+**Conclusion reported.** The previous iteration's null WAS a step-size null — width moves fifty times
+more once the edit is behaviourally real (0.003 -> 0.10-0.15 width units) — but the specificity test
+fails completely: no single embedding direction is a lever, and every behaviourally sized edit destroys
+the token's width trait, leaving it at a generic ~0.68. Narrow transitions are a fragile property of the
+exact embedding training produced.
+
+**Deliverable changes.** REPORT.md: new Methods subsection "The behaviour-calibrated intervention"
+(with the calibration equation); new Results pattern 14 with **Figure 14** (`plots/intervene2.png`); old
+patterns 14-16 renumbered 15-17 with cross-references updated; Summary paragraph on the open mechanism
+rewritten around the collapse result; Conclusion rewritten in the same place; forward-pass accounting
+1.2M -> 1.3M. Recommended next experiment changed from the behaviour-calibrated intervention (now run)
+to a **behaviour-preserving displacement**: step the embedding row by the norm a 0.2-bit edit needed but
+along directions whose output shift stays under 0.005 bits, and see whether w_hat survives — deciding
+whether the trait is behavioural or geometric, which also decides what the free vocabulary lookup is
+reading. RESULTS.md: two new tables (calibrated intervention, and where the edited tokens land),
+Figure 14, a new headline paragraph, the setting line, and the new next-experiment section.
+
+No earlier number superseded; the probe-calibrated intervention is retained as the test of the probe's
+own quantitative claim, explicitly framed as the loophole this experiment closes. `check_render.py`
+passes (18 display eqs, 14 embeds + captions per file).
+
+## 2026-08-11 (iteration 3, second step) — the fixed-displacement test: the collapse follows the move, not the model's response
+
+Ran `experiments/embed_quiet.py` + `experiments/plot_quiet.py` (Figure 15) to separate the two readings
+of the collapse. For each of the same 12 tokens, 48 random directions were probed at a step of 0.05
+(the linear regime) and the logit responses stacked into a matrix whose left singular vectors give the
+loudest and quietest combinations; the token was then displaced by the SAME norm its own 0.2-bit edit
+required (median 1.84) along the quietest, the loudest and one plain random direction.
+
+| direction, same displacement norm per token | output movement produced | mean dw | mean w_hat after | sd across tokens |
+|---|---|---|---|---|
+| (before any edit) | - | - | 0.543 | 0.083 |
+| quietest of 48 combinations | 0.181 bits | +0.132 | 0.675 | 0.019 |
+| loudest of 48 combinations | 0.261 bits | +0.105 | 0.648 | 0.039 |
+| plain random direction | 0.165 bits | +0.132 | 0.675 | 0.026 |
+
+Across the 36 edits, rho(output movement, dw) = +0.074 (p = 0.67) over a 0.03-0.77 bit range, while the
+collapse reproduces in all three directions. Post-edit widths still correlate with the originals at
+rho = +0.62 (p = 0.03). **Reported limitation:** the "quiet" construction is not quiet at this
+displacement (0.181 vs 0.165 bits for a random direction) — the linear response at eps = 0.05 does not
+survive a step of norm 1.84 — so the behaviour-preserving version of the test was not achieved.
+
+**Superseded numbers.** The previous entry's claim that the collapse "is indexed by output movement
+rather than by how far the row moved" (inferred from probe steps of norm 1.40 landing at 0.691 against
+random steps of norm 1.90 landing at 0.678) is **withdrawn**: at fixed displacement norm the width
+change does not track output movement at all (rho = +0.07, p = 0.67). The corrected statement is that
+the landing width is insensitive to what the edit does to the model over this range, and what matters
+is that a displacement of this size happened. Also corrected: "destroys the trait" -> "compresses the
+trait", since the post-edit ranking still agrees with the original (rho = +0.73 / +0.85 after a
+0.05-bit edit, +0.57 / +0.36 after a 0.2-bit one, +0.62 in this run).
+
+**Deliverable changes.** REPORT.md: new Methods subsection "The fixed-displacement test" (with the
+response-matrix equation); new Results pattern 15 with **Figure 15** (`plots/quiet.png`); patterns
+15-17 renumbered 16-18 with cross-references updated; pattern 14, the Summary and the Conclusion
+corrected as above; Limitations extended with the 12-token sample size and the failed quiet
+construction; forward-pass accounting 1.3M -> 1.4M. Recommended next experiment changed to **a ladder
+of displacement norms (0.1 to 1.0) with the quiet/loud combinations rebuilt at each**, to find the
+norm at which the two separate. RESULTS.md: fixed-displacement table, Figure 15, headline paragraph
+and next-experiment section updated the same way. `check_render.py` passes (19 display eqs, 15 embeds
++ captions per file).

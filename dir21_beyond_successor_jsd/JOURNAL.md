@@ -306,3 +306,92 @@ response, which the layer sweep says is where the ordering is already fixed.
 
 On track? yes — S1-S5 complete, nine experiments run and reported (two of them nulls, both reported as
 such), deliverables current-best and render-checked, no blocker.
+
+## 2026-08-11 — iteration 3: the behaviour-calibrated intervention (the null was a step-size null)
+
+**Did.** Ran the experiment the previous iteration recommended (`embed_intervene2.py` +
+`plot_intervene2.py`, Figure 14): 12 tokens, embedding edits grown along the probe direction until the
+token's next-token distribution moves 0.05 / 0.1 / 0.2 bits, both signs, with a random direction
+calibrated to the SAME output movement as the control (144 re-measurements). Folded into both
+deliverables; `check_render.py` passes.
+
+**Learned.** Three things, and the third is the one worth keeping. (1) The previous null WAS a step-size
+null: width moves 0.10-0.15 width units once the edit is behaviourally real, against 0.003 before —
+fifty times more. (2) The specificity test nonetheless fails in every way available: random directions
+matched on output movement move width just as much (0.123 vs 0.127, Wilcoxon p = 0.47), the probe's
+signed prediction has slope -0.002, and all 144 edits widen although the probe predicts opposite signs
+for opposite steps. (3) The positive finding: the edits do not slide tokens along a width axis, they
+COLLAPSE the trait — after a 0.2-bit edit the 12 tokens sit at mean w_hat 0.68 with sd 0.02 across
+tokens, against 0.543 +- 0.083 before, and the narrowest tokens move furthest (rho = -0.78 / -0.94).
+Narrowness is a fragile property of the exact trained embedding. Two side facts sharpen this: the probe
+direction needs a 1.5-1.8x smaller step to reach a given output movement (so it is behaviourally
+special, just not for width), and the larger random displacements (edited row norm 1.90 vs 1.40) land
+at the same width, so the collapse is indexed by output movement rather than by geometric displacement
+— which is what makes the next experiment the right one.
+
+**Process note.** The first launch of the run silently started a second copy (a `cd X && nohup ... &`
+compound backgrounded the `cd` too, so my follow-up `tail` looked in the wrong directory and I assumed
+nothing had started). Two processes then raced on the same output JSON. Caught it by comparing the
+per-token count in the JSON against the log, killed both, and re-ran clean — the reported numbers come
+from a single clean run.
+
+**Assumption logged (loop mode).** Calibrated by scanning a geometric ladder of step norms and
+interpolating in log-log rather than bisecting each target separately: one scan serves all three
+budgets per direction and the achieved / requested ratio came out at median 1.00 (IQR 0.91-1.05), so
+the extra accuracy of per-target bisection would have bought nothing for ~3x the calibration cost.
+Rejected also: dropping the probe-calibrated intervention from the deliverables as superseded. It tests
+a different claim (the probe's own quantitative prediction, off by 20x) and it is what motivates this
+experiment's design, so it stays, framed as the loophole this run closes rather than as history.
+
+**Next step.** Displace the embedding row a long way while keeping the model's output fixed: for each
+token search directions whose output shift stays under 0.005 bits, take a step of the same norm a
+0.2-bit edit needed (a displacement pattern 14 says should collapse width), and re-measure w_hat. Width
+surviving => the trait is a function of the behaviour the embedding induces, and the search moves to
+which output modes the token activates; width collapsing anyway => the trait is tied to the embedding's
+exact location, and the free vocabulary-wide lookup is reading a geometric accident rather than a
+behavioural property, which is a caveat an auditor using the table would need.
+
+On track? yes — S1-S5 complete, ten experiments run and reported (three of them nulls, all reported as
+such, and this one turned its null into the direction's clearest causal statement), deliverables
+current-best and render-checked, no blocker.
+
+## 2026-08-11 — iteration 3, second step: the fixed-displacement test (and a correction)
+
+**Did.** Ran the experiment the first step recommended, in the form the budget allowed
+(`embed_quiet.py` + `plot_quiet.py`, Figure 15): hold the displacement norm fixed at the value each
+token's 0.2-bit edit needed, and vary how loudly the model responds to the direction taken — quietest
+and loudest combinations of 48 probed directions (from the SVD of their logit responses at a step of
+0.05), plus a plain random direction.
+
+**Learned.** Two things, one of which corrects yesterday's write-up. (1) The construction fails at this
+scale: the "quiet" direction moves the output by 0.181 bits against a random direction's 0.165, because
+the linear response measured at a 0.05 step does not survive a step of norm 1.84. I reported that as a
+limitation of the test rather than quietly dropping it. (2) The decoupling still works as an
+observation: at fixed displacement norm the width change is flat in the output movement actually
+produced (rho = +0.07, p = 0.67, over 0.03-0.77 bits), while the collapse reproduces in all three
+directions (mean w_hat 0.648-0.675, sd 0.019-0.039 against 0.543 +- 0.083). That **withdraws** the
+claim I wrote in the first step, that the landing point is indexed by output movement rather than
+displacement — it was inferred from probe-vs-random step norms in a run where norm and bits moved
+together, and this run decouples them and finds no bits effect. Corrected in REPORT.md, RESULTS.md and
+CHANGELOG.md. I also checked the post-edit ranking, which I should have checked yesterday: it partly
+survives (rho = +0.62 here; +0.73/+0.85 after a 0.05-bit edit and +0.57/+0.36 after a 0.2-bit one in
+the calibrated run), so "destroys the trait" became "compresses the trait, leaving a residual ordering"
+everywhere it appeared.
+
+**Assumption logged (loop mode).** Built the quiet/loud directions from a 48-direction random subspace
+rather than the full 2048-dimensional Jacobian: the full Jacobian needs 2048 forward passes per token
+per frame, roughly 40x the budget, and the subspace version was expected to give a usable contrast. It
+did give a contrast in the linear regime but not at the displacement used, which is exactly the
+limitation now reported and what makes the norm ladder the right next experiment. Rejected: rerunning
+immediately at smaller norms this iteration — that is a full experiment, not a patch, and the time left
+was better spent making the correction propagate cleanly through both deliverables.
+
+**Next step.** Run the quiet-versus-loud contrast on a ladder of displacement norms (0.1 to 1.0),
+rebuilding the two combinations at each norm, and plot w_hat against norm for both. The separation
+point (if any) decides whether width is a function of the behaviour the embedding induces or of the
+embedding's exact location — and therefore whether the free vocabulary-wide lookup is reading a
+behavioural property or a geometric accident, which is the caveat that matters for using it as an
+auditing table.
+
+On track? yes — S1-S5 complete, eleven experiments run and reported, one earlier claim withdrawn and
+corrected in place, deliverables current-best and render-checked, no blocker.

@@ -1,0 +1,25 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  15%|█▌        | 44/292 [00:00<00:00, 411.74it/s]Loading weights:  45%|████▌     | 132/292 [00:00<00:00, 655.78it/s]Loading weights:  75%|███████▍  | 218/292 [00:00<00:00, 740.34it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 734.95it/s]
+probe direction: alpha=0.1, ||g||=0.7091; a unit step changes the probe's prediction by 0.709 width units (median embedding row norm 0.9837)
+[1/12] ' the' base w 0.361 | probe +0.05b->+0.278 +0.10b->+0.332 +0.20b->+0.326 -0.05b->+0.166 -0.10b->+0.245 -0.20b->+0.315
+[2/12] ' actually' base w 0.461 | probe +0.05b->+0.164 +0.10b->+0.207 +0.20b->+0.248 -0.05b->+0.171 -0.10b->+0.185 -0.20b->+0.171
+[3/12] ' really' base w 0.489 | probe +0.05b->+0.176 +0.10b->+0.211 +0.20b->+0.239 -0.05b->+0.138 -0.10b->+0.155 -0.20b->+0.158
+[4/12] ' because' base w 0.505 | probe +0.05b->+0.131 +0.10b->+0.176 +0.20b->+0.230 -0.05b->+0.101 -0.10b->+0.114 -0.20b->+0.114
+[5/12] ' just' base w 0.521 | probe +0.05b->+0.145 +0.10b->+0.185 +0.20b->+0.218 -0.05b->+0.112 -0.10b->+0.105 -0.20b->+0.091
+[6/12] ' quite' base w 0.537 | probe +0.05b->+0.116 +0.10b->+0.146 +0.20b->+0.165 -0.05b->+0.056 -0.10b->+0.105 -0.20b->+0.136
+[7/12] ' never' base w 0.562 | probe +0.05b->+0.063 +0.10b->+0.088 +0.20b->+0.117 -0.05b->+0.098 -0.10b->+0.100 -0.20b->+0.104
+[8/12] ' well' base w 0.583 | probe +0.05b->+0.042 +0.10b->+0.060 +0.20b->+0.091 -0.05b->+0.036 -0.10b->+0.048 -0.20b->+0.076
+[9/12] ' strange' base w 0.598 | probe +0.05b->+0.112 +0.10b->+0.143 +0.20b->+0.151 -0.05b->+0.060 -0.10b->+0.079 -0.20b->+0.100
+[10/12] ' happening' base w 0.611 | probe +0.05b->+0.076 +0.10b->+0.105 +0.20b->+0.119 -0.05b->+0.036 -0.10b->+0.069 -0.20b->+0.080
+[11/12] ' nice' base w 0.626 | probe +0.05b->+0.040 +0.10b->+0.066 +0.20b->+0.124 -0.05b->+0.040 -0.10b->+0.050 -0.20b->+0.052
+[12/12] ' gone' base w 0.660 | probe +0.05b->+0.071 +0.10b->+0.095 +0.20b->+0.098 -0.05b->+0.038 -0.10b->+0.045 -0.20b->+0.036
+probe  : median step norm 1.006 (row norm 0.984), median output shift 0.093 bits, mean |dw| 0.1269, sign agreement 0.50
+    0.05 bits: |dw| 0.1028, dw(+) +0.1177, dw(-) +0.0878, step 0.873
+    0.10 bits: |dw| 0.1298, dw(+) +0.1512, dw(-) +0.1084, step 1.003
+    0.20 bits: |dw| 0.1482, dw(+) +0.1772, dw(-) +0.1192, step 1.147
+random : median step norm 1.620 (row norm 0.984), median output shift 0.101 bits, mean |dw| 0.1229, sign agreement 0.50
+    0.05 bits: |dw| 0.1086, dw(+) +0.1086, dw(-) +0.1087, step 1.347
+    0.10 bits: |dw| 0.1252, dw(+) +0.1207, dw(-) +0.1297, step 1.670
+    0.20 bits: |dw| 0.1349, dw(+) +0.1238, dw(-) +0.1461, step 2.022
+probe slope vs its own prediction -0.0020, rho +0.061 (p=6.1e-01)
+|dw| probe / random = 1.03, probe larger in 0.53 of matched pairs

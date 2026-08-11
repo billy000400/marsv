@@ -1,0 +1,21 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<07:40,  1.58s/it]Loading weights:  21%|██        | 60/292 [00:01<00:05, 45.18it/s]Loading weights:  26%|██▋       | 77/292 [00:02<00:04, 50.28it/s]Loading weights:  31%|███       | 90/292 [00:02<00:03, 58.62it/s]Loading weights:  35%|███▌      | 103/292 [00:02<00:03, 57.44it/s]Loading weights:  39%|███▊      | 113/292 [00:02<00:03, 54.06it/s]Loading weights:  41%|████▏     | 121/292 [00:02<00:03, 51.55it/s]Loading weights:  45%|████▌     | 132/292 [00:02<00:02, 56.93it/s]Loading weights:  48%|████▊     | 140/292 [00:03<00:02, 60.15it/s]Loading weights:  51%|█████     | 148/292 [00:03<00:03, 47.54it/s]Loading weights:  54%|█████▍    | 158/292 [00:03<00:02, 51.58it/s]Loading weights:  57%|█████▋    | 165/292 [00:03<00:02, 54.48it/s]Loading weights:  60%|██████    | 176/292 [00:03<00:01, 60.95it/s]Loading weights:  64%|██████▍   | 188/292 [00:03<00:01, 64.52it/s]Loading weights:  67%|██████▋   | 195/292 [00:04<00:01, 62.01it/s]Loading weights:  69%|██████▉   | 202/292 [00:04<00:01, 62.70it/s]Loading weights:  72%|███████▏  | 209/292 [00:04<00:01, 63.99it/s]Loading weights:  74%|███████▍  | 216/292 [00:04<00:01, 63.77it/s]Loading weights:  77%|███████▋  | 224/292 [00:04<00:01, 55.80it/s]Loading weights:  79%|███████▉  | 230/292 [00:04<00:01, 44.61it/s]Loading weights:  86%|████████▋ | 252/292 [00:05<00:00, 59.90it/s]Loading weights:  91%|█████████ | 266/292 [00:05<00:00, 72.32it/s]Loading weights:  95%|█████████▍| 276/292 [00:05<00:00, 69.63it/s]Loading weights:  99%|█████████▊| 288/292 [00:05<00:00, 78.53it/s]Loading weights: 100%|██████████| 292/292 [00:05<00:00, 53.59it/s]
+[1/12] ' the' base w 0.361 step 1.78 | quiet 0.190b->+0.300 loud 0.211b->+0.307 random 0.118b->+0.278
+[2/12] ' actually' base w 0.461 step 1.89 | quiet 0.194b->+0.188 loud 0.104b->+0.170 random 0.309b->+0.210
+[3/12] ' really' base w 0.489 step 2.73 | quiet 0.347b->+0.169 loud 0.461b->+0.091 random 0.768b->+0.147
+[4/12] ' because' base w 0.505 step 1.94 | quiet 0.283b->+0.183 loud 0.434b->+0.205 random 0.088b->+0.154
+[5/12] ' just' base w 0.521 step 1.69 | quiet 0.120b->+0.156 loud 0.037b->+0.089 random 0.074b->+0.164
+[6/12] ' quite' base w 0.537 step 1.56 | quiet 0.086b->+0.135 loud 0.383b->+0.116 random 0.138b->+0.153
+[7/12] ' never' base w 0.562 step 1.42 | quiet 0.298b->+0.108 loud 0.396b->+0.085 random 0.175b->+0.099
+[8/12] ' well' base w 0.583 step 1.50 | quiet 0.113b->+0.064 loud 0.061b->+0.024 random 0.216b->+0.084
+[9/12] ' strange' base w 0.598 step 2.49 | quiet 0.093b->+0.098 loud 0.057b->+0.085 random 0.155b->+0.075
+[10/12] ' happening' base w 0.611 step 1.80 | quiet 0.173b->+0.092 loud 0.256b->+0.048 random 0.135b->+0.113
+[11/12] ' nice' base w 0.626 step 2.47 | quiet 0.091b->+0.063 loud 0.289b->-0.001 random 0.253b->+0.054
+[12/12] ' gone' base w 0.660 step 2.43 | quiet 0.189b->+0.033 loud 0.266b->+0.040 random 0.250b->+0.055
+
+same displacement norm (median 1.84) for all three directions
+before any edit: mean w 0.543, sd across tokens 0.083
+  quiet  : output shift 0.1812 bits, mean dw +0.1324, mean w 0.675, sd across tokens 0.019, rho(base w, w after) +0.657 (p=2.0e-02)
+  loud   : output shift 0.2614 bits, mean dw +0.1050, mean w 0.648, sd across tokens 0.039, rho(base w, w after) +0.168 (p=6.0e-01)
+  random : output shift 0.1651 bits, mean dw +0.1322, mean w 0.675, sd across tokens 0.026, rho(base w, w after) +0.685 (p=1.4e-02)
+rho(output shift, dw) over all 36 edits: +0.074 (p=6.7e-01)

@@ -46,7 +46,7 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-10)
+## Current status (2026-08-11)
 
 S1-S5 all have a pass, and the experiment S5 recommended has been run. **Main finding:** the leftover
 after corpus successor JSD is a per-token additive trait — held-out R^2 0.149 (JSD) -> 0.578 (JSD + one
@@ -91,14 +91,34 @@ keeps the token ranking at rho = +0.844 (mid-sentence), +0.770 (question), +0.73
 The embedding intervention has since been run, and is a NULL: editing a token's embedding row along the
 probe's gradient by a step the probe says should move width by +-0.05 moves the measured width by
 0.0027 on average (slope -0.023, sign agreement 0.39); a matched-norm random direction moves it 0.0008.
-The direction that predicts width does not set it. Caveat that defines the follow-up: the edits shifted
-the model's output by only 0.0001 bits, so the test never reached a behaviourally meaningful regime.
+The direction that predicts width does not set it. Caveat that defined the follow-up: the edits shifted
+the model's output by only 0.0001 bits, so that test never reached a behaviourally meaningful regime.
 
-**Next step:** repeat the intervention with the step calibrated on the MODEL — grow it along the probe
-direction until the token's next-token distribution moves 0.05 / 0.1 / 0.2 bits, measure width at each,
-keep the matched-norm random control. Width moving along the probe direction only => a lever, and this
-null was a step-size artifact. Both moving equally => no single embedding direction carries the trait,
-and the search moves to block 0's attention pattern and MLP response.
+The behaviour-calibrated intervention has since been run, and it converts the null into the direction's
+clearest causal statement. With the step grown until the token's output moves 0.05 / 0.1 / 0.2 bits,
+width moves 0.10-0.15 units (fifty times more, so the earlier null was a step-size null) — but a random
+direction matched on output movement moves it just as much (0.123 vs 0.127, Wilcoxon p = 0.47), the
+probe's signed prediction has slope -0.002, and **all 144 edits widen** where the probe predicts
+opposite signs. The edits do not steer width, they **destroy the trait**: after a 0.2-bit edit the 12
+tokens land at mean w_hat 0.68 with sd 0.02 across tokens, against 0.543 +- 0.083 before, narrowest
+tokens moving furthest (rho = -0.78 / -0.94). The probe direction is behaviourally special (1.5-1.8x
+smaller step for a given output movement) but does not carry width. The compression is strong but not
+total: the post-edit ranking still agrees with the original at rho = +0.73 / +0.85 after a 0.05-bit
+edit and +0.57 / +0.36 after a 0.2-bit one.
+
+The fixed-displacement test has since been run: at the SAME per-token displacement norm (median 1.84),
+the quietest and loudest of 48 probed direction combinations and a plain random direction all land at
+mean w_hat 0.648-0.675 (sd across tokens 0.019-0.039, against 0.543 +- 0.083 before), and the width
+change is flat in the output movement actually produced (rho = +0.07, p = 0.67, over 0.03-0.77 bits).
+This **withdraws** the earlier inference that the collapse is indexed by output movement. Limitation
+reported: the "quiet" construction is not quiet at that displacement (0.181 vs 0.165 bits for a random
+direction), because the linear response at a 0.05 step does not survive a step of norm 1.84.
+
+**Next step:** run the quiet-versus-loud contrast on a ladder of displacement norms (0.1 to 1.0),
+rebuilding both combinations at each norm, and plot w_hat against norm for the two. Separation =>
+width is a function of the behaviour the embedding induces, and the search moves to which output modes
+the token activates. No separation => the trait is tied to the embedding's exact location, and the free
+vocabulary-wide lookup is reading a geometric accident rather than a behavioural property.
 
 ## Stages
 
