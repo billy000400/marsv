@@ -620,3 +620,19 @@ most, by an amount that must be measured per model", with the three-model number
 **Figures.** Added `plots/depth_models.png` as **Figure 15** in both deliverables (A raw unablated
 $w_{TV}$ per patch block, three models; B the same as share of headroom closed). Fifteen figures
 embedded with visible numbered captions in both files; `experiments/check_render.py` passes on both.
+
+## 2026-08-11 — S16: Experiment 13, the C(b) rate is bank-dependent
+
+- **New experiment** (`experiments/bank_depth.py`, `results/bank_depth.json`, `plots/bank_depth.png`):
+  the Experiment 12 blocks 0-4 unablated sweep re-run on the S4 corpus-mined wide-JSD bank (median
+  endpoint JSD 0.59) instead of the low-JSD banks, 60 pairs x 5 sites x 2 models = 600 sweeps, worst
+  endpoint error 8.9e-5.
+- **Result added to RESULTS.md and REPORT.md as Experiment 13 + Table 17 + Figure 16.** C(4) on the
+  wide bank: gpt2-medium 17.7%, gpt2-large 16.9% (against 18.6% and 60.7% on the low-JSD banks). The
+  cross-model gap is a property of the low-divergence population; the within-model swing (gpt2-large
+  60.7% -> 16.9%) exceeds the between-model gap.
+- **Claim narrowed, not superseded.** Experiment 12's numbers are unchanged; its between-model ordering
+  is now stated as holding at matched endpoint divergence only. REPORT.md's Summary gains the same
+  qualifier ("the rate is a joint property of the model and the pair population"). The direction and
+  front-loading claims are unchanged and now hold on two banks.
+- Both deliverables pass `experiments/check_render.py` (16 embedded figures each, 0 problems).

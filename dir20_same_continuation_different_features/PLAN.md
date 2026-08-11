@@ -85,6 +85,9 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
 - [x] S14 - Turn Experiment 9's two patch sites into a curve: the identical held-out fixed head set
   ablated at five sites in gpt2-large, to locate where the effect (and the plateau) dies.
 
+- [x] S16 - Confound check on S15: re-run the blocks 0-4 unablated sweep on the S4 corpus-mined
+  wide-JSD bank, to test whether C(b) is a model property or a property of the low-JSD banks.
+
 - [x] S15 - Does the top-of-stack collapse reproduce outside gpt2-large? Blocks 0-4 in gpt2-small and
   gpt2-medium, with the unablated w_TV curve as the primary readout (the ablation delta is under-powered
   in those models).
@@ -105,7 +108,7 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S15 complete (2026-08-11). The success criterion is met and exceeded.** All 6
+**S1-S16 complete (2026-08-11). The success criterion is met and exceeded.** All 6
 hand-picked pairs validate in all five models, a 200-pair-per-model corpus-mined bank carries the
 association test in five models, that bank has been re-run at three patch sites in the 24-block models
 and at four/five sites in the depth-mismatched GPT-2 models, a dedicated low-JSD bank (365/399/356
@@ -222,6 +225,14 @@ largest single step, but the share of each model's own block-0 headroom closed a
 therefore a gpt2-large statement; the general claim is that the top blocks matter most by a model-specific
 amount. The fixed-set ablation delta was a null at 9 of 10 model-sites as predicted (only gpt2-medium
 block 0, +0.011, CI [+0.004, +0.017]), which is why the unablated curve carries the claim.
+
+**S16 outcome.** S15's "rate is model-specific" claim is narrowed: it holds among low-JSD pairs only.
+On the wide-JSD corpus-mined bank the two models close the same share of headroom after four blocks
+(gpt2-medium 17.7%, gpt2-large 16.9%, against 18.6% and 60.7% on the low-JSD banks), and it is
+gpt2-large that moves, not gpt2-medium. High-divergence pairs start much sharper (median w_TV 0.042 /
+0.094 at block 0), so they carry more headroom and give up a smaller share per block. The direction
+(monotone widening) and the front-loading (first block removed is the largest step) hold on both banks
+in both models, so those carry the mechanism claim.
 
 ## Next step
 

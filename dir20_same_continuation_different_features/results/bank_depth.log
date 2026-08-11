@@ -1,0 +1,37 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  32%|███▏      | 93/292 [00:00<00:00, 927.64it/s]Loading weights:  68%|██████▊   | 198/292 [00:00<00:00, 975.04it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 978.39it/s]
+gpt2-medium: 60 pairs, 24 blocks, sites [0, 1, 2, 3, 4]
+    L0 pair 0/60
+    L0 pair 30/60
+gpt2-medium 0 0.09426342678283528
+    L1 pair 0/60
+    L1 pair 30/60
+gpt2-medium 1 0.10480735016760159
+    L2 pair 0/60
+    L2 pair 30/60
+gpt2-medium 2 0.12488931148587193
+    L3 pair 0/60
+    L3 pair 30/60
+gpt2-medium 3 0.14672566533947853
+    L4 pair 0/60
+    L4 pair 30/60
+gpt2-medium 4 0.16595283009209133
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  20%|██        | 88/436 [00:00<00:00, 854.18it/s]Loading weights:  40%|███▉      | 174/436 [00:00<00:00, 705.04it/s]Loading weights:  57%|█████▋    | 247/436 [00:00<00:00, 685.86it/s]Loading weights:  74%|███████▎  | 321/436 [00:00<00:00, 693.60it/s]Loading weights:  90%|████████▉ | 391/436 [00:00<00:00, 687.70it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 721.25it/s]
+gpt2-large: 60 pairs, 36 blocks, sites [0, 1, 2, 3, 4]
+    L0 pair 0/60
+    L0 pair 30/60
+gpt2-large 0 0.042006163442314476
+    L1 pair 0/60
+    L1 pair 30/60
+gpt2-large 1 0.06666651816943278
+    L2 pair 0/60
+    L2 pair 30/60
+gpt2-large 2 0.08331270687393663
+    L3 pair 0/60
+    L3 pair 30/60
+gpt2-large 3 0.09890800304563893
+    L4 pair 0/60
+    L4 pair 30/60
+gpt2-large 4 0.11931428760500734
+wrote plots/bank_depth.png

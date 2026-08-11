@@ -722,3 +722,40 @@ On track? yes — S15 bounded the generality of S14's mechanism claim in the dir
 (shape general, rate model-specific) and corrected the Summary's scope; both deliverables are curated
 to current-best with fifteen captioned figures and pass `check_render.py`; no unaddressed feedback and
 no STOP.
+
+---
+## 2026-08-11 (S16: is gpt2-medium's shallow rate a model property or a bank property?)
+
+**Feedback check.** Listed the direction root: only `human_feedback.txt.addressed.md`, already
+suffixed. Nothing unaddressed.
+
+**What I did.** Took the cheap follow-up S15 flagged rather than the big open design question (pairs
+differing at an earlier position), because ~30 min of wall-clock left made a new mining + sweep design
+unsafe. Wrote `experiments/bank_depth.py`: the identical blocks 0-4 unablated sweep of S15, run on the
+S4 corpus-mined bank (full JSD range) instead of the per-model low-JSD banks, in gpt2-medium and
+gpt2-large. 600 sweeps, ~4 min GPU.
+
+**What I learned.** The S15 headline needed narrowing. C(4) on the wide bank is 17.7% (medium) and
+16.9% (large) — the 19-point, threefold gap of S15 is gone. And it is gpt2-large that moves (60.7% ->
+16.9%), not gpt2-medium (18.6% -> 17.7%). Mechanically: high-divergence pairs are far sharper at block 0
+(median w_TV 0.042 / 0.094 vs 0.189 / 0.252), so they carry more headroom and surrender a smaller share
+of it per block removed. The two claims I most wanted to be general — monotone widening, and the first
+block removed being the biggest step — hold on both banks in both models, so those are what the report
+now leans on. Lesson: a normalised cross-model statistic can be a statement about the mined population
+rather than the model, and the cheapest way to find out is to re-run it on a differently-mined bank.
+
+**Assumptions logged (loop mode).** (1) Unablated readout only — S15 already showed the ablation delta
+is a null at 9/10 model-sites, and the confound question is about the switch, not the circuit.
+(2) gpt2-medium and gpt2-large only: gpt2-small has no S4 wide bank in `results/`, and mining one was
+out of time budget. (3) 60 pairs evenly spaced through the bank, matching S14/S15's subsample rule.
+(4) Experiment 12 kept in full rather than replaced — its numbers are correct for its population, and
+Experiment 13 is a scope statement about them, not a stronger measurement of the same thing (rule 6
+would require replacement only if it were the latter).
+
+**Next step.** Unchanged and still the largest open item: pairs that differ at an *earlier* position
+rather than the final token. A smaller one this iteration created: mine a wide-JSD bank for gpt2-small
+so Experiment 13 covers all three models.
+
+On track? yes — S16 caught and fixed an over-general claim in the previous iteration's headline at a
+cost of 4 GPU-minutes; both deliverables are curated to current-best with sixteen captioned figures and
+pass `check_render.py`; no unaddressed feedback and no STOP written.
