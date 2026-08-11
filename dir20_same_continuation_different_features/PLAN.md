@@ -79,6 +79,9 @@ A linear response has width 0.8; call `w10-90 < 0.5` a clear plateau. Always sho
   ablation with the patch at a relative-depth-matched middle block in all three models, and add the
   block-0 fixed-set run for gpt2-small that S11 skipped.
 
+- [x] S13 - Vary the one design choice the whole report shares: append a shared continuation after the
+  differing token so the readout sits 1/2/4 positions downstream, and re-sweep.
+
 ## Required outputs
 
 - `plots/final_logit_curves.png`: 4 x 2 grid of raw \(d(\alpha)\) curves, plus \(d=\alpha\).
@@ -95,13 +98,15 @@ Training models, checkpoint sweeps, full-sequence interpolation, training-corpus
 
 ## Current status
 
-**S1-S12 complete (2026-08-11). The success criterion is met and exceeded.** All 6
+**S1-S13 complete (2026-08-11). The success criterion is met and exceeded.** All 6
 hand-picked pairs validate in all five models, a 200-pair-per-model corpus-mined bank carries the
 association test in five models, that bank has been re-run at three patch sites in the 24-block models
 and at four/five sites in the depth-mismatched GPT-2 models, a dedicated low-JSD bank (365/399/356
 pairs) carries the hypothesis test, that bank has been re-swept under six ablation conditions in all
 three GPT-2 models, and a held-out fixed head set has been ablated at two patch sites per model on 4836
-more sweeps — 16306 sweeps in total, endpoint identity error <= 3.6e-4 throughout.
+more sweeps, and a shared-continuation re-sweep at four readout offsets adds 900 — 17206 sweeps in
+total, endpoint identity error <= 3.6e-4 throughout except in S13, where the manipulation drives the two
+endpoints to near-coincidence and the bound is 2.1e-3.
 
 **Verdict.** Matthew's contrast reproduces in his own model (gpt2-large) and not in gpt2-medium;
 relative depth governs plateau strength; the base rate of plateaus among arbitrary pairs is high
@@ -181,10 +186,19 @@ that gpt2-large's advantage belongs to that patch site, not to the model. gpt2-s
 run (+0.015, p = 1.6e-3) completes the three-model comparison, and recounting the stored sets corrected
 gpt2-large's fixed-set block-0 membership from five heads to seven.
 
+**S13 outcome.** The plateau does not depend on the interpolated token being the last token. Appending
+the model's own greedy continuation to both prompts (s = 0/1/2/4) moves the readout downstream, where the
+patched activation is reachable only through attention, and the median w_TV is unchanged in all three
+GPT-2 models: 0.148 -> 0.193 (gpt2-large, paired delta +0.001, p = 0.65), 0.252 -> 0.284 (medium,
+p = 0.11), 0.311 -> 0.303 (small, p = 0.60). The same suffix collapses endpoint JSD 15-16x
+(0.0499 -> 0.0034 in gpt2-large), so S3's across-pair divergence-sharpness correlation does NOT hold
+within a pair: divergence is a marker of feature disjointness, not the driver of sharpness.
+
 ## Next step
 
-S13: pairs differing at an *earlier* position rather than the final token — the one design choice the
-whole report shares and never varies. Cheaper alternative if GPU time is short: sweep two or three
-intermediate patch sites in gpt2-large to locate where the fixed-set effect dies, turning Experiment 9's
-two points into a curve. Both deliverables are current, pass `experiments/check_render.py`, and embed
-all twelve figures with visible captions cited by number.
+S14: turn Experiment 9's two patch sites into a curve — sweep three or four intermediate sites in
+gpt2-large to locate where the fixed-set head effect dies. The longer-suffix extension of S13 is blocked
+on conditioning, not GPU: past s ~ 4 the two endpoints are too close for the normalised distance d(alpha)
+to be well defined, so it needs a different readout (e.g. KL to each endpoint distribution). Both
+deliverables are current, pass `experiments/check_render.py`, and embed all thirteen figures with visible
+captions cited by number.

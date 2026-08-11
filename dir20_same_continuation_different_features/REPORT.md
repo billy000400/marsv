@@ -64,6 +64,15 @@ by 94%, to a small but solid $+0.012$. Interpolation sharpness is thus about the
 about the depth that processes them — which matters for anyone reading a plateau as evidence about
 downstream mechanism.
 
+**None of this needs the interpolated token to be the last one.** Every sweep above patches the final
+token of the prompt and reads the very next distribution, so a sharp switch could be an artifact of that
+shortcut. Appending the model's own continuation to both prompts moves the readout up to four positions
+downstream, where the patched activation is reachable only through attention, and the median transition
+width does not move (GPT-2 Large $w_{TV}$ $0.148 \to 0.193$, paired $\Delta = +0.001$, $p = 0.65$; the
+same null in the other two models). Those four shared tokens shrink the two prompts' output divergence
+15-fold, which is the more interesting half: endpoint divergence correlates with sharpness across pairs
+but does not set it within a pair.
+
 **Depth and circuit are not two ingredients but one compound.** Repeating that fixed-set ablation with
 the patch moved to the middle of each stack, everything else identical, takes GPT-2 Large's effect from
 $+0.187$ to $-0.002$ and leaves nothing measurable in the other two models. At the mid-stack site the
@@ -211,7 +220,27 @@ on the low-JSD banks of Experiment 6 (365 pairs from 102 prefixes in GPT-2 Small
 Medium, 356 from 113 in GPT-2 Large). Experiment 7 re-runs all 1120 low-JSD sweeps under six ablation
 conditions each, for 6720 more; Experiment 8 adds 1111 held-out fixed-set sweeps; and Experiment 9 adds
 3725 (365 block-0 sweeps for GPT-2 Small's missing fixed set, plus three conditions over each model's
-whole low-JSD bank at the mid-stack patch) — 16306 in total.
+whole low-JSD bank at the mid-stack patch). Experiment 10 re-sweeps a subsample of each low-JSD bank
+(120 pairs in GPT-2 Small, 60 in GPT-2 Medium, 45 in GPT-2 Large, evenly spaced over the bank) at four
+suffix lengths, 900 more — 17206 in total.
+
+**Shared-continuation prompts (Experiment 10).** Every other experiment puts the differing token last,
+so the interpolated activation sits in the residual stream position that produces the readout. To move
+it off that position we append the model's own greedy continuation of the A prompt, $\sigma$, of length
+$s \in \lbrace 0,1,2,4 \rbrace$ tokens, to *both* prompts:
+
+```math
+A = \text{prefix} + [a] + \sigma, \qquad B = \text{prefix} + [b] + \sigma, \qquad
+\sigma = \text{greedy}_s(\text{prefix} + [a]).
+```
+
+The patch is still applied to the differing position's block-0 `resid_post`, and $d(\alpha)$ is still
+read at the final logits, which now sit $s$ tokens downstream. $s = 0$ is the original design and
+reproduces the stored sweeps exactly. Because a shared continuation drives the two endpoint logit
+vectors to within $10^{-3}$ of each other, and float32 matmul kernels differ with batch shape, the two
+endpoint references are computed inside the identical batched forward path as the swept rows; this
+keeps the endpoint reproduction error at or below $2.1\times10^{-3}$, two orders of magnitude under the
+endpoint separation.
 
 ### Metrics
 
@@ -519,7 +548,7 @@ $d(0)=0$ and $d(1)=1$ exactly. Deviation from this measures implementation error
 ## Results
 
 **The harness is correct.** All 6 hand-written pairs tokenized validly in all five models, and across
-all 16306 sweeps the patched runs at the endpoints reproduced the clean forward passes to
+all 17206 sweeps the patched runs at the endpoints reproduced the clean forward passes to
 $|d(0)| \le 3.6 \times 10^{-4}$ and $|d(1) - 1| \le 3.6 \times 10^{-4}$. The numbers below are about
 the models, not about patching artifacts.
 
@@ -1157,6 +1186,58 @@ its size; and at the mid patch every fixed-set head in GPT-2 Large and GPT-2 Sma
 patch, so all of them are endpoint-only there — which is not what limits the effect, since the seven
 block-0 heads that carry most of the block-0 result are endpoint-only too.
 
+### The plateau does not depend on the interpolated token being the last one
+
+Every result so far shares a design choice that never varies: the differing token is the prompt's last
+token, and the readout is the very next distribution. A sharp switch could therefore be a property of
+that shortcut — the patched vector never has to travel anywhere. It also leaves the Experiment 3
+regularity ambiguous, because endpoint divergence has only ever been compared *across* pairs, never
+manipulated within one. Both are answered by appending the model's own greedy continuation to both
+prompts (Methods) so the readout sits $s$ tokens downstream and can reach the patched activation only
+through attention. The pairs are re-swept as a paired design, so each row compares the same pairs.
+
+| Model | $n$ | median $w_{TV}$, $s{=}0$ | $s{=}1$ | $s{=}2$ | $s{=}4$ | paired $\Delta$ ($s{=}4$ vs $0$) | 95% CI | $p$ | % sharp $s{=}0 \to 4$ | median endpoint JSD $s{=}0 \to 4$ |
+|---|---|---|---|---|---|---|---|---|---|---|
+| gpt2-small | 120 | 0.311 | 0.293 | 0.338 | 0.303 | $-0.003$ | $[-0.042, +0.040]$ | $0.60$ | 25.8% → 28.3% | 0.0378 → 0.0024 |
+| gpt2-medium | 60 | 0.252 | 0.257 | 0.266 | 0.284 | $+0.019$ | $[-0.014, +0.055]$ | $0.11$ | 48.3% → 45.0% | 0.0344 → 0.0021 |
+| gpt2-large | 45 | 0.148 | 0.172 | 0.159 | 0.193 | $+0.001$ | $[-0.015, +0.026]$ | $0.65$ | 60.0% → 53.3% | 0.0499 → 0.0034 |
+
+**The switch survives the move in all three models**, and GPT-2 Large's curve stays far sharper than the
+others ($0.193$ against the linear response's $0.5$). At $n = 45$ its paired interval is $\pm 0.02$
+wide, small against the $0.15 \to 0.5$ range the metric spans, so this is a tight null rather than a
+shortage of power. The plateau is a property of how the network resolves an interpolated activation into
+a downstream computation, and every conclusion in this report survives relaxing the design choice they
+all share.
+
+**What the invariance runs against is the more informative half.** Four tokens of agreed-on continuation
+almost erase the disagreement the differing token created: median endpoint divergence falls 15–16-fold,
+$0.050 \to 0.0034$ nats in GPT-2 Large and $0.038 \to 0.0024$ in GPT-2 Small. The transition width does
+not follow it down. Experiment 3's across-pair regularity — divergent endpoints, sharp switches — breaks
+as soon as divergence is manipulated inside a pair, which tells us endpoint divergence is a marker of
+some other property of the pair rather than the quantity that sets sharpness. Experiment 6's feature
+measurements say what that property is: how disjoint the two prompts' engaged features are. This is the
+report's one within-pair manipulation of divergence, and it is what turns a correlation into a claim
+about what does and does not cause the switch.
+
+Figure 13 puts the invariance and the collapse side by side, with the mean switch curves for context.
+
+![Median transition width, endpoint divergence and mean switch curves against suffix length in three GPT-2 models](plots/offset_position.png)
+
+**Figure 13.** The switch is unchanged when the interpolated token stops being the last token, even
+though the two prompts' outputs nearly merge. **A** — x: suffix length $s$, the number of shared tokens
+appended after the differing token ($s = 0$ is the design used everywhere else); y: median $w_{TV}$ over
+the swept pairs, smaller = sharper switch, bars = 95% bootstrap over pairs; gray dashed = the linear
+response $w_{TV} = 0.5$. **B** — same x; y (log scale): median Jensen–Shannon divergence in nats between
+the two complete prompts' next-token distributions at the final position. **C** — x: interpolation
+position $\alpha$; y: mean relative distance $d(\alpha)$ over the swept pairs, solid = $s = 0$, dotted
+= $s = 4$, gray dashed = the linear response $d = \alpha$. In all panels gpt2-small is circles/solid,
+gpt2-medium squares/dashed, gpt2-large triangles/dotted.
+
+Two caveats. The two larger models are swept on evenly spaced subsamples of their banks to fit the
+compute budget, so their $s = 0$ medians differ from the full-bank values quoted elsewhere; all
+comparisons are paired within the subsample. And the shared continuation is natural text for prompt A
+and imposed on prompt B, which is the price of holding it identical across the two.
+
 ## Conclusion
 
 The reported plateau is real in the model it was reported in. In GPT-2 Large, interpolating one token's
@@ -1210,6 +1291,14 @@ compress what they wrote. For practice this is a scope condition worth stating p
 study of this kind is interpretable only at a patch site where the unablated curve plateaus, and the
 same experiment run one third of the way up the stack would have returned a clean null and taught
 nothing about the circuit.
+
+Two design choices that the whole report shares turn out to matter very differently. Patching the last
+token is not one of them: appending a shared continuation and reading the logits four positions later
+leaves every transition width statistically unchanged, so the probe is not measuring an artifact of its
+own readout position. Endpoint divergence is the one that does not survive scrutiny — the same shared
+continuation shrinks it 15-fold within a pair while the switch stays exactly as sharp, so the
+across-pair correlation between divergence and sharpness is a symptom of how disjoint the two prompts'
+features are, not a cause of the plateau.
 
 **Limitations.** The intervention's heads are selected per pair by the same statistic that defines HCD,
 so it shows the measured construct is load-bearing rather than validating an independently-discovered

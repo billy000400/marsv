@@ -464,3 +464,42 @@ mid-stack patch, both as no-ablation / matched-control / fixed-set bars per mode
 against relative depth on a symlog axis with cluster-bootstrap intervals). Twelve figures embedded with
 visible numbered captions in both files, each cited by number; `experiments/check_render.py` passes on
 both.
+
+---
+## 2026-08-11 (S13) — the plateau does not depend on the interpolated token being the last token
+
+**New experiment.** `experiments/offset_position.py` (+ `experiments/analyze_offset.py`): the model's
+own greedy continuation of the A prompt, $s \in \lbrace 0,1,2,4 \rbrace$ tokens, is appended to *both*
+prompts of each low-JSD pair; the block-0 SLERP patch stays at the differing position and the logits are
+read $s$ tokens downstream. Evenly spaced subsamples of each bank (120 / 60 / 45 pairs in gpt2-small /
+-medium / -large) at four suffix lengths: 900 new sweeps. $s = 0$ reproduces the stored `lowjsd_*` sweeps
+with a maximum $w_{TV}$ difference of exactly 0 — the harness check for this experiment.
+
+**New result 1 — the switch is invariant to the readout position (Table 14, Figure 13A/C).** Paired
+median $w_{TV}$, $s{=}0 \to s{=}4$: gpt2-large $0.148 \to 0.193$ ($\Delta = +0.001$, CI
+$[-0.015,+0.026]$, $p = 0.65$), gpt2-medium $0.252 \to 0.284$ ($+0.019$, $p = 0.11$), gpt2-small
+$0.311 \to 0.303$ ($-0.003$, $p = 0.60$). Percent sharp $60.0 \to 53.3$ / $48.3 \to 45.0$ /
+$25.8 \to 28.3$. This removes the one methodological escape route the whole report shared.
+
+**New result 2 — endpoint divergence does not set sharpness within a pair (Figure 13B).** The shared
+continuation collapses median endpoint JSD 15–16-fold ($0.0499 \to 0.0034$ gpt2-large, $0.0344 \to
+0.0021$ gpt2-medium, $0.0378 \to 0.0024$ gpt2-small) with no matching change in width. Experiment 3's
+across-pair regularity is therefore demoted from a candidate driver to a marker of feature disjointness
+(Experiment 6), stated in RESULTS.md's Experiment 10, REPORT.md's new Results subsection and Conclusion.
+
+**Superseded numbers.** Sweep total 16306 -> 17206 (Methods and the harness-check sentence in both
+files). The report-wide endpoint identity bound $3.6\times10^{-4}$ now carries a stated exception: for
+$s > 0$ the two endpoint logit vectors come within $10^{-3}$ of each other and the bound is
+$2.1\times10^{-3}$. Endpoint references for this experiment are computed inside the identical batched
+forward path as the swept rows, because float32 kernels vary with batch shape; with batch-1 references
+the same sweeps gave errors up to $9.8\times10^{-1}$ on near-degenerate endpoints.
+
+**Story change (rule 9b).** No reversal, one demotion and one strengthening. Endpoint divergence moves
+from "a descriptive regularity that tracks sharpness" to "a marker, not the quantity that sets
+sharpness", on the strength of the first within-pair manipulation in the report. The last-token design
+is promoted from an unexamined assumption to a tested and discharged one.
+
+**Figures.** Added `plots/offset_position.png` as **Figure 13** in both deliverables (A median $w_{TV}$
+vs suffix length with bootstrap intervals, B endpoint JSD collapse on a log axis, C mean switch curves
+at $s = 0$ and $s = 4$). Thirteen figures embedded with visible numbered captions in both files, each
+cited by number; `experiments/check_render.py` passes on both.

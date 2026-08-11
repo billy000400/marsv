@@ -554,3 +554,54 @@ On track? yes — S12 delivered a contingency result that changes the report's f
 confirming it, plus a corrected count; both deliverables are curated to current-best with twelve
 captioned figures and pass `check_render.py`; no unaddressed feedback, and no STOP because the
 earlier-position question is still open and the loop has time to spend on it.
+
+---
+## 2026-08-11 (S13: does the plateau need the differing token to be last?)
+
+**Feedback check.** Listed the direction root first: the only matching file is
+`human_feedback.txt.addressed.md`, already suffixed. Nothing unaddressed; no STOP written (see below).
+
+**What I did.** `experiments/offset_position.py` + `experiments/analyze_offset.py`, ~35 min of GPU.
+Appended the model's own greedy continuation of the A prompt to *both* prompts of each low-JSD pair at
+four suffix lengths, kept the block-0 patch at the differing position, and read the logits downstream.
+900 sweeps across three GPT-2 models.
+
+**What I learned.**
+- The plateau does not care where the readout sits. Four tokens downstream, reachable only through
+  attention, the median transition width is statistically unchanged in all three models (gpt2-large
+  $0.148 \to 0.193$, $p = 0.65$). That discharges the assumption every experiment in this report shares.
+- The better result was the one I did not go looking for: the shared continuation collapses endpoint
+  divergence 15–16-fold while the width stays put. Experiment 3's across-pair correlation between
+  divergence and sharpness therefore does not hold within a pair, so divergence is a marker of feature
+  disjointness rather than the driver. That is the report's first within-pair manipulation of the
+  quantity, and it changes how Experiment 3 should be read.
+- **A numerics trap that would have produced a fake result.** The first run reported endpoint identity
+  errors up to $9.8\times10^{-1}$. Not a bug in the patch: with a shared suffix the two endpoint logit
+  vectors come within $10^{-3}$, and the clean references were computed at batch 1 while the sweep runs
+  at batch 32, so batch-shape-dependent float32 kernel differences were comparable to the signal in
+  $d(\alpha)$. Recomputing the references inside the identical batched path (and padding every chunk to
+  a constant batch shape) took the worst error to $2.1\times10^{-3}$. Worth remembering whenever a
+  normalised distance has a denominator that can be driven to zero by the manipulation itself.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. The shared continuation is A's greedy continuation, not B's and not corpus text — it keeps the text
+   natural for at least one member of the pair and is deterministic. Rejected: sampling a continuation
+   (adds a seed-dependent nuisance), and using a fixed neutral string (unnatural after every prefix).
+2. Suffix lengths 0/1/2/4 rather than a longer sweep: by $s = 4$ endpoint divergence has already fallen
+   16-fold, so longer suffixes mostly test numerical precision, not mechanism.
+3. Subsampled banks (120 / 60 / 45) rather than all 365–399 pairs, because the concurrent-agent GPU
+   share made the full sweep infeasible in the remaining wall clock. The design is paired and the
+   resulting interval on gpt2-large is $\pm 0.02$ against a $0.15 \to 0.5$ range, which is tight enough
+   for the null to mean something. Stated as a caveat in both deliverables.
+4. Read out only at the final logits, not at intermediate positions' residuals, keeping the primary
+   metric identical to the rest of the report.
+
+**Next step.** The obvious extension is a suffix long enough to test whether the switch eventually
+dissolves, but the numerics above set the real limit — past $s \approx 4$ the endpoints are too close
+for $d(\alpha)$ to be well conditioned, so a longer sweep needs a different readout (e.g. the KL between
+the swept and endpoint distributions rather than a normalised logit distance). Also still untouched:
+sweeping intermediate patch sites in gpt2-large to turn Experiment 9's two points into a curve.
+
+On track? yes — S13 discharged the report's one shared design assumption and demoted the endpoint-
+divergence story with a within-pair manipulation; both deliverables are curated to current-best with
+thirteen captioned figures and pass `check_render.py`; no unaddressed feedback and no STOP.

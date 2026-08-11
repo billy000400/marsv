@@ -1,0 +1,11 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 7091.21it/s]
+  gpt2-medium pair 0/60
+  gpt2-medium pair 20/60
+  gpt2-medium pair 40/60
+gpt2-medium s=0: n=60 median w_TV=0.252 sharp=48.3% median JSD_final=0.0344
+gpt2-medium s=1: n=60 median w_TV=0.257 sharp=35.0% median JSD_final=0.0131
+gpt2-medium s=2: n=60 median w_TV=0.266 sharp=35.0% median JSD_final=0.0049
+gpt2-medium s=4: n=60 median w_TV=0.284 sharp=45.0% median JSD_final=0.0021
+gpt2-medium: max endpoint err 4.87e-04
