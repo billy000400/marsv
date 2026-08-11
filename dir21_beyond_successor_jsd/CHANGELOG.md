@@ -524,3 +524,37 @@ dose–response curve against an output-movement-matched random control**. RESUL
 localisation paragraph, new ablation table + Figure 18 with the flat-profile reading spelled out, next-
 experiment section rewritten to match. `check_render.py` passes (REPORT 22 display eqs / 18 embeds,
 RESULTS 18 embeds, 0 problems).
+
+## 2026-08-11 — iteration 8: dose–response breaks the block-0 MLP confound (pattern 22)
+
+**New experiment.** `experiments/dose.py` + `experiments/plot_dose.py` → `results/dose.json`,
+`plots/dose.png`. The block-0 MLP's final-position output is blended toward its mean with weight
+alpha = 0.1 … 1; at each dose a fixed random direction added to the same residual stream is
+bisection-scaled to move the model's output by the same number of bits. Both arms are scored by
+rho(before, after) of the per-token anchor width and by the across-token sd, for the same 12 tokens,
+6 anchors and 1 frame as the ablation sweep. 56 s.
+
+**Result (new, supersedes nothing).** The arms separate where it matters. Over 0.007–0.103 bits the MLP
+dose is below its matched control at every rung (rho +0.84/+0.99, +0.64/+0.91, +0.62/+0.79,
++0.25/+0.61); the MLP arm crosses rho = 0.6 at ~0.03 bits and the control at ~0.10, i.e. a random
+disturbance needs ~3.5x more output movement for the same damage. The across-token sd collapses
+identically in both arms (0.069/0.067, 0.055/0.053, 0.027/0.026). Above 0.25 bits both arms are at
+noise (+0.74/−0.32, −0.10/−0.76; SE(rho) ≈ 0.3 at n = 12) and are reported but not interpreted.
+
+**Deliverable changes.**
+- RESULTS.md — summary bullet on the ablation updated: the confound sentence ("which is both the
+  finding and its caveat") replaced by the dose–response verdict. New subsection "Dose–response: is the
+  block-0 MLP special, or merely loud?" with the matched-bits table and **Figure 19**
+  (`plots/dose.png`). "Next experiment" rewritten: old ask (run the dose–response) → new ask (probe and
+  transplant the block-0 MLP output vector m_u).
+- REPORT.md — Summary paragraph on the ablation updated with the dose–response verdict; new Methods
+  subsection "Separating a carrier from a loud component: the matched-bits dose–response" defining
+  m_u^mlp(alpha), m_u^ctrl(c) and the bisection condition B(ctrl) = B(mlp) in a ```math fence; new
+  Results pattern 22 with the table and **Figure 19**; "Recommended next experiment" rewritten from the
+  dose–response ask to the probe/transplant ask.
+- Figure count 18 → 19 in both files. `check_render.py` passes on both (23 display eqs, 19 embeds).
+
+**Interpretation recorded.** The direction's first positive mechanistic localisation: the per-token
+width trait is realised in the block-0 MLP's contribution to the final-position residual stream, and
+level (spread) versus ordering are separate channels — disturbance of any kind compresses the level,
+only the block-0 MLP erases the ordering.

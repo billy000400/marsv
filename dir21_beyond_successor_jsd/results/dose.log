@@ -1,0 +1,20 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<06:43,  1.39s/it]Loading weights:  27%|██▋       | 78/292 [00:01<00:03, 70.52it/s]Loading weights:  39%|███▊      | 113/292 [00:02<00:02, 68.50it/s]Loading weights:  46%|████▌     | 135/292 [00:02<00:02, 65.62it/s]Loading weights:  52%|█████▏    | 151/292 [00:02<00:01, 71.27it/s]Loading weights:  57%|█████▋    | 165/292 [00:02<00:01, 73.28it/s]Loading weights:  61%|██████    | 177/292 [00:02<00:01, 66.30it/s]Loading weights:  66%|██████▌   | 192/292 [00:03<00:01, 74.48it/s]Loading weights:  70%|██████▉   | 204/292 [00:03<00:01, 77.42it/s]Loading weights:  73%|███████▎  | 214/292 [00:03<00:01, 77.29it/s]Loading weights:  77%|███████▋  | 224/292 [00:03<00:01, 67.01it/s]Loading weights:  82%|████████▏ | 240/292 [00:03<00:00, 76.27it/s]Loading weights:  85%|████████▌ | 249/292 [00:03<00:00, 70.09it/s]Loading weights:  90%|█████████ | 264/292 [00:04<00:00, 76.53it/s]Loading weights:  95%|█████████▍| 276/292 [00:04<00:00, 78.91it/s]Loading weights:  99%|█████████▉| 290/292 [00:04<00:00, 83.23it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 66.62it/s]
+baseline mean 0.565 sd 0.084 (3s)
+mlp dose 0.100: bits 0.001 rho +0.97 mean 0.585 sd 0.076 (6s)
+ctrl dose 3.331: bits 0.001 rho +0.97 mean 0.563 sd 0.084 (10s)
+mlp dose 0.200: bits 0.003 rho +0.92 mean 0.608 sd 0.071 (13s)
+ctrl dose 7.005: bits 0.003 rho +0.97 mean 0.569 sd 0.081 (16s)
+mlp dose 0.300: bits 0.007 rho +0.84 mean 0.639 sd 0.070 (19s)
+ctrl dose 11.173: bits 0.007 rho +0.99 mean 0.594 sd 0.074 (23s)
+mlp dose 0.400: bits 0.014 rho +0.64 mean 0.681 sd 0.069 (26s)
+ctrl dose 15.688: bits 0.014 rho +0.91 mean 0.639 sd 0.067 (29s)
+mlp dose 0.500: bits 0.029 rho +0.62 mean 0.730 sd 0.055 (32s)
+ctrl dose 20.755: bits 0.029 rho +0.79 mean 0.689 sd 0.053 (36s)
+mlp dose 0.650: bits 0.103 rho +0.25 mean 0.817 sd 0.027 (39s)
+ctrl dose 32.743: bits 0.103 rho +0.61 mean 0.792 sd 0.026 (42s)
+mlp dose 0.800: bits 0.265 rho +0.74 mean 0.857 sd 0.021 (46s)
+ctrl dose 49.458: bits 0.265 rho -0.32 mean 0.840 sd 0.020 (49s)
+mlp dose 1.000: bits 0.451 rho -0.10 mean 0.822 sd 0.018 (52s)
+ctrl dose 77.658: bits 0.451 rho -0.76 mean 0.826 sd 0.013 (56s)
+wrote results/dose.json

@@ -46,7 +46,7 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-11, iteration 7)
+## Current status (2026-08-11, iteration 8)
 
 S1-S5 all have a pass, and the experiment S5 recommended has been run. **Main finding:** the leftover
 after corpus successor JSD is a per-token additive trait — held-out R^2 0.149 (JSD) -> 0.578 (JSD + one
@@ -145,12 +145,23 @@ token to w_hat ~ 0.82 and erases the ordering (rho = -0.10). Confound stated in 
 also the only early component whose removal the model feels (0.451 bits vs <= 0.007 for every other),
 and 0.4 bits is the rung at which the ladder showed any disturbance flattens the ordering.
 
-**Next step:** break that confound with a dose-response. Blend the block-0 MLP's final-position output
-toward its mean with weight alpha = 0.1 ... 1, and at each alpha run a control that perturbs the same
-residual stream with a random vector rescaled to the same output movement in bits; plot rho(before,
-after) against bits for both arms. Separated curves place the trait in the block-0 MLP; coincident
-curves say disturbance as such kills it, closing the mechanistic line and leaving the static-embedding
-lookup as the practical deliverable.
+The dose-response has since been run, and it breaks that confound in the block-0 MLP's favour.
+Softening the ablation to alpha = 0.1 ... 1 and matching every dose to a random perturbation of the
+same residual stream at the SAME output movement in bits, the MLP arm is below its matched control at
+every rung of the survivable band 0.007-0.103 bits (rho +0.84/+0.99, +0.64/+0.91, +0.62/+0.79,
++0.25/+0.61): it crosses rho = 0.6 at ~0.03 bits, the control only at ~0.10, so **a random disturbance
+needs ~3.5x more output movement for the same damage**. Above 0.25 bits both arms are noise (SE(rho) ~
+0.3 at n = 12) and are not interpreted. The across-token sd collapses identically in the two arms, so
+LEVEL compression is a pure disturbance effect and only the ORDERING singles out a component. First
+positive mechanistic localisation: the trait is realised in the block-0 MLP's contribution to the
+final-position residual stream.
+
+**Next step:** stop destroying, start reading. Fit a ridge probe from the block-0 MLP's final-position
+output m_u to the measured anchor width (held-out, shuffled-target control) over the 123 endpoint
+tokens, and transplant m_u from a narrow token onto a wide token's forward pass. Probe beats the
+embedding probe's rho = +0.76 and the transplant moves the recipient toward the donor -> the trait is a
+readable vector; both null -> the block-0 MLP is a necessary stage rather than the store, and the
+static-embedding lookup stands as the practical deliverable.
 
 ## Stages
 

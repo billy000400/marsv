@@ -566,3 +566,39 @@ the static-embedding lookup stands as the deliverable.
 On track? yes — S1-S5 complete, fifteen experiments run and reported, the recommended experiment from
 the last iteration executed and answered (positively, with its confound stated), deliverables
 current-best and render-checked, no unaddressed feedback, no blocker.
+
+## 2026-08-11 — iteration 8: the confound breaks in the MLP's favour
+
+**Did.** Wrote and ran `experiments/dose.py` (56 s): blend the block-0 MLP's final-position output
+toward its mean at alpha = 0.1 … 1, and at each dose bisection-scale a fixed random direction added to
+the same residual stream until the model's output moves the same bits. Re-measured w_hat_u for the same
+12 tokens / 6 anchors / 1 frame as the ablation sweep, scored both arms by rho(before, after) and
+across-token sd, plotted both against bits (`plots/dose.png`, Figure 19). Curated both deliverables,
+render check passes.
+
+**Learned.** The curves separate in the survivable band and coincide in the destroyed one. From 0.007
+to 0.103 bits the MLP dose is below its matched random control at every rung (+0.84/+0.99, +0.64/+0.91,
++0.62/+0.79, +0.25/+0.61); crossing rho = 0.6 costs the MLP ~0.03 bits and the control ~0.10, so
+~3.5x. Above 0.25 bits both arms are noise (SE(rho) ≈ 0.3 at n = 12) and I reported those two rungs
+without interpreting them. The unexpected half is the second panel: the across-token sd collapses along
+an identical trajectory in the two arms, so LEVEL compression is a pure disturbance effect (as pattern
+15 found for embeddings) while ORDERING is what singles out the component. That distinction retro-fits
+every earlier "the edit widens everything" null — those experiments were reading the level channel.
+
+**Assumption logged (loop mode).** One random-control seed and one random direction, not an ensemble:
+the effect at the informative rungs is a factor ~3.5 in bits, far larger than the seed-to-seed spread
+the norm ladder saw across 24 directions, and time allowed 16 measurements. Matched on bits rather than
+on displacement norm, because the ladder already showed bits is the variable that governs damage.
+Rejected: matching by norm (would have reproduced the ladder's confound); rejected running three frames
+(the ablation baseline this is compared against is 1-frame, so the comparison must be too).
+
+**Next step.** Stop destroying and start reading: fit a ridge probe from the block-0 MLP's
+final-position output m_u to the measured anchor width (held-out, shuffled-target control) and
+transplant m_u from a narrow token onto a wide token's forward pass. Probe beats the embedding probe's
+rho = +0.76 and transplant moves the recipient → the trait is a readable vector; both null → the
+block-0 MLP is a necessary stage, not the store, and the static-embedding lookup stands as the
+deliverable.
+
+On track? yes — S1-S5 complete, sixteen experiments run and reported, the recommended experiment from
+the last iteration executed and answered positively with the confound broken, deliverables current-best
+and render-checked, no unaddressed feedback, no blocker.

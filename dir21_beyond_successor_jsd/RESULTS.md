@@ -67,7 +67,13 @@ untouched for 101 of them (median $\rho = +0.99$; every one of the 96 heads $\ge
 exception is the **block-0 MLP**: removing it collapses the spread across tokens from sd 0.084 to
 0.018, pushes every token to $\hat w_u \approx 0.82$ and leaves $\rho = -0.10$. It is also the only
 early component the model noticeably feels (0.451 bits of output movement, against $\le 0.007$ for
-every other component and $\le 0.0004$ for every head), which is both the finding and its caveat.
+every other component and $\le 0.0004$ for every head). A dose–response against an output-matched
+random control breaks that confound in the block-0 MLP's favour: at every dose where the ordering is
+still alive, blending the MLP toward its mean costs more rank agreement per bit than a random
+perturbation of the same residual stream matched bit-for-bit (at 0.014 bits, $\rho = +0.64$ against
+$+0.91$), and the control needs about **3.5× more output movement** to do the same damage. The
+across-token *spread*, by contrast, collapses identically in the two arms — so disturbance flattens the
+level, and the block-0 MLP specifically carries the ordering.
 
 **The trait is real; the measuring stick is not neutral.** Swapping the six anchors for six function
 words or six rare content words still recovers the fitted token effect ($\rho = +0.57$ and $+0.61$),
@@ -510,22 +516,72 @@ The profile is flat everywhere except one point, so the trait is not spread thin
 attention: no head carries a detectable share of it, and no MLP above block 0 does either. The block-0
 MLP both destroys it and is the only early component whose removal moves the model by more than
 0.01 bits — 0.451 bits, essentially the 0.4-bit rung at which the displacement ladder showed that *any*
-disturbance flattens the ordering. The two readings cannot be separated by ablation alone: either the
-block-0 MLP computes the trait, or it is simply the only single early component large enough to reach
-the regime where the trait dies. What the sweep does establish is that nothing else in blocks 0–5 is
-load-bearing, which narrows the mechanistic search from 102 components to one.
+disturbance flattens the ordering. The sweep on its own therefore establishes the negative half firmly
+(nothing else in blocks 0–5 is load-bearing, narrowing the search from 102 components to one) and
+leaves the positive half confounded by size. The dose–response below removes that confound.
+
+### Dose–response: is the block-0 MLP special, or merely loud?
+
+To separate "this component computes the trait" from "this is the only early component big enough to
+reach the lethal regime", we soften the ablation into a dose and give every dose a control that is
+exactly as loud. The MLP's final-position output is blended toward its mean with weight $\alpha$, and
+at each $\alpha$ a fixed random direction is added to the same residual stream with its scale
+binary-searched so the model's output moves the *same* number of bits. Figure 19 plots both arms in
+bits, so the comparison is at matched loudness rather than matched knob setting.
+
+![Rank agreement and across-token spread against output movement for the block-0 MLP dose and an output-matched random control](plots/dose.png)
+
+**Figure 19.** Dose–response for the block-0 MLP (solid, circles: output blended toward its mean,
+$\alpha = 0.1 \dots 1$) against a random direction added to the same residual stream and rescaled to
+the same output movement (dashed, squares). x (both panels): output movement in bits (log scale), the
+mean JSD between the perturbed and unperturbed next-token distributions of the 12 tokens. Left y: rank
+agreement $\rho$ between each token's anchor width before and after the perturbation — 1 = ordering
+intact, 0 = destroyed. Right y: sd of $\hat w_u$ across the 12 tokens; dotted line = the unperturbed
+spread 0.084. The two arms separate on the left panel and coincide on the right.
+
+| output movement (bits) | $\rho$, block-0 MLP dose | $\rho$, matched random control | sd, MLP | sd, control |
+|---|---|---|---|---|
+| 0.001 | +0.97 | +0.97 | 0.076 | 0.084 |
+| 0.003 | +0.92 | +0.97 | 0.071 | 0.081 |
+| 0.007 | +0.84 | +0.99 | 0.070 | 0.074 |
+| 0.014 | +0.64 | +0.91 | 0.069 | 0.067 |
+| 0.029 | +0.62 | +0.79 | 0.055 | 0.053 |
+| 0.103 | +0.25 | +0.61 | 0.027 | 0.026 |
+| 0.265 | +0.74 | −0.32 | 0.021 | 0.020 |
+| 0.451 | −0.10 | −0.76 | 0.018 | 0.013 |
+
+The curves separate in the regime that matters. Across the four rungs from 0.007 to 0.103 bits — the
+band where the ordering is still partly alive — the MLP dose sits below its matched control at every
+single one, and the gap is large: the MLP arm falls through $\rho = 0.6$ at roughly 0.03 bits, the
+control only at roughly 0.10, so a random disturbance needs about **3.5× more output movement** to do
+the same damage. Above 0.25 bits both arms are at noise ($\rho$ from $+0.74$ to $-0.76$, and with
+$n = 12$ tokens a single $\rho$ carries a standard error near 0.3), so the top two rungs cannot rank
+the arms and are reported but not interpreted.
+
+The second panel is the cleaner half of the result, because it shows the two effects the earlier
+experiments kept confusing. The across-token *spread* collapses along an identical trajectory in both
+arms (0.069/0.067, 0.055/0.053, 0.027/0.026 at matched bits) — pushing the residual stream around by
+any means compresses every token toward $\hat w_u \approx 0.82$, exactly as the displacement ladder
+found for embedding edits. The *ordering* does not behave that way: it survives a matched random
+disturbance and dies under the block-0 MLP dose. Level and ranking are separate channels, and only the
+ranking singles out a component.
+
+This is the direction's first positive mechanistic localisation. It is one component, one frame, one
+random-control seed and 12 tokens, and it says that the block-0 MLP's contribution to the final-position
+residual stream is where the per-token width trait is realised — consistent with the layer sweep's
+finding that the ordering is already fixed at the input and that the blocks *below* the interpolation
+site do the sharpening.
 
 ## Next experiment
 
-**Give the block-0 MLP a dose–response curve, and match it against an equally loud control.** The
-ablation sweep found exactly one candidate (Figure 18) and left exactly one confound: the block-0 MLP
-is both the component whose removal erases the trait and the only early component whose removal the
-model feels at all. Interpolate the ablation — replace the block-0 MLP's final-position output by
-$(1-\alpha)$ of itself plus $\alpha$ of its mean, for $\alpha = 0.1 \dots 1$ — and at each $\alpha$
-build a control that perturbs the same residual stream by a random vector rescaled to the *same* output
-movement in bits. Then plot $\rho$(before, after) against output movement for both. If the MLP arm
-loses the ordering at a smaller output movement than the matched control, the block-0 MLP computes the
-trait; if the two curves lie on top of each other, the trait dies from disturbance as such and the
-sweep's single hit is a size effect, closing the mechanistic line and leaving the static-embedding
-lookup (Figures 10–11) as the deliverable. Cost: ~20 conditions at the price of one ablation
-component, well under the last experiment's budget.
+**Read the block-0 MLP's contribution, instead of destroying it.** The dose–response says the trait
+lives in one component's final-position output; the natural follow-up is to test whether that output is
+also *sufficient*. Take the block-0 MLP output vector $m_u$ at the final position for each of the 123
+endpoint tokens, and (a) fit a ridge probe from $m_u$ to the measured anchor width $\hat w_u$ with the
+same held-out protocol as the embedding probe, and (b) transplant $m_u$ from a narrow token onto a wide
+token's forward pass and re-measure. If the probe from $m_u$ beats the embedding probe's $\rho = +0.76$
+and the transplant moves the recipient's width toward the donor's, the trait is carried by that vector
+and the mechanism is settled at the level of a readable feature. If the probe is no better than the
+embedding probe and the transplant does nothing, the block-0 MLP is a necessary stage rather than the
+place the number is stored, and the practical deliverable remains the static-embedding lookup
+(Figures 10–11). Cost: 123 forwards plus ~12 transplants, cheaper than this iteration's experiment.
