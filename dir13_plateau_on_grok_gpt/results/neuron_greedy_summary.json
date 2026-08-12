@@ -1,0 +1,90 @@
+{
+  "reproduction_check": {
+    "median_w_baseline_here": 0.3507,
+    "max_abs_diff_baseline": 0.0,
+    "max_abs_diff_R1_vs_pair_fitted": {
+      "32": 0.0,
+      "128": 0.0
+    }
+  },
+  "untrained_median_w": 0.803,
+  "worst_endpoint_error": 1e-06,
+  "n_pairs": 150,
+  "k_list": [
+    32,
+    128
+  ],
+  "r_list": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "all_units_ceiling": 0.8673,
+  "greedy": {
+    "32": {
+      "1": {
+        "median_w": 0.581,
+        "recovered_frac": 0.5091,
+        "median_overlap_with_R1": 32.0
+      },
+      "2": {
+        "median_w": 0.5829,
+        "recovered_frac": 0.5133,
+        "median_overlap_with_R1": 28.0
+      },
+      "4": {
+        "median_w": 0.576,
+        "recovered_frac": 0.4982,
+        "median_overlap_with_R1": 26.5
+      },
+      "8": {
+        "median_w": 0.576,
+        "recovered_frac": 0.4981,
+        "median_overlap_with_R1": 26.0
+      }
+    },
+    "128": {
+      "1": {
+        "median_w": 0.6602,
+        "recovered_frac": 0.6842,
+        "median_overlap_with_R1": 128.0
+      },
+      "2": {
+        "median_w": 0.6703,
+        "recovered_frac": 0.7065,
+        "median_overlap_with_R1": 108.0
+      },
+      "4": {
+        "median_w": 0.6724,
+        "recovered_frac": 0.7113,
+        "median_overlap_with_R1": 102.0
+      },
+      "8": {
+        "median_w": 0.6756,
+        "recovered_frac": 0.7182,
+        "median_overlap_with_R1": 100.0
+      }
+    }
+  },
+  "paired_vs_R1": {
+    "32": {
+      "2": 0.2353375032951336,
+      "4": 0.40959460349118515,
+      "8": 0.4312335956433597
+    },
+    "128": {
+      "2": 9.356535572405772e-17,
+      "4": 1.453911107727013e-19,
+      "8": 6.1287335470028276e-21
+    }
+  },
+  "paired_R8_vs_R4": {
+    "32": 0.9746142158466742,
+    "128": 5.998909779483433e-06
+  },
+  "frac_pairs_R8_ge_R1": {
+    "32": 0.5067,
+    "128": 0.8467
+  }
+}

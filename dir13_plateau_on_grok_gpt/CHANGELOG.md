@@ -1840,3 +1840,43 @@ listed it as the direction's real open problem since 2026-08-03.
   `results/neuron_scale_summary.json`, `results/neuron_scale_raw.npz`, `results/neuron_scale.log`.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 48 display / 981 inline equations / 37 figures; RESULTS 37 figures; 0 problems).
+
+## 2026-08-12 — S24g: unit interactions measured — worth 3.4 points at $k=128$, nothing at $k=32$
+
+- **Feedback status.** Seven `human_feedback*` files in the direction root, all already
+  `.addressed.md`; zero unaddressed, so this iteration advanced the plan (PLAN's own "Next step" named
+  this experiment).
+- **New experiment (`experiments/neuron_greedy.py`), pre-registered before running.** Residual-corrected
+  (greedy) selection: build the linearized set in $R$ equal rounds and, before each round, re-measure
+  every unit's importance $I^{S_r}_j=n_j\max_t|a^{S_r}_j(t)-\mathrm{chord}_j(t)|$ *with the units
+  already chosen linearized*, so a unit is scored by the bend still left. $R\in\{1,2,4,8\}$,
+  $k\in\{32,128\}$, same 150 pairs / context / checkpoint. $R=1$ is exactly the one-shot pair-fitted
+  rule, so it is both the control and a free reproduction check. Predictions registered: (P1) $R=4$ at
+  $k=32$ gains $\ge 5$ points over $R=1$; (P2) recovery is non-decreasing in $R$ at both $k$; (P3)
+  $R=8$ at $k=32$ clears the 56.6% of the best per-unit rule.
+- **Outcome — P1 and P3 refuted, P2 holds only at $k=128$.** Recovered fraction of the
+  trained→untrained width gap. At $k=32$: **50.9% ($R=1$) → 51.3% → 49.8% → 49.8% ($R=8$)**, paired
+  $p=0.24$, $0.41$, $0.43$ against $R=1$; only 50.7% of pairs not worse. At $k=128$: **68.4% → 70.7% →
+  71.1% → 71.8%**, paired $p=9.4\times10^{-17}$, $1.5\times10^{-19}$, $6.1\times10^{-21}$, with
+  $R=4\rightarrow8$ itself significant ($p=6.0\times10^{-6}$) and 84.7% of pairs not worse (median
+  width gain $+0.0145$). Set overlap with the one-shot picks at $R=8$: median **100/128** and
+  **26/32**. Built-in checks, all exact: $R=1$ reproduces `neuron_path.py`'s per-pair pair-fitted
+  widths (max difference 0.000000 at both $k$), baseline reproduces to median 0.3507 (max difference
+  0.000000), worst endpoint deviation $10^{-6}$.
+- **Claims updated (no result superseded).** No earlier number changed. Both deliverables previously
+  left the residual gap attributed to an unmeasured *joint* effect; they now bound it — joint selection
+  closes **3.4 of the 18.3 points** (≈ a fifth) between the best one-shot ranking and the 86.7%
+  all-units ceiling at $k=128$, and none at $k=32$. This also corrects the S24f reading: the blind
+  text-only rule beats the fitted ranking at $k=32$ because of the per-unit score's *form* (endpoint
+  displacement vs path curvature), not because the fitted ranking misses joint structure — a rule that
+  sees joint structure perfectly does no better there. REPORT Summary, Conclusion and Limitation 7, and
+  the RESULTS.md Headline, carry it.
+- **New figure.** **Figure 35** `plots/neuron_greedy.png` — (a) recovered fraction vs rounds $R$ for
+  $k=32$ and $k=128$, against the best per-unit rule at each size and the all-units ceiling;
+  (b) empirical CDF of the per-pair width change from $R=8$ vs $R=1$; (c) median overlap of the
+  sequential set with the one-shot set vs $R$. Exploratory Figures 35–37 renumbered **36–38**; both
+  files now hold 38 embeds, 38 visible captions, sequential numbering 1–38.
+- **Code/data:** new `experiments/neuron_greedy.py`, `experiments/plot_neuron_greedy.py`; new
+  `results/neuron_greedy_summary.json`, `results/neuron_greedy_raw.npz`, `results/neuron_greedy.log`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 49 display / 1,057 inline equations / 38 figures; RESULTS 38 figures; 0 problems).

@@ -1,0 +1,48 @@
+{
+  "n_pairs": 2080,
+  "n_characters": 65,
+  "n_distinct_endpoint_predictions": 15,
+  "class_sizes": [
+    13,
+    11,
+    7,
+    6,
+    6,
+    5,
+    4,
+    3,
+    3,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "class_labels": {
+    "o": 13,
+    "e": 11,
+    "a": 7,
+    "\u2423": 6,
+    "i": 6,
+    "r": 5,
+    "n": 4,
+    "\\n": 3,
+    "u": 3,
+    "v": 2,
+    "T": 1,
+    "t": 1,
+    "y": 1,
+    "f": 1,
+    "p": 1
+  },
+  "frac_paths_exactly_two_predictions": 0.3163,
+  "median_predictions_visited": 3.0,
+  "mean_predictions_visited": 2.9,
+  "iqr_predictions_visited": [
+    2.0,
+    3.0
+  ],
+  "max_predictions_visited": 7,
+  "frac_pairs_endpoints_share_prediction": 0.0995
+}

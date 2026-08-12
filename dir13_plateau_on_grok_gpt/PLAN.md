@@ -590,6 +590,33 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S24g DONE 2026-08-12 — unit interactions are measured and small: worth 3.4 points at $k=128$ and
+nothing at $k=32$.** Zero unaddressed feedback files, so this iteration advanced the plan (PLAN's own
+"Next step" named this experiment). One script, no training, 77 s of forward passes.
+`experiments/neuron_greedy.py` makes selection *sequential*: build the linearized set in $R$ equal
+rounds and, before each round, re-measure every unit's importance
+$I^{S_r}_j=n_j\max_t\lvert a^{S_r}_j(t)-\mathrm{chord}_j(t)\rvert$ with the units already chosen
+linearized, so a unit is scored by the bend still left. $R\in\lbrace 1,2,4,8\rbrace$,
+$k\in\lbrace 32,128\rbrace$, same 150 pairs / context / step-30,000 checkpoint. $R=1$ is exactly the
+one-shot pair-fitted rule, so it is both the control and a free reproduction check.
+**P1 (greedy $R=4$ at $k=32$ gains ≥5 points) REFUTED:** 50.9% → 51.3% → **49.8%** → 49.8%, paired
+$p=0.24$, $0.41$, $0.43$; only 50.7% of pairs not worse. **P3 (greedy clears the best per-unit rule's
+56.6% at $k=32$) REFUTED** by the same numbers. **P2 (monotone in $R$) holds at $k=128$ only, and
+there it is strong:** 68.4% → 70.7% → 71.1% → **71.8%**, paired $p=9.4\times10^{-17}$,
+$1.5\times10^{-19}$, $6.1\times10^{-21}$, with $R{=}4\rightarrow8$ itself significant
+($p=6.0\times10^{-6}$), 84.7% of pairs not worse, median width gain $+0.0145$. Eight rounds keeps a
+median **100 of 128** picks (**26 of 32** at $k=32$), so the gain is a reallocation of a fifth of the
+set, not a different circuit. Reading: joint effects close **3.4 of the 18.3 points** between the best
+one-shot ranking and the 86.7% all-units ceiling, and only in the interchangeable tail — the leading
+units carry the bend nearly independently. This **corrects S24f's attribution**: the blind rule beats
+the fitted ranking at $k=32$ because of the per-unit score's form (endpoint displacement vs path
+curvature), not because the fitted ranking misses joint structure. Free checks all exact: $R=1$
+reproduces the stored pair-fitted widths (max difference 0.000000 at both $k$), baseline 0.3507 (max
+difference 0.000000), worst endpoint deviation $10^{-6}$. New `experiments/neuron_greedy.py`,
+`experiments/plot_neuron_greedy.py`, `results/neuron_greedy_{summary.json,raw.npz,log}`,
+**Figure 35** (`plots/neuron_greedy.png`); exploratory Figures 35–37 renumbered 36–38, 38 embeds /
+38 captions / sequential 1–38 in both files; `check_render.py` passes with 0 problems.
+
 **S24f DONE 2026-08-12 — the text-only selection score is at the ceiling of its family, and two
 pre-registered predictions were refuted.** Zero unaddressed feedback files, so this iteration advanced
 the plan (PLAN's own "Next step" named this consolidation). One script, no training, 62 s of forward
@@ -1117,6 +1144,23 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S24g DONE (2026-08-12) — see "Current status". The selection thread is finished. The units are
+identified, described from held-out corpus text, selected better by a blind text-only rule than by the
+assay-fitted one at $k=32$, shown to be near-uniform writers, and now shown to interact only weakly:
+sequential re-selection gains 3.4 points at $k=128$ and nothing at $k=32$, so joint effects close about
+a fifth of the distance to the all-units ceiling. What that leaves is a question of a different kind —
+not *which* units are chosen but why the last third of the sharpness needs hundreds of them when a few
+dozen carry the first half. The instrument for it is a saturation analysis of $\rho(S)$ against $k$
+with pair-level resolution (the 13-point grid in `neuron_path.py` already holds most of the data): does
+the tail behave like many small independent contributions, or like a second population of units with a
+different character profile? Forward passes only. The one experiment that would raise the ceiling on
+this section's own result is exhaustive one-at-a-time greedy at $k=32$, scoring each candidate by its
+measured effect on $d(t)$ (~$k\times$ the passes of one ranking) — worth running only if the saturation
+analysis suggests the batched approximation is what limits the $k=32$ result rather than the geometry.
+S24 item 3 (a longer character run whose second local-complexity descent separates from initial fit,
+the denser Figure-9 grid on the pilot run's local maximum, or a second model/tokenizer) still needs
+materially more compute than one 30,000-step run.**
 
 **S24f DONE (2026-08-12) — see "Current status". The individual-displacement family of selection rules
 is closed: the write norm adds nothing (it hurts), and an oracle reading the network's own endpoint

@@ -161,10 +161,21 @@ by the unit's write norm — the natural conversion into residual displacement �
 instead of gaining one, because the write norms span a factor of only 1.71 across the population. The
 write norm alone selects nothing (0.3%): what marks the units that carry a plateau boundary is what
 they detect, not how loudly they write.
-**Verdict: plateaus are real in this model, and at the patched position they look like next-character
-decision basins** — but that is a *description* read off one token slot, not the phenomenon: the sharp
-switch is still there several characters downstream where the decision is not, and its mechanism sits
-upstream in the early MLPs. Qualified further because we tested a reconstruction rather than the
+The last explanation left for the remaining gap — that all these rules score units one at a time and
+miss units that only matter jointly — is measured and turns out to be small. Rebuilding the set in
+eight rounds, re-measuring each unit's importance with the units already chosen straightened, gains
+**3.4 points at $k=128$** (68.4% → **71.8%**, $p=6.1\times10^{-21}$, 84.7% of pairs not worse) and
+nothing at $k=32$ (50.9% → 49.8%, $p=0.43$). Joint effects therefore close about a fifth of the
+distance from the best one-shot ranking to the all-units ceiling, and only in the tail: the leading
+units carry the bend nearly independently, and it is the interchangeable remainder a sequential rule
+can reallocate.
+**Verdict: plateaus are real in this model, and they are character-conditioned basins in logit space
+whose boundaries coincide with next-character prediction changes** — a coincidence, not an identity:
+the 65 endpoint characters produce only 15 distinct endpoint predictions, the median path visits three
+predictions rather than two, and on 9.9% of pairs both endpoints share one prediction, so decisions
+cannot label basins one-to-one. That description is also read off one token slot rather than being the
+phenomenon: the sharp switch is still there several characters downstream where the decision is not,
+and its mechanism sits upstream in the early MLPs. Qualified further because we tested a reconstruction rather than the
 paper's exact checkpoint, and because the sharpness is graded rather than step-like.
 
 **Companion report.** `REPORT_followup.md` re-analyses the same 2,080-pair sweep along two axes this
@@ -446,7 +457,7 @@ We report, for each bias, how far the boundary actually moves ($t^{c}_{\mathrm{g
 the bias size in nats relative to the endpoint gap span $g(0)-g(1)$, the resulting
 $|t^{*}-t_{\mathrm{gap}}|$, and — as a numerical check on the algebra — the largest deviation between
 $d(t)$ computed with and without the bias. The decision account predicts the plateau follows the
-boundary; the measured invariance of $d(t)$ and the size of the shift decide it (Figure 22).
+boundary; the measured invariance of $d(t)$ and the size of the shift decide it (Figure 23).
 
 That probe rules the readout out but cannot say which upstream computation produces the sharp change.
 The depth control (below) points at the earliest blocks, but only by moving where the patch is
@@ -464,7 +475,7 @@ its own endpoints and the assay is otherwise unchanged. We run $S = \lbrace 1,2,
 \rbrace$ (the **late** group it does not), on a fixed random 150-pair subsample of the 2,080 at
 interpolation block 0 of the step-30000 checkpoint. Reported per condition: median and interquartile
 range of $w_{10\to90}$, the strict-rule pass rate, and the *paired* per-pair changes
-$\Delta w = w^{g} - w^{g=1}$ and $\Delta t^{*} = t^{*g} - t^{*g=1}$ on the same pairs (Figure 23). The
+$\Delta w = w^{g} - w^{g=1}$ and $\Delta t^{*} = t^{*g} - t^{*g=1}$ on the same pairs (Figure 24). The
 "blocks 1–4 build the sharpness" account predicts a monotone widening as $g \to 0$ in the early group
 and no such effect in the late group.
 
@@ -498,7 +509,7 @@ the fraction of pairs whose two endpoints predict different characters ($a^{*}\n
 number of distinct $\arg\max$ characters visited along the path, and the median distance
 $|t^{*}-t_{\mathrm{flip}}|$ between the plateau midpoint and the first prediction flip. If a plateau
 simply *is* the decision region, destroying the plateau should destroy the decision structure with it;
-a surviving decision alongside a straight $d(t)$ falsifies that reading (Figure 24).
+a surviving decision alongside a straight $d(t)$ falsifies that reading (Figure 25).
 
 **Two mandatory controls.** *Learned-vs-init*: the identical 2,080-pair sweep at the step-0 checkpoint.
 If the width distribution at initialization already matched the trained one, the structure would be
@@ -606,7 +617,7 @@ instead of three, should land between frozen-mid's $0.365$ and frozen-deep's $0.
 $0.40$–$0.45$; a value at or below 0.365 counts against that description. (Freezing block 0 costs the measurement
 nothing, since injecting at block 0 overwrites block 0's output anyway, so all five of frozen-mid's
 trainable blocks sit downstream of the injection — as in frozen-deep, unlike frozen-two.) Any
-other outcome falsifies them (Figure 25).
+other outcome falsifies them (Figure 26).
 
 **The narrow run — separating trainable depth from trainable capacity.** Every frozen run removes
 trainable blocks and trainable parameters together, so "width is set by how many blocks can train" and
@@ -629,7 +640,7 @@ w_{\mathrm{narrow}} \approx w(P{\approx}5.4\text{--}5.6\mathrm{M}) \approx 0.47
 
 It is assayed exactly like the frozen runs — same 150 pairs, same interpolation block 0, same
 matched-accuracy rule $k_{\mathrm{match}}$, same depth control — and compared against the reference at
-*its* matched-accuracy checkpoint, so neither training length nor task performance differs (Figure 26).
+*its* matched-accuracy checkpoint, so neither training length nor task performance differs (Figure 27).
 It is also assayed at its final checkpoint, for comparison with the frozen runs' final checkpoints; the
 harness time budget ended this one run at step 27,143 rather than 30,000, which is reported with the
 result.
@@ -661,7 +672,7 @@ two seeds of one condition (how much of a difference in median width is seed noi
 spread over all five twice-trained conditions (the error bar every reported gap must clear), a rank
 test across the six matched-accuracy runs of the depth comparison treating each *run's* median width as
 one observation, and — for the position term — whether *every* frozen-deep seed falls below *every*
-frozen-mirror seed (Figures 26 and 27).
+frozen-mirror seed (Figures 27 and 28).
 
 ### Readout offset: interpolating a character the readout does not read
 
@@ -814,7 +825,7 @@ units that the chord linearization ever recruited against the 3,172 it never did
 
 The prediction test then asks whether tuning at a pair's two endpoint characters says which units that
 pair recruits. For pair $(a,b)$ every unit gets a score, and the ranking induced by that score is
-compared with the recorded top-32 of Figure 29. The primary score is **differential tuning** — a unit
+compared with the recorded top-32 of Figure 30. The primary score is **differential tuning** — a unit
 that fires at one endpoint and not at the other is the kind of unit whose activation can switch as the
 path crosses — and the secondary score is the **maximum** over the two endpoints, which also selects
 units firing at both:
@@ -1025,6 +1036,39 @@ isolates endpoint displacement against path curvature at matched weighting. All 
 same chord substitution, the same $k\in\lbrace 8,32,128\rbrace$ and the same recovered fraction
 $\rho(S)$, so every number is comparable to the section above.
 
+### Do the units interact? Residual-corrected (greedy) selection
+
+Every rule above scores each unit on its own and keeps the top $k$. Such a rule cannot notice that two
+units carry the same piece of bend, nor that a unit only matters once another has been straightened —
+and "joint effects" was the standing explanation for the gap between the best rule and the ceiling
+reached by linearizing all 3,840 units. To measure that explanation instead of assuming it, selection
+stays fitted (it may read the pair's own activations) but becomes **sequential**: the set is built in
+$R$ equal rounds, and before each round the importance of every unit is re-measured *with the units
+already chosen linearized*, so a unit is scored by the bend that is still left for it to carry.
+Writing $S_r$ for the set after round $r$ and $a^{S}_j(t)$ for unit $j$'s recorded activation when the
+units in $S$ are chord-substituted, the **residual importance** is:
+
+```math
+I^{S}_j=n_j\cdot\max_t\bigl\lvert a^{S}_j(t)-\mathrm{chord}_j(t)\bigr\rvert ,
+\qquad S_{r+1}=S_r\cup\lbrace\text{the }k/R\text{ units }j\notin S_r\text{ with largest }I^{S_r}_j\rbrace ,
+```
+
+with $\mathrm{chord}_j(t)=(1-t)a_j(0)+t\,a_j(1)$ as before and $S_0=\varnothing$. Units already in
+$S_r$ have $I^{S_r}_j=0$ by construction, so the rule never re-picks one. Because the chord matches the
+true activation at both endpoints, linearizing $S_r$ leaves $a_j(0)$ and $a_j(1)$ — and hence every
+chord — unchanged, so the rounds differ only in what happens between the endpoints.
+
+$R=1$ is exactly the one-shot pair-fitted rule $I_j$ of the earlier section, which makes it both the
+control and a free reproduction check: the sole difference as $R$ grows is that later rounds see the
+network after the earlier picks are straightened, so any gain is a joint effect and nothing else. We
+run $R\in\lbrace 1,2,4,8\rbrace$ at $k\in\lbrace 32,128\rbrace$ on the same 150 pairs, score with the
+same recovered fraction $\rho(S)$, and additionally report the **set overlap**
+$\lvert S^{R}\cap S^{1}\rvert$ — how many of the $k$ picks the sequential rule keeps — so a change in
+$\rho$ can be read against how much of the set actually moved. This is a batched approximation to full greedy search:
+exhaustive greedy would add one unit at a time and score each candidate by its measured effect on
+$d(t)$, costing about $k$ times more forward passes, so the gain reported here is a lower bound on
+what joint selection can achieve.
+
 ### Spherical interpolation and patching
 
 A straight line between two activations cuts through low-norm regions the model never produces, which
@@ -1064,7 +1108,7 @@ d(t)=\frac{\lVert x(t)-x_A\rVert_2}{\lVert x(t)-x_A\rVert_2+\lVert x(t)-x_B\rVer
 Read it as: $d \approx 0$ means "output still looks like A", $d \approx 1$ "like B". A
 **plateau–boundary–plateau** curve hugs 0, crosses quickly, then hugs 1; a no-plateau response is
 roughly the straight line $d = t$. By construction $d(0)=0$ and $d(1)=1$. The raw individual curves
-are the primary evidence (Figures 6, 8, 18, 22).
+are the primary evidence (Figures 6, 8, 19, 23).
 
 **Transition width $w_{10\to 90}$** — *how narrow is the boundary?* Eyeballing thousands of curves
 invites cherry-picking, so we summarize each curve with one boundary-position-invariant scalar: the
@@ -1587,6 +1631,49 @@ $\phi(c)$, downward triangles the same statistic on the untrained network (0.00 
 diamonds the old criterion (0.86–1.00 for every character, i.e. no discrimination). The dotted
 horizontal line is the $\phi = 0.5$ majority mark.
 
+#### What labels a basin: the endpoint character, not the decision class
+
+A basin is a stretch of the path the model refuses to leave, and two different labels can be attached
+to one: the **endpoint character** patched in, or the model's **argmax next-character prediction** at
+that position. Since the transitions coincide with prediction changes (91% of changes fall inside the
+transition window), it is tempting to merge the two and read the result as "one next-character
+decision basin per character". Counting the predictions the paths actually visit shows the merge does
+not hold. The counts use the argmax already stored for all 2,080 pairs, so no new forward passes were
+needed (Figure 16).
+
+![two panels: a histogram of how many distinct argmax predictions each interpolation path visits, and a bar chart of how many endpoint characters map to each of the 15 distinct endpoint predictions](plots/basin_decision.png)
+
+**Figure 16.** Endpoint characters and decision classes are not the same labelling. Reference
+character GPT at step 30,000, interpolation after block 0, all 2,080 character pairs, argmax
+next-character prediction read at the patched position across the 50-step path. **(a)** x: number of
+distinct argmax predictions visited along a path; y: percentage of the 2,080 pairs. The solid bar is
+"exactly two", the count that a plateau–boundary–plateau story *in decision space* requires; hatched
+bars are every other count. **(b)** x: the 15 distinct predictions produced by the 65 endpoint
+characters (`␣` = space, `\n` = newline); y: how many endpoint characters map to that prediction; a
+many-to-one bar means those characters are indistinguishable by their decision.
+
+**The 65 endpoint characters produce only 15 distinct endpoint predictions.** The largest class
+contains **13** characters and the next **11**; just 5 of the 15 predictions come from a single
+character. A decision label cannot individuate the 59 characters that own a basin, so basins and
+decision classes are not in one-to-one correspondence.
+
+**The typical path visits three predictions, not two.** Exactly two are visited on **31.6%** of paths;
+the median is **3** (interquartile range 2–3, maximum 7). Most paths therefore pass through at least
+one intermediate decision belonging to neither endpoint, while the $d(t)$ curve still shows a single
+plateau, boundary and plateau.
+
+**On 9.9% of pairs both endpoints share one prediction.** For those the decision does not distinguish
+the endpoints at all, yet the interpolation still rests near each end and switches sharply between
+them — direct evidence that the resting behaviour is not the decision.
+
+**What this narrows.** The basins are **character-conditioned and live in logit space**, and their
+boundaries *coincide with* prediction changes rather than being defined by them. Every measurement in
+this section — the rest-ratio criterion and its null families, the per-character basin fractions, the
+frequency dependence, the 78% per-character variance share — is computed from the geometry of $d(t)$
+and is unaffected. What does not follow is a one-to-one map between basins and next-character
+decisions, so this report does not use that stronger phrasing. The 91% coincidence keeps its original,
+weaker reading: where the path switches basins, the model's prediction usually changes too.
+
 **Verdict on the per-character question: PLAN case (i) holds for the great majority of the vocabulary
 but not for all of it.** Fifty-nine of the 65 characters hold a basin against at least half of their
 partners, 55 against at least 90% of them, and 39 against every one; the median $\phi$ is 1.00 and the
@@ -1595,13 +1682,13 @@ and `z` (0.47), with `x` (0.56) just above the line. For those, paths leave the 
 immediately and drift the rest of the way, so calling their region a basin is not supported. What
 differs among the 59 that do own one is *how sharply* it is left: median widths run from 0.264 (`o`)
 to 0.590 (`3`). By the strict knife-edge rule no character qualifies for a majority of its partners
-($\sigma(c) \ge 0.5$ for 0 of 65; $\ge 0.25$ for 6 — `o`, `s`, `a`, `I`, `\n`, `e`). Figure 16 puts
+($\sigma(c) \ge 0.5$ for 0 of 65; $\ge 0.25$ for 6 — `o`, `s`, `a`, `I`, `\n`, `e`). Figure 17 puts
 the two per-character statistics side by side, and shows that they agree: the characters with the
 widest transitions are the ones that lose their basins.
 
 ![per-character width distributions with basin fraction overlay](plots/allpairs_width_by_char.png)
 
-**Figure 16.** Basin ownership and transition sharpness move together across the vocabulary.
+**Figure 17.** Basin ownership and transition sharpness move together across the vocabulary.
 x-axis: the 65 characters, sorted by median width (␣ = space, `\n` = newline). Left y-axis: the
 distribution of $w_{10\to90}$ over that character's 64 partners as a box (box = inter-quartile range,
 bar = median, whiskers 1.5×IQR, outliers hidden); each box's hatch gives the character class (`//`
@@ -1613,7 +1700,7 @@ and fall away only among the widest characters at the right.
 **The six characters without a basin are the six the model barely saw.** `$` occurs once in the
 training text, `&` three times and `3` twenty-seven times; `X`, `Z` and `z` occur 112, 161 and 320
 times, against a median of 4,561 over the vocabulary. Across all 65 characters $\phi$ rises with
-training frequency at Spearman $\rho = 0.56$ ($p = 1.0\times10^{-6}$, n = 65; Figure 17), and every
+training frequency at Spearman $\rho = 0.56$ ($p = 1.0\times10^{-6}$, n = 65; Figure 18), and every
 character seen at least 1,000 times has $\phi \ge 0.68$. This is the practical reading of the result: the basin
 structure is something the model *builds per character as it learns that character*, not a generic
 property of the architecture, and it is missing exactly where training data is missing. It also tells
@@ -1622,7 +1709,7 @@ vocabulary the guarantee does not cover.
 
 ![basin fraction against training-set frequency, log x axis](plots/basin_vs_frequency.png)
 
-**Figure 17.** Basin ownership tracks how often the character appears in training. x: the number of
+**Figure 18.** Basin ownership tracks how often the character appears in training. x: the number of
 occurrences of the character in the 1.00M-character training split (log scale); y: the basin fraction
 $\phi(c)$; one point per character, with every character below $\phi = 0.95$ labelled. The dashed
 vertical line marks 1,000 occurrences, the under-training cutoff used in the companion report. Spearman
@@ -1633,12 +1720,12 @@ all 2,080 widths explains **78.2%** of the variance (adjusted 77.6%), against a 
 (99th percentile 4.1%) for the same 65 free parameters on permuted data. Only **21.8%** is
 pair-specific residual. That rules out PLAN case (iii) ("the sharpness lives in the pair") and case
 (ii) ("only a subset of characters has a basin"): each character carries its own transition sharpness
-into every pairing it appears in. Figure 18 shows the raw curves behind this for six representative
+into every pairing it appears in. Figure 19 shows the raw curves behind this for six representative
 characters — raw $d(t)$ remains the primary evidence, and the per-character bundles are visibly tight.
 
 ![raw d(t) curves for six representative characters](plots/allpairs_curves_small_multiples.png)
 
-**Figure 18.** Raw $d(t)$ for six characters against all 64 of their partners. Each panel: relative
+**Figure 19.** Raw $d(t)$ for six characters against all 64 of their partners. Each panel: relative
 distance $d(t)$ (y; 0 = output looks like the named character's prompt, 1 = looks like the partner's)
 vs interpolation position $t$ (x); one thin line per partner, all oriented so the named character sits
 at $t = 0$; the gray dashed line is the straight-line reference $d = t$. Panels show the sharpest
@@ -1650,12 +1737,12 @@ which is the φ = 0.03 of Figure 15C seen directly.
 
 **What do the plateaus correspond to?** Two measurements separate the candidate explanations. The
 readout-decision test asks whether a plateau simply *is* the set of residual states that decode to the
-same next character. Before that, Figure 19 answers the question it depends on — does the boundary sit
+same next character. Before that, Figure 20 answers the question it depends on — does the boundary sit
 where the two characters become equally likely?
 
 ![midpoint crossing vs relative endpoint plausibility](plots/allpairs_boundary_vs_logp.png)
 
-**Figure 19.** Where the switch happens versus which endpoint the model prefers. x-axis:
+**Figure 20.** Where the switch happens versus which endpoint the model prefers. x-axis:
 $\log_{10} p(A\mid\text{context}) - \log_{10} p(B\mid\text{context})$, the model's log-probability
 preference between the two endpoint characters (positive = it prefers A). y-axis: the midpoint crossing
 $t^{*}$, the interpolation position at which the isotonic curve reaches 0.5. One marker per pair,
@@ -1665,11 +1752,11 @@ $t^{*} = 0.5$; gray dashed vertical line = equal plausibility. Spearman ρ = 0.2
 endpoint keeps a slightly *larger* share of the path, so basin size tracks plausibility — but weakly,
 and $t^{*}$ stays within 0.30–0.72 throughout.
 
-Figure 20 is the readout-decision test itself.
+Figure 21 is the readout-decision test itself.
 
 ![readout decision test panels](plots/allpairs_readout_decision.png)
 
-**Figure 20.** The plateau boundary is the model's next-character decision boundary. Left: histogram
+**Figure 21.** The plateau boundary is the model's next-character decision boundary. Left: histogram
 of $t^{*}-t_{\text{flip}}$ (x), the offset between the curve's midpoint and the first change in the
 model's predicted next character; y = number of pairs; black dotted line at 0. Median
 $|t^{*}-t_{\text{flip}}|$ = 0.045, i.e. 2.2 steps of the 50-point grid. Middle: number of distinct
@@ -1687,7 +1774,7 @@ every change inside it, and **80%** of pairs have flat arms that are each a sing
 parts of $d(t)$ are regions of constant model output; the boundary is where the output changes; and the
 transition is a short scramble between two decisions rather than an instantaneous flip.
 
-**Both mandatory controls are decisive** (Figure 21). *Learned, not architectural:* at initialization
+**Both mandatory controls are decisive** (Figure 22). *Learned, not architectural:* at initialization
 **all 2,080** paths are straight lines (median width **0.803**, inter-quartile range 0.800–0.806,
 **100%** at $w \ge 0.70$, **0** strict plateaus), against median **0.355** and 8.8% strict after
 training (Mann–Whitney p < 1e-300). Without this control "learned structure" would be unsupported;
@@ -1698,7 +1785,7 @@ the unembedding geometry contributes none of it.
 
 ![init-vs-final width distributions and width by interpolation block](plots/allpairs_controls.png)
 
-**Figure 21.** Controls. Left: distribution of $w_{10\to90}$ (x) against number of pairs (y) for the
+**Figure 22.** Controls. Left: distribution of $w_{10\to90}$ (x) against number of pairs (y) for the
 same 2,080 pairs at step 0 (initialization) and step 30,000 (final); the two histograms carry distinct
 hatches and their medians appear in the legend. Gray dashed = straight-line value 0.80, black dotted =
 strict rule 0.25. Right: median $w_{10\to90}$ (y) against the interpolation block at which the patch is
@@ -1718,17 +1805,17 @@ p = 1.2e-7). The direction again rules out the trivial artifact — *better-sepa
 
 #### The hypothesis
 
-**A plateau in this model is the set of final-position residual states that decode to the same
-next-character prediction, one basin per character — a shape that the MLPs of blocks 1–4 build and
+**A plateau in this model is a character-conditioned basin in logit space, whose boundary coincides
+with a change in the model's next-character prediction — a shape that the MLPs of blocks 1–4 build and
 everything downstream merely reads.** The evidence: 91% of all prediction changes along a path fall
-inside the transition window and 80% of paths have single-prediction flat arms (Figure 20), every
+inside the transition window and 80% of paths have single-prediction flat arms (Figure 21), every
 character that the model saw more than a thousand times retains its own basin against most partners
 ($\phi \ge 0.68$ for all 53 such characters, 0/4,160 false positives on the untrained network) with
-78% of the width variance explained by per-character terms alone (Figures 14–16), the structure is absent at
-initialization (Figure 21), and deleting the block-1–4 MLPs returns the width to that untrained value
-while amplifying them sharpens it further (0.80 → 0.35 → 0.31, Figure 23). That "decodes to the same
+78% of the width variance explained by per-character terms alone (Figures 14–17), the structure is absent at
+initialization (Figure 22), and deleting the block-1–4 MLPs returns the width to that untrained value
+while amplifying them sharpens it further (0.80 → 0.35 → 0.31, Figure 24). That "decodes to the same
 prediction" clause is a **description, not the mechanism**: the decision survives the ablation that
-flattens $d(t)$ (80.7% of pairs still predict different characters at their endpoints, Figure 24), and
+flattens $d(t)$ (80.7% of pairs still predict different characters at their endpoints, Figure 25), and
 the leading alternative — that the basin is carved by endpoint *plausibility* — still predicts which
 pairs are sharp (partial $\rho = -0.59$) even though it does not mediate the intervention
 ($\rho(\Delta w,\Delta\max p) = +0.22$). The "blocks 1–4 build it" clause survives only as a statement
@@ -1737,7 +1824,7 @@ blocks stay trainable — freeze 1–4 and it moves to blocks 5–8 ($w = 0.471$
 8–11 ($0.558$), freeze 5–11 and it moves back to 1–4 ($0.626$), freeze 0–3 and 9–11 and it sits in the
 middle window 4–8 ($0.331$), freeze all but blocks 5–7 and 96% of it lands in that three-block window
 ($0.427$), each at or above the reference's
-validation accuracy (Figure 25) — so the site is contingent, and what freezing costs is sharpness,
+validation accuracy (Figure 26) — so the site is contingent, and what freezing costs is sharpness,
 governed mainly by *where* the trainable blocks sit. A seventh run tested the limit of the
 trainable-depth reading and confirmed it there: freezing blocks 1–10, leaving block 11 as the only
 trainable block downstream of the injection, gives $w = 0.726$, matching the $\approx 0.70$
@@ -1766,9 +1853,9 @@ the gap. Removing trainable blocks can sharpen the path. What that relocatable c
 been narrowed one level below the block: linearizing a pair's own 32 most path-nonlinear MLP units of
 the 3,840 in blocks 1–4 removes half the sharpness, 32 random units remove 1.2%, and one fixed global
 set of 32 removes 19.0%, so the bend is carried by a few dozen gated units recruited per path from a
-shared pool (Figure 29). Those units are character detectors: each unit's tuning measured in ordinary
+shared pool (Figure 30). Those units are character detectors: each unit's tuning measured in ordinary
 Shakespeare, with no interpolation involved, predicts which pairs recruit it at AUROC 0.847
-(Figure 30).
+(Figure 31).
 
 #### The readout-rebalancing intervention: the plateau sits upstream of the decision
 
@@ -1780,11 +1867,11 @@ intervention adds a constant $c$ to one row of the unembedding output — a pure
 every residual-stream activation on the path bit-identical. Two bias sizes were fixed before the
 result was seen: **equalised** ($c_{\mathrm{eq}}$, median 2.44 nats), which makes the two endpoint
 predictions score symmetrically, and **midpoint-forced** ($c_{\mathrm{half}}$, median 5.28 nats), which
-puts the decision boundary exactly at the path midpoint. Figure 22 shows where the boundary lands.
+puts the decision boundary exactly at the path midpoint. Figure 23 shows where the boundary lands.
 
 ![histograms of decision-boundary position under three readouts, and boundary shift versus bias size](plots/rebalance_readout.png)
 
-**Figure 22.** Readout rebalancing on 1,873 character pairs, interpolation block 0, step 30000. Left
+**Figure 23.** Readout rebalancing on 1,873 character pairs, interpolation block 0, step 30000. Left
 (a): number of pairs (y) against position along the path $t$ (x), for the plateau midpoint $t^{*}$
 (solid) and the decision boundary $t_{\mathrm{gap}}$ under the unmodified readout (dashed), the
 equalised bias (dash-dot) and the midpoint-forced bias (dotted — a spike at 0.5 by construction).
@@ -1800,7 +1887,7 @@ additive readout bias of any size. One consequence is a limit on the test itself
 plausibility account's prediction that the *width* would change, because no readout-level change of
 endpoint plausibility can alter $d(t)$ at all. If plausibility shapes the basins, it must do so through
 the learned weights of blocks 1–11 — the same blocks the depth control identifies as where the
-sharpness is built (Figure 21).
+sharpness is built (Figure 22).
 
 **The decision boundary barely moves either; it is pinned to the residual-stream transition.** The
 logit gap swings a median 21.9 nats across the path, so it is extremely steep. The 2.44-nat equalising
@@ -1820,11 +1907,11 @@ sentence "a plateau is the set of states that decode to the same prediction" sur
 
 The readout probe moved the mechanism upstream without saying which upstream computation makes the
 transition sharp. Scaling the MLP branch of blocks 1–4 answers that directly, and the late-block group
-is the specificity control (Figure 23).
+is the specificity control (Figure 24).
 
 ![transition width versus MLP gain for early and late blocks, and paired per-pair width changes](plots/mlp_gain_intervention.png)
 
-**Figure 23.** MLP-gain intervention, 150 character pairs, interpolation block 0, step-30000 fresh
+**Figure 24.** MLP-gain intervention, 150 character pairs, interpolation block 0, step-30000 fresh
 character checkpoint. Left (A): median transition width $w_{10\to90}$ (y) against MLP-branch gain $g$
 (x; $g=1$ is the unmodified model), shaded band = interquartile range; solid line with circles = gain
 applied to blocks 1–4, dashed line with squares = blocks 8–11. The dashed horizontal reference is the
@@ -1858,7 +1945,7 @@ block's MLP alone, and re-measuring both mediators under every ablated model, an
 
 ![median width per single-block MLP deletion, width change versus plausibility change, and decision-structure survival](plots/mlp_block_scan.png)
 
-**Figure 24.** Per-block MLP ablation, 150 character pairs, interpolation block 0, step-30000 fresh
+**Figure 25.** Per-block MLP ablation, 150 character pairs, interpolation block 0, step-30000 fresh
 character checkpoint. **A** (left): median transition width $w_{10\to90}$ (y; bars = interquartile
 range) per condition (x: the unmodified model, then each single early block's MLP deleted at $g=0$,
 then all four). Dashed horizontal reference = the untrained (step-0) median width 0.803, dotted =
@@ -1914,7 +2001,7 @@ Every intervention so far cuts into an already-trained network, so it can only s
 component is load-bearing at inference. The hypothesis made a stronger, training-time claim, and the
 frozen-block runs (Methods §Frozen-block training test) test it: retrain from scratch with a block
 group held at its step-0 weights, then assay the result at matched validation accuracy and at the end
-of the same 30,000-step schedule. Figure 25 collects the outcome of all seven runs.
+of the same 30,000-step schedule. Figure 26 collects the outcome of all seven runs.
 
 All eight finished the full schedule and lost nothing on the task — each in fact ended *above* the
 reference: final validation next-character accuracy **0.5625** (blocks 1–4 frozen), **0.5622** (blocks
@@ -1934,7 +2021,7 @@ comparison in the series.
 
 ![raw interpolation curves, transition widths, injection-depth profile and validation accuracy for the reference and eight frozen-block runs](plots/frozen_blocks.png)
 
-**Figure 25.** Frozen-block training test, 150 character pairs, interpolation block 0. **Top row:** raw
+**Figure 26.** Frozen-block training test, 150 character pairs, interpolation block 0. **Top row:** raw
 relative distance $d(t)$ (y) against interpolation position $t$ (x) for the same 20 pairs under twelve
 models — reference untrained (step 0), reference at step 2500, reference trained (step 30000), and
 blocks 1–4, 8–11, 1–7, 0–3&9–11, 0–4&8–11, 0–1&7–11, 0&6–11, 5–11 and 1–10 frozen (each at its final step
@@ -2265,7 +2352,7 @@ at once, with every run shown at matched validation accuracy and again at the en
 
 ![median transition width against trainable blocks and against trainable parameters, for seven runs at matched validation accuracy](plots/capacity_vs_depth.png)
 
-**Figure 26.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0.
+**Figure 27.** Trainable depth versus trainable capacity, 150 character pairs, interpolation block 0.
 y (both panels): median transition width $w_{10\to90}$ (lower = sharper plateau), bars = interquartile
 range; the gray dashed horizontal line is the untrained value 0.803. **Left:** x = number of trainable
 transformer blocks (axis reversed, 12 → 2). **Right:** x = trainable parameters in millions. Runs that
@@ -2334,11 +2421,11 @@ carry a positional claim (frozen-deep, blocks 6–10, blocks 0–4). Retraining 
 **0.002 to 0.040** — the largest shift being the narrow run's 0.397 → 0.437 at matched accuracy — and
 in no consistent direction, with the second seed coming out sharper for four of the nine
 condition-by-checkpoint pairs and blunter for the other five. That 0.040 is the error bar every reported gap
-has to clear, so Figure 27 shows it beside the six gaps this section's conclusions rest on.
+has to clear, so Figure 28 shows it beside the six gaps this section's conclusions rest on.
 
 ![two seeds of each twice-trained condition, and the size of each reported gap against the largest seed spread](plots/seed_replication.png)
 
-**Figure 27.** Seed replication, 150 character pairs, interpolation block 0, context `"The house was "`.
+**Figure 28.** Seed replication, 150 character pairs, interpolation block 0, context `"The house was "`.
 **Left:** median transition width $w_{10\to90}$ (y, lower = sharper) for the five conditions trained
 twice (x); circles mark the matched-accuracy checkpoint (validation accuracy 0.550) and squares the
 step-30,000 checkpoint, filled = model seed 1337 and open = seed 2024, the two seeds of a checkpoint
@@ -2398,11 +2485,11 @@ detectably, $+0.040$, $p = 7.4\times10^{-8}$). The strict plateau rule is met by
 $k = 0$ and **47.3%** at $k = 8$. The untrained network at the same $k$ produces the straight line every
 time (**0.809, 0.807, 0.804, 0.804, 0.807**, 0/150 pairs plateaued), so the paired trained-vs-untrained
 gap is $-0.51$ to $-0.57$ with $p = 2.3\times10^{-26}$ at every offset: this is a learned property of
-the forward computation and not geometry supplied by the prompt shape (Figure 28).
+the forward computation and not geometry supplied by the prompt shape (Figure 29).
 
 ![median interpolation paths, transition width and endpoint signal as the readout moves away from the patched character](plots/pos_offset.png)
 
-**Figure 28.** Readout offset sweep on the reference character GPT at step 30,000, 150 character pairs,
+**Figure 29.** Readout offset sweep on the reference character GPT at step 30,000, 150 character pairs,
 context `"The house was "`, filler `" and then"`; the varied character sits at position 14 and the
 readout at the last position, $k$ characters later. **Left:** median relative distance $d(t)$ (y) vs
 interpolation position $t$ (x), one curve per offset $k$ (solid/dashed/dot-dash per the legend, marker
@@ -2423,8 +2510,7 @@ characters later — but the fraction of pairs whose endpoints predict a *differ
 collapses much faster, from 86.7% at $k = 0$ to **8.7%** at $k = 4$. At that offset more than nine in
 ten pairs end at the same top-1 prediction, and yet **52.0%** of them still produce a strict
 plateau–boundary–plateau curve. The sharp switch therefore outlives the description this report has
-been using for it: "next-character decision basin" is what the boundary looks like *at the patched
-position*, and four characters downstream the decision is gone while the discrete switch remains. What
+been using for it: a prediction flip is what the boundary looks like *at the patched position*, and four characters downstream the decision is gone while the discrete switch remains. What
 switches is the model's internal state, which the logits at the patched position happen to expose as a
 prediction flip.
 
@@ -2463,11 +2549,11 @@ token slot). None of it says what those MLPs *compute*. Linearizing individual u
 keeping each unit's endpoint values and deleting only its curvature in $t$, so both endpoints stay
 exact (worst deviation $10^{-6}$ over every pair and condition) — answers the sharpest available
 version of that question: is the bend the work of a few units that switch, or of thousands of small
-contributions? Figure 29 gives the three readings that decide it.
+contributions? Figure 30 gives the three readings that decide it.
 
 ![median transition width against the number of linearized MLP units for three selection rules; per-pair units needed for half the effect; reuse of units across pairs](plots/neuron_path.png)
 
-**Figure 29.** Chord linearization of MLP hidden units in blocks 1–4, 150 character pairs,
+**Figure 30.** Chord linearization of MLP hidden units in blocks 1–4, 150 character pairs,
 interpolation block 0, step 30,000. **A** (left): median transition width $w_{10\to90}$ (y; shaded band
 = inter-quartile range) against the number $k$ of linearized units (x, $\log_2$ scale, out of 3,840);
 one series per selection rule — solid with circles = the pair's own top-$k$, dashed with squares = one
@@ -2522,16 +2608,16 @@ experiment itself would be circular. So the units are characterized from a separ
 model's own training corpus, run normally, with no interpolation, no patching and no shared context —
 and the question becomes whether that independent description predicts which paths recruit them.
 
-To show that it does, Figure 30 puts the corpus-derived rankings beside the pair-blind controls, and
+To show that it does, Figure 31 puts the corpus-derived rankings beside the pair-blind controls, and
 shows what the most-reused units respond to.
 
 ![four panels: AUROC by ranking rule, recruitment rate by tuning decile, tuning sharpness of recruited versus never-recruited units, and tuning profiles of the three most-reused units](plots/neuron_feature.png)
 
-**Figure 30.** Corpus character tuning versus recruitment in the interpolation assay; reference
+**Figure 31.** Corpus character tuning versus recruitment in the interpolation assay; reference
 character GPT at step 30,000, blocks 1–4, 3,840 hidden units, 150 pairs, context `"The house was "`.
 **A** (left): AUROC (y) of each ranking rule (x), one point per pair (jittered), black bar = mean and
 printed value; dashed line = chance 0.5. The two corpus rules are differential tuning $|z_a-z_b|$ and
-$\max(z_a,z_b)$; "global importance" is the assay-derived pair-blind ranking of Figure 29; "overall
+$\max(z_a,z_b)$; "global importance" is the assay-derived pair-blind ranking of Figure 30; "overall
 activity" ranks by mean corpus activation; "random" is a shuffle. **B**: percentage of units recruited
 into a pair's top-32 (y, log scale) by decile of differential tuning (x; decile 1 = most sharply
 differentiating); dashed line = the 0.83% chance rate. **C**: density (y) of tuning sharpness
@@ -2565,7 +2651,7 @@ without running the assay once (Figure 30B).
 one of that pair's two endpoints for **27.2%** of recruitments, against a **2.8%** base rate over all
 3,840 units — a **9.8×** lift ($p=2.3\times10^{-26}$). Two characters out of 65 account for more than a
 quarter of the preferences of the units that bend the path between them. And the pool identified in
-Figure 29 is exactly the sharply tuned population: the 668 ever-recruited units have median sharpness
+Figure 30 is exactly the sharply tuned population: the 668 ever-recruited units have median sharpness
 **5.45** against **4.47** for the other 3,172 (Mann–Whitney $p=5.8\times10^{-27}$, Figure 30C).
 
 **They are legible one at a time.** The most reused unit (block 2, recruited by 88 of 150 pairs) is
@@ -2579,15 +2665,15 @@ ordinary character-identity detectors that the assay happens to drive through th
 two rankings, which leaves open whether tuning predicts the ranking without the tuned units carrying
 the bend. To close that, the selection rule is handed to the corpus: for each pair, the 32 units with
 the largest differential tuning are linearized, chosen without computing $d(t)$, the importance score
-$I_j$, or anything else from the assay (Figure 31).
+$I_j$, or anything else from the assay (Figure 32).
 
 ![recovered fraction of the trained-to-untrained width gap against the number of linearized units, for corpus-tuning selection against three assay-derived reference rules](plots/neuron_feature_causal.png)
 
-**Figure 31.** Chord linearization with units selected by corpus tuning alone; reference character GPT
+**Figure 32.** Chord linearization with units selected by corpus tuning alone; reference character GPT
 at step 30,000, 150 pairs, block-0 interpolation, context `"The house was "`. x: number of units
 linearized, $k$ (log$_2$ scale, of 3,840 in blocks 1–4); y: recovered fraction $\rho$ as a percentage
 (0% = the edit changed nothing, 100% = the paths are as straight as at initialization). Solid/circles =
-the held-out corpus rule $|z_a-z_b|$; dashed/squares = the assay's own per-pair top-$k$ of Figure 29,
+the held-out corpus rule $|z_a-z_b|$; dashed/squares = the assay's own per-pair top-$k$ of Figure 30,
 fitted on the curve it is tested on and therefore the ceiling; dash-dotted/triangles = one fixed global
 assay-derived set, the strongest previous rule blind to the individual pair; dotted/diamonds = random
 $k$, the floor. The unmodified baseline reproduces per pair exactly (0.3507, max per-pair difference
@@ -2631,12 +2717,12 @@ obvious suspect: it describes a unit by the character *at* the position, which i
 unit that responds to a two-character pattern. Testing that needs two things — a description of what
 the missed units actually are, and a check on whether the obvious fix selects them. Both come from one
 further pass over the same training split, tabulating activations against the (previous, current)
-character pair. Figure 32 shows the descriptive half in panel (a), the direct comparison of the two
+character pair. Figure 33 shows the descriptive half in panel (a), the direct comparison of the two
 recruit groups in (b), and the causal test of the fix in (c).
 
 ![cumulative distributions of the current-character variance share for found, missed and all units; a matched-size ablation of found versus missed recruits; and a five-rule comparison of the width gap removed at k equals 32](plots/neuron_bigram.png)
 
-**Figure 32.** What the units missed by character tuning are, and whether previous-character
+**Figure 33.** What the units missed by character tuning are, and whether previous-character
 conditioning recovers them; reference character GPT at step 30,000, blocks 1–4, 3,840 units, 150 pairs,
 block-0 interpolation, context `"The house was "`. **(a)** Cumulative fraction of units (y) against the
 current-character share $C_j/T_j$ (x) defined in Methods. Solid = the 2,819 recruited units the
@@ -2645,7 +2731,7 @@ medians in the legend. **(b)** Recovered fraction $\rho$ as a percentage (y) fro
 recruits (hatched `//`) versus 8 missed recruits (hatched `\\`), matched in size, over the 138 pairs
 where both groups have at least 8 members. **(c)** Recovered fraction at $k=32$ (y) for five selection
 rules (x), all re-scored on the 84 pairs whose two characters are both well sampled after a space;
-dashed line marks the current-character rule. Random and the fitted per-pair ceiling are Figure 31's
+dashed line marks the current-character rule. Random and the fitted per-pair ceiling are Figure 32's
 floor and ceiling, re-scored on the same 84 pairs.
 
 **The missed units are the context-dependent ones.** For the recruits the character ranking finds, the
@@ -2696,12 +2782,12 @@ the missed recruits are not; the puzzle is that a sharper hand-built conditionin
 better and selected worse. Both are settled by fitting the description instead of building it: a ridge
 regression over the eight characters ending at each position, plus a previous-by-current interaction
 table, fitted on the model's own training split with the penalty chosen on one held-out slice and every
-$R^2$ reported on another. Figure 33 shows the descriptive half in panel (a) and the causal half — a
+$R^2$ reported on another. Figure 34 shows the descriptive half in panel (a) and the causal half — a
 new blind selection rule and the two controls that decompose it — in panels (b) and (c).
 
 ![three panels: held-out R-squared against probe window length for found, missed and all units; a bar chart of the width gap removed at k equals 32 by seven selection rules; and recovered fraction against the number of linearized units](plots/neuron_probe.png)
 
-**Figure 33.** A fitted probe describes the missed recruits and selects better than the hand-built
+**Figure 34.** A fitted probe describes the missed recruits and selects better than the hand-built
 profiles; reference character GPT at step 30,000, blocks 1–4, 3,840 units, 150 pairs, block-0
 interpolation, context `"The house was "`, 94,080 held-out corpus positions. **(a)** Median held-out
 $R^2_j$ (y) against the probe's window length (x: 1 = current character only, then 2, 4, 8 characters,
@@ -2768,12 +2854,12 @@ vector, so the physically natural score is not the activation swing but the disp
 $\lvert\Delta a_j\rvert\,n_j$ — every blind rule so far ignores $n_j$. And the corpus rules only
 *predict* that swing, so reading it off the network directly ($E_j$) is an oracle that says whether
 estimation error is what stands between them and the fitted ranking. Five rules, the identical chord
-intervention, the same 150 pairs, the same $k$ (Figure 34). Three predictions were registered before
+intervention, the same 150 pairs, the same $k$ (Figure 35). Three predictions were registered before
 the run; the two that failed are the informative ones.
 
 ![three panels: a bar chart of the width gap removed at k equals 32 by ten selection rules, an empirical CDF of the per-pair width change caused by write-norm weighting, and recovered fraction against the number of linearized units for the pair-blind floor](plots/neuron_scale.png)
 
-**Figure 34.** Neither converting a score into residual-displacement units nor replacing the corpus
+**Figure 35.** Neither converting a score into residual-displacement units nor replacing the corpus
 estimate with the network's own activations improves selection; reference character GPT at step 30,000,
 blocks 1–4, 3,840 units, 150 pairs, block-0 interpolation, context `"The house was "`. **(a)** Recovered
 fraction $\rho$ as a percentage (y) at $k=32$ for ten selection rules (x). Hatched `//` = the
@@ -2831,6 +2917,71 @@ not to text-based prediction in general. Free checks: the unmodified baseline re
 per-pair widths exactly (median 0.3507, max deviation 0.000000) and both endpoints stay exact under
 every rule (worst deviation $10^{-6}$).
 
+### Units interact only in the tail: joint selection is worth 3.4 points at $k=128$, nothing at $k=32$
+
+The previous section ended by naming the one explanation still standing for the gap between the best
+ranking and the all-units ceiling: every rule scores units individually and none can see that a set
+works better than its members do apart. Sequential selection measures that explanation directly.
+Building the set in $R$ rounds and re-measuring residual importance $I^{S_r}_j$ before each round
+gives a rule that *does* see joint structure, while $R=1$ is the one-shot ranking itself, so the
+comparison isolates the joint effect and nothing else (Figure 36). Three predictions were registered
+before the run; the two that failed are the informative ones.
+
+![three panels: recovered width-gap fraction against the number of selection rounds for two set sizes, an empirical CDF of the per-pair width change from eight rounds versus one, and the overlap between the greedy and one-shot sets](plots/neuron_greedy.png)
+
+**Figure 36.** Re-measuring importance between selection rounds helps only once the set is large.
+Reference character GPT at step 30,000, interpolation after block 0, blocks 1–4, 3,840 hidden units,
+150 character pairs, top-$k$ units chord-linearized. **(a)** Recovered fraction $\rho(S)$ as a
+percentage (y) against the number of selection rounds $R$ (x, log scale; $R=1$ is the one-shot
+pair-fitted ranking $I_j$). Solid with circles = $k=32$, dashed with squares = $k=128$; the dotted
+horizontal line at each set size marks the best per-unit rule measured anywhere in this report
+($E_j$ at $k=32$, $D^{\mathrm{probe}}_j n_j$ at $k=128$), and the black dash-dotted line is the
+ceiling reached by linearizing all 3,840 units. **(b)** Empirical cumulative distribution (y: fraction
+of the 150 pairs) of the per-pair change in transition width $w$ between $R=8$ and $R=1$ (x; positive
+= sequential selection removes more of the gap); the vertical line is no change. **(c)** Median
+percentage of the $k$ selected units that the sequential rule keeps from the one-shot set (y) against
+$R$ (x, log scale), same two series.
+
+**At $k=32$ joint selection buys nothing.** Recovery reads 50.9% ($R=1$), 51.3%, 49.8%, 49.8%
+($R=8$); none differs from the one-shot ranking (paired $p=0.24$, $0.41$, $0.43$), and just 50.7% of
+pairs are not worse — a coin flip. Both predictions attached to this set size fail: four rounds were
+registered to gain at least 5 points, and eight rounds to clear the 56.6% of the best per-unit rule.
+
+**At $k=128$ it is real, monotone and broad.** Recovery rises 68.4% → 70.7% → 71.1% → **71.8%**, each
+step significant against one round ($p=9.4\times10^{-17}$, $1.5\times10^{-19}$,
+$6.1\times10^{-21}$), and even the final doubling $R=4\rightarrow8$ adds a significant amount
+($p=6.0\times10^{-6}$). It is not a median artifact: **84.7%** of the 150 pairs are not worse under
+eight rounds, with a median width gain of $+0.0145$.
+
+**The gain is a small reallocation of the same set.** Eight rounds keeps a median **100 of 128** picks
+at $k=128$ and **26 of 32** at $k=32$. Swapping about a fifth of the units is worth 3.4 points at the
+larger size and nothing at the smaller one.
+
+**Why this matters.** It closes the mechanism thread with a bounded number in place of an open
+possibility. Joint effects among the units that carry a plateau boundary are real but small: they
+recover **3.4 of the 18.3 points** — roughly a fifth — separating the best one-shot ranking from the
+all-units ceiling at $k=128$, and none of the gap at $k=32$. The contrast between the two set sizes
+locates them. The leading units carry the bend nearly independently, which is why scoring them one at
+a time is already close to the best a size-32 set can do; the tail is nearly interchangeable, and
+there a sequential rule can reallocate picks toward whichever units still bend the path once the
+leaders are straight. This also corrects the reading the previous section carried forward: a blind
+text-only rule beats the fitted per-pair ranking at $k=32$ *not* because that ranking is blind to
+joint structure — a rule that sees joint structure perfectly does no better there — but because of the
+form of the per-unit score, endpoint displacement against path curvature, which the previous section
+had already isolated. For anyone using this machinery to find the units behind a new pair's geometry,
+the recipe stays one line and now has an error bar on its refinement: rank by the activation swing the
+endpoint swap causes, take the top $k$, and expect sequential re-selection to be worth a few points
+only for sets in the hundreds.
+
+**Caveats.** Rounds are equal-sized and stop at $R=8$ (16 units per round at $k=128$); exhaustive
+greedy — one unit at a time, each candidate scored by its measured effect on $d(t)$ — is the stronger
+test at roughly $k$ times the compute, so 3.4 points is a lower bound on what joint selection can
+reach, not the maximum attainable by any 128 units. Two set sizes, 150 pairs, one context, one
+checkpoint, one model, and the result speaks about this chord intervention rather than about unit
+interactions in general. Free checks, all exact: $R=1$ reproduces the stored pair-fitted widths per
+pair (max deviation 0.000000 at both $k$), the unmodified baseline reproduces to median 0.3507 (max
+deviation 0.000000), and both endpoints stay exact under every selection (worst deviation $10^{-6}$).
+
 ### Exploratory corroboration: 40 natural minimal pairs
 
 *(Labelled exploratory and kept out of the headline — PLAN scope forbids a new 40-pair dataset in the
@@ -2839,11 +2990,11 @@ character natural prefixes rather than one short shared context.)* With interpol
 recording at final logits, 14 of 40 pairs meet the strict frozen rule (IDs 0, 4, 5, 6, 7, 9, 14, 20,
 21, 22, 28, 34, 36, 37); 24/40 have $w \le 0.35$; only 2/40 are near-straight (#10, #19, $w \ge 0.6$);
 0/40 are non-monotone. Median width is 0.309 (range [0.110, 0.773]) against the straight line's 0.8.
-The structure is visible pair by pair, with no averaging involved (Figure 35).
+The structure is visible pair by pair, with no averaging involved (Figure 37).
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 35.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
+**Figure 37.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
 final-logit space, one panel per frozen pair; panel titles give the pair ID, the two endpoint
 characters, and the transition width $w$. Gray dashed = the straight-line reference $d = t$. Most
 curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) track the straight line.
@@ -2852,11 +3003,11 @@ curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) trac
 and recording $d(t)$ at each later block's final-position residual, median width falls strictly
 monotonically from 0.777 (block 1) to 0.445 (block 11) and 0.309 at the logits; the strict rule is
 passed only at the logits (14 pairs), never at intermediate residuals. The plateau is *formed* by the
-downstream stack, not present in the interpolated activation itself (Figure 36).
+downstream stack, not present in the interpolated activation itself (Figure 38).
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 36.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
+**Figure 38.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
 frozen before inspection): $d(t)$ (y) vs interpolation position $t$ (x). Thin lines are the recording
 blocks, shaded on the cividis scale from block 1 (dark) to block 11 (light) per the colour bar; the
 thick black line is the final logits and the gray dashed line the straight-line reference. Early-block
@@ -2865,11 +3016,11 @@ curves are near-straight and progressively sharpen into plateau–boundary–pla
 **Later interpolation kills the plateau — the predicted control.** If downstream layers create the
 plateau, interpolating later (fewer layers left) must weaken it. It does, monotonically: median
 $w_{10\to 90}$ = 0.309, 0.564, 0.647, 0.733, 0.757, 0.802 for interpolation blocks 0, 2, 4, 6, 8, 10 —
-reaching the straight-line reference 0.8 when only one block remains (Figure 37).
+reaching the straight-line reference 0.8 when only one block remains (Figure 39).
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 37.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
+**Figure 39.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
 per interpolation block, shaded on the cividis scale from block 0 (dark) to block 10 (light) as given
 in the legend; the block-0 curve is strongly sigmoid and later blocks collapse onto the gray dashed
 straight line. Right: median transition width $w_{10\to90}$ (y; bars = inter-quartile range across the
@@ -2910,7 +3061,7 @@ that flattens $d(t)$ (80.7% of pairs still predict different characters at their
 3 $\arg\max$ regions unchanged, while $|t^{*}-t_{\mathrm{flip}}|$ decouples 0.043 → 0.214), and the
 widening is **not mediated by plausibility** ($\rho(\Delta w,\Delta\max p)=+0.22$; median
 $|\Delta\max p|\le 0.0007$; where plausibility moves it moves in the direction that predicts *sharper*
-plateaus). So "decision basin" remains the right description of the geometry and is ruled out as its
+plateaus). So the prediction flip stays an accurate marker of the geometry and is ruled out as its
 cause: blocks 1–4 build a sharp residual-stream change from which the readout computes both the
 decision and the plausibility ranking. Moving the readout off the patched character then bounds how
 much of the description survives at all. With the interpolated character held eight positions from the
@@ -2976,7 +3127,11 @@ units' response out of sample and, scored at the assay's own context in raw acti
 curve. Controls attribute that to scale rather than context: the original character profile with
 per-unit standardization removed reaches 56.3% on its own, and the score is then at its ceiling — the
 oracle that reads the network's own endpoint activations ties it at 56.6% ($p=0.27$), weighting by each
-unit's write norm costs about a point, and the write norm alone selects 0.3%. No geometric rule over
+unit's write norm costs about a point, and the write norm alone selects 0.3%. Nor is the residue a
+large joint effect: rebuilding the set in eight rounds, re-scoring every unit against the bend still
+left after the earlier picks are straightened, gains 3.4 points at 128 units (68.4% → **71.8%**) and
+nothing at 32, so unit interactions close about a fifth of the distance to the all-units ceiling and do
+so only in the interchangeable tail of the ranking. No geometric rule over
 which blocks must be trainable has survived a test.
 
 **Joint Grokking↔plateau verdict: primary not testable (PLAN case 5); character analogues temporally
@@ -2998,7 +3153,7 @@ recipe — outside this run's compute budget (~30k vs the paper's ~1e5 steps).
 
 **Interpretation.** The interpolated block-0 activation itself carries a nearly linear image of the
 input mixture; blocks 1–4 then collapse it toward one of the two endpoint computations, and the
-remaining blocks add nothing. That collapse is the work of a few dozen MLP units per path (Figure 29),
+remaining blocks add nothing. That collapse is the work of a few dozen MLP units per path (Figure 30),
 drawn from a shared pool but selected pair by pair. The all-pairs sweep sharpens the earlier reading that plateaus are "a
 distributed property of the whole stack": the sharpening is concentrated shallow, and what the basins
 *index* is the model's next-character decision — the flat arms are constant-prediction regions and 91%
@@ -3048,19 +3203,21 @@ natural activation-to-activation directions.
    *which* pairs are sharp (partial $\rho = -0.59$) but is excluded as the mechanism
    ($\rho(\Delta w,\Delta\max p) = +0.22$). What blocks 1–4 compute to produce the sharp change is now
    characterised — a few dozen gated MLP units per path, pair-dependent, drawn from a pool of 668
-   (Figure 29), and identifiable in advance as the character detectors tuned to the pair's own
-   endpoints (Figure 30, AUROC 0.847; linearizing 32 units chosen that way, blind to the assay,
+   (Figure 30), and identifiable in advance as the character detectors tuned to the pair's own
+   endpoints (Figure 31, AUROC 0.847; linearizing 32 units chosen that way, blind to the assay,
    removes 28.9% of the width gap against 1.2% for random units) — though that corpus rule recovers
    less than the fitted per-pair ranking's 50.9%, and the units it misses are context-dependent rather
-   than character-pure (Figure 32), which conditioning the profile on the preceding character does not
+   than character-pure (Figure 33), which conditioning the profile on the preceding character does not
    fix. A fitted probe over the eight characters ending at the position does describe those missed
    units (median held-out $R^2$ 0.78) and, used as the selection rule in its own activation units,
-   removes 56.5% of the width gap (Figure 33) — more than the ranking fitted to the curve, with the
+   removes 56.5% of the width gap (Figure 34) — more than the ranking fitted to the curve, with the
    controls attributing most of that to keeping each unit's scale rather than to the added context.
-   That text-only rule is at the ceiling of its family (Figure 34): an oracle reading the network's own
+   That text-only rule is at the ceiling of its family (Figure 35): an oracle reading the network's own
    endpoint activations ties it, and weighting by the units' write norms — which span a factor of only
-   1.71 — slightly hurts, so what is left uncharacterised is the *joint* effect of a set of units, not
-   the identity of the individual ones.
+   1.71 — slightly hurts. The joint effect of a set of units, which that ceiling left open, is now
+   measured and small (Figure 36): sequential re-selection over eight rounds gains 3.4 points at 128
+   units and nothing at 32, so what stays uncharacterised is not which units are chosen but why so much
+   of the sharpness needs hundreds of them.
    The freezing
    experiments bound the claim further:
    networks trained with blocks 1–4, 1–7, 5–11, 0–3&9–11, 0–4&8–11, 0–1&7–11 or 1–10 held at

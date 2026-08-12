@@ -2349,3 +2349,82 @@ pilot run's local maximum, or a second model/tokenizer) and needs materially mor
 On track? yes — S24f done, the text-only selection score is shown to be at the ceiling of its family
 with two pre-registered predictions refuted and the remaining limit identified as joint rather than
 individual effect; blocker: none.
+
+## 2026-08-12 — S24g: are the units interacting? Residual-corrected (greedy) selection
+
+**Feedback check first.** `ls` of the direction root shows seven `human_feedback*` files, all already
+ending in `.addressed.md`. Zero unaddressed, so this iteration advanced the plan — and PLAN's own
+"Next step" named exactly this: a greedy or residual-corrected selection that picks the next unit by
+how much of the *remaining* bend it removes, to test directly whether joint effects account for the
+gap left by the per-unit rules.
+
+**Why this experiment.** Every selection rule in this series scores units one at a time and takes the
+top $k$. S24f ended by naming that as the one remaining explanation for why no rule reaches the 86.7%
+that linearizing all 3,840 units removes — and it was an explanation, not a measurement. Making the
+selection sequential turns it into a measurement: build the set in $R$ rounds and re-measure every
+unit's importance with the units already chosen straightened, so a unit is scored by the bend still
+left for it to carry. $R=1$ is *identical* to the one-shot pair-fitted rule, so it is simultaneously
+the control and a free reproduction check, and the only thing that changes as $R$ grows is that later
+rounds see the network after the earlier picks are linearized. Any gain is therefore a joint effect and
+nothing else.
+
+**Implementation note.** `experiments/neuron_greedy.py` subclasses `neuron_path.ChordMLP` with one
+extra mode, `ablate_record`, that linearizes the current set *and* records the resulting activations,
+so one forward pass per round yields the residual curvature of every remaining unit. The chords never
+need refreshing: the chord equals the true activation at $t=0$ and $t=1$, so linearizing a set leaves
+both endpoints — and hence every other unit's chord — untouched. Whole run: 77 s, 150 pairs,
+$R\in\{1,2,4,8\}$ at $k\in\{32,128\}$.
+
+**Pre-registered before running** (in the script docstring): P1 greedy $R=4$ at $k=32$ gains ≥5 points
+over $R=1$; P2 recovery is non-decreasing in $R$ at both $k$; P3 greedy $R=8$ at $k=32$ clears the
+56.6% of the best per-unit rule.
+
+**What came out — P1 and P3 refuted, P2 only at the larger set.** At $k=32$ sequential selection buys
+nothing: 50.9% → 51.3% → 49.8% → 49.8%, paired $p=0.24/0.41/0.43$, and 50.7% of pairs not worse — a
+coin flip. At $k=128$ it is real, monotone and broad: 68.4% → 70.7% → 71.1% → **71.8%**, every step
+significant ($p$ down to $6.1\times10^{-21}$, and $R{=}4\rightarrow8$ alone at $p=6.0\times10^{-6}$),
+84.7% of pairs not worse, median width gain +0.0145. Eight rounds keeps a median 100 of 128 picks
+(and 26 of 32), so the gain is a reallocation of about a fifth of the set, not a different circuit.
+Free checks all exact: $R=1$ reproduced `neuron_path.py`'s per-pair widths to 0.000000 at both $k$,
+baseline to 0.000000, worst endpoint deviation $10^{-6}$.
+
+**What I learned.** Joint effects exist but are worth about a fifth of the remaining distance to the
+ceiling, and only in the tail of the ranking. The contrast between the two set sizes is the real
+content: the leading units carry the bend nearly independently of one another — which is why scoring
+them alone is already near the best a size-32 set can do — while the tail is close to interchangeable,
+so re-measuring can reallocate it. That also **corrects last iteration's reading**. S24f attributed the
+$k=32$ gap (blind rule 56.5% beating the fitted ranking's 50.9%) to the fitted ranking being blind to
+joint structure; a rule that sees joint structure perfectly does no better at $k=32$, so the cause is
+the per-unit score's *form* — endpoint displacement versus path curvature — which S24f had itself
+already isolated. The mechanism thread now closes with a bounded number rather than an open
+possibility: what stays uncharacterised is not *which* units get chosen but why so much of the
+sharpness needs hundreds of them.
+
+**Assumption logged.** I used equal-sized rounds up to $R=8$ rather than exhaustive one-at-a-time
+greedy, because full greedy scores each candidate by its measured effect on $d(t)$ and costs ~$k$×
+more forward passes than the whole batched sweep; the rejected alternative was full greedy at $k=32$
+only, which would have answered the question at the one set size where the batched version already
+shows a flat curve. Consequence, stated in both deliverables: 3.4 points is a *lower bound* on what
+joint selection can reach, not the maximum attainable by any 128 units.
+
+**Deliverable work.** New Results section in both files with **Figure 35** (`plots/neuron_greedy.png`,
+three panels) and a new REPORT.md Methods subsection defining the residual importance $I^{S}_j$, the
+round schedule, and the set-overlap diagnostic. REPORT Summary, Conclusion and Limitation 7, and the
+RESULTS.md Headline, carry the bounded joint-effect result and the corrected reading of S24f.
+Exploratory Figures 35–37 renumbered 36–38; 38 embeds / 38 captions / sequential 1–38 in each file;
+`check_render.py REPORT.md RESULTS.md` passes with 0 problems.
+
+**Next step.** The selection thread is finished: the units are identified, described from held-out
+corpus text, selected better by a blind rule than by the assay-fitted one at small $k$, shown to be
+near-uniform writers, and now shown to interact only weakly. The one question it leaves is different in
+kind — why hundreds of units are needed for the last third of the sharpness when a few dozen carry the
+first half — which is a question about the *distribution* of the bend, not about ranking, and the
+honest instrument for it is a saturation curve of recovered fraction against $k$ with pair-level
+resolution (already partly in `neuron_path.py`'s 13-point grid). Everything else open is PLAN S24
+item 3 (a longer character run whose second local-complexity descent separates from initial fit, the
+denser Figure-9 grid on the pilot run's local maximum, or a second model/tokenizer) and needs
+materially more compute than one 30,000-step run. No `STOP` written — the plan retains open candidates.
+
+On track? yes — S24g done, joint unit interactions are bounded at 3.4 points (≈ a fifth of the
+remaining gap) at $k=128$ and zero at $k=32$, with two pre-registered predictions refuted and last
+iteration's attribution corrected in both deliverables; blocker: none.
