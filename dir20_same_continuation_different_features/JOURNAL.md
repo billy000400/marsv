@@ -1171,3 +1171,16 @@ Re-verified only: `python3 ../check_render.py REPORT.md RESULTS.md` → exit 0 (
 195 inline eqs, 3 figures; RESULTS.md 196 inline eqs, 6 figures; 0 problems, GitHub markdown-API
 placement check included); `wc -w REPORT.md` = 4999 words, 3 embedded figures — within the
 5,000-word / 8-figure report policy. This entry is the only file edited.
+
+## 2026-08-12 (hold iteration #14: still waiting on the wrapper's content review)
+
+No change. `human_feedback_1.txt` is still present and unrenamed, so no `STOP` is written (CLAUDE.md
+rule 11); the manifest stays `review_pending` with its single checklist item `done`. Plan success
+criteria are met, so no experiment was run and no deliverable, plot or result file was touched.
+Re-verified only: `python3 ../check_render.py REPORT.md RESULTS.md` → REPORT.md reported 11 display /
+195 inline eqs, 3 embedded figures, 0 problems (GitHub markdown-API placement check included); the
+RESULTS.md pass then aborted on an HTTP 403 rate limit from the GitHub markdown API, not on a
+document problem. RESULTS.md is byte-identical to the copy that passed the full check in hold
+iteration #13 (last modified 18:49, before that check), so no re-verification is outstanding.
+`wc -w REPORT.md` = 4999 words, 3 embedded figures — within the 5,000-word / 8-figure report policy.
+This entry is the only file edited.
