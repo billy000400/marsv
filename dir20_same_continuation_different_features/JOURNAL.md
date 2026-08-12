@@ -1123,3 +1123,12 @@ so no experiment was run and no deliverable, plot or result file was touched. Re
 `python3 ../check_render.py REPORT.md RESULTS.md` → exit 0 (REPORT.md 11 display / 195 inline eqs,
 3 figures; RESULTS.md 196 inline eqs, 6 figures; 0 problems); REPORT.md 4999 words, 3 embedded
 figures. This entry is the only file edited.
+
+## 2026-08-12 (hold iteration #9: still waiting on the wrapper's content review)
+
+No change. `human_feedback_1.txt` is present and unrenamed, so no `STOP` (CLAUDE.md rule 11); the
+manifest stays `review_pending` with its single checklist item `done`. Plan success criteria are met,
+so no experiment was run and no deliverable, plot or result file was touched. Re-verified only:
+`python3 ../check_render.py REPORT.md RESULTS.md` → exit 0 (REPORT.md 11 display / 195 inline eqs,
+3 figures; RESULTS.md 196 inline eqs, 6 figures; 0 problems); `wc -w REPORT.md` = 4999 words, 3
+embedded figures — within the 5,000-word / 8-figure report policy. This entry is the only file edited.
