@@ -14,6 +14,16 @@ from pathlib import Path
 
 MANIFEST_VERSION = 1
 STATES = {"triage", "ready", "in_progress", "review_pending", "blocked", "rejected", "addressed"}
+DEFAULT_REPORT_WORDS = 5000
+DEFAULT_REPORT_FIGURES = 8
+FEEDBACK_ONLY_MARKER = "feedback-only"
+REPORT_POLICY_DEFAULTS = {
+    "core_research_question": "Use the direction's PLAN.md research question.",
+    "primary_report": "REPORT.md",
+    "max_words": DEFAULT_REPORT_WORDS,
+    "max_main_figures": DEFAULT_REPORT_FIGURES,
+    "detailed_results": "RESULTS.md",
+}
 
 
 def fail(message: str) -> "None":
@@ -72,6 +82,7 @@ def create_manifest(direction: Path, source: Path) -> Path:
         "required_outputs": None,
         "may_modify": None,
         "must_remain_unchanged": None,
+        "report_policy": {key: None for key in REPORT_POLICY_DEFAULTS},
         "unresolved_ambiguities": [
             "Classify output routing from the exact feedback before doing research."
         ],
@@ -175,6 +186,37 @@ def active_manifests(direction: Path) -> list[Path]:
     return active
 
 
+def feedback_only_marker(direction: Path) -> Path:
+    return direction / ".tasks" / FEEDBACK_ONLY_MARKER
+
+
+def begin_relaunch(direction: Path, continue_research: bool = False) -> str:
+    """Apply durable relaunch state before the shell wrapper removes STOP."""
+    marker = feedback_only_marker(direction)
+    stop = direction / "STOP"
+    if continue_research:
+        marker.unlink(missing_ok=True)
+        stop.unlink(missing_ok=True)
+        return "continue-research"
+    if stop.is_file() and active_manifests(direction):
+        marker.parent.mkdir(parents=True, exist_ok=True)
+        marker.write_text("Restore STOP after all active feedback is addressed.\n", encoding="utf-8")
+        stop.unlink()
+        return "feedback-only"
+    stop.unlink(missing_ok=True)
+    return "continue-research"
+
+
+def restore_feedback_only_if_complete(direction: Path) -> bool:
+    """Recover or finish feedback-only mode without invoking a worker."""
+    marker = feedback_only_marker(direction)
+    if marker.is_file() and not active_manifests(direction):
+        (direction / "STOP").touch()
+        marker.unlink()
+        return True
+    return False
+
+
 def section(text: str, title: str) -> str:
     match = re.search(
         rf"(?ms)^##\s+{re.escape(title)}\s*$.*?(?=^##\s+|\Z)", text
@@ -221,7 +263,7 @@ def compact_context(direction: Path) -> str:
 
 WORKER_RULES = """You are one iteration of an unattended research workflow. Use the compact context below; do not reread whole journals, changelogs, results, or reports unless the current task truly requires a specific section. CLAUDE.md remains the general operator reference and WRITING.md is a high-priority system instruction.
 
-Feedback tasks use the active JSON manifest. In state triage, do no research: classify exact required outputs, files that may be modified, files that must remain unchanged, and ambiguities. Preserve every checklist request byte-for-byte. Set state to ready only when routing and meaning are clear; otherwise set state to blocked and name the ambiguity. A literal character such as & is data, not permission to reinterpret it as a word. Never choose a different research question or output filename to escape ambiguity.
+Feedback tasks use the active JSON manifest. In state triage, do no research: classify exact required outputs, files that may be modified, files that must remain unchanged, ambiguities, and the report policy (core question, primary report, word and main-figure limits, and detailed-results file). Preserve every checklist request byte-for-byte. Set state to ready only when routing and meaning are clear; otherwise set state to blocked and name the ambiguity. A literal character such as & is data, not permission to reinterpret it as a word. Never choose a different research question or output filename to escape ambiguity.
 
 For ready/in_progress/rejected tasks, answer or repair the verbatim checklist and write only to declared paths. Read an existing report section only when editing it. For every checklist item, fill completion.what_was_done, completion.evidence (exact figure/table/experiment/section/file), and completion.ambiguity (use "None" when none remains), then set status to done. Set state to review_pending only when every item and every required output is complete. Never rename feedback or create STOP yourself; the wrapper does that only after format checks and an independent content review.
 
@@ -236,6 +278,67 @@ Do not add every completed experiment to REPORT*.md. Preserve detailed evidence 
 def resolve_declared(direction: Path, declared: str) -> Path:
     path = Path(declared)
     return path if path.is_absolute() else direction / path
+
+
+def plan_report_policy(direction: Path) -> dict:
+    plan = direction / "PLAN.md"
+    if not plan.is_file():
+        return {}
+    text = plan.read_text(encoding="utf-8")
+    fields = {
+        "core_research_question": r"Core research question",
+        "primary_report": r"Primary report",
+        "max_words": r"Maximum report words",
+        "max_main_figures": r"Maximum main figures",
+        "detailed_results": r"Detailed results",
+    }
+    found = {}
+    for key, label in fields.items():
+        match = re.search(rf"(?mi)^[-*]?\s*\*{{0,2}}{label}\*{{0,2}}\s*:\s*(.+?)\s*$", text)
+        if match:
+            value = match.group(1).strip().strip("*").strip().strip("`")
+            found[key] = int(value) if key in {"max_words", "max_main_figures"} else value
+    return found
+
+
+def report_policy(direction: Path, data: dict | None = None) -> dict:
+    policy = dict(REPORT_POLICY_DEFAULTS)
+    policy.update(plan_report_policy(direction))
+    if data and isinstance(data.get("report_policy"), dict):
+        policy.update({key: value for key, value in data["report_policy"].items() if value is not None})
+    for key in ("max_words", "max_main_figures"):
+        if not isinstance(policy[key], int) or policy[key] < 1:
+            fail(f"report_policy.{key} must be a positive integer")
+    return policy
+
+
+def report_counts(path: Path) -> tuple[int, int]:
+    text = path.read_text(encoding="utf-8")
+    words = len(re.findall(r"\b[\w]+(?:[’'-][\w]+)*\b", text, flags=re.UNICODE))
+    figures = len(re.findall(r"!\[[^\]\n]*\]\([^\)\n]+\)", text))
+    return words, figures
+
+
+def report_budget_failures(direction: Path, reports: list[str] | None = None,
+                           data: dict | None = None) -> list[str]:
+    policy = report_policy(direction, data)
+    candidates = (
+        [resolve_declared(direction, item) for item in reports]
+        if reports is not None
+        else sorted(direction.glob("REPORT*.md"))
+    )
+    failures = []
+    for path in candidates:
+        if not path.is_file() or not path.name.startswith("REPORT") or path.suffix.lower() != ".md":
+            continue
+        words, figures = report_counts(path)
+        if words > policy["max_words"]:
+            failures.append(f"{path.name}: {words} words exceeds {policy['max_words']}")
+        if figures > policy["max_main_figures"]:
+            failures.append(
+                f"{path.name}: {figures} Markdown image embeds exceeds {policy['max_main_figures']}"
+            )
+    return failures
 
 
 def snapshot_files(direction: Path, data: dict) -> dict[str, str | None]:
@@ -268,8 +371,7 @@ def files_for_review(path: Path, data: dict) -> list[str]:
     return list(dict.fromkeys(outputs))
 
 
-REVIEW_RULES = 
-"""Act as a fresh completion reviewer. Inspect only the bundled original feedback, task checklist, and every declared output. Reject if any request was omitted or reinterpreted; the work answers a different research question; unrequested analysis displaced requested analysis; jargon is important but undefined; correlation is called a mechanism or causal explanation; a claim is stronger than its evidence; or technically formatted prose is difficult for a new researcher. Rendering success is necessary but never sufficient. Return pass=false with concrete failures whenever in doubt. List every exact declared output path in inspected_outputs after inspecting it.
+REVIEW_RULES = """Act as a fresh completion reviewer. Inspect only the bundled original feedback, task checklist, and every declared output. Reject if any request was omitted or reinterpreted; the work answers a different research question; unrequested analysis displaced requested analysis; jargon is important but undefined; correlation is called a mechanism or causal explanation; a claim is stronger than its evidence; or technically formatted prose is difficult for a new researcher. Rendering success is necessary but never sufficient. Return pass=false with concrete failures whenever in doubt. List every exact declared output path in inspected_outputs after inspecting it.
 
 Reject if a report exceeds its declared/default word or figure budget; duplicates the
 detailed result archive; includes secondary experiments unnecessary to answer the core
@@ -321,6 +423,7 @@ def record_review(manifest: Path, review_path: Path, format_passed: bool) -> boo
     data = validate(manifest, require_review=True)
     review = parse_review(review_path)
     expected = files_for_review(manifest, data)
+    budget_failures = report_budget_failures(direction_for(manifest), expected, data)
     inspected = review.get("inspected_outputs")
     passed = (
         format_passed
@@ -329,11 +432,13 @@ def record_review(manifest: Path, review_path: Path, format_passed: bool) -> boo
         and len(inspected) == len(expected)
         and set(inspected) == set(expected)
         and review.get("failures") == []
+        and not budget_failures
     )
     data["review"] = {
         "format_passed": format_passed,
         "content": review,
         "expected_outputs": expected,
+        "budget_failures": budget_failures,
     }
     direction = direction_for(manifest)
     if passed:
@@ -373,6 +478,13 @@ def main() -> None:
     p.add_argument("manifest", type=Path)
     p.add_argument("review", type=Path)
     p.add_argument("--format-passed", choices=("yes", "no"), required=True)
+    p = sub.add_parser("check-budgets")
+    p.add_argument("direction", type=Path)
+    p = sub.add_parser("begin-relaunch")
+    p.add_argument("direction", type=Path)
+    p.add_argument("--continue-research", action="store_true")
+    p = sub.add_parser("feedback-only-check")
+    p.add_argument("direction", type=Path)
     args = parser.parse_args()
 
     if args.command == "prepare":
@@ -426,6 +538,18 @@ def main() -> None:
         ok = record_review(args.manifest.resolve(), args.review.resolve(), args.format_passed == "yes")
         print("ADDRESSED" if ok else "REJECTED")
         raise SystemExit(0 if ok else 1)
+    elif args.command == "check-budgets":
+        failures = report_budget_failures(args.direction.resolve())
+        if failures:
+            for failure in failures:
+                print(f"workflow: {failure}", file=sys.stderr)
+            raise SystemExit(1)
+        print("OK")
+    elif args.command == "begin-relaunch":
+        print(begin_relaunch(args.direction.resolve(), args.continue_research))
+    elif args.command == "feedback-only-check":
+        restored = restore_feedback_only_if_complete(args.direction.resolve())
+        print("RESTORED" if restored else "PENDING")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 """Check that a Markdown deliverable actually renders on GitHub -- and reads like a paper.
 
-Six checks, all of which have caught a real bug in this direction:
+Six checks, each of which has caught a real project bug:
 
 1. KaTeX compile of every display (```math fence) equation.
 2. KaTeX compile of every inline $...$ expression *after* simulating GitHub's
@@ -12,7 +12,7 @@ Six checks, all of which have caught a real bug in this direction:
    table the reader has to interpret unaided is an unfinished result.
 6. Mechanical contrast constructions ("we do X rather than Y") stay rare (rule 9d).
 
-Usage: python experiments/check_render.py REPORT.md RESULTS.md
+Usage: python check_render.py DIR/REPORT.md DIR/RESULTS.md
 Exit code 1 if any check fails.
 """
 

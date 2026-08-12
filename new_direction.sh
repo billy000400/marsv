@@ -30,6 +30,13 @@ TODO — concrete artifact(s) that mean done, e.g. "RESULTS.md has <X>/<Y> (curr
 gives a clear verdict with Methods + figures." Null/negative results are COMPLETE if the question is
 answered. When done, the loop writes an empty `STOP` file.
 
+## Report policy
+- **Core research question:** TODO — the exact question REPORT.md answers.
+- **Primary report:** `REPORT.md`
+- **Maximum report words:** 5000
+- **Maximum main figures:** 8
+- **Detailed results:** `RESULTS.md`
+
 ## Fallback (if time runs short)
 TODO — minimum acceptable deliverable. The wrapper reserves the last 20 min to finalize + STOP.
 
@@ -42,7 +49,7 @@ TODO — minimum acceptable deliverable. The wrapper reserves the last 20 min to
 ## Stages (checklist)
 - [ ] S1 — TODO
 - [ ] S2 — TODO
-- [ ] S3 — TODO  (each reported metric: save a plot + define it in the affected REPORT*.md Methods)
+- [ ] S3 — TODO  (save useful plots; define metrics selected for REPORT*.md in its Methods)
 
 ## Out of scope (do NOT)
 - TODO. Don't drift into other directions.

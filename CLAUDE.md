@@ -127,13 +127,13 @@ Results show current-best numbers only, with figures referenced from plots/.
 ### 8a. Display math must live at COLUMN 0 (top level), never nested in a list item.
 
 **The rule, verified against GitHub's own renderer (`POST https://api.github.com/markdown`):**
-keep every display equation — whether `$$…$$` or a ` ```math ` fence — as its own top-level block at
+keep every display equation — whether double-dollar delimiters or a ` ```math ` fence — as its own top-level block at
 **column 0, with a blank line before and after**. Do NOT put display math inside a `-`/`*`/`1.` list
 item. Inline `$…$` in a sentence is fine for its *placement* — but its *contents* have a separate
 trap; see **8b**.
 
 **Why (the exact failure modes, both confirmed by reproduction):**
-1. A `$$…$$` block **glued** to the end of the preceding prose line (no blank line before `$$`) is
+1. A display-math block using double-dollar delimiters, when **glued** to the end of the preceding prose line (no blank line before double-dollar delimiters) is
    parsed as inline text and GitHub dumps the raw LaTeX — at column 0 too, not just in lists.
 2. **The subtle one that bit us:** an **indented ` ```math ` fence inside a list item renders as a
    plain code block (gray box + copy icon), not math, whenever that same list item's text contains
@@ -155,7 +155,7 @@ s(x) = \lVert \nabla_h \log p \rVert_F
 Follow-up prose as its own paragraph.
 ~~~
 
-Prefer the ` ```math ` fence over `$$…$$` for display blocks (no glued-delimiter trap), but at column 0
+Prefer the ` ```math ` fence over double-dollar delimiters for display blocks (no glued-delimiter trap), but at column 0
 either works. **Verify before committing:** pipe the file through the GitHub markdown API and confirm
 every display equation becomes a `math-renderer class="js-display-math"` element and NONE become
 `<pre lang="math">` code blocks:
@@ -207,18 +207,17 @@ LaTeX is valid and both checks above pass, which is why an operator has now repo
 
 ### 8d. Run ONE script that checks 8a–8c, rule 12 and rules 9a/9d. Eyeballing has failed every time.
 
-`dir13_plateau_on_grok_gpt/experiments/check_render.py` (with `katex_compile.js`) does all four checks
+The root `check_render.py` (with root `katex_compile.js`) does all mechanical render checks
 and exits non-zero on any problem: it compiles every ` ```math ` fence with KaTeX, compiles every
 inline `$…$` **after applying GitHub's backslash-stripping** (so 8b breaks surface as real KaTeX
 errors), flags every denylisted macro, and confirms via the GitHub API that each display equation
 became `js-display-math` and none became `<pre lang="math">` — plus that no `(plots/x.png)` path is
 missing its `![…]` embed, that every table has a real prose paragraph above it (rule 9a), and that
 self-describing contrast constructions stay within budget (rule 9d). One-time setup:
-`npm install --prefix /tmp/katexcheck katex`. Copy it into your direction and run it before you
-finish an iteration:
+`npm install --prefix /tmp/katexcheck katex`. Run the root checker before finishing an iteration:
 
 ~~~
-python3 experiments/check_render.py REPORT*.md RESULTS.md  # exit 0 = renders on GitHub
+python3 ../check_render.py REPORT*.md RESULTS.md  # from a direction; exit 0 = renders on GitHub
 ~~~
 
 ---
@@ -343,17 +342,18 @@ deliverable.
 - “Self-contained” means explaining the evidence selected for the argument. It does not mean
   documenting every experiment performed.
 
-A bare path like `(plots/foo.png)` in prose does NOT render — it is just text, and the figure never
-appears. **Every quantitative result must be embedded as an actual Markdown image** so it renders on
-GitHub:
+For every figure selected for a report or `RESULTS.md`, a bare path like `(plots/foo.png)` in
+prose does NOT render — it is just text. Embed the selected figure as an actual Markdown image so it
+renders on GitHub. Saving a plot does not imply that it belongs in a report:
 
 ```
 ![Short descriptive caption](plots/foo.png)
 ```
 
-- This applies to every affected REPORT*.md, not only RESULTS.md, and on **normal iterations**, not only at
-  finalization: whenever you curate the deliverables, (re)embed the current-best figures as `![](…)`
-  images. Do not defer report figures to the last 20 minutes.
+- This rendering requirement applies to figures actually selected for any deliverable, on normal
+  iterations as well as finalization. Do not defer selected report figures to the last 20 minutes.
+- Explain every metric selected for a report. Metrics used only in `RESULTS.md` stay defined there and
+  need not be copied into the report.
 - Grep before committing to catch un-rendered path references:
   `grep -nE '\(plots/[^)]+\.png\)' REPORT*.md RESULTS.md` — every hit that is not preceded by `!` and
   a caption in `![...]` is a figure that will NOT render. Convert it to an `![caption](plots/….png)`

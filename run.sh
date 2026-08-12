@@ -31,8 +31,12 @@ BUDGET_ABS="$(pwd)/$BUDGET_FILE"
 RULES_ABS="$(pwd)/CLAUDE.md"     # operator rules (read before write, curation, report structure)
 WRITING_ABS="$(pwd)/WRITING.md" # appended with Claude's supported system-prompt-file flag
 WORKFLOW_ABS="$(pwd)/workflow.py"
-[ -f "$WRITING_ABS" ] && [ -f "$WORKFLOW_ABS" ] || { echo "[run.sh] missing WRITING.md or workflow.py" >&2; exit 1; }
 CHECK_MD_ABS="$(pwd)/check_md.py"
+CHECK_RENDER_ABS="$(pwd)/check_render.py"
+[ -f "$WRITING_ABS" ] && [ -f "$WORKFLOW_ABS" ] && [ -f "$CHECK_MD_ABS" ] && [ -f "$CHECK_RENDER_ABS" ] || {
+  echo "[run.sh] missing WRITING.md, workflow.py, check_md.py, or check_render.py" >&2
+  exit 1
+}
 read_budget() { grep -E "^$1:" "$BUDGET_FILE" 2>/dev/null | head -1 | sed -E "s/^$1:[[:space:]]*//; s/[[:space:]].*$//"; }
 
 MODEL="$(read_budget MODEL)";                    MODEL="${MODEL:-opus}"
@@ -126,7 +130,14 @@ git_sync() {
   ' _ "$phase" "$branch" "$DIR" "$SSH_SETUP"
 }
 
+# Crash recovery: a completed feedback-only relaunch must stop before any worker call.
+python3 "$WORKFLOW_ABS" feedback-only-check . >/dev/null || exit 1
+
 while [ "$(date +%s)" -lt "$END" ] && [ ! -f STOP ]; do
+  if [ "$(python3 "$WORKFLOW_ABS" feedback-only-check .)" = "RESTORED" ]; then
+    echo "[gate] all feedback was already addressed; restored STOP before worker invocation."
+    break
+  fi
   REMAIN=$(( (END - $(date +%s)) / 60 ))
   echo "[run.sh] $(date '+%F %T')  ~${REMAIN} min left  -----------------------------"
 
@@ -150,6 +161,15 @@ ${COMPACT_CONTEXT}"
     --model "$MODEL" \
     --dangerously-skip-permissions \
     2>&1 | tee -a session.log
+
+  if [ -z "$ACTIVE_MANIFEST" ] && [ -f STOP ]; then
+    if ! python3 "$WORKFLOW_ABS" check-budgets . >/dev/null; then
+      PREMATURE_STOP=".tasks/STOP.over-budget.$(date +%s)"
+      mkdir -p .tasks
+      mv STOP "$PREMATURE_STOP"
+      echo "[gate] moved STOP to $PREMATURE_STOP; report budget must pass before completion."
+    fi
+  fi
 
   if [ -n "$ACTIVE_MANIFEST" ]; then
     # A worker cannot bypass the gate by creating STOP or renaming feedback itself.
@@ -175,10 +195,10 @@ ${COMPACT_CONTEXT}"
         FORMAT_PASSED=no
       fi
       REPORT_FILES=(REPORT*.md)
-      if [ -f experiments/check_render.py ] && [ -e "${REPORT_FILES[0]}" ]; then
+      if [ -e "${REPORT_FILES[0]}" ]; then
         RENDER_FILES=("${REPORT_FILES[@]}")
         [ -f RESULTS.md ] && RENDER_FILES+=(RESULTS.md)
-        python3 experiments/check_render.py "${RENDER_FILES[@]}" || FORMAT_PASSED=no
+        python3 "$CHECK_RENDER_ABS" "${RENDER_FILES[@]}" || FORMAT_PASSED=no
       fi
 
       REVIEW_DIR="$(mktemp -d /tmp/marsv-content-review.XXXXXX)" || break
@@ -190,8 +210,12 @@ ${COMPACT_CONTEXT}"
               --safe-mode --tools Read --system-prompt "$REVIEW_SYSTEM" \
               --json-schema "$REVIEW_SCHEMA" --output-format json \
               --model "$MODEL" --dangerously-skip-permissions) >"$REVIEW_DIR/review.json"; then
-          python3 "$WORKFLOW_ABS" record-review "$ACTIVE_MANIFEST" "$REVIEW_DIR/review.json" \
-            --format-passed "$FORMAT_PASSED" || true
+          if python3 "$WORKFLOW_ABS" record-review "$ACTIVE_MANIFEST" "$REVIEW_DIR/review.json" \
+              --format-passed "$FORMAT_PASSED"; then
+            if [ "$(python3 "$WORKFLOW_ABS" feedback-only-check .)" = "RESTORED" ]; then
+              echo "[gate] final feedback approved; restored STOP and ended feedback-only relaunch."
+            fi
+          fi
         else
           echo "[gate] reviewer failed to run; feedback remains unaddressed."
         fi

@@ -1385,3 +1385,7 @@ $n_{\rm train} = 80$ on the original 123, all 8 block-6 probes reproduce pattern
 CHECKS PASS (REPORT 47 display eqs / 1872 inline eqs / 38 embeds / 0 problems; RESULTS 3 display eqs /
 1279 inline eqs / 38 embeds / 0 problems). Figure 38 numbered after Figure 37 in both files and cited by
 number; 38 embeds and 38 captions per file; no bare `(plots/*.png)` references.
+
+## 2026-08-12 — concise report curation
+
+Preserved the previous full REPORT.md verbatim as TECHNICAL_APPENDIX.md and rewrote REPORT.md around the shortest evidence chain answering the original question. No experiment or metric changed; detailed and secondary evidence remains in RESULTS.md and the appendix. The curated report selects seven figures and stays within the canonical report budget.

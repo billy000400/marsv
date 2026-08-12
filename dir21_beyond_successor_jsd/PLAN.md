@@ -16,6 +16,14 @@ The existing correlation therefore leaves an important question unanswered:
 
 This is an exploratory investigation. Do not begin by assuming that layer alignment, boundary angle, spline density, context, semantics, or any other proposed mechanism is correct. Inspect the local evidence first and propose hypotheses afterward.
 
+## Report policy
+
+- **Core research question:** Why can token pairs with similar successor JSD have different transition widths?
+- **Primary report:** `REPORT.md`
+- **Maximum report words:** 5000
+- **Maximum main figures:** 8
+- **Detailed results:** `RESULTS.md`
+
 ## Success criterion
 
 Produce a concise exploratory report that:

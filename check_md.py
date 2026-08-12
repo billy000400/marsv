@@ -16,7 +16,7 @@ Checks (the high-frequency GitHub-render failures):
 import sys, os, re
 
 def strip_code(s: str) -> str:
-    s = re.sub(r'```.*?```', '', s, flags=re.S)   # fenced blocks
+    s = re.sub(r'(?ms)^(```|~~~)[^\n]*\n.*?^\1\s*$', '', s, flags=re.S)  # backtick or tilde fenced blocks
     s = re.sub(r'`[^`]*`', '', s)                 # inline code
     return s
 
@@ -39,7 +39,7 @@ def check(path):
         errs.append(r'contains \[ \] \( or \) — GitHub does not render these; use $$...$$ or $...$')
 
     # E3 image embeds resolve on disk
-    embedded = re.findall(r'!\[[^\]]*\]\(([^)\s]+)', src)
+    embedded = re.findall(r'!\[[^\]]*\]\(([^)\s]+)', body)
     for p in embedded:
         if p.startswith(('http://', 'https://')):
             continue

@@ -16,7 +16,7 @@ These rules apply to every `REPORT*.md`, including follow-ups and supplements.
 10. Match the requested research question and output path exactly; do not substitute a
     nearby question or a conventional filename.
 11. Keep each report concise. Unless PLAN.md or the active task manifest explicitly
-    overrides it, a REPORT*.md must stay below 5,000 words and 8 main figures.
+    overrides it, a REPORT*.md may contain at most 5,000 words and 8 main figures.
 12. A report presents the shortest evidence chain sufficient to answer its research
     question. It is not an archive of every experiment.
 13. Put secondary analyses, robustness checks, failed experiments, and implementation

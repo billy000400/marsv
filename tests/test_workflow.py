@@ -147,6 +147,117 @@ LATEST_JOURNAL_ONLY
         self.assertIn("every `REPORT*.md`", writing)
         self.assertIn('--append-system-prompt-file "$WRITING_ABS"', run)
         self.assertNotIn("JOURNAL.md, RESULTS.md, and CHANGELOG.md in full", run)
+        self.assertTrue((ROOT / "check_render.py").is_file())
+        self.assertTrue((ROOT / "katex_compile.js").is_file())
+        self.assertIn('python3 "$CHECK_RENDER_ABS"', run)
+        self.assertNotIn("experiments/check_render.py", run)
+        self.assertEqual(list(ROOT.glob("dir*/experiments/check_render.py")), [])
+        self.assertEqual(list(ROOT.glob("dir*/experiments/katex_compile.js")), [])
+
+
+    def test_default_word_budget_rejects_5001_words(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = self.make_direction(Path(tmp))
+            report = direction / "REPORT.md"
+            report.write_text("word " * 5001, encoding="utf-8")
+            self.assertIn("5001 words", workflow.report_budget_failures(direction)[0])
+
+    def test_default_figure_budget_rejects_nine_embeds(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = self.make_direction(Path(tmp))
+            report = direction / "REPORT.md"
+            report.write_text("\n".join(f"![figure {i}](plots/{i}.png)" for i in range(9)), encoding="utf-8")
+            self.assertIn("9 Markdown image embeds", workflow.report_budget_failures(direction)[0])
+
+    def test_task_override_permits_long_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = self.make_direction(Path(tmp))
+            report = direction / "REPORT.md"
+            report.write_text("word " * 5001, encoding="utf-8")
+            manifest = self.prepare(direction, "Write REPORT.md.")
+            data = workflow.load_manifest(manifest)
+            data["report_policy"]["max_words"] = 6000
+            self.assertEqual(workflow.report_budget_failures(direction, ["REPORT.md"], data), [])
+
+    def test_results_plots_need_not_be_in_report(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = self.make_direction(Path(tmp))
+            (direction / "REPORT.md").write_text("# Concise report\n\nNo main figure is needed.\n", encoding="utf-8")
+            (direction / "RESULTS.md").write_text(
+                "\n".join(f"![detail {i}](plots/{i}.png)" for i in range(20)), encoding="utf-8")
+            self.assertEqual(workflow.report_budget_failures(direction), [])
+
+    def make_feedback(self, direction: Path, number: int) -> Path:
+        source = direction / f"human_feedback_{number}.txt"
+        source.write_text(f"Feedback {number}.", encoding="utf-8")
+        return workflow.create_manifest(direction, source)
+
+    def approve_manifest(self, manifest: Path) -> bool:
+        self.route_and_seal(manifest, ["REPORT.md"])
+        direction = workflow.direction_for(manifest)
+        (direction / "REPORT.md").write_text("# Report\n\nAnswer.\n", encoding="utf-8")
+        self.complete(manifest)
+        outputs = workflow.files_for_review(manifest, workflow.load_manifest(manifest))
+        review = direction / ".tasks" / "approval.json"
+        review.write_text(json.dumps({
+            "pass": True, "inspected_outputs": outputs, "failures": [], "summary": "Approved."
+        }), encoding="utf-8")
+        return workflow.record_review(manifest, review, format_passed=True)
+
+    def test_stop_with_feedback_enters_feedback_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = self.make_direction(Path(tmp))
+            (direction / "STOP").touch()
+            self.make_feedback(direction, 1)
+            self.assertEqual(workflow.begin_relaunch(direction), "feedback-only")
+            self.assertTrue(workflow.feedback_only_marker(direction).is_file())
+            self.assertFalse((direction / "STOP").exists())
+
+    def test_rejection_or_remaining_feedback_does_not_restore_stop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = self.make_direction(Path(tmp))
+            (direction / "STOP").touch()
+            first = self.make_feedback(direction, 1)
+            self.make_feedback(direction, 2)
+            workflow.begin_relaunch(direction)
+            self.assertTrue(self.approve_manifest(first))
+            self.assertFalse(workflow.restore_feedback_only_if_complete(direction))
+            self.assertFalse((direction / "STOP").exists())
+            active = workflow.active_manifests(direction)[0]
+            self.route_and_seal(active, ["REPORT.md"])
+            (direction / "REPORT.md").write_text("# Report\n", encoding="utf-8")
+            self.complete(active)
+            outputs = workflow.files_for_review(active, workflow.load_manifest(active))
+            review = direction / ".tasks" / "rejection.json"
+            review.write_text(json.dumps({"pass": False, "inspected_outputs": outputs,
+                                          "failures": ["Incomplete"], "summary": "Rejected"}), encoding="utf-8")
+            self.assertFalse(workflow.record_review(active, review, format_passed=True))
+            self.assertFalse(workflow.restore_feedback_only_if_complete(direction))
+            self.assertTrue(workflow.feedback_only_marker(direction).is_file())
+
+    def test_final_approval_and_crash_recovery_restore_stop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = self.make_direction(Path(tmp))
+            (direction / "STOP").touch()
+            manifest = self.make_feedback(direction, 1)
+            workflow.begin_relaunch(direction)
+            self.assertTrue(self.approve_manifest(manifest))
+            self.assertTrue(workflow.restore_feedback_only_if_complete(direction))
+            self.assertTrue((direction / "STOP").is_file())
+            self.assertFalse(workflow.feedback_only_marker(direction).exists())
+            (direction / "STOP").unlink()
+            workflow.feedback_only_marker(direction).write_text("pending\n", encoding="utf-8")
+            self.assertTrue(workflow.restore_feedback_only_if_complete(direction))
+            self.assertTrue((direction / "STOP").is_file())
+
+    def test_continue_research_bypasses_feedback_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            direction = self.make_direction(Path(tmp))
+            (direction / "STOP").touch()
+            self.make_feedback(direction, 1)
+            self.assertEqual(workflow.begin_relaunch(direction, continue_research=True), "continue-research")
+            self.assertFalse(workflow.feedback_only_marker(direction).exists())
+            self.assertFalse((direction / "STOP").exists())
 
 
 if __name__ == "__main__":

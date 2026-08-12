@@ -1665,3 +1665,7 @@ reframed as what they actually measured.
 into a positive one with a concrete mechanism-locating follow-up. No STOP: the next experiment is named
 and cheap (refit the other five sites at 250 tokens), and it decides whether the free embedding lookup
 can be upgraded to a width-specific table or whether readability begins in the middle of the network.
+
+## 2026-08-12 — concise report curation
+
+Preserved the previous full REPORT.md verbatim as TECHNICAL_APPENDIX.md and rewrote REPORT.md around the shortest evidence chain answering the original question. No experiment or metric changed; detailed and secondary evidence remains in RESULTS.md and the appendix. The curated report selects seven figures and stays within the canonical report budget.
