@@ -1412,3 +1412,15 @@ plot or result file was touched — REPORT.md (md5 4d9f89410ff47f9179f0a0d1546ce
 (md5 c32a6d3b1d735c671419d8089546b178) remain byte-identical to hold iterations #13–#33. No render
 check was re-run: the bytes are unchanged since the last clean full pass, and the recent attempts
 only re-hit the GitHub markdown API rate limit. This entry is the only file edited.
+
+## 2026-08-12 (hold iteration #35: unchanged, still awaiting the wrapper's content review)
+
+No change. `human_feedback_1.txt` is still present and unrenamed, so no `STOP` (CLAUDE.md rule 11);
+the manifest stays `review_pending` with its single checklist item `done`. The plan's success
+criteria are met (S1–S4 plus the pre-registered replication S3R), so no experiment ran and no
+deliverable, plot or result file was touched — REPORT.md (md5 4d9f89410ff47f9179f0a0d1546ce70e) and
+RESULTS.md (md5 c32a6d3b1d735c671419d8089546b178) remain byte-identical to hold iterations #13–#34.
+`check_render.py` was attempted once this iteration and again hit the GitHub markdown API rate limit
+(HTTP 403) before finishing; the local KaTeX/figure/table/contrast checks it ran first reported no
+problems, and the bytes are unchanged since the last clean full pass, so nothing needs repair. This
+entry is the only file edited.
