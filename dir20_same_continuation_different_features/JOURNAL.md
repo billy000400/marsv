@@ -1077,3 +1077,12 @@ experiment was run. Re-verified only: `python3 ../check_render.py REPORT.md RESU
 (REPORT.md 11 display / 195 inline eqs, 3 figures; RESULTS.md 196 inline eqs, 6 figures; 0 problems);
 REPORT.md is 4999 words with 3 embedded figures, inside the 5,000-word / 8-figure limit. No files
 edited other than this entry.
+
+## 2026-08-12 (hold iteration #4: still waiting on the wrapper's content review)
+
+State unchanged. `human_feedback_1.txt` remains unrenamed, so no `STOP` is written (CLAUDE.md
+rule 11); the manifest stays `review_pending` with its one checklist item `done`. Plan success
+criteria are already met, so no experiment was run and no deliverable was touched. Re-verified only:
+`python3 ../check_render.py REPORT.md RESULTS.md` → exit 0 (REPORT.md 11 display / 195 inline eqs,
+3 figures; RESULTS.md 196 inline eqs, 6 figures; 0 problems); REPORT.md 4999 words, 3 figures.
+No files edited other than this entry.
