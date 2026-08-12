@@ -43,9 +43,10 @@ spanning subword fragments, punctuation, numerals, capitalised names and rarer w
 measured widths correlate at $\rho = +0.60$ ($p = 3.0\times10^{-4}$). What that lookup ranks is narrower
 than "the width": it predicts how plateau-shaped a token's curves are, and predicts none of the width
 ordering that remains once curve shape is removed, so the free tier inherits its accuracy from the two
-properties nearly coinciding in this model. That missing component stays unreadable one block deeper —
-from the block-0 MLP's output and from the whole post-block-0 residual state alike — so there is no
-cheap upgrade to a table that ranks the crossing width specifically.
+properties nearly coinciding in this model. That missing component stays unreadable at every site we
+tried — the block-0 MLP's output, the whole post-block-0 residual state, and the residual stream after
+blocks 6, 12 and 18, where the probe drifts down to zero rather than up — so there is no cheap upgrade
+to a table that ranks the crossing width specifically, at any depth.
 
 **And it is not a quirk of one network.** Repeating the measurement in three other Pythia sizes at the
 same checkpoint, with the same token ids, anchors and frames, gives the same ranking of tokens:
@@ -1469,21 +1470,75 @@ moving the probe one block deeper.
 "Not readable" means "not by this probe" — a different probe family or a larger training set could
 still recover the component. The two properties are also entangled in the data ($\rho = +0.809$ across
 the 123 tokens), so the width residual is built from the smaller part of a strong correlation and is
-the least reliable of the four targets. And these are the three earliest representations only; nothing
-here tests the deeper sites where the layer sweep shows the crossing actually sharpening.
+the least reliable of the four targets. And these are the three earliest representations only; the
+section below takes the same probes down the network.
+
+### Does the component become explicit deeper in the network?
+
+All three sites above sit within one block of the input, and the layer sweep says that is the wrong end
+of the network to look for a sharp crossing: re-measuring the same tokens at blocks 6, 12 and 18 keeps
+the ordering ($\rho = +0.72$ between block 0 and block 18) while the median width climbs 0.553 → 0.800
+and the across-token spread collapses fivefold. If the component is decided early but only *stated*
+later, that is where it would be stated — and a mid-network probe would still be one forward pass, so
+an auditor could afford it. Figure 35 refits the same four probes, with the same targets, ceilings and
+50 splits, from the residual state at blocks 6, 12 and 18 at the same final token position, averaged
+over the three frames as before. Block 0 is refit alongside, read from `hidden_states` rather than from
+the forward hook the previous section used, and must reproduce its numbers.
+
+![Four panels of four probe accuracies each, one panel per residual-stream depth: blocks 0, 6, 12 and 18](plots/deep_shape.png)
+
+**Figure 35.** Pythia-1.4B, 123 endpoint tokens, 50 shared train/test splits. Each panel is the
+residual-stream state at the final token position after one block: (left to right) blocks 0, 6, 12, 18.
+y: the four targets — median edge drift $E_u$, plateau-filtered width $w_u$, and each with the other's
+across-token rank regressed out. x: mean held-out Spearman $\rho$ between predicted and measured target,
+error bars $\pm 1$ sd across splits. Hatched gray bars = the 50-permutation null (mean $\pm 1$ sd),
+carets = the ceiling $\sqrt{R}$ that target's split-half reliability allows (identical across panels,
+since ceilings belong to the targets), printed $p$ = a permutation $p$-value above 0.05.
+
+| held-out $\rho$ (123 tokens, 50 shared splits) | block 0 | block 6 | block 12 | block 18 | ceiling |
+|---|---|---|---|---|---|
+| shape $E_u$ | $+0.808$ | $+0.820$ | $+0.832$ | $+0.821$ | 0.927 |
+| width $w_u$ | $+0.666$ | $+0.627$ | $+0.630$ | $+0.628$ | 0.857 |
+| **width, shape removed** | **$+0.115$** ($p = 0.22$) | **$+0.089$** ($p = 0.18$) | **$+0.021$** ($p = 0.45$) | **$-0.026$** ($p = 0.73$) | 0.630 |
+| shape, width removed | $+0.281$ | $+0.318$ | $+0.297$ | $+0.322$ | 0.739 |
+
+**Depth does not make the width-specific component readable; it makes it less readable.** The bold row
+stays inside its permutation null at all four depths, reaching at most 0.18 of a ceiling of 0.630, and
+by block 18 it is at zero. The decline is real split by split against block 0 — $-0.026$ at block 6
+(higher in 40% of 50 splits), $-0.094$ at block 12 (16%) and $-0.141$ at block 18 (10%,
+$p = 3\times10^{-12}$) — but both ends of it are inside the null, so the claim is narrow: the little
+the probe had at block 0 is gone by block 18, not that depth destroys information. The rest of the
+table is nearly flat, which is what makes that row readable. Shape is recovered at $+0.81$–$+0.83$
+everywhere and is slightly *better* deeper (block 12 beats block 0 by $+0.024$, 80% of splits), so the
+deeper residual stream is not a worse representation in general — it is specifically no better for the
+width, and no better at all for the part of the width shape does not explain. The block-0 panel
+reproduces the previous section's four numbers to four decimals, which makes the four panels a
+comparison of depth rather than of runs.
+
+Six representations — the embedding row, the block-0 MLP output, and the residual stream after blocks
+0, 6, 12 and 18 — now sit on the same side of a line: each carries the width-specific component (the
+transplant moves it at $+0.796$ with shape held constant) and none states it to a ridge readout. For
+the deliverable that closes the door properly rather than one block at a time: there is no depth at
+which a one-forward-pass linear probe becomes the width screen. What is cheaply readable in this model
+is curve shape; measuring the widths stays the only route to the width.
+
+The limits are unchanged except that the third is now narrower. "Not readable" still means "not by
+ridge on 2,048 features from 80 training tokens", and this test adds sites rather than probe families.
+Shape and width are still entangled at $+0.809$, making the width residual the least reliable of the
+four targets. And these are residual-stream states at four depths, at one token position, in one model:
+an MLP's internal hidden layer or another model could still hold the component in linearly readable
+form.
 
 ## Next experiment
 
-**Read the same four targets from the middle of the network.** The three earliest representations are
-now tested and the width-specific component is at chance in all of them. The layer sweep says the
-sharpening happens further down: measured at blocks 6, 12 and 18 the token ordering survives
-($\rho = +0.72$ between block 0 and block 18) while the median width climbs 0.553 → 0.800 and the
-spread across tokens collapses fivefold. That is the natural place to look for a representation in
-which the crossing width is explicit. The test refits the same four probes, unchanged in protocol,
-targets and splits, from the residual state at blocks 6, 12 and 18 at the same final position, on the
-same 123 tokens. If the width residual rises above chance at some depth, the component becomes explicit
-downstream of where it is decided and a mid-network probe is the screen that ranks it; if it stays at
-chance everywhere while the transplant keeps transporting it, the negative strengthens from "no early
-site makes it explicit" to "no residual-stream site at any depth does, under a linear readout". One
-forward pass per token per frame with hidden states retained — 123 tokens $\times$ 3 frames, no
-interpolation curves.
+**Change the readout, not the site.** Six feature sets have now been tested against one probe family,
+so the caveat every statement of this negative carries — "not readable" means not by ridge regression
+on 2,048 features with 80 training tokens — is the only untested part left, and a seventh site would
+not touch it. The test holds the features, targets, splits and permutation nulls fixed and swaps the
+readout: kernel ridge with an RBF kernel, and a $k$-nearest-neighbour readout in the same feature
+space, each tuned on the training half of every split exactly as the ridge penalty is. If a nonlinear
+readout lifts the width residual above its null at any of the six sites, linearity was the binding
+constraint and the component is present in a form a screen could use; if both stay inside the null, the
+negative stops depending on the word "linear". Cost: the same 369 single-token forward passes to
+rebuild the features, then CPU-bound algebra on 123 tokens — no interpolation curves, no new
+measurement.

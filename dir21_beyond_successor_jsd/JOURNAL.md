@@ -1423,3 +1423,67 @@ figure with matched nulls and ceilings and an exact tie-check to the previous re
 deliverables are curated to current-best with Figure 34 embedded and `check_render.py` passing (34
 embeds, 34 captions, 0 problems). No STOP written: the next experiment is named, cheap and real — the
 same four probes from the residual state at blocks 6, 12 and 18.
+
+## 2026-08-12 — iteration 20: going deeper makes it worse, which is the useful part
+
+**What I set out to do.** No unaddressed feedback, so ordinary plan work: the experiment both
+deliverables named as next. Pattern 44 had found the width-with-shape-removed component at chance at the
+three earliest sites, and the obvious objection to that negative is that it tested the wrong end of the
+network — the layer sweep (pattern 9) shows the crossing being sharpened over blocks 0–18 while the
+token ordering survives at $+0.72$. If the component is decided at the input but only *stated* later, a
+mid-network probe finds it. Refit the same four probes from the residual stream after blocks 0, 6, 12
+and 18.
+
+**It is not stated later, and the direction of the miss is the finding.** Width with shape removed goes
+$+0.115 \to +0.089 \to +0.021 \to -0.026$ across the four depths, with permutation $p$ of 0.22, 0.18,
+0.45, 0.73. Not just flat — monotonically towards zero. I expected flat, on the theory that the three
+early sites were already telling me the answer; a downward trend is a stronger result than the one I was
+prepared for, because "decided early, stated later" is the specific hypothesis this run existed to kill
+and it dies with a sign rather than a shrug.
+
+**The trap I had to avoid was overreading that trend.** The paired split-by-split drops are unambiguous
+($-0.141$ at block 18, higher in 10% of 50 splits, $p = 3\times10^{-12}$), and it is tempting to write
+"depth destroys the width-specific information". That would be wrong twice over: both ends of the trend
+are inside their own permutation nulls, so what is declining is a quantity I cannot distinguish from
+zero at either end, and a probe getting worse says nothing about what the representation holds. What I
+wrote instead is that the little the probe had at block 0 is gone by block 18, and that the hypothesis
+this tested is dead. Narrow, but it is what the numbers carry.
+
+**What made the trend interpretable was the rest of the table being flat.** Shape is read at $+0.808 \to
++0.820 \to +0.832 \to +0.821$ and is actually best at block 12 ($+0.024$ over block 0, 80% of splits).
+So I can say the deeper residual stream is not a degraded representation in general — it reads shape
+slightly *better* — it is specifically no better for the width and no better at all for the shape-free
+part of it. Without that control column the bold row would have been consistent with "features get
+harder to read with depth", which is a boring and probably wrong explanation.
+
+**The tie-check earned its keep again, and this time it checked something extra.** Block 0 is the same
+site pattern 44 measured, but reached differently: pattern 44 took it from a forward hook on the block,
+this run takes it from `hidden_states[1]`. All four numbers match to four decimals (diff $0.0000$). That
+makes the four panels a comparison of depth rather than of runs, and it independently confirms the two
+routes to the post-block-0 state agree — which I had assumed when writing the script and would rather
+have verified than assumed. Third iteration running that this reproduction check has paid off.
+
+**Assumptions logged.** (a) Four depths, not all 24: blocks 6/12/18 are the ones the layer sweep already
+characterises, so the widths and orderings at those depths are known quantities rather than new ones,
+and a denser sweep would have multiplied the permutation-null cost without changing what the experiment
+can conclude. (b) Frame-averaged features again, as in pattern 44 — a genuine simplification for
+residual states at depth, more so than at block 0, since attention has had more blocks to read the
+frame. (c) Same targets and ceilings as patterns 41/44, recomputed rather than reused, and they agree.
+
+**Why the next experiment changes the readout instead of the site.** Six feature sets have now been
+tested against exactly one probe family, and every statement of this negative carries the same caveat:
+ridge, 2,048 features, 80 training tokens. A seventh site does not touch that caveat, and after this
+run's monotone decline I do not expect a seventh site to be informative anyway. Swapping in RBF kernel
+ridge and a $k$-NN readout, with features, targets, splits and nulls held fixed, is the cheap test of
+the one thing I have been repeating as a limitation for three iterations without measuring.
+
+**What I learned, beyond this direction.** A negative result gets stronger by having its best available
+escape route tested and closed, not by being restated at more sites. The escape route here was specific
+and named in advance ("decided early, stated later"), which is why closing it is worth a figure; if I
+had merely added blocks 6/12/18 as "more coverage" the same numbers would have said much less.
+
+**On track?** Yes. The named experiment ran, killed the hypothesis it was built to test, produced one
+figure with matched nulls and ceilings and an exact tie-check to the previous result, and both
+deliverables are curated to current-best with Figure 35 embedded and `check_render.py` passing (35
+embeds, 35 captions, 0 problems). No STOP written: the next experiment is named, cheap and real, and it
+attacks the last untested caveat rather than adding coverage.

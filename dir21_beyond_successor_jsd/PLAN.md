@@ -46,7 +46,36 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 19 — COMPLETE; what transports is not what a probe can read)
+## Current status (2026-08-12, iteration 20 — COMPLETE; the negative now spans most of the depth)
+
+**Iteration 20 ran the experiment both deliverables named as next** (`experiments/deep_shape_probe.py`,
+`plot_deep_shape.py`; Figure 35; deliverables now carry 35 figures each and pass `check_render.py`).
+The same four probes refit from the residual stream after blocks 0, 6, 12 and 18 — same 123 tokens,
+same four targets and ceilings, same 50 splits, same 50-permutation nulls. 369 single-token forward
+passes with hidden states retained; cost again dominated by the sixteen probes' permutation nulls on CPU.
+
+* **Width with shape removed is at chance at every depth:** $+0.115$ ($p = 0.22$) at block 0, $+0.089$
+  ($p = 0.18$) at 6, $+0.021$ ($p = 0.45$) at 12, $-0.026$ ($p = 0.73$) at 18, against a ceiling of
+  0.630. The trend runs *down*, not up — the opposite of what "decided early, stated later" predicts.
+* **The decline is real split by split but the claim stays narrow.** Against block 0: $-0.026$ (40% of
+  splits), $-0.094$ (16%), $-0.141$ (10%, $p = 3\times10^{-12}$). Both ends are inside the null, so the
+  statement is "the little it had is gone", not "depth destroys information".
+* **Not a general degradation.** Shape holds at $+0.808 \to +0.820 \to +0.832 \to +0.821$ and peaks at
+  block 12 ($+0.024$ over block 0, 80% of splits); the shape residual also improves slightly. Raw width
+  loses a little ($-0.036$ to $-0.040$). Deeper states read shape better and the width no better.
+* **The block-0 tie-check is exact to four decimals** ($+0.808$, $+0.666$, $+0.115$, $+0.281$; each
+  diff $0.0000$), reached from `hidden_states` rather than pattern 44's forward hook.
+* **Deliverable consequence:** six representations now carry the component without stating it, and none
+  state it. No depth turns a one-forward-pass linear probe into the width screen. Recorded in both files.
+
+**Next step (only if reopened):** change the readout, not the site. Six feature sets have been tested
+against one probe family, so the only untested caveat left is "ridge, 2,048 features, 80 training
+tokens". Hold features, targets, splits and nulls fixed and swap in RBF kernel ridge and a $k$-NN
+readout, each tuned on the training half of every split as the ridge penalty is. Above the null at any
+of the six sites → linearity was the binding constraint; inside it → the negative stops depending on
+the word "linear". Cost: the same 369 forward passes to rebuild features, then CPU-bound algebra.
+
+## Previous status (2026-08-12, iteration 19 — COMPLETE; what transports is not what a probe can read)
 
 **Iteration 19 ran the experiment both deliverables named as next** (`experiments/early_shape_probe.py`,
 `plot_early_shape.py`; Figure 34; deliverables now carry 34 figures each and pass `check_render.py`).

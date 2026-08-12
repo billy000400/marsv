@@ -1193,3 +1193,62 @@ blocks 6, 12 and 18, where the layer sweep shows the crossing sharpening while t
 (REPORT 44 display eqs / 1469 inline eqs / 34 embeds / 0 problems; RESULTS 3 display eqs / 1009 inline
 eqs / 34 embeds / 0 problems). Embed/caption counts match at 34 each; no bare `(plots/*.png)`
 references.
+
+## 2026-08-12 — iteration 20: the probe negative extends to blocks 6, 12 and 18 (Figure 35, pattern 45)
+
+**What changed.** Ran the experiment both deliverables named as next: the four probes of patterns 41/44
+refit from the residual stream after blocks 0, 6, 12 and 18 of Pythia-1.4B, on the same 123 endpoint
+tokens, with the same four targets, ceilings, 80/43 splits and 50-permutation nulls. New code
+`experiments/deep_shape_probe.py` and `experiments/plot_deep_shape.py`; new artifacts
+`results/deep_shape.json`, `results/deep_shape.log`, `plots/deep_shape.png`. Added as Figure 35 and
+pattern 45 to REPORT.md (new Results subsection "Does the component become explicit deeper in the
+network?", plus a Methods paragraph defining the per-block feature set) and to RESULTS.md (matching new
+subsection). Both deliverables now carry 35 figures.
+
+**New numbers (held-out Spearman $\rho$, 123 tokens, 50 shared splits).**
+
+- shape $E_u$: $+0.808$ / $+0.820$ / $+0.832$ / $+0.821$ at blocks 0 / 6 / 12 / 18 (ceiling 0.927).
+- width $w_u$: $+0.666$ / $+0.627$ / $+0.630$ / $+0.628$ (ceiling 0.857).
+- width with shape removed: $+0.115$ ($p = 0.22$) / $+0.089$ ($p = 0.18$) / $+0.021$ ($p = 0.45$) /
+  $-0.026$ ($p = 0.73$) (ceiling 0.630) — inside its permutation null at every depth.
+- shape with width removed: $+0.281$ / $+0.318$ / $+0.297$ / $+0.322$ (ceiling 0.739).
+- paired against block 0 on the 50 shared splits, width residual: $-0.026$ (higher in 40% of splits,
+  $p = 0.034$), $-0.094$ (16%, $p = 2\times10^{-9}$), $-0.141$ (10%, $p = 3\times10^{-12}$); shape:
+  $+0.012$ (66%), $+0.024$ (80%), $+0.013$ (58%); raw width: $-0.040$ (20%), $-0.036$ (22%), $-0.038$
+  (30%); shape residual: $+0.037$ (70%), $+0.017$ (58%, $p = 0.11$), $+0.041$ (68%).
+- tie-check: the refit block-0 probes reproduce pattern 44's $+0.808$, $+0.666$, $+0.115$, $+0.281$
+  with all four differences $0.0000$, reached from `hidden_states` rather than the forward hook, so the
+  four panels of Figure 35 differ only in depth.
+
+**Superseded text (no numbers superseded — this adds sites rather than replacing a result).**
+
+- REPORT.md Summary and RESULTS.md Summary: "stays at chance one block deeper" → "stays at chance at
+  the block-0 MLP output, the post-block-0 residual state, and blocks 6, 12 and 18, drifting down to
+  zero"; the "no cheap upgrade" sentence now ends "at any depth we tested".
+- REPORT.md pattern 44's third limit: "the sites are the three earliest ones; nothing here tests whether
+  a deeper representation makes the component explicit" → pointer to the new section. Same edit in
+  RESULTS.md.
+- REPORT.md Limitations: "the early-site probes (pattern 44) test three representations with one probe
+  family … cover only the three earliest representations" → "patterns 44 and 45 together test six
+  representations … The sites now span most of the network's depth; the probe family does not."
+- REPORT.md Discussion and Conclusion paragraphs on the readout extended from three sites to six.
+- REPORT.md compute budget: "the early-site probes" → "the two site-probe experiments".
+
+**Interpretation.** The one remaining way the component could have become linearly explicit was for the
+network to state downstream what it decides at the input, and the layer sweep puts the sharpening of the
+crossing over exactly these blocks. It does not happen: the probe moves monotonically towards zero with
+depth while the shape target is read just as well or better, so the deeper states are not degraded in
+general, only no better for the width and no better at all for its shape-free part. The decline is real
+split by split, but both ends sit inside the null, so the recorded claim is "the little the probe had at
+block 0 is gone by block 18", not "depth destroys information". Six representations now carry the
+width-specific component (transplant, pattern 43, $+0.796$ with shape held constant) without stating it
+to a ridge readout, and none state it.
+
+**Next experiment (recorded in both deliverables).** Change the readout, not the site: hold features,
+targets, splits and nulls fixed and swap ridge for RBF kernel ridge and a $k$-NN readout, each tuned on
+the training half of every split. This is the only untested caveat left after six feature sets.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 44 display eqs / 1536 inline eqs / 35 embeds / 0 problems; RESULTS 3 display eqs / 1049 inline
+eqs / 35 embeds / 0 problems). Embed/caption counts match at 35 each; figures numbered sequentially
+through 35; no bare `(plots/*.png)` references.
