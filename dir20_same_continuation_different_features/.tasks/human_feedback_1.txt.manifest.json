@@ -25,10 +25,7 @@
     "results/matched_pairs.json, results/matched_pairs.sha256, results/matched_features.npz (the amended analysis's locked bank)",
     "results/matched_pairs_rep.json, results/matched_pairs_rep.sha256, results/matched_features_rep.npz (the replication bank, locked 2026-08-12T02:53Z before any replication width was analysed)"
   ],
-  "unresolved_ambiguities": [
-    "RESOLVED (documented assumption, not blocking): 'independent replication' does not name a specific kind of independence. Interpreted as an independent-sample replication: a new pre-registered run on the WikiText-103 train split, a corpus split no analysis in this direction has ever touched, with the bank size and stopping rule frozen in writing before any replication width existed. The reports state explicitly that this is independence of data and protocol, not of team or codebase, and that external replication remains outstanding.",
-    "RESOLVED (documented assumption, not blocking): the feedback names no output file. Both deliverables that carry the claim (REPORT.md and RESULTS.md) are relabelled; no new report path is created, because none was requested."
-  ],
+  "unresolved_ambiguities": [],
   "checklist": [
     {
       "request": "The fixed-path intervention problem is now resolved, and the matched association is substantially cleaner. However, this cannot be described as a fully pre-registered confirmatory result: the PLAN fixed 300 prefixes and explicitly required an underpowered verdict and stop when fewer than 40 contrasts survived, but the bank was expanded from 300 to 1,395 prefixes after only 21 survived. Because no widths had been observed, this blinded sample-size change does not necessarily bias the effect, but it violates the frozen stopping rule. Please relabel this as an amended analysis and require an independent replication before making a confirmatory claim.",
@@ -39,5 +36,9 @@
         "ambiguity": "None. Two readings were resolved by documented assumption rather than left open: the feedback names no output file, so both deliverables carrying the claim (REPORT.md, RESULTS.md) were relabelled and no new report path was created; and \"independent\" was implemented as independence of data and protocol (untouched corpus split, sample size and stopping rule frozen before scoring), with the reports stating plainly that it is not independence of code or personnel and that external replication remains outstanding."
       }
     }
+  ],
+  "resolved_assumptions": [
+    "RESOLVED (documented assumption, not blocking): 'independent replication' does not name a specific kind of independence. Interpreted as an independent-sample replication: a new pre-registered run on the WikiText-103 train split, a corpus split no analysis in this direction has ever touched, with the bank size and stopping rule frozen in writing before any replication width existed. The reports state explicitly that this is independence of data and protocol, not of team or codebase, and that external replication remains outstanding.",
+    "RESOLVED (documented assumption, not blocking): the feedback names no output file. Both deliverables that carry the claim (REPORT.md and RESULTS.md) are relabelled; no new report path is created, because none was requested."
   ]
 }

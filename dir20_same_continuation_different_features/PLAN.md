@@ -1,237 +1,586 @@
-# PLAN - Do internal feature differences explain transition width at matched successor JSD?
+# PLAN — Intuitive Same-Continuation Examples: When Do Conceptually Different Endpoints Produce Plateaus?
 
-> This plan supersedes the previous exploratory `dir20` plan. Run it as a fresh confirmatory
-> direction. Existing `dir20` pair banks and outcomes may be used to reuse code, but they must not
-> enter the primary analysis.
+> Working folder: `dir20_same_continuation_different_features`
+>
+> This plan **supersedes the current F-based matched-pair analysis as the next direction**.
+> The goal is no longer to explain transition width with a newly invented feature score.
+> The goal is to find **simple, human-readable examples** where two conceptually different endpoint tokens lead to essentially the same continuation, then directly inspect whether interpolation between them produces a plateau.
 
 ## Question
 
-Why can two final-token pairs have similar successor JSD but very different transition widths?
+Consider two prompts that are identical except for the final token:
 
-Primary hypothesis:
+```text
+P + A
+P + B
+```
 
-> Among pairs matched on successor JSD and basic endpoint geometry, a pair that engages more
-> different downstream MLP features will have a sharper transition, i.e. a smaller width.
+where `A` and `B` represent the same underlying referent, quantity, entity, or information in noticeably different ways.
 
-This experiment tests an association first. It attempts a causal intervention only if that
-association replicates on fresh data.
+Examples:
 
-## Success criterion (definition of done)
+```text
+Mary and John went to the store. John gave a book to Mary
+Mary and John went to the store. John gave a book to her
+```
 
-`REPORT.md` gives a clear supported / not supported / underpowered verdict using a fresh held-out
-bank in GPT-2 Large. It must contain:
+```text
+Two plus two is four
+Two plus two is 4
+```
 
-1. Matthew's `big`/`in` plateau and `big`/`large` smooth comparison as a sanity check;
-2. at least 80 matched within-prefix contrasts locked before any interpolation outcome is computed;
-3. a balance table showing that successor JSD and endpoint-geometry confounds are matched;
-4. the paired difference in transition width between high- and low-feature-difference pairs;
-5. raw curves for representative supporting cases and counterexamples.
+The central question is:
 
-A clean null result is complete. When complete, write an empty `STOP` file.
+> **When two conceptually different endpoint tokens lead the model to make essentially the same next prediction, which endpoint pairs produce a plateau during activation interpolation, and which do not?**
+
+A second question is:
+
+> **Does the same example behave similarly in GPT-2 Large and Pythia, or can one model show a plateau while the other is smooth?**
+
+The output of this direction should primarily be **concrete examples and raw interpolation curves**, not a new scalar explanation.
+
+---
+
+## Success criterion
+
+`REPORT.md` is complete when it contains:
+
+1. A bank of at least **12 intuitive endpoint pairs** that pass the continuation checks below, preferably spanning at least 4 human-interpretable relation types.
+2. The exact natural-language prompt for every pair.
+3. For every accepted pair, the actual endpoint next-token predictions and short greedy continuations in:
+
+   * GPT-2 Large;
+   * Pythia.
+4. For every accepted pair, a **normalized-distance-vs-interpolation-position plot** for both models.
+5. A plain-English grouping of examples into:
+
+   * clear plateau-like behavior in both models;
+   * smooth / approximately proportional behavior in both models;
+   * GPT-2 Large / Pythia disagreement;
+   * ambiguous or pathological curves.
+6. Several particularly clean positive and negative examples discussed individually.
+
+A null result is valid. For example, if almost every continuation-matched example is smooth, report that clearly.
+
+Do **not** invent another feature score to rescue the direction.
+
+---
 
 ## Fallback
 
-If fewer than 80 contrasts survive the single pre-specified caliper relaxation, run all surviving
-contrasts only if there are at least 40, label the result underpowered, finalize the report, and stop.
-Do not change the feature metric or continue relaxing the matching rules after seeing widths.
+If fewer than 12 examples survive the continuation requirements, use all surviving examples if there are at least 6.
 
-## Setup (fixed)
+If fewer than 6 survive, expand the set of **human-designed semantic templates**, not the statistical machinery.
 
-- Model: pretrained `gpt2-large`, evaluation mode.
-- Hooking convention: TransformerLens `resid_post` / equivalent verified Hugging Face hooks.
-- Interpolation site: the final token at block-0 `resid_post`.
-- Interpolation: Matthew's rescaled SLERP - SLERP the direction and linearly interpolate the L2 norm.
-- Grid: 101 equally spaced values of alpha in `[0, 1]`.
-- Readout: full final-token logits after the remaining blocks.
-- Fresh corpus bank: 300 eligible prefixes from the WikiText-103 **test** split, seed 31, using random
-  20-40-token spans. Do not reuse the old validation prefixes or old low-JSD bank.
-- Candidate final tokens: the top 24 printable, non-special next tokens under the shared prefix.
-- Fixed seeds, `torch.no_grad()`, and float32 metric computation.
-- Read `../BUDGET.md` and `../CLAUDE.md` every iteration. Keep `RESULTS.md` and `REPORT.md`
-  current-best only; put history in `CHANGELOG.md`.
-- Do not install or upgrade PyTorch, torchvision, TransformerLens, JAX, or Flax.
+Do not switch to random token-pair mining simply to increase sample size.
 
-## Fixed measurements
+---
 
-### 1. Successor JSD
+## Setup
 
-For a shared prefix `P` and candidate final tokens `A` and `B`, run the complete prompts `P+A` and
-`P+B`. Let `p_A` and `p_B` be their full-vocabulary next-token distributions. Compute
+### Models
 
-\[
-JSD(A,B)=\frac{1}{2}KL(p_A\|m)+\frac{1}{2}KL(p_B\|m),\qquad
-m=\frac{p_A+p_B}{2},
-\]
+Run every useful example independently on:
 
-in natural-log units. This is inference-time successor JSD, not a training-corpus statistic.
+* pretrained `gpt2-large`;
+* the same pretrained Pythia checkpoint already used by the earlier exploratory code if one exists; otherwise use `EleutherAI/pythia-410m`.
 
-### 2. Internal feature difference (primary independent variable)
+Use the final pretrained checkpoints in `eval()` mode.
 
-Run each endpoint normally and record post-GELU MLP-neuron activations at the final token in blocks
-1-35. Block 0 is excluded because its `resid_post` is the interpolation site.
+The purpose is **cross-model replication of individual examples**, not a model-size scaling study.
 
-For neuron `j` in block `l`, define its contribution score as
+### Tokenization requirement
 
-\[
-s_{l,j}=|a_{l,j}|\,\|W^{out}_{l,j}\|_2.
-\]
+For every candidate pair:
 
-For each endpoint, keep the top 64 neurons per block by this score. Treat `(block, neuron)` as the
-feature identity. The primary feature-difference score is the Jaccard distance
+* the shared prefix must be identical within each model;
+* `A` must be exactly one final token;
+* `B` must be exactly one final token;
+* both requirements must hold for **both GPT-2 Large and Pythia**.
 
-\[
-F(A,B)=1-\frac{|S_A\cap S_B|}{|S_A\cup S_B|}.
-\]
+Reject examples that cannot be represented as a single differing final-token position in both models.
 
-Freeze this definition before computing any interpolation widths. Call it an **MLP feature proxy**,
-not proof that individual neurons are semantic features.
+### Interpolation
 
-### 3. Transition width (primary outcome)
+Use the same intervention geometry as the existing Matthew-style experiment:
 
-For each interpolated output `x_alpha` and endpoint outputs `x_A,x_B`, compute Matthew's relative
-distance
+* interpolation site: final-token `resid_post` after block 0;
+* 101 equally spaced interpolation positions
+  `alpha = 0.00, 0.01, ..., 1.00`;
+* rescaled SLERP: interpolate direction with SLERP and interpolate activation norm linearly;
+* run all remaining transformer blocks normally.
 
-\[
-d(\alpha)=\frac{\|x_\alpha-x_A\|_2}
-{\|x_\alpha-x_A\|_2+\|x_\alpha-x_B\|_2}.
-\]
+Verify that `alpha=0` and `alpha=1` reproduce the original endpoint outputs.
 
-Use `w_TV` as the primary width because it remains defined for non-monotonic curves. Let cumulative
-variation be
+---
 
-\[
-c_k=\frac{\sum_{i=1}^{k}|d_i-d_{i-1}|}
-{\sum_{i=1}^{100}|d_i-d_{i-1}|}.
-\]
+## What counts as an intuitive candidate?
 
-Then
+Do **not** start from arbitrary token pairs and then try to explain them after the fact.
 
-\[
-w_{TV}=\alpha(c=0.75)-\alpha(c=0.25).
-\]
+Start from a human-readable relationship between `A` and `B`.
 
-A linear response has `w_TV = 0.5`; a sharp step approaches zero. Report raw `d(alpha)`,
-`w_10-90`, and a non-monotonicity score as secondary diagnostics. Do not classify pairs using an
-arbitrary plateau/no-plateau threshold.
+Prioritize categories such as:
 
-## Stages
+### 1. Same referent, different linguistic form
 
-- [x] **S1 - Validate the implementation with Matthew's contrast.**
-  - Run exact prompts `The house was big` / `The house was in` and `The house was big` /
-    `The house was large` in GPT-2 Large.
-  - Save the two raw curves together with the linear reference.
-  - Require endpoint reconstruction error below `1e-4` and `w_TV(big,in) < w_TV(big,large)`.
-  - If this fails, debug and stop before mining new pairs.
+Example:
 
-- [x] **S2 - Build and lock matched contrasts without looking at width.**
-  - For every fresh prefix, form all unordered pairs among the 24 candidate final tokens.
-  - Before interpolation, compute successor JSD, `F`, final-logit L2 endpoint distance, block-0
-    endpoint angle, block-0 log norm ratio, and mean token surprisal under the shared prefix.
-  - Keep candidate pairs with `0.005 <= JSD <= 0.20` and final-logit distance above the bank's 10th
-    percentile, preventing near-identical endpoints from making `d(alpha)` noise-dominated.
-  - Within each prefix, find two candidate pairs using four distinct final tokens. Label the one with
-    larger `F` as `high-F` and the other as `low-F`.
-  - Primary calipers: `|Delta JSD| <= 0.01`, standardized Euclidean distance at most `0.50` across
-    final-logit distance, block-0 angle, block-0 log norm ratio, and mean surprisal, and
-    `Delta F >= 0.10`.
-  - Select at most one contrast per prefix: maximize `Delta F`, then minimize confound distance.
-  - If fewer than 80 contrasts survive, apply exactly one relaxation:
-    `|Delta JSD| <= 0.02`, confound distance at most `0.75`, and `Delta F >= 0.08`.
-  - Save the chosen prompts, endpoint metrics, and matching version to `results/matched_pairs.json`.
-    Hash this file and record the hash in `JOURNAL.md`. Only then may S3 compute interpolation curves.
+```text
+Mary ↔ her
+John ↔ him
+```
 
-- [x] **S3 - Test the matched prediction.**
-  - Run the identical block-0 interpolation for both members of every locked contrast.
-  - For contrast `i`, compute
-    `Delta w_i = w_TV(high-F)_i - w_TV(low-F)_i`.
-    The prediction is `Delta w < 0`.
-  - Primary summaries: median `Delta w`, its prefix bootstrap 95% CI, and the fraction of contrasts
-    with `Delta w < 0`. A paired permutation p-value may be reported as a secondary summary.
-  - Call the association supported only if there are at least 80 contrasts, median `Delta w <= -0.05`,
-    at least 60% have the predicted sign, and the 95% CI lies below zero. Otherwise report the null or
-    underpowered result and stop.
-  - Required figures:
-    - `plots/matching_balance.png`: high-F versus low-F balance for every matched variable;
-    - `plots/matched_widths.png`: paired low-F to high-F width lines plus the `Delta w` distribution;
-    - `plots/example_curves.png`: five strongest supporting contrasts and five strongest
-      counterexamples, with prompt tokens, JSD, `F`, and `w_TV` shown.
+The surrounding sentence must make the coreference unambiguous.
 
-- [x] **S4 - Conditional causal test; run only if S3 is supported.**
-  - Keep the original block-0 endpoint activations and every SLERP vector fixed. Do not ablate block 0,
-    rerun upstream blocks, or regenerate the path.
-  - In blocks 1-35, take neurons in the symmetric difference of the two endpoint top-64 feature sets.
-    At each alpha, replace only their post-GELU activations with the linear endpoint interpolation
-    `a'_j(alpha) = (1-alpha)a_j(A) + alpha a_j(B)`.
-  - This preserves both endpoints while removing nonlinear switching in the differential neurons.
-  - Compare with an equal-size control set matched by block, mean contribution magnitude, endpoint
-    activation difference, and output-weight norm.
-  - The causal prediction is that differential-neuron linearization increases `w_TV` more than the
-    matched control. Report paired effects and raw curves. If it does not, retain the S3 result as an
-    association only.
+### 2. Same quantity, different representation
+
+Examples:
+
+```text
+four ↔ 4
+ten ↔ 10
+```
+
+### 3. Same entity or fact, different notation
+
+Examples may involve:
+
+```text
+name ↔ abbreviation
+name ↔ symbol
+symbol ↔ numeric identifier
+```
+
+but only keep them when the resulting English prompt is natural and the relationship is obvious without specialist explanation.
+
+### 4. Same lexical content, different surface form
+
+Examples such as:
+
+```text
+four ↔ Four
+```
+
+Treat these as useful **controls**, not the main conceptual examples.
+
+### 5. Other simple equivalences
+
+The agent may propose additional categories, but every candidate must be explainable in **one ordinary English sentence**.
+
+Do not introduce terms such as "feature identity", "latent semantics", or newly named categories unless they are genuinely necessary.
+
+---
+
+## Stage S1 — Reproduce the known interpolation behavior
+
+Before searching for new examples, reproduce Matthew's basic sanity check in GPT-2 Large:
+
+```text
+The house was big
+The house was in
+```
+
+and
+
+```text
+The house was big
+The house was large
+```
+
+Save the normalized-distance curves with the linear reference.
+
+This stage only verifies that the interpolation implementation is behaving as expected.
+
+Do not use these examples as evidence for the new question.
+
+---
+
+## Stage S2 — Build intuitive candidates without looking at interpolation curves
+
+Start with these four seed pairs:
+
+```text
+Mary and John went to the store. John gave a book to Mary
+Mary and John went to the store. John gave a book to her
+```
+
+```text
+Two plus two is four
+Two plus two is 4
+```
+
+```text
+The answer is four
+The answer is Four
+```
+
+```text
+Which chemical element does this clue identify? Au
+Which chemical element does this clue identify? 79
+```
+
+Then construct additional simple examples from the categories above.
+
+Aim for approximately **30–50 candidates before continuation filtering**.
+
+For every candidate save:
+
+* shared prefix `P`;
+* endpoint token `A`;
+* endpoint token `B`;
+* one-sentence plain-English explanation of the relationship;
+* token IDs in both models.
+
+Do **not** compute interpolation curves during candidate construction.
+
+---
+
+## Stage S3 — Check that the continuation is actually the same
+
+This stage happens **before interpolation**.
+
+For `P+A` and `P+B`, in each model separately, save:
+
+1. the top-5 next-token predictions and probabilities;
+2. the greedy next token;
+3. a 5-token greedy continuation;
+4. the already-established inference-time successor JSD.
+
+### Primary continuation requirement
+
+A useful example must have the **same top-1 next-token prediction after A and B in both GPT-2 Large and Pythia**.
+
+Prefer stronger examples where several subsequent greedy tokens are also identical.
+
+### Avoid trivial punctuation matches
+
+If the shared top-1 prediction is only punctuation or whitespace, do not treat that alone as evidence of a shared continuation.
+
+In that case inspect the following greedy tokens and require that the continuation also agrees on meaningful content beyond the punctuation.
+
+For example, this is weak:
+
+```text
+A → "."
+B → "."
+```
+
+This is much stronger:
+
+```text
+A → ". The next ..."
+B → ". The next ..."
+```
+
+### JSD
+
+Successor JSD is a **sanity check only**.
+
+Use it to detect cases where the two full next-token distributions are clearly different even though the argmax happens to match.
+
+Do not:
+
+* optimize examples for JSD;
+* match pairs by JSD;
+* regress plateau strength against JSD;
+* turn JSD into the explanation of the result.
+
+As a simple guard, flag examples with successor JSD above `0.15` in either model as weak continuation matches and normally exclude them from the main examples.
+
+### Lock before interpolation
+
+Save all surviving examples to:
+
+```text
+results/intuitive_pairs.json
+```
+
+before looking at any interpolation curves.
+
+This prevents selecting examples only because their plateau looked interesting.
+
+---
+
+## Stage S4 — Plot the interpolation path for every surviving example
+
+For every locked example, run the activation interpolation independently in GPT-2 Large and Pythia.
+
+Let:
+
+* `x_A` be the final-token output logit vector at endpoint A;
+* `x_B` be the final-token output logit vector at endpoint B;
+* `x_alpha` be the output produced by the interpolated activation.
+
+Plot the existing normalized distance:
+
+```math
+d(\alpha)
+=
+\frac{
+\|x_\alpha-x_A\|_2
+}{
+\|x_\alpha-x_A\|_2+\|x_\alpha-x_B\|_2
+}.
+```
+
+A proportional response follows approximately:
+
+```math
+d(\alpha)=\alpha.
+```
+
+A plateau-like response stays near one endpoint for a substantial part of the path and then changes rapidly.
+
+### Required figure for every useful example
+
+Create one figure with two side-by-side panels:
+
+```text
+GPT-2 Large                       Pythia
+d(alpha)                          d(alpha)
+1 |                               1 |
+  |        _____                    |       /
+  |       /                         |      /
+  |______/                          |_____/
+0 +----------- alpha             0 +----------- alpha
+  0           1                    0           1
+```
+
+Each panel must show:
+
+* `d(alpha)`;
+* the `d=alpha` linear reference;
+* axes fixed to `[0,1]`;
+* exact endpoint tokens;
+* successor JSD;
+* greedy continuation after A;
+* greedy continuation after B.
+
+Save as:
+
+```text
+plots/examples/<example_name>.png
+```
+
+The **plot is the primary evidence**.
+
+Do not replace the curve with a width number.
+
+If the existing code already computes `w_TV`, it may be stored as a secondary diagnostic, but:
+
+* do not invent a new width metric;
+* do not rank examples using `w_TV`;
+* do not make the report depend on a threshold in `w_TV`;
+* do not use a scalar metric instead of showing the raw curve.
+
+Also flag examples where the two endpoint output vectors are so close that normalized distance becomes numerically unstable or visually meaningless. Keep those separate as "uninformative", rather than interpreting noise as a plateau.
+
+---
+
+## Stage S5 — Look for concrete positive, negative, and disagreement cases
+
+After all locked examples have been swept, organize them by what the raw curves show.
+
+### A. Plateau in both models
+
+Find examples where GPT-2 Large and Pythia both show a clear sharp transition.
+
+These are the strongest examples that the phenomenon is not model-specific.
+
+### B. Smooth in both models
+
+Find examples where both models move approximately proportionally despite the endpoints being conceptually different and having the same continuation.
+
+These are equally important.
+
+They show that:
+
+> conceptual difference + same continuation is **not sufficient** to produce a plateau.
+
+### C. Cross-model disagreement
+
+Look specifically for examples like:
+
+```text
+GPT-2 Large: strong plateau
+Pythia:      smooth
+```
+
+or the reverse.
+
+These are particularly useful because the **textual relationship is held fixed**, but the learned model changes.
+
+Do not explain the disagreement with a new score in this direction.
+
+Simply document it cleanly as a target for a later mechanistic experiment.
+
+### D. Ambiguous / pathological
+
+Keep non-monotonic, noisy, or near-identical-output examples visible, but do not force them into plateau/no-plateau categories.
+
+---
+
+## Required summary figure
+
+Create:
+
+```text
+plots/example_summary.png
+```
+
+showing a small set of the clearest examples, preferably:
+
+* 2 plateau-in-both examples;
+* 2 smooth-in-both examples;
+* 2 cross-model disagreement examples, if they exist.
+
+Every mini-panel must show the actual normalized-distance curve.
+
+The reader should be able to understand the main result from this figure without reading a statistical methods section.
+
+---
+
+## REPORT.md structure
+
+Keep the report short and example-driven.
+
+### 1. Question
+
+Explain in plain English:
+
+> We hold the continuation approximately fixed and change how the final concept is represented. Does the internal path between those representations contain a plateau?
+
+### 2. Experimental setup
+
+Briefly explain:
+
+* identical prefix;
+* one-token endpoint replacement;
+* same-next-prediction requirement;
+* block-0 activation interpolation;
+* normalized output distance;
+* GPT-2 Large / Pythia cross-check.
+
+### 3. The examples
+
+For each important example show:
+
+```text
+Prompt A:
+Prompt B:
+
+Why A/B are conceptually related:
+
+GPT-2 Large:
+next prediction A:
+next prediction B:
+short continuation A:
+short continuation B:
+successor JSD:
+
+Pythia:
+next prediction A:
+next prediction B:
+short continuation A:
+short continuation B:
+successor JSD:
+```
+
+Then immediately show the normalized-distance plot.
+
+### 4. What has a plateau?
+
+Organize examples into:
+
+* plateau in both;
+* smooth in both;
+* model disagreement;
+* ambiguous.
+
+Focus on concrete comparisons.
+
+### 5. Takeaway
+
+The report should answer:
+
+> **Can two conceptually different representations with essentially the same continuation have either a plateau or no plateau?**
+
+and, if the data permit:
+
+> **Can the same textual example plateau in one model but not another?**
+
+Do not claim to know *why* yet.
+
+That becomes the next direction.
+
+---
 
 ## Required outputs
 
-- `results/matched_pairs.json`: locked pre-outcome matched-pair manifest.
-- `results/matched_sweeps.npz`: alpha grid and raw `d(alpha)` curves.
-- `results/matched_metrics.json`: endpoint metrics, widths, diagnostics, and paired effects.
-- `plots/matthew_sanity.png`.
-- `plots/matching_balance.png`.
-- `plots/matched_widths.png`.
-- `plots/example_curves.png`.
-- `RESULTS.md`: compact tables and numerical results.
-- `REPORT.md`: Question, Methods, Results, Limitations, and one clear verdict.
+```text
+results/intuitive_candidates.json
+results/intuitive_pairs.json
+results/interpolation_curves.npz
+plots/matthew_sanity.png
+plots/example_summary.png
+plots/examples/*.png
+RESULTS.md
+REPORT.md
+```
 
-## Out of scope (do not drift)
+`results/intuitive_pairs.json` must include the human-readable prompts and continuation outputs, not only token IDs.
 
-- No Pythia, OPT, GPT-2 Small/Medium, model-size comparison, depth sweep, training-time sweep, or
-  continuation-offset study.
-- No new feature metric after seeing widths; head, SAE, residual-distance, spline-density, and local-
-  complexity measures are follow-up directions, not extra chances for a positive result.
-- No causal localization unless S3 passes its frozen gate.
-- No claim that successor JSD causes width, or that the neuron proxy identifies semantic features.
-- The four earlier hand-written prompt pairs may appear only as qualitative examples, not evidence.
+---
 
-## On-track check (required every iteration)
+## Out of scope — do not drift
+
+Do **not**:
+
+* define another feature-difference score;
+* use the old MLP Jaccard `F` as the organizing variable;
+* search for correlations between `F` and width;
+* perform neuron linearization or causal neuron interventions;
+* run regression, bootstrap, matching, or quantile analysis;
+* mine thousands of arbitrary WikiText token pairs;
+* introduce SAE scores, attention-head scores, local-complexity scores, or other proxies;
+* claim that the experiment explains the mechanism producing the plateau;
+* hide raw interpolation curves behind summary statistics.
+
+The purpose of this direction is deliberately simpler:
+
+> **Find understandable examples. Show the curves. Cross-check the same examples in two models. Establish what kinds of cases can have a plateau and what kinds can fail to have one.**
+
+Mechanistic explanation comes later.
+
+---
+
+## On-track check
 
 End each `JOURNAL.md` entry with:
 
-`On track? <yes/no> - <stage, % done, blocker if any>`
+```text
+On track? <yes/no> — <stage, % done, blocker if any>
+```
+
+If the agent finds itself inventing a new scalar metric to summarize "conceptual difference", the answer is **no**.
+
+---
 
 ## Current status
 
-**COMPLETE — verdict: supported, confirmed by a pre-registered independent replication (S3R), with a
-causal test behind it.** S1 passed its gate
-($w_{TV}$ 0.012 vs 0.292, endpoint error 3.5e-7). S2 locked **101** matched contrasts under the single
-pre-specified relaxation (manifest sha256 `2415f5ff6dfcf88fb9cc7a67b87c93d859434296310f4b8d406c6f545e23ff56`,
-recorded before any sweep). S3 met all four gate clauses: median `Delta w = -0.0708`, 95% CI
-`[-0.0866, -0.0582]`, 82.2% predicted sign, permutation p < 1e-4. S4 (conditional, unlocked by S3)
-supported: median `w_TV` 0.144 -> 0.471 for differential-neuron linearization against 0.167 for the
-matched control, 202/202 pairs.
+Fresh restart from the earlier four hand-written examples.
 
-**One deviation from this plan, recorded in REPORT.md Limitations, CHANGELOG.md and JOURNAL.md:** the
-bank was enlarged from the specified 300 prefixes to all 1395 eligible WikiText-103 test paragraphs,
-because 300 yielded only 21 contrasts — below this plan's own 40-contrast fallback floor. Every metric
-definition, eligibility filter and caliper was unchanged and no interpolation width had been computed.
-Because that stopping rule was frozen in advance, S1-S4 are labelled the **amended analysis**
-throughout both deliverables (operator feedback #1).
+The previous F-based result may remain as historical work, but it is not the organizing principle of this direction.
 
-**S3R — pre-registered independent replication: PASSED.** Protocol frozen in JOURNAL.md
-2026-08-12T02:44Z, before any replication data was scored: WikiText-103 **train** split (untouched by
-any analysis here), bank size fixed at exactly 1400 prefixes, run once with no enlargement, re-seeding,
-re-drawing or second relaxation, everything else identical, same four-clause gate. Outcome: 5 contrasts
-under the primary calipers -> 99 under the one pre-specified relaxation; median `Delta w = -0.0641`,
-95% CI `[-0.0908, -0.0426]`, 78.8% predicted sign, permutation p < 1e-4 — all four clauses met.
-Manifest sha256 `ed1df0866f012b6195521dcda0d81306c7c6cb9d00e5dca2b30cda62e9af6d6b`, recorded before its
-first sweep. The confirmatory claim for the matched association now rests on S3R; S4's causal result
-still rests on the amended bank only.
+---
 
 ## Next step
 
-None required — the success criterion is met and the association is confirmed by S3R. Three extensions
-if the direction is continued:
-1. a pre-registered replication of the **causal** experiment (S4) on the S3R bank, which would put the
-   mechanism on the same footing as the association;
-2. the **minimal sufficient differential set** (S4 shows 1.7% of neurons suffice, not that they are
-   necessary at that size);
-3. the same locked matched design with an **SAE-feature or attention-head** version of `F`, testing
-   whether "different machinery" is a neuron-level or a feature-level fact.
+Implement S2 and S3 first:
+
+1. verify tokenization of the four seed examples in GPT-2 Large and Pythia;
+2. print their top-5 next-token predictions and 5-token greedy continuations;
+3. construct additional human-readable candidates;
+4. lock all candidates that genuinely have similar continuations;
+5. **only then** run interpolation and generate the normalized-distance plots.
