@@ -15,6 +15,7 @@ fi
 [ -f run.sh ]    || echo "[new] WARNING: no run.sh in $(pwd) — run from the project root."
 [ -f BUDGET.md ] || echo "[new] WARNING: no BUDGET.md in $(pwd)."
 [ -f CLAUDE.md ] || echo "[new] WARNING: no CLAUDE.md in $(pwd) — agents won't see the operator rules."
+[ -f WRITING.md ] || echo "[new] WARNING: no WRITING.md in $(pwd) — report writing rules are missing."
 
 mkdir -p "$DIR/experiments" "$DIR/results" "$DIR/plots"
 : > "$DIR/experiments/.gitkeep"; : > "$DIR/plots/.gitkeep"
@@ -22,7 +23,7 @@ mkdir -p "$DIR/experiments" "$DIR/results" "$DIR/plots"
 # ---- PLAN.md ----
 printf '# PLAN — Direction: %s\n\n' "$TITLE"                                  >  "$DIR/PLAN.md"
 printf '> Working folder: `%s`. Agent REWRITES "Current status"/"Next step" + ticks stages each\n' "$DIR" >> "$DIR/PLAN.md"
-printf '> iteration. Disk (PLAN/JOURNAL/RESULTS/CHANGELOG + ../BUDGET.md + ../CLAUDE.md) is the only memory.\n\n' >> "$DIR/PLAN.md"
+printf '> iteration. run.sh supplies compact task/PLAN/latest-journal context; full files remain available on demand.\n\n' >> "$DIR/PLAN.md"
 cat >> "$DIR/PLAN.md" <<'EOF'
 ## Success criterion (definition of "done")
 TODO — concrete artifact(s) that mean done, e.g. "RESULTS.md has <X>/<Y> (current-best) and REPORT.md
@@ -34,14 +35,14 @@ TODO — minimum acceptable deliverable. The wrapper reserves the last 20 min to
 
 ## Setup (fixed)
 - TODO — model / data / hook points. Default: GPT-2 small via HuggingFace `transformers` + forward hooks; STREAM data.
-- **Shared limits in `../BUDGET.md`; operator rules in `../CLAUDE.md` — read both every iteration.**
-- **Deliverable hygiene (see CLAUDE.md):** RESULTS.md/REPORT.md = current-best only, no history; CHANGELOG.md = the history.
+- **Shared limits in `../BUDGET.md`; operator rules in `../CLAUDE.md`; report rules in `../WRITING.md`.**
+- **Deliverable hygiene:** RESULTS.md/REPORT*.md = current-best only; CHANGELOG.md = history.
 - **Do NOT `pip install` torch, torchvision, transformer_lens, cupbearer, jax, flax** — they break the CUDA build.
 
 ## Stages (checklist)
 - [ ] S1 — TODO
 - [ ] S2 — TODO
-- [ ] S3 — TODO  (each reported metric: produce + save figure to plots/ + define it in REPORT.md Methods)
+- [ ] S3 — TODO  (each reported metric: save a plot + define it in the affected REPORT*.md Methods)
 
 ## Out of scope (do NOT)
 - TODO. Don't drift into other directions.
@@ -68,9 +69,9 @@ EOF
 # ---- CHANGELOG.md (append-only history of deliverable changes) ----
 printf '# CHANGELOG — Direction: %s\n\n' "$TITLE"                             >  "$DIR/CHANGELOG.md"
 cat >> "$DIR/CHANGELOG.md" <<'EOF'
-Append-only ledger of changes to RESULTS.md / REPORT.md. One dated entry per change: what changed,
+Append-only ledger of changes to RESULTS.md / REPORT*.md. One dated entry per change: what changed,
 why, and — if a result was superseded — the old -> new numbers. This is the ONLY place history lives;
-RESULTS.md and REPORT.md themselves stay current-best with no history.
+RESULTS.md and every REPORT*.md stay current-best with no history.
 
 ---
 EOF

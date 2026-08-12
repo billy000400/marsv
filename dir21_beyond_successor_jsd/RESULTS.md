@@ -119,7 +119,11 @@ $m_u$ here is computed from the token embedding alone — its cosine across the 
 $m_u$ with a probe, however, is no easier than reading it off the static embedding ($\rho = +0.748$ vs
 $+0.764$): the component carries the trait without making it more linearly explicit. Nor is it
 compressible — transplanting only the top 64 principal components of $m$, which carry 79% of its
-across-token variance, delivers 30% of the transfer while causing 95% of the output movement.
+across-token variance, delivers 30% of the transfer while causing 95% of the output movement. What the
+write transports is the whole curve: scored on how plateau-shaped the recipient's curves become, the
+same 132 transplants give a slope of $+0.970$ alongside $+0.913$ for the width, and each property still
+transports with the donor's other property held constant ($+0.796$ and $+0.517$, both above zero in all
+12 recipients).
 
 **But the token is a token *of a training corpus*.** The same 123 strings measured in GPT-2 small —
 different corpus, different BPE vocabulary — rank at $\rho = -0.22$ with Pythia-1.4B (against $+0.88$
@@ -1356,14 +1360,69 @@ $E$ and $w$ come from the same curves, so their noise is shared and each residua
 the width target is also defined using $E$. Neither coupling explains why the shape residual survives in
 both models while the width residual survives in only one. Two models, one site each, 123 tokens.
 
+### Does the transplant move shape too, or only width?
+
+The section above is about what can be *read* from a token's embedding. The transplant of $m_u$ is the
+strongest *causal* result here, it acts on a vector computed from that same embedding row one block
+later, and it was scored on width alone — so it could have been a shape result in disguise. Figure 33
+repeats the transplant unchanged (same 12 tokens, 6 anchors, sentence frame and hook) and records $E$ on
+every curve alongside $w$, so both scorings come from the same forward passes. Per recipient, across its
+11 cross donors, we take the least-squares slope of the value it lands on against the donor's own value
+(1.0 = the donor's value arrives whole) and the rank correlation of the same pair with the donor's
+*other* property regressed out, which is needed because baseline width and baseline shape rank these 12
+tokens at $\rho = +0.937$ and a marginal statistic on one can be inherited from the other.
+
+![Post-transplant width against the donor's own width, post-transplant edge drift against the donor's own edge drift, and the two scorings paired over the 12 recipients](plots/transplant_shape.png)
+
+**Figure 33.** Pythia-1.4B, block 0, 132 cross transplants of the original 12 endpoint tokens. (a) x:
+the donor's own unedited median width $w$; y: the width the recipient lands on after the donor's $m_u$
+is written into it. (b) the same transplants with both axes replaced by edge drift $E$. Thin lines join
+one recipient's 11 donors; dashed line $y = x$ = the donor's value arriving whole. (c) the two scorings
+paired over the same 12 recipients — transported slope (left pair) and partial rank correlation with the
+donor's other property held constant (right pair); circles = scored on width, squares = scored on edge
+drift, gray lines join one recipient's two values, dashed line at 1.0 = complete transport, $p$-values
+from Wilcoxon signed-rank tests on the 12 paired differences.
+
+| transplanting $m_u$ (12 recipients × 11 donors, frame 1) | width $w$ | edge drift $E$ |
+|---|---|---|
+| donor dependence $\rho$ | $+0.968$ ($p = 5\times10^{-4}$) | $+0.940$ ($p = 5\times10^{-4}$) |
+| **transported slope** (1.0 = donor's value arrives whole) | **$+0.913$** | **$+0.970$** |
+| partial $\rho$, donor's other property held constant | $+0.796$ (min $+0.49$) | $+0.517$ (min $+0.27$) |
+| recipient dependence $\rho$ (control) | $-0.104$ ($p = 0.64$) | $-0.025$ ($p = 0.75$) |
+| baseline reliability $R$, 3 anchors vs 3 | 0.671 [0.196, 0.871] | 0.552 [$-0.036$, 0.865] |
+
+**The write hands over the whole curve.** Shape transports at least as completely as width — slope
+$+0.970$ against $+0.913$, with shape ahead in 11 of the 12 recipients ($p = 0.0015$) — and both are
+close enough to 1.0 that the donor's value effectively arrives intact. The control agrees in both
+scorings: with the donor fixed, the recipient's untouched state predicts neither landing value. Two
+checks tie this to the original experiment: the baseline widths reproduce it to the last stored digit
+(max difference 0.0000) and the width control reproduces its $\rho = -0.104$ exactly. So the readout
+result and the causal result are not in conflict, and an intervention on $m_u$ changes where the model's
+behaviour is sensitive rather than one summary statistic of it.
+
+**And the width-specific component does travel with $m_u$**, even though no probe on the embedding could
+recover it ($+0.072$, $p = 0.255$ above): with the donor's shape held constant, the donor's width still
+predicts the recipient's landing width at $+0.796$, above zero in all 12 recipients. A failed probe
+bounds what a linear readout of that form extracts, not what the vector contains.
+
+The gap between the two partial correlations ($+0.796$ against $+0.517$) is **not** evidence that width
+transports more specifically than shape: a partial correlation is attenuated by noise in the quantity
+held constant, and the shape baseline is noisier here, with a reliability interval that covers zero. No
+disattenuation is defensible at that width, so the supported claim is that each property transports
+specifically, not the ordering between them. The partials also rest on the small part of the donor
+ranking the two properties do not share, over 11 donors per recipient. 12 tokens, one frame, one model,
+and both properties come from the same curves.
+
 ## Next experiment
 
-**Score the transplant on curve shape, not just width.** The two strongest causal results here — the
-token-to-token transplant of $m_u$ and the cross-checkpoint transplant — were both scored on width
-alone, and the section above shows that what the static embedding one block earlier actually carries is
-curve shape. Repeating the within-model token-to-token transplant unchanged, and recording the
-recipient's edge drift $E$ alongside its width, asks whether writing the donor's $m_u$ moves the
-recipient's curve *shape* as completely as it moves its width. If it does, shape is the trait this
-report has been tracking and width is downstream of it, which would explain why every readout of $m_u$
-failed while exact substitution succeeded. It costs one Pythia-1.4B sweep of the 123 tokens and one
-extra statistic per curve.
+**Read the residual targets off $m_u$ instead of the embedding.** Two results above sit side by side:
+a probe on the static embedding leaves the width-with-shape-removed target at chance ($+0.072$,
+$p = 0.255$), while substituting $m_u$ transports exactly that component ($+0.796$ with the donor's
+shape held constant). Both can be true, since a failed probe bounds the probe. What is still unknown is
+whether the width-specific component can be read *anywhere* early in the network. The test refits the
+same four probes, unchanged in protocol and splits, from the block-0 MLP output $m_u$ and from the full
+post-block-0 residual state $x_u$ on the same 123 tokens. If the width residual becomes predictable from
+$m_u$, the free lookup upgrades to a one-forward-pass lookup that ranks the property the screen actually
+wants; if it stays at chance from every representation while the transplant keeps transporting it, that
+is a sharper version of this report's central negative. It needs 123 tokens $\times$ 3 frames of
+single-token forward passes and no interpolation curves — the cheapest experiment proposed here.

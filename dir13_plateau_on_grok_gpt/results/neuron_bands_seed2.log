@@ -1,0 +1,176 @@
+self_test OK: step w=0.089 detected, line w=0.800 rejected
+  step 831: median w 0.6407 (21s)
+  step 2038: median w 0.4724 (61s)
+  step 5000: median w 0.3757 (93s)
+  step 12500: median w 0.3452 (112s)
+  step 30000: median w 0.3381 (144s)
+/usr/local/lib/python3.11/dist-packages/scipy/stats/_wilcoxon.py:181: RuntimeWarning: invalid value encountered in scalar divide
+  z = (r_plus - mn) / se
+  step 30000: statistics done, [752880, 94080, 94080] positions (151s)
+  step 30000: r2_1 median 0.1724 (151s)
+  step 30000: r2_full median 0.5694 (154s)
+[
+ {
+  "step": 831,
+  "n_pairs_used": 103,
+  "median_w_baseline": 0.5639,
+  "rho_all_units": 0.3749,
+  "rho_band_alone": [
+   0.0743,
+   0.0887,
+   0.1076,
+   0.1016,
+   0.0392,
+   0.0066
+  ],
+  "sum_of_band_alone": 0.4295,
+  "redundancy_ratio": 1.0967,
+  "frac_pairs_ratio_gt_1": 0.6505,
+  "p_sum_vs_all": 6.221006472205565e-07
+ },
+ {
+  "step": 2038,
+  "n_pairs_used": 103,
+  "median_w_baseline": 0.405,
+  "rho_all_units": 0.5403,
+  "rho_band_alone": [
+   0.1218,
+   0.1547,
+   0.162,
+   0.1175,
+   0.0287,
+   0.0009
+  ],
+  "sum_of_band_alone": 0.5846,
+  "redundancy_ratio": 1.1201,
+  "frac_pairs_ratio_gt_1": 0.6893,
+  "p_sum_vs_all": 5.245016561918342e-07
+ },
+ {
+  "step": 5000,
+  "n_pairs_used": 103,
+  "median_w_baseline": 0.333,
+  "rho_all_units": 0.5951,
+  "rho_band_alone": [
+   0.1318,
+   0.1573,
+   0.1653,
+   0.1304,
+   0.0493,
+   -0.0001
+  ],
+  "sum_of_band_alone": 0.6265,
+  "redundancy_ratio": 1.0497,
+  "frac_pairs_ratio_gt_1": 0.5922,
+  "p_sum_vs_all": 0.0012067494401287687
+ },
+ {
+  "step": 12500,
+  "n_pairs_used": 103,
+  "median_w_baseline": 0.3202,
+  "rho_all_units": 0.732,
+  "rho_band_alone": [
+   0.1803,
+   0.1823,
+   0.1857,
+   0.1955,
+   0.0868,
+   -0.0006
+  ],
+  "sum_of_band_alone": 0.8351,
+  "redundancy_ratio": 1.1589,
+  "frac_pairs_ratio_gt_1": 0.9029,
+  "p_sum_vs_all": 6.171260138199636e-15
+ },
+ {
+  "step": 30000,
+  "n_pairs_used": 103,
+  "median_w_baseline": 0.3006,
+  "rho_all_units": 0.7788,
+  "rho_band_alone": [
+   0.2349,
+   0.231,
+   0.1937,
+   0.1792,
+   0.0803,
+   -0.0007
+  ],
+  "sum_of_band_alone": 0.9543,
+  "redundancy_ratio": 1.2014,
+  "frac_pairs_ratio_gt_1": 0.8641,
+  "p_sum_vs_all": 1.8274530572878942e-14
+ }
+]
+[
+ {
+  "edge_lo": 0,
+  "edge_hi": 8,
+  "size": 8,
+  "rho_alone": 0.2559,
+  "rho_within_region_same_size": 0.0005,
+  "rho_alone_per_1000_units": 31.9889,
+  "p_alone_vs_within_region": 2.7006250574319515e-26,
+  "frac_pairs_alone_gt_within": 0.9867
+ },
+ {
+  "edge_lo": 8,
+  "edge_hi": 32,
+  "size": 24,
+  "rho_alone": 0.2613,
+  "rho_within_region_same_size": 0.0019,
+  "rho_alone_per_1000_units": 10.8874,
+  "p_alone_vs_within_region": 2.2996057560669792e-26,
+  "frac_pairs_alone_gt_within": 1.0
+ },
+ {
+  "edge_lo": 32,
+  "edge_hi": 128,
+  "size": 96,
+  "rho_alone": 0.2164,
+  "rho_within_region_same_size": 0.0074,
+  "rho_alone_per_1000_units": 2.2537,
+  "p_alone_vs_within_region": 2.2996057560669792e-26,
+  "frac_pairs_alone_gt_within": 1.0
+ },
+ {
+  "edge_lo": 128,
+  "edge_hi": 512,
+  "size": 384,
+  "rho_alone": 0.1889,
+  "rho_within_region_same_size": 0.0232,
+  "rho_alone_per_1000_units": 0.492,
+  "p_alone_vs_within_region": 2.6469347492701727e-26,
+  "frac_pairs_alone_gt_within": 0.9867
+ },
+ {
+  "edge_lo": 512,
+  "edge_hi": 2048,
+  "size": 1536,
+  "rho_alone": 0.0807,
+  "rho_within_region_same_size": 0.0292,
+  "rho_alone_per_1000_units": 0.0525,
+  "p_alone_vs_within_region": 8.268452136097212e-26,
+  "frac_pairs_alone_gt_within": 0.9533
+ },
+ {
+  "edge_lo": 2048,
+  "edge_hi": 3840,
+  "size": 1792,
+  "rho_alone": -0.0008,
+  "rho_within_region_same_size": -0.0008,
+  "rho_alone_per_1000_units": -0.0004,
+  "p_alone_vs_within_region": NaN,
+  "frac_pairs_alone_gt_within": 0.0
+ }
+]
+{
+ "n_head": 707,
+ "n_tail": 1664,
+ "r2_full_head": 0.716,
+ "r2_full_tail": 0.494,
+ "p_r2_full": 6.381243537819867e-72,
+ "r2_lag0_head": 0.3389,
+ "r2_lag0_tail": 0.1405,
+ "p_r2_lag0": 3.65450822973408e-66
+}
+done in 155s

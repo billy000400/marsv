@@ -1101,3 +1101,50 @@ carries one block earlier is shape.
 (REPORT 42 display eqs / 1300 inline eqs / 32 embeds / 0 problems; RESULTS 3 display eqs / 913 inline
 eqs / 32 embeds / 0 problems). Embed/caption counts match at 32 each; no bare `(plots/*.png)`
 references.
+
+## 2026-08-12 — iteration 18: the transplant is scored on curve shape as well as width
+
+**New experiment.** `experiments/transplant_shape.py` + `plot_transplant_shape.py` →
+`results/transplant_shape.json`, `results/transplant_shape.log`, `plots/transplant_shape.png`
+(Figure 33). Pattern 23's within-model token-to-token transplant of the block-0 MLP output $m_u$
+repeated unchanged (12 endpoint tokens, 6 anchors, frame 1, same write hook, Pythia-1.4B), with edge
+drift $E$ recorded on every curve alongside the width $w$. 132 cross transplants; both scorings come
+from the same forward passes, so the comparison is matched by construction.
+
+**What changed in the deliverables.**
+- REPORT.md — new Methods subsection "Scoring the transplant on shape as well as width" (transported
+  slope, partial rank correlation, recipient-dependence control, split-half reliability of each
+  baseline); new Results subsection "Does the transplant move the curve's shape too?" with Figure 33 and
+  pattern 43; Summary transplant paragraph and Conclusion transplant paragraph extended with the
+  shape scoring; "Recommended next experiment" replaced (was: score the transplant on shape — now done).
+- RESULTS.md — Headline transplant paragraph extended; new section "Does the transplant move shape too,
+  or only width?" with Figure 33 and its table; "Next experiment" replaced.
+- Both files go from 32 to 33 figures.
+
+**Results added (no earlier number superseded — this is a second scoring of an existing experiment,
+and every pattern-23 statistic it recomputes came out identical).**
+- transported slope: $+0.970$ on edge drift against $+0.913$ on width; shape ahead in 11/12 recipients,
+  Wilcoxon $p = 0.0015$.
+- donor dependence: $+0.940$ (shape) against $+0.968$ (width), both $p = 5\times10^{-4}$.
+- partial $\rho$ with the donor's other property held constant: $+0.796$ (width) and $+0.517$ (shape),
+  both above zero in all 12 recipients, $p = 5\times10^{-4}$. The gap between them is reported as not
+  resolved, because the shape baseline's reliability interval covers zero.
+- recipient-dependence control: $-0.104$ (width) and $-0.025$ (shape).
+- baseline split-half reliability (3 anchors vs 3, 2,000-token bootstrap): $w$ 0.671 [0.196, 0.871],
+  $E$ 0.552 [$-0.036$, 0.865]. Baseline $w$ and $E$ rank the 12 tokens at $\rho = +0.937$.
+- reproduction checks: baseline widths match pattern 23's stored values exactly (max difference
+  0.0000, so the strict width path through `curve_metrics` is unchanged), and the width
+  recipient-dependence control reproduces its $-0.104$ exactly.
+
+**Interpretation change.** The report previously posed this as a two-way question — if only shape
+transfers, shape is the trait and width its consequence; if only width transfers, $m_u$ carries
+something the embedding does not and the mechanism comes apart at block 0. Neither branch holds: both
+transfer. The claim now recorded is that the write hands over the whole curve, and that the
+width-specific component the embedding probe left at chance (pattern 41, $+0.072$, $p = 0.255$) does
+travel with $m_u$ — stated as a bound on the linear readout, not as a claim that the embedding lacks
+the information.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 44 display eqs / 1387 inline eqs / 33 embeds / 0 problems; RESULTS 3 display eqs / 964 inline
+eqs / 33 embeds / 0 problems). Embed/caption counts match at 33 each; no bare `(plots/*.png)`
+references.

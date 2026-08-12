@@ -1,0 +1,37 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:09,  1.06s/it]Loading weights:  16%|█▋        | 48/292 [00:01<00:04, 55.59it/s]Loading weights:  25%|██▌       | 73/292 [00:01<00:03, 62.81it/s]Loading weights:  31%|███       | 90/292 [00:01<00:03, 66.20it/s]Loading weights:  36%|███▌      | 104/292 [00:01<00:02, 67.39it/s]Loading weights:  40%|███▉      | 116/292 [00:02<00:02, 73.85it/s]Loading weights:  43%|████▎     | 127/292 [00:02<00:02, 75.78it/s]Loading weights:  47%|████▋     | 137/292 [00:02<00:02, 69.49it/s]Loading weights:  50%|█████     | 146/292 [00:02<00:02, 66.01it/s]Loading weights:  54%|█████▍    | 158/292 [00:02<00:01, 69.34it/s]Loading weights:  58%|█████▊    | 170/292 [00:02<00:01, 77.30it/s]Loading weights:  62%|██████▏   | 180/292 [00:02<00:01, 75.56it/s]Loading weights:  66%|██████▋   | 194/292 [00:03<00:01, 74.25it/s]Loading weights:  71%|███████   | 206/292 [00:03<00:01, 75.42it/s]Loading weights:  74%|███████▍  | 216/292 [00:03<00:01, 69.85it/s]Loading weights:  79%|███████▉  | 230/292 [00:03<00:00, 75.67it/s]Loading weights:  85%|████████▍ | 248/292 [00:03<00:00, 88.72it/s]Loading weights:  88%|████████▊ | 258/292 [00:03<00:00, 86.74it/s]Loading weights:  93%|█████████▎| 272/292 [00:03<00:00, 97.75it/s]Loading weights:  97%|█████████▋| 283/292 [00:04<00:00, 84.46it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 69.77it/s]
+base ' the': w 0.366  E 0.0512
+base ' actually': w 0.527  E 0.0838
+base ' really': w 0.504  E 0.0756
+base ' because': w 0.528  E 0.0739
+base ' just': w 0.530  E 0.0798
+base ' quite': w 0.575  E 0.0916
+base ' never': w 0.555  E 0.0829
+base ' well': w 0.618  E 0.0986
+base ' strange': w 0.637  E 0.1028
+base ' happening': w 0.621  E 0.0980
+base ' nice': w 0.639  E 0.1079
+base ' gone': w 0.682  E 0.1263
+baseline widths reproduce pattern 23: True (max |diff| 0.00e+00)
+[1/12] recipient ' the': self w 0.366 E 0.0512 | mean-donor w 0.670 E 0.1588
+[2/12] recipient ' actually': self w 0.527 E 0.0838 | mean-donor w 0.668 E 0.1267
+[3/12] recipient ' really': self w 0.504 E 0.0756 | mean-donor w 0.639 E 0.1197
+[4/12] recipient ' because': self w 0.528 E 0.0739 | mean-donor w 0.630 E 0.1071
+[5/12] recipient ' just': self w 0.530 E 0.0798 | mean-donor w 0.658 E 0.1195
+[6/12] recipient ' quite': self w 0.575 E 0.0916 | mean-donor w 0.683 E 0.1309
+[7/12] recipient ' never': self w 0.555 E 0.0829 | mean-donor w 0.641 E 0.1117
+[8/12] recipient ' well': self w 0.618 E 0.0986 | mean-donor w 0.676 E 0.1262
+[9/12] recipient ' strange': self w 0.637 E 0.1028 | mean-donor w 0.665 E 0.1563
+[10/12] recipient ' happening': self w 0.621 E 0.0980 | mean-donor w 0.673 E 0.1248
+[11/12] recipient ' nice': self w 0.639 E 0.1079 | mean-donor w 0.667 E 0.1420
+[12/12] recipient ' gone': self w 0.682 E 0.1263 | mean-donor w 0.682 E 0.1578
+
+across the 12 tokens, baseline w and E rank at +0.937
+[w] per-recipient rho +0.968 (p 0.0005), slope +0.913, partial rho +0.796 (p 0.0005), self-check rho +1.00, recipient-dependence rho -0.104 (p 0.636)
+[edge] per-recipient rho +0.940 (p 0.0005), slope +0.970, partial rho +0.517 (p 0.0005), self-check rho +1.00, recipient-dependence rho -0.025 (p 0.751)
+paired rho    : w +0.968 vs E +0.940 (11/12 recipients favour w, p 0.0117)
+paired slope  : w +0.913 vs E +0.970 (1/12 recipients favour w, p 0.0015)
+paired partial: w +0.796 vs E +0.517 (10/12 recipients favour w, p 0.0049)
+baseline w    split-half reliability R = 0.671 [0.196, 0.871]
+baseline edge split-half reliability R = 0.552 [-0.036, 0.865]
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/transplant_shape.json

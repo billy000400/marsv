@@ -590,6 +590,18 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S26 DONE 2026-08-12 — the band decomposition gets its second seed.**
+`experiments/neuron_bands_seed2.py` (155 s, forward passes only) repeats the band decomposition on the
+seed-2024 run S25 trained, with the same 150 pairs, context, block, six rank bands and five checkpoints.
+Reproduces: band-alone effects at step 30,000 (25.6 / 26.1 / 21.6 / 18.9 / 8.1 / −0.1% against the
+reference run's 27.9 / 25.9 / 24.1 / 20.4 / 10.4 / −0.1%), the redundancy ratio Λ = 1.28 against 1.29,
+the 610-fold per-unit decline against 520-fold, every band beating its within-region control, and the
+rank–describability gradient. Does not reproduce: the *flatness* of Λ over training (reference
+1.21 → 1.18, p = 0.9; second run 1.10 → 1.20, per-pair median +0.10, p = 2e-5). Claim narrowed
+accordingly — "redundancy does not accumulate" → "redundancy is there from the start", which both runs
+show. Curated as **Figure 43** in both deliverables (exploratory figures renumbered 44–46);
+`check_render.py` → ALL CHECKS PASS (46 figures per file).
+
 **S25 DONE 2026-08-12 — second seed: the structural developmental facts reproduce, the promoted-unit
 describability gain does not.** `experiments/train_frozen.py --tag ref_pos_s2 --seed 2024 --freeze ""`
 (23.0 min, final val acc 0.5511 vs the reference run's 0.5502) plus `experiments/neuron_seed2.py`

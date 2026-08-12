@@ -10,6 +10,7 @@ set -euo pipefail
 # project root = the folder this script lives in (must hold run.sh + BUDGET.md)
 ROOT="$(cd "$(dirname "$0")" && pwd)"; cd "$ROOT"
 [ -x run.sh ] || { echo "[relaunch] no executable run.sh in $ROOT — run this from the project root."; exit 1; }
+[ -f workflow.py ] && [ -f WRITING.md ] || { echo "[relaunch] missing workflow.py or WRITING.md"; exit 1; }
 
 RAW="${1:?usage: ./relaunch.sh <direction_dir> [hours]}"
 DIR="$(basename "${RAW%/}")"                       # strip trailing slash / any path
@@ -21,6 +22,11 @@ HOURS_ARG="${2:-}"
 [ -f "$DIR/PLAN.md" ]  || { echo "[relaunch] $DIR/ has no PLAN.md — not a valid direction."; exit 1; }
 if tmux has-session -t "$SESSION" 2>/dev/null; then
   echo "[relaunch] '$SESSION' already running.  attach: tmux attach -t $SESSION   kill: tmux kill-session -t $SESSION"; exit 1
+fi
+python3 workflow.py prepare "$DIR" >/dev/null
+TASK_MANIFEST="$(python3 workflow.py active "$DIR")"
+if [ -n "$TASK_MANIFEST" ]; then
+  echo "[relaunch] task manifest: $TASK_MANIFEST (loaded by every run.sh iteration)"
 fi
 if [ -f "$DIR/STOP" ]; then
   rm -f "$DIR/STOP"

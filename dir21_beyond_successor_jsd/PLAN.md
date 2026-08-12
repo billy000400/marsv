@@ -46,7 +46,36 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 17 — COMPLETE; the free lookup ranks curve shape)
+## Current status (2026-08-12, iteration 18 — COMPLETE; the transplant moves shape and width alike)
+
+**Iteration 18 ran the experiment both deliverables named as next** (`experiments/transplant_shape.py`,
+`plot_transplant_shape.py`; Figure 33; deliverables now carry 33 figures each and pass
+`check_render.py`). Pattern 23's token-to-token transplant repeated unchanged — same 12 tokens, 6
+anchors, frame 1, same hook — with edge drift $E$ recorded on every curve alongside the width $w$, so
+both scorings come from the same forward passes. 90 seconds of GPU.
+
+* **Both properties transport.** Transported slope $+0.970$ on shape against $+0.913$ on width (shape
+  ahead in 11/12 recipients, $p = 0.0015$); donor dependence $+0.940$ and $+0.968$. The control agrees
+  in both scorings: with the donor fixed, the recipient's untouched state predicts neither landing value
+  ($-0.025$, $-0.104$). So the causal result is not a shape result in disguise, and the mechanism does
+  not split into a readable half and a causal half at block 0.
+* **The width-specific component does travel with $m_u$.** With the donor's shape held constant the
+  donor's width still predicts the recipient's landing width at $+0.796$, above zero in all 12
+  recipients — the component pattern 41's embedding probe left at chance ($+0.072$, $p = 0.255$). A
+  failed linear readout bounds the probe, not the vector.
+* **The gap between the two partials is not reportable as a difference.** $+0.796$ against $+0.517$
+  favours width in 10/12, but the shape baseline's reliability interval covers zero
+  ($R = 0.552$, $[-0.036, 0.865]$), so attenuation is not excluded and no disattenuation is applied.
+* **Two checks tie the rerun to the original.** Baseline widths reproduce pattern 23 exactly (max
+  difference 0.0000) and the width control reproduces its $\rho_{\mathrm{recip}} = -0.104$ exactly.
+
+**Next step (only if reopened):** refit pattern 41's four probes (shape, width, and each residualised on
+the other) from $m_u$ and from the post-block-0 state $x_u$ instead of the embedding row, same 123
+tokens, same protocol and splits. Asks whether the width-specific component is readable anywhere early
+in the network given that substitution transports it. Costs 123 tokens $\times$ 3 frames of single-token
+forward passes and no interpolation curves.
+
+## Previous status (2026-08-12, iteration 17 — COMPLETE; the free lookup ranks curve shape)
 
 **Iteration 17 ran the experiment both deliverables named as next** (`experiments/gpt2_shape_probe.py`,
 `plot_gpt2_shape.py`; Figure 32; deliverables now carry 32 figures each and pass `check_render.py`).

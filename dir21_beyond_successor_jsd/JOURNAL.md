@@ -1295,3 +1295,70 @@ qualification of the report's cheapest claim with a matched control and a stated
 deliverables are curated to current-best with Figure 32 embedded and check_render.py passing (32 embeds,
 32 captions, 0 problems). No STOP written: the next experiment is named and is a real one — score the
 token-to-token transplant on edge drift as well as width.
+
+## 2026-08-12 — iteration 18: scoring the transplant on shape, and a two-way question that came back "both"
+
+**What I set out to do.** No unaddressed feedback, so ordinary plan work: the experiment both
+deliverables named as next. Pattern 23 writes one token's block-0 MLP output $m_u$ into another token
+and the recipient's transition width follows the donor almost completely. It was scored on width alone.
+Iteration 17 found that what the static embedding one block earlier ranks is curve *shape*, so the
+causal result was open to the reading that it had been a shape result all along. Repeat the transplant
+unchanged, record edge drift on every curve alongside width.
+
+**The design choice that mattered was refusing to rely on the marginal statistics.** Across the 12
+transplant tokens baseline width and baseline shape rank at $+0.937$. At that correlation "the slope on
+shape is 0.970 and on width 0.913" is nearly content-free — either number could be inherited whole from
+the other. So each recipient also gets a partial: the donor's width against the recipient's landing
+width with the donor's *shape* regressed out, and the mirror. That is the same move iteration 17 made
+with residual targets, and again it is the part that carries the conclusion.
+
+**The answer was "both", which was not one of the two branches the report had written down.** The
+report had posed it as a fork: if only shape transfers, shape is the trait and width is its consequence;
+if only width transfers, $m_u$ carries something the embedding does not and the mechanism comes apart at
+block 0. Neither. Slope $+0.970$ on shape, $+0.913$ on width, control near zero in both scorings
+($-0.025$, $-0.104$), and both partials above zero in every one of the 12 recipients. Writing the vector
+hands over the whole curve. I rewrote the Results claim around that rather than trying to force the
+result into either branch, and replaced the "recommended next experiment" section that had posed the
+fork.
+
+**The genuinely interesting number is the width partial.** $+0.796$ with the donor's shape held
+constant. That is precisely the component iteration 17's embedding probe could not recover at all
+($+0.072$, permutation $p = 0.255$). Two things I was careful not to say. Not "the embedding lacks the
+information the MLP output has" — a linear probe failing bounds the probe, and the report already
+documents this exact asymmetry in another form (every steering direction failed while exact
+substitution succeeded). And not "width transports more specifically than shape" from $+0.796$ versus
+$+0.517$: a partial correlation is attenuated by noise in the quantity held constant, the shape
+baseline's split-half reliability is 0.552 with a bootstrap interval of $[-0.036, 0.865]$ that covers
+zero, and with an interval that wide no correction is defensible. The firm claim is that each property
+transports specifically; the ordering between them is not resolved. This is the same trap as iteration
+17's GPT-2 shape ceiling and I handled it the same way — quote the raw number, quote the interval,
+correct nothing.
+
+**Two checks I built in and am glad I did.** The rerun uses `envwidth.run_pair` (which returns both
+statistics) where the original used `anchor_width.run_pair` (width only). Both route through the same
+`curve_metrics.metrics`, so the baseline widths should be bit-identical — and they are, max difference
+0.0000. I also recomputed the recipient-dependence control, which came out at $-0.104$, the original's
+value exactly. Those two make the rerun the original experiment rather than a near-neighbour of it, and
+they cost nothing because the second control was three lines. Adding the control after the first run and
+re-running the whole thing cost 90 seconds, which is the argument for keeping these experiments cheap.
+
+**Assumptions logged.** (a) The partial is linear in ranks over 11 donors, so a nonlinear dependence
+between the donor's two properties would leak. (b) $E$ and $w$ come from the same curves and the width
+target's curve set is selected by $E$, so their noise is shared; this makes the partials conservative
+and is stated in both deliverables. (c) One frame, 12 tokens, one model — the transplant's original
+scope, unchanged on purpose, because widening it would have made the comparison to pattern 23 inexact.
+(d) The split-half reliability splits anchors 3 vs 3 without a Spearman-Brown correction, so it
+describes a half-measurement and is a conservative stand-in for the 6-anchor median's reliability.
+
+**What I learned, beyond this direction.** When a report writes down a two-branch prediction, the
+useful discipline is to check whether "both" and "neither" are live before running it. Here "both" was
+not only live, it was the answer, and because the fork had been written into the deliverable as the
+motivation, the reframing had to touch the Summary, the Conclusion and the next-experiment section, not
+just the new Results subsection.
+
+**On track?** Yes. The named experiment ran, answered the question it was posed to answer, produced one
+new figure with a matched control and a stated limitation, and both deliverables are curated to
+current-best with Figure 33 embedded and `check_render.py` passing (33 embeds, 33 captions, 0 problems).
+No STOP written: the next experiment is named, cheap and real — refit iteration 17's four residual
+probes from $m_u$ and $x_u$ instead of the embedding row, to ask whether the width-specific component is
+readable anywhere early in the network now that we know substitution transports it.

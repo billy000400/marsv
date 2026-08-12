@@ -2025,8 +2025,9 @@ per-pair top-$k$ units that are also in that pair's step-30,000 top-$k$ (y, medi
 against training step (x, log scale): circles (solid) $k=8$, squares (dashed) $k=32$; chance is 0.2% and
 0.8%.
 
-- **Redundancy does not accumulate.** $\Lambda$ reads 1.21, 1.01, 1.08, 1.21, 1.18 across the five
-  checkpoints — flat, with a dip at step 2,038. The overlap between bands is already there at step 831,
+- **Redundancy is there from the start.** $\Lambda$ reads 1.21, 1.01, 1.08, 1.21, 1.18 across the five
+  checkpoints of this run — a dip at step 2,038 and no net change end to end; the second training run
+  repeats the level and drifts up a little (Figure 43). The overlap between bands is already there at step 831,
   where the median width on these pairs is still 0.52. What grows is how much of the bend these units
   account for at all: 46.2% → 81.0% for all units at once, concentrated at the top of the ranking (top-8
   band 7.2% → 23.9%, the 512–2,048 band 7.8% → 10.0%, the bottom band zero throughout).
@@ -2189,8 +2190,51 @@ demoted group and all 3,840 units.
   reference 0.59, p = 0.035). What two runs support is the backward-looking statement — readability
   drains away with head membership — and not a prediction of which units will be promoted.
 
+The band decomposition itself (Figures 37 and 38) was also measured on one run, and the seed-2024
+checkpoints let it be repeated with forward passes alone: the band-alone and all-units effects at all
+five checkpoints, and at step 30,000 the same-size same-region random control, the per-unit worth, and
+the character-window probe refitted on that run and read by the band of each unit's best rank. Three
+parts are not repeated because the second-seed comparison does not turn on them: the marginal column
+inside the nested prefix, the naive draw from all 3,840 units, and the greedy re-selection.
+
+![three panels comparing the two training runs: redundancy ratio against training step, per-band effect at step 30,000 with its within-region random control, and probe R-squared against the band of a unit's best rank](plots/neuron_bands_seed2.png)
+
+**Figure 43.** The band decomposition reproduces at a second seed; the one measurement that differs is
+the direction of the small drift in redundancy over training. Same 150 pairs, context, block-0
+interpolation, six bands and checkpoints in both runs; seed 1337 filled markers on solid lines, seed
+2024 open markers on dashed lines. **(a)** y = redundancy ratio $\Lambda$ (sum of the six band-alone
+effects divided by the all-units effect, per pair), median over the pairs usable at every checkpoint
+(94 in seed 1337, 103 in seed 2024); x = training step (log scale); the gray dashed line at 1.0 marks
+exact additivity. **(b)** y = percentage of the trained→untrained width gap removed at step 30,000;
+x = importance-rank band (band size in the tick label); circles = the band linearized alone, squares =
+a same-size random draw from the same region of the ranking. **(c)** y = median held-out $R^2$ of the
+character-window probe refitted on each run's own step-30,000 model; x = the band of a unit's best rank
+over the 150 pairs; circles = full description, squares = current character alone.
+
+- **The band effects and the reach of the ranking reproduce.** Band-alone effects at step 30,000 are
+  25.6%, 26.1%, 21.6%, 18.9%, 8.1% and −0.1% from the top band down (reference 27.9, 25.9, 24.1, 20.4,
+  10.4, −0.1 — every band within 2.5 points), summing to **105.6%** against an all-units ceiling of
+  **84.0%**, i.e. $\Lambda=1.28$ (paired p = 6e-23, 90.0% of the 150 pairs above 1; reference 1.29 and
+  86.7%). Every band above rank 2,048 again beats a same-size draw from its own region (25.6 vs 0.05,
+  26.1 vs 0.19, 21.6 vs 0.74, 18.9 vs 2.3, 8.1 vs 2.9%, all p ≤ 8e-26 on 95–100% of pairs), the bottom
+  1,792 units again do nothing, and per-unit worth again collapses along the ranking, 32.0% of the gap
+  per 1,000 units in the top band to 0.053% in the 512–2,048 band — 610-fold, against 520-fold in the
+  reference run (Figure 43b).
+- **The rank–describability gradient reproduces.** Held-out $R^2$ by best-rank band: 0.96, 0.64, 0.64,
+  0.59, 0.50, 0.47 for the full description and 0.91, 0.27, 0.22, 0.15, 0.13, 0.15 from the current
+  character alone (reference 0.97, 0.70, 0.66, 0.59, 0.52, 0.50 and 0.91, 0.30, 0.22, 0.14, 0.12, 0.13).
+  Head units (best rank under 32, n = 707) reach 0.72 and 0.34 against 0.49 and 0.14 for the 1,664 tail
+  units (p = 6e-72 and 4e-66; reference 0.80 and 0.42 against 0.51 and 0.12) (Figure 43c).
+- **Whether redundancy grows is not settled by two runs.** In the reference run $\Lambda$ ends where it
+  began (1.21 at step 831, 1.18 at step 30,000; per-pair median change −0.01, p = 0.9). In the second
+  run it starts lower and drifts up: 1.10, 1.12, 1.05, 1.16, 1.20 (per-pair median change +0.10,
+  p = 2e-5, 68% of pairs up) (Figure 43a). Both runs agree on what the claim rests on — at the earliest
+  checkpoint, with the median width still 0.52 and 0.56 and the paths barely sharpened, the bands
+  already overlap by 10–20% — so the redundancy is present as soon as there is a bend to share, and in
+  both runs the change over all of training is small beside the standing distance from additivity.
+
 **What this adds.** The concentrated picture suggested by the top-$k$ curve is an artifact of scoring
-nested prefixes: the same bend is available in several places at once, so straightening the top 32 units
+nested prefixes, in both training runs: the same bend is available in several places at once, so straightening the top 32 units
 removes the most efficient copy of a capability and leaves others behind — an ablation argument built on
 a prefix curve would overstate what it had removed, and the band-alone measurement is what settles it.
 The ranking is worth trusting to about rank 2,048 and worth nothing below, which tells a unit-selection
@@ -2210,10 +2254,13 @@ units will be promoted.
 **Caveats.** Two training runs, one context, one interpolation site, 150 pairs (94 for the developmental
 panels),
 five checkpoints; the band edges reuse the existing $k$ grid and are not fitted. Band-alone effects are
-properties of this chord intervention. Figure 37c is an association at the final checkpoint. Figure 42
-covers turnover, promotion and the describability trajectories at a second seed; the band decomposition
-and the flat redundancy ratio were measured only in the reference run, and two runs show whether a trend
-has the same sign and rough size without estimating the spread across initializations. Figures 40 to 42
+properties of this chord intervention. Figure 37c is an association at the final checkpoint. Figures 42
+and 43 give a second seed to turnover, promotion, the describability trajectories, the band-alone and
+all-units effects at every checkpoint, the within-region control and the rank–describability gradient;
+the marginal column inside the nested prefix, the naive draw from all 3,840 units and the greedy
+re-selection remain reference-run measurements. Two runs show whether a trend has the same sign and
+rough size without estimating the spread across initializations, and where they disagree in sign — the
+drift in $\Lambda$ — neither settles it. Figures 40 to 42
 stay associational:
 nothing in them shows that a unit is promoted *because* of what it computes. Of Figure 40's six tests,
 five survive a Holm correction across the six; the exception is the unconditional full-window contrast
@@ -2228,11 +2275,11 @@ rank trajectories in Figure 39 hit their tautological endpoints exactly (median 
 checkpoint). Data: `results/neuron_bands_summary.json`, `results/neuron_bands_time_summary.json`,
 `results/neuron_head_identity_summary.json`, `results/neuron_head_origin_summary.json`,
 `results/neuron_head_describe_summary.json`, `results/neuron_probe_early_summary.json`,
-`results/neuron_seed2_summary.json`; code:
+`results/neuron_seed2_summary.json`, `results/neuron_bands_seed2_summary.json`; code:
 `experiments/neuron_bands.py`, `experiments/neuron_bands_time.py`,
 `experiments/neuron_head_identity.py`, `experiments/neuron_head_origin.py`,
 `experiments/neuron_head_describe.py`, `experiments/neuron_probe_early.py`,
-`experiments/neuron_seed2.py`.
+`experiments/neuron_seed2.py`, `experiments/neuron_bands_seed2.py`.
 
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
@@ -2251,32 +2298,32 @@ checkpoint). Data: `results/neuron_bands_summary.json`, `results/neuron_bands_ti
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 43 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 44 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 43.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 44.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 44 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 45 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 44.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 45.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 45 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 46 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 45.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 46.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -2396,8 +2443,10 @@ all-units ceiling, so the same bend is carried in several places at once and a n
 the mechanism look more concentrated than it is. The ordering keeps predicting causal effect down to
 about rank 2,048 — every band beats a same-size random draw from its own region, p ≤ 1e-25 — and
 predicts nothing below it, where the last 1,792 units bend the path not at all. Across five checkpoints
-the redundancy stays flat (1.21, 1.01, 1.08, 1.21, 1.18): it is there as soon as there is a bend to
-share. What training builds is a head whose membership it keeps rewriting — at step 831 a pair's top
+the redundancy is already there at the first one (1.21, 1.01, 1.08, 1.21, 1.18) rather than
+accumulating, and a second training run repeats the whole decomposition — every band alone within 2.5
+points, the same roughly 600-fold decline in per-unit worth, a ratio above 1 at every checkpoint —
+differing only in drifting up slightly over training where the reference run ends where it began. What training builds is a head whose membership it keeps rewriting — at step 831 a pair's top
 eight units already remove 7.2% of its gap, and **none** of them is a unit the finished network ranks in
 that pair's top eight. Those eventual head units are promoted from just below the head: at step 831 they
 already sit at median rank **113.5** of 3,840 (random: 1,919.5), half of them inside that checkpoint's

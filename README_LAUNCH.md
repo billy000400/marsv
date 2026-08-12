@@ -92,8 +92,16 @@ secrets off the pod.
 
 ## Two cheap reliability mitigations (already baked in)
 - Each PLAN.md opens with a crisp success criterion **and** a fallback, so a short or broken run still
-  produces a finalized RESULTS.md + REPORT.md.
+  produces finalized RESULTS.md and the requested REPORT*.md deliverable.
 - Every iteration must end its JOURNAL.md entry with an `On track? yes/no — ...` line, so drift is
   visible at a glance when you skim the log.
+
+## Feedback completion gate
+
+`launch.sh` and `relaunch.sh` create/load a compact `.tasks/*.manifest.json` for each unaddressed
+feedback file. `run.sh` supplies that manifest, selected PLAN sections, and only the latest journal
+entry. The worker never renames feedback. After format checks over `REPORT*.md`, a fresh reviewer sees
+only the original feedback, checklist, and every declared or modified output. Only a passing content
+review can add the `.addressed.md` suffix; ambiguous routing remains blocked.
 ```
 ```

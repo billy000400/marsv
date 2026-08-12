@@ -5,9 +5,11 @@
 > directions; lives at the project root.
 >
 > **Autonomous-loop mode:** you run headless with no human to answer mid-iteration. Wherever a rule
-> below says "ask" or "stop and clarify", instead: pick the most standard option, record the
-> assumption AND the alternatives you rejected in JOURNAL.md, and continue. Never block the loop
-> waiting for input.
+> below says "ask" or "stop and clarify", use a standard documented assumption only for ordinary
+> implementation details. A materially ambiguous scientific request or output path is different:
+> record it as `blocked` in the active task manifest and stop that task. Never substitute a nearby
+> research question, rewrite literal data such as `&` as the word “and,” or choose `REPORT.md`
+> because the requested destination is unclear.
 >
 > **Version control is automatic — do NOT run git yourself.** After every iteration the wrapper
 > (`run.sh`) commits this direction's work and pushes it to GitHub, serialized across the concurrent
@@ -18,7 +20,7 @@
 | File         | Role                           | How to write it                                          |
 |--------------|--------------------------------|---------------------------------------------------------|
 | RESULTS.md   | Final, presentable deliverable | CURATE: read, then overwrite to current-best. No history.|
-| REPORT.md    | Final, presentable deliverable | CURATE: read, then overwrite to current-best. No history.|
+| REPORT*.md   | Final, presentable deliverables| CURATE only the requested file; no history.              |
 | CHANGELOG.md | History of deliverable changes | APPEND-ONLY. Never rewrite earlier entries.             |
 | JOURNAL.md   | Working log                    | APPEND-ONLY. Never rewrite earlier entries.             |
 | PLAN.md      | Live plan                      | Edit in place (status / next-step / checkboxes).        |
@@ -66,7 +68,7 @@ When your changes create orphans:
 - Don't remove pre-existing dead code unless asked.
 
 The test: Every changed line should trace directly to the user's request.
-(This governs CODE. The research DELIVERABLES — RESULTS.md/REPORT.md — are deliberately CURATED, not
+(This governs CODE. The research DELIVERABLES — RESULTS.md/REPORT*.md — are deliberately CURATED, not
 surgical: see Part B. Code = minimal diffs; reports = rewritten clean to current-best.)
 
 ## 4. Goal-Driven Execution
@@ -95,22 +97,26 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 Never overwrite or edit a file without first reading its current contents. Prefer a targeted edit
 over a full rewrite; preserve everything you are not deliberately changing. Never blank-truncate a
-file you have not read. (For RESULTS.md/REPORT.md, "read then rewrite clean" is expected per rule 6 —
+file you have not read. (For RESULTS.md/REPORT*.md, "read then rewrite clean" is expected per rule 6 —
 but you still READ first.)
 
-## 6. RESULTS.md and REPORT.md are finalized deliverables — curate, don't log.
+## 6. RESULTS.md and every REPORT*.md are finalized deliverables — curate, don't log.
 
 Always overwrite them to reflect the CURRENT BEST state, as if for a reader seeing them for the first
-time. NEVER keep version history, "changed after review" notes, "v1/v2", or multiple runs of the SAME
+time. Edit only the report path requested by the task manifest. NEVER keep version history, "changed
+after review" notes, "v1/v2", or multiple runs of the SAME
 experiment in them. When a stronger or more statistically significant result for the same experiment
 appears, REPLACE the weaker one — do not show both. One experiment -> one current result.
 
 ## 7. All history lives in CHANGELOG.md (append-only).
 
-Each iteration, append a dated entry recording what changed in RESULTS.md/REPORT.md and why — and if a
+Each iteration, append a dated entry recording what changed in RESULTS.md/REPORT*.md and why — and if a
 result was superseded, the old -> new numbers. This is the ONLY place result/version history belongs.
 
-## 8. REPORT.md must be a self-contained, presentable report.
+## 8. Every REPORT*.md must be a self-contained, presentable report.
+
+`WRITING.md` is the canonical short writing policy and is appended by `run.sh` through Claude's
+system-prompt-file mechanism. It applies equally to `REPORT.md`, `REPORT_followup.md`, and supplements.
 
 Structure: `Summary -> Methods -> Results -> Conclusion`. The **Methods** section MUST state:
 - **Data & Model:** dataset, model (e.g. GPT-2 small, 124M), and exactly which layer(s)/hook point and sample sizes.
@@ -199,25 +205,27 @@ LaTeX is valid and both checks above pass, which is why an operator has now repo
 - Never definition macros (`\def \gdef \edef \xdef \let \newcommand \renewcommand \providecommand`)
   or HTML/link macros (`\href \url \includegraphics \htmlClass \htmlId \htmlStyle \htmlData`).
 
-### 8d. Run ONE script that checks 8a–8c and rule 12. Eyeballing has failed every time.
+### 8d. Run ONE script that checks 8a–8c, rule 12 and rules 9a/9d. Eyeballing has failed every time.
 
 `dir13_plateau_on_grok_gpt/experiments/check_render.py` (with `katex_compile.js`) does all four checks
 and exits non-zero on any problem: it compiles every ` ```math ` fence with KaTeX, compiles every
 inline `$…$` **after applying GitHub's backslash-stripping** (so 8b breaks surface as real KaTeX
 errors), flags every denylisted macro, and confirms via the GitHub API that each display equation
 became `js-display-math` and none became `<pre lang="math">` — plus that no `(plots/x.png)` path is
-missing its `![…]` embed. One-time setup: `npm install --prefix /tmp/katexcheck katex`. Copy it into
-your direction and run it before you finish an iteration:
+missing its `![…]` embed, that every table has a real prose paragraph above it (rule 9a), and that
+self-describing contrast constructions stay within budget (rule 9d). One-time setup:
+`npm install --prefix /tmp/katexcheck katex`. Copy it into your direction and run it before you
+finish an iteration:
 
 ~~~
-python3 experiments/check_render.py REPORT.md RESULTS.md   # exit 0 = renders on GitHub
+python3 experiments/check_render.py REPORT*.md RESULTS.md  # exit 0 = renders on GitHub
 ~~~
 
 ---
 
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying assumptions are logged before implementation rather than discovered after mistakes, and RESULTS.md/REPORT.md always read as a clean current-best paper with all history in CHANGELOG.md.
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, clarifying assumptions are logged before implementation rather than discovered after mistakes, and RESULTS.md/REPORT*.md always read as clean current-best deliverables with all history in CHANGELOG.md.
 
-## 9. Write RESULTS.md and REPORT.md for a newcomer to technical AI safety research.
+## 9. Write RESULTS.md and every REPORT*.md for a newcomer to technical AI safety research.
 
 Key points it instructs agents to follow:
 - **Reader model:** a strong ML engineer / first-year grad student who has *not* read the subfield's papers.
@@ -228,7 +236,60 @@ Key points it instructs agents to follow:
 - **Interpret the numbers** — say whether a result is strong/weak/surprising and what it implies.
 - **Plain words, short sentences, active voice.**
 - **Keep rigor intact** — accessible means well-explained, not vague; don't drop caveats/CIs/sample sizes to sound friendlier.
-- A one-line **test**: could a capable ML engineer new to the subfield read REPORT.md and correctly explain what you did, why it matters, and what you found, without another source?
+- A one-line **test**: could a capable ML engineer new to the subfield read the affected REPORT*.md and correctly explain what you did, why it matters, and what you found, without another source?
+
+### 9a. State the strengths explicitly. Never make the reader infer the contribution from a table.
+
+A table of numbers is evidence, not an argument. Wherever you present a favorable result, say in prose:
+**where** the method performs best (which regime, model, layer, data slice), **which measured result**
+supports that statement, **what practical problem** it addresses, and **why that capability matters**
+relative to existing methods. Explain why an advantage arises only when causal evidence supports that
+explanation; a checkpoint correlation is not a mechanism. "Ours: 0.87 / baseline: 0.71" with no
+surrounding sentence is an unfinished result.
+
+**Test:** delete every table and figure from the affected REPORT*.md — can a reader still name your contribution and why
+it is useful? If not, the prose is doing too little. `check_render.py` (rule 8d) enforces the mechanical
+half of this: a table sitting directly under a heading, with no prose paragraph above it, fails.
+
+### 9b. Let the story follow the evidence, not the other way round.
+
+This applies only to self-directed framing after all requested analyses are complete. It never permits
+changing a human's research question, output routing, or checklist to fit a more favorable story.
+
+When the results do not support the narrative you started with, **rebuild the narrative around the strongest
+evidence you actually have** — redefine the problem, reorder the contributions, pick a new primary result, and
+restructure the Summary, motivation, and Results sections to match. Do not keep a Summary that promises what
+the numbers no longer deliver, and do not bury the strongest finding in a subsection because an earlier plan
+called it secondary. In loop mode, record the re-framing (old story → new story, and what evidence forced it)
+in JOURNAL.md and CHANGELOG.md; each REPORT*.md itself shows only the current story (rule 6).
+
+### 9c. Use this default order when the results are unfavorable.
+
+Work down the list and stop at the first step that honestly fixes the mismatch:
+
+1. **Cut** content unrelated to the core claim.
+2. **Narrow** the claim to what the evidence supports.
+3. **Adopt a more informative evaluation dimension** — one that actually distinguishes the methods.
+4. **Explain differences in objectives or trade-offs** — only when the evidence supports that explanation.
+5. **Reorganize the experiments** so the genuine strengths come first.
+6. **Redefine the paper's overall story** (rule 9b).
+7. **Discuss the limitation** — only when it cannot be avoided and it materially affects the central conclusion.
+
+This is a presentation order, not permission to hide anything: steps 1–6 reframe what the paper *claims*,
+they never delete a result that contradicts a claim you are still making. A caveat, CI, or sample size that
+qualifies a surviving claim stays (rule 9's "keep rigor intact").
+
+### 9d. Avoid mechanical contrast constructions.
+
+Do not repeatedly write "We do X rather than Y", "A is X, not Y", "unlike prior work, we …". One or two such
+sentences in a whole report is fine; a paragraph built out of them reads as defensive and says less than it
+appears to. State directly what the method does, why it is designed that way, and what the design achieves —
+the contrast is then obvious without being announced.
+
+`check_render.py` (rule 8d) counts these and fails above a budget of 2 per file. It flags only sentences
+that describe *our own* work by contrast — "we measure X rather than Y", "our detector scores X instead of
+Y", "unlike prior work, …". An ordinary comparison between two things being studied ("the variance is
+explained by per-character terms rather than pair chemistry") is not the tic and is not flagged.
 
 ---
 
@@ -236,32 +297,39 @@ Key points it instructs agents to follow:
 
 ## 10. Address operator feedback before anything else.
 
-Humans drop feedback into this direction as files named `human_feedback*.md` (also `*REVIEW*`). An
-**unaddressed** feedback file is any such file whose name does NOT end in `.addressed.md`.
+Humans drop feedback into this direction as files beginning `human_feedback` (any extension), or
+containing `REVIEW`. An unaddressed feedback file is any such file not ending in `.addressed.md`.
+`workflow.py prepare` creates `.tasks/<source>.manifest.json` before any research begins.
 
-Every iteration, **before** advancing the plan:
-- Glob this direction for `human_feedback*.md` and `*REVIEW*` that lack the `.addressed.md` suffix.
-  (`ls` the direction root; do not assume there are none — check.)
-- If any exist, that IS this iteration's work. Read each in full and **address every point** — run the
-  requested experiment, add the requested plot/metric, answer the requested question in
-  RESULTS.md/REPORT.md. In loop mode you cannot reply to the human, so the answer lives in the
-  deliverables + a JOURNAL entry.
-- When a file is fully addressed, **rename it** `mv human_feedback_XXXX.md human_feedback_XXXX.addressed.md`
-  (never delete it, never edit its contents). Record in CHANGELOG.md what you changed and in JOURNAL.md
-  which file you addressed.
-- If a point is genuinely infeasible (missing data, out of budget), still rename to `.addressed.md` but
-  state plainly in the deliverable + JOURNAL why it could not be done and what you did instead.
+The manifest is the compact task authority. It contains the exact source filename, required output
+files, existing files that may change, files that must remain unchanged, unresolved ambiguities, and
+a verbatim checklist. Never edit a checklist request. In particular, literal characters such as `&`
+must remain literal. Copy user paths exactly and never redirect a follow-up into `REPORT.md`.
+
+The first agent pass is triage only: fill routing fields and verify the checklist before research.
+If a scientific instruction or destination is materially unclear, set the manifest to `blocked`,
+record the ambiguity, and stop. Otherwise set it to `ready`. Later passes fill, for every item:
+what was done; the exact figure, table, experiment, report section, or file answering it; and whether
+ambiguity remains. Only a complete task may be set to `review_pending`.
+
+The worker must never rename feedback. After render/format checks, `run.sh` starts a fresh content
+reviewer with only the original feedback, manifest checklist, and every declared or modified report
+and required output. The reviewer rejects omitted or reinterpreted asks, a changed research question,
+displacing requested work with unrequested analysis, undefined jargon, causal language unsupported by
+correlation, claims stronger than evidence, or prose inaccessible to a new researcher. Passing render
+checks is necessary but not sufficient. Only the wrapper may rename approved feedback to
+`.addressed.md`; infeasible or ambiguous items remain unaddressed.
 
 ## 11. Never STOP while unaddressed feedback remains.
 
 The wrapper's loop halts the moment a `STOP` file exists. So **do NOT write `STOP` if any
-`human_feedback*.md` / `*REVIEW*` file without `.addressed.md` is present** — a STOP'd direction stops
+`human_feedback*` / `*REVIEW*` file without `.addressed.md` is present** — a STOP'd direction stops
 looping and will silently ignore feedback dropped afterward. Only write `STOP` once (a) the plan is
 complete AND (b) zero unaddressed feedback files remain. If you re-enter and find new unaddressed
 feedback next to a stale `STOP`, delete `STOP`, address the feedback, and only re-write `STOP` when
 clean again.
 
-## 12. Embed every plot as a RENDERED image in REPORT.md and RESULTS.md — every iteration.
+## 12. Embed every plot as a RENDERED image in every affected REPORT*.md and RESULTS.md.
 
 A bare path like `(plots/foo.png)` in prose does NOT render — it is just text, and the figure never
 appears. **Every quantitative result must be embedded as an actual Markdown image** so it renders on
@@ -271,11 +339,11 @@ GitHub:
 ![Short descriptive caption](plots/foo.png)
 ```
 
-- This applies to REPORT.md too, not only RESULTS.md, and on **normal iterations**, not only at
+- This applies to every affected REPORT*.md, not only RESULTS.md, and on **normal iterations**, not only at
   finalization: whenever you curate the deliverables, (re)embed the current-best figures as `![](…)`
-  images. Do not defer REPORT.md's figures to the last 20 minutes.
+  images. Do not defer report figures to the last 20 minutes.
 - Grep before committing to catch un-rendered path references:
-  `grep -nE '\(plots/[^)]+\.png\)' REPORT.md RESULTS.md` — every hit that is not preceded by `!` and
+  `grep -nE '\(plots/[^)]+\.png\)' REPORT*.md RESULTS.md` — every hit that is not preceded by `!` and
   a caption in `![...]` is a figure that will NOT render. Convert it to an `![caption](plots/….png)`
   embed (a parenthetical pointer alongside an already-embedded figure is fine).
 - **Motivate every figure BEFORE it appears, and cut the ones nothing needs** (the figure analogue of
@@ -308,7 +376,7 @@ y: relative distance `d(t)`. Solid = between-plateau pairs, dashed = within-plat
 - **Check before finishing** — every embed must be followed by a visible caption line:
 
 ~~~
-grep -A2 -nE '^!\[' REPORT.md RESULTS.md | grep -c '\*\*Figure'   # must equal the number of embeds
+grep -A2 -nE '^!\[' REPORT*.md RESULTS.md | grep -c '\*\*Figure'  # must equal the number of embeds
 ~~~
 
 - **Every figure must be readable from the report alone.** For each embedded plot, the caption or the

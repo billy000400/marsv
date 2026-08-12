@@ -29,6 +29,10 @@ DIR="${1:?usage: run.sh <research-subdir> [hours]}"
 BUDGET_FILE="BUDGET.md"
 BUDGET_ABS="$(pwd)/$BUDGET_FILE"
 RULES_ABS="$(pwd)/CLAUDE.md"     # operator rules (read before write, curation, report structure)
+WRITING_ABS="$(pwd)/WRITING.md" # appended with Claude's supported system-prompt-file flag
+WORKFLOW_ABS="$(pwd)/workflow.py"
+[ -f "$WRITING_ABS" ] && [ -f "$WORKFLOW_ABS" ] || { echo "[run.sh] missing WRITING.md or workflow.py" >&2; exit 1; }
+CHECK_MD_ABS="$(pwd)/check_md.py"
 read_budget() { grep -E "^$1:" "$BUDGET_FILE" 2>/dev/null | head -1 | sed -E "s/^$1:[[:space:]]*//; s/[[:space:]].*$//"; }
 
 MODEL="$(read_budget MODEL)";                    MODEL="${MODEL:-opus}"
@@ -58,6 +62,7 @@ FINALIZE_MIN=20
 BUDGET_SEC=$(awk "BEGIN{printf \"%d\", $HOURS*3600}")
 END=$(( $(date +%s) + BUDGET_SEC ))
 
+python3 "$WORKFLOW_ABS" prepare "$DIR" >/dev/null || exit 1
 cd "$DIR" || { echo "[run.sh] cannot cd into $DIR"; exit 1; }
 mkdir -p experiments results plots
 
@@ -125,40 +130,75 @@ while [ "$(date +%s)" -lt "$END" ] && [ ! -f STOP ]; do
   REMAIN=$(( (END - $(date +%s)) / 60 ))
   echo "[run.sh] $(date '+%F %T')  ~${REMAIN} min left  -----------------------------"
 
-  claude -p "You are mid-project and your working memory RESETS every iteration. \
-FIRST read CLAUDE.md (operator rules, at ${RULES_ABS}) and BUDGET.md (at ${BUDGET_ABS}), then \
-PLAN.md, JOURNAL.md, RESULTS.md, and CHANGELOG.md in full. OBEY every rule in CLAUDE.md. \
-FEEDBACK FIRST (CLAUDE.md Part C): before advancing the plan, list this direction for files matching \
-'human_feedback*.md' or '*REVIEW*' that do NOT end in '.addressed.md'. If any exist, addressing them IS \
-this iteration: read each in full, do every ask (run the experiment / add the plot / add the metric / \
-answer the question in RESULTS.md+REPORT.md), then 'mv' the file to end in '.addressed.md' (never delete/edit \
-it), and log it in CHANGELOG.md + JOURNAL.md. \
-KEY RULES: RESULTS.md and REPORT.md are FINAL, presentable deliverables — read them, then overwrite \
-to current-best ONLY (no version history, no 'changed after review', no weaker/superseded variant of \
-an experiment when a stronger one exists). Put ALL change history in CHANGELOG.md (append-only). \
-SHARED-RESOURCE LIMITS (this run): you are 1 of ${N_AGENTS} agents on GPU '${GPU_NAME}' (${GPU_VRAM_GB} GB); \
-call torch.cuda.set_per_process_memory_fraction(${VRAM_FRACTION}) (~${VRAM_PER_AGENT} GB), keep RAM under \
-~${RAM_PER_AGENT} GB (memmap caches), torch.set_num_threads(${CPU_THREADS}), HALVE batch on OOM. \
-You have ${REMAIN} minutes of wall-clock left. \
-If that number is <= ${FINALIZE_MIN}: do ONLY finalization — refresh RESULTS.md (current-best only) and \
-write a clean presentable REPORT.md per CLAUDE.md (Summary -> Methods -> Results -> Conclusion; the \
-Methods section MUST give Data/Model/Layer, and DEFINE every metric and baseline with rendered \$\$LaTeX\$\$ \
-equations; embed plots/ figures; current-best numbers only). Append a final CHANGELOG.md entry, then \
-create an empty STOP file and stop — BUT ONLY IF no unaddressed 'human_feedback*.md'/'*REVIEW*' file remains \
-(never write STOP while feedback is unaddressed; a STOP'd direction stops looping and ignores it). \
-Otherwise do ONE focused iteration: advance the plan by the smallest useful step, write/modify code under \
-experiments/, RUN it, then CURATE RESULTS.md to current-best (read it, overwrite clean — no history) and \
-save a PNG for every quantitative result into plots/ (plt.savefig + plt.close, NEVER plt.show; headless Agg) \
-and EMBED each as a rendered Markdown image '![caption](plots/foo.png)' in BOTH RESULTS.md AND REPORT.md \
-(a bare '(plots/foo.png)' path in prose does NOT render — it must be an '![...](...)' image; embed REPORT.md \
-figures every iteration, do not defer them to finalization). APPEND to CHANGELOG.md what changed in the deliverables this iteration \
-(old -> new numbers if a result was superseded). Then append to JOURNAL.md (what you did, learned, next step) \
-and update PLAN.md 'Current status'/'Next step'/checkboxes. End the JOURNAL entry with the 'On track?' line. \
-Persist ALL state to disk before you finish; assume nothing carries over." \
-    --append-system-prompt "Obey CLAUDE.md every iteration. File roles are STRICT: RESULTS.md and REPORT.md are curated, presentable, current-best — read then overwrite clean, NEVER keep history or superseded/weaker results in them. CHANGELOG.md and JOURNAL.md are append-only history. REPORT.md must have a Methods section defining every metric and baseline with \$\$LaTeX\$\$ equations plus the data/model/layer used. Visualize every reported result: PNGs in plots/ (savefig+close, never show) EMBEDDED as rendered '![caption](plots/x.png)' images in BOTH RESULTS.md and REPORT.md every iteration — a bare path in prose does not render. OPERATOR FEEDBACK (CLAUDE.md Part C): each iteration, before other work, address any 'human_feedback*.md'/'*REVIEW*' file lacking a '.addressed.md' suffix, then rename it to '.addressed.md'; NEVER write STOP while any such file is unaddressed. Read before write. Persist every iteration. Prefer small verifiable steps; on a broken experiment debug minimally or fall back per PLAN.md." \
+  python3 "$WORKFLOW_ABS" prepare . >/dev/null || break
+  ACTIVE_MANIFEST="$(python3 "$WORKFLOW_ABS" active .)"
+  if [ -n "$ACTIVE_MANIFEST" ]; then
+    python3 "$WORKFLOW_ABS" guard-source "$ACTIVE_MANIFEST" || break
+    python3 "$WORKFLOW_ABS" seal "$ACTIVE_MANIFEST" >/dev/null || break
+  fi
+
+  COMPACT_CONTEXT="$(python3 "$WORKFLOW_ABS" context .)" || break
+  WORKER_RULES="$(python3 "$WORKFLOW_ABS" worker-rules)" || break
+  WORK_PROMPT="${WORKER_RULES}
+
+Shared-resource limits: 1 of ${N_AGENTS} agents on GPU '${GPU_NAME}' (${GPU_VRAM_GB} GB); use torch.cuda.set_per_process_memory_fraction(${VRAM_FRACTION}) (~${VRAM_PER_AGENT} GB), keep RAM under ~${RAM_PER_AGENT} GB, torch.set_num_threads(${CPU_THREADS}), and halve batch size on OOM. ${REMAIN} minutes remain. If <= ${FINALIZE_MIN} and there is no active feedback, finalize only. Persist all state before finishing.
+
+${COMPACT_CONTEXT}"
+
+  claude -p "$WORK_PROMPT" \
+    --append-system-prompt-file "$WRITING_ABS" \
     --model "$MODEL" \
     --dangerously-skip-permissions \
     2>&1 | tee -a session.log
+
+  if [ -n "$ACTIVE_MANIFEST" ]; then
+    # A worker cannot bypass the gate by creating STOP or renaming feedback itself.
+    if [ -f STOP ]; then
+      PREMATURE_STOP=".tasks/STOP.premature.$(date +%s)"
+      mv STOP "$PREMATURE_STOP"
+      echo "[gate] moved premature STOP to $PREMATURE_STOP; feedback is not approved."
+    fi
+    python3 "$WORKFLOW_ABS" guard-source "$ACTIVE_MANIFEST" || break
+    python3 "$WORKFLOW_ABS" validate "$ACTIVE_MANIFEST" >/dev/null || {
+      echo "[gate] invalid task manifest; feedback remains unaddressed."
+      break
+    }
+    TASK_STATE="$(python3 "$WORKFLOW_ABS" state "$ACTIVE_MANIFEST")"
+    if [ "$TASK_STATE" = "blocked" ]; then
+      echo "[gate] task is blocked on a material ambiguity; feedback remains unaddressed."
+      break
+    fi
+    if [ "$TASK_STATE" = "review_pending" ]; then
+      FORMAT_PASSED=yes
+      mapfile -t FORMAT_FILES < <(python3 "$WORKFLOW_ABS" format-files "$ACTIVE_MANIFEST")
+      if [ "${#FORMAT_FILES[@]}" -eq 0 ] || ! python3 "$CHECK_MD_ABS" "${FORMAT_FILES[@]}"; then
+        FORMAT_PASSED=no
+      fi
+      REPORT_FILES=(REPORT*.md)
+      if [ -f experiments/check_render.py ] && [ -e "${REPORT_FILES[0]}" ]; then
+        RENDER_FILES=("${REPORT_FILES[@]}")
+        [ -f RESULTS.md ] && RENDER_FILES+=(RESULTS.md)
+        python3 experiments/check_render.py "${RENDER_FILES[@]}" || FORMAT_PASSED=no
+      fi
+
+      REVIEW_DIR="$(mktemp -d /tmp/marsv-content-review.XXXXXX)" || break
+      if python3 "$WORKFLOW_ABS" make-review-bundle "$ACTIVE_MANIFEST" "$REVIEW_DIR"; then
+        REVIEW_SYSTEM="$(python3 "$WORKFLOW_ABS" review-rules)"
+        REVIEW_PROMPT="$(<"$REVIEW_DIR/review_prompt.txt")"
+        REVIEW_SCHEMA='{"type":"object","properties":{"pass":{"type":"boolean"},"inspected_outputs":{"type":"array","items":{"type":"string"}},"failures":{"type":"array","items":{"type":"string"}},"summary":{"type":"string"}},"required":["pass","inspected_outputs","failures","summary"],"additionalProperties":false}'
+        if (cd "$REVIEW_DIR" && claude -p "$REVIEW_PROMPT" \
+              --safe-mode --tools Read --system-prompt "$REVIEW_SYSTEM" \
+              --json-schema "$REVIEW_SCHEMA" --output-format json \
+              --model "$MODEL" --dangerously-skip-permissions) >"$REVIEW_DIR/review.json"; then
+          python3 "$WORKFLOW_ABS" record-review "$ACTIVE_MANIFEST" "$REVIEW_DIR/review.json" \
+            --format-passed "$FORMAT_PASSED" || true
+        else
+          echo "[gate] reviewer failed to run; feedback remains unaddressed."
+        fi
+      fi
+      rm -rf "$REVIEW_DIR"
+    fi
+  fi
 
   git_sync iter || true          # checkpoint this iteration's investigation to GitHub
   sleep 2

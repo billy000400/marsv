@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""check_md.py — verify Markdown will render on GitHub (deliverables gate).
+"""check_md.py — verify Markdown will render on GitHub (format gate only).
 
 Usage:  python check_md.py FILE [FILE ...]
+        python check_md.py REPORT*.md RESULTS.md
 Exit 0 = all clean (warnings allowed), 1 = at least one ERROR, 2 = usage.
+
+Passing this script is not completion; run.sh also requires a fresh content review.
 
 Checks (the high-frequency GitHub-render failures):
   E1  display math $$ unbalanced (odd count)

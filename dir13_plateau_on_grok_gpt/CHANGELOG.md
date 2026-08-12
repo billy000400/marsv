@@ -2070,3 +2070,43 @@ listed it as the direction's real open problem since 2026-08-03.
   (REPORT 51 display / 1,159 inline equations / 45 figures; RESULTS 45 figures; 0 problems); embed count
   equals caption count (90 = 45 + 45).
 - **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
+
+## 2026-08-12 — S26: the band decomposition gets its second seed (new Figure 43 in both deliverables)
+
+- **What ran.** `experiments/neuron_bands_seed2.py` (155 s, forward passes only) re-measures the band
+  decomposition on the second training run of the reference recipe (model seed 2024, the checkpoints
+  S25 trained), using the same code paths and settings as the seed-1337 runs: `neuron_path.record_pair`
+  / `ablate_pair`, the same 150 pairs, context `"The house was "`, block-0 interpolation, the same six
+  rank bands and the same five checkpoints, plus `neuron_probe_early.fit_probe` refitted on the new run
+  at step 30,000. This closes the caveat added in the previous entry ("the band decomposition and
+  redundancy ratio remain single-run").
+- **Reproduces.** Band-alone effects at step 30,000 **25.6 / 26.1 / 21.6 / 18.9 / 8.1 / −0.1%** against
+  the reference run's 27.9 / 25.9 / 24.1 / 20.4 / 10.4 / −0.1% (every band within 2.5 points); sum
+  **105.6%** against an all-units ceiling of **84.0%**, i.e. **Λ = 1.28** (p = 6e-23, 90.0% of pairs
+  above 1) against 1.29 (86.7%); per-unit worth 32.0% → 0.053% of the gap per 1,000 units, a 610-fold
+  decline against 520-fold; every band above rank 2,048 beats a same-size draw from its own region
+  (25.6 vs 0.05, 26.1 vs 0.19, 21.6 vs 0.74, 18.9 vs 2.3, 8.1 vs 2.9%, all p ≤ 8e-26) and the bottom
+  1,792 units again do nothing; probe $R^2$ by best-rank band 0.96 / 0.64 / 0.64 / 0.59 / 0.50 / 0.47
+  (full) and 0.91 / 0.27 / 0.22 / 0.15 / 0.13 / 0.15 (current character) against 0.97 / 0.70 / 0.66 /
+  0.59 / 0.52 / 0.50 and 0.91 / 0.30 / 0.22 / 0.14 / 0.12 / 0.13, head-vs-tail 0.72/0.34 against
+  0.49/0.14 (p = 6e-72, 4e-66).
+- **Does not reproduce.** The *flatness* of Λ over training. Reference run: 1.21 → 1.18, per-pair median
+  change −0.01, p = 0.9. Second run: 1.10, 1.12, 1.05, 1.16, 1.20, per-pair median change **+0.10**,
+  p = 2e-5, 68% of pairs up. Both runs still start above 1 at the earliest checkpoint (1.21 and 1.10,
+  median widths 0.52 and 0.56), which is the part the claim rests on.
+- **Claims narrowed as a result (rule 9c step 2).** "Redundancy does not accumulate" → "Redundancy is
+  there from the start" in the Results of both files, with the flat-trend sentence scoped to the
+  reference run; the Summary/Headline sentence changes from "the redundancy stays flat (1.21, 1.01,
+  1.08, 1.21, 1.18)" to "already there at the first checkpoint … rather than accumulating", followed by
+  what the second run repeats and where it differs. Both Caveats sections now list the three parts that
+  remain single-run (marginal column inside the nested prefix, naive all-3,840 random draw, greedy
+  re-selection) instead of the whole decomposition.
+- **New files.** `experiments/neuron_bands_seed2.py`, `results/neuron_bands_seed2_summary.json` (both
+  seeds side by side), `results/neuron_bands_seed2_raw.npz`, `results/neuron_bands_seed2.log`,
+  `plots/neuron_bands_seed2.png` → embedded as **Figure 43** in REPORT.md and RESULTS.md; the three
+  exploratory figures renumbered 43–45 → 44–46 in both files. No existing measurement was re-run or
+  superseded.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 51 display / 1,173 inline equations / 46 figures; RESULTS 46 figures; 0 problems); embed count
+  equals caption count (92 = 46 + 46).
+- **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.

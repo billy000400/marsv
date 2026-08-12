@@ -2749,3 +2749,34 @@ renumbered 42–44 → 43–45 in both files before the new Figure 42 was insert
 On track? yes — PLAN "Next step" item (i) from last iteration is done, and the successor list is now the
 depth-series second seed, extending seed 2 to the band decomposition, and a probe family beyond the
 8-character window; blocker: none.
+
+
+## 2026-08-12 — S26: a second seed for the band decomposition (curation completed the following iteration)
+
+**What ran.** `experiments/neuron_bands_seed2.py`, 155 s of forward passes, re-measuring the band
+decomposition on the seed-2024 checkpoints S25 had trained, with the same 150 pairs, the same context,
+the same block-0 interpolation, the same six rank bands and the same five checkpoints, plus the
+character-window probe refitted on the new run at step 30,000. It reuses `neuron_path.record_pair` /
+`ablate_pair` and `neuron_probe_early.fit_probe` rather than reimplementing either, the same way
+`neuron_seed2.py` does.
+
+**Why this and not something else.** S25 left an explicit caveat in both deliverables — "the band
+decomposition and redundancy ratio remain single-run" — and the checkpoints it needed were already on
+disk in /tmp, so the whole measurement cost forward passes only. Closing a caveat I had just written
+was cheaper than anything else on the successor list.
+
+**Result.** Everything the argument rests on reproduces (numbers in CHANGELOG). The one measurement
+that does not is the *flatness* of the redundancy ratio over training: the reference run's Λ sits at
+1.21 → 1.18 with a per-pair median change of −0.01 (p = 0.9), while the second run climbs 1.10 → 1.20
+(median +0.10, p = 2e-5, 68% of pairs up). Both runs are above 1 at the first checkpoint, which is the
+part the claim needs, so the claim moved from "redundancy does not accumulate" to "redundancy is there
+from the start", with the flat trend scoped to the reference run.
+
+**Process note, and the reason this entry is dated a day late in the file.** The previous iteration ran
+the experiment and curated REPORT.md, RESULTS.md and CHANGELOG.md (all three carry the S26 material and
+Figure 43), but stopped before writing PLAN.md and JOURNAL.md. This iteration wrote both from the
+CHANGELOG entry and the summary JSON; no measurement was re-run, and `check_render.py REPORT.md
+RESULTS.md` re-verified the curated state (ALL CHECKS PASS, 46 figures per file).
+
+On track? yes — the second-seed item is finished for both the developmental head measurements (S25) and
+the band decomposition (S26); blocker: none.
