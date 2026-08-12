@@ -1487,3 +1487,65 @@ figure with matched nulls and ceilings and an exact tie-check to the previous re
 deliverables are curated to current-best with Figure 35 embedded and `check_render.py` passing (35
 embeds, 35 captions, 0 problems). No STOP written: the next experiment is named, cheap and real, and it
 attacks the last untested caveat rather than adding coverage.
+
+## 2026-08-12 — iteration 21: the negative survives losing the word "linear"
+
+**What I set out to do.** No unaddressed feedback, so ordinary plan work: the experiment both
+deliverables named as next. After six feature sets had come back at chance for the width-specific
+component, every statement of that negative still carried one qualifier — ridge, 2,048 features, 80
+training tokens. A seventh site would not touch it. So: same features, same 123 tokens, same four
+targets and ceilings, same 50 splits, same 50 permutations, and swap only the readout for RBF kernel
+ridge and $k$-NN, each tuned by the same 5-fold CV inside the training half that tunes ridge's penalty.
+
+**Result: 18 site-by-readout cells, all inside their nulls.** Best is kernel ridge at block 6, $+0.145$
+with permutation $p = 0.118$ — 0.23 of a ceiling of 0.630, the sort of number chance produces one time
+in eight. Kernel ridge contains linear ridge as a limiting case, which is what makes it the informative
+half: given the freedom to bend, cross-validation declines to use it, and at *every* site it picks the
+largest penalty in the grid ($10^5$) for this target. The best fit it can find on the training half is
+nearly a constant.
+
+**The controls did the load-bearing work.** Without them "three readouts found nothing" is equally
+consistent with "my kernel code is broken". Kernel ridge tracks ridge on shape to within $0.008$ at all
+six sites and is slightly *better* on the raw width ($+0.657$ vs $+0.630$ at block 12, higher in 88% of
+splits), so nonlinearity does buy a little where there is something to buy. $k$-NN behaves exactly like
+the weaker learner it is: above its null everywhere on shape and width ($p = 0.02$) but 0.06–0.33 below
+ridge — and its accuracy climbs with depth, which is a small positive finding of its own about how the
+deeper residual stream arranges these tokens.
+
+**The temptation I avoided.** Kernel ridge beats ridge on the width residual at the three deeper sites
+($+0.056$, $+0.099$ in 88% of splits, $+0.052$) and loses at the three early ones. It would be easy to
+write "the component becomes nonlinearly encoded with depth". Both readouts are indistinguishable from
+chance at those sites, so the paired difference is a comparison of two ways of predicting nothing. What
+I wrote is that it says which readout degrades more gracefully, not where the component lives.
+
+**Engineering note worth keeping.** Kernels and neighbour orderings depend on the features and the
+split but never on the target, so each split's kernel inverse is a fixed linear map from training
+targets to predictions. Building those maps once per site and applying them to all 4 targets x 51
+target vectors turned 24 x 51 nonlinear fits into matrix-vector products; the whole nonlinear half cost
+less than the ridge half. The ridge nulls I reused rather than refit (deterministic given the same
+features, splits and seeds — 8 minutes per site to reproduce 50 identical numbers), and I said so in
+the docstring and Methods rather than quietly.
+
+**Assumptions logged.** (a) Two readout families, not a survey — kernel ridge is the strict
+generalisation of the incumbent and $k$-NN assumes nothing about functional form, so between them they
+bracket "was the constraint linearity?"; a random forest or MLP would add cost without adding a
+distinct answer at n = 80. (b) Euclidean distance on train-standardised features for both, matching
+ridge's own standardisation, rather than cosine — one geometry, comparable across readouts. (c) Ridge
+refit for rho (tie-check, exact to four decimals over 24 probes) but its published nulls reused.
+
+**Why the next experiment is a learning curve.** With linearity ruled out the only caveat left on every
+cell is 80 training tokens, and $k$-NN's shortfall on the easy targets is a direct measurement that this
+sample size costs a flexible learner real accuracy. Training sizes 30/50/80/100 on the same tokens and
+features, with the controls setting the scale, either shows the width residual climbing towards its null
+boundary (underpowered, and the curve names the size a decisive test needs) or flat at chance while the
+controls climb (the representations do not expose it). No forward passes.
+
+**What I learned, beyond this direction.** When a negative result's caveat is a property of the *method*
+rather than of the data, testing it is usually cheaper than restating the result at more sites — the
+features were already built, and the whole experiment was algebra. Three iterations running, the tie-
+check to the previous run has been what makes a new panel a comparison rather than a re-run.
+
+**On track?** Yes. The named experiment ran, closed the last method-side caveat, produced one figure
+with matched nulls and ceilings and an exact 24-probe tie-check, and both deliverables are curated to
+current-best with Figure 36 embedded and `check_render.py` passing (36 embeds, 36 captions, 0
+problems). No STOP written: the next experiment is named, cheap and real.

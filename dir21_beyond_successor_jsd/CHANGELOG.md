@@ -1252,3 +1252,41 @@ the training half of every split. This is the only untested caveat left after si
 (REPORT 44 display eqs / 1536 inline eqs / 35 embeds / 0 problems; RESULTS 3 display eqs / 1049 inline
 eqs / 35 embeds / 0 problems). Embed/caption counts match at 35 each; figures numbered sequentially
 through 35; no bare `(plots/*.png)` references.
+
+## 2026-08-12 — iteration 21: pattern 46, three readouts on the six feature sets (Figure 36)
+
+**What changed in the deliverables.** Both REPORT.md and RESULTS.md gain one new section on the last
+untested caveat of the report's central negative — "not readable" had always meant "not by ridge". New
+Methods subsection in REPORT.md ("Two more readouts on those same six feature sets") defining RBF
+kernel ridge and $k$-nearest-neighbour regression with rendered equations and their tuning grids;
+RESULTS.md defines both in-line in its new section. New Figure 36 (`plots/readout.png`) embedded in
+both, with a visible caption; both files now carry 36 figures. The summary paragraph in REPORT.md and
+the "Next experiment" section of both files were rewritten.
+
+**New result (pattern 46, `experiments/readout_probe.py`, `results/readout.json`).** Six feature sets
+(embedding row $W_E[u]$, block-0 MLP output $m_u$, residual stream after blocks 0, 6, 12, 18) x three
+readouts (linear ridge, RBF kernel ridge, $k$-NN) x four targets, with tokens, targets, ceilings, the
+50 train/test splits and the 50 permutations held fixed at patterns 41/44/45's values. All 18
+site-by-readout cells for width-with-shape-removed are inside their permutation nulls; best is kernel
+ridge at block 6, $+0.145$ ($p = 0.118$), 0.23 of a ceiling of 0.630. Controls: kernel ridge within
+$0.008$ of ridge on shape at every site and slightly above it on raw width ($+0.657$ vs $+0.630$ at
+block 12, higher in 88% of splits); $k$-NN at $+0.53$–$+0.74$ on shape and $+0.31$–$+0.57$ on width,
+above its null everywhere ($p = 0.02$) but below ridge. Kernel ridge's CV picks the largest penalty in
+the grid ($10^5$) for the width residual at every site.
+
+**Superseded claims.** No number changed. What changed is the scope of the standing negative: the
+qualifier "not readable *by ridge* on 2,048 features" (used in patterns 41, 44 and 45 and in both
+deliverables' limits paragraphs) is replaced by "not readable by any of three readout families at 80
+training tokens". The ridge column was refit rather than quoted and reproduces patterns 44/45 to four
+decimals across all 24 probes (largest $|{\rm diff}| = 0.0000$); its permutation null is the published
+one, which is the same 50 numbers by construction given identical features, splits and seeds.
+
+**Next experiment (recorded in both deliverables).** A learning curve: refit ridge and kernel ridge at
+training sizes 30, 50, 80, 100 on the same 123 tokens, features, targets and nulls, and read the width
+residual against its null at each size, with the control targets setting the scale. This tests the one
+caveat that still applies to every cell of pattern 46 — 80 training tokens.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 47 display eqs / 1633 inline eqs / 36 embeds / 0 problems; RESULTS 3 display eqs / 1115 inline
+eqs / 36 embeds / 0 problems). Figure 36 numbered sequentially after Figure 35 in both files and cited
+by number in the prose; no bare `(plots/*.png)` references.

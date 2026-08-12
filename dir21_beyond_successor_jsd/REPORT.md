@@ -58,7 +58,9 @@ this model the two orderings nearly coincide. Removing the shape ranking from th
 reliably measured quantity the probe cannot predict at all (pattern 41), and moving the probe deeper
 does not help: the same target stays at chance when read from the block-0 MLP's output, from the full
 post-block-0 residual state (pattern 44), and from the residual stream at blocks 6, 12 and 18, where
-it drifts down to exactly zero rather than up (pattern 45). So there is no cheap upgrade from this
+it drifts down to exactly zero rather than up (pattern 45). Swapping the linear probe for RBF kernel
+ridge or nearest neighbours on those same six representations leaves all 18 combinations at chance
+(pattern 46), so the miss is not an artifact of linearity. There is no cheap upgrade from this
 shape-ranking table to a table that ranks the crossing width specifically, at any depth we tested.
 
 **The ranking is a token property; the level belongs to the context.** Re-measuring the same 123
@@ -1305,6 +1307,61 @@ and the same paired Wilcoxon comparison, here run against block 0. The $\ell = 0
 $x_u$ the first round measured, so refitting it is a tie-check that the two ways of reaching that state
 — the forward hook above and `hidden_states` here — agree; because the protocol is deterministic, the
 four numbers must match, and that is checked. Figure 35 reports these sixteen probes.
+
+### Two more readouts on those same six feature sets
+
+Both rounds above vary the *features* and keep one *readout*: ridge regression, which can only use a
+weighted sum of the 2,048 numbers in a feature vector. A quantity can be present in a representation and
+invisible to that readout — for instance if it is written as how far the state sits from some region
+rather than as its projection on a direction. So a third round keeps the six feature sets, the four
+targets, the ceilings, the 50 splits and the 50 permutations exactly as they are, and changes only how
+the target is predicted from the features. Two readouts join ridge, both of them nonlinear:
+
+**RBF kernel ridge** — ridge regression applied not to the features themselves but to their
+similarities, so the fitted function can bend. Similarity between two standardised feature vectors
+$x_i$ and $x_j$ is the radial basis function (RBF) kernel, which is 1 for identical vectors and decays
+to 0 as they separate:
+
+```math
+K_{ij} = \exp\!\left(-\gamma \lVert x_i - x_j \rVert^2\right)
+```
+
+The prediction for a held-out token is a weighted sum of the training targets, with weights solved as in
+ridge but in this similarity space:
+
+```math
+\hat y_\ast = \sum_{i \in \text{train}} \alpha_i K_{\ast i}, \qquad
+\alpha = (K + \lambda I)^{-1} (y_{\text{train}} - \bar y_{\text{train}})
+```
+
+Here $\lambda$ is the same penalty grid ridge uses and $\gamma$ sets the kernel width; both are tuned per
+split. This is the strictly more general readout — as $\gamma$ shrinks, kernel ridge approaches linear
+ridge — so it is the fairer of the two tests of "was linearity the constraint?".
+
+**$k$-nearest-neighbour ($k$-NN) regression** — predict a held-out token's target as the plain average
+of the targets of its $k$ closest training tokens, by Euclidean distance in the same standardised
+feature space:
+
+```math
+\hat y_\ast = \frac{1}{k} \sum_{i \in N_k(\ast)} y_i
+```
+
+This assumes only that tokens near each other in the representation have similar targets, with no
+functional form at all. It is the weaker learner of the two on any target that needs many features at
+once, which is exactly why it is informative: it says whether the representation is organised so that
+"nearby" means "similar width".
+
+Both new readouts are tuned the way the ridge penalty is — 5-fold cross-validation *inside the 80-token
+training half of each split*, choosing the setting with the best training-half $R^2$, so no held-out
+token influences any choice. The grids are $\gamma \in \lbrace 0.25, 0.5, 1, 2, 4 \rbrace$ times the
+median-heuristic value $1/\mathrm{median}\lVert x_i - x_j \rVert^2$ over training pairs, $\lambda$ over
+ridge's own 13-point grid, and $k \in \lbrace 1, 3, 5, 9, 15, 25, 39 \rbrace$. Kernels and neighbour
+orderings depend on the features and the split but never on the target, so each is built once per split
+and reused for all four targets and all 51 target vectors (the real one plus the 50 permutations). Ridge
+is refit here as a tie-check against the two rounds above; its permutation null is the one already
+published for each site and target, which is the same 50 numbers by construction, since the null is a
+deterministic function of the features, splits and permutation seeds this round holds fixed. Figure 36
+reports the resulting 18 site-by-readout cells per target.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -2969,6 +3026,80 @@ $+0.809$ across the 123 tokens, making the width residual the least reliable of 
 position, in one model: an MLP's internal hidden layer, an attention output, or another model could
 still hold the component in a form a linear readout would find.
 
+### Is the component unreadable, or only unreadable by a linear probe?
+
+Everything above tests six representations with one kind of readout. Ridge regression predicts the
+target from a weighted sum of the 2,048 numbers in a feature vector, so it will report chance for any
+quantity the representation encodes in a form no weighted sum captures — a distance from a region, a
+product of two coordinates, a threshold. That caveat has ridden along with every statement of this
+negative, and it is the last one that can be tested without new measurements: the features are already
+built, so two more readouts cost only CPU. Figure 36 puts RBF kernel ridge and a $k$-nearest-neighbour
+readout beside ridge on all six feature sets, with the same targets, ceilings, 50 splits and 50
+permutations.
+
+![Four panels, one per target, each plotting held-out accuracy for three readouts across six feature sets](plots/readout.png)
+
+**Figure 36.** Pythia-1.4B, the same 123 endpoint tokens and the same 50 shared 80/43 train/test splits
+used throughout. Each panel is one target: shape $E_u$ (median edge drift), width $w_u$ (median
+plateau-filtered envelope width), and each with the other's across-token rank regressed out. x: the six
+feature sets in depth order — the static embedding row $W_E[u]$, the block-0 MLP output $m_u$, and the
+residual stream after blocks 0, 6, 12 and 18. y: mean held-out Spearman $\rho$ between predicted and
+measured target over the 50 splits, error bars $\pm 1$ standard deviation across splits. The three
+lines are the readouts: linear ridge (solid, circles), RBF kernel ridge (dashed, squares) and $k$-NN
+(dotted, triangles). The hatched gray strip is the permutation null ($\pm 2$ standard deviations around
+its mean, taking whichever of the three readouts gives the widest band at that site), and the dash-dot
+line is the ceiling $\sqrt{R}$ that the target's own measurement noise allows. Higher is better. The
+bottom-left panel is the open question; the other three are controls that say whether the readouts work
+at all.
+
+**Pattern 46 — no readout finds the width-specific component, and the two nonlinear ones work fine on
+everything else.** The negative does not depend on linearity.
+
+| width with shape removed, held-out $\rho$ (ceiling 0.630) | $W_E[u]$ | $m_u$ | block 0 | block 6 | block 12 | block 18 |
+|---|---|---|---|---|---|---|
+| linear ridge | $+0.072$ ($p = 0.25$) | $+0.084$ ($p = 0.31$) | $+0.115$ ($p = 0.22$) | $+0.089$ ($p = 0.18$) | $+0.021$ ($p = 0.45$) | $-0.026$ ($p = 0.73$) |
+| RBF kernel ridge | $+0.049$ ($p = 0.33$) | $+0.059$ ($p = 0.31$) | $+0.087$ ($p = 0.24$) | $+0.145$ ($p = 0.12$) | $+0.120$ ($p = 0.18$) | $+0.026$ ($p = 0.41$) |
+| $k$-NN | $-0.009$ ($p = 0.63$) | $-0.012$ ($p = 0.71$) | $+0.033$ ($p = 0.39$) | $-0.018$ ($p = 0.61$) | $-0.021$ ($p = 0.71$) | $-0.056$ ($p = 0.76$) |
+
+All 18 cells sit inside their own permutation null. The closest any readout comes is kernel ridge at
+block 6, $+0.145$ with permutation $p = 0.118$ — 0.23 of a ceiling of 0.630, and a result that would
+arise by chance about one time in eight. Kernel ridge is a strict generalisation of ridge, so this is
+the informative half of the test: given the freedom to bend the fit, cross-validation on the training
+half declines to use it. At every site the tuner picks the largest penalty in the grid
+($\lambda = 10^5$) for this target, meaning the best training-half fit available to it is nearly a
+constant. There is one real pattern inside the null — kernel ridge beats ridge on this target at the
+three deeper sites ($+0.056$ at block 6, $+0.099$ at block 12 in 88% of splits, $+0.052$ at block 18)
+and loses to it at the three early ones ($-0.024$ to $-0.028$). Both readouts are indistinguishable
+from chance at every one of those sites, so this says something about which readout degrades more
+gracefully, not about where the component lives.
+
+The other three targets are what license reading the bold table as a fact about the representation
+rather than about broken code. Kernel ridge tracks ridge on shape to within $0.008$ everywhere
+($+0.785$ against $+0.783$ at the embedding, $+0.819$ against $+0.821$ at block 18) and is slightly but
+consistently better on the raw width ($+0.670$ against $+0.658$ at the embedding, $+0.657$ against
+$+0.630$ at block 12 in 88% of splits) — a nonlinear readout does buy a little on a target that is
+genuinely there. $k$-NN is the weaker learner and behaves like one: it recovers shape at $+0.53$ to
+$+0.74$ and width at $+0.31$ to $+0.57$, far above its null (permutation $p = 0.02$ in every case) but
+$0.06$ to $0.33$ below ridge. Its accuracy also climbs steadily with depth on both targets, which is a
+small positive result of its own: the deeper residual stream arranges these 123 tokens so that
+neighbouring states have similar curve shapes, and averaging the 5 to 39 nearest training tokens
+suffices to rank them.
+
+Three readout families, six representations, 18 cells, none above chance. The report's central negative
+can now be stated without the qualifier it has carried since pattern 41: within Pythia-1.4B, the part
+of a token's crossing width that its curve shape does not already explain is not recoverable from any of
+these six activation vectors by a linear probe, by a tuned kernel method, or by nearest neighbours, at
+80 training tokens. The same component is transported intact when one of those very vectors is written
+into another token (pattern 43, $+0.796$ with shape held constant), so "carried but not stated" is now a
+statement about three readout families rather than one.
+
+Two limits survive and one narrows. The sample-size caveat is unchanged and is now the binding one: 80
+training tokens is little for any readout, and $k$-NN's shortfall on the easy targets is a direct
+demonstration that this sample size costs a flexible learner accuracy. Shape and width remain entangled
+at $+0.809$ across the 123 tokens, so the width residual stays the least reliable of the four targets
+($R = 0.397$). What no longer applies is "not readable means not readable by ridge": that was the
+motivation for this experiment, and it is answered.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -3130,20 +3261,27 @@ exactly that stretch of depth. It is not stated later: read from the residual st
 $+0.83$ throughout. Six representations spanning the embedding row to three-quarters of the way through
 the network now carry the component without exposing it.
 
-**The single most informative next experiment changes the readout, not the site.** Every statement of
-this negative carries the same caveat, and it is now the only one left: "not readable" means not by
-ridge regression on 2,048 features with 80 training tokens. Six feature sets have been tested against
-that one probe family, so adding a seventh site buys little, whereas the caveat is untested and cheap to
-test. The experiment holds the features, targets, splits and permutation nulls fixed and swaps the
-readout — kernel ridge with an RBF kernel and a $k$-nearest-neighbour readout in the same feature space,
-both tuned on the training half of each split exactly as the ridge penalty is. If a nonlinear readout
-lifts the width residual above its null at any of the six sites, the binding constraint was linearity,
-the component is present in a form a screen could exploit, and the report's negative narrows to a
-statement about linear probes. If both stay inside the null, the negative stops depending on the word
-"linear" and becomes a statement about what these representations make available to a probe of any of
-these families at this sample size. The cost is the same 369 single-token forward passes pattern 45
-already runs to rebuild the feature sets, and then CPU-bound algebra on 123 tokens; no interpolation
-curves, and no new measurement of any kind.
+Pattern 46 then removed the last qualifier that applied to all of them. Ridge is one readout, and a
+representation can hold a quantity no weighted sum of its coordinates recovers, so the same six feature
+sets were refit with RBF kernel ridge and with $k$-nearest neighbours, everything else held fixed. All
+18 site-by-readout cells for the width-with-shape-removed target stay inside their permutation nulls,
+the best being kernel ridge at block 6 ($+0.145$, $p = 0.118$), while the same two readouts recover
+shape and width at every site — kernel ridge within $0.008$ of ridge on shape and slightly above it on
+width, $k$-NN well above chance on both. Three readout families, six representations, no readout finds
+the component.
+
+**The single most informative next experiment raises the training set.** With linearity ruled out, the
+one caveat that still applies to every cell of pattern 46 is that each readout saw 80 training tokens.
+That is a small sample for a flexible learner, and $k$-NN's shortfall on the easy targets is a direct
+measurement of what it costs. The experiment is a learning curve on data already in hand: refit ridge
+and kernel ridge on the same 123 tokens at training sizes of 30, 50, 80 and 100, with the same six
+feature sets, four targets and 50-permutation nulls, and read the width residual's accuracy against its
+null at each size. The three control targets set the scale, since shape and width should improve
+visibly with training size on these same features. If the width residual climbs towards its null
+boundary as training tokens are added, the negative was partly a power problem and the curve names the
+sample size a decisive test would need; if it stays flat at chance while the controls climb, the
+representations do not expose the component and more tokens of this kind will not change that. The cost
+is CPU-bound algebra on features that already exist — no forward passes, no new measurement.
 
 ---
 

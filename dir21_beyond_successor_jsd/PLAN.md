@@ -46,7 +46,39 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 20 — COMPLETE; the negative now spans most of the depth)
+## Current status (2026-08-12, iteration 21 — COMPLETE; the negative no longer depends on "linear")
+
+**Iteration 21 ran the experiment both deliverables named as next** (`experiments/readout_probe.py`,
+`plot_readout.py`, `readout_table.py`; Figure 36; deliverables now carry 36 figures each and pass
+`check_render.py`). Two nonlinear readouts joined ridge on the six feature sets already tested — RBF
+kernel ridge and $k$-NN regression — with features, tokens, four targets, ceilings, the 50 splits and
+the 50 permutations all held fixed, and both tuned by the same 5-fold CV inside each training half that
+tunes the ridge penalty. 738 single-token forward passes to rebuild the features; the rest CPU.
+
+* **All 18 site-by-readout cells for width-with-shape-removed are inside their nulls.** Best cell:
+  kernel ridge at block 6, $+0.145$ ($p = 0.118$), 0.23 of a ceiling of 0.630. Kernel ridge contains
+  ridge as a special case, and at every site its CV picks the largest penalty in the grid ($10^5$) for
+  this target — the best training-half fit it finds is nearly a constant.
+* **The controls say the readouts work.** Kernel ridge is within $0.008$ of ridge on shape everywhere
+  and slightly better on raw width ($+0.657$ vs $+0.630$ at block 12, 88% of splits). $k$-NN reaches
+  $+0.53$–$+0.74$ on shape and $+0.31$–$+0.57$ on width, above its null everywhere ($p = 0.02$) but
+  below ridge, and improves with depth on both.
+* **One real pattern, still inside the null:** kernel ridge beats ridge on the width residual at the
+  three deeper sites ($+0.056$, $+0.099$, $+0.052$) and loses at the three early ones ($-0.024$ to
+  $-0.028$). Which readout degrades more gracefully, not where the component lives.
+* **The ridge tie-check is exact:** all 24 refit ridge probes reproduce patterns 44/45 to four decimals
+  (largest $|{\rm diff}| = 0.0000$), so the three readouts are compared on identical features and splits.
+* **Deliverable consequence:** the central negative can drop the qualifier "by a linear probe". Three
+  readout families, six representations, no cell above chance. Recorded in both files.
+
+**Next step (only if reopened):** raise the training set. The last caveat applying to every cell is 80
+training tokens. Refit ridge and kernel ridge on the same 123 tokens at training sizes 30, 50, 80, 100
+with the same features, targets and nulls, and read the width residual against its null at each size;
+the control targets set the scale. Rising towards the null boundary → underpowered, and the curve names
+the sample size a decisive test needs. Flat at chance while controls climb → more tokens of this kind
+will not help. Cost: no forward passes, CPU-bound algebra only.
+
+## Previous status (2026-08-12, iteration 20 — COMPLETE; the negative now spans most of the depth)
 
 **Iteration 20 ran the experiment both deliverables named as next** (`experiments/deep_shape_probe.py`,
 `plot_deep_shape.py`; Figure 35; deliverables now carry 35 figures each and pass `check_render.py`).
