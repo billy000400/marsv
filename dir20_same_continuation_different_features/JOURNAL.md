@@ -1067,3 +1067,13 @@ Nothing outstanding: plan criteria met, `human_feedback_1.txt` manifest complete
 and `STOP` stays unwritten while that feedback file is unrenamed. Re-verified only:
 `python3 ../check_render.py REPORT.md RESULTS.md` → exit 0 (REPORT.md 11 display / 195 inline eqs,
 3 figures; RESULTS.md 196 inline eqs, 6 figures; 0 problems). No files edited.
+
+## 2026-08-12 (hold iteration #3: still waiting on the wrapper's content review)
+
+State unchanged. `human_feedback_1.txt` is still unrenamed, so per CLAUDE.md rule 11 no `STOP` is
+written; the manifest stays at `review_pending` with its single checklist item `done`. Plan success
+criteria are met (S3R replication passed; deliverables within the report policy), so no new
+experiment was run. Re-verified only: `python3 ../check_render.py REPORT.md RESULTS.md` → exit 0
+(REPORT.md 11 display / 195 inline eqs, 3 figures; RESULTS.md 196 inline eqs, 6 figures; 0 problems);
+REPORT.md is 4999 words with 3 embedded figures, inside the 5,000-word / 8-figure limit. No files
+edited other than this entry.
