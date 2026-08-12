@@ -1019,3 +1019,76 @@ order correlates with.
 makes it interpretable, and forced a scope correction that both deliverables now carry; RESULTS.md and
 REPORT.md are curated to current-best with Figures 27–28 embedded and `check_render.py` passes. No STOP
 written: budget remains and the next experiment costs no GPU.
+
+### 2026-08-12 — iteration 14: the edge-drift test, and what it did to two negatives
+
+**Context on re-entry.** No unaddressed feedback (`human_feedback.addressed.md` only). The previous
+iteration had written `experiments/edgedrift.py` and run it — `results/edgedrift.json` was already on
+disk with all six configurations — and then hit the session limit before any analysis, figure or
+deliverable text existed. So this iteration was: verify the stored run, analyse it, plot it, and curate
+both deliverables.
+
+**What I did.** Re-launched `edgedrift.py` first (it skips completed configurations, so this was a
+cheap integrity check — it confirmed all six rows were present). Wrote `edgedrift_analysis.py`, which
+answers three things: how plateau-shaped each configuration is against the straight-line reference
+`E = 0.2`; whether the `E` ordering transfers between models the way the width ordering does; and
+whether GPT-2's disagreement with Pythia survives discarding its non-plateau curves. Wrote
+`plot_edgedrift.py` (Figure 29) and curated RESULTS.md and REPORT.md.
+
+**A design decision worth recording.** My first version of the third test split the 123 tokens at
+GPT-2's median `E` and compared the plateau-like half with the wandering half. It returned split-half
+reliabilities of −0.10 and +0.10 — uninterpretable, because halving the token set also restricts the
+range of widths, and `E` and width correlate at +0.77 within GPT-2, so the split throws away most of
+the signal a rank correlation needs. I replaced it with a *curve*-level filter: keep the curves with
+`E ≤ 0.1`, recompute each token's width from what survives, and keep all 123 tokens in the correlation.
+That version is both cleaner and decisive. The general rule: when you subset to test whether a
+correlation is driven by bad measurements, subset the measurements, not the units the correlation is
+computed over.
+
+**What I found — the two negatives have different causes.**
+- GPT-2's block-0 curves are as plateau-shaped as Pythia-1.4B's (median `E` 0.087 vs 0.081), so the
+  iteration-13 negative is not "no plateau to measure".
+- The prediction I made last iteration — that Pythia-160M, the size without the trait, would look like
+  GPT-2 — is refuted, and informatively: 160M is the *least* plateau-shaped of the six configurations
+  (`E` = 0.183, essentially the straight line's 0.2). Plateau structure sharpens with Pythia scale
+  (0.183 → 0.115 → 0.081), and the size where the ordering appears is the size where the ramps stop.
+  This is a correspondence between two measurements at one checkpoint each; both deliverables say so.
+- The filter result is the strongest thing here: keeping GPT-2's 56% plateau-shaped curves raises its
+  split-half reliability from 0.319 to 0.661 and the ceiling from 0.53 to 0.77, while its agreement
+  with Pythia-1.4B stays at −0.185. That converts iteration 13's "too noisy to say more" into a
+  measured statement — GPT-2 ranks these 123 strings reproducibly, and its ranking is not Pythia's.
+- The filter cannot be run at 160M (only 13.2% of curves pass; 83 tokens, reliability −0.139), which is
+  itself a fact about that model. On all its curves 160M is reliable (0.699) and still disagrees with
+  1.4B (+0.213, ceiling 0.787), so both failing models have their own consistent answers.
+
+**A caveat the experiment exposed about the whole report.** Inside each Pythia, edge drift and width
+rank the tokens almost identically (+0.93 / +0.96 / +0.97) and transfer between 410M and 1.4B equally
+well (+0.887 vs +0.884). The per-token trait can therefore be described as "how long the output stays
+put near the endpoints" just as well as "how narrow the crossing is". That is one measurement seen two
+ways, not two findings, and I said so in both deliverables rather than presenting it as a new result.
+
+**Assumptions logged.** (a) The cut `E ≤ 0.1` is half the straight-line value; no other cut was tried,
+and the limitation is stated. (b) The filtered width is a median over whichever of a token's 18 curves
+survive, so tokens are scored against slightly different anchor/frame subsets — recorded as a
+limitation rather than repaired, because repairing it (a common surviving subset) would have discarded
+most tokens. (c) Pythia-1.4B is the reference ranking throughout, as in iteration 13. (d) For the 160M
+filter I re-ran `edgedrift.py` for that configuration alone to store per-curve widths; it reproduced
+the stored summary exactly, which doubles as a determinism check.
+
+**What this cost the earlier text.** REPORT.md's "What this costs the report" paragraph claimed the
+split-half reliability check is *the* go/no-go test for porting the screen. It now has to be computed
+on plateau-shaped curves (scoring every curve is what hid GPT-2's own ordering behind 0.32), and it is
+not sufficient on its own, since 160M passes it at 0.699 and still disagrees. Both deliverables now
+recommend two cheap checks — the edge-drift distribution and the filtered reliability. I also noticed
+the Conclusion never mentioned GPT-2 at all, though the scope narrowing had been in the Summary and
+Results since iteration 13; it now carries a paragraph.
+
+**Next step.** Refit the ridge embedding probe inside GPT-2 against the plateau-filtered widths (target
+reliability 0.661 rather than 0.32), same 80/43 splits and shuffled-target control, against the new
+0.77 ceiling. Zero forward passes. The earlier GPT-2 probe null was fitted against an unreliable
+target, so it never tested whether a different corpus also writes a width trait into the embedding.
+
+**On track?** Yes — the named next experiment ran, refuted the prediction it was designed to test,
+upgraded one negative from noise-limited to measured, and both deliverables are curated to current-best
+with Figure 29 embedded and `check_render.py` passing. No STOP written: the direction has a cheap,
+well-specified next experiment and budget remains.

@@ -46,7 +46,37 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 13 — COMPLETE; GPT-2 cross-tokenizer test added)
+## Current status (2026-08-12, iteration 14 — COMPLETE; edge-drift test separates the two negatives)
+
+**Iteration 14 ran the experiment both deliverables named as next** (`experiments/edgedrift.py` — run
+at the start of this iteration; `edgedrift_analysis.py`, `plot_edgedrift.py`; Figure 29; deliverables
+now carry 29 figures each and pass `check_render.py`). It splits two negatives that had been read as
+one story.
+
+* **Edge drift** $E = d(0.1) + (1 - d(0.9))$ — how far the curve moves in the outer tenth of the path
+  at each end; $\approx 0$ for a plateau, exactly 0.2 for the straight line $d(t) = t$. Computed on the
+  2,214 stored curves of six configurations (GPT-2 blocks 0/4/8; Pythia-160M/410M/1.4B at block 0).
+* **GPT-2 does have plateaus** (median $E$ 0.087 vs Pythia-1.4B's 0.081), so its disagreement is not a
+  case of scoring a width where no plateau exists. Its distinguishing feature is the spread of curve
+  shapes (10–90%: 0.028–0.333); depth widens it (0.164 at block 8).
+* **The prediction from iteration 13 fails.** Pythia-160M does not look like GPT-2 — it is the *least*
+  plateau-shaped configuration (0.183, ≈ a straight ramp, 87% of curves above the 0.1 cut against 22%
+  of 1.4B's). Plateau structure sharpens with Pythia scale (0.183 → 0.115 → 0.081).
+* **GPT-2 has a reproducible ordering of its own.** Keeping only its plateau-shaped curves
+  ($E \le 0.1$, 56%) raises split-half reliability 0.319 → 0.661 (ceiling 0.53 → 0.77) while agreement
+  with Pythia-1.4B stays at $-0.185$. Iteration 13's "too noisy to say" becomes a measured negative.
+  The filter cannot be run at 160M (13.2% of curves pass; 83 tokens, reliability $-0.139$), but on all
+  curves 160M is also reliable (0.699) and also disagrees ($+0.213$, ceiling 0.787).
+* **Caveat surfaced:** within each Pythia, $E$ and $\hat w_u$ rank tokens almost identically
+  ($+0.93/+0.96/+0.97$) and transfer equally (410M–1.4B $+0.887$ vs $+0.884$) — one measurement, two
+  descriptions.
+
+**Next step (only if reopened):** refit the ridge embedding probe inside GPT-2 against the
+plateau-filtered widths (reliability 0.661 rather than 0.32), same 80/43 splits and shuffled-target
+control, read against the new ceiling of 0.77. Zero forward passes. It is the first test that can say
+whether a *different* corpus also writes a width trait into the static embedding.
+
+## Previous status (2026-08-12, iteration 13 — COMPLETE; GPT-2 cross-tokenizer test added)
 
 **Iteration 13 ran the experiment both deliverables named as next** (`experiments/envwidth.py`,
 `xmodel_width.py`, `xmodel_analysis.py`, `gpt2_sites.py`, `xcurve_examples.py`, `plot_xmodel.py`;

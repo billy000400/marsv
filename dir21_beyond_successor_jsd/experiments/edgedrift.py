@@ -82,7 +82,8 @@ def main():
             w_by_token=[float(x) for x in np.median(W, axis=1)],
             w_median=float(np.median(W)),
             rho_edge_w=[float(x) for x in spearmanr(np.median(E, axis=1), np.median(W, axis=1))[:2]],
-            edge_curves=[float(x) for x in E.ravel()])
+            edge_curves=[float(x) for x in E.ravel()],
+            w_curves=[float(x) for x in W.ravel()])
         r = res["rows"][key]
         print(f"[{key}] median E {r['edge_median']:.4f} (10-90% {r['edge_q'][0]:.4f}-"
               f"{r['edge_q'][1]:.4f}), {r['edge_frac_above_half_line']:.3f} of curves above "

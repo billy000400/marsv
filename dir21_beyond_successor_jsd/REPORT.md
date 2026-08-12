@@ -165,6 +165,19 @@ is undefined for them, and its per-token width has a split-half reliability of 0
 behaved. So the screen is per-model, and the split-half reliability check, which needs no reference
 model, is what tells an auditor whether it applies to theirs.
 
+**GPT-2 disagrees; Pythia-160M barely has transitions to disagree about.** A width can be computed on a
+curve that has no plateau in it, which would make a failed transfer meaningless. To rule that out we
+score every curve by its **edge drift** $E$ — how far the output moves inside the outer tenth of the
+path at each end, near 0 for a plateau and exactly 0.2 for a straight line. GPT-2's block-0 curves are
+as plateau-shaped as Pythia-1.4B's at the median ($E = 0.087$ against 0.081), so it does form
+transitions; keeping only its plateau-shaped curves ($E \le 0.1$, 56% of them) doubles its measurement
+reliability to 0.66 and lifts the ceiling to 0.77, while its agreement with Pythia stays at $-0.19$.
+GPT-2 therefore has a real, reproducible width ordering that has nothing to do with Pythia's. The 160M
+floor turns out to be a different failure: it is the least plateau-shaped configuration we measured
+($E = 0.183$, essentially a straight ramp, with 87% of its curves above the 0.1 cut against 22% of
+Pythia-1.4B's), and plateau structure sharpens with scale across the three Pythias. Two negatives, two
+causes.
+
 We also ruled out the most deflationary explanation. Because `w` is a *fraction* of the path, a
 transition of fixed absolute size would look narrower on a longer path. If that were the mechanism,
 converting `w` into residual-stream distance units would make it more homogeneous. It does the
@@ -968,6 +981,44 @@ and 8, and validity, reliability, level and agreement with Pythia are reported a
 $\log_{10} N_u$ and successor entropy $H_u$ (`dir18`'s manifest, the same two used in the checkpoint
 sweep) partialled out of both rankings, so that a mismatch in what the two corpora contain cannot by
 itself explain the result. Figures 27 and 28 report all of this.
+
+### Is there a plateau to measure at all? Edge drift
+
+The envelope width above is defined for every curve — including a curve that rises steadily from the
+first step. That is a problem for interpreting a negative result, because a steadily rising curve has
+no plateau in it: its "width" is near 1 by construction and describes nothing about the model. Two very
+different situations therefore look alike in a width ranking that fails to transfer. A model can have
+plateau-shaped transitions in a *different* token order, or it can have no plateau structure for a
+width to describe. To tell them apart we score each curve by how much it moves inside the outer tenth
+of the path at each end:
+
+```math
+E \;=\; d(0.1) \;+\; \bigl(1 - d(0.9)\bigr).
+```
+
+$d(0) = 0$ and $d(1) = 1$ by construction, so the first term is the rise over the first tenth of the
+path and the second is the rise over the last tenth. We call $E$ the **edge drift**. A curve that sits
+still near both endpoints and jumps in the middle — the plateau shape this report is about — has
+$E \approx 0$; the straight line $d(t) = t$ gives exactly $E = 0.2$, which is the reference value every
+number below is read against. Lower is more plateau-shaped. $E$ needs no new forward passes: it is
+computed from the same 50-step curves already stored for each model and site.
+
+Edge drift is used in two ways. First as a **description**: the distribution of $E$ over all
+$123 \times 6 \times 3 = 2{,}214$ curves per configuration, for GPT-2 at blocks 0, 4 and 8 and for
+Pythia-160M, 410M and 1.4B at block 0, with Pythia-160M as the prediction test — it is the one Pythia
+that does not carry the width ordering, so if a missing ordering goes with missing plateau structure it
+should resemble GPT-2 here. We also report the rank correlation between a token's median $E$ and its
+median $\hat w^{\mathrm{env}}$ inside each model, which says how much of the width ranking is just the
+curve leaving its endpoint earlier.
+
+Second as a **filter**. Calling a curve plateau-shaped when $E \le 0.1$ (half the straight-line value),
+we recompute each token's width from only its plateau-shaped curves and redo two of the cross-model
+quantities on the result: the split-half reliability $R_M$ and the agreement with Pythia-1.4B's ranking
+against its ceiling. If a model's disagreement with Pythia is an artifact of scoring curves that have
+no plateau, discarding those curves should raise the agreement; if the model simply orders tokens
+differently, discarding them should raise the reliability and leave the agreement where it was.
+Filtering curves rather than tokens keeps all 123 tokens in the correlation, so the comparison is not
+confounded by a narrower range of widths. Figure 29 reports both uses.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -2028,12 +2079,91 @@ $\le 0.011$ for the other eleven — and the only one that inflates the across-t
 12 tokens and a reliability of 0.32 this is suggestive, not established, but the site of the effect is
 where Pythia puts it.
 
+### Two models fail the screen for two different reasons: is there a plateau to measure?
+
+Two negatives are now on the table, and they have been read as one story. GPT-2 ranks the tokens
+differently from Pythia (pattern 32), and Pythia-160M ranks them differently from the larger Pythias
+(pattern 26). Both were reported as "the trait is absent here", but a width ranking can fail to
+transfer for two quite different reasons: the model may have plateau-shaped transitions in a different
+token order, or it may have no plateau structure at all, in which case a width is a number without a
+referent. Edge drift $E$ separates them (Methods): it is how far the curve moves in the outer tenth of
+the path at each end, $\approx 0$ for a plateau and exactly 0.2 for a straight line. It costs no
+forward passes. Figure 29 (left) gives the whole distribution of $E$ for six configurations, and
+Figure 29 (right) asks whether GPT-2's disagreement with Pythia survives throwing away every curve that
+is not plateau-shaped.
+
+![Left: cumulative distributions of edge drift for GPT-2 at three blocks and three Pythia sizes. Right: GPT-2's reliability, noise ceiling and agreement with Pythia before and after discarding non-plateau curves](plots/edgedrift.png)
+
+**Figure 29.** Left, x: edge drift $E$ of a single interpolation curve (log scale), y: fraction of that
+configuration's 2,214 curves (123 tokens × 6 anchors × 3 frames) with drift at most $E$; a curve
+further left is more plateau-shaped. The dashed vertical line is the straight-line reference
+$E = 0.2$ and the thin solid line is the $E \le 0.1$ cut used on the right. Series: GPT-2 small at
+blocks 0 (solid), 4 (dashed) and 8 (dotted), and Pythia-160M (solid), 410M (dashed) and 1.4B
+(dash-dotted) at block 0. Right, y: Spearman $\rho$. Three quantities for GPT-2 block 0 — its
+split-half reliability, the noise ceiling $\sqrt{R_A R_B}$ for agreement with Pythia-1.4B, and the
+measured agreement — each computed on all 2,214 curves (hatched `//`) and on the 56% that are
+plateau-shaped (dotted fill).
+
+| | GPT-2 block 0 | GPT-2 block 4 | GPT-2 block 8 | Pythia-160M | Pythia-410M | Pythia-1.4B |
+|---|---|---|---|---|---|---|
+| median edge drift $E$ (straight line = 0.2) | 0.087 | 0.136 | 0.164 | **0.183** | 0.115 | **0.081** |
+| 10th–90th percentile of $E$ | 0.028–0.333 | 0.044–0.461 | 0.093–0.418 | 0.091–0.328 | 0.081–0.168 | 0.059–0.116 |
+| fraction of curves with $E > 0.1$ | 0.440 | 0.627 | 0.861 | 0.868 | 0.682 | 0.221 |
+| median $\hat w^{\mathrm{env}}$ (level) | 0.435 | 0.587 | 0.670 | 0.743 | 0.649 | 0.545 |
+| $\rho$ between $E$ and $\hat w^{\mathrm{env}}$ across tokens | +0.770 | +0.731 | +0.556 | +0.927 | +0.963 | +0.967 |
+| $\rho$ of this configuration's $E$ ranking with Pythia-1.4B's | −0.167 | +0.122 | −0.049 | +0.243 | +0.887 | — |
+
+**Pattern 35 — GPT-2 does have plateaus; the model that does not is Pythia-160M.** GPT-2's block-0
+curves are as plateau-shaped at the median as Pythia-1.4B's ($E = 0.087$ against 0.081, on a scale
+where 0.2 is a straight line), so its disagreement with Pythia is not a case of measuring a width where
+there is no plateau. The prediction we made from the earlier negative fails, and informatively: the
+Pythia size that lacks the width ordering is the *least* plateau-shaped configuration of the six
+($E = 0.183$, essentially the straight-line value, with 87% of its curves above 0.1 against 22% of
+Pythia-1.4B's). Within Pythia, plateau structure strengthens with scale — median $E$ falls
+0.183 → 0.115 → 0.081 from 160M to 410M to 1.4B — and the size at which the ordering appears (410M,
+pattern 26) is the size at which the curves stop looking like ramps. That is a correspondence between
+two measurements at one checkpoint each, not a demonstration that one causes the other. What GPT-2 does
+have is a much wider *spread* of curve shapes than any Pythia: its 10th–90th range spans
+0.028–0.333, so 44% of its curves drift more than a plateau should while the rest are as flat as
+Pythia's best. Depth makes this worse rather than better — median $E$ rises to 0.164 by block 8 — which
+sits alongside pattern 33's finding that the same depth repairs strict validity: GPT-2's deeper sites
+give tidier curves that are also closer to straight ramps.
+
+**Pattern 36 — GPT-2 has a reproducible width ordering of its own, and it is not Pythia's.** Keeping
+only the 56% of GPT-2 curves that are plateau-shaped and re-deriving each token's width from what
+survives more than doubles its split-half reliability, from 0.319 to 0.661, which lifts the ceiling on
+any cross-model agreement from 0.53 to 0.77. The agreement with Pythia-1.4B does not follow it up: it
+stays at $-0.185$ ($p = 0.04$, 123 tokens) where it was $-0.219$. This is the result that turns
+pattern 32 from a statement we could not fully back into a measured one. Before, the honest reading was
+"GPT-2's measurement is too noisy for its $-0.22$ to mean much"; now GPT-2's plateau-shaped curves rank
+its tokens consistently with each other — the ordering is real and reproducible inside GPT-2 — and it is
+uncorrelated with Pythia's at less than a quarter of the ceiling. The same filter cannot be run at
+Pythia-160M: only 13.2% of its curves pass the $E \le 0.1$ cut, leaving 83 tokens and a measurement
+with no reliability left (split-half $-0.139$), so whether *its* disagreement would survive the filter
+is untestable with these curves. Measured on all its curves, though, 160M behaves like GPT-2 in the one
+respect that matters here — a reproducible ordering of its own (reliability 0.699) that is close to
+unrelated to Pythia-1.4B's ($+0.213$ against a ceiling of 0.787). Both models that fail the screen have
+their own consistent answer; neither has Pythia-1.4B's.
+
+**A caveat this exposes about `w` itself.** Inside each Pythia, a token's width and its edge drift rank
+the tokens almost identically ($\rho = +0.93$, $+0.96$, $+0.97$ at 160M, 410M and 1.4B), and the two
+statistics also transfer between models to the same degree (410M–1.4B: $+0.887$ for $E$ against
+$+0.884$ for $\hat w^{\mathrm{env}}$). So the per-token trait this report screens for can equally be
+described as *how long the output stays put near the endpoints* rather than as the width of the
+crossing in the middle. That is a restatement of the same measurement, not a second finding — but it
+means a reader should not picture two independent curve properties where there is essentially one.
+
 **What this costs the report.** The width ordering is a property of a token *as trained in a particular
-corpus*, not of the token string. The practical screen is therefore per-model: an auditor must run the
-split-half reliability check first, because it is exactly the statistic that separates the two regimes
-here (0.89 in a model where the screen works, 0.32 in one where it does not) and it needs no reference
-model to compute. The 160M floor found earlier reads the same way — as a fact about that training run,
-not about parameter count.
+corpus*, not of the token string: GPT-2 orders the same 123 strings reproducibly (reliability 0.66 on
+its plateau-shaped curves) and its order has nothing to do with Pythia's ($-0.19$ against a ceiling of
+0.77). The practical screen is therefore per-model, and an auditor's first step is the split-half
+reliability check, which needs no reference model — but it must be computed on plateau-shaped curves,
+because scoring every curve is what hid GPT-2's own ordering behind a reliability of 0.32. The
+reliability check alone is also not the whole story: Pythia-160M passes it (0.699) and still disagrees
+with the larger Pythias, while being the configuration whose curves are nearest to straight ramps. Both
+checks are cheap and neither needs a reference model, so the honest recommendation is to run both — the
+edge-drift distribution to see whether the model has plateaus, and the split-half reliability on the
+plateau-shaped curves to see whether its widths are measurable.
 
 ### Candidate hypotheses
 
@@ -2140,23 +2270,27 @@ control; and even the frequency signal is gone. Before any of that, the measurem
 of 0.32 against Pythia's 0.89, at every site we tried. The ordering is a property of a token *as
 trained in a particular corpus*, and the screen is per-model.
 
-**The single most informative next experiment is now to separate two ways GPT-2 could fail.** The
-GPT-2 result shows the ordering does not port and hints at why, but it does not distinguish a model
-that has plateau-shaped transitions in a *different* token order from a model that lacks the plateau
-structure the width statistic presupposes. The quantity that separates them already exists in this
-project: edge drift `E`, the movement of `d(t)` inside the outer 20% of the path, which is near 0 for a
-plateau and near 0.18 for a straight line (a formal definition is in Methods). It costs no forward
-passes — compute `E` for the 2,214 curves already stored per model and per site, for GPT-2,
-Pythia-410M and Pythia-1.4B, and compare the distributions. If GPT-2's `E` sits near the straight-line
-value while Pythia's sits near zero, GPT-2 small has no plateau to measure, the negative is a statement
-about plateau structure rather than about token ordering, and the prediction is that Pythia-160M — the
-size that also lacks the trait — looks the same way, which would unify patterns 26 and 32 under one
-mechanism. If GPT-2's `E` is as small as Pythia's, it has genuine plateaus in a different order, and
-the question becomes what *its* ordering correlates with, which is the first evidence available about
-what a different corpus writes into the same slot. Either way the scope claim gets sharper, at a cost
-of minutes. The mechanistic follow-up inside Pythia is unchanged and still cheap: write the final
-checkpoint's block-0 MLP output vector $m_u$ into the `step128` model, where the ordering does not yet
-exist, and see whether it appears — tying patterns 23 and 29 together.
+Patterns 35 and 36 then asked which of two failures each negative is, and split them. GPT-2's curves are
+plateau-shaped ($E = 0.087$ at block 0, against Pythia-1.4B's 0.081 and a straight line's 0.2), and
+scoring only its plateau-shaped curves doubles its reliability to 0.661 without moving its agreement
+with Pythia ($-0.185$ against a ceiling of 0.77). GPT-2 has its own reproducible ordering of these 123
+strings. Pythia-160M is the opposite case — the least plateau-shaped configuration measured
+($E = 0.183$), which is also where the trait is absent.
+
+**The single most informative next experiment is now to ask what GPT-2's own ordering is made of.**
+Until pattern 36 there was no reliable GPT-2 target to model: the probe refit inside GPT-2 landed on
+its shuffled control ($+0.295$ vs $+0.275$), but it was fitted against a target with a reliability of
+0.32, so the null was uninformative. The filtered widths give a target with reliability 0.661, and the
+experiment costs no forward passes: refit the same ridge probe on GPT-2's own embedding matrix against
+the plateau-filtered widths, with the same 80/43 splits and shuffled-target control, and report it
+against the new ceiling. If the probe now reads GPT-2's ordering out of its embeddings at a level
+comparable to Pythia's $+0.76$, then both models write a width trait into the static embedding and only
+its *content* is corpus-specific, which is a much sharper claim than "the screen is per-model" and
+tells an auditor exactly what to refit. If the probe stays at its control with a reliable target, the
+trait is embedding-readable in Pythia specifically, and the cross-corpus difference is about where the
+information sits rather than what it says. The mechanistic follow-up inside Pythia is unchanged and
+still cheap: write the final checkpoint's block-0 MLP output vector $m_u$ into the `step128` model,
+where the ordering does not yet exist, and see whether it appears — tying patterns 23 and 29 together.
 
 ---
 
@@ -2280,6 +2414,20 @@ out. The free lookup therefore reads a learned quantity — but one learned in t
 training, and a mature model's lookup detects it in a young checkpoint ($\rho = +0.54$ at `step128`)
 several hundred steps before that checkpoint's own embedding matrix makes it linearly readable.
 
+The limit of all of that is the training corpus. The same 123 strings measured in GPT-2 small, whose
+vocabulary contains every one of them, produce a ranking that correlates with Pythia-1.4B's at
+$\rho = -0.22$ where two Pythia sizes agree at $+0.88$, and the free lookup and the refitted probe fail
+there too. That is not GPT-2 lacking transitions to measure: its curves leave their endpoints as late
+as Pythia-1.4B's (edge drift 0.087 against 0.081, on a scale where a straight line is 0.2), and scoring
+only its plateau-shaped curves doubles its measurement reliability to 0.66 while leaving its
+disagreement with Pythia at $-0.19$ against a ceiling of 0.77. GPT-2 has a reproducible width ordering
+of its own; it is simply a different one. The 160M floor is the other kind of failure — its curves are
+the closest to straight ramps of any configuration measured (edge drift 0.183), so at that size there
+is little plateau structure for a width to order. The practical consequence for an auditor is that both
+cheap checks should be run before trusting the screen on a new model: the edge-drift distribution to
+see whether its transitions have plateaus, and the split-half reliability of the per-token width,
+computed on the plateau-shaped curves, to see whether they can be measured.
+
 **Limitations.** The main analysis is one model, one hook point (after block 0) and one checkpoint; the
 cross-model section adds three further sizes but only for the per-token measurement, the embedding
 probe and the block-level ablation, not for the pair bank or the screens. The pair bank, the
@@ -2326,6 +2474,13 @@ sampled counts rather than the exact Pile token statistics Pythia trained on, an
 $R^2_{\mathrm{corpus}} = 0.375$ bounds what *these* statistics explain, not what any model-free
 statistic could. The early checkpoints are also the noisiest to measure — `step32`'s reliability is
 0.241 — so the disattenuated agreements below `step128` carry wide intervals, and the refitted probe
-there trains on 80 tokens with sd $\pm 0.10$. The
+there trains on 80 tokens with sd $\pm 0.10$. The edge-drift cut $E \le 0.1$ is a judgement call too —
+half the straight-line value — and the filtered widths are medians over whichever of a token's 18
+curves survive it, so different tokens are scored against slightly different anchor and frame subsets;
+the reliability it reports (0.661) is a reliability of that filtered measurement, not of the full
+protocol. The comparison of edge drift across models is six configurations at one checkpoint each, so
+"plateau structure sharpens with scale" describes three Pythia sizes, not a scaling law, and the
+association between a model's ramp-like curves and its missing width ordering is a correspondence
+between two measurements, with no intervention behind it. The
 0.2-bit movement gate is a judgement call: it keeps 929 of
 1,000 pairs, and the headline correlation is reported both with and without it.

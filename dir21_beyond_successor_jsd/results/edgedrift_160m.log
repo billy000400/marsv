@@ -1,3 +1,5 @@
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
 [transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:  39%|███▊      | 57/148 [00:00<00:00, 556.95it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 786.55it/s]
+[160m_block0] median E 0.1833 (10-90% 0.0912-0.3276), 0.868 of curves above 0.10, median w_env 0.743, rho(E, w) +0.927
 wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/edgedrift.json

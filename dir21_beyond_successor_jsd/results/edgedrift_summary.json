@@ -1,0 +1,318 @@
+{
+ "configs": [
+  "gpt2_block0",
+  "gpt2_block4",
+  "gpt2_block8",
+  "410m_block0",
+  "1.4b_block0",
+  "160m_block0"
+ ],
+ "tokens": [
+  " about",
+  " absolutely",
+  " actually",
+  " after",
+  " all",
+  " almost",
+  " already",
+  " also",
+  " always",
+  " amazing",
+  " an",
+  " as",
+  " at",
+  " bad",
+  " beautiful",
+  " because",
+  " being",
+  " better",
+  " big",
+  " by",
+  " called",
+  " clear",
+  " coming",
+  " completely",
+  " cool",
+  " dangerous",
+  " dead",
+  " definitely",
+  " different",
+  " difficult",
+  " done",
+  " easy",
+  " either",
+  " enough",
+  " exactly",
+  " extremely",
+  " far",
+  " fine",
+  " for",
+  " from",
+  " fun",
+  " getting",
+  " going",
+  " gone",
+  " good",
+  " great",
+  " happening",
+  " hard",
+  " her",
+  " his",
+  " hot",
+  " important",
+  " impossible",
+  " in",
+  " interesting",
+  " just",
+  " kind",
+  " like",
+  " made",
+  " me",
+  " meant",
+  " more",
+  " most",
+  " mostly",
+  " moving",
+  " much",
+  " my",
+  " never",
+  " nice",
+  " no",
+  " not",
+  " nothing",
+  " now",
+  " obvious",
+  " of",
+  " on",
+  " one",
+  " only",
+  " our",
+  " out",
+  " over",
+  " part",
+  " perfect",
+  " pretty",
+  " probably",
+  " quite",
+  " real",
+  " really",
+  " right",
+  " simple",
+  " simply",
+  " so",
+  " some",
+  " something",
+  " still",
+  " strange",
+  " such",
+  " supposed",
+  " taking",
+  " that",
+  " the",
+  " their",
+  " there",
+  " this",
+  " to",
+  " too",
+  " totally",
+  " true",
+  " un",
+  " under",
+  " up",
+  " very",
+  " well",
+  " what",
+  " when",
+  " with",
+  " wonderful",
+  " working",
+  " worth",
+  " written",
+  " wrong",
+  " you",
+  " your"
+ ],
+ "line_reference": 0.2,
+ "frames": [
+  "The thing was",
+  "They said it was",
+  "I thought it was"
+ ],
+ "anchors": [
+  " and",
+  " significant",
+  " close",
+  " playing",
+  " bigger",
+  " buried"
+ ],
+ "shape": {
+  "gpt2_block0": {
+   "edge_median": 0.08649245048873122,
+   "edge_q10_q90": [
+    0.028370155245065757,
+    0.332537142857909
+   ],
+   "frac_curves_above_half_line": 0.4399277326106594,
+   "w_median": 0.43496993074691287,
+   "w_sd_across_tokens": 0.13174506036900915,
+   "rho_edge_width": [
+    0.7704079658459198,
+    2.074286593753531e-25
+   ]
+  },
+  "gpt2_block4": {
+   "edge_median": 0.13616868196986603,
+   "edge_q10_q90": [
+    0.04388887374661867,
+    0.46111859530210514
+   ],
+   "frac_curves_above_half_line": 0.6273712737127372,
+   "w_median": 0.5867499560028162,
+   "w_sd_across_tokens": 0.11131931967322599,
+   "rho_edge_width": [
+    0.731114006010499,
+    7.947305760760912e-22
+   ]
+  },
+  "gpt2_block8": {
+   "edge_median": 0.16362781450152386,
+   "edge_q10_q90": [
+    0.09270738918334236,
+    0.4180071830749513
+   ],
+   "frac_curves_above_half_line": 0.8613369467028004,
+   "w_median": 0.670385045659303,
+   "w_sd_across_tokens": 0.0928650768907249,
+   "rho_edge_width": [
+    0.5559324657233882,
+    2.4726628078757133e-11
+   ]
+  },
+  "410m_block0": {
+   "edge_median": 0.11518179532140482,
+   "edge_q10_q90": [
+    0.08120600652880952,
+    0.16807918794453133
+   ],
+   "frac_curves_above_half_line": 0.6820234869015357,
+   "w_median": 0.6487548927831422,
+   "w_sd_across_tokens": 0.05989031137894386,
+   "rho_edge_width": [
+    0.9626278520849725,
+    1.7051658954054406e-70
+   ]
+  },
+  "1.4b_block0": {
+   "edge_median": 0.08094223346561186,
+   "edge_q10_q90": [
+    0.05916507897898556,
+    0.11636965427547685
+   ],
+   "frac_curves_above_half_line": 0.22131887985546522,
+   "w_median": 0.5451798018475527,
+   "w_sd_across_tokens": 0.06576563385563103,
+   "rho_edge_width": [
+    0.9673420954198967,
+    5.621523441292226e-74
+   ]
+  },
+  "160m_block0": {
+   "edge_median": 0.18330750335007884,
+   "edge_q10_q90": [
+    0.09118186790496112,
+    0.3276375904679296
+   ],
+   "frac_curves_above_half_line": 0.8681120144534779,
+   "w_median": 0.7431597624330148,
+   "w_sd_across_tokens": 0.07532155938440893,
+   "rho_edge_width": [
+    0.9270936786575693,
+    2.117707186088661e-53
+   ]
+  }
+ },
+ "transfer": {
+  "410m_block0|1.4b_block0": {
+   "rho_edge": 0.8870451819272291,
+   "p_edge": 1.978427106201818e-42,
+   "rho_width": 0.8840076872476816,
+   "p_width": 8.967693569553871e-42,
+   "n": 123
+  },
+  "160m_block0|1.4b_block0": {
+   "rho_edge": 0.2430124724303827,
+   "p_edge": 0.006761973377628478,
+   "rho_width": 0.21329532703047815,
+   "p_width": 0.0178491495936431,
+   "n": 123
+  },
+  "gpt2_block0|1.4b_block0": {
+   "rho_edge": -0.16660432601153088,
+   "p_edge": 0.06551034521449672,
+   "rho_width": -0.21909300795810707,
+   "p_width": 0.014903859977616764,
+   "n": 123
+  },
+  "gpt2_block0|410m_block0": {
+   "rho_edge": -0.1268589338458165,
+   "p_edge": 0.16204577092839428,
+   "rho_width": -0.1890276147605474,
+   "p_width": 0.03626632823862448,
+   "n": 123
+  }
+ },
+ "filter": {
+  "edge_cut": 0.1,
+  "reference": "1.4b_block0",
+  "reference_reliability": 0.8854843868482243,
+  "gpt2_block0": {
+   "all_curves": {
+    "frac_curves_kept": 1.0,
+    "n_tokens": 123,
+    "n_reliability": 123,
+    "reliability": 0.3191202215706148,
+    "ceiling": 0.531578755903888,
+    "w_median": 0.44247949648101936,
+    "rho_vs_1_4b": -0.21909300795810707,
+    "p": 0.014903859977616764,
+    "disattenuated": -0.4121553119359799
+   },
+   "plateau_curves": {
+    "frac_curves_kept": 0.5600722673893406,
+    "n_tokens": 123,
+    "n_reliability": 119,
+    "reliability": 0.6610727056019071,
+    "ceiling": 0.765094477422234,
+    "w_median": 0.30479536852195366,
+    "rho_vs_1_4b": -0.185480646451097,
+    "p": 0.039982043471700424,
+    "disattenuated": -0.2424284214885732
+   }
+  },
+  "160m_block0": {
+   "all_curves": {
+    "frac_curves_kept": 1.0,
+    "n_tokens": 123,
+    "n_reliability": 123,
+    "reliability": 0.6991333819914598,
+    "ceiling": 0.786811091735388,
+    "w_median": 0.7495306501589128,
+    "rho_vs_1_4b": 0.21329532703047815,
+    "p": 0.0178491495936431,
+    "disattenuated": 0.27108835814710575
+   },
+   "plateau_curves": {
+    "frac_curves_kept": 0.13188798554652212,
+    "n_tokens": 83,
+    "n_reliability": 47,
+    "reliability": -0.13900568884491715,
+    "ceiling": 0.0,
+    "w_median": 0.5385390001907554,
+    "rho_vs_1_4b": 0.10511733344527938,
+    "p": 0.34426875445575145,
+    "disattenuated": null
+   }
+  }
+ }
+}

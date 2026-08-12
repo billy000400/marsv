@@ -905,3 +905,49 @@ correlates with." No new forward passes.
 **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
 (REPORT 37 display eqs / 955 inline eqs / 28 embeds / 0 problems; RESULTS 684 inline eqs / 28 embeds /
 0 problems); 56 figure captions for 56 embeds across the two files.
+
+## 2026-08-12 — iteration 14: the two negatives split (edge drift), Figure 29 added
+
+**What changed.** Ran the experiment both deliverables named as next: edge drift
+`E = d(0.1) + (1 - d(0.9))` on the 2,214 stored curves of six configurations (GPT-2 blocks 0/4/8;
+Pythia-160M/410M/1.4B at block 0), plus a curve-level filter that re-derives each token's width from
+only its plateau-shaped curves. New code: `experiments/edgedrift.py` (run this iteration; also extended
+to store per-curve widths), `edgedrift_analysis.py`, `plot_edgedrift.py`. New results:
+`results/edgedrift.json`, `edgedrift_summary.json`. New figure: `plots/edgedrift.png` (Figure 29).
+RESULTS.md gains a Headline paragraph and a new section with the `E` definition, Figure 29 and the
+six-configuration table; REPORT.md gains a Methods subsection ("Is there a plateau to measure at all?
+Edge drift"), a Results section with patterns 35–36 and Figure 29, a Summary paragraph, a Conclusion
+paragraph (GPT-2 was previously absent from the Conclusion) and three new limitation clauses. Both
+files now carry 29 figures each.
+
+**Result superseded** (old → new): iteration 13's reading of the GPT-2 negative, "its measurement
+reliability is 0.319, which caps any correlation at 0.53, so the correct reading is *no relationship*"
+→ "scoring only its plateau-shaped curves (`E` ≤ 0.1, 56% of them) raises reliability **0.319 → 0.661**
+and the ceiling **0.53 → 0.77**, while agreement with Pythia-1.4B stays at **−0.219 → −0.185**: GPT-2
+has a reproducible width ordering of its own and it is unrelated to Pythia's." The GPT-2 section's
+"What this costs the report" paragraph changed accordingly: the go/no-go reliability check must be
+computed on plateau-shaped curves, and it is no longer the only check recommended.
+
+**Prediction refuted** (old → new): iteration 13 predicted that if GPT-2 lacked plateau structure,
+Pythia-160M — the size without the trait — would look the same. Neither half holds. GPT-2's curves are
+plateau-shaped (median `E` 0.087 against Pythia-1.4B's 0.081, straight line 0.2), and **Pythia-160M is
+the least plateau-shaped configuration measured** (0.183, 87% of curves above the 0.1 cut against 22%
+of 1.4B's). The 160M floor is therefore re-read once more: not only a fact about that training run, but
+one about a model whose transitions are close to straight ramps. Stated in both deliverables as a
+correspondence between two measurements at one checkpoint each, not as a cause.
+
+**Caveat added.** Within each Pythia, a token's edge drift and its width rank the tokens almost
+identically (ρ = +0.93 / +0.96 / +0.97 at 160M / 410M / 1.4B) and transfer between 410M and 1.4B to the
+same degree (+0.887 vs +0.884). Both deliverables now say the trait can equally be described as how
+long the output stays put near the endpoints, and that this is one measurement rather than two.
+
+**Recommended next experiment replaced** (old → new): "separate two ways GPT-2 could fail" (done) →
+"**refit the ridge embedding probe inside GPT-2 against the plateau-filtered widths** (target
+reliability 0.661 rather than 0.32), same 80/43 splits and shuffled-target control, read against the
+new ceiling of 0.77 — the earlier probe null there was fitted against an unreliable target and said
+little." No forward passes.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 38 display eqs / 1020 inline eqs / 29 embeds / 0 problems; RESULTS 1 display eq / 735 inline
+eqs / 29 embeds / 0 problems). Determinism check: re-running `edgedrift.py` for Pythia-160M reproduced
+its previously stored summary exactly (median `E` 0.1833, 0.868 of curves above 0.1).
