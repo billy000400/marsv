@@ -1046,3 +1046,17 @@ prose path in either file; REPORT.md's figure captions are numbered 1–3 in rea
 
 **State.** No file content changed except this entry and the corresponding PLAN.md status line and
 CHANGELOG.md note. No number, claim, figure, or section was touched.
+
+## 2026-08-12 (hold iteration: nothing outstanding, waiting on the wrapper's content review)
+
+**Why nothing was run.** The plan's success criteria are all met (S1, S2/S3 amended analysis, S3R
+pre-registered replication, S4) and the `human_feedback_1.txt` manifest is complete at
+`review_pending`. The operator rules forbid starting a new experiment once the criterion is
+satisfied, and forbid writing `STOP` while a `human_feedback*` file has not been renamed
+`.addressed.md` — only the wrapper renames it, after its independent content review. So the correct
+action this iteration was to hold.
+
+**Verification.** Working tree clean; REPORT.md and RESULTS.md unchanged since the full
+`check_render.py` pass logged in the previous entry (exit 0). Re-confirmed locally: REPORT.md 4999
+words, 3 figures; 9 `![` embeds across both files and 9 visible `**Figure` caption lines; zero bare
+`(plots/*.png)` prose paths. No `STOP` written.
