@@ -590,6 +590,24 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S25 DONE 2026-08-12 — second seed: the structural developmental facts reproduce, the promoted-unit
+describability gain does not.** `experiments/train_frozen.py --tag ref_pos_s2 --seed 2024 --freeze ""`
+(23.0 min, final val acc 0.5511 vs the reference run's 0.5502) plus `experiments/neuron_seed2.py`
+(66 s: importance ranking at five checkpoints, then the character-window probe refitted at each, reusing
+`neuron_path.record_pair` and `neuron_probe_early.fit_probe` with `CKPT_DIR` pointed at the new run).
+Reproduces: sharpening (median `w` 0.641 → 0.338 vs 0.653 → 0.351), head turnover (top-8 overlap with
+the final head 1, 2, 4, 6, 8 vs 0, 2, 4, 6, 8; top-32 7, 12, 15, 22, 32 vs 6, 10, 16, 23, 32), promotion
+from just below the head (median rank 126 at step 831 vs 113.5, chance 1,919.5; 50.2% inside the top 128
+vs 51.8%; displaced leaders settle at 98 vs 100.5), the whole-network describability decline
+(0.40 → 0.17 vs 0.39 → 0.15), the demoted fall (−0.27 vs −0.25), the stable ceiling (0.96–0.99), and both
+final-checkpoint band contrasts (stable vs promoted 0.98/0.47, CLES 0.77; demoted vs never-head
+0.81/0.22, CLES 0.78). Does NOT reproduce: the promoted units' absolute gain (per-unit median −0.02 vs
++0.05 from the current character; still a relative rise, 1.5× → 2.7× the background), and the
+forward-looking step-831 contrast one band below the head collapses to null (0.69 vs 0.68, CLES 0.53,
+p = 0.4, against 0.80 vs 0.64, p = 7e-4). Curated as **Figure 42** in both deliverables (exploratory
+figures renumbered 43–45), with the Summary/Headline, the "why this matters" consequence and the caveats
+narrowed to the backward-looking statement. `check_render.py` → ALL CHECKS PASS (45 figures per file).
+
 **Operator feedback #7 addressed 2026-08-12 (pending review) — the claim is narrowed from decision
 basins to character-conditioned basins.** No new experiment: the counts the operator cites were already
 measured (`results/basin_decision.json`, Figure 16 — 65 endpoint characters → 15 distinct endpoint
@@ -1261,6 +1279,25 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S25 DONE (2026-08-12) and curated — see "Current status". The second seed that every developmental
+claim in this block was waiting for is measured, so the block now separates what belongs to the recipe
+(turnover, promotion from a recognizable early pool, readability draining away with lost head membership)
+from what belonged to one initialization (the promoted units' absolute describability gain, and any
+forward prediction of which units get promoted).
+
+**What this leaves, in order of what a reader asks next.** (i) The depth series still has one seed per
+condition, so the 0.397-vs-0.476 gap that carries the depth argument has no across-seed bar; the new run
+does not supply one, because it is an unfrozen reference run — a second seed at `n_embd` 192 and at one
+frozen condition is still ~23 min of training plus ~70 s of assay each, and `frozen_assay_raw.npz` holds
+the per-pair reference results needed to score them. (ii) The band decomposition and the flat redundancy
+ratio were measured only in the reference run; re-running `neuron_bands.py` / `neuron_bands_time.py` on
+the seed-2024 checkpoints now on disk would extend the second seed to them (ablations, so ~10× the cost
+of `neuron_seed2.py`, roughly 10–15 min). (iii) Whether the describability coupling is specific to the
+8-character window probe family — a unit that stops being readable from 8 characters may have become
+readable from something else, and no probe here tests that. It needs a new probe family and is the
+larger piece of work. Note the seed-2 checkpoints live in `/tmp/dir13_frozen/checkpoints_ref_pos_s2`
+(1.2 GB, scratch) and vanish with `/tmp`; retraining them is 23 minutes.
 
 **S24j DONE (2026-08-12) and curated — see "Current status". Both halves ran in one iteration: the
 final-checkpoint comparison (`neuron_head_describe.py`, no GPU) and the step-831 refit that interprets

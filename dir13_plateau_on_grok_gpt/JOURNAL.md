@@ -2694,3 +2694,58 @@ shared with three other agents — but the PLAN estimate is corrected to the mea
 
 On track? yes — PLAN "Next step" item (i) from last iteration is done and the successor list is now a
 second seed and a probe family beyond the 8-character window; blocker: none.
+
+## 2026-08-12 — S25: the second seed, and what it costs the describability story
+
+**Feedback check first.** `human_feedback_7.txt` is still un-renamed; its manifest is `review_pending`
+with the single checklist item `done` and nothing `rejected`, so the wrapper's independent reviewer has
+not run and there is nothing to repair. That sends me to PLAN's "Next step", whose head item was the
+second seed — named there as the check "an external reader will ask for first".
+
+**Why I spent 23 minutes on training rather than picking a cheaper item.** Three of this block's claims
+are developmental (turnover, promotion, describability trajectory) and all three were measured on one
+run. A one-run developmental trend is exactly the kind of result a single initialization can manufacture,
+and no amount of extra analysis on the same checkpoints fixes that. The reference recipe retrains in
+~23 min on this harness (`train_frozen.py --tag ref_pos_s2 --seed 2024 --freeze ""`, seed 2024 being the
+seed every other second-seed run here uses), which left ample budget for the analysis and the curation.
+
+**Engineering.** `neuron_seed2.py` re-measures all three on the new checkpoints by reusing the existing
+code paths rather than re-implementing them: `neuron_path.record_pair` for the importance vector (from
+which top-8/top-32 overlap AND rank trajectories both follow — the seed-1 versions were two separate
+scripts, two passes) and `neuron_probe_early.fit_probe` with `CKPT_DIR` rebound to the new run. Roles are
+defined inside each run from that run's own top-8 sets, since unit indices are not comparable across
+initializations. Whole run: 66 s (13 s ranking, 53 s probe). I smoke-tested it against the two
+checkpoints that existed while training was still going, with outputs redirected to /tmp — which caught
+nothing except that the code ran, but the alternative was finding a bug after the training had finished.
+
+**Result, and the part I had to give up.** Everything structural reproduces closely (numbers in
+CHANGELOG). What does not is the half of S24j I had written most confidently: in seed 2024 the promoted
+units' median probe $R^2$ *falls* slightly over training (−0.02 per unit) where seed 1337 had it rise
+(+0.05). Relative to the falling background they still rise, and on the full-window probe they still gain
+a little absolutely, so the claim is not reversed — it is seed-dependent, which is weaker than what the
+Summary and Headline were saying. The forward-looking contrast is worse: seed 1337's "future promotions
+are already more describable one band below the head" (p = 7e-4) is a clean null in seed 2024 (p = 0.4).
+The symmetric surprise is that the *backward*-looking half got stronger: the demoted fall, the stable
+ceiling and both final-checkpoint band contrasts all reproduce, the band contrasts with larger effects.
+
+**Framing (rules 9b/9c step 2).** I narrowed the claim rather than presenting both halves as equal. The
+Summary and Headline now say readability drains away with lost head membership — the statement two runs
+support — and name the disagreement in one clause. Figure 41's caption is scoped to the reference run and
+points forward to Figure 42; the "why this matters" consequence keeps checkpoint-specificity (which two
+runs support) and adds that the promoted half is seed-dependent. Caveats change "one run" to "two
+training runs" and state which measurements did NOT get a second seed (band decomposition, redundancy
+ratio), so the reader is not left assuming the whole block was replicated.
+
+**Figure.** One figure, three panels, both seeds. First draft had legends sitting on the curves in two
+panels; second draft had seed carried by both linestyle and marker shape, which left the three role
+groups in panel (c) separated by colour alone — a rule-13 failure I would not have caught by reading the
+code. Final: group → marker shape + colour, seed → linestyle + filled/open marker, so the figure survives
+grayscale.
+
+**Checks.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 51 display / 1,159 inline
+equations / 45 figures; RESULTS 45 figures; 0 problems), embeds = captions = 90. Exploratory figures
+renumbered 42–44 → 43–45 in both files before the new Figure 42 was inserted.
+
+On track? yes — PLAN "Next step" item (i) from last iteration is done, and the successor list is now the
+depth-series second seed, extending seed 2 to the band decomposition, and a probe family beyond the
+8-character window; blocker: none.

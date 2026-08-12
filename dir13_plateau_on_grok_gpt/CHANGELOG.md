@@ -2031,3 +2031,42 @@ listed it as the direction's real open problem since 2026-08-03.
   (REPORT 51 display / 1,147 inline equations / 44 figures; RESULTS 44 figures; 0 problems); embed count
   equals caption count (88 = 44 + 44).
 - **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
+
+## 2026-08-12 — S25: a second training seed for the developmental head results (Figure 42)
+
+- **What changed in the deliverables.** REPORT.md and RESULTS.md gained one Results subsection and one
+  figure — **Figure 42**, `plots/neuron_seed2.png` — reporting the same three developmental measurements
+  on a second training run of the reference recipe (model seed 2024). The three exploratory figures were
+  renumbered 42–44 → **43–45** in both files. REPORT.md's Methods gained the paragraph "Are these
+  developmental facts properties of the recipe or of one initialization?" in the band-decomposition
+  subsection; RESULTS.md carries the same method description inline above Figure 42.
+- **Why.** Every developmental number in that block came from one run, and PLAN's "Next step" had named
+  a second seed as the check an external reader asks for first.
+- **What the second run shows.** Reproduces: the sharpening trajectory (median transition width
+  0.641 → 0.472 → 0.376 → 0.345 → 0.338 against 0.653 → 0.484 → 0.368 → 0.365 → 0.351), the head turnover
+  (top-8 overlap with the final head 1, 2, 4, 6, 8 against 0, 2, 4, 6, 8; top-32 7, 12, 15, 22, 32 against
+  6, 10, 16, 23, 32), the promotion from just below the head (median rank 126 of 3,840 at step 831 against
+  113.5, chance 1,919.5; 50.2% already inside the top 128 against 51.8%; displaced leaders settle at 98
+  against 100.5), the whole-network describability decline (0.40 → 0.17 against 0.39 → 0.15), the demoted
+  units' faster fall (per-unit median −0.27 against −0.25), the stable units' ceiling (0.96–0.99), and both
+  final-checkpoint band-matched contrasts (stable vs promoted 0.98/0.47, effect size 0.77, p = 6e-13;
+  demoted vs never-head 0.81/0.22, 0.78, p = 5e-15). Does not reproduce: the promoted units' gain in
+  absolute describability (per-unit median **−0.02 against +0.05** from the current character; the
+  relative rise against the falling background survives, 1.5× → 2.7× the all-unit median against
+  1.6× → 4.7×), and the forward-looking step-831 contrast one band below the head, which collapses from
+  0.80 vs 0.64 (effect size 0.63, p = 7e-4) to **0.69 vs 0.68 (0.53, p = 0.4)**.
+- **Claims narrowed as a result (rule 9c step 2).** REPORT.md's Summary and RESULTS.md's Headline no longer
+  state the promoted-unit gain; both now say readability *drains away* with lost head membership and name
+  the second run's disagreement. The "why this matters" consequence in both files keeps the
+  checkpoint-specificity point and adds that the promoted half is seed-dependent and that no early
+  checkpoint predicts promotion. Figure 41's caption in both files is now scoped to the reference run and
+  points to Figure 42. Both Caveats sections change "one run" to "two training runs" and record that the
+  band decomposition and redundancy ratio remain single-run.
+- **New files.** `experiments/neuron_seed2.py`, `results/neuron_seed2_summary.json` (both seeds side by
+  side), `results/neuron_seed2_raw.npz`, `results/neuron_seed2.log`, `plots/neuron_seed2.png`,
+  `results/train_{hist,meta}_ref_pos_s2.json`, `results/train_ref_pos_s2.log`. No existing measurement was
+  re-run or superseded.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 51 display / 1,159 inline equations / 45 figures; RESULTS 45 figures; 0 problems); embed count
+  equals caption count (90 = 45 + 45).
+- **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
