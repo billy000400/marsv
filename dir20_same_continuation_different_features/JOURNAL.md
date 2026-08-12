@@ -1060,3 +1060,10 @@ action this iteration was to hold.
 `check_render.py` pass logged in the previous entry (exit 0). Re-confirmed locally: REPORT.md 4999
 words, 3 figures; 9 `![` embeds across both files and 9 visible `**Figure` caption lines; zero bare
 `(plots/*.png)` prose paths. No `STOP` written.
+
+## 2026-08-12 (hold iteration #2: still waiting on the wrapper's content review)
+
+Nothing outstanding: plan criteria met, `human_feedback_1.txt` manifest complete at `review_pending`,
+and `STOP` stays unwritten while that feedback file is unrenamed. Re-verified only:
+`python3 ../check_render.py REPORT.md RESULTS.md` → exit 0 (REPORT.md 11 display / 195 inline eqs,
+3 figures; RESULTS.md 196 inline eqs, 6 figures; 0 problems). No files edited.
