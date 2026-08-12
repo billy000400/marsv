@@ -789,3 +789,58 @@ network learned about that token's successors." ~15 min GPU.
 **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
 (REPORT 32 display eqs / 769 inline eqs / 24 embeds / 0 problems; RESULTS 501 inline eqs / 24 embeds /
 0 problems).
+
+## 2026-08-12 — iteration 12: where the trait comes from — 17 training checkpoints
+
+The experiment both deliverables named as next was run, and widened from 4 checkpoints to 17:
+`experiments/checkpoints.py` (per-checkpoint anchor widths for the same 123 tokens × 6 anchors ×
+3 frames at block 0, plus an embedding probe refitted inside each checkpoint) on
+`pythia-410m-deduped` at `step0/2/8/16/32/64/128/256/512/1000/2000/4000/8000/16000/32000/64000/143000`,
+`experiments/checkpoints_analysis.py` (split-half reliability, disattenuated agreement with the final
+ranking, correlations with two corpus statistics, partial Spearman, rank $R^2$) and
+`experiments/plot_checkpoints.py`. Results in `results/checkpoints.json`,
+`results/checkpoints_summary.json` (+ `.log`s). Two new figures — `plots/ckpt_emergence.png`,
+`plots/ckpt_source.png` — embedded as **Figures 25–26** in both deliverables (figure count 24 → 26).
+
+**Added to RESULTS.md and REPORT.md (new results; nothing superseded).**
+- **When: the ordering is learned in the first 512 of 143,000 steps.** At `step0` there is no ordering
+  at all (across-token sd **0.003** vs 0.060 at the end, reliability 0.570, $\rho$ = **+0.015** with the
+  final ranking), still true at `step16`. Agreement then runs +0.17 / +0.29 / +0.44 / +0.66 / **+0.79**
+  at `step32/64/128/256/512` (**+0.87** after dividing by the noise ceiling), +0.94 by `step2000`, and
+  does not change for the remaining 98.6% of training (+0.94 … +0.99).
+- **Level and ordering separate in training too.** Median $\hat w_u$ 0.833 (`step256`) → 0.595
+  (`step64000`) — sharpening continues two orders of magnitude after the ordering is fixed; the final
+  checkpoint's 0.658 is the sweep's one non-monotone point.
+- **What: two stages, and only the first is frequency.** $\rho(\hat w_u, \log_{10} N_u)$ = −0.39 /
+  −0.63 / **−0.72** at `step32/64/128` — stronger than the finished model's −0.53 — while the agreement
+  with the final ranking net of unigram count and successor entropy is zero there (−0.05 / −0.08 /
+  +0.15). From `step256` the non-corpus component appears: partial agreement +0.45 → +0.60 (`step512`)
+  → +0.75 (`step2000`) → +0.79–0.82. In the finished model the two corpus statistics explain
+  $R^2_{\mathrm{corpus}}$ = **0.375** of the ranking's rank variance (0.378 in 1.4B).
+- **The fixed 1.4B lookup reads a young checkpoint before that checkpoint's own embedding does.**
+  +0.21 / +0.40 / +0.54 / +0.71 / +0.81 at `step32/64/128/256/512`, +0.77–0.84 later (best at
+  `step2000`, +0.836, above the finished model's +0.760), while a probe refitted inside the checkpoint
+  is at its shuffled-control level through `step256` and reaches its final +0.77–0.81 only from
+  `step4000`.
+- **Consistency check.** This sweep's `step143000` reproduces iteration 11's independent 410M run at
+  $\rho$ = +1.0000 over the 123 tokens.
+- Clarified an apparent inconsistency in the deliverables: the −0.33 frequency correlation reported in
+  pattern 5 is for the *fitted* token effect $a_u$; the *measured* $\hat w_u$ tracks $\log_{10} N_u$ at
+  −0.52 (1.4B) / −0.53 (410M) and successor entropy at −0.48 / −0.46. RESULTS.md's supporting-quantities
+  table gains these three rows.
+- REPORT.md Methods gains a checkpoint-sweep subsection defining $H_u$, the partial Spearman
+  $\rho^{\mathrm{part}}$ and $R^2_{\mathrm{corpus}}$, and names the 17 revisions in Data & model;
+  Results gains patterns 29–31; Summary, Conclusion and Limitations updated.
+
+**Recommended next experiment replaced** (old → new): "when during training does the trait appear, and
+is it a corpus statistic?" (now answered: by `step512`, and only partly) → "**a different tokenizer and
+corpus**: measure anchor widths in `gpt2` for the token strings that are single tokens in both
+vocabularies, same frames and anchor protocol, and compare the ranking with Pythia's against each
+model's split-half reliability. Everything here holds token inventory and training data fixed, so this
+is the last untested generalisation the deliverable rests on." ~10 min GPU. Cheaper mechanistic
+follow-up named: transplant the final checkpoint's $m_u$ into the `step128` model and ask whether the
+ordering appears.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 35 display eqs / 887 inline eqs / 26 embeds / 0 problems; RESULTS 633 inline eqs / 26 embeds /
+0 problems); 52 figure captions for 52 embeds across the two files.

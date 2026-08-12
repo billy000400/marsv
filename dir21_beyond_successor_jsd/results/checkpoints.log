@@ -1,0 +1,208 @@
+=== step1000 ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4670.63it/s]
+  frame 0 token 0/123 ' about' w=0.720
+  frame 0 token 60/123 ' meant' w=0.825
+  frame 0 token 120/123 ' wrong' w=0.784
+  frame 1 token 0/123 ' about' w=0.725
+  frame 1 token 60/123 ' meant' w=0.817
+  frame 1 token 120/123 ' wrong' w=0.784
+  frame 2 token 0/123 ' about' w=0.725
+  frame 2 token 60/123 ' meant' w=0.811
+  frame 2 token 120/123 ' wrong' w=0.783
+[step1000] valid 1.000 median w 0.736 sd 0.059 probe rho +0.398 +- 0.107 (null +0.074) [56s]
+=== step8000 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4803.89it/s]
+  frame 0 token 0/123 ' about' w=0.670
+  frame 0 token 60/123 ' meant' w=0.759
+  frame 0 token 120/123 ' wrong' w=0.749
+  frame 1 token 0/123 ' about' w=0.646
+  frame 1 token 60/123 ' meant' w=0.746
+  frame 1 token 120/123 ' wrong' w=0.730
+  frame 2 token 0/123 ' about' w=0.646
+  frame 2 token 60/123 ' meant' w=0.746
+  frame 2 token 120/123 ' wrong' w=0.730
+[step8000] valid 1.000 median w 0.662 sd 0.060 probe rho +0.775 +- 0.052 (null +0.073) [102s]
+=== step32000 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 5015.43it/s]
+  frame 0 token 0/123 ' about' w=0.601
+  frame 0 token 60/123 ' meant' w=0.655
+  frame 0 token 120/123 ' wrong' w=0.711
+  frame 1 token 0/123 ' about' w=0.601
+  frame 1 token 60/123 ' meant' w=0.674
+  frame 1 token 120/123 ' wrong' w=0.692
+  frame 2 token 0/123 ' about' w=0.596
+  frame 2 token 60/123 ' meant' w=0.685
+  frame 2 token 120/123 ' wrong' w=0.704
+[step32000] valid 1.000 median w 0.620 sd 0.061 probe rho +0.790 +- 0.049 (null -0.013) [148s]
+=== step143000 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  25%|██▌       | 74/292 [00:00<00:00, 737.31it/s]Loading weights:  59%|█████▉    | 173/292 [00:00<00:00, 868.62it/s]Loading weights:  89%|████████▉ | 260/292 [00:00<00:00, 788.06it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 857.02it/s]
+  frame 0 token 0/123 ' about' w=0.668
+  frame 0 token 60/123 ' meant' w=0.701
+  frame 0 token 120/123 ' wrong' w=0.720
+  frame 1 token 0/123 ' about' w=0.637
+  frame 1 token 60/123 ' meant' w=0.701
+  frame 1 token 120/123 ' wrong' w=0.719
+  frame 2 token 0/123 ' about' w=0.613
+  frame 2 token 60/123 ' meant' w=0.709
+  frame 2 token 120/123 ' wrong' w=0.721
+[step143000] valid 1.000 median w 0.658 sd 0.060 probe rho +0.774 +- 0.055 (null +0.032) [196s]
+=== step0 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4380.07it/s]
+  frame 0 token 0/123 ' about' w=0.831
+  frame 0 token 60/123 ' meant' w=0.833
+  frame 0 token 120/123 ' wrong' w=0.826
+  frame 1 token 0/123 ' about' w=0.831
+  frame 1 token 60/123 ' meant' w=0.832
+  frame 1 token 120/123 ' wrong' w=0.828
+  frame 2 token 0/123 ' about' w=0.831
+  frame 2 token 60/123 ' meant' w=0.831
+  frame 2 token 120/123 ' wrong' w=0.828
+[step0] valid 1.000 median w 0.829 sd 0.003 probe rho -0.128 +- 0.111 (null +0.021) [247s]
+=== step2000 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 5041.46it/s]
+  frame 0 token 0/123 ' about' w=0.621
+  frame 0 token 60/123 ' meant' w=0.792
+  frame 0 token 120/123 ' wrong' w=0.779
+  frame 1 token 0/123 ' about' w=0.635
+  frame 1 token 60/123 ' meant' w=0.795
+  frame 1 token 120/123 ' wrong' w=0.779
+  frame 2 token 0/123 ' about' w=0.635
+  frame 2 token 60/123 ' meant' w=0.794
+  frame 2 token 120/123 ' wrong' w=0.775
+[step2000] valid 1.000 median w 0.701 sd 0.066 probe rho +0.654 +- 0.075 (null +0.142) [294s]
+=== step64000 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4446.76it/s]
+  frame 0 token 0/123 ' about' w=0.579
+  frame 0 token 60/123 ' meant' w=0.623
+  frame 0 token 120/123 ' wrong' w=0.679
+  frame 1 token 0/123 ' about' w=0.558
+  frame 1 token 60/123 ' meant' w=0.637
+  frame 1 token 120/123 ' wrong' w=0.679
+  frame 2 token 0/123 ' about' w=0.558
+  frame 2 token 60/123 ' meant' w=0.626
+  frame 2 token 120/123 ' wrong' w=0.666
+[step64000] valid 1.000 median w 0.595 sd 0.077 probe rho +0.807 +- 0.048 (null +0.033) [340s]
+=== step512 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4569.03it/s]
+  frame 0 token 0/123 ' about' w=0.823
+  frame 0 token 60/123 ' meant' w=0.808
+  frame 0 token 120/123 ' wrong' w=0.853
+  frame 1 token 0/123 ' about' w=0.822
+  frame 1 token 60/123 ' meant' w=0.810
+  frame 1 token 120/123 ' wrong' w=0.867
+  frame 2 token 0/123 ' about' w=0.820
+  frame 2 token 60/123 ' meant' w=0.807
+  frame 2 token 120/123 ' wrong' w=0.867
+[step512] valid 1.000 median w 0.806 sd 0.050 probe rho +0.249 +- 0.096 (null +0.206) [386s]
+=== step16000 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4542.67it/s]
+  frame 0 token 0/123 ' about' w=0.658
+  frame 0 token 60/123 ' meant' w=0.722
+  frame 0 token 120/123 ' wrong' w=0.701
+  frame 1 token 0/123 ' about' w=0.626
+  frame 1 token 60/123 ' meant' w=0.710
+  frame 1 token 120/123 ' wrong' w=0.701
+  frame 2 token 0/123 ' about' w=0.613
+  frame 2 token 60/123 ' meant' w=0.710
+  frame 2 token 120/123 ' wrong' w=0.711
+[step16000] valid 1.000 median w 0.638 sd 0.060 probe rho +0.786 +- 0.042 (null +0.021) [435s]
+=== step4000 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4253.22it/s]
+  frame 0 token 0/123 ' about' w=0.708
+  frame 0 token 60/123 ' meant' w=0.786
+  frame 0 token 120/123 ' wrong' w=0.766
+  frame 1 token 0/123 ' about' w=0.663
+  frame 1 token 60/123 ' meant' w=0.778
+  frame 1 token 120/123 ' wrong' w=0.754
+  frame 2 token 0/123 ' about' w=0.653
+  frame 2 token 60/123 ' meant' w=0.778
+  frame 2 token 120/123 ' wrong' w=0.754
+[step4000] valid 1.000 median w 0.667 sd 0.062 probe rho +0.757 +- 0.064 (null +0.161) [481s]
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/checkpoints.json
+=== step128 ===
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4307.36it/s]
+  frame 0 token 0/123 ' about' w=0.801
+  frame 0 token 60/123 ' meant' w=0.829
+  frame 0 token 120/123 ' wrong' w=0.814
+  frame 1 token 0/123 ' about' w=0.801
+  frame 1 token 60/123 ' meant' w=0.832
+  frame 1 token 120/123 ' wrong' w=0.824
+  frame 2 token 0/123 ' about' w=0.801
+  frame 2 token 60/123 ' meant' w=0.832
+  frame 2 token 120/123 ' wrong' w=0.824
+[step128] valid 1.000 median w 0.819 sd 0.022 probe rho +0.027 +- 0.115 (null +0.069) [55s]
+=== step32 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4709.08it/s]
+  frame 0 token 0/123 ' about' w=0.813
+  frame 0 token 60/123 ' meant' w=0.829
+  frame 0 token 120/123 ' wrong' w=0.826
+  frame 1 token 0/123 ' about' w=0.811
+  frame 1 token 60/123 ' meant' w=0.829
+  frame 1 token 120/123 ' wrong' w=0.826
+  frame 2 token 0/123 ' about' w=0.813
+  frame 2 token 60/123 ' meant' w=0.829
+  frame 2 token 120/123 ' wrong' w=0.826
+[step32] valid 1.000 median w 0.822 sd 0.010 probe rho -0.016 +- 0.113 (null -0.005) [105s]
+=== step256 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 18893.84it/s]
+  frame 0 token 0/123 ' about' w=0.824
+  frame 0 token 60/123 ' meant' w=0.844
+  frame 0 token 120/123 ' wrong' w=0.836
+  frame 1 token 0/123 ' about' w=0.824
+  frame 1 token 60/123 ' meant' w=0.841
+  frame 1 token 120/123 ' wrong' w=0.851
+  frame 2 token 0/123 ' about' w=0.826
+  frame 2 token 60/123 ' meant' w=0.839
+  frame 2 token 120/123 ' wrong' w=0.852
+[step256] valid 1.000 median w 0.833 sd 0.024 probe rho +0.080 +- 0.113 (null +0.153) [153s]
+=== step8 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 15292.20it/s]
+  frame 0 token 0/123 ' about' w=0.829
+  frame 0 token 60/123 ' meant' w=0.831
+  frame 0 token 120/123 ' wrong' w=0.826
+  frame 1 token 0/123 ' about' w=0.829
+  frame 1 token 60/123 ' meant' w=0.830
+  frame 1 token 120/123 ' wrong' w=0.826
+  frame 2 token 0/123 ' about' w=0.829
+  frame 2 token 60/123 ' meant' w=0.830
+  frame 2 token 120/123 ' wrong' w=0.826
+[step8] valid 1.000 median w 0.828 sd 0.003 probe rho -0.090 +- 0.106 (null +0.100) [201s]
+=== step64 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4265.98it/s]
+  frame 0 token 0/123 ' about' w=0.786
+  frame 0 token 60/123 ' meant' w=0.830
+  frame 0 token 120/123 ' wrong' w=0.815
+  frame 1 token 0/123 ' about' w=0.786
+  frame 1 token 60/123 ' meant' w=0.832
+  frame 1 token 120/123 ' wrong' w=0.820
+  frame 2 token 0/123 ' about' w=0.787
+  frame 2 token 60/123 ' meant' w=0.832
+  frame 2 token 120/123 ' wrong' w=0.820
+[step64] valid 1.000 median w 0.819 sd 0.021 probe rho +0.058 +- 0.139 (null +0.066) [250s]
+=== step16 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 3922.40it/s]
+  frame 0 token 0/123 ' about' w=0.827
+  frame 0 token 60/123 ' meant' w=0.828
+  frame 0 token 120/123 ' wrong' w=0.823
+  frame 1 token 0/123 ' about' w=0.827
+  frame 1 token 60/123 ' meant' w=0.827
+  frame 1 token 120/123 ' wrong' w=0.824
+  frame 2 token 0/123 ' about' w=0.828
+  frame 2 token 60/123 ' meant' w=0.827
+  frame 2 token 120/123 ' wrong' w=0.824
+[step16] valid 1.000 median w 0.824 sd 0.002 probe rho -0.058 +- 0.107 (null +0.110) [298s]
+=== step2 ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4499.80it/s]
+  frame 0 token 0/123 ' about' w=0.831
+  frame 0 token 60/123 ' meant' w=0.833
+  frame 0 token 120/123 ' wrong' w=0.826
+  frame 1 token 0/123 ' about' w=0.831
+  frame 1 token 60/123 ' meant' w=0.832
+  frame 1 token 120/123 ' wrong' w=0.828
+  frame 2 token 0/123 ' about' w=0.831
+  frame 2 token 60/123 ' meant' w=0.831
+  frame 2 token 120/123 ' wrong' w=0.828
+[step2] valid 1.000 median w 0.829 sd 0.003 probe rho -0.128 +- 0.111 (null +0.023) [346s]
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/checkpoints.json

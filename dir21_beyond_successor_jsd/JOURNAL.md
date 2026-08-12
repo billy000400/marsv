@@ -884,3 +884,75 @@ network learned. ~15 min of GPU.
 direction's strongest generalisation result plus an honest partial-replication failure, both
 deliverables are curated to current-best with Figures 22–24 embedded, and `check_render.py` passes. No
 STOP written: budget remains and there is a concrete cheap next experiment.
+
+### 2026-08-12 — iteration 12: seventeen checkpoints, and a two-stage answer
+
+No unaddressed feedback (`human_feedback.addressed.md` only), so this iteration ran the experiment both
+deliverables named: when during training does the per-token width trait appear, and is it a corpus
+statistic?
+
+**What I ran.** `checkpoints.py` (anchor widths for the same 123 tokens × 6 anchors × 3 frames at
+block 0, plus an embedding probe refitted inside the checkpoint) on `pythia-410m-deduped`, and
+`checkpoints_analysis.py` / `plot_checkpoints.py`. The plan named four checkpoints; each run costs ~50 s
+including the download, so I ran the four, saw the ordering was already near-final at the earliest of
+them (`step1000`, +0.80), and added `step0/512/2000/4000/16000/64000` and then a dense early grid
+(`step2/8/16/32/64/128/256`) — 17 in total, ~8 min of GPU. That is what turned a one-line answer into
+the two-stage result.
+
+**Result 1 — the ordering is fixed in the first 512 of 143,000 steps.** Nothing at initialisation
+(across-token sd 0.003 vs 0.060 trained; rho +0.015 with the final ranking; reliability 0.570, i.e. the
+measurement is pure noise there), nothing at `step16`, then +0.17/+0.29/+0.44/+0.66/+0.79 at
+`step32/64/128/256/512` (+0.87 disattenuated), +0.94 by `step2000`, flat for the remaining 98.6% of
+training. Meanwhile the LEVEL keeps falling until `step64000` (median 0.833 → 0.595). The
+ordering/level split this direction found for context (frames) and for scale (model sizes) also holds
+for training time. Three independent instances of the same dissociation is now the report's most
+repeated structural fact.
+
+**Result 2 — the two-stage answer, which neither hypothesis predicted.** The experiment was designed to
+separate "early and sharpening ⇒ corpus statistic" from "late and gradual ⇒ learned". The truth is
+early AND mostly not a corpus statistic: up to `step128` the ranking is *entirely* unigram frequency
+(rho = −0.72 with log10 count, stronger than the finished model's −0.53, and zero agreement with the
+final ranking once frequency and successor entropy are partialled out), and from `step256` a second
+component appears that those statistics do not contain (partial agreement +0.45 → +0.60 → +0.75 →
++0.80). In the finished model the two corpus statistics explain only 0.375 of the ranking's rank
+variance. Lesson worth keeping: the dense early grid is what made this visible — with only the four
+planned checkpoints, stage one is entirely below the first measurement and the answer reads as a flat
+"in place by step1000, partial +0.65", which would have been a materially weaker and slightly wrong
+conclusion.
+
+**Result 3 — an asymmetry I did not expect.** The fixed lookup read off 1.4B's embedding matrix ranks
+`step128`'s measured widths at +0.54 and `step512`'s at +0.81, while a probe refitted inside those same
+checkpoints is at its shuffled-control level (+0.03, +0.25). A mature model's table detects the trait
+in a young model several hundred steps before that model's own embeddings encode it linearly.
+
+**An inconsistency I found and fixed in the deliverables.** The Summary has always said the trait "is
+not a simple corpus statistic: frequency rho = −0.33", which is the *fitted* token effect a_u against
+log-frequency. The *measured* anchor width tracks log-frequency at −0.52 (1.4B) / −0.53 (410M). Both are
+true and they are different quantities, but printed side by side without that note they read as a
+contradiction, so I stated the distinction in pattern 30 and added the measured rows to RESULTS.md's
+supporting-quantities table.
+
+**Sanity checks that passed.** This sweep's `step143000` reproduces iteration 11's separate 410M run at
+rho = +1.0000 over 123 tokens (independent process, independent model load) — the cheapest possible
+check that the harness is measuring the same thing. Validity of the width curves is 1.000 at every
+checkpoint including `step0`, so the near-zero spread at initialisation is a real absence of variation,
+not a mass of failed fits.
+
+**Assumptions logged.** (a) 410M rather than 1.4B for the sweep, because the cross-model section
+established that 410M and 1.4B rank tokens identically and 410M is 3.5× cheaper per checkpoint;
+rejected running 1.4B checkpoints, which would have bought ~4 checkpoints instead of 17. (b) Corpus
+statistics are dir18's sampled counts, not exact Pile statistics — stated as a limitation, since it
+bounds what *these* statistics explain. (c) Reliability again estimated by anchor split-half, for
+comparability with the cross-model section.
+
+**Next step.** The last untested generalisation: a different tokenizer and training corpus. Measure
+anchor widths in `gpt2` for the token strings that are single tokens in both vocabularies, same three
+frames, six anchors chosen the same way, and compare the ranking with Pythia's against each model's
+split-half reliability. `gpt2` is cached; ~10 min GPU. If positive, follow with a cross-checkpoint
+transplant (write the final checkpoint's m_u into the `step128` model and ask whether the ordering
+appears), which would tie the transplant result to the emergence result.
+
+**On track?** Yes — the named next experiment was run, widened from 4 checkpoints to 17, and returned a
+result that changed the answer rather than confirming a guess; both deliverables are curated to
+current-best with Figures 25–26 embedded and `check_render.py` passes. No STOP written: budget remains
+and there is a concrete cheap next experiment.

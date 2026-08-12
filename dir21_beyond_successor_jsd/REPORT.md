@@ -141,6 +141,20 @@ between 160M and 410M. The block-0 MLP is again the single early component whose
 ordering in every model — though the finer claim that it does so faster *per bit* than a matched random
 disturbance holds only at 1.4B, and the reproducible evidence for the component is the transplant.
 
+**And it is learned almost immediately, but it is not a count table.** Repeating the measurement in 17
+released checkpoints of Pythia-410M shows nothing at initialisation (spread across tokens sd $= 0.003$
+against 0.060 at the end; agreement with the final ranking $\rho = +0.015$) and an ordering that is
+$0.87$ of the way to the final one, relative to what measurement noise allows, after **512 of 143,000
+optimizer steps**. It is complete by `step2000` and does not change for the remaining 98.6% of
+training, while the *level* goes on sharpening (median width 0.833 → 0.595 between `step256` and
+`step64000`). The trait is built in two stages. Up to `step128` it is purely a frequency statistic —
+rank correlation with $\log_{10}$ unigram count $-0.72$ there, stronger than the $-0.53$ it ends at,
+with nothing left once frequency and successor entropy are partialled out. From `step256` a second
+component appears that those two corpus statistics do not contain: they explain only 0.375 of the final
+ranking's rank variance, and the agreement between an early checkpoint and the finished model survives
+partialling them out at $+0.6$ to $+0.8$. So the free lookup cannot be replaced by a count table, and
+what it reads is fixed very early rather than refined late.
+
 We also ruled out the most deflationary explanation. Because `w` is a *fraction* of the path, a
 transition of fixed absolute size would look narrower on a longer path. If that were the mechanism,
 converting `w` into residual-stream distance units would make it more homogeneous. It does the
@@ -158,7 +172,11 @@ position of the residual stream immediately after transformer block 0**; blocks 
 normally and the final-position logits are read after the final LayerNorm and unembedding. The
 cross-model section repeats the per-token measurement, the embedding probe and a block-level ablation
 in `pythia-160m-deduped` (12 blocks, width 768), `pythia-410m-deduped` (24 blocks, width 1024) and
-`pythia-1b-deduped` (16 blocks, width 2048) at the same revision and the same hook point.
+`pythia-1b-deduped` (16 blocks, width 2048) at the same revision and the same hook point. The
+checkpoint sweep repeats the per-token measurement and the embedding probe in `pythia-410m-deduped` at
+17 revisions — `step0`, `2`, `8`, `16`, `32`, `64`, `128`, `256`, `512`, `1000`, `2000`, `4000`,
+`8000`, `16000`, `32000`, `64000` and `143000` — again at the same hook point, tokens, anchors and
+frames.
 
 **Pairs and frames.** The 1,000 token pairs built in `dir18` from 123 eligible endpoint tokens, each
 run in three fixed sentence frames — `The thing was`, `They said it was`, `I thought it was` — with the
@@ -835,6 +853,68 @@ rearrangement of the tokens counts:
 
 Both are compared between arms with a Wilcoxon signed-rank test over the 12 tokens. Figure 24 reports
 the result.
+
+### When is the trait learned, and is it just a corpus statistic? The checkpoint sweep
+
+The cross-model result leaves the trait's origin open. It is learned rather than architectural — 160M
+does not have it, 410M does — and it is shared by networks that differ in shape but share a training
+corpus. Two very different stories fit that. The ordering could be a repackaging of a statistic of the
+data itself, such as how often a token occurs or how predictable its successors are, in which case the
+embedding lookup is a roundabout way of reading a count table and an auditor needs no model at all. Or
+it could be something the network builds as it learns each token's successor distribution, in which
+case the lookup reads a genuinely learned property and has to be read from a model. Training
+checkpoints separate the two: a property of the data is available from the first optimizer steps, while
+one that has to be learned accrues as the loss falls.
+
+Pythia releases its intermediate weights, so we repeat the per-token measurement in
+**`pythia-410m-deduped` at 17 checkpoints** spanning `step0` (random initialisation) to `step143000`
+(end of training), keeping everything else fixed: the same 123 endpoint tokens, the same 6 anchor
+tokens, the same 3 sentence frames, the same block-0 hook point and the same 50-step interpolation. The
+grid is deliberately dense over the first 512 steps (`step2`, `8`, `16`, `32`, `64`, `128`, `256`,
+`512`) because that is where the ordering turns out to appear. Each checkpoint gets its own split-half
+reliability $R_M$ and its own refitted embedding probe (same 80/43 splits, 50 repetitions,
+shuffled-target control), and we additionally score the **fixed** lookup — the out-of-fold predictions
+of the probe fitted on Pythia-1.4B's embedding matrix — against every checkpoint's measured widths.
+Agreement with the end of training is reported raw and divided by the noise ceiling
+$\sqrt{R_M R_{\mathrm{final}}}$, exactly as in the cross-model comparison, so that an early checkpoint
+is not penalised for being measured noisily.
+
+Two statistics of the training corpus come per token from `dir18`'s manifest and need no model at all.
+The **unigram count** $N_u$ is the number of times token $u$ occurs in `dir18`'s corpus sample. The
+**successor entropy** $H_u$ is the Shannon entropy, in bits, of that token's empirical next-token
+distribution $q_u$ over the same sample — low for a token with one habitual continuation, high for a
+token that can be followed by anything:
+
+```math
+H_u \;=\; -\sum_{v} q_u(v)\,\log_2 q_u(v) .
+```
+
+These two are the "free explanation" of the width ordering, and $\log_{10} N_u$ is used rather than the
+raw count because counts span five orders of magnitude. The question is not merely whether they
+correlate with $\hat w_u$ — they do — but whether they account for the part of the ordering that is
+already in place early. That is a **partial Spearman correlation**: rank-transform every variable, then
+correlate what is left of an early checkpoint's ranking and of the final ranking after both have had
+the two corpus rankings regressed out of them,
+
+```math
+\rho^{\mathrm{part}} \;=\; \rho\bigl(e^{(t)},\, e^{(T)}\bigr), \qquad
+e^{(t)} \;=\; \mathrm{r}\bigl(\hat w^{(t)}\bigr) \;-\; P\,\mathrm{r}\bigl(\hat w^{(t)}\bigr),
+```
+
+where $\mathrm{r}(\cdot)$ is the rank transform over the 123 tokens, $t$ indexes the checkpoint, $T$ is
+`step143000`, and $P$ is the least-squares projection onto the span of an intercept,
+$\mathrm{r}(\log_{10} N_u)$ and $\mathrm{r}(H_u)$. If the early agreement is nothing but the corpus
+statistics, $\rho^{\mathrm{part}}$ collapses toward zero; if it survives, the two checkpoints share
+something the counts do not contain. The share of the final ordering those counts explain on their own
+is the $R^2$ of the same projection,
+
+```math
+R^2_{\mathrm{corpus}} \;=\; 1 \;-\;
+\frac{\lVert \mathrm{r}(\hat w^{(T)}) - P\,\mathrm{r}(\hat w^{(T)}) \rVert^2}
+     {\lVert \mathrm{r}(\hat w^{(T)}) - \overline{\mathrm{r}(\hat w^{(T)})} \rVert^2} .
+```
+
+Figures 25 and 26 report these.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -1728,6 +1808,89 @@ rearranges the *ordering* faster per bit than a generic disturbance of the same 
 component is therefore the transplant (patterns 23–25), which does not depend on a matched control at
 all: its evidence is that the *donor's identity* sets the recipient's width.
 
+**Pattern 29 — the ordering does not exist at initialisation and is essentially complete after 512 of
+143,000 training steps.** At `step0` there is nothing to rank: the spread of $\hat w_u$ across the 123
+tokens is sd $= 0.003$ against $0.060$ at the end of training, the six-anchor measurement's own
+split-half reliability is $0.570$ (so most of what little variation exists is measurement noise), and
+the agreement with the final ranking is $\rho = +0.015$. That is still true at `step16`. The ordering
+then appears over less than two orders of magnitude of training: agreement with `step143000` runs
+$+0.17$ (`step32`), $+0.29$ (`step64`), $+0.44$ (`step128`), $+0.66$ (`step256`), $+0.79$ (`step512`)
+and $+0.80$ (`step1000`), which after dividing by each checkpoint's noise ceiling is $+0.87$ already at
+`step512`. The last tenth arrives by `step2000` ($+0.94$ disattenuated) and then nothing moves:
+$+0.95$, $+0.94$, $+0.97$, $+0.99$, $+0.98$ at `step4000` through `step64000`. **The level keeps
+changing long after the ordering has stopped**: the median $\hat w_u$ falls from $0.833$ at `step256`
+to $0.595$ at `step64000` — transitions go on sharpening for two orders of magnitude of training after
+which tokens are narrow has been settled (the final checkpoint's $0.658$ interrupts that trend, the one
+non-monotone point in the sweep). This is the training-time version of the split the frame-shape
+control and the four-model comparison both found: ordering and level are separate channels.
+
+To show when the trait appears and to separate its two channels, Figure 25 plots agreement with the end
+of training, and the level and spread of the measurement, against training step.
+
+![Agreement of each checkpoint's per-token width ranking with the final checkpoint, and the level and spread of the measurement, against training step](plots/ckpt_emergence.png)
+
+**Figure 25.** Pythia-410M-deduped at 17 released checkpoints, same 123 tokens, 6 anchors, 3 frames and
+block-0 site throughout. x (both panels): training step, log scale; `step0` (random initialisation) is
+drawn off-scale to the left of the vertical rule. Left, y: Spearman $\rho$ over the 123 tokens —
+circles/solid = raw agreement of that checkpoint's ranking with `step143000`'s, squares/dashed = the
+same divided by the noise ceiling $\sqrt{R_M R_{\mathrm{final}}}$, triangles/dotted = that checkpoint's
+own split-half reliability $R_M$; dash-dotted line = perfect agreement. The final checkpoint is omitted
+from the two agreement series because it would be compared with itself. Right: median $\hat w_u$
+(y-left, circles/solid, shaded band $\pm 1$ sd across tokens) and the across-token sd itself (y-right,
+squares/dashed). Spread appears from `step32` and saturates by `step512`; the level keeps falling until
+`step64000`.
+
+**Pattern 30 — the trait is built in two stages, and only the first one is unigram frequency.** The
+first thing the model learns about width is a frequency statistic: the rank correlation between
+$\hat w_u$ and $\log_{10} N_u$ goes $-0.03$ (`step16`), $-0.39$ (`step32`), $-0.63$ (`step64`),
+$-0.72$ (`step128`) — *stronger* at `step128` than at the end of training ($-0.53$) — while at those
+same checkpoints the agreement with the final ranking, with $\log_{10} N_u$ and $H_u$ partialled out,
+sits at zero ($-0.05$, $-0.08$, $+0.15$). In other words, everything a `step128` model knows about
+which tokens have narrow transitions is *rare tokens are narrow*, and none of it is the part that
+survives to the end. The second stage begins at `step256`: the successor-entropy correlation moves from
+$-0.15$ to $-0.46$, and the partial agreement with the final ranking climbs to $+0.45$ (`step256`),
+$+0.60$ (`step512`), $+0.65$ (`step1000`), $+0.75$ (`step2000`) and $+0.79$ to $+0.82$ thereafter. In
+the finished model the two corpus statistics explain $R^2_{\mathrm{corpus}} = 0.375$ of the final
+ranking's rank variance in 410M and $0.378$ in 1.4B, and the measured width tracks $\log_{10} N_u$ at
+$-0.53$ and $-0.52$ in those two models. (Pattern 5's weaker $-0.33$ is a different quantity — the
+token effect $a_u$ *fitted* inside the pair bank, not the directly measured $\hat w_u$.)
+
+**So the answer to "corpus statistic or learned property" is: both, in that order, and the learned part
+is the larger one.** Two-thirds of the final ordering's rank variance is not in unigram frequency or
+successor entropy, and the part an early checkpoint shares with the finished model survives partialling
+both out at $+0.6$ to $+0.8$. An auditor cannot replace the lookup with a count table; but the lookup
+is reading something a model acquires in its first few hundred optimizer steps, not a late refinement
+of that token's successor distribution.
+
+**Pattern 31 — a mature model's lookup detects the trait before the young model's own embedding
+expresses it.** The *fixed* free lookup — the probe fitted once on Pythia-1.4B's embedding matrix —
+ranks each checkpoint's measured widths at $+0.21$ (`step32`), $+0.40$ (`step64`), $+0.54$ (`step128`),
+$+0.71$ (`step256`), $+0.81$ (`step512`), and $+0.77$ to $+0.84$ at every later checkpoint; it tracks
+the trait from the step it first appears, and it ranks `step2000`'s widths ($+0.836$) slightly better
+than the finished model's ($+0.760$). A probe refitted *inside* each checkpoint lags an order of
+magnitude behind in steps: it is indistinguishable from its shuffled-target control through `step256`
+($-0.02$ to $+0.08$), reaches $+0.25$ at `step512`, $+0.65$ at `step2000`, and only attains its final
+$+0.77$–$+0.81$ from `step4000` on. The behaviour is therefore in place well before that model's own
+embedding row encodes it linearly, which is a useful asymmetry for an auditor: a table built on a
+trained model reads a checkpoint whose embeddings could not have produced that table. The lag should
+not be over-read — each refit trains on 80 tokens and its sd is $\pm 0.10$ in the early regime, and
+`step32`'s reliability of 0.241 makes its disattenuated agreement unstable.
+
+To ask whether the ordering is a repackaged corpus statistic, and to compare the two ways of reading it
+off an embedding matrix, Figure 26 plots the corpus correlations and both lookups against training step.
+
+![Correlation of each checkpoint's widths with two corpus statistics and with the final ranking after partialling them out, and the accuracy of the fixed and refitted embedding lookups](plots/ckpt_source.png)
+
+**Figure 26.** Same sweep and same x-axis as Figure 25. Left, y: Spearman $\rho$ over the 123 tokens —
+circles/solid = $-\rho$ between $\hat w_u$ and $\log_{10} N_u$ (the token's unigram count in `dir18`'s
+corpus sample), squares/dashed = $-\rho$ with the successor entropy $H_u$ (both negated so that "more
+of the ordering explained" points up), diamonds/dash-dotted = raw agreement with `step143000`,
+triangles/dotted = that agreement with both corpus statistics partialled out
+($\rho^{\mathrm{part}}$). Right, y: Spearman $\rho$ between each checkpoint's measured $\hat w_u$ and
+two predictions of it — circles/solid = a ridge probe refitted inside that checkpoint (shaded band
+$\pm 1$ sd over 50 random 80/43 splits), squares/dashed = the fixed lookup read off Pythia-1.4B's
+embedding matrix, triangles/dotted = the refitted probe with shuffled targets.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -1816,19 +1979,32 @@ block-0 MLP is the single early carrier in each. They also cost the mechanism a 
 dose–response's ordering-specific margin over a movement-matched control is absent at 410M, so what
 survives across models is the site plus the transplant, not the per-bit specificity.
 
-That makes the next question **where the trait comes from**, not whether it generalises. It is learned
-rather than architectural — 160M does not have it and 410M does — and it is shared by models that
-differ in shape but share a training corpus and a tokenizer. Pythia's released checkpoints make the
-cheapest discriminating experiment straightforward: measure anchor widths for the same 123 tokens in
-Pythia-410M at `step1000`, `step8000`, `step32000` and `step143000`, and correlate each checkpoint's
-ranking with the final one and with two corpus quantities already inherited from `dir18` — the token's
-unigram frequency and its successor entropy. If the ranking is largely in place by `step8000` and only
-sharpens afterwards, the trait is tracking a simple corpus statistic that an auditor could compute with
-no model at all, and the embedding probe is a roundabout way of reading it. If it emerges late and
-gradually, it tracks the model's acquisition of that token's successor distribution, and the lookup is
-genuinely reading something the network learned. The two outcomes call for different tools, which is
-what makes the experiment worth running before anything else. Cost: four anchor-width runs at about a
-minute and a half each on 410M, under fifteen minutes of GPU time.
+Patterns 29–31 then asked where the trait comes from, and returned neither of the two answers the
+experiment was designed to separate. It is not a late refinement of the model's successor
+distributions: the ordering is 87% complete, relative to measurement noise, after 512 of 143,000 steps
+and does not change again. Nor is it a corpus statistic in disguise: unigram frequency is the whole
+story only up to `step128`, and in the finished model frequency and successor entropy together explain
+0.375 of the ranking's rank variance, with the early-to-final agreement surviving their removal at
+$+0.6$–$+0.8$. What the lookup reads is fixed in the first few hundred optimizer steps and is more than
+a count table.
+
+**The single most informative next experiment is now a change of tokenizer and training corpus.** Every
+generalisation result here — four model sizes, 17 checkpoints — holds the token inventory and the
+training data fixed, so "the ordering belongs to the token" is so far a statement about the Pile and
+Pythia's tokenizer. The test is cheap: take the token *strings* from this report's pool that are also
+single tokens in GPT-2's BPE vocabulary (most of the 123 are common words with a leading space, so the
+overlap should be large), measure anchor widths for them in `gpt2` (12 blocks, width 768) at the same
+relative hook point and in the same three frames with six anchors chosen the same way, and correlate
+the resulting ranking with Pythia's on the shared strings, against the split-half reliability of each.
+Agreement near the ceiling would make the width ordering a property of the token in English text and
+turn the lookup into something an auditor can port to a model it was not built on; disagreement well
+below the ceiling would confine every result here to one training corpus and one tokenizer, and would
+make the 160M floor a statement about Pythia rather than about scale. Cost: `gpt2` is small and already
+cached, so about ten minutes of GPU time. The cheaper mechanistic alternative, if that comes back
+positive, is a cross-checkpoint transplant: write the *final* checkpoint's block-0 MLP output vector
+$m_u$ into the `step128` model, where the ordering does not yet exist, and see whether the width
+ordering appears — which would tie patterns 23 and 29 together by showing that what training builds in
+the first few hundred steps is exactly the vector the transplant moves.
 
 ---
 
@@ -1936,6 +2112,22 @@ they also bound it: with a per-token movement-matched control the ordering-speci
 1.4B is absent at 410M, so the durable evidence for that component is the transplant rather than the
 damage.
 
+Seventeen checkpoints of one of those models say when the vector acquires its content, and the answer
+is: almost immediately. A randomly initialised Pythia-410M has no width ordering at all (spread across
+tokens sd $= 0.003$, agreement with the trained ranking $\rho = +0.015$), and neither does it at
+`step16`; by `step512` the ordering is 0.87 of what the measurement's noise ceiling allows, by
+`step2000` it is 0.94, and across the remaining 98.6% of training it does not move. The level does —
+median width falls from 0.833 at `step256` to 0.595 at `step64000` — so training first decides which
+tokens are narrow and then spends the rest of its budget sharpening everything. What it decides in the
+first hundred steps is only frequency: at `step128` the ranking correlates with log unigram count at
+$-0.72$, more strongly than the finished model does, and is otherwise empty, with no agreement with the
+final ranking once frequency and successor entropy are removed. The component that survives to the end
+appears from `step256` onward and is not those statistics: they account for 0.375 of the final
+ranking's rank variance, while the early-to-final agreement holds at $+0.6$–$+0.8$ with both partialled
+out. The free lookup therefore reads a learned quantity — but one learned in the first 0.4% of
+training, and a mature model's lookup detects it in a young checkpoint ($\rho = +0.54$ at `step128`)
+several hundred steps before that checkpoint's own embedding matrix makes it linearly readable.
+
 **Limitations.** The main analysis is one model, one hook point (after block 0) and one checkpoint; the
 cross-model section adds three further sizes but only for the per-token measurement, the embedding
 probe and the block-level ablation, not for the pair bank or the screens. The pair bank, the
@@ -1975,6 +2167,13 @@ evidence about a distributed code only in so far as off-manifold states are info
 models compared in patterns 26–28 share a tokenizer and a training corpus, so that comparison tests
 portability across networks, not across token inventories or data; the matched-control rerun there
 covers one model (410M), the same 12 tokens and one frame, and its null is a null at $n = 12$ rather
-than a demonstration that the arms are identical. The
+than a demonstration that the arms are identical. The checkpoint sweep inherits that same restriction
+and adds one of its own: it is a single model's training run, so "the ordering is fixed by `step512`"
+is a statement about this seed and this schedule, not a law. Its corpus statistics are `dir18`'s
+sampled counts rather than the exact Pile token statistics Pythia trained on, and only two of them, so
+$R^2_{\mathrm{corpus}} = 0.375$ bounds what *these* statistics explain, not what any model-free
+statistic could. The early checkpoints are also the noisiest to measure — `step32`'s reliability is
+0.241 — so the disattenuated agreements below `step128` carry wide intervals, and the refitted probe
+there trains on 80 tokens with sd $\pm 0.10$. The
 0.2-bit movement gate is a judgement call: it keeps 929 of
 1,000 pairs, and the headline correlation is reported both with and without it.

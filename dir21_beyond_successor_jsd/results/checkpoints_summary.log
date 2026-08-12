@@ -1,0 +1,21 @@
+     step0 med 0.829 sd 0.003 rel 0.570 | vs final +0.015 (dis +0.022, partial +0.020) | logN -0.001 ent -0.028 | probe -0.128 lookup14 -0.059
+     step2 med 0.829 sd 0.003 rel 0.571 | vs final +0.016 (dis +0.022, partial +0.019) | logN -0.002 ent -0.027 | probe -0.128 lookup14 -0.058
+     step8 med 0.828 sd 0.003 rel 0.526 | vs final +0.020 (dis +0.030, partial +0.001) | logN -0.006 ent -0.056 | probe -0.090 lookup14 -0.053
+    step16 med 0.824 sd 0.002 rel 0.553 | vs final +0.033 (dis +0.047, partial -0.001) | logN -0.029 ent -0.050 | probe -0.058 lookup14 -0.052
+    step32 med 0.822 sd 0.010 rel 0.241 | vs final +0.173 (dis +0.373, partial -0.051) | logN -0.389 ent -0.044 | probe -0.016 lookup14 +0.205
+    step64 med 0.819 sd 0.021 rel 0.759 | vs final +0.291 (dis +0.353, partial -0.080) | logN -0.629 ent -0.166 | probe +0.058 lookup14 +0.395
+   step128 med 0.819 sd 0.022 rel 0.875 | vs final +0.443 (dis +0.502, partial +0.146) | logN -0.718 ent -0.153 | probe +0.027 lookup14 +0.540
+   step256 med 0.833 sd 0.024 rel 0.856 | vs final +0.661 (dis +0.756, partial +0.447) | logN -0.578 ent -0.456 | probe +0.080 lookup14 +0.706
+   step512 med 0.806 sd 0.050 rel 0.923 | vs final +0.788 (dis +0.868, partial +0.598) | logN -0.612 ent -0.528 | probe +0.249 lookup14 +0.813
+  step1000 med 0.736 sd 0.059 rel 0.957 | vs final +0.797 (dis +0.863, partial +0.646) | logN -0.531 ent -0.556 | probe +0.398 lookup14 +0.769
+  step2000 med 0.701 sd 0.066 rel 0.956 | vs final +0.866 (dis +0.938, partial +0.754) | logN -0.638 ent -0.545 | probe +0.654 lookup14 +0.836
+  step4000 med 0.667 sd 0.062 rel 0.942 | vs final +0.871 (dis +0.950, partial +0.767) | logN -0.616 ent -0.575 | probe +0.757 lookup14 +0.807
+  step8000 med 0.662 sd 0.060 rel 0.940 | vs final +0.864 (dis +0.944, partial +0.750) | logN -0.633 ent -0.531 | probe +0.775 lookup14 +0.823
+ step16000 med 0.638 sd 0.060 rel 0.936 | vs final +0.882 (dis +0.966, partial +0.790) | logN -0.617 ent -0.549 | probe +0.786 lookup14 +0.802
+ step32000 med 0.620 sd 0.061 rel 0.931 | vs final +0.898 (dis +0.986, partial +0.818) | logN -0.623 ent -0.515 | probe +0.790 lookup14 +0.807
+ step64000 med 0.595 sd 0.077 rel 0.935 | vs final +0.892 (dis +0.977, partial +0.811) | logN -0.550 ent -0.477 | probe +0.807 lookup14 +0.817
+step143000 med 0.658 sd 0.060 rel 0.891 | vs final +1.000 (dis +1.122, partial +1.000) | logN -0.525 ent -0.464 | probe +0.774 lookup14 +0.760
+
+final ranking R2 from (log count, successor entropy) ranks = 0.375
+step143000 here vs iteration-11 410M run: rho +1.0000 (n 123)
+wrote results/checkpoints_summary.json

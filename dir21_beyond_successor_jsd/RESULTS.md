@@ -8,8 +8,9 @@ position, 1,000 token pairs from 123 endpoint tokens × 3 sentence frames × 50 
 the layer sweep, the embedding probe, the vocabulary test, the frame-shape control, the two
 embedding interventions, the displacement-norm ladder, the two mode-split experiments, the component
 ablation, the per-token-matched dose–response and the block-0 MLP probe/transplant are new inference on
-the same model and hook point, ~1.6M forward passes). The last section repeats the cheap end of the
-pipeline on `pythia-160m/410m/1b-deduped` at the same checkpoint. Transition width `w` = fraction of the path over
+the same model and hook point, ~1.6M forward passes). The last two sections repeat the cheap end of the
+pipeline on `pythia-160m/410m/1b-deduped` at the same checkpoint, and on 17 released training
+checkpoints of `pythia-410m-deduped` from `step0` to `step143000`. Transition width `w` = fraction of the path over
 which the output-distance score `d(t)` climbs from 0.1 to 0.9; smaller = narrower. Analyses run on the
 **929 pairs** whose endpoint output movement is at least 0.2 bits in every frame.
 
@@ -49,6 +50,17 @@ Pythia-1.4B's embedding matrix ranks 410M's measured widths at $\rho = +0.760$ a
 against $+0.765$ on the model it was fitted in. The exception is the smallest model: 160M ranks tokens
 differently ($+0.21$, and $+0.26$ after the same correction), so the trait is something the family
 acquires with scale, somewhere between 160M and 410M.
+
+**It is learned in the first 0.4% of training, and it is not a count table.** Seventeen released
+checkpoints of Pythia-410M show no ordering at initialisation (across-token sd 0.003 against 0.060 at
+the end; $\rho = +0.015$ with the final ranking) and an ordering that reaches **0.87 of its noise
+ceiling by `step512`** and 0.94 by `step2000`, after which it does not change for the remaining 98.6%
+of training — while the *level* keeps sharpening (median width 0.833 → 0.595 between `step256` and
+`step64000`). Two stages: through `step128` the ranking is purely unigram frequency ($\rho = -0.72$
+with $\log_{10}$ count, stronger than the $-0.53$ it ends at, and nothing left after partialling
+frequency and successor entropy out), and from `step256` a second component appears that those
+statistics do not contain — they explain only **0.375** of the final ranking's rank variance, and
+early-to-final agreement survives their removal at $+0.6$ to $+0.8$.
 
 **The ranking is a token property; the level is the context's.** Measured in four differently shaped
 contexts (mid-sentence, interrogative, list, code), the token ranking holds at $\rho = +0.84$, $+0.77$,
@@ -322,6 +334,9 @@ per-token effect cannot be looked up in a count table.
 | CV of `w` vs CV of $w \cdot d_0$ | 0.158 vs **0.216** — path-length artifact refuted |
 | token effect $a_u$ vs **measured anchor width** $\hat w_u$ | $\rho = +0.70$ ($p = 4.6\times10^{-19}$; $+0.67$ with output entropy partialled out) |
 | token effect $a_u$ vs corpus log-frequency | $\rho = -0.33$ ($p = 2.9\times10^{-4}$) |
+| **measured** $\hat w_u$ vs corpus log-frequency (1.4B / 410M) | $\rho = -0.52$ / $-0.53$ |
+| **measured** $\hat w_u$ vs successor entropy (1.4B / 410M) | $\rho = -0.48$ / $-0.46$ |
+| rank $R^2$ of the token ranking from both corpus statistics (1.4B / 410M) | 0.378 / 0.375 |
 | token effect $a_u$ vs continuation entropy | $\rho = -0.24$ ($p = 0.008$) |
 | token effect $a_u$ vs model surprisal in frame | $\rho = +0.26$ ($p = 0.004$) |
 | token effect $a_u$ vs basin radius, anchor directions ($\tau = 0.2$ bits) | $\rho = +0.39$ ($p = 1.1\times10^{-5}$) — sign opposite to the basin prediction |
@@ -857,16 +872,114 @@ $n = 12$); the honest current reading is that it is a small model-specific effec
 statement is the transplant's — the block-0 MLP's *output vector* carries the width, which needs no
 matched control because its evidence is the donor's identity, not the size of the damage.
 
+### Seventeen checkpoints: the ordering is learned in the first 512 steps, and it is not a count table
+
+The lookup is worth building only if we know what it reads. Four model sizes showed the ranking is
+learned rather than architectural (160M lacks it, 410M has it), which leaves two very different
+possibilities: it repackages a statistic of the training data — how often a token occurs, how
+predictable its successors are, both computable with no model at all — or it is something the network
+builds while learning that token's successors. Training checkpoints separate them, because a property
+of the data is available from the first optimizer steps. We repeat the per-token measurement in
+**Pythia-410M at 17 released checkpoints** from `step0` (random initialisation) to `step143000`, with
+the same 123 tokens, 6 anchors, 3 frames and block-0 site, and score each checkpoint against the final
+ranking (raw, and divided by the noise ceiling from its own split-half reliability), against the
+token's unigram count $N_u$ and successor entropy $H_u$ from `dir18`'s manifest, and against both
+embedding lookups. This sweep's `step143000` reproduces the independent 410M run above at
+$\rho = +1.0000$ over the 123 tokens.
+
+| checkpoint | median $\hat w_u$ | sd across tokens | reliability | $\rho$ with final (raw / ÷ ceiling) | $\rho$ with final, corpus stats removed | $\rho$ with $\log_{10} N_u$ | probe refit here | fixed 1.4B lookup |
+|---|---|---|---|---|---|---|---|---|
+| `step0` (init) | 0.829 | 0.003 | 0.570 | $+0.015$ / $+0.02$ | $+0.02$ | $-0.00$ | $-0.128$ | $-0.059$ |
+| `step16` | 0.824 | 0.002 | 0.553 | $+0.033$ / $+0.05$ | $-0.00$ | $-0.03$ | $-0.058$ | $-0.052$ |
+| `step32` | 0.822 | 0.010 | 0.241 | $+0.173$ / $+0.37$ | $-0.05$ | $-0.39$ | $-0.016$ | $+0.205$ |
+| `step64` | 0.819 | 0.021 | 0.759 | $+0.291$ / $+0.35$ | $-0.08$ | $-0.63$ | $+0.058$ | $+0.395$ |
+| `step128` | 0.819 | 0.022 | 0.875 | $+0.443$ / $+0.50$ | $+0.15$ | $\mathbf{-0.72}$ | $+0.027$ | $+0.540$ |
+| `step256` | 0.833 | 0.024 | 0.856 | $+0.661$ / $+0.76$ | $+0.45$ | $-0.58$ | $+0.080$ | $+0.706$ |
+| **`step512`** | 0.806 | 0.050 | 0.923 | $+0.788$ / $\mathbf{+0.87}$ | $+0.60$ | $-0.61$ | $+0.249$ | $+0.813$ |
+| `step2000` | 0.701 | 0.066 | 0.956 | $+0.866$ / $\mathbf{+0.94}$ | $+0.75$ | $-0.64$ | $+0.654$ | $+0.836$ |
+| `step8000` | 0.662 | 0.060 | 0.940 | $+0.864$ / $+0.94$ | $+0.75$ | $-0.63$ | $+0.775$ | $+0.823$ |
+| `step32000` | 0.620 | 0.061 | 0.931 | $+0.898$ / $+0.99$ | $+0.82$ | $-0.62$ | $+0.790$ | $+0.807$ |
+| `step64000` | 0.595 | 0.077 | 0.935 | $+0.892$ / $+0.98$ | $+0.81$ | $-0.55$ | $+0.807$ | $+0.817$ |
+| `step143000` (final) | 0.658 | 0.060 | 0.891 | — | — | $-0.53$ | $+0.774$ | $+0.760$ |
+
+(`step2`, `8`, `1000`, `4000` and `16000` were also measured and fall between their neighbours; the
+full grid is in `results/checkpoints_summary.json` and in the figures.)
+
+To show when the trait appears and to separate its two channels, Figure 25 plots agreement with the end
+of training, and the level and spread of the measurement, against training step.
+
+![Agreement of each checkpoint's per-token width ranking with the final checkpoint, and the level and spread of the measurement, against training step](plots/ckpt_emergence.png)
+
+**Figure 25.** Pythia-410M-deduped at 17 released checkpoints, same 123 tokens, 6 anchors, 3 frames and
+block-0 site throughout. x (both panels): training step, log scale; `step0` (random initialisation) is
+drawn off-scale to the left of the vertical rule. Left, y: Spearman $\rho$ over the 123 tokens —
+circles/solid = raw agreement of that checkpoint's ranking with `step143000`'s, squares/dashed = the
+same divided by the noise ceiling $\sqrt{R_M R_{\mathrm{final}}}$, triangles/dotted = that checkpoint's
+own split-half reliability $R_M$; dash-dotted line = perfect agreement. The final checkpoint is omitted
+from the two agreement series because it would be compared with itself. Right: median $\hat w_u$
+(y-left, circles/solid, shaded band $\pm 1$ sd across tokens) and the across-token sd itself (y-right,
+squares/dashed).
+
+**The ordering does not exist at initialisation and is essentially complete after 512 of 143,000
+steps.** At `step0` there is nothing to rank — the across-token spread is 0.003 against 0.060 at the
+end, the measurement's own reliability is 0.570, and agreement with the final ranking is $+0.015$ — and
+that is still true at `step16`. Agreement then climbs to $+0.87$ of the noise ceiling by `step512` and
+$+0.94$ by `step2000`, and across the remaining 98.6% of training it does not change ($+0.94$ to
+$+0.99$). The **level** keeps moving long after: median $\hat w_u$ falls from 0.833 at `step256` to
+0.595 at `step64000`, so transitions go on sharpening for two orders of magnitude of training after
+which tokens are narrow has been settled (the final checkpoint's 0.658 is the one non-monotone point).
+Ordering and level are separate channels in training, exactly as they are across contexts and across
+model sizes.
+
+To ask whether that ordering is a repackaged corpus statistic, and to compare the two ways of reading
+it off an embedding matrix, Figure 26 plots the corpus correlations and both lookups against training
+step.
+
+![Correlation of each checkpoint's widths with two corpus statistics and with the final ranking after partialling them out, and the accuracy of the fixed and refitted embedding lookups](plots/ckpt_source.png)
+
+**Figure 26.** Same sweep and same x-axis as Figure 25. Left, y: Spearman $\rho$ over the 123 tokens —
+circles/solid = $-\rho$ between $\hat w_u$ and $\log_{10} N_u$ (unigram count in `dir18`'s corpus
+sample), squares/dashed = $-\rho$ with successor entropy $H_u$ (both negated so that "more of the
+ordering explained" points up), diamonds/dash-dotted = raw agreement with `step143000`,
+triangles/dotted = that agreement with both corpus statistics partialled out. Right, y: Spearman $\rho$
+between each checkpoint's measured $\hat w_u$ and two predictions of it — circles/solid = a ridge probe
+refitted inside that checkpoint (shaded band $\pm 1$ sd over 50 random 80/43 splits), squares/dashed =
+the fixed lookup read off Pythia-1.4B's embedding matrix, triangles/dotted = the refitted probe with
+shuffled targets.
+
+**The trait is built in two stages, and only the first is frequency.** Up to `step128` everything the
+model knows about width is *rare tokens are narrow*: the correlation with $\log_{10} N_u$ reaches
+$-0.72$ there, stronger than the $-0.53$ the finished model shows, while the agreement with the final
+ranking net of frequency and successor entropy is zero ($-0.05$, $-0.08$, $+0.15$ at `step32`–`128`).
+From `step256` a second component appears — successor-entropy correlation moves $-0.15 \to -0.46$ and
+the partial agreement with the final ranking climbs $+0.45 \to +0.60 \to +0.75$ and plateaus near
+$+0.80$. In the finished model the two corpus statistics explain 0.375 of the ranking's rank variance
+(0.378 in 1.4B). So the free lookup cannot be replaced by a count table, and what it reads is fixed in
+the first few hundred optimizer steps rather than refined late.
+
+**A mature model's lookup detects the trait before the young model's own embedding expresses it.** The
+fixed 1.4B lookup tracks each checkpoint's measured widths from the step the trait appears ($+0.21$,
+$+0.40$, $+0.54$, $+0.71$, $+0.81$ at `step32`–`512`) and holds $+0.77$–$+0.84$ thereafter, ranking
+`step2000` ($+0.836$) slightly better than the finished model ($+0.760$). A probe refitted *inside*
+each checkpoint is indistinguishable from its shuffled control through `step256` and only reaches its
+final $+0.77$–$+0.81$ from `step4000` on. Read with care — each refit trains on 80 tokens (sd
+$\pm 0.10$ early) and `step32`'s reliability of 0.241 makes its ceiling-corrected value unstable — but
+the asymmetry is useful: a table built on a trained model reads a checkpoint whose own embeddings could
+not have produced that table.
+
 ## Next experiment
 
-**Where does the trait come from — the corpus or the architecture?** Four sizes now agree on which
-tokens are narrow, and the trait appears between 160M and 410M, so it is learned rather than built in,
-and shared by networks that differ in width and depth. The cheapest experiment that would say what is
-being learned uses the checkpoints Pythia already provides: measure anchor widths for the 123 tokens in
-Pythia-410M at `step1000`, `step8000`, `step32000` and `step143000`, and correlate each checkpoint's
-ranking with the final one and with the corpus statistics of the token (unigram frequency, successor
-entropy). If the ranking is in place early and only sharpens, the trait tracks token frequency in the
-data; if it emerges late and gradually, it tracks the model's acquisition of that token's successor
-distribution. Either answer tells a monitoring user whether the free lookup is a corpus statistic they
-could compute without a model at all. Cost: four anchor-width runs at ~1.5 minutes each on 410M, plus
-the corpus counts already inherited from `dir18` — under 15 minutes of GPU time.
+**Does the ordering survive a change of tokenizer and training corpus?** Every generalisation result
+here — four model sizes, 17 checkpoints — holds the token inventory and the training data fixed, so
+"the ordering belongs to the token" is still a statement about the Pile and Pythia's tokenizer. Take
+the token strings from this report's pool that are also single tokens in GPT-2's BPE vocabulary,
+measure their anchor widths in `gpt2` (12 blocks, width 768) at the same relative hook point, in the
+same three frames, with six anchors chosen the same way, and correlate the resulting ranking with
+Pythia's on the shared strings against each model's split-half reliability. Agreement near the ceiling
+would make the width ordering a property of the token in English text and let an auditor port the
+lookup to a model family it was not built on; disagreement well below the ceiling would confine every
+result here to one corpus and one tokenizer, and would make the 160M floor a fact about Pythia rather
+than about scale. Cost: `gpt2` is small and already cached — about 10 minutes of GPU time. If that
+comes back positive, the cheaper mechanistic follow-up is a cross-checkpoint transplant: write the
+final checkpoint's block-0 MLP output vector $m_u$ into the `step128` model, where the ordering does
+not yet exist, and see whether it appears.

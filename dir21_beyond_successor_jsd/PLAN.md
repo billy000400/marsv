@@ -46,7 +46,37 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 11 — COMPLETE; cross-model replication added)
+## Current status (2026-08-12, iteration 12 — COMPLETE; training-checkpoint sweep added)
+
+**Iteration 12 ran the experiment both deliverables named as next, on 17 checkpoints rather than four**
+(`experiments/checkpoints.py`, `checkpoints_analysis.py`, `plot_checkpoints.py`; Figures 25–26;
+deliverables now carry 26 figures each and pass `check_render.py`).
+
+* **The ordering is learned in the first 512 of 143,000 steps.** Pythia-410M has no width ordering at
+  initialisation (across-token sd 0.003 vs 0.060 trained; rho +0.015 with the final ranking) or at
+  `step16`; agreement then runs +0.17 / +0.29 / +0.44 / +0.66 / +0.79 at `step32/64/128/256/512`
+  (+0.87 after the noise-ceiling correction), +0.94 by `step2000`, and does not change for the
+  remaining 98.6% of training. The **level** keeps sharpening until `step64000` (median 0.833 → 0.595):
+  the ordering/level split now holds across contexts, model sizes AND training time.
+* **Two stages, and only the first is a corpus statistic.** Through `step128` the ranking is entirely
+  unigram frequency (rho −0.72 with log10 count, stronger than the finished model's −0.53; zero
+  agreement with the final ranking once frequency and successor entropy are partialled out). From
+  `step256` a component those statistics do not contain appears (partial agreement +0.45 → +0.60 →
+  +0.75 → +0.80). The two corpus statistics explain only $R^2 = 0.375$ of the final ranking.
+* **A mature model's lookup reads a young checkpoint first.** The fixed 1.4B embedding lookup ranks
+  `step128` at +0.54 and `step512` at +0.81, while a probe refitted inside those checkpoints is at its
+  shuffled-control level until `step512` and only matures by `step4000`.
+* **Consistency:** this sweep's `step143000` reproduces iteration 11's independent 410M run at
+  rho = +1.0000 (n = 123).
+
+**Next step (only if reopened):** the last untested generalisation — a different tokenizer and training
+corpus. Measure anchor widths in `gpt2` for the token strings that are single tokens in both
+vocabularies, same three frames and six anchors chosen the same way, and compare the ranking with
+Pythia's against each model's split-half reliability. ~10 min GPU (`gpt2` is cached). If positive,
+follow with a cross-checkpoint transplant: write the final checkpoint's $m_u$ into the `step128` model
+and ask whether the ordering appears.
+
+## Previous status (2026-08-12, iteration 11 — COMPLETE; cross-model replication added)
 
 **Iteration 11 ran the experiment both deliverables named as next, on three extra models rather than
 one** (`experiments/second_model.py`, `second_ctrl.py`, `second_analysis.py`, `plot_second.py`;
@@ -66,7 +96,7 @@ Figures 22–24; deliverables now carry 24 figures each and pass `check_render.p
   all nine rungs (9/18 rung × seed comparisons, chance; rho = 0.6 crossing ratio 0.66× against 1.3× at
   1.4B). Deliverables now claim the site, not the per-bit specificity, and point at the transplant.
 
-**Next step (only if reopened):** where does the trait come from? Measure anchor widths for the 123
+**Next step named at iteration 11 — DONE in iteration 12, see the current status above.** Where does the trait come from? Measure anchor widths for the 123
 tokens in Pythia-410M at `step1000`, `step8000`, `step32000`, `step143000`; correlate each checkpoint's
 ranking with the final one and with the token's unigram frequency and successor entropy (both in
 dir18's manifest). Early-and-sharpening ⇒ the lookup reads a corpus statistic computable with no model;
