@@ -1346,3 +1346,14 @@ REPORT.md 18:48 (4999 words, 3 figures, md5 4d9f89410ff47f9179f0a0d1546ce70e) / 
 rate limit) before any document check ran; since the files are unchanged from the last full passing
 run, this remains the same transient limit rather than an open verification. This entry is the only
 file edited.
+
+## 2026-08-12 (hold iteration #29: unchanged, still awaiting the wrapper's content review)
+
+No change. `human_feedback_1.txt` is still present and unrenamed, so no `STOP` (CLAUDE.md rule 11);
+the manifest stays `review_pending` with its single checklist item `done`. The plan's success
+criteria are met, so no experiment ran and no deliverable, plot or result file was touched —
+REPORT.md (4999 words, 3 figures, md5 4d9f89410ff47f9179f0a0d1546ce70e) / RESULTS.md
+(md5 c32a6d3b1d735c671419d8089546b178), byte-identical to hold iterations #13–#28.
+`python3 ../check_render.py REPORT.md RESULTS.md` again aborted with HTTP 403 (GitHub markdown API
+rate limit) before any document check ran; the files are unchanged from the last full passing run,
+so this is the same transient limit, not an open verification. This entry is the only file edited.
