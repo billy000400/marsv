@@ -1231,3 +1231,67 @@ unchanged from `checkpoints_analysis.py` so the numbers are comparable with the 
 one framing correction and one narrowed claim, and both deliverables are curated to current-best with
 Figure 31 embedded and `check_render.py` passing (31 embeds, 31 captions, 0 problems). No STOP written:
 the GPT-2 edge-drift-versus-width probe is still open, well specified, and costs no forward passes.
+
+## 2026-08-12 — iteration 17: what the free lookup actually ranks
+
+**What I set out to do.** No unaddressed feedback, so ordinary plan work: the one candidate left on the
+iteration-16 next-step list — inside GPT-2, fit the same ridge probe to a token's edge drift E and to
+its plateau-filtered width, on the same tokens and splits, to find out which curve property its
+embedding holds. Zero forward passes; both targets were already stored.
+
+**Two design choices that changed what the experiment could conclude.** First, fitting the two targets
+separately is not enough to separate them. E and w rank the tokens at +0.537 in GPT-2 and +0.809 in
+Pythia-1.4B, so a probe fitted to either scores on the other and "which probe is higher" mostly reflects
+which target is measured more reliably. I added the two rank-residual targets — width with the shape
+ranking regressed out, and shape with the width ranking regressed out — which is what actually answers
+the question. Second, I ran the whole thing in Pythia-1.4B as well, which was not in the plan's next
+step. The reason is that GPT-2's probe is weak everywhere, so a GPT-2-only answer would have been a
+comparison of two small numbers; Pythia-1.4B is where the lookup works, so it is where the question has
+consequences. That turned out to be where the result is.
+
+**What it found, and it landed on the model I was not asked about.** In Pythia-1.4B the embedding ranks
+curve shape, not crossing width. Shape probe +0.783 against width +0.658 (47 of 50 shared splits,
+p = 3.4e−14); remove shape from width and the probe falls to +0.072, permutation p = 0.255, the only
+probe in the set that is not above chance; remove width from shape and it holds at +0.243. The reason
+this is not "residualising removed the signal along with the noise" is the reliability row: the width
+residual has split-half reliability 0.397 with a bootstrap interval of [0.098, 0.591], so tokens really
+do differ in how narrow their crossing is relative to their curve shape — the embedding simply does not
+carry it. GPT-2 is the mixed case: both residuals stay above chance (+0.280 and +0.335), so its weak
+lookup is not merely a shape lookup, it is genuinely weak.
+
+**What I did NOT let this become.** It is tempting to write "the report's headline result was really
+about shape all along". The practical claims are untouched — the lookup still ranks measured widths at
++0.76 and still predicts 718 unseen pairs at R² = 0.213 — because a screen only needs its prediction to
+track the measured width. What changes is the interpretation and one piece of practical advice: among
+tokens with similar curve shape the lookup carries nothing, and no better readout of the embedding will
+recover it. I qualified the Summary, the Conclusion and the RESULTS.md Headline rather than rewriting
+the story around the negative.
+
+**A number I had to handle carefully.** GPT-2's shape target has split-half reliability 0.099 with a
+bootstrap interval of [−0.317, +0.374], and its shape residual comes out at −0.155. Disattenuating by
+sqrt(R) there would have produced a headline "0.685 of ceiling" out of a ceiling that is not
+distinguishable from zero, so I added the bootstrap interval to every reliability and quote no fraction
+of ceiling where the interval covers zero. The negative estimate is itself informative in the other
+direction: the probe predicts that target above chance on held-out tokens, so the target cannot be
+noise, and the half-based estimator must be biased downwards for residual targets (each half's residual
+is built from two noisy half-medians). Reporting the raw ρ and no ceiling is the honest form.
+
+**Assumptions logged.** (a) The residual is linear in ranks, which matches the Spearman evaluation but
+would miss a nonlinear dependence between shape and width. (b) E and w are computed from the same
+curves and w's curve set is selected by E ≤ 0.1, so their noise is shared and the residual probes are
+conservative; this cannot explain the asymmetry between the two models or between the two residual
+directions, and both couplings are stated in the deliverables. (c) The permutation null uses 50 draws,
+so p bottoms out at 0.020 and cannot rank probes — every probe-versus-probe comparison in the section is
+the paired Wilcoxon over the 50 shared splits. (d) Pythia's embedding matrix is read from the fp16
+checkpoint and upcast, identical to the values an fp32 load produces.
+
+**What I learned, beyond this direction.** When two measured quantities rank the same items at +0.8,
+"which one does my model predict better" is nearly meaningless — the reliabilities decide it. The
+residualised pair of probes costs one extra line of code and turns a comparison of two similar numbers
+into a test with a possible negative, and here the negative is the finding.
+
+**On track?** Yes. The named experiment ran, extended to the model where it mattered, produced a
+qualification of the report's cheapest claim with a matched control and a stated limitation, and both
+deliverables are curated to current-best with Figure 32 embedded and check_render.py passing (32 embeds,
+32 captions, 0 problems). No STOP written: the next experiment is named and is a real one — score the
+token-to-token transplant on edge drift as well as width.

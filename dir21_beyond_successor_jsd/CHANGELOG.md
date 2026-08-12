@@ -1051,3 +1051,53 @@ two checkpoints' m_u geometries are too different for any further cross-checkpoi
 **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
 (REPORT 40 display eqs / 1188 inline eqs / 31 embeds / 0 problems; RESULTS 1 display eq / 841 inline eqs
 / 31 embeds / 0 problems). Embed/caption counts match at 31 each; no bare `(plots/*.png)` references.
+
+## 2026-08-12 — iteration 17: what the embedding lookup ranks (Figure 32, patterns 41–42)
+
+**What was added.** `experiments/gpt2_shape_probe.py` and `experiments/plot_gpt2_shape.py`, writing
+`results/gpt2_shape.json`, `results/gpt2_shape.log` and `plots/gpt2_shape.png` (Figure 32). Zero forward
+passes: stored curves plus the two models' embedding matrices on CPU. This is the experiment both
+deliverables named as next at iteration 16 — fit the same ridge probe to a token's edge drift E and to
+its plateau-filtered width, on the same tokens and the same 50 splits — extended with the two residual
+targets that actually separate the properties, and run in Pythia-1.4B as well as GPT-2.
+
+**New in REPORT.md.** Methods subsection "Shape or width? Separating the two curve properties a probe
+could be fitting" (targets E_u and w_u, the rank residuals, reliability of a residual target computed
+inside each half, 2,000-token bootstrap intervals on every reliability, shared splits, 50-permutation
+null with its p floor of 0.020). Results subsection "What does the embedding lookup actually rank — the
+crossing, or the flat start?" with Figure 32, two tables and patterns 41–42.
+
+**New in RESULTS.md.** Subsection "Shape or width: what the free lookup actually ranks" with Figure 32,
+the target definitions, one combined table and the two findings.
+
+**Numbers (all new).** Pythia-1.4B: shape probe +0.783 ± 0.046 (R = 0.859 [0.798, 0.901], 0.84 of
+ceiling) vs width probe +0.658 ± 0.067 (R = 0.734 [0.598, 0.834], 0.77); paired +0.125, 47/50 splits,
+p = 3.4e−14. Width with shape removed +0.072 ± 0.125, permutation p = 0.255 — not above chance — against
+a reliably measured residual (R = 0.397 [0.098, 0.591]); shape with width removed +0.243 ± 0.102
+(0.33 of ceiling, p = 0.020); the two residual probes differ by +0.171, 45/50 splits, p = 2.6e−11.
+GPT-2: shape +0.216 ± 0.125 (R = 0.099 [−0.317, 0.374] — no ceiling quoted), width +0.244 ± 0.122
+(0.30 of ceiling), width|shape +0.280 ± 0.107 (0.38 of ceiling, R = 0.543), shape|width +0.335 ± 0.106
+(R = −0.155, no ceiling defined); all four permutation p = 0.020; shape − width paired −0.028, p = 0.40;
+shape|width − width|shape +0.055, 31/50, p = 0.011. Targets rank the 123 tokens at ρ = +0.809
+(Pythia-1.4B) and +0.537 (GPT-2) — lower than pattern 35's +0.967 and +0.770 because those use the
+all-curve width, and both values are now stated side by side so the two tables cannot be read as
+contradicting each other.
+
+**Interpretation qualified, not retracted (old → new).** "The per-token number is largely readable from
+the static embedding" (patterns 10, 38) → the practical claims are untouched (the lookup still ranks
+measured widths at +0.76 and still predicts 718 unseen pairs at R² = 0.213), but what the probe reads is
+now stated as curve *shape*: in Pythia-1.4B the width ordering is predicted only through its overlap
+with shape, and the width-specific residual — a reliably measured quantity — is at chance. The
+qualifier was added to the REPORT.md Summary, the REPORT.md Conclusion and the RESULTS.md Headline so no
+part of either deliverable still describes the lookup as reading crossing width directly.
+
+**Recommended next experiment replaced (old → new).** "Inside GPT-2, fit the same probe to edge drift E
+and to the plateau-filtered width separately" (done, above) → "**repeat the within-model token-to-token
+transplant of m_u and score the recipient's edge drift alongside its width**", because the two
+transplant results (patterns 23, 39) were both scored on width alone and the property the embedding
+carries one block earlier is shape.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 42 display eqs / 1300 inline eqs / 32 embeds / 0 problems; RESULTS 3 display eqs / 913 inline
+eqs / 32 embeds / 0 problems). Embed/caption counts match at 32 each; no bare `(plots/*.png)`
+references.

@@ -46,7 +46,34 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 16 — COMPLETE; the last causal test inside Pythia is done)
+## Current status (2026-08-12, iteration 17 — COMPLETE; the free lookup ranks curve shape)
+
+**Iteration 17 ran the experiment both deliverables named as next** (`experiments/gpt2_shape_probe.py`,
+`plot_gpt2_shape.py`; Figure 32; deliverables now carry 32 figures each and pass `check_render.py`).
+Zero forward passes: stored curves plus the GPT-2 and Pythia-1.4B embedding matrices on CPU. Four
+probes per model on identical features and identical 50 splits — edge drift $E_u$, plateau-filtered
+width $w_u$, and each with the other's rank regressed out.
+
+* **The separation needed the residual targets.** $E$ and $w$ rank the 123 tokens at $+0.809$
+  (Pythia-1.4B) and $+0.537$ (GPT-2), so fitting each target alone cannot say which the embedding
+  holds. Pythia-1.4B was added to the plan's GPT-2-only step because that is where the lookup works.
+* **Inside Pythia-1.4B the lookup ranks shape.** Shape probe $+0.783$ vs width $+0.658$ (47/50 splits,
+  $p = 3.4 \times 10^{-14}$). Width with shape removed falls to $+0.072$, permutation $p = 0.255$ — the
+  only probe here not above chance — while the width residual is reliably measured ($R = 0.397$,
+  $[0.098, 0.591]$). Shape with width removed holds at $+0.243$ (0.33 of ceiling).
+* **GPT-2 is the mixed case.** Both residuals stay above chance ($+0.280$ at 0.38 of ceiling, and
+  $+0.335$), so its weak lookup is not merely a shape lookup — it is weak. Its shape target is barely
+  reliable ($R = 0.099$, $[-0.317, +0.374]$), so no fraction of ceiling is quoted for it.
+* **Practical claims untouched, interpretation qualified.** The lookup still ranks measured widths at
+  $+0.76$ and predicts 718 unseen pairs at $R^2 = 0.213$; what changed is that it cannot separate tokens
+  with similar curve shape. Summary, Conclusion and Headline now say this.
+
+**Next step (only if reopened):** score the transplant on shape. Repeat the within-model token-to-token
+transplant of $m_u$ unchanged and record the recipient's edge drift alongside its width — both
+transplant results (patterns 23, 39) were scored on width alone, and the property the embedding carries
+one block earlier is shape. One Pythia-1.4B sweep of the 123 tokens plus one extra statistic per curve.
+
+## Previous status (2026-08-12, iteration 16 — COMPLETE; the last causal test inside Pythia is done)
 
 **Iteration 16 ran candidate (a) named below** (`experiments/ckpt_transplant.py`,
 `ckpt_transplant_analysis.py`, `ckpt_transplant_geom.py`, `plot_ckpt_transplant.py`; Figure 31;

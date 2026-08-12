@@ -52,7 +52,10 @@ a shuffled-target control ($\rho = -0.20$). Used forward, with the probe fitted 
 running the model at all. That is weaker than measuring the widths (0.397), because ridge shrinkage
 compresses the predicted range, but it makes the screen a table over the vocabulary rather than a
 per-token experiment, and it still ranks unseen pairs about as well as the model's own endpoint output
-difference, which needs both endpoints of every pair to be run.
+difference, which needs both endpoints of every pair to be run. What the probe reads is narrower than
+"the width", though: it ranks how plateau-shaped a token's curves are, and the width follows because in
+this model the two orderings nearly coincide. Removing the shape ranking from the width ranking leaves a
+reliably measured quantity the probe cannot predict at all (pattern 41).
 
 **The ranking is a token property; the level belongs to the context.** Re-measuring the same 123
 tokens in four differently shaped contexts — a mid-sentence continuation, an interrogative, a
@@ -1125,6 +1128,65 @@ no plateau, discarding those curves should raise the agreement; if the model sim
 differently, discarding them should raise the reliability and leave the agreement where it was.
 Filtering curves rather than tokens keeps all 123 tokens in the correlation, so the comparison is not
 confounded by a narrower range of widths. Figure 29 reports both uses.
+
+### Shape or width? Separating the two curve properties a probe could be fitting
+
+The embedding probe inside GPT-2 (Figure 30) reaches only a third of the accuracy its target's
+measurement noise allows. Two different situations produce that number and they are different claims
+about the model. The embedding may hold the same trait it holds inside Pythia — the crossing width —
+only faintly; or it may hold a *different* property of the curve, namely how plateau-shaped the curve
+is, with the width probe working only to the extent that shape and width happen to be correlated. Edge
+drift $E$ already measures shape on every stored curve, so the two readings can be told apart without a
+forward pass. This matters for the report's practical recommendation: a lookup that ranks tokens by
+curve shape is not the screen an auditor wants, because the screen's purpose is to say which token pairs
+have a narrow crossing.
+
+Each token $u$ gets two targets from its $c = 1, \dots, 18$ curves (6 anchors $\times$ 3 frames), the
+shape target $E_u$ and the width target $w_u$ that Figure 30 already used:
+
+```math
+E_u \;=\; \mathrm{median}_{c} \; E_{u,c},
+\qquad
+w_u \;=\; \mathrm{median}_{c \,:\, E_{u,c} \le 0.1} \; \hat w^{\mathrm{env}}_{u,c}.
+```
+
+$E_u$ is low for a token whose curves sit still near both endpoints and high for a token whose curves
+start moving immediately; $w_u$ is the fraction of the path its plateau-shaped curves spend crossing.
+Both are medians over the same measurements, so neither is favoured by having more data behind it.
+
+The two are correlated across tokens, so fitting one and scoring it says little on its own. To ask what
+the embedding holds *specifically*, we build two further targets in which one property is removed from
+the other. Writing $r^{w}$ and $r^{E}$ for the across-token ranks of $w_u$ and $E_u$, the width residual
+is the part of a token's width ranking that its shape ranking does not explain,
+
+```math
+\tilde w_u \;=\; r^{w}_u \;-\; \hat a \;-\; \hat b \; r^{E}_u ,
+```
+
+with $\hat a, \hat b$ the least-squares fit of $r^{w}$ on $r^{E}$ and the result standardised to unit
+variance; the shape residual $\tilde E_u$ swaps the roles. Ranks are used because every accuracy in this
+section is a Spearman correlation. Reading the four probes together answers the question: if the
+embedding holds shape and nothing else, the shape residual stays predictable and the width residual
+collapses to chance.
+
+Each target is scored against the ceiling its own measurement noise allows, $\sqrt{R}$, where $R$ is the
+split-half reliability over the six anchors with the Spearman-Brown correction defined in the
+cross-model protocol above. For the two residual targets the residual is formed *inside* each half
+separately, so that $R$ describes the residual rather than the quantities it was built from. Because a
+"fraction of ceiling" divides by $\sqrt{R}$ and becomes unstable when $R$ is small, every reliability is
+reported with a 95% percentile interval from 2,000 bootstrap resamples of the 123 tokens, and no
+fraction of ceiling is quoted where the interval covers zero.
+
+The probe itself is unchanged from the embedding probe above: ridge regression from the token's static
+embedding row (768 dimensions in GPT-2, 2,048 in Pythia-1.4B) to the target, 80 training tokens and 43
+held-out, ridge strength chosen by 5-fold cross-validation inside the training tokens only, repeated
+over 50 random splits. **All four targets use the same 50 splits**, so two probes can be compared split
+by split with a Wilcoxon signed-rank test on the 50 paired differences, which is the comparison this
+section relies on. Chance is 50 independent permutations of the target evaluated through the identical
+protocol; the permutation $p$-value is the number of those draws that reach the probe's accuracy, plus
+one, divided by 51. Its smallest attainable value is therefore 0.020, so these $p$-values say whether a
+probe is above chance and cannot rank probes against each other. Pythia-1.4B runs the identical four probes as the contrast case — the model
+where the width probe already reaches its ceiling. Figure 32 reports all eight.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -2258,7 +2320,9 @@ statistics also transfer between models to the same degree (410M–1.4B: $+0.887
 $+0.884$ for $\hat w^{\mathrm{env}}$). So the per-token trait this report screens for can equally be
 described as *how long the output stays put near the endpoints* rather than as the width of the
 crossing in the middle. That is a restatement of the same measurement, not a second finding — but it
-means a reader should not picture two independent curve properties where there is essentially one.
+means a reader should not picture two independent curve properties where there is essentially one. The
+two descriptions do separate once something has to predict them, and patterns 41 and 42 below show that
+the static embedding holds the shape description and not the width one.
 
 **What this costs the report.** The width ordering is a property of a token *as trained in a particular
 corpus*, not of the token string: GPT-2 orders the same 123 strings reproducibly (reliability 0.66 on
@@ -2448,6 +2512,112 @@ trait travels in $m_u$ *as read by a particular network* — a vector plus the w
 rather than in a vector that means the same thing throughout training, rests on patterns 39 and 40
 together: the transfer is real and small, and the geometry says why it could not have been large.
 
+### What does the embedding lookup actually rank — the crossing, or the flat start?
+
+The free lookup is the cheapest thing this report offers an auditor: inside Pythia-1.4B a ridge probe
+on a token's static embedding row ranks its measured width at $\rho = +0.76$ with no forward pass
+(pattern 10), and inside GPT-2 the same probe manages a weak version of it (pattern 38). Both
+statements assume the probe is fitting the property the screen cares about — how *narrowly* the model
+crosses between two tokens. A curve has a second property the same measurements already record: how
+plateau-shaped it is, scored by the edge drift $E$. These two orderings largely coincide, at
+$\rho = +0.537$ in GPT-2 and $\rho = +0.809$ in Pythia-1.4B over the 123 tokens (pattern 35's table
+gives higher values, $+0.770$ and $+0.967$, because it uses the width taken over all curves; here both
+targets are the ones the probes were actually fitted to, and the width is taken only over the
+plateau-shaped curves). With the two orderings that close, a probe fitted to one of them will score on
+the other, so the earlier results cannot say which property the embedding holds. To find out, Figure 32
+fits four probes per model on identical features and identical splits: shape alone, width alone, and
+each with the other's ranking removed.
+
+![Four probes per model shown as dots with error bars against their noise ceilings and null bands, GPT-2 on the left and Pythia-1.4B on the right](plots/gpt2_shape.png)
+
+**Figure 32.** x: mean held-out Spearman $\rho$ between predicted and measured target over the 50
+train/test splits, error bars $\pm 1$ standard deviation across those splits. y: the four targets, top
+to bottom — the token's median edge drift $E_u$ (shape), its plateau-filtered width $w_u$, the width
+with the shape ranking regressed out, and the shape with the width ranking regressed out. Circles are
+the probes, hatched gray bars the 50-permutation null (mean $\pm 1$ sd), and the triangle on each row is
+the ceiling $\sqrt{R}$ set by that target's own split-half reliability $R$; the bottom-left row has no
+triangle because its reliability estimate is negative, so no ceiling is defined. Left: GPT-2 small
+(124M), block 0, 768 embedding dimensions. Right: Pythia-1.4B, block 0, 2,048 dimensions. Each panel
+title gives the rank correlation between that model's two targets.
+
+**Pattern 41 — inside Pythia-1.4B the lookup ranks curve shape, and the width-specific part of the
+ordering is not in the embedding at all.** The table reads the right-hand panel of Figure 32.
+
+| Pythia-1.4B, block 0 | shape $E_u$ | width $w_u$ | width, shape removed | shape, width removed |
+|---|---|---|---|---|
+| target reliability $R$ | 0.859 | 0.734 | 0.397 | 0.546 |
+| 95% interval for $R$ | [0.798, 0.901] | [0.598, 0.834] | [0.098, 0.591] | [0.310, 0.698] |
+| ceiling $\sqrt{R}$ | 0.927 | 0.857 | 0.630 | 0.739 |
+| held-out $\rho$ | $+0.783 \pm 0.046$ | $+0.658 \pm 0.067$ | $+0.072 \pm 0.125$ | $+0.243 \pm 0.102$ |
+| $\rho$ ÷ ceiling | $+0.84$ | $+0.77$ | $+0.11$ | $+0.33$ |
+| held-out $R^2$ | $+0.543$ | $+0.375$ | $-0.096$ | $+0.043$ |
+| permutation $p$ | 0.020 | 0.020 | 0.255 | 0.020 |
+
+The shape probe is the better of the two unresidualised probes — $+0.783$ against $+0.658$, ahead in 47
+of the 50 shared splits, paired Wilcoxon $p = 3.4 \times 10^{-14}$ — and it is the residual probes that
+settle the question. Remove the shape ranking from the width ranking and the probe falls to $+0.072$,
+inside the null band and the only probe in this section that is not above chance ($p = 0.255$). Remove
+the width ranking from the shape ranking and the probe holds at $+0.243$, a third of its ceiling and
+above chance, beating the other residual by $+0.171$ in 45 of 50 splits ($p = 2.6 \times 10^{-11}$).
+
+The reason this is not an artifact of residualising away everything is the reliability row. The width
+residual is a real, reproducible measurement — split-half reliability 0.397 with a 95% interval of
+[0.098, 0.591], meaning tokens genuinely differ in how wide their crossing is relative to what their
+curve shape predicts, and that difference survives changing which anchors it is measured against. The
+embedding simply does not know about it. What a token's embedding row carries into block 0 is how flat
+its transitions start out; the width ranking comes along because in this model the two orderings nearly
+coincide.
+
+This qualifies pattern 10's interpretation without touching its practical claim. The lookup still ranks
+measured widths at $+0.76$ and still predicts the widths of 718 pairs it never saw (patterns 10 and 12),
+because for a screen what matters is that the prediction tracks the measured width. What changes is what
+an auditor should expect it to resolve: among tokens whose curves have similar shape, the lookup carries
+no information about which crossing is narrower, and any attempt to improve it by finding a better
+readout of the embedding is aimed at information the embedding does not contain.
+
+**Pattern 42 — GPT-2's weak lookup is not merely a shape lookup; both components survive there.** The
+same table for the left-hand panel of Figure 32.
+
+| GPT-2 (124M), block 0 | shape $E_u$ | width $w_u$ | width, shape removed | shape, width removed |
+|---|---|---|---|---|
+| target reliability $R$ | 0.099 | 0.661 | 0.543 | $-0.155$ |
+| 95% interval for $R$ | [$-0.317$, 0.374] | [0.501, 0.777] | [0.343, 0.698] | [$-0.719$, 0.174] |
+| ceiling $\sqrt{R}$ | 0.315 | 0.813 | 0.737 | not defined |
+| held-out $\rho$ | $+0.216 \pm 0.125$ | $+0.244 \pm 0.122$ | $+0.280 \pm 0.107$ | $+0.335 \pm 0.106$ |
+| $\rho$ ÷ ceiling | not quoted | $+0.30$ | $+0.38$ | not defined |
+| held-out $R^2$ | $-0.035$ | $-0.021$ | $-0.016$ | $+0.042$ |
+| permutation $p$ | 0.020 | 0.020 | 0.020 | 0.020 |
+
+All four GPT-2 probes are above chance, and the two unresidualised ones are indistinguishable from each
+other ($-0.028 \pm 0.173$ paired over the 50 shared splits, shape ahead in 26 of 50, $p = 0.40$). Both
+residuals survive: the width with shape removed reaches $+0.280$, 0.38 of the ceiling its own
+reliability allows and slightly above the unresidualised width probe, and the shape with width removed
+reaches $+0.335$. The shape residual is the better of the two by $+0.055$ (ahead in 31 of 50 splits,
+$p = 0.011$), a margin small enough that the honest summary is that GPT-2's embedding holds a little of
+each. The practical consequence is the useful one: GPT-2's shortfall as a lookup (pattern 38) is not
+explained away as "it is really ranking shape" — there is genuine width-specific signal in its embedding
+— it is simply weak, 0.38 of what its target's reliability allows against 0.77 for Pythia's
+unresidualised width.
+
+Two of GPT-2's reliability figures are worth stating on their own. Its shape target reproduces across
+anchor halves at only $R = 0.099$, with an interval of [$-0.317$, 0.374] that covers zero, so no
+fraction of ceiling is quoted for it: in GPT-2, how plateau-shaped a curve is depends more on which
+anchor it is measured against than on the token, where in Pythia-1.4B it is a stable token property
+($R = 0.859$, interval [0.798, 0.901]). And GPT-2's shape residual returns a *negative* reliability
+estimate. Since the probe nevertheless predicts that target above chance on tokens it never saw, the
+target cannot be pure noise; the split-half estimate is biased downwards for residual targets, because
+each half's residual is formed from two noisy half-medians. We therefore quote the raw $\rho$ there and
+no ceiling.
+
+Three limits belong with both patterns. $E$ and $w$ are computed from the same curves, so their
+measurement noise is shared and removing one ranking from the other also removes part of that shared
+noise — this makes the residual probes conservative, and it cannot explain why the shape residual
+survives in both models while the width residual survives in only one. The width target is defined
+using $E$ (only curves with $E \le 0.1$ enter it), so the two quantities are coupled by construction as
+well as by the model. And this is two models at one site each, 123 tokens; the pattern that shape is the
+more embedding-readable of the two properties has been checked twice, the claim that width-specific
+signal is entirely absent has been checked once, in Pythia-1.4B.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -2576,13 +2746,26 @@ arrangement agreement $+0.03$). The mechanism is a vector plus the weights that 
 the causal line of attack inside Pythia: with the coordinate systems this different, no cross-checkpoint
 edit will do better, and every within-model intervention has been run.
 
-**The single most informative next experiment is now in GPT-2.** Pattern 38 localised its shortfall to
-*which* widths the embedding predicts — the all-curve target beats the plateau-filtered one, so what
-GPT-2's embedding holds is concentrated in the curves the filter discards. The next step is to fit the
-same probe, on the same tokens and the same 50 splits, to two targets separately: a token's edge drift
-$E$ and its plateau-filtered width. If the edge-drift probe is the stronger of the two, GPT-2's
-embedding holds curve *shape*, and the report's screen would need a shape check before a width lookup is
-attempted in a new model. It costs no forward passes: both targets are already stored.
+Patterns 41 and 42 then ran that test and changed what the lookup is understood to be reading. Fitting
+the same probe to a token's edge drift and to its plateau-filtered width, on identical features and
+identical splits, shows that inside Pythia-1.4B the embedding ranks curve *shape*: the shape probe beats
+the width probe ($+0.783$ against $+0.658$, 47 of 50 splits), and once shape is removed the width
+residual falls to chance ($+0.072$, $p = 0.255$) even though that residual is a reliably measured
+quantity ($R = 0.397$, interval [0.098, 0.591]). The reverse residual survives at $+0.243$. GPT-2 is the
+mixed case — both residuals stay above chance there — so its weak lookup is not merely a shape lookup.
+
+**The single most informative next experiment now returns to the transplant.** The two strongest causal
+results in this report, the token-to-token transplant of $m_u$ (pattern 23) and the checkpoint
+transplant (pattern 39), were both scored on width alone. Patterns 41 and 42 say that the property the
+static embedding actually carries is curve shape, and $m_u$ is computed from that embedding row one
+block later. The test is to repeat the within-model token-to-token transplant, unchanged, and score the
+recipient's edge drift alongside its width: does writing the donor's $m_u$ move the recipient's curve
+*shape* to the donor's as completely as it moves its width? If it does, shape is the trait this report
+has been tracking all along and width is its consequence, which would explain why every readout of $m_u$
+failed while exact substitution succeeded. If width transfers and shape does not, then $m_u$ carries
+something the embedding does not, and the two halves of the mechanism come apart at block 0. The
+experiment reuses the transplant code with one extra statistic per curve; it needs one Pythia-1.4B sweep
+of the 123 tokens, roughly the cost of pattern 23's original run.
 
 ---
 
@@ -2616,7 +2799,10 @@ the pool's own range. Nor is it confined to the context it was built in: measure
 continuation, an interrogative, a colon-list and a code prefix, the token ranking holds at $\rho$ from
 $+0.84$ down to $+0.50$, against $+0.82$ for two frames of the original shape. The level of `w` is a
 different matter — its median moves from 0.53 to 0.71 across those contexts — so the ordering travels
-and the calibration does not.
+and the calibration does not. What the table encodes is best described as curve shape rather than
+crossing width: the same probe predicts a token's edge drift better than its width, and predicts nothing
+of the width once shape is removed, so the free tier ranks tokens by how flat their transitions start
+and inherits the width ordering from the two being nearly the same in this model.
 
 Three things qualify this. The measurement is anchor-dependent: two disjoint anchor sets rank the
 tokens at $\rho = 0.46$ while each still recovers the fitted effect at $\rho \approx 0.6$, so the trait

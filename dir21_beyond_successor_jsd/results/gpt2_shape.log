@@ -1,0 +1,18 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 4565.40it/s]
+[gpt2] shape and width rank the 123 tokens at rho +0.537
+[gpt2] shape             rho +0.216 +- 0.125; reliability +0.099 [-0.317, +0.374] (ceiling 0.315) -> +0.685 of ceiling; null -0.001 +- 0.104, permutation p 0.020
+[gpt2] width             rho +0.244 +- 0.122; reliability +0.661 [+0.501, +0.777] (ceiling 0.813) -> +0.300 of ceiling; null +0.006 +- 0.108, permutation p 0.020
+[gpt2] width_given_shape rho +0.280 +- 0.107; reliability +0.543 [+0.343, +0.698] (ceiling 0.737) -> +0.380 of ceiling; null +0.001 +- 0.109, permutation p 0.020
+[gpt2] shape_given_width rho +0.335 +- 0.106; reliability -0.155 [-0.719, +0.174] (ceiling 0.000) -> undefined of ceiling; null -0.003 +- 0.096, permutation p 0.020
+[gpt2] paired shape - width: -0.028 +- 0.173, shape higher in 52% of 50 shared splits (Wilcoxon p 0.404)
+[gpt2] paired shape_given_width - width_given_shape: +0.055 +- 0.145, shape_given_width higher in 62% of 50 shared splits (Wilcoxon p 0.0106)
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  21%|██        | 62/292 [00:00<00:00, 539.68it/s]Loading weights:  54%|█████▍    | 158/292 [00:00<00:00, 750.26it/s]Loading weights:  80%|████████  | 234/292 [00:00<00:00, 695.30it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 732.54it/s]
+[pythia_1.4b] shape and width rank the 123 tokens at rho +0.809
+[pythia_1.4b] shape             rho +0.783 +- 0.046; reliability +0.859 [+0.798, +0.901] (ceiling 0.927) -> +0.844 of ceiling; null -0.029 +- 0.095, permutation p 0.020
+[pythia_1.4b] width             rho +0.658 +- 0.067; reliability +0.734 [+0.598, +0.834] (ceiling 0.857) -> +0.767 of ceiling; null +0.004 +- 0.095, permutation p 0.020
+[pythia_1.4b] width_given_shape rho +0.072 +- 0.125; reliability +0.397 [+0.098, +0.591] (ceiling 0.630) -> +0.115 of ceiling; null +0.011 +- 0.093, permutation p 0.255
+[pythia_1.4b] shape_given_width rho +0.243 +- 0.102; reliability +0.546 [+0.310, +0.698] (ceiling 0.739) -> +0.329 of ceiling; null -0.015 +- 0.085, permutation p 0.020
+[pythia_1.4b] paired shape - width: +0.125 +- 0.071, shape higher in 94% of 50 shared splits (Wilcoxon p 3.38e-14)
+[pythia_1.4b] paired shape_given_width - width_given_shape: +0.171 +- 0.137, shape_given_width higher in 90% of 50 shared splits (Wilcoxon p 2.63e-11)
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/gpt2_shape.json
