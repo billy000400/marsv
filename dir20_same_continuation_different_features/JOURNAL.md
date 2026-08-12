@@ -1208,3 +1208,15 @@ figures, RESULTS.md 6. `python3 ../check_render.py REPORT.md RESULTS.md` again a
 (GitHub markdown API rate limit) before any document check ran; the limit has still not reset. The
 files are byte-identical to the copies that passed the full check, so this remains a transient API
 limit rather than an outstanding verification. This entry is the only file edited.
+
+## 2026-08-12 (hold iteration #17: still waiting on the wrapper's content review)
+
+No change. `human_feedback_1.txt` is still present and unrenamed, so no `STOP` is written (CLAUDE.md
+rule 11); the manifest stays `review_pending` with its single checklist item `done`. Plan success
+criteria are met, so no experiment was run and no deliverable, plot or result file was touched.
+Re-verified only: REPORT.md and RESULTS.md still carry mtimes 18:48 / 18:49 — the copies that passed
+`check_render.py` in hold iterations #13–#14 — with `wc -w REPORT.md` = 4999 words, 3 embedded
+figures in REPORT.md and 6 in RESULTS.md. `python3 ../check_render.py REPORT.md RESULTS.md` again
+aborted on HTTP 403 (GitHub markdown API rate limit) before any document check ran. The files are
+byte-identical to the copies that passed the full check, so this remains a transient API limit, not
+an outstanding verification. This entry is the only file edited.
