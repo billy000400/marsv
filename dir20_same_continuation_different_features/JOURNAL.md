@@ -990,3 +990,39 @@ both running one and stating the requirement; running it satisfies the stronger 
 weaker reading is preserved because the reports say plainly which claims are confirmed and which are
 not. Rejected alternative: relabel only, and defer the replication to a future iteration — rejected
 because the deliverables would then carry an unconfirmed headline for an unbounded time.
+
+## 2026-08-12 (report length: REPORT.md cut to the 5,000-word limit)
+
+**What triggered it.** With the feedback task at `review_pending` and its checklist complete, the
+remaining defect in the deliverables was mechanical: REPORT.md was 7261 words against the 5,000-word
+limit in `WRITING.md` rule 11, restated in PLAN.md's report policy ("Maximum report words: 5000",
+"Maximum main figures: 8"). Word count is a hard rule, so this iteration was spent on it alone. No
+experiment was run and no number changed.
+
+**What I cut, and the principle.** WRITING.md rules 12–13 say the report carries the shortest
+evidence chain that answers its question, and that robustness checks, failed or secondary analyses,
+and implementation detail belong in RESULTS.md. The report's chain is: matched contrasts → the
+amended $\Delta w$ → the pre-registered replication → the causal intervention. Everything outside
+that chain went to RESULTS.md, which already contained all of it: the S1 harness check and its
+figure, the balance-scatter figure, the robustness table, and the counterexample curves. The
+secondary width $w_{10\text{-}90}$ left the report entirely, so RESULTS.md now defines it (and the
+non-monotonicity score) in S1 rather than relying on the report's Methods.
+
+**What I deliberately did NOT cut**, because operator feedback #1 depends on it: the Summary's
+"Why 'amended'" paragraph, the two labelled findings bullets, the Scope paragraph's honesty note on
+what "independent" means, Methods > "Pre-registration, locking, and the amendment" and
+"The independent replication and its frozen protocol", the "(amended analysis)" section labels, the
+replication section with its gate table and forest figure, and all five Limitations items. Every
+equation required by rule 8 also stayed; the cuts came out of prose, three figures, and two tables.
+
+**Judgement call worth recording.** Dropping the S1 curve figure costs the report its only picture of
+a raw interpolation curve, which is a real loss for a newcomer. I kept the axes-and-outcome material
+in Methods (the $d(\alpha)$ and $w_{TV}$ definitions) and pointed at RESULTS.md S1, and chose this
+over dropping either the balance table or a limitation, because the word limit is a hard rule and S1
+is a harness-validation result rather than part of the report's evidence chain. Rejected alternative:
+keep all six figures and cut Methods rigor — rejected because rules 8 and 9 are equally hard rules.
+
+**State.** REPORT.md 4999 words, 3 figures, numbered 1–3 in reading order and each cited by number.
+Local render checks pass on both deliverables; the GitHub markdown-API placement check was
+rate-limited (HTTP 403) this iteration and could not be run, and no ` ```math ` fence was moved or
+nested by the edit.

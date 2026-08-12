@@ -775,3 +775,40 @@ require an independent replication before any confirmatory claim. Both addressed
 - **Checks.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → 0 problems (REPORT.md 11
   display / 279 inline eqs, 6 figures; RESULTS.md 0 / 189, 6 figures); every embed followed by a
   visible numbered caption; figures in reading order 1–6 in both files and each cited by number.
+
+## 2026-08-12 — REPORT.md brought within the 5,000-word report limit
+
+- **Why.** `WRITING.md` rule 11 and `PLAN.md`'s report policy (max 5000 words, max 8 main figures)
+  were both violated: REPORT.md stood at 7261 words with 6 figures. No result changed; this entry
+  records what moved out of the report and where it now lives.
+- **REPORT.md 7261 → 4999 words, 6 → 3 figures.** Content moved to (or already present in)
+  RESULTS.md rather than deleted:
+  - the S1 harness-check subsection and its curve figure (`plots/matthew_sanity.png`) → RESULTS.md
+    S1; the report keeps one sentence with the 24-fold $w_{TV}$ gap and the 13-fold JSD gap that
+    motivates the matched design;
+  - the balance scatter figure (`plots/matching_balance.png`) → RESULTS.md Figure 2; the report keeps
+    the balance table itself;
+  - the robustness table (subset and covariate-adjusted estimates) → RESULTS.md "Robustness to the
+    residual confound imbalance"; the report keeps the two-sentence summary and the adjusted
+    intercept $-0.085 \pm 0.013$;
+  - the counterexample curves (`plots/example_curves.png`) and the floor-effect discussion →
+    RESULTS.md "Supporting cases and counterexamples";
+  - the secondary width $w_{10\text{-}90}$ row and definition → RESULTS.md, which now defines
+    $w_{10\text{-}90}$ and the non-monotonicity score in its S1 section (they are no longer used in
+    the report).
+- **Figures renumbered in REPORT.md** to reading order 1–3: Figure 1 paired widths
+  (`plots/matched_widths.png`), Figure 2 replication forest (`plots/replication_forest.png`),
+  Figure 3 causal test (`plots/causal_linearization.png`). Every in-text citation was updated;
+  RESULTS.md numbering (Figures 1–6) is unchanged.
+- **Unchanged:** every number, the amended-analysis labelling, the pre-registration and amendment
+  account, the replication protocol and its gate, and all five Limitations items required by
+  operator feedback #1. Amended analysis still median $\Delta w = -0.0708$, CI
+  $[-0.0866, -0.0582]$, 82.2%; replication $-0.0641$, CI $[-0.0908, -0.0426]$, 78.8%, $n = 99$;
+  S4 still 0.144 → 0.471 against 0.167 control.
+- **Checks.** Local `check_render.py` checks pass for both files (REPORT.md 11 display / 195 inline
+  equations, 3 figures, 0 problems; RESULTS.md 0 / 196, 6 figures, 0 problems): every equation
+  compiles under GitHub's inline backslash-stripping, no denylisted macros, no un-embedded
+  `plots/*.png` path, every table has prose above it, contrast constructions within budget. The
+  GitHub markdown-API placement check could not run this iteration (HTTP 403, unauthenticated rate
+  limit shared across the concurrent directions); no ` ```math ` fence was moved or nested by this
+  edit, and all fences remain at column 0.

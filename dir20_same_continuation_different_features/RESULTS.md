@@ -69,6 +69,14 @@ the exact frozen protocol. The gate was fixed in advance: endpoint reconstructio
 and the plateau case must come out sharper than the smooth case. Both passed with three orders of
 magnitude of margin on the error.
 
+Two secondary diagnostics appear here and in S3 alongside the primary width $w_{TV}$ (defined in
+`REPORT.md`, Methods). $w_{10\text{-}90}$ is the classical first-crossing width — the gap in
+interpolation position $\alpha$ between the first time the relative distance $d(\alpha)$ crosses $0.1$
+and the first time it crosses $0.9$; it is undefined for curves that double back, which is why it is
+not the primary outcome. Non-monotonicity is the share of a curve's total movement that runs backwards,
+$\sum_{i: \Delta d_i < 0} \lvert \Delta d_i \rvert / \sum_i \lvert \Delta d_i \rvert$, where 0 means a
+perfectly monotone curve.
+
 | Pair | successor JSD | $w_{TV}$ | $w_{10\text{-}90}$ | non-monotonicity | endpoint error |
 |---|---|---|---|---|---|
 | `The house was` + ` big` / ` in` | 0.663 | **0.012** | 0.044 | 0.000 | $3.5\times10^{-7}$ |

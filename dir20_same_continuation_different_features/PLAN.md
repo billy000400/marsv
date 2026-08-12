@@ -569,21 +569,36 @@ If the agent finds itself inventing a new scalar metric to summarize "conceptual
 
 ## Current status
 
-Fresh restart from the earlier four hand-written examples.
-
-The previous F-based result may remain as historical work, but it is not the organizing principle of this direction.
+- **S1 harness check: PASSED** — the two originally reported prompt pairs reproduce, endpoint error
+  $3\times10^{-7}$, $w_{TV}$ 0.012 vs 0.292 (RESULTS.md S1).
+- **S2 locked matched bank (amended analysis): DONE** — 101 within-prefix contrasts from 1395
+  WikiText-103 test prefixes, hashed before any sweep. Labelled *amended* because the plan's 300-prefix
+  bank and its 40-contrast stopping rule were departed from (operator feedback #1).
+- **S3 matched test (amended analysis): SUPPORTED** — median $\Delta w = -0.0708$, 95% CI
+  $[-0.0866, -0.0582]$, 82.2% predicted sign, permutation $p < 10^{-4}$.
+- **S3R pre-registered independent replication: PASSED** — protocol frozen in JOURNAL.md before any
+  replication prefix was scored; WikiText-103 train split, 1400 prefixes, run once; 99 contrasts,
+  median $\Delta w = -0.0641$, 95% CI $[-0.0908, -0.0426]$, 78.8% predicted sign, $p < 10^{-4}$; all
+  four gate clauses met. This is the direction's confirmatory result.
+- **S4 causal intervention (amended bank only): SUPPORTED** — linearizing the differential neurons
+  moves median $w_{TV}$ 0.144 → 0.471 against 0.167 for a matched control, 202/202 pairs. No
+  pre-registered replication of its own.
+- **Deliverables:** REPORT.md (4999 words, 3 figures) and RESULTS.md are current-best and within the
+  report policy below. Feedback `human_feedback_1.txt` is complete in the manifest and awaiting the
+  wrapper's independent content review.
+- **Open discrepancy for the operator (not acted on):** the "Core research question" line in the
+  report policy below still names cross-model agreement with Pythia, while the accepted work — and
+  operator feedback #1 — concerns the GPT-2 Large matched-pair question the report answers. The
+  policy line is left exactly as written; changing a declared research question is not the agent's
+  call.
 
 ---
 
 ## Next step
 
-Implement S2 and S3 first:
-
-1. verify tokenization of the four seed examples in GPT-2 Large and Pythia;
-2. print their top-5 next-token predictions and 5-token greedy continuations;
-3. construct additional human-readable candidates;
-4. lock all candidates that genuinely have similar continuations;
-5. **only then** run interpolation and generate the normalized-distance plots.
+Nothing is outstanding on the plan itself. If the direction is reopened, the first extensions are:
+a pre-registered replication of the S4 causal experiment (it currently rests on the amended bank),
+and the same matched test at another patch depth or in a second model.
 
 ## Report policy
 
