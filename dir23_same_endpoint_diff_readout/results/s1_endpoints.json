@@ -1,0 +1,507 @@
+{
+  "model": "gpt2-large",
+  "prefix": "Country: France\n Capital: Paris\n Continent: Europe\n Currency: euro\n Language: French\n Type: country\n\nCountry:",
+  "token_checks": {
+    " Japan": {
+      "single_token": true,
+      "ids": [
+        2869
+      ]
+    },
+    " Germany": {
+      "single_token": true,
+      "ids": [
+        4486
+      ]
+    },
+    " Tokyo": {
+      "single_token": true,
+      "ids": [
+        11790
+      ]
+    },
+    " Asia": {
+      "single_token": true,
+      "ids": [
+        7229
+      ]
+    },
+    " yen": {
+      "single_token": true,
+      "ids": [
+        28808
+      ]
+    },
+    " Japanese": {
+      "single_token": true,
+      "ids": [
+        4960
+      ]
+    },
+    " country": {
+      "single_token": true,
+      "ids": [
+        1499
+      ]
+    },
+    " Berlin": {
+      "single_token": true,
+      "ids": [
+        11307
+      ]
+    },
+    " Europe": {
+      "single_token": true,
+      "ids": [
+        2031
+      ]
+    },
+    " euro": {
+      "single_token": true,
+      "ids": [
+        11063
+      ]
+    },
+    " German": {
+      "single_token": true,
+      "ids": [
+        2679
+      ]
+    }
+  },
+  "suffix_tokens": {
+    "Capital": {
+      "suffix": "\n Capital:",
+      "ids": [
+        198,
+        9747,
+        25
+      ],
+      "pieces": [
+        "\n",
+        " Capital",
+        ":"
+      ],
+      "n_tokens": 3
+    },
+    "Continent": {
+      "suffix": "\n Continent:",
+      "ids": [
+        198,
+        45778,
+        25
+      ],
+      "pieces": [
+        "\n",
+        " Continent",
+        ":"
+      ],
+      "n_tokens": 3
+    },
+    "Currency": {
+      "suffix": "\n Currency:",
+      "ids": [
+        198,
+        20113,
+        25
+      ],
+      "pieces": [
+        "\n",
+        " Currency",
+        ":"
+      ],
+      "n_tokens": 3
+    },
+    "Language": {
+      "suffix": "\n Language:",
+      "ids": [
+        198,
+        15417,
+        25
+      ],
+      "pieces": [
+        "\n",
+        " Language",
+        ":"
+      ],
+      "n_tokens": 3
+    },
+    "Type": {
+      "suffix": "\n Type:",
+      "ids": [
+        198,
+        5994,
+        25
+      ],
+      "pieces": [
+        "\n",
+        " Type",
+        ":"
+      ],
+      "n_tokens": 3
+    }
+  },
+  "newline_id": [
+    198
+  ],
+  "prefix_n_tokens": 27,
+  "immediate": {
+    "A": {
+      "endpoint": " Japan",
+      "top1": "\n",
+      "p_newline": 0.9289993643760681,
+      "top5": [
+        [
+          "\n",
+          0.9289993643760681
+        ],
+        [
+          " (",
+          0.009292376227676868
+        ],
+        [
+          " Currency",
+          0.005571957677602768
+        ],
+        [
+          "\n\n",
+          0.0043253349140286446
+        ],
+        [
+          "<|endoftext|>",
+          0.0037508464884012938
+        ]
+      ]
+    },
+    "B": {
+      "endpoint": " Germany",
+      "top1": "\n",
+      "p_newline": 0.9445473551750183,
+      "top5": [
+        [
+          "\n",
+          0.9445473551750183
+        ],
+        [
+          " (",
+          0.00809252355247736
+        ],
+        [
+          " Capital",
+          0.004776492714881897
+        ],
+        [
+          "\n\n",
+          0.003182370448485017
+        ],
+        [
+          "<|endoftext|>",
+          0.0028396963607519865
+        ]
+      ]
+    },
+    "jsd_bits": 0.0076120312526397615
+  },
+  "readouts": {
+    "Capital": {
+      "suffix": "\n Capital:",
+      "A": {
+        "top1": " Tokyo",
+        "p_expected": 0.9251996874809265,
+        "expected": " Tokyo",
+        "top5": [
+          [
+            " Tokyo",
+            0.9251996874809265
+          ],
+          [
+            " Osaka",
+            0.021282564848661423
+          ],
+          [
+            " Kyoto",
+            0.01994973234832287
+          ],
+          [
+            " N",
+            0.0034156341571360826
+          ],
+          [
+            " Kobe",
+            0.002882356522604823
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "B": {
+        "top1": " Berlin",
+        "p_expected": 0.7432350516319275,
+        "expected": " Berlin",
+        "top5": [
+          [
+            " Berlin",
+            0.7432350516319275
+          ],
+          [
+            " Munich",
+            0.09686362743377686
+          ],
+          [
+            " Frankfurt",
+            0.07219027727842331
+          ],
+          [
+            " Hamburg",
+            0.013315911404788494
+          ],
+          [
+            " Cologne",
+            0.007879340089857578
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "jsd_bits": 0.9909211540636065
+    },
+    "Continent": {
+      "suffix": "\n Continent:",
+      "A": {
+        "top1": " Asia",
+        "p_expected": 0.7427298426628113,
+        "expected": " Asia",
+        "top5": [
+          [
+            " Asia",
+            0.7427298426628113
+          ],
+          [
+            " Japan",
+            0.18088968098163605
+          ],
+          [
+            " Europe",
+            0.018466763198375702
+          ],
+          [
+            " East",
+            0.011667242273688316
+          ],
+          [
+            " North",
+            0.007013633381575346
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "B": {
+        "top1": " Europe",
+        "p_expected": 0.8629010319709778,
+        "expected": " Europe",
+        "top5": [
+          [
+            " Europe",
+            0.8629010319709778
+          ],
+          [
+            " Germany",
+            0.07692515850067139
+          ],
+          [
+            " North",
+            0.009355158545076847
+          ],
+          [
+            " European",
+            0.00892581045627594
+          ],
+          [
+            " Central",
+            0.004955871030688286
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "jsd_bits": 0.8846916890329211
+    },
+    "Currency": {
+      "suffix": "\n Currency:",
+      "A": {
+        "top1": " yen",
+        "p_expected": 0.5841906666755676,
+        "expected": " yen",
+        "top5": [
+          [
+            " yen",
+            0.5841906666755676
+          ],
+          [
+            " Japanese",
+            0.11103422194719315
+          ],
+          [
+            " \u00a5",
+            0.06228455528616905
+          ],
+          [
+            " JP",
+            0.04860153794288635
+          ],
+          [
+            " Yen",
+            0.030056776478886604
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "B": {
+        "top1": " euro",
+        "p_expected": 0.38794422149658203,
+        "expected": " euro",
+        "top5": [
+          [
+            " euro",
+            0.38794422149658203
+          ],
+          [
+            " de",
+            0.17067958414554596
+          ],
+          [
+            " De",
+            0.10669616609811783
+          ],
+          [
+            " Deutsche",
+            0.05492405220866203
+          ],
+          [
+            " Euro",
+            0.035693876445293427
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "jsd_bits": 0.9148652270539568
+    },
+    "Language": {
+      "suffix": "\n Language:",
+      "A": {
+        "top1": " Japanese",
+        "p_expected": 0.9494701623916626,
+        "expected": " Japanese",
+        "top5": [
+          [
+            " Japanese",
+            0.9494701623916626
+          ],
+          [
+            " English",
+            0.011236046440899372
+          ],
+          [
+            " Japan",
+            0.007466048933565617
+          ],
+          [
+            " Kan",
+            0.0030724056996405125
+          ],
+          [
+            " Chinese",
+            0.00234319269657135
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "B": {
+        "top1": " German",
+        "p_expected": 0.8907987475395203,
+        "expected": " German",
+        "top5": [
+          [
+            " German",
+            0.8907987475395203
+          ],
+          [
+            " English",
+            0.06637424230575562
+          ],
+          [
+            " De",
+            0.026529209688305855
+          ],
+          [
+            " Germany",
+            0.002469755010679364
+          ],
+          [
+            " Arabic",
+            0.0009970940882340074
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "jsd_bits": 0.9684989988074963
+    },
+    "Type": {
+      "suffix": "\n Type:",
+      "A": {
+        "top1": " country",
+        "p_expected": 0.7264719605445862,
+        "expected": " country",
+        "top5": [
+          [
+            " country",
+            0.7264719605445862
+          ],
+          [
+            " Japan",
+            0.08564712107181549
+          ],
+          [
+            " Japanese",
+            0.01982448436319828
+          ],
+          [
+            " city",
+            0.015790555626153946
+          ],
+          [
+            " nation",
+            0.010632705874741077
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "B": {
+        "top1": " country",
+        "p_expected": 0.8228055834770203,
+        "expected": " country",
+        "top5": [
+          [
+            " country",
+            0.8228055834770203
+          ],
+          [
+            " Germany",
+            0.02267957665026188
+          ],
+          [
+            " Europe",
+            0.014106692746281624
+          ],
+          [
+            " city",
+            0.013395850546658039
+          ],
+          [
+            " European",
+            0.012426777742803097
+          ]
+        ],
+        "top1_matches_expected": true
+      },
+      "jsd_bits": 0.1112341816417306
+    }
+  }
+}

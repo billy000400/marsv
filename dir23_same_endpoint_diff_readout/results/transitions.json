@@ -1,0 +1,105 @@
+{
+  "immediate": {
+    "t10": 0.2214422704517003,
+    "n_cross_t10": 1,
+    "t50": 0.43815013842862655,
+    "n_cross_t50": 1,
+    "t90": 0.687727360717505,
+    "n_cross_t90": 1,
+    "w": 0.46628509026580467,
+    "monotonic": true,
+    "max_backstep": 0.0,
+    "jsd_bits": 0.007611985381134279
+  },
+  "Capital": {
+    "t10": 0.321792294529477,
+    "n_cross_t10": 1,
+    "t50": 0.4538257086212308,
+    "n_cross_t50": 1,
+    "t90": 0.5918292509602749,
+    "n_cross_t90": 1,
+    "w": 0.27003695643079795,
+    "monotonic": true,
+    "max_backstep": 0.0,
+    "jsd_bits": 0.9909211013264883,
+    "answer_A": " Tokyo",
+    "answer_B": " Berlin",
+    "top1_switch_t": [
+      0.46
+    ],
+    "n_distinct_top1": 2
+  },
+  "Continent": {
+    "t10": 0.29584707253827286,
+    "n_cross_t10": 1,
+    "t50": 0.4436005883957933,
+    "n_cross_t50": 1,
+    "t90": 0.5743575311754303,
+    "n_cross_t90": 1,
+    "w": 0.27851045863715745,
+    "monotonic": true,
+    "max_backstep": 0.0,
+    "jsd_bits": 0.8846928497992606,
+    "answer_A": " Asia",
+    "answer_B": " Europe",
+    "top1_switch_t": [
+      0.44
+    ],
+    "n_distinct_top1": 2
+  },
+  "Currency": {
+    "t10": 0.298421142652282,
+    "n_cross_t10": 1,
+    "t50": 0.4430882231149431,
+    "n_cross_t50": 1,
+    "t90": 0.565441793499183,
+    "n_cross_t90": 1,
+    "w": 0.267020650846901,
+    "monotonic": true,
+    "max_backstep": 0.0,
+    "jsd_bits": 0.9148653610121436,
+    "answer_A": " yen",
+    "answer_B": " euro",
+    "top1_switch_t": [
+      0.47000000000000003
+    ],
+    "n_distinct_top1": 2
+  },
+  "Language": {
+    "t10": 0.3221083074096753,
+    "n_cross_t10": 1,
+    "t50": 0.44967317069740625,
+    "n_cross_t50": 1,
+    "t90": 0.5770549458339985,
+    "n_cross_t90": 1,
+    "w": 0.25494663842432325,
+    "monotonic": true,
+    "max_backstep": 0.0,
+    "jsd_bits": 0.9684993858851766,
+    "answer_A": " Japanese",
+    "answer_B": " German",
+    "top1_switch_t": [
+      0.45
+    ],
+    "n_distinct_top1": 2
+  },
+  "Type": {
+    "t10": 0.30172507843616236,
+    "n_cross_t10": 1,
+    "t50": 0.43786909341192426,
+    "n_cross_t50": 1,
+    "t90": 0.5802873503453501,
+    "n_cross_t90": 1,
+    "w": 0.2785622719091877,
+    "monotonic": true,
+    "max_backstep": 0.0,
+    "jsd_bits": 0.11123379708571601,
+    "answer_A": " country",
+    "answer_B": " country",
+    "top1_switch_t": [],
+    "n_distinct_top1": 1
+  },
+  "delta_t50_primary": 0.01073748550628767,
+  "omega_rad": 1.1154624223709106,
+  "cos_endpoints": 0.43976226449012756
+}

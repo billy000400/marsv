@@ -161,7 +161,7 @@ If a curve is strongly non-monotonic or crosses a threshold multiple times, repo
 
 ## Stages
 
-* [ ] **S1 — Reproduce endpoint behavior**
+* [x] **S1 — Reproduce endpoint behavior**
 
   * Confirm all tokenizations.
   * Reproduce the shared immediate newline prediction.
@@ -170,7 +170,7 @@ If a curve is strongly non-monotonic or crosses a threshold multiple times, repo
   * Record top-5 predictions and target-token probabilities.
   * If any of the four divergent readouts fails to produce the expected top-1 predictions, document the discrepancy and stop.
 
-* [ ] **S2 — Run the shared interpolation**
+* [x] **S2 — Run the shared interpolation**
 
   * Construct the 101 `Japan → Germany` interpolated embeddings.
   * For every (t), run the same embedding through all five readout suffixes.
@@ -185,7 +185,7 @@ If a curve is strongly non-monotonic or crosses a threshold multiple times, repo
     * probabilities of both expected endpoint tokens.
   * For Type, additionally record (p(\texttt{country})).
 
-* [ ] **S3 — Plot every (d(t)) curve**
+* [x] **S3 — Plot every (d(t)) curve**
 
   * Save:
 
@@ -207,7 +207,7 @@ If a curve is strongly non-monotonic or crosses a threshold multiple times, repo
     * `plots/distance_overlay.png`: all five curves on the same axes;
     * `plots/immediate_prediction.png`: (p(\text{newline})) across (t).
 
-* [ ] **S4 — Compare transition locations**
+* [x] **S4 — Compare transition locations**
 
   * Create `plots/transition_comparison.png`.
   * For every readout:
@@ -241,7 +241,7 @@ If a curve is strongly non-monotonic or crosses a threshold multiple times, repo
 
 * Do not present this threshold as a statistical significance test.
 
-* [ ] **S5 — Write the verdict**
+* [x] **S5 — Write the verdict**
 
   * If the four primary readouts have clear transitions and (\Delta t_{50}\leq0.05), conclude:
 
@@ -318,8 +318,25 @@ On track? <yes/no> — <stage, % done, blocker if any>
 
 ## Current status
 
-None yet — fresh start.
+**Complete — verdict: aligned transitions.** S1–S5 all done in one iteration.
+
+* S1 reproduced every preliminary endpoint value exactly (immediate JSD 0.0076 bits, p(newline)
+  0.929/0.945; Capital 0.991, Continent 0.885, Currency 0.915, Language 0.968, Type 0.111 bits;
+  all tokenizations single-token, every suffix exactly 3 tokens).
+* S2 ran the shared 101-point slerp interpolation of the ` Japan`→` Germany` input embedding through
+  all five readout suffixes. All five d(t) curves are monotonic with exactly one crossing of each of
+  0.1/0.5/0.9.
+* S3/S4 produced all eight figures. t50 = 0.454 (Capital), 0.444 (Continent), 0.443 (Currency),
+  0.450 (Language), 0.438 (Type); widths 0.255–0.279 against 0.80 for a linear change.
+  **Δt50 across the four primary readouts = 0.011**, well inside the 0.05 descriptive-alignment
+  threshold. Top-1 answers flip at t = 0.44–0.47.
+* S5 verdict written in REPORT.md: aligned transitions, with the Type control discussed separately as
+  a non-discriminating top-1 readout (0.111 bits of residual endpoint divergence), and the scope
+  limits (one pair, one prompt, one model, no mechanism claim) stated.
+
+Deliverables: REPORT.md (7 figures, ~2.9k words), RESULTS.md, plots/ (8 PNGs),
+results/{s1_endpoints.json, interp.csv, interp.npz, transitions.json}.
 
 ## Next step
 
-Load GPT-2 Large, reproduce all endpoint predictions and tokenizations, and save the endpoint JSD table before implementing interpolation.
+None — success criterion met. Direction finalized and STOP written.
