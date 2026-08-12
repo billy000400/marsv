@@ -1,0 +1,26 @@
+{
+ "tokens": [
+  " the",
+  " actually",
+  " really",
+  " because",
+  " just",
+  " quite",
+  " never",
+  " well",
+  " strange",
+  " happening",
+  " nice",
+  " gone"
+ ],
+ "norm_m": 21.838714599609375,
+ "norm_x": 27.19662857055664,
+ "norm_rest": 11.022844314575195,
+ "ratio_m_over_x": 0.794938325881958,
+ "spread_m": 15.520881652832031,
+ "spread_rest": 4.814795017242432,
+ "spread_x": 17.072418212890625,
+ "spread_share_m": 0.7632340788841248,
+ "hybrid_dist_to_donor": 0.25360774993896484,
+ "hybrid_dist_to_recipient": 0.9377734065055847
+}

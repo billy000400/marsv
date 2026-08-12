@@ -657,3 +657,165 @@ store, leaving the static-embedding lookup as the practical deliverable. Cost is
 
 **On track?** Yes — complete. All stages S1–S5 done, every required output delivered, deliverables
 verified rendering-clean and mutually consistent, no unaddressed feedback, `STOP` written.
+
+---
+
+## 2026-08-12 — iteration 10: operator feedback, per-token-matched dose–response
+
+**Context on re-entry.** The direction had written `STOP` at iteration 9; the operator removed it and
+dropped `human_feedback.txt` into the folder. Per CLAUDE.md Part C that file is the whole iteration.
+
+**The feedback.** The dose–response's random control was matched to the block-0 MLP dose only on the
+*mean* output JSD over the 12 tokens, while the conclusion is about the *ordering* of those tokens —
+so per-token perturbation magnitudes could be badly mismatched, and the control could be too weak on
+exactly the tokens that carry the ranking. Match or normalise per token before concluding.
+
+**What I did.** Wrote `experiments/dose2.py`. For each dose alpha, one batched forward gives the MLP
+arm's output movement B_p for each of the 18 endpoint prompts (12 tokens + 6 anchors); a vectorised
+bisection then finds a separate scale c_p per prompt so the random direction moves *that prompt's*
+output by exactly B_p bits; widths are re-measured with each prompt carrying its own c_p. Three seeds
+instead of one. The old mean-matched control is rerun alongside solely as a diagnostic. Added a paired
+per-token Wilcoxon on |Δŵ_u| and on the level-free |Δŵ_u − mean Δŵ|, since a Spearman rho over 12
+tokens has SE ≈ 0.3 and cannot carry this claim on its own. Runtime ~3 min on the shared GPU.
+
+**Implementation note worth keeping.** The perturbation only enters through the endpoint states and
+endpoint logits: during the interpolation the block-0 Patcher overwrites the final-position hidden
+state, so the MLP hook is inert inside `run_pair`. That is why a per-prompt scale is well defined at
+all — each endpoint forward is a separate call, so the hook can carry a different c per prompt — and
+why per-token matching costs almost nothing (only the 6 anchor endpoints must be recomputed per token).
+
+**What I found — the feedback was correct and material.** The mean-matched control was giving
+individual tokens 0.08× to 8.5× the movement the dose gave them, because the dose is itself uneven
+(per-token movement spans 0.254–0.710 bits at full ablation). Fixing it:
+- the control's rho at the 0.103-bit rung falls from +0.61 (at an actual 0.078 bits) to +0.15 — below
+  the MLP arm, i.e. the old figure's most eye-catching separation was an under-dosed control;
+- the headline margin drops from "~3.5× more output movement needed by the control" to **1.3×**;
+- the claim's band narrows from 0.007–0.103 bits to **below 0.03 bits**; above 0.1 bits the arms cross;
+- the localisation itself survives: MLP below its matched control in **15/15** rung × seed comparisons
+  in the live band, and the paired per-token test gives ~2× more width movement under the dose than
+  under each token's exactly matched control (p = 0.0010 at 0.0068 bits), still significant after each
+  arm's mean level shift is subtracted (p = 0.034 / 0.016 at the two live doses);
+- one earlier claim is retracted: the across-token spread does *not* collapse identically in both arms
+  above 0.014 bits — the dose compresses harder (0.027 vs 0.055 at 0.103 bits).
+
+**What I learned.** Matching an intervention against a control on an *aggregate* of the very units the
+conclusion ranks is not a control at all: the aggregate can be satisfied while the per-unit doses are
+off by two orders of magnitude, and the mismatch flatters whichever arm is measured on the units it
+under-doses. The general rule for this project: match the control on the same index the claim is
+indexed by. Second, when the headline statistic is a correlation over n = 12, a paired per-unit test
+should be reported next to it — here it is the statistic that survived the re-matching, and it also
+made it possible to separate the level shift from the reordering (subtract each arm's mean change).
+
+**Assumptions logged.** (a) Anchors are perturbed with their own matched scale c_p rather than the
+token's, so every prompt in the measurement is matched to its own MLP-arm movement — the strictest
+reading of the feedback. (b) The rho = 0.6 crossing is read by log-linear interpolation between rungs,
+the same rule for both arms. (c) Rejected alternative: normalising rho by per-token movement post hoc
+instead of re-running matched — rejected because the mismatch is up to 8.5× and no post-hoc
+normalisation of a rank statistic can undo an under-dosed control.
+
+**Next step.** Unchanged and still the recommended experiment in both deliverables: ridge-probe the
+block-0 MLP's final-position output m_u for the measured anchor width (held-out, shuffled-target
+control) over the 123 endpoint tokens, and transplant m_u from a narrow token onto a wide token's
+forward pass. Given that the localisation's margin is now known to be modest, the probe half matters
+more than before: a probe beating the embedding probe's rho = +0.76 would establish the component's
+role positively rather than by damage.
+
+**On track?** Yes — the operator's point was addressed in full, the affected numbers were corrected
+downward in both deliverables rather than defended, both files pass `check_render.py`, and the
+direction's conclusion survives in weakened, honestly stated form.
+
+### 2026-08-12 — iteration 10, part 2: the recommended follow-up (block-0 MLP probe + transplant)
+
+The feedback was fully addressed with ~2.5 h of budget left, so I ran the experiment both deliverables
+had named as the single most informative next step rather than writing STOP on a direction that had a
+concrete, cheap question outstanding.
+
+**What I ran.** `experiments/mlp_read.py`: (A) ridge probes to the measured anchor width from the
+block-0 MLP final-position output m_u, the static embedding row, and the full post-block-0 state, all
+on the embedding probe's protocol; (B) transplants — every ordered pair of the 12 tokens, overwriting
+the recipient's m_u with the donor's. Plus `experiments/mlp_geom.py` to size the intervention.
+
+**Two bugs caught before they became results.**
+1. The first transplant run applied the write to the ANCHOR forwards too, so every transplant — self
+   included — pushed all widths to ~0.81 and the effect looked like a null (per-recipient rho +0.32,
+   slope +0.036). The self-transplant sanity check is what exposed it: it must return the baseline
+   exactly, and it did not. Fixed by computing the anchor endpoints once, unedited. Lesson worth
+   keeping: build the identity case into every intervention experiment; it is the cheapest possible
+   test that the harness edits only what it claims to.
+2. The probe was going to take ~70 min because `embed_probe.probe` solves a 2049x2049 system per ridge
+   strength (0.16 s each, 3300 per probe, 8 probes) — over the script's own timeout. Replaced with the
+   dual form (X'X + lam I)^-1 X' = X'(XX' + lam I)^-1, an 80x80 solve, with a run-time assertion that
+   it matches the primal on the same splits (it does, to 1e-12).
+
+**Result — the transplant is the direction's cleanest positive.** Width follows the donor: per-recipient
+rho = +0.968 (min +0.95, Wilcoxon p = 5e-4), slope +0.913 on the donor's own width; the recipient's
+remaining state contributes nothing (per-donor rho = −0.104, p = 0.64, between-donor variance 66x
+between-recipient). Self-transplant reproduces the baseline to 4 dp. One vector carries the trait.
+
+**And m_u is context-free.** Its cosine across the three sentence frames is 1.0000 — exact, because
+Pythia is parallel-residual, so block 0's MLP reads ln(W_E[u]) before attention writes anything into
+the stream. This retroactively explains three earlier results: why a per-token width exists at all, why
+it survives a change of frame (only the level moves), and why a static-embedding lookup works.
+
+**The probe half is a null, and I reported it as one.** rho = +0.748 ± 0.049 from m_u against +0.764
+from the embedding row and +0.772 from the full post-block-0 state — all within 1 sd. The first MLP
+transports the trait without making it more linearly explicit, which is consistent with the earlier
+failure of edits along the probe direction to steer width.
+
+**Honesty check I ran on myself.** A transplant that swaps 79% of the state's norm and 76% of its
+across-token spread could make "m_u carries the width" near-tautological, so `mlp_geom.py` measured
+exactly that, and both deliverables now state it: the hybrid state sits ~0.75 of the way to the donor
+and the edit costs a median 0.738 bits. What rescues the claim from tautology is the control — the
+untouched quarter of the state carries zero width information (rho = −0.104), and the transfer slope
+(0.913) exceeds the state-displacement fraction (0.75).
+
+**Next step.** How compressible is m_u? Project the donor–recipient difference onto the top k principal
+components of m across the 123 tokens, transplant only that projection, sweep k. A handful of
+directions reproducing slope +0.913 would turn the trait into a low-dimensional feature an auditor
+could monitor or edit — the first thing in this direction a steering method could act on. Cost is ~1
+minute of GPU per k.
+
+**On track?** Yes — feedback addressed in full and the named follow-up delivered, with its positive
+half (transplant), its null half (probe) and its scale caveat all in the deliverables; both files pass
+check_render.py at 20 figures.
+
+### 2026-08-12 — iteration 10, part 3: the rank sweep (how compressible is m_u?)
+
+Ran the experiment part 2 had just named, since it costs ~1 min of GPU per value of k.
+
+**What I ran.** `experiments/mlp_rank.py`: transplant only P_k(m_d − m_r), the projection of the
+donor–recipient difference onto the top k principal components of m across the 123 endpoint tokens, for
+k = 1 … 122; controls = the bottom k components and a random k-dimensional subspace.
+
+**Result — a clean negative, and a more interesting one than a positive would have been.** The top 64
+components carry 79% of the across-token variance of m and buy only 30% of the transfer (slope +0.274
+vs +0.913 for the intact vector), while already causing 95% of the full transplant's output movement.
+The tail they discard transfers nothing (−0.022) and barely moves the model (0.016 bits). Random
+subspaces do nothing. Top-64 + bottom-58 would give +0.25 if the effects added; together they give
++0.913. So the trait needs the exact vector.
+
+**The panel I did not expect.** Partial transplants behave exactly like every disturbance in this
+report — mean w_hat rises from 0.565 toward 0.65, spread compresses — while the COMPLETE transplant
+returns mean 0.573, sd 0.076, i.e. the unedited distribution with the tokens' widths swapped. Truncation
+keeps all the damage and loses the transfer. That is a much sharper way to say "this is not a
+low-dimensional feature" than the slope curve alone.
+
+**What I learned.** Two things worth carrying. (a) When an intervention transfers a trait, sweep its
+rank before calling the trait a feature — the transfer slope and the disruption it causes come apart,
+and only their combination distinguishes "carries the trait" from "breaks the model". (b) The
+off-manifold caveat is real and I stated it in both deliverables: a truncated m is a vector no token
+produces, so this bounds the code's compressibility only in so far as the model's response to
+off-manifold states is informative.
+
+**Next step.** Leave this model. The direction's practical deliverable is the free static-embedding
+screen, and its untested assumption is that the width trait belongs to the token's representation
+rather than to this network. Repeat the cheap end of the pipeline on Pythia 410M or 2.8B (~60 tokens'
+anchor widths, the embedding probe, the block-0 MLP ablation) and compare three numbers: the probe's
+held-out rho (+0.76 here), the cross-model rank agreement of measured widths, and whether the block-0
+MLP is again the single early carrier. ~20 min of GPU.
+
+**On track?** Yes — the operator's feedback was addressed in full, and the two experiments the
+deliverables named as "next" were both run and written up in the same iteration, one positive
+(transplant transfers the trait) and one negative (no low-dimensional part of it does). Both files pass
+check_render.py at 21 figures. No STOP written: the direction has a concrete, cheap next experiment and
+budget remains.

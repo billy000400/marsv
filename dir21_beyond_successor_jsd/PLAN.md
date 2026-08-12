@@ -46,20 +46,56 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-11, iteration 9 — COMPLETE, STOP written)
+## Current status (2026-08-12, iteration 10 — COMPLETE, feedback addressed)
 
 **The direction is finished.** All stages S1–S5 are done, every required output is delivered, both
-deliverables pass `check_render.py`, and no unaddressed `human_feedback*.md` / `*REVIEW*` file remains.
-Iteration 9 ran no new experiment (time budget exhausted): it repaired REPORT.md's Conclusion, which
-still carried the pre-iteration-7 claim that the network mechanism was unknown, and added the
-dose–response caveat to Limitations. RESULTS.md was already current-best and unchanged.
+deliverables pass `check_render.py`, and no unaddressed `human_feedback*` / `*REVIEW*` file remains
+(`human_feedback.addressed.md`).
 
-**Next step (only if reopened):** the experiment both deliverables name — ridge-probe the block-0 MLP's
-final-position output $m_u$ for the measured anchor width (held-out, shuffled-target control) over the
-123 endpoint tokens, and transplant $m_u$ from a narrow token onto a wide token's forward pass. Probe
-beating the embedding probe's $\rho = +0.76$ plus a transplant that moves the recipient toward the donor
-makes the trait a readable vector; both null marks the block-0 MLP a necessary stage rather than the
-store. Cost ~123 forwards + ~12 transplants.
+Iteration 10 addressed the operator's control-matching objection: the dose–response's random control
+was matched to the block-0 MLP dose on the *mean* output JSD over the 12 tokens, while the conclusion
+ranks those tokens individually. `experiments/dose2.py` reruns it with the control's scale
+binary-searched **per endpoint prompt** (three seeds), plus a paired per-token Wilcoxon test.
+The objection was material: the old control mis-dosed individual tokens by 0.08×–8.5×, and correcting
+it cuts the headline margin from "a random disturbance needs ~3.5× more output movement" to **1.3×**,
+narrows the claim's band from 0.007–0.103 bits to below 0.03 bits, and retracts "the spread collapses
+identically in both arms" above 0.014 bits. The localisation survives: MLP below its matched control
+in 15/15 rung × seed comparisons in the live band, and the level-free paired per-token test gives ~2×
+more width movement under the dose (p = 0.034 / 0.016 at the two live doses).
+
+With budget left after the feedback, iteration 10 also ran the follow-up both deliverables named
+(`experiments/mlp_read.py`, `mlp_geom.py`; Figure 20): transplanting the block-0 MLP's output vector
+transports the width almost completely (slope +0.913 on the donor, nothing from the recipient's
+remaining state), while a probe from that vector is no more accurate than one from the static
+embedding, and no low-dimensional part of it carries the trait (`mlp_rank.py`, Figure 21). Deliverables
+now carry 21 figures each and pass `check_render.py`. No `STOP` written: budget remained and the
+direction has a concrete next experiment (a second model).
+
+That follow-up has since been run too (iteration 10, part 2): the probe/transplant experiment both
+deliverables named. **Transplant = strong positive**: overwriting a token's block-0 MLP output $m_u$
+with another token's transports the width (per-recipient rho = +0.968, slope +0.913 on the donor;
+recipient's remaining state rho = −0.104; self-transplant reproduces the baseline exactly), and $m_u$
+is context-free (cosine 1.0000 across frames — Pythia's parallel residual means block 0's MLP reads the
+embedding before attention writes), which is why the static-embedding lookup works at all.
+**Probe = null**: rho = +0.748 from $m_u$ against +0.764 from the embedding row and +0.772 from the
+full post-block-0 state — the component carries the trait without making it more readable. Scale caveat
+stated: a transplant moves the output 0.738 bits and $m_u$ is 0.79 of the state's norm / 0.76 of its
+across-token spread.
+
+The rank sweep has since been run too (iteration 10, part 3; `experiments/mlp_rank.py`, Figure 21) and
+is a clean **negative**: transplanting only the top $k$ principal components of $m_d - m_r$ gives slope
++0.256 / +0.298 / +0.274 at $k$ = 8 / 32 / 64 (0.24 / 0.55 / 0.79 of the across-token variance) against
++0.913 for the intact vector, while a top-64 transplant already causes 95% of the full transplant's
+output movement; the discarded tail transfers nothing (−0.022) and a random 64-dim subspace gives
++0.000. Partial transplants disturb (mean $\hat w$ 0.565 → 0.61–0.65, spread compressed) where the
+complete one exchanges widths cleanly (mean 0.573, sd 0.076). The trait is a property of the whole
+vector, not a low-dimensional feature.
+
+**Next step (only if reopened):** leave this model. Repeat the cheap end of the pipeline on a second
+Pythia size (410M or 2.8B) — anchor widths for ~60 tokens, the embedding probe, the block-0 MLP
+ablation — and compare the probe's held-out rho (+0.76 here), the cross-model rank agreement of
+measured widths on shared tokens, and whether the block-0 MLP is again the single early carrier. That
+decides whether the free screen is a property of tokens or a per-model calibration. Cost ~20 min GPU.
 
 ### Record of what was established (iteration 8 status, retained)
 
@@ -160,16 +196,19 @@ token to w_hat ~ 0.82 and erases the ordering (rho = -0.10). Confound stated in 
 also the only early component whose removal the model feels (0.451 bits vs <= 0.007 for every other),
 and 0.4 bits is the rung at which the ladder showed any disturbance flattens the ordering.
 
-The dose-response has since been run, and it breaks that confound in the block-0 MLP's favour.
-Softening the ablation to alpha = 0.1 ... 1 and matching every dose to a random perturbation of the
-same residual stream at the SAME output movement in bits, the MLP arm is below its matched control at
-every rung of the survivable band 0.007-0.103 bits (rho +0.84/+0.99, +0.64/+0.91, +0.62/+0.79,
-+0.25/+0.61): it crosses rho = 0.6 at ~0.03 bits, the control only at ~0.10, so **a random disturbance
-needs ~3.5x more output movement for the same damage**. Above 0.25 bits both arms are noise (SE(rho) ~
-0.3 at n = 12) and are not interpreted. The across-token sd collapses identically in the two arms, so
-LEVEL compression is a pure disturbance effect and only the ORDERING singles out a component. First
-positive mechanistic localisation: the trait is realised in the block-0 MLP's contribution to the
-final-position residual stream.
+The dose-response has since been run — and rerun in iteration 10 with the control matched PER TOKEN
+after operator feedback, which is the version that stands. Softening the ablation to alpha = 0.1 ... 1
+and matching every dose to a random perturbation of the same residual stream that moves EACH TOKEN's
+output by the same number of bits (three seeds), the MLP arm is below its matched control at all five
+rungs up to 0.03 bits and in 15/15 rung x seed comparisons (rho +0.84/+0.98, +0.64/+0.91,
++0.62/+0.76): it crosses rho = 0.6 at 0.031 bits, the control at 0.041, so **a random disturbance needs
+~1.3x more output movement for the same damage**. Above 0.1 bits the arms cross and are noise
+(SE(rho) ~ 0.3 at n = 12). The load-bearing statistic is paired and per-token: the dose moves a token's
+width ~2x as far as that token's own matched control (0.074 vs 0.036 at 0.0068 bits, p = 0.0010),
+still so after each arm's mean level shift is removed (p = 0.034, 0.016 at the two live doses). The
+across-token sd collapses identically only through 0.014 bits; beyond that the dose compresses harder.
+Positive mechanistic localisation, modest in size: the trait is realised in the block-0 MLP's
+contribution to the final-position residual stream.
 
 **Recommended follow-up (carried into the status block above):** stop destroying, start reading. Fit a ridge probe from the block-0 MLP's final-position
 output m_u to the measured anchor width (held-out, shuffled-target control) over the 123 endpoint

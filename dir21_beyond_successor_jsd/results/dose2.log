@@ -1,0 +1,62 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<06:01,  1.24s/it]Loading weights:  19%|█▉        | 56/292 [00:01<00:04, 55.41it/s]Loading weights:  27%|██▋       | 80/292 [00:01<00:03, 64.87it/s]Loading weights:  34%|███▎      | 98/292 [00:01<00:03, 61.97it/s]Loading weights:  40%|███▉      | 116/292 [00:02<00:02, 71.61it/s]Loading weights:  44%|████▍     | 129/292 [00:02<00:02, 75.19it/s]Loading weights:  48%|████▊     | 141/292 [00:02<00:01, 78.24it/s]Loading weights:  52%|█████▏    | 152/292 [00:02<00:01, 72.18it/s]Loading weights:  55%|█████▌    | 161/292 [00:02<00:01, 75.03it/s]Loading weights:  58%|█████▊    | 170/292 [00:02<00:01, 72.35it/s]Loading weights:  62%|██████▏   | 180/292 [00:02<00:01, 71.94it/s]Loading weights:  64%|██████▍   | 188/292 [00:03<00:01, 70.41it/s]Loading weights:  68%|██████▊   | 200/292 [00:03<00:01, 71.71it/s]Loading weights:  74%|███████▍  | 216/292 [00:03<00:00, 79.45it/s]Loading weights:  78%|███████▊  | 228/292 [00:03<00:00, 70.53it/s]Loading weights:  83%|████████▎ | 242/292 [00:03<00:00, 79.33it/s]Loading weights:  89%|████████▉ | 260/292 [00:04<00:00, 79.17it/s]Loading weights:  95%|█████████▍| 276/292 [00:04<00:00, 83.31it/s]Loading weights:  99%|█████████▉| 290/292 [00:04<00:00, 91.06it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 68.05it/s]
+baseline mean 0.565 sd 0.084 (4s)
+alpha 0.1
+  mlp a=0.1: bits 0.0006 rho +0.97 mean 0.585 sd 0.076 (7s)
+  ctrl/token seed=0: bits 0.0006 rho +1.00 mean 0.565 sd 0.082 (11s)
+  ctrl/mean seed=0: bits 0.0005 rho +0.98 mean 0.563 sd 0.084 (15s)
+  ctrl/token seed=1: bits 0.0006 rho +1.00 mean 0.571 sd 0.079 (20s)
+  ctrl/token seed=2: bits 0.0006 rho +0.99 mean 0.574 sd 0.084 (24s)
+alpha 0.2
+  mlp a=0.2: bits 0.0027 rho +0.92 mean 0.608 sd 0.071 (27s)
+  ctrl/token seed=0: bits 0.0027 rho +1.00 mean 0.572 sd 0.077 (32s)
+  ctrl/mean seed=0: bits 0.0023 rho +0.97 mean 0.567 sd 0.081 (36s)
+  ctrl/token seed=1: bits 0.0027 rho +1.00 mean 0.585 sd 0.074 (40s)
+  ctrl/token seed=2: bits 0.0027 rho +0.98 mean 0.587 sd 0.082 (44s)
+alpha 0.3
+  mlp a=0.3: bits 0.0068 rho +0.84 mean 0.639 sd 0.070 (48s)
+  ctrl/token seed=0: bits 0.0068 rho +0.99 mean 0.590 sd 0.071 (52s)
+  ctrl/mean seed=0: bits 0.0063 rho +0.99 mean 0.591 sd 0.074 (56s)
+  ctrl/token seed=1: bits 0.0068 rho +0.99 mean 0.608 sd 0.071 (61s)
+  ctrl/token seed=2: bits 0.0068 rho +0.96 mean 0.606 sd 0.080 (65s)
+alpha 0.4
+  mlp a=0.4: bits 0.0143 rho +0.64 mean 0.681 sd 0.069 (68s)
+  ctrl/token seed=0: bits 0.0143 rho +0.90 mean 0.623 sd 0.067 (73s)
+  ctrl/mean seed=0: bits 0.0130 rho +0.92 mean 0.633 sd 0.068 (77s)
+  ctrl/token seed=1: bits 0.0143 rho +0.94 mean 0.639 sd 0.064 (81s)
+  ctrl/token seed=2: bits 0.0143 rho +0.87 mean 0.634 sd 0.073 (86s)
+alpha 0.5
+  mlp a=0.5: bits 0.0292 rho +0.62 mean 0.730 sd 0.055 (89s)
+  ctrl/token seed=0: bits 0.0292 rho +0.87 mean 0.660 sd 0.054 (94s)
+  ctrl/mean seed=0: bits 0.0213 rho +0.82 mean 0.667 sd 0.059 (98s)
+  ctrl/token seed=1: bits 0.0292 rho +0.79 mean 0.681 sd 0.055 (102s)
+  ctrl/token seed=2: bits 0.0292 rho +0.64 mean 0.672 sd 0.071 (106s)
+alpha 0.65
+  mlp a=0.65: bits 0.1033 rho +0.25 mean 0.817 sd 0.027 (110s)
+  ctrl/token seed=0: bits 0.1033 rho +0.01 mean 0.751 sd 0.046 (114s)
+  ctrl/mean seed=0: bits 0.0776 rho +0.68 mean 0.770 sd 0.033 (119s)
+  ctrl/token seed=1: bits 0.1033 rho +0.21 mean 0.762 sd 0.054 (123s)
+  ctrl/token seed=2: bits 0.1033 rho +0.22 mean 0.738 sd 0.066 (127s)
+alpha 0.8
+  mlp a=0.8: bits 0.2651 rho +0.74 mean 0.857 sd 0.021 (131s)
+  ctrl/token seed=0: bits 0.2651 rho +0.36 mean 0.824 sd 0.016 (135s)
+  ctrl/mean seed=0: bits 0.2302 rho -0.16 mean 0.839 sd 0.019 (140s)
+  ctrl/token seed=1: bits 0.2651 rho +0.17 mean 0.795 sd 0.034 (144s)
+  ctrl/token seed=2: bits 0.2651 rho +0.20 mean 0.794 sd 0.056 (148s)
+alpha 1.0
+  mlp a=1.0: bits 0.4506 rho -0.10 mean 0.822 sd 0.018 (152s)
+  ctrl/token seed=0: bits 0.4506 rho -0.01 mean 0.821 sd 0.014 (156s)
+  ctrl/mean seed=0: bits 0.4803 rho -0.76 mean 0.820 sd 0.009 (161s)
+  ctrl/token seed=1: bits 0.4506 rho -0.08 mean 0.811 sd 0.016 (165s)
+  ctrl/token seed=2: bits 0.4506 rho -0.08 mean 0.814 sd 0.020 (170s)
+
+paired |dw| MLP vs per-token-matched control
+  alpha 0.1: |dw| mlp 0.020 ctrl 0.006 p 0.005
+  alpha 0.2: |dw| mlp 0.043 ctrl 0.017 p 0.002
+  alpha 0.3: |dw| mlp 0.074 ctrl 0.036 p 0.001
+  alpha 0.4: |dw| mlp 0.116 ctrl 0.067 p 0.000
+  alpha 0.5: |dw| mlp 0.165 ctrl 0.106 p 0.000
+  alpha 0.65: |dw| mlp 0.251 ctrl 0.185 p 0.001
+  alpha 0.8: |dw| mlp 0.292 ctrl 0.239 p 0.001
+  alpha 1.0: |dw| mlp 0.257 ctrl 0.250 p 0.266
+wrote results/dose2.json

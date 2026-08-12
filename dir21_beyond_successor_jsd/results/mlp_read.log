@@ -1,0 +1,26 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  15%|█▌        | 44/292 [00:00<00:00, 418.20it/s]Loading weights:  42%|████▏     | 122/292 [00:00<00:00, 612.46it/s]Loading weights:  70%|██████▉   | 204/292 [00:00<00:00, 694.25it/s]Loading weights:  98%|█████████▊| 286/292 [00:00<00:00, 742.61it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 687.51it/s]
+m_u across frames: mean cosine 1.0000
+dual-form ridge matches the primal solve (rho +0.781)
+probe mlp_out        -> w_hat: test rho +0.748 +- 0.049 R2 +0.511 (null rho -0.234)
+probe mlp_out_frame0 -> w_hat: test rho +0.748 +- 0.049 R2 +0.511 (null rho -0.140)
+probe resid_block0   -> w_hat: test rho +0.772 +- 0.044 R2 +0.558 (null rho -0.010)
+probe embedding      -> w_hat: test rho +0.764 +- 0.045 R2 +0.514 (null rho -0.156)
+
+baseline mean 0.565 sd 0.084
+[1/12] recipient ' the': self 0.366 mean-donor 0.670
+[2/12] recipient ' actually': self 0.527 mean-donor 0.668
+[3/12] recipient ' really': self 0.504 mean-donor 0.639
+[4/12] recipient ' because': self 0.528 mean-donor 0.630
+[5/12] recipient ' just': self 0.530 mean-donor 0.658
+[6/12] recipient ' quite': self 0.575 mean-donor 0.683
+[7/12] recipient ' never': self 0.555 mean-donor 0.641
+[8/12] recipient ' well': self 0.618 mean-donor 0.676
+[9/12] recipient ' strange': self 0.637 mean-donor 0.665
+[10/12] recipient ' happening': self 0.621 mean-donor 0.673
+[11/12] recipient ' nice': self 0.639 mean-donor 0.667
+[12/12] recipient ' gone': self 0.682 mean-donor 0.682
+
+per-recipient rho(donor width, post-transplant width): mean +0.968 (Wilcoxon p = 0.0005), mean slope +0.913
+self-transplant preserves the ordering: rho = +1.00; recipient identity after a cross transplant: rho = -0.78
+wrote results/mlp_read.json

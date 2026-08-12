@@ -1,0 +1,19 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:22,  1.11s/it]Loading weights:  19%|█▉        | 56/292 [00:01<00:03, 61.89it/s]Loading weights:  28%|██▊       | 82/292 [00:01<00:03, 69.50it/s]Loading weights:  35%|███▍      | 101/292 [00:01<00:02, 66.33it/s]Loading weights:  40%|███▉      | 116/292 [00:01<00:02, 75.05it/s]Loading weights:  44%|████▍     | 129/292 [00:02<00:02, 79.07it/s]Loading weights:  48%|████▊     | 141/292 [00:02<00:02, 72.95it/s]Loading weights:  52%|█████▏    | 151/292 [00:02<00:01, 76.34it/s]Loading weights:  55%|█████▌    | 161/292 [00:02<00:02, 56.68it/s]Loading weights:  62%|██████▏   | 182/292 [00:02<00:01, 74.82it/s]Loading weights:  66%|██████▋   | 194/292 [00:03<00:01, 81.22it/s]Loading weights:  70%|██████▉   | 204/292 [00:03<00:01, 76.71it/s]Loading weights:  74%|███████▍  | 216/292 [00:03<00:01, 69.85it/s]Loading weights:  78%|███████▊  | 228/292 [00:03<00:00, 77.52it/s]Loading weights:  83%|████████▎ | 242/292 [00:03<00:00, 85.46it/s]Loading weights:  86%|████████▋ | 252/292 [00:03<00:00, 78.06it/s]Loading weights:  89%|████████▉ | 261/292 [00:03<00:00, 79.45it/s]Loading weights:  93%|█████████▎| 272/292 [00:04<00:00, 83.58it/s]Loading weights:  96%|█████████▌| 281/292 [00:04<00:00, 79.44it/s]Loading weights:  99%|█████████▉| 290/292 [00:04<00:00, 78.30it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 68.65it/s]
+baseline mean 0.565 sd 0.084
+pca k=  1: slope -0.097 rho -0.081 (var retained 0.057, 0.003 bits)
+random k=  1: slope +0.000 rho -0.007 (var retained None, 0.000 bits)
+pca k=  2: slope +0.073 rho +0.217 (var retained 0.099, 0.015 bits)
+pca k=  4: slope +0.113 rho +0.295 (var retained 0.154, 0.030 bits)
+random k=  4: slope -0.002 rho -0.142 (var retained None, 0.000 bits)
+pca k=  8: slope +0.256 rho +0.400 (var retained 0.236, 0.271 bits)
+pca k= 16: slope +0.262 rho +0.437 (var retained 0.365, 0.450 bits)
+random k= 16: slope +0.002 rho -0.003 (var retained None, 0.000 bits)
+pca k= 32: slope +0.298 rho +0.470 (var retained 0.548, 0.599 bits)
+pca k= 64: slope +0.274 rho +0.579 (var retained 0.789, 0.713 bits)
+random k= 64: slope +0.000 rho -0.087 (var retained None, 0.001 bits)
+pca k=122: slope +0.913 rho +0.968 (var retained 1.0, 0.750 bits)
+tail k= 16: slope -0.002 rho +0.001 (var retained None, 0.000 bits)
+tail k= 32: slope -0.004 rho -0.005 (var retained None, 0.003 bits)
+tail k= 58: slope -0.022 rho +0.006 (var retained None, 0.016 bits)
+wrote results/mlp_rank.json

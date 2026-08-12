@@ -6,8 +6,9 @@
 position, 1,000 token pairs from 123 endpoint tokens × 3 sentence frames × 50 interpolation steps
 (pair artifacts inherited from `dir18`; the per-token probes, the forward screen, the anchor-set swap,
 the layer sweep, the embedding probe, the vocabulary test, the frame-shape control, the two
-embedding interventions, the displacement-norm ladder and the two mode-split experiments are new inference on the same model and
-hook point, ~1.6M forward passes). Transition width `w` = fraction of the path over
+embedding interventions, the displacement-norm ladder, the two mode-split experiments, the component
+ablation, the per-token-matched dose–response and the block-0 MLP probe/transplant are new inference on
+the same model and hook point, ~1.6M forward passes). Transition width `w` = fraction of the path over
 which the output-distance score `d(t)` climbs from 0.1 to 0.9; smaller = narrower. Analyses run on the
 **929 pairs** whose endpoint output movement is at least 0.2 bits in every frame.
 
@@ -67,13 +68,29 @@ untouched for 101 of them (median $\rho = +0.99$; every one of the 96 heads $\ge
 exception is the **block-0 MLP**: removing it collapses the spread across tokens from sd 0.084 to
 0.018, pushes every token to $\hat w_u \approx 0.82$ and leaves $\rho = -0.10$. It is also the only
 early component the model noticeably feels (0.451 bits of output movement, against $\le 0.007$ for
-every other component and $\le 0.0004$ for every head). A dose–response against an output-matched
-random control breaks that confound in the block-0 MLP's favour: at every dose where the ordering is
-still alive, blending the MLP toward its mean costs more rank agreement per bit than a random
-perturbation of the same residual stream matched bit-for-bit (at 0.014 bits, $\rho = +0.64$ against
-$+0.91$), and the control needs about **3.5× more output movement** to do the same damage. The
-across-token *spread*, by contrast, collapses identically in the two arms — so disturbance flattens the
-level, and the block-0 MLP specifically carries the ordering.
+every other component and $\le 0.0004$ for every head). A dose–response against a random control
+matched **token by token** on output movement breaks that confound in the block-0 MLP's favour, by a
+modest margin: at every dose where the ordering is still alive, and for all three control seeds,
+blending the MLP toward its mean costs more rank agreement per bit than a random perturbation of the
+same residual stream (at 0.014 bits, $\rho = +0.64$ against $+0.91$), and the control needs about
+**1.3× more output movement** to do the same damage. Token by token the gap is clearer: the dose moves
+a token's width about **twice as far** as that token's own exactly matched control (0.074 against
+0.036 width units at 0.0068 bits, Wilcoxon $p = 0.001$), and still does after each arm's mean level
+shift is removed ($p = 0.034$). Matching per token is what makes those numbers mean anything — a
+control matched only on the 12-token average gives individual tokens 0.08× to 8.5× the movement the
+dose gave them, and inflates the apparent margin to 2.8×.
+
+**And that component's output vector is sufficient on its own.** Overwriting one token's block-0 MLP
+output $m_u$ with another token's — leaving the rest of the forward pass, and the anchors, untouched —
+transports the width almost completely: the recipient's new width tracks the **donor's** width at
+$\rho = +0.968$ with slope $+0.913$, while the recipient's own remaining state contributes nothing
+($\rho = -0.104$, $p = 0.64$; 66× less variance). A self-transplant reproduces the baseline exactly.
+$m_u$ here is computed from the token embedding alone — its cosine across the three sentence frames is
+1.0000 — which is why a per-token width exists before any context is read. Reading the number *off*
+$m_u$ with a probe, however, is no easier than reading it off the static embedding ($\rho = +0.748$ vs
+$+0.764$): the component carries the trait without making it more linearly explicit. Nor is it
+compressible — transplanting only the top 64 principal components of $m$, which carry 79% of its
+across-token variance, delivers 30% of the transfer while causing 95% of the output movement.
 
 **The trait is real; the measuring stick is not neutral.** Swapping the six anchors for six function
 words or six rare content words still recovers the fitted token effect ($\rho = +0.57$ and $+0.61$),
@@ -524,64 +541,199 @@ leaves the positive half confounded by size. The dose–response below removes t
 
 To separate "this component computes the trait" from "this is the only early component big enough to
 reach the lethal regime", we soften the ablation into a dose and give every dose a control that is
-exactly as loud. The MLP's final-position output is blended toward its mean with weight $\alpha$, and
-at each $\alpha$ a fixed random direction is added to the same residual stream with its scale
-binary-searched so the model's output moves the *same* number of bits. Figure 19 plots both arms in
-bits, so the comparison is at matched loudness rather than matched knob setting.
+exactly as loud **on each token separately**. The MLP's final-position output is blended toward its
+mean with weight $\alpha$; at each $\alpha$ a random direction is added to the same residual stream
+with a scale binary-searched *per endpoint prompt* so that **that token's** output moves the same
+number of bits as the dose moved it. Per-token matching is essential because the conclusion is about
+the ordering of individual tokens and the dose is uneven across them — at full ablation the per-token
+movement spans 0.254–0.710 bits. The comparison is repeated for three random seeds.
 
-![Rank agreement and across-token spread against output movement for the block-0 MLP dose and an output-matched random control](plots/dose.png)
+![Rank agreement, across-token spread, control matching quality and per-token width change for the block-0 MLP dose and a per-token output-matched random control](plots/dose.png)
 
 **Figure 19.** Dose–response for the block-0 MLP (solid, circles: output blended toward its mean,
-$\alpha = 0.1 \dots 1$) against a random direction added to the same residual stream and rescaled to
-the same output movement (dashed, squares). x (both panels): output movement in bits (log scale), the
-mean JSD between the perturbed and unperturbed next-token distributions of the 12 tokens. Left y: rank
-agreement $\rho$ between each token's anchor width before and after the perturbation — 1 = ordering
-intact, 0 = destroyed. Right y: sd of $\hat w_u$ across the 12 tokens; dotted line = the unperturbed
-spread 0.084. The two arms separate on the left panel and coincide on the right.
+$\alpha = 0.1 \dots 1$) against a random direction added to the same residual stream, rescaled so each
+token's output moves the same number of bits (dashed, squares; mean of three seeds, error bars 1 sd
+across seeds). Panel 1 x: output movement in bits (log scale), the mean over the 12 tokens of the JSD
+between perturbed and unperturbed next-token distributions. Panel 1 y: rank agreement $\rho$ between
+each token's anchor width before and after the perturbation — 1 = ordering intact, 0 = destroyed;
+dotted triangles = the same control matched only on the 12-token *mean* movement. Panel 2, same x: sd
+of $\hat w_u$ across the 12 tokens; dash-dotted line = the unperturbed spread 0.084. Panel 3 x: the
+dose's output movement; y: each token's ratio of control movement to dose movement (log scale, 1.0 =
+exact match), open triangles = mean-matched control, filled squares = per-token-matched. Panel 4 x:
+the 12 tokens ordered by unperturbed width; y: $|\Delta\hat w_u|$ at the 0.0068-bit dose.
 
-| output movement (bits) | $\rho$, block-0 MLP dose | $\rho$, matched random control | sd, MLP | sd, control |
+| output movement (bits) | $\rho$, block-0 MLP dose | $\rho$, per-token-matched control | sd, MLP | sd, control |
 |---|---|---|---|---|
-| 0.001 | +0.97 | +0.97 | 0.076 | 0.084 |
-| 0.003 | +0.92 | +0.97 | 0.071 | 0.081 |
-| 0.007 | +0.84 | +0.99 | 0.070 | 0.074 |
-| 0.014 | +0.64 | +0.91 | 0.069 | 0.067 |
-| 0.029 | +0.62 | +0.79 | 0.055 | 0.053 |
-| 0.103 | +0.25 | +0.61 | 0.027 | 0.026 |
-| 0.265 | +0.74 | −0.32 | 0.021 | 0.020 |
-| 0.451 | −0.10 | −0.76 | 0.018 | 0.013 |
+| 0.0006 | +0.97 | $+1.00 \pm 0.00$ | 0.076 | 0.081 |
+| 0.0027 | +0.92 | $+0.99 \pm 0.01$ | 0.071 | 0.078 |
+| 0.0068 | +0.84 | $+0.98 \pm 0.02$ | 0.070 | 0.074 |
+| 0.0143 | +0.64 | $+0.91 \pm 0.04$ | 0.069 | 0.068 |
+| 0.0292 | +0.62 | $+0.76 \pm 0.12$ | 0.055 | 0.060 |
+| 0.1033 | +0.25 | $+0.15 \pm 0.12$ | 0.027 | 0.055 |
+| 0.2651 | +0.74 | $+0.24 \pm 0.10$ | 0.021 | 0.035 |
+| 0.4506 | −0.10 | $-0.06 \pm 0.04$ | 0.018 | 0.016 |
 
-The curves separate in the regime that matters. Across the four rungs from 0.007 to 0.103 bits — the
-band where the ordering is still partly alive — the MLP dose sits below its matched control at every
-single one, and the gap is large: the MLP arm falls through $\rho = 0.6$ at roughly 0.03 bits, the
-control only at roughly 0.10, so a random disturbance needs about **3.5× more output movement** to do
-the same damage. Above 0.25 bits both arms are at noise ($\rho$ from $+0.74$ to $-0.76$, and with
-$n = 12$ tokens a single $\rho$ carries a standard error near 0.3), so the top two rungs cannot rank
-the arms and are reported but not interpreted.
+The curves separate in the band where an ordering still exists. Across the five rungs up to 0.03 bits
+the MLP dose sits below its matched control at every one of the 15 rung × seed comparisons; it falls
+through $\rho = 0.6$ at 0.031 bits and the control at 0.041, so a random disturbance needs about
+**1.3× more output movement** to do the same damage. Above 0.1 bits both arms are at noise
+(with $n = 12$ tokens a single $\rho$ carries a standard error near 0.3), and the two cross, so the
+top three rungs are reported but not interpreted.
 
-The second panel is the cleaner half of the result, because it shows the two effects the earlier
-experiments kept confusing. The across-token *spread* collapses along an identical trajectory in both
-arms (0.069/0.067, 0.055/0.053, 0.027/0.026 at matched bits) — pushing the residual stream around by
-any means compresses every token toward $\hat w_u \approx 0.82$, exactly as the displacement ladder
-found for embedding edits. The *ordering* does not behave that way: it survives a matched random
-disturbance and dies under the block-0 MLP dose. Level and ranking are separate channels, and only the
-ranking singles out a component.
+Panel 3 shows why the matching had to be per token, and what it cost. A control matched only on the
+12-token average moves individual tokens by 0.08× to 8.5× what the dose moved them; per-token matching
+brings every ratio to 1.000. Under the loose control the MLP's margin looked like 2.8× (the control
+crossing $\rho = 0.6$ only at 0.086 bits) because at the higher rungs the control was simply
+under-dosed — at 0.103 bits it received 0.078 bits and kept $\rho = +0.68$, where an honestly matched
+control lands at $+0.15$, below the MLP arm.
 
-This is the direction's first positive mechanistic localisation. It is one component, one frame, one
-random-control seed and 12 tokens, and it says that the block-0 MLP's contribution to the final-position
+| paired per-token test, dose vs that token's own matched control ($n = 12$) | at 0.0068 bits | at 0.0143 bits | at 0.4506 bits |
+|---|---|---|---|
+| mean $\lvert\Delta\hat w_u\rvert$, MLP dose / control | 0.074 / 0.036 | 0.116 / 0.067 | 0.257 / 0.250 |
+| Wilcoxon $p$ | 0.0010 | 0.0005 | 0.27 |
+| level-free $\lvert\Delta\hat w_u - \overline{\Delta\hat w}\rvert$, MLP / control | 0.034 / 0.014 | 0.047 / 0.022 | 0.064 / 0.063 |
+| Wilcoxon $p$ | 0.034 | 0.016 | 0.79 |
+
+Because a rank correlation over 12 tokens is blunt, the load-bearing evidence is this paired per-token
+comparison. The dose moves a token's width roughly twice as far as that token's exactly matched
+control at every dose from 0.0006 to 0.265 bits ($p \le 0.005$ throughout), converging only at full
+ablation where both have saturated. Removing each arm's mean level shift — leaving only the part that
+rearranges tokens — keeps the difference at the two doses where the ordering is still alive
+($p = 0.034$, $0.016$) and erases it once the ordering is gone ($p \ge 0.47$ above 0.1 bits).
+
+The spread panel separates two effects the earlier experiments kept confusing. Through 0.014 bits the
+across-token *spread* collapses along the same trajectory in both arms (0.070/0.074, 0.069/0.068 at
+matched bits) — pushing the residual stream around by any means compresses every token toward
+$\hat w_u \approx 0.82$, as the displacement ladder found for embedding edits; beyond that the dose
+compresses harder (0.027 vs 0.055 at 0.103 bits), where the ordering has already gone. Level and
+ranking are separate channels, and it is the ranking that singles out a component.
+
+This is the direction's positive mechanistic localisation, with an honest margin: one component, one
+frame, three control seeds, 12 tokens, and a 1.3× separation in bits (about 2× in per-token width
+change) confined to doses below 0.03 bits. It says the block-0 MLP's contribution to the final-position
 residual stream is where the per-token width trait is realised — consistent with the layer sweep's
 finding that the ordering is already fixed at the input and that the blocks *below* the interpolation
-site do the sharpening.
+site do the sharpening. The control equalises how far each token's output moves, not the direction it
+moves in, so it bounds a size effect rather than every alternative to a carrier.
+
+### Transplant: the block-0 MLP's output vector carries the width
+
+Destroying a component shows it is necessary. To ask whether its output is *sufficient*, we take the
+block-0 MLP's final-position output vector $m_u$ — which in this architecture is computed from the
+token embedding alone, with no context (its cosine across the three sentence frames is 1.0000) — and
+overwrite one token's $m_u$ with another's, leaving every other part of the forward pass in place. The
+six anchor prompts are never edited, so a token transplanted with its own $m_u$ must return exactly its
+baseline width; it does, for all 12 tokens (max difference $0.0000$). We also probe $m_u$ directly, to
+see whether the number is more *readable* there than in the static embedding.
+
+![Ridge probes from three representations, the 12x12 transplant matrix, transplanted width against the donor's own width, and donor-versus-recipient rank agreement](plots/mlp_read.png)
+
+**Figure 20.** Left: held-out Spearman $\rho$ (y) between predicted and measured $\hat w_u$ for ridge
+probes from three representations (x), 80 train / 43 test tokens over 50 random splits, error bars
+$\pm 1$ sd across splits, hatched distinctly; gray cross-hatched bars = the same probe with shuffled
+targets. Centre left: measured width $\hat w$ after transplant (colour, `cividis`) for every recipient
+(y) × donor (x) pair, both axes ordered narrow → wide by the token's own unedited width; vertical
+banding = the donor sets the value. Centre right: recipient's width after the transplant (y) against
+the donor's own width (x); circles = cross transplants, diamonds = self transplants, gray lines join
+one recipient's 12 donors, dashed line $y = x$ (complete transfer). Right: Spearman $\rho$ over the 11
+partners (y) for each of the 12 tokens sorted by its own value (x) — circles: with the recipient held
+fixed, against the donor's width; squares: with the donor held fixed, against the recipient's width.
+
+| transplanting $m_u$ from a donor onto a recipient (12 × 11 pairs, frame 1) | value |
+|---|---|
+| **width follows the donor: $\rho$ over the 11 donors, per recipient** | **$+0.968$** (min $+0.95$, Wilcoxon $p = 5\times10^{-4}$) |
+| **slope of the recipient's new width on the donor's own width** | **$+0.913$** (1.0 = complete transfer) |
+| width follows the recipient's remaining state: $\rho$ over the 11 recipients, per donor | $-0.104$ ($p = 0.64$) |
+| between-donor variance ÷ between-recipient variance of the transplanted width | $66\times$ |
+| self-transplant vs baseline | $\rho = +1.000$, max difference $0.0000$ |
+| $m_u$ replaced by the 12-token mean (the ablation, at this dose) | $\hat w = 0.663 \pm 0.017$, from $0.565 \pm 0.084$ |
+
+Swapping one vector transports the whole trait. A wide token given a narrow token's $m_u$ becomes
+narrow, at 91% of the full distance, and the width it lands on is set by the donor to the near-exclusion
+of anything else in the recipient's forward pass: the recipient's own identity contributes 66× less
+variance and is, if anything, mildly *anti*-correlated with the outcome. This is the sufficiency result
+the ablation and dose–response could not give, and it also explains why the static-embedding lookup
+works at all — $m_u$ is a fixed function of the token's embedding row, so a per-token width is fixed
+before any context is read.
+
+The intervention is a large one and should be read as such. The transplant moves the model's output by
+a median 0.738 bits, and $m_u$ is 79% of the post-block-0 state's norm and 76% of its across-token
+spread, so the hybrid state sits about three-quarters of the way from the recipient toward the donor.
+The claim the numbers support is that the width-relevant content of the block-0 state lives in the
+MLP's contribution — not that a small edit suffices.
+
+| what the number can be read from (ridge probe, 80 train / 43 test, 50 splits) | held-out $\rho$ | held-out $R^2$ |
+|---|---|---|
+| static embedding row $W_E[u]$ | $+0.764 \pm 0.045$ | $0.514$ |
+| **block-0 MLP output $m_u$** | $+0.748 \pm 0.049$ | $0.511$ |
+| post-block-0 residual state $x_u$ | $+0.772 \pm 0.044$ | $0.558$ |
+| shuffled targets (control, worst of the three) | $-0.234$ | \- |
+
+The probe half is a null, and an informative one. Reading $\hat w_u$ off $m_u$ is no easier than
+reading it off the static embedding ($+0.748$ against $+0.764$) or off the full post-block-0 state
+($+0.772$); all three sit at the same accuracy. So the block-0 MLP does not make the width trait more
+linearly explicit — it *carries* it rather than *encoding* it in a newly readable direction, which is
+consistent with the earlier failure of edits along the probe direction to steer width. For a
+practitioner this means the free static-embedding lookup (Figures 10–11) loses nothing to a probe
+placed deeper.
+
+### How many directions does the transplant need? All of them
+
+If the width trait were a low-dimensional feature, a few directions of $m_u$ would carry it, and an
+auditor could monitor or edit those directions instead of the whole vector. We test this by
+transplanting only part of the difference: project $m_d - m_r$ onto the top $k$ principal components of
+$m$ across the 123 tokens, transplant that projection alone, and sweep $k$. Two controls: the bottom
+$k$ components (the low-variance tail), and a random $k$-dimensional subspace.
+
+![Transfer slope against the number of transplanted directions, against the variance they carry, and the mean transplanted width against output movement](plots/mlp_rank.png)
+
+**Figure 21.** Left: transfer slope on the donor's width (y) against the number of transplanted
+directions $k$ (x, log scale); circles = top $k$ principal components of $m$, triangles = bottom $k$,
+squares = a random $k$-dimensional subspace; dash-dotted line = the complete transplant's $+0.913$.
+Centre: the same slope (y) against the share of the across-token variance of $m$ that the transplanted
+subspace carries (x); dashed line = transfer proportional to variance kept. Right: mean $\hat w$ over
+the 132 transplants (y, error bars 1 sd across transplants) against the output movement the partial
+transplant causes (x, bits, symmetric log scale), each point labelled with its $k$; dash-dotted line =
+the unedited mean 0.565.
+
+| directions transplanted | variance carried | transfer slope | $\rho$ | mean $\hat w$ | output movement |
+|---|---|---|---|---|---|
+| top 8 principal components | 0.24 | $+0.256$ | $+0.40$ | 0.653 | 0.271 bits |
+| top 32 | 0.55 | $+0.298$ | $+0.47$ | 0.647 | 0.599 bits |
+| top 64 | 0.79 | $+0.274$ | $+0.58$ | 0.613 | 0.713 bits |
+| **all 122 (the complete vector)** | **1.00** | **$+0.913$** | **$+0.97$** | **0.573** | 0.750 bits |
+| bottom 58 (the low-variance tail) | 0.21 | $-0.022$ | $+0.01$ | 0.601 | 0.016 bits |
+| random 64-dimensional subspace | \- | $+0.000$ | $-0.09$ | 0.570 | 0.001 bits |
+| *reference: no edit* | \- | \- | \- | *0.565* | \- |
+
+The answer is that the trait needs the whole vector. Keeping the 64 principal components that carry
+79% of the across-token variance of $m$ buys only 30% of the transfer ($+0.274$ against $+0.913$) while
+already causing 95% of the full transplant's output movement, and the discarded tail on its own carries
+nothing ($-0.022$, and it barely moves the model at all: 0.016 bits). Top-64 and bottom-58 together
+would give $+0.25$ if their effects added; the complete vector gives $+0.913$.
+
+The third panel makes the dissociation concrete. Every partial transplant behaves like the
+disturbances of Figures 14–19 — it inflates the mean width from 0.565 toward 0.65 and compresses the
+spread — whereas the complete transplant is not a disturbance in this sense at all: it returns a mean
+of 0.573 and a spread of 0.076, essentially the unedited 0.565 and 0.084, having simply exchanged the
+tokens' widths. Truncating the vector costs the transfer and keeps the damage.
+
+So the width trait is not a low-dimensional feature of the block-0 MLP's output that could be read off
+a handful of directions; it is a property of that vector as a whole, which matches what the mode-split
+experiments found from the output side (the trait belongs to the token's whole next-token map, not to
+an identifiable slice of it). One caveat is worth stating: a truncated $m$ is a vector no token
+actually produces, so the failure of a partial transplant is evidence about the code being distributed
+only to the extent that the model's response to off-manifold states is informative.
 
 ## Next experiment
 
-**Read the block-0 MLP's contribution, instead of destroying it.** The dose–response says the trait
-lives in one component's final-position output; the natural follow-up is to test whether that output is
-also *sufficient*. Take the block-0 MLP output vector $m_u$ at the final position for each of the 123
-endpoint tokens, and (a) fit a ridge probe from $m_u$ to the measured anchor width $\hat w_u$ with the
-same held-out protocol as the embedding probe, and (b) transplant $m_u$ from a narrow token onto a wide
-token's forward pass and re-measure. If the probe from $m_u$ beats the embedding probe's $\rho = +0.76$
-and the transplant moves the recipient's width toward the donor's, the trait is carried by that vector
-and the mechanism is settled at the level of a readable feature. If the probe is no better than the
-embedding probe and the transplant does nothing, the block-0 MLP is a necessary stage rather than the
-place the number is stored, and the practical deliverable remains the static-embedding lookup
-(Figures 10–11). Cost: 123 forwards plus ~12 transplants, cheaper than this iteration's experiment.
+**Test the lookup where it would be used: a second model.** Everything here is one model, one hook
+point. The claim with practical value is the free static-embedding screen, and its untested assumption
+is that a token's width trait is a property of the token's *representation* rather than of this
+particular network. Repeat the cheapest end of the pipeline on a second Pythia size (410M or 2.8B):
+measure anchor widths for ~60 tokens, fit the embedding probe, and check three numbers against this
+report — the probe's held-out $\rho$ (here $+0.76$), the rank agreement of the two models' measured
+widths on the shared tokens, and whether the block-0 MLP is again the single early component that
+carries the ordering. Agreement would make the screen a property of tokens; disagreement would make it
+a per-model calibration, which is still usable but must be re-fitted. Cost: about the same as the
+anchor-width measurement here, ~20 minutes of GPU time.

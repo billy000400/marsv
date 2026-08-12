@@ -600,3 +600,136 @@ Negative results retained: basin radius refuted, path-length normalisation refut
 not a width lever, top-mass steering untestable by embedding edits.
 
 **STOP written.** Plan complete, no unaddressed feedback.
+
+## 2026-08-12 — iteration 10: operator feedback (`human_feedback.txt`), per-token-matched dose–response
+
+**Feedback addressed.** `human_feedback.txt`: *"the MLP and random controls are matched only on the
+mean output JSD across the 12 tokens, while the conclusion depends on the ordering of those individual
+tokens … match or normalize output JSD separately for each token before concluding that the block-0
+MLP specifically carries the transition-width ordering."* Renamed to `human_feedback.addressed.md`.
+
+**What was run.** New `experiments/dose2.py`: the dose–response rerun with the random control's scale
+binary-searched **separately for each of the 18 endpoint prompts** (12 tokens + 6 anchors) so every
+token's own output moves exactly as many bits as the block-0 MLP dose moved it, repeated for three
+random seeds (the previous run used one). Added a paired per-token statistic (Wilcoxon over the 12
+tokens on |Δŵ_u|, and on the level-free |Δŵ_u − mean Δŵ|), and reran the old mean-matched control
+alongside purely to measure how mismatched it had been. `experiments/plot_dose2.py` replaces
+`plots/dose.png` with a four-panel figure. Results in `results/dose2.json` / `dose2.log` (~3 min GPU).
+
+**The feedback was right, and the numbers change.** The mean-matched control gave individual tokens
+between **0.08× and 8.5×** the output movement the MLP dose gave them (the dose itself is uneven: at
+full ablation per-token movement spans 0.254–0.710 bits, a factor of 2.8). Superseded numbers, old →
+new, in RESULTS.md and REPORT.md:
+
+- Control's rank agreement, mean-matched → per-token-matched, at the matched MLP rungs:
+  0.007 bits +0.99 → +0.98; 0.014 bits +0.91 → +0.91; 0.029 bits +0.79 → +0.76; **0.103 bits +0.61 →
+  +0.15** (the old control was under-dosed at 0.078 bits there); 0.265 bits −0.32 → +0.24; 0.451 bits
+  −0.76 → −0.06. MLP arm unchanged (+0.84 / +0.64 / +0.62 / +0.25 / +0.74 / −0.10).
+- Headline margin: **"a random disturbance needs ~3.5× more output movement to do the same damage" →
+  "~1.3×"** (rho = 0.6 crossing: MLP 0.031 bits, matched control 0.041 bits; the loose control's 0.086
+  bits gives the discarded 2.8–3.5× figure).
+- Band of the claim: "four rungs 0.007–0.103 bits" → **"five rungs up to 0.03 bits"**; above 0.1 bits
+  the two arms cross and are not interpreted (SE(rho) ≈ 0.3 at n = 12).
+- Seeds: one random-control seed → three (control rho now reported as mean ± sd across seeds).
+- New primary statistic (level-free, per token, paired): the dose moves each token's width ~2× as far
+  as that token's own matched control — 0.074 vs 0.036 width units at 0.0068 bits (Wilcoxon
+  p = 0.0010); after subtracting each arm's mean shift, 0.034 vs 0.014 (p = 0.034) and 0.047 vs 0.022
+  at 0.0143 bits (p = 0.016); null once the ordering is dead (p ≥ 0.47 above 0.1 bits).
+- Retracted claim: "the across-token spread collapses **identically** in the two arms". True through
+  0.014 bits (0.070/0.074, 0.069/0.068), false above it — the dose compresses harder (0.027 vs 0.055 at
+  0.103 bits). The level/ordering split now rests on the rungs where an ordering still exists.
+- Localisation itself **stands**: the MLP arm is below its matched control in 15/15 rung × seed
+  comparisons in the live band. Its strength is downgraded from "3.5× cheaper" to "1.3× in bits, ~2×
+  in per-token width change, below 0.03 bits".
+
+**Where it changed.** REPORT.md Summary (matched-bits paragraph), Methods (the dose–response
+subsection now defines per-prompt matching with $B_p$, the three seeds, and both paired statistics),
+Results pattern 22 (rewritten, new table, new Figure 19 caption, mismatch diagnostic), Conclusion and
+Limitations. RESULTS.md headline paragraph and the dose–response section (new table + paired-test
+table). Figure count stays 19 in both files; `plots/dose.png` regenerated (2 panels → 4: ordering,
+spread, control-matching ratio, per-token change).
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 25 display eqs / 551 inline eqs / 19 embeds / 0 problems; RESULTS 339 inline eqs / 19 embeds /
+0 problems).
+
+## 2026-08-12 — iteration 10 (part 2): the recommended follow-up run — block-0 MLP probe + transplant
+
+With the feedback addressed and budget left, the experiment both deliverables named as the single most
+informative next step was run: `experiments/mlp_read.py` (probe + transplant) and
+`experiments/mlp_geom.py` (how large the transplant is). Results in `results/mlp_read.json`,
+`results/mlp_geom.json`; new figure `plots/mlp_read.png` embedded as **Figure 20** in both
+deliverables (figure count 19 → 20).
+
+**Added to RESULTS.md and REPORT.md (new results, nothing superseded).**
+- **Transplant — a strong positive.** Overwriting one token's block-0 MLP final-position output $m_u$
+  with another's (anchors untouched) transports the width: per-recipient rho(donor width, resulting
+  width) = **+0.968** (min +0.95, Wilcoxon p = 5e-4), slope **+0.913** on the donor's own width, while
+  the recipient's remaining state contributes nothing (per-donor rho = **−0.104**, p = 0.64;
+  between-donor variance 66× between-recipient). Self-transplant reproduces the baseline exactly
+  (rho = +1.000, max diff 0.0000) — the pipeline's sanity check.
+- **Context-free.** $m_u$ has cosine **1.0000** across the three sentence frames: Pythia's parallel
+  residual means block 0's MLP reads the token embedding before attention writes, so a token's width is
+  fixed before any context is read. This is now the stated reason the static-embedding lookup works.
+- **Probe — a null, reported as one.** Ridge probe from $m_u$ to measured $\hat w_u$ (embedding
+  probe's protocol): rho = **+0.748 ± 0.049**, R^2 = 0.511, against **+0.764** for the static embedding
+  row and **+0.772** for the full post-block-0 state; shuffled targets −0.234. All within 1 sd, so the
+  block-0 MLP carries the trait without making it more linearly readable. Practical consequence stated:
+  the free embedding lookup gives up nothing to a deeper probe.
+- **Scale caveat stated with numbers** (`mlp_geom.py`): a cross transplant moves the output by a median
+  0.738 bits; $m_u$ is 0.79 of the post-block-0 state's norm and 0.76 of its across-token spread, and
+  the hybrid state sits ~0.75 of the way from recipient to donor. Claim limited accordingly: the
+  width-relevant content of the block-0 state lives in the MLP's contribution, not "a small edit
+  suffices".
+- REPORT.md Methods gains a subsection defining the probe references, the parallel-residual split
+  $x_u = \text{rest}_u + m_u$, the transplant, and the two statistics $\rho_{\mathrm{donor}}$ /
+  $\rho_{\mathrm{recip}}$ with equations; Results gains patterns 23 and 24; Summary, Conclusion and
+  Limitations updated.
+- **Recommended next experiment replaced** (old → new): "probe and transplant the block-0 MLP output"
+  (now done) → "**how compressible is $m_u$?** — project $m_d - m_r$ onto the top $k$ principal
+  components of $m$ across the 123 tokens, transplant only that, sweep $k$; a handful of directions
+  reproducing slope +0.913 would make the trait a low-dimensional, monitorable feature."
+
+**Implementation note.** `mlp_read.py` solves the ridge probe in its dual form (80×80 instead of
+2049×2049 per ridge strength); the script asserts at run time that it matches
+`embed_probe.probe` on the same splits, so the four probes are the same estimator as pattern 10's.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 28 display eqs / 630 inline eqs / 20 embeds / 0 problems; RESULTS 394 inline eqs / 20 embeds /
+0 problems).
+
+## 2026-08-12 — iteration 10 (part 3): how many directions of $m_u$ carry the width? None few enough
+
+`experiments/mlp_rank.py` + `plot_mlp_rank.py`; results in `results/mlp_rank.json` / `.log`; new
+figure `plots/mlp_rank.png` embedded as **Figure 21** in both deliverables (figure count 20 → 21).
+This runs the experiment part 2 had named as next, so RESULTS.md's and REPORT.md's "next experiment"
+sections are replaced again (see below).
+
+**Added (new result, nothing superseded).** Partial transplant: project the donor–recipient difference
+$m_d - m_r$ onto the top $k$ principal components of $m$ across the 123 tokens, transplant only that,
+sweep $k$; controls = the bottom $k$ components and a random $k$-dimensional subspace.
+- top 8 / 32 / 64 components (0.24 / 0.55 / 0.79 of the across-token variance) → transfer slope
+  **+0.256 / +0.298 / +0.274**, against **+0.913** for the complete vector ($k = 122$);
+- the discarded tail (bottom 58, 0.21 of the variance) transfers nothing (**−0.022**) and is nearly
+  behaviourally inert (0.016 bits); a random 64-dim subspace gives **+0.000**;
+- top-64 plus bottom-58 would give +0.25 if additive; intact gives +0.913;
+- dissociation between damage and transfer: a top-64 transplant already causes 95% of the full
+  transplant's output movement (0.713 of 0.750 bits) and inflates mean $\hat w$ to 0.613 (sd 0.060)
+  from the unedited 0.565 (sd 0.084), while the complete transplant returns 0.573 (sd 0.076) — it
+  exchanges widths instead of disturbing them.
+- Conclusion recorded: the width trait is a property of the whole block-0 MLP output vector, not of a
+  low-dimensional readable subspace — consistent with patterns 16–17 on the output side. Caveat stated:
+  a truncated $m$ is off-manifold.
+- REPORT.md Methods gains the partial-transplant definition with $m_{\mathrm{write}} = m_r + P_k(m_d -
+  m_r)$; Results gains pattern 25; Summary, Conclusion and Limitations updated.
+
+**Recommended next experiment replaced** (old → new): "how compressible is $m_u$?" (now answered: not
+at all) → "**a second model**: repeat the cheap end of the pipeline on Pythia 410M or 2.8B — anchor
+widths for ~60 tokens, embedding probe, block-0 MLP ablation — and compare the probe's held-out rho
+(+0.76 here), the cross-model rank agreement of measured widths, and whether the block-0 MLP is again
+the single carrier. This tests whether the free screen is a property of tokens or a per-model
+calibration." Cost ~20 min GPU.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 29 display eqs / 669 inline eqs / 21 embeds / 0 problems; RESULTS 428 inline eqs / 21 embeds /
+0 problems); 42 figure captions for 42 embeds across the two files.
