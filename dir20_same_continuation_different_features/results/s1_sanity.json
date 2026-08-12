@@ -1,0 +1,71 @@
+{
+  "big_in": {
+    "label": "big / in (plateau case)",
+    "prefix": "The house was",
+    "tok_a": " big",
+    "tok_b": " in",
+    "jsd": 0.6625694632530212,
+    "w_tv": 0.012299556150799695,
+    "w10_90": 0.043702277094125774,
+    "nonmono": 0.0,
+    "endpoint_rel_err": [
+      2.707442945393268e-07,
+      3.4943172977364156e-07
+    ],
+    "omega_rad": 0.9070415496826172,
+    "cos_h0": 0.616078794002533,
+    "norm_a": 24.155183792114258,
+    "norm_b": 20.896228790283203,
+    "top_a": [
+      "\u0120enough",
+      ",",
+      "\u0120and",
+      ".",
+      "\u0120but"
+    ],
+    "top_b": [
+      "\u0120a",
+      "\u0120the",
+      "\u0120an",
+      "\u0120good",
+      "\u0120dis"
+    ]
+  },
+  "big_large": {
+    "label": "big / large (smooth case)",
+    "prefix": "The house was",
+    "tok_a": " big",
+    "tok_b": " large",
+    "jsd": 0.05250447057187557,
+    "w_tv": 0.29238498699578963,
+    "w10_90": 0.5916624322533608,
+    "nonmono": 0.0,
+    "endpoint_rel_err": [
+      2.7382293410482816e-07,
+      3.197604314664204e-07
+    ],
+    "omega_rad": 0.7467691898345947,
+    "cos_h0": 0.7338873147964478,
+    "norm_a": 24.155183792114258,
+    "norm_b": 25.69871711730957,
+    "top_a": [
+      "\u0120enough",
+      ",",
+      "\u0120and",
+      ".",
+      "\u0120but"
+    ],
+    "top_b": [
+      "\u0120and",
+      ",",
+      "\u0120enough",
+      ".",
+      "\u0120but"
+    ]
+  },
+  "_gate": {
+    "endpoint_err_ok": true,
+    "ordering_ok": true,
+    "passed": true
+  }
+}

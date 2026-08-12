@@ -1,0 +1,36 @@
+{
+  "matching_version": "relaxed",
+  "rule": {
+    "version": "relaxed",
+    "djsd": 0.02,
+    "conf": 0.75,
+    "df": 0.08
+  },
+  "seed": 31,
+  "model": "gpt2-large",
+  "n_prefixes": 6,
+  "n_candidate_pairs": 1656,
+  "n_eligible": 54,
+  "logit_dist_p10": 289.7493591308594,
+  "confound_sd": {
+    "logit_dist": 69.25273445202293,
+    "angle0": 0.1627258493517958,
+    "lognorm_ratio": 0.14296810144465275,
+    "mean_surprisal": 2.974548239169139
+  },
+  "topk_neurons": 64,
+  "n_contrasts": 0,
+  "contrasts": [],
+  "bank_summary": {
+    "jsd": [
+      0.01203650701791048,
+      0.5759923458099365,
+      0.6925597935914993
+    ],
+    "F": [
+      0.7288914837463023,
+      0.8957357653438501,
+      0.9549801726148822
+    ]
+  }
+}
