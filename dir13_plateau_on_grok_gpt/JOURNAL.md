@@ -1969,3 +1969,70 @@ No `STOP` written — wall-clock remains and the plan has open candidates.
 On track? yes — S24a complete, all four pre-registered predictions held, an experiment that had been
 stranded on disk is now reported, and the report's central description is narrowed to what the evidence
 actually supports; blocker: none.
+
+## 2026-08-12 (later still) — S24b: opening the block, one unit at a time
+
+**What I did.** Part C first: listed the direction root for `human_feedback*.md` / `*REVIEW*` without
+the `.addressed.md` suffix — none of the seven, so this iteration advanced the plan. PLAN's S24 item 1
+("what the trainable blocks compute") has been the named open problem since 2026-08-03 and has
+survived seven iterations of freezing experiments, all of which only ever answered *where* the
+computation may live. I also checked `results/` against the deliverables first — the lesson from last
+iteration, when a finished experiment was found stranded on disk — and everything there is reported.
+
+The probe is a chord linearization of individual MLP hidden units. For a set `S` of units in blocks
+1–4, each unit's post-GeLU activation at the patched position is replaced along the path by the chord
+between its own two endpoint values. That deletes exactly one thing — the unit's curvature in `t` —
+and nothing else, and it has a property that made it worth choosing over ablation: the chord agrees
+with the true activation at both ends, so the two endpoint states that `d(t)` is measured against are
+untouched for any `S`. That is verified per pair (worst deviation 1e-6) and it is why the resulting
+widths can be read as "how much of the bend did that set carry" rather than "how much did I break".
+
+**What the numbers say.** Linearizing all 3,840 units of blocks 1–4 removes 86.7% of the sharpness
+(0.351 → 0.743 against the untrained 0.803) — nearly as much as deleting the MLPs outright (0.796),
+while keeping every unit and every endpoint. Then the concentration: a pair's own top-32 units, 0.83%
+of the population, remove 50.9%; the per-pair median number of units for half of that pair's own gap
+is 64 (IQR 32–128). Thirty-two random units remove 1.2%, and random selection needs ~2,048 units to
+match 32 ranked ones, so the ranking carries roughly a 64× concentration. The other half of the result
+is negative and I think more useful: one *fixed* global set of 32 removes only 19.0%, and a typical
+pair shares 9 of its 32 units with it. 668 of the 3,840 units ever enter a top-32 and 82% of those
+serve two or more pairs, so there is a shared pool of about a sixth of the early MLP units, but which
+few dozen bend a given path is pair-dependent. An unpredicted detail: the carrying units skew *deeper*
+within the group (16/19/28/37% of top-32 slots in blocks 1/2/3/4) while single-block deletion is
+front-loaded (41/28/18/11%). Both can hold — deleting block 1's MLP also changes what blocks 2–4 see —
+and I said so in the section rather than leaving it as a loose end.
+
+**Assumptions logged (loop mode, no one to ask).** (a) The importance ranking is measured on the same
+curve it is then tested on, so per-pair top-`k` is a *concentration* measure, not a held-out
+prediction. I did not fix this with a train/test split over `t` (which would break the 50-point grid
+the whole report shares); instead the global-set condition is the honest out-of-pair test, and it is
+reported as the weaker number in both deliverables and in the caveats. (b) Importance weights the
+off-chord deviation by the unit's write-vector norm, so a large swing through a small output direction
+does not outrank a small swing through a large one; the unweighted alternative was rejected because it
+ranks by activation scale, which is not what reaches the residual stream. (c) Linearizing units in
+block 1 changes the input to blocks 2–4, so this is an intervention, not an additive decomposition —
+stated in both files.
+
+**What I learned.** Two things worth carrying. First, an intervention that preserves the endpoints is
+strictly more informative here than one that does not: every earlier mechanism probe had to argue that
+the endpoints it moved were still comparable, and this one simply does not have that problem — the
+1e-6 check is the whole argument. Second, the "sparse or distributed?" question had a much cheaper
+answer than the freezing series that preceded it: no training, 198 s of forward passes on checkpoints
+that already existed, against ~30 min per frozen run. Seven iterations of retraining bought "where",
+and one afternoon of hooks bought "how many".
+
+**Deliverable work.** New Results section in both files with Figure 29 (`plots/neuron_path.png`) and a
+new REPORT.md Methods subsection defining the chord substitution, the importance score and the
+recovered fraction $\rho(S)$. The hypothesis paragraph, Conclusion, Interpretation and Limitation 7
+each had a "still uncharacterised" clause that is no longer true; all four are narrowed to what the
+counts support, with "what those units detect" named as the part that stays open. Exploratory Figures
+29–31 renumbered 30–32; 32 embeds / 32 captions / sequential 1–32 in each file;
+`check_render.py REPORT.md RESULTS.md` passes with 0 problems.
+
+**Next step.** The obvious successor is what the units *detect*: take the ~668 pool units and ask what
+inputs drive them (max-activating characters/contexts in the corpus), which would turn "a few dozen
+gated units" into a statement about features. It needs no training either. Beyond that, PLAN S24 item 3
+(a longer character run, or a second model/tokenizer) still needs materially more compute than remains.
+No `STOP` written — wall-clock remains and the plan has open candidates.
+
+On track? yes — S24b done, the direction's named open problem now has its first quantitative answer
+(sparse per path, pooled across paths), and both deliverables carry it; blocker: none.

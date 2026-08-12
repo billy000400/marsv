@@ -442,6 +442,21 @@ Null results are complete when the validity gates pass. When complete, write an 
       New **Figure 25** (`plots/seed_replication.png`) in both deliverables; Figure 24 re-rendered with
       the two extra seed markers and leader-line labels.
 
+- [x] **S24b - What the early MLPs compute: chord linearization of individual units.** DONE 2026-08-12,
+      the first answer to S24 item 1 (open since 2026-08-03). `experiments/neuron_path.py` replaces a
+      chosen set of block-1-4 MLP hidden units' post-GeLU activations along the path by the chord
+      between their own endpoint values, deleting only each unit's curvature in `t` and leaving both
+      endpoints exact (worst deviation 1e-6 over every pair and condition). Same 150 pairs, block-0
+      interpolation, step-30,000 `ref_pos` checkpoint as the gain/per-block interventions; three
+      selection rules (per-pair top-k, one global top-k, random k) at 13 sizes; 198 s, no training.
+      **Result: sparse per path, pooled across paths.** All 3,840 units -> `w` 0.743 (86.7% of the
+      trained->untrained gap; MLP deletion reaches 0.796). Per-pair top-32 (0.83% of units) -> 50.9%;
+      per-pair median k for half its own gap = 64 (IQR 32-128); random 32 -> 1.2% and random needs
+      ~2,048 units to match 32 ranked ones. One global set of 32 -> only 19.0%, median overlap of a
+      pair's top-32 with it 9/32; 668 units ever enter a top-32 and 82% of those serve >=2 pairs.
+      Unpredicted: top-32 slots skew deeper (16/19/28/37% in blocks 1/2/3/4) against single-block
+      deletion's front-loaded 41/28/18/11%. Figure 29 (`plots/neuron_path.png`) in both deliverables.
+
 - [x] **S24a - Readout offset: interpolate a character the readout does not read.** DONE 2026-08-12,
       all four pre-registered predictions HELD. The reference character run was retrained
       (`train_frozen.py --tag ref_pos`, nothing frozen, seed 1337, 30,000 steps, 29.2 min) because
@@ -560,6 +575,33 @@ Prioritize in this order: Figure 9 validity gate, BPE training/validation, Matth
 End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker if any>`.
 
 ## Current status
+
+**S24b DONE 2026-08-12 — the direction's named open problem (S24 item 1, "what the trainable blocks
+compute") has its first quantitative answer, and it needed no training.** Zero unaddressed feedback
+files, so this iteration advanced the plan. `experiments/neuron_path.py` linearizes individual
+block-1–4 MLP units along the interpolation path — each chosen unit's post-GeLU activation is replaced
+by the chord between its own endpoint values, so the unit keeps its endpoint behaviour and loses only
+its curvature in $t$, and both endpoints stay exact for any chosen set (worst deviation $10^{-6}$ over
+every pair and condition). Same 150 pairs, block-0 interpolation and step-30,000 `ref_pos` checkpoint
+as the gain and per-block interventions, so widths compare directly (unmodified 0.351, untrained
+0.803); 198 s of forward passes. **The bend is the nonlinear-in-$t$ part of these MLPs:** linearizing
+all 3,840 units gives median $w$ **0.743**, i.e. **86.7%** of the trained→untrained gap, against 0.796
+for deleting the MLPs outright. **It is sparse per path:** a pair's own top-32 units (0.83% of them)
+recover **50.9%**, the per-pair median for half of its own gap is **64** units (IQR 32–128), while 32
+*random* units recover **1.2%** and random selection needs ~2,048 units to match 32 ranked ones.
+**It is not a reusable circuit:** one fixed global set of 32 recovers **19.0%**, a typical pair shares
+only **9 of its 32** units with it, and although 668 of 3,840 units ever enter a top-32 (82% of them
+serving ≥2 pairs, the most reused 88/150), the subset that bends a given path is pair-dependent.
+Unpredicted detail, reported rather than smoothed: the carrying units skew *deeper* inside the group
+(16.0 / 18.8 / 27.8 / 37.4% of top-32 slots in blocks 1/2/3/4) while single-block MLP deletion is
+front-loaded (41/28/18/11%) — consistent, because deleting block 1's MLP also changes what blocks 2–4
+receive. Both deliverables gained a Results section, a REPORT.md Methods subsection (chord
+substitution, importance score $I_j$, recovered fraction $\rho(S)$) and **Figure 29**
+(`plots/neuron_path.png`); the four "still uncharacterised" clauses in the hypothesis, Conclusion,
+Interpretation and Limitation 7 are narrowed to what the counts support, with *what those units detect*
+named as the open part. Exploratory figures renumbered 29–31 → 30–32; `check_render.py REPORT.md
+RESULTS.md` passes with 0 problems. New: `experiments/neuron_path.py`,
+`experiments/plot_neuron_path.py`, `results/neuron_path_{summary.json,raw.npz}`, `results/neuron_path.log`.
 
 **S24a DONE 2026-08-12 — the readout was moved off the patched character; all four pre-registered
 predictions held, and the report's central description narrowed.** Zero unaddressed feedback files, so
@@ -957,8 +999,16 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
-**S24a DONE (2026-08-12) — all four predictions below HELD; see "Current status" for the numbers. The
-remaining candidates are S24 items 1 and 3 below (item 2 is now closed).**
+**S24b DONE (2026-08-12) — S24 item 1 has its first quantitative answer; see "Current status". The
+successor it opens, and the cheapest next step, is *what those units detect*: take the 668 pool units
+(`results/neuron_path_raw.npz`, `counts` and `imp_mean`) and find each one's maximally activating
+characters/contexts in the SHA-verified corpus, then ask whether a unit's top-activating contexts
+predict which pairs recruit it. That needs forward passes only — no training — and it would turn "a few
+dozen gated units per path" into a statement about features. S24 item 3 (a longer character run whose
+second local-complexity descent separates from initial fit, or a second model/tokenizer) still needs
+materially more compute than one 30,000-step run.**
+
+**S24a DONE (2026-08-12) — all four predictions below HELD; see "Current status" for the numbers.**
 
 **S24a as pre-registered BEFORE the trained/untrained rows existed (kept for the record).** Every number in both deliverables patches
 the final sequence position and reads the final logits, so "the path bends sharply" and "the readout

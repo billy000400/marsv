@@ -1605,3 +1605,48 @@ PLAN.md and REPORT.md Methods before it was scored.
   (REPORT 32 display / 733 inline equations / 31 figures; RESULTS 31 figures; 0 problems).
 - **No `STOP`**: wall-clock remains and PLAN's S24 candidates (what the trainable blocks compute; a
   second model/tokenizer; a longer run) are still open. Zero unaddressed feedback files.
+
+## 2026-08-12 (later) — S24b: chord linearization of individual MLP units — the bend is a few dozen units per path
+
+**What changed in the deliverables.** A new Results section in both files, *"What the early MLPs
+compute — a sparse, pair-dependent set of units carries the bend"* (RESULTS.md) / *"What the early
+MLPs compute: a few dozen units per path, recruited from a shared pool"* (REPORT.md), plus a REPORT.md
+Methods subsection defining the intervention and its two metrics. This is the first result here about
+*what* the implicated blocks compute rather than where the computation may sit; PLAN S24 item 1 had
+listed it as the direction's real open problem since 2026-08-03.
+
+- **New intervention.** For a set $S$ of MLP hidden units in blocks 1–4, each unit's post-GeLU
+  activation at the patched position is replaced along the path by the chord between its own endpoint
+  values, $a_j(t)\to(1-t)a_j(0)+t\,a_j(1)$ — the unit keeps its endpoint behaviour and loses only its
+  curvature in $t$. Both endpoints stay exact for any $S$ (worst $|d(0)|$, $|1-d(1)|$ = **1e-6** over
+  every pair and condition). Units ranked by
+  $I_j=\lVert W^{\mathrm{proj}}_{:,j}\rVert_2\max_t|a_j(t)-\bar a_j(t)|$; three selection rules
+  (per-pair top-$k$, one global top-$k$, random $k$) at 13 sizes, 150 pairs, block-0 interpolation,
+  step-30,000 reference checkpoint — the same subsample and setting as the gain and per-block
+  interventions, so widths are comparable (unmodified 0.351, untrained 0.803).
+- **New numbers.** All 3,840 units linearized → median $w$ **0.743**, recovering **86.7%** of the
+  trained→untrained gap (MLP deletion reaches 0.796). Per-pair top-32 (0.83% of units) → **50.9%**;
+  top-512 → 83.6%; per-pair median $k$ for half of its own gap = **64** (IQR 32–128). Random 32 →
+  **1.2%**; random selection needs ~2,048 units for what 32 ranked units give (≈64× concentration).
+  One global set of 32 → **19.0%**; 668 of 3,840 units ever enter a top-32, 82% of those serve ≥2
+  pairs, most reused unit 88/150 pairs, median overlap of a pair's top-32 with the global top-32
+  **9/32**. Block composition of the 4,800 top-32 slots: 16.0 / 18.8 / 27.8 / 37.4% in blocks 1/2/3/4
+  — increasing with depth, the opposite ordering to single-block MLP deletion (41/28/18/11%), which is
+  explained in the section rather than left as a discrepancy.
+- **Claims updated (no result superseded; nothing removed).** The hypothesis paragraph's
+  "a **relocatable** computation that we have not yet characterised" (RESULTS.md) becomes "carried by a
+  few dozen MLP units per path"; REPORT.md's Conclusion sentence "what the trainable blocks actually
+  compute to bend the path is still uncharacterised" is replaced by the counts above, with "what those
+  units detect" named as what stays open; Limitation 7 and the Interpretation paragraph are narrowed
+  the same way; the Summary and Headline each gain the result as their closing paragraph.
+- **New figure.** **Figure 29** `plots/neuron_path.png` — A: median width vs number of linearized units
+  for the three selection rules; B: per-pair smallest $k$ for half that pair's gap; C: unit reuse across
+  pairs. The exploratory Figures 29–31 are renumbered **30–32** in both files with their prose citations
+  updated; both files now hold 32 embeds, 32 visible captions, sequential numbering 1–32.
+- **Code/data:** new `experiments/neuron_path.py`, `experiments/plot_neuron_path.py`;
+  new `results/neuron_path_summary.json`, `results/neuron_path_raw.npz`, `results/neuron_path.log`.
+  No training was needed — the run took 198 s on the existing `ref_pos` checkpoints.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 35 display / 780 inline equations / 32 figures; RESULTS 32 figures; 0 problems).
+- **No `STOP`**: wall-clock remains and PLAN S24 item 3 (a longer character run / second model) is open.
+  Zero unaddressed feedback files.

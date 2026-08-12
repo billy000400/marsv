@@ -119,6 +119,15 @@ offset 4 the two endpoints predict the *same* next character for **91.3%** of pa
 decision-basin description no longer applies there — and **52.0%** of pairs still give a strict
 plateau. So what switches discretely is the network's state, which the patched position happens to
 expose as a prediction flip.
+With that settled, the last experiment opens the mechanism itself. Replacing an MLP unit's activation
+along the path by the straight chord between its own endpoint values — which leaves both endpoints
+exact and deletes only the unit's curvature in $t$ — removes **86.7%** of the sharpness when applied to
+all 3,840 units of blocks 1–4. A pair's own **32** most path-nonlinear units, 0.83% of that population,
+already remove **50.9%**, while 32 random units remove **1.2%** and random selection needs about 2,048
+units to match the top-32. No fixed set does it for everyone: a single global set of 32 removes 19.0%,
+and a typical pair shares only 9 of its 32 units with it. The bend is the work of a few dozen gated
+units per path, recruited from a shared pool of 668 — neither a distributed rotation nor a reusable
+circuit.
 **Verdict: plateaus are real in this model, and at the patched position they look like next-character
 decision basins** — but that is a *description* read off one token slot, not the phenomenon: the sharp
 switch is still there several characters downstream where the decision is not, and its mechanism sits
@@ -676,6 +685,64 @@ or whether the sharp switch outlives that description.
 The trained network is compared against **its own initialization** at every $k$ (the same untrained
 baseline used in the all-pairs controls), because a short prompt with a fixed suffix might bend paths
 for reasons of geometry that have nothing to do with training.
+
+### Chord linearization: which units in blocks 1–4 bend the path?
+
+The gain and per-block interventions establish that the MLPs of blocks 1–4 make the transition sharp,
+but deleting an MLP is a blunt instrument: it removes the unit's endpoint behaviour along with
+everything else, so it cannot say whether the bend comes from a handful of units switching or from
+thousands of small contributions. That distinction is what a mechanistic account needs, and it decides
+a practical question too — whether a small unit set could be identified once and used to control the
+geometry. So we intervene on individual MLP hidden units, and we remove from each one exactly the part
+of its behaviour that can bend a path: its curvature in the interpolation parameter $t$.
+
+Let $a_j(t)$ be the post-GeLU activation of hidden unit $j$ (in one of blocks 1–4) at the patched
+position, on the same 50-point $t$ grid used everywhere. For a chosen set $S$ of units we substitute
+the **chord** between that unit's own two endpoint activations:
+
+```math
+a_j(t)\;\longrightarrow\;\bar a_j(t)=(1-t)\,a_j(0)+t\,a_j(1),\qquad j\in S,
+```
+
+leaving every other unit, every attention head and every LayerNorm untouched. Two properties make this
+the right knife. The substitution is exact at both ends ($\bar a_j(0)=a_j(0)$, $\bar a_j(1)=a_j(1)$),
+so the two endpoint states that $d(t)$ is measured against are unchanged for any $S$ — verified per
+pair as $|d(0)|$ and $|1-d(1)|$. And a straight $d(t)$ after the substitution means the units in $S$
+were carrying the whole bend, since a set of units whose responses are all linear in $t$ can only add
+a linear term to the residual stream.
+
+Units are ranked by how far each pulls the residual stream off its own chord, weighting the deviation
+by the norm of that unit's output (write) vector $W^{\mathrm{proj}}_{:,j}$, so a large activation
+swing through a small write direction does not outrank a small swing through a large one:
+
+```math
+I_j=\bigl\lVert W^{\mathrm{proj}}_{:,j}\bigr\rVert_2\cdot\max_t\bigl|a_j(t)-\bar a_j(t)\bigr| .
+```
+
+Three selection rules are run at the same set of sizes $k$, and the comparison between them is the
+experiment. **Per-pair top-$k$** takes the $k$ largest $I_j$ for that pair — how concentrated the bend
+is for one path. **Global top-$k$** takes one fixed set of $k$ units, ranked by $I_j$ averaged over the
+150 pairs after normalizing each pair to its own maximum — whether a single shared circuit accounts for
+every pair. **Random $k$** draws $k$ units uniformly per pair — the control establishing that the
+ranking, not the number of edited units, produces the effect.
+
+The effect of a set is reported as the **recovered fraction** $\rho(S)$: how far linearizing $S$ moves
+the median width from the trained model toward the untrained network's straight line, where
+$\tilde w$ denotes the median over the 150 pairs:
+
+```math
+\rho(S)=\frac{\tilde w(S)-\tilde w_{\text{trained}}}{\tilde w_{\text{init}}-\tilde w_{\text{trained}}} .
+```
+
+$\rho=0$ means the edit changed nothing; $\rho=1$ means the paths are as straight as at initialization.
+Per pair we also report the smallest $k$ whose per-pair top-$k$ reaches $\rho_i \ge 0.5$ on that pair's
+own gap, which is the quantity Figure 29B plots. Reuse of units across pairs is summarized by how many
+of the 150 pairs each unit appears in the top-32 of, and by the overlap between a pair's top-32 and the
+global top-32.
+
+Everything else matches the gain and per-block interventions exactly — the same 150-pair subsample, the
+shared context `"The house was "`, block-0 interpolation and the step-30,000 character checkpoint — so
+every width in this sweep is comparable to the rest of the report.
 
 ### Spherical interpolation and patching
 
@@ -1414,7 +1481,11 @@ accuracy ($p=8.5\times10^{-18}$). The second fact also holds at the end of train
 networks have run all 30,000 steps: blocks 6–10 give median $w = 0.328$ against the reference's
 $0.351$ (paired $-0.037$, 36.7% of pairs wider), and the run kept sharpening past its
 matched-accuracy checkpoint ($0.342 \rightarrow 0.328$), so the matched-accuracy number understates
-the gap. Removing trainable blocks can sharpen the path.
+the gap. Removing trainable blocks can sharpen the path. What that relocatable computation *is* has now
+been narrowed one level below the block: linearizing a pair's own 32 most path-nonlinear MLP units of
+the 3,840 in blocks 1–4 removes half the sharpness, 32 random units remove 1.2%, and one fixed global
+set of 32 removes 19.0%, so the bend is carried by a few dozen gated units recruited per path from a
+shared pool (Figure 29).
 
 #### The readout-rebalancing intervention: the plateau sits upstream of the decision
 
@@ -2101,6 +2172,65 @@ The scope of this result is one context, one filler string, one seed and $k \le 
 two words at this tokenization); it says the switch survives being read a short distance away, not that
 it survives arbitrary distance or a change of context.
 
+### What the early MLPs compute: a few dozen units per path, recruited from a shared pool
+
+Everything to this point localises the sharpness (blocks 1–4 here, whichever blocks stay trainable
+after retraining) and rules descriptions out (the next-character decision, endpoint plausibility, one
+token slot). None of it says what those MLPs *compute*. Linearizing individual units along the path —
+keeping each unit's endpoint values and deleting only its curvature in $t$, so both endpoints stay
+exact (worst deviation $10^{-6}$ over every pair and condition) — answers the sharpest available
+version of that question: is the bend the work of a few units that switch, or of thousands of small
+contributions? Figure 29 gives the three readings that decide it.
+
+![median transition width against the number of linearized MLP units for three selection rules; per-pair units needed for half the effect; reuse of units across pairs](plots/neuron_path.png)
+
+**Figure 29.** Chord linearization of MLP hidden units in blocks 1–4, 150 character pairs,
+interpolation block 0, step 30,000. **A** (left): median transition width $w_{10\to90}$ (y; shaded band
+= inter-quartile range) against the number $k$ of linearized units (x, $\log_2$ scale, out of 3,840);
+one series per selection rule — solid with circles = the pair's own top-$k$, dashed with squares = one
+global top-$k$ shared by all pairs, dash-dotted with triangles = random $k$. The dashed horizontal
+reference is the untrained network's median width 0.80, the dotted one the unmodified model's 0.35.
+**B** (middle): distribution over the 150 pairs of the smallest $k$ (x, $\log_2$) whose per-pair
+top-$k$ recovers half of that pair's own trained-to-untrained width gap; y = number of pairs; dashed
+vertical line = median. **C** (right): unit reuse — x = number of pairs a unit appears in the top-32
+of, y = number of units on a log scale, counting only units used at least once.
+
+**The bend is the nonlinear-in-$t$ part of these MLPs, and almost all of it.** Linearizing all 3,840
+units moves the median width from 0.351 to **0.743** — $\rho$ = **0.867** of the way to the untrained
+0.803 — and drops the strict plateau rate from 10% to 0%, with both endpoints exact throughout.
+Deleting the same four MLPs outright reaches 0.796; keeping every unit and removing only its curvature
+costs nearly as much, which is what makes the following counts meaningful.
+
+**A tiny fraction of units carries half of it, and the ranking is what does the work.** A pair's own
+top-32 units — 0.83% of 3,840 — recover **50.9%** of the gap, its top-512 recover 83.6%, and per pair
+the median number of units needed for half of its own gap is **64** (inter-quartile range 32–128,
+defined for all 150 pairs). Thirty-two *random* units recover **1.2%**; random selection needs about
+**2,048** units, 53% of the population, to reach what the top-32 reach with 32 — a roughly 64-fold
+concentration. This is the first quantitative statement here about the computation rather than its
+location: a few dozen gated units, not a distributed rotation across the early MLP population.
+
+**There is a shared pool, but no single reusable circuit.** One fixed global set of 32 units recovers
+**19.0%** where per-pair sets of the same size recover 50.9%, and it needs 1,024 units to pass 75%.
+The reuse statistics agree: 668 of the 3,840 units ever enter a pair's top-32 and 82% of those serve
+two or more pairs (the most reused serves 88 of 150), yet a typical pair shares only **9 of its 32**
+units with the global set. So the units that bend paths are drawn from a common pool of about a sixth
+of the early MLP population, while which subset bends a *given* path is pair-dependent. The practical
+consequence is direct: an intervention that identifies a small unit set on one pair should not be
+expected to control the geometry of another, even though the units come from the same pool.
+
+**The carrying units sit deeper than the deletion effect suggested, and that is not a contradiction.**
+Of the 4,800 top-32 slots, 16.0% / 18.8% / 27.8% / 37.4% lie in blocks 1 / 2 / 3 / 4 — increasing with
+depth, the opposite ordering to single-block MLP deletion (41% / 28% / 18% / 11%). Deleting block 1's
+MLP also changes the input every later block receives, so it inherits their contribution; chord
+linearization asks which units bend the path as the network actually runs, and by that measure the
+work is concentrated closer to the top of the implicated group.
+
+**Caveats.** The per-pair ranking is measured on the same curve it is tested on, so the per-pair
+series is a concentration measure rather than a held-out prediction; the global-set series is the
+out-of-pair test and is deliberately reported as the weaker result. Linearizing units in block 1 also
+changes the input to blocks 2–4, so the sweep is an intervention, not an additive decomposition.
+One context, one checkpoint, one model, 150 pairs.
+
 ### Exploratory corroboration: 40 natural minimal pairs
 
 *(Labelled exploratory and kept out of the headline — PLAN scope forbids a new 40-pair dataset in the
@@ -2109,11 +2239,11 @@ character natural prefixes rather than one short shared context.)* With interpol
 recording at final logits, 14 of 40 pairs meet the strict frozen rule (IDs 0, 4, 5, 6, 7, 9, 14, 20,
 21, 22, 28, 34, 36, 37); 24/40 have $w \le 0.35$; only 2/40 are near-straight (#10, #19, $w \ge 0.6$);
 0/40 are non-monotone. Median width is 0.309 (range [0.110, 0.773]) against the straight line's 0.8.
-The structure is visible pair by pair, with no averaging involved (Figure 29).
+The structure is visible pair by pair, with no averaging involved (Figure 30).
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 29.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
+**Figure 30.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
 final-logit space, one panel per frozen pair; panel titles give the pair ID, the two endpoint
 characters, and the transition width $w$. Gray dashed = the straight-line reference $d = t$. Most
 curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) track the straight line.
@@ -2122,11 +2252,11 @@ curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) trac
 and recording $d(t)$ at each later block's final-position residual, median width falls strictly
 monotonically from 0.777 (block 1) to 0.445 (block 11) and 0.309 at the logits; the strict rule is
 passed only at the logits (14 pairs), never at intermediate residuals. The plateau is *formed* by the
-downstream stack, not present in the interpolated activation itself (Figure 30).
+downstream stack, not present in the interpolated activation itself (Figure 31).
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 30.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
+**Figure 31.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
 frozen before inspection): $d(t)$ (y) vs interpolation position $t$ (x). Thin lines are the recording
 blocks, shaded on the cividis scale from block 1 (dark) to block 11 (light) per the colour bar; the
 thick black line is the final logits and the gray dashed line the straight-line reference. Early-block
@@ -2135,11 +2265,11 @@ curves are near-straight and progressively sharpen into plateau–boundary–pla
 **Later interpolation kills the plateau — the predicted control.** If downstream layers create the
 plateau, interpolating later (fewer layers left) must weaken it. It does, monotonically: median
 $w_{10\to 90}$ = 0.309, 0.564, 0.647, 0.733, 0.757, 0.802 for interpolation blocks 0, 2, 4, 6, 8, 10 —
-reaching the straight-line reference 0.8 when only one block remains (Figure 31).
+reaching the straight-line reference 0.8 when only one block remains (Figure 32).
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 31.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
+**Figure 32.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
 per interpolation block, shaded on the cividis scale from block 0 (dark) to block 10 (light) as given
 in the legend; the block-0 curve is strongly sigmoid and later blocks collapse onto the gray dashed
 straight line. Right: median transition width $w_{10\to90}$ (y; bars = inter-quartile range across the
@@ -2220,9 +2350,15 @@ this study where a network at full task accuracy fails to build a recognisable p
 that carried load-bearing comparisons from a single initialization — blocks 6–10 and blocks 0–4 — have
 since been replicated from a second seed against pre-registered predictions, and both held: the
 sharpest network in the study repeats to within 0.002, and all four seed pairings preserve the
-near-readout-versus-bottom ordering. What that leaves open is not a seed question but a mechanistic
-one: what the trainable blocks actually compute to bend the path is still uncharacterised, and no
-geometric rule over which blocks must be trainable has survived a test.
+near-readout-versus-bottom ordering. The mechanistic question those runs left open is now partly
+answered from the other side. Linearizing MLP units along the path — keeping each unit's endpoint
+values and deleting only its curvature in $t$ — removes 86.7% of the sharpness when applied to all
+3,840 units of blocks 1–4, and **32 units chosen per pair** (0.83% of them) already remove **50.9%**
+against **1.2%** for 32 random units. The bend is carried by a few dozen gated units per path, not by
+a distributed rotation. It is equally not a reusable circuit: one fixed global set of 32 removes only
+19.0%, and a typical pair shares 9 of its 32 units with it, so the units come from a shared pool of
+668 while the subset that bends a given path is pair-dependent. No geometric rule over which blocks
+must be trainable has survived a test, and what the individual units detect remains open.
 
 **Joint Grokking↔plateau verdict: primary not testable (PLAN case 5); character analogues temporally
 associated (PLAN case 1).** The mandatory validity gate — reproducing *Deep Networks Always Grok*
@@ -2243,7 +2379,8 @@ recipe — outside this run's compute budget (~30k vs the paper's ~1e5 steps).
 
 **Interpretation.** The interpolated block-0 activation itself carries a nearly linear image of the
 input mixture; blocks 1–4 then collapse it toward one of the two endpoint computations, and the
-remaining blocks add nothing. The all-pairs sweep sharpens the earlier reading that plateaus are "a
+remaining blocks add nothing. That collapse is the work of a few dozen MLP units per path (Figure 29),
+drawn from a shared pool but selected pair by pair. The all-pairs sweep sharpens the earlier reading that plateaus are "a
 distributed property of the whole stack": the sharpening is concentrated shallow, and what the basins
 *index* is the model's next-character decision — the flat arms are constant-prediction regions and 91%
 of prediction changes sit inside the boundary. Note this coexists with an earlier finding on the same
@@ -2290,8 +2427,10 @@ natural activation-to-activation directions.
    at all, the block-1–4 MLPs set the sharpness causally, and the decision structure survives the
    ablation that destroys the plateau. The plausibility account likewise survives as a predictor of
    *which* pairs are sharp (partial $\rho = -0.59$) but is excluded as the mechanism
-   ($\rho(\Delta w,\Delta\max p) = +0.22$). What blocks 1–4 actually compute to produce the sharp
-   change is still uncharacterised, and the freezing experiments have now bounded the claim further:
+   ($\rho(\Delta w,\Delta\max p) = +0.22$). What blocks 1–4 compute to produce the sharp change is now
+   partly characterised — a few dozen gated MLP units per path, pair-dependent and drawn from a pool of
+   668 (Figure 29) — though what those units detect is not, and the freezing experiments bound the
+   claim further:
    networks trained with blocks 1–4, 1–7, 5–11, 0–3&9–11, 0–4&8–11, 0–1&7–11 or 1–10 held at
    initialization all
    reach at least the reference's accuracy and still bend the paths (0.471, 0.558, 0.626, 0.331, 0.427,
