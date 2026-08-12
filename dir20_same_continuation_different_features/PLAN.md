@@ -584,3 +584,11 @@ Implement S2 and S3 first:
 3. construct additional human-readable candidates;
 4. lock all candidates that genuinely have similar continuations;
 5. **only then** run interpolation and generate the normalized-distance plots.
+
+## Report policy
+
+- **Core research question:** When continuation-matched endpoint pairs are interpolated, which produce plateaus, and does this agree across GPT-2 Large and Pythia?
+- **Primary report:** `REPORT.md`
+- **Maximum report words:** 5000
+- **Maximum main figures:** 8
+- **Detailed results:** `RESULTS.md`
