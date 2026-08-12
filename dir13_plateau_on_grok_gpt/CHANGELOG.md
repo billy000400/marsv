@@ -2110,3 +2110,52 @@ listed it as the direction's real open problem since 2026-08-03.
   (REPORT 51 display / 1,173 inline equations / 46 figures; RESULTS 46 figures; 0 problems); embed count
   equals caption count (92 = 46 + 46).
 - **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
+
+## 2026-08-12 — S27: the describability decline survives a four-fold wider probe, at a quarter of its size (new Figure 44 in both deliverables)
+
+- **What ran.** `experiments/neuron_probe_family.py` (~5 min: two corpus passes plus one importance pass
+  per checkpoint) refits the same ridge probe with five feature families at the two checkpoints where the
+  unit roles are defined (step 831 and step 30,000): **char1** (the current character alone, the family
+  the published headline numbers use), **past8** (the published eight-character window with its
+  previous×current interaction table), **past32** (24 more characters of history), **next8** (the eight
+  characters *after* the position, sharing no feature with the past families), and **all40** (past32 and
+  next8 together). All five are fitted on identical rows (corpus positions 32–119 of each 128-character
+  window), with the estimator, λ grid and 80/10/10 window split of `neuron_probe.py`. This answers the
+  caveat both deliverables carried — that the whole-network decline in Figure 41b "is consistent with the
+  network coming to compute things an 8-character window cannot express".
+- **Prerequisite.** The reference run's checkpoints had been wiped from /tmp scratch, so the recipe was
+  retrained from the published seeds (`train_frozen.py --tag ref_pos --seed 1337 --freeze ""`, 24 min).
+  It reproduced: final validation accuracy **0.5502** against 0.5502, the same early and final top-8 unit
+  pools (Jaccard **1.00** for both), and per-unit probe $R^2$ correlating **0.95** and **0.99** with the
+  published fits at the two checkpoints. Roles are re-derived from the retrained run's own top-8 sets.
+- **The decline is not a window-length artifact.** Demoted units: median $R^2$ 0.93 → 0.41 (char1),
+  0.96 → 0.77 (past8), 0.96 → 0.78 (past32), 0.96 → 0.78 (all40); the per-unit median fall moves by
+  **0.0002** between past8 and all40 (−0.0635 → −0.0637, n = 141, p ≈ 1e-12 both), and the whole-network
+  fall stops shrinking as well (−0.055 past8, −0.045 all40, p = 2e-27). The forward-only family explains
+  almost nothing anywhere (median $R^2$ 0.087 → 0.043 network-wide) and declines too. Role ordering holds
+  under every family (all40 at step 30,000: stable 0.99, promoted 0.92, demoted 0.78, never-head 0.59;
+  char1: 0.97, 0.73, 0.41, 0.15).
+- **Its size, though, is mostly the one-character probe.** Per-unit falls of **0.26** (demoted) and
+  **0.22** (whole network) under char1 become **0.06** and **0.05** under past8 — about three quarters of
+  the apparent collapse is a shift out of the current character into short-range context. At step 30,000
+  past8 adds a median **+0.35** of $R^2$ over char1 network-wide and +0.22 for demoted units, against
+  **+0.014** for the stable head units.
+- **Claims adjusted.** REPORT.md's Summary and RESULTS.md's headline paragraph now add that the drain
+  survives 32 characters of history plus eight of lookahead at about a quarter of its size ("a fact about
+  the units; its magnitude is a fact about the probe"). The "why this matters" consequence in both files
+  now says an interpretability claim needs the probe family attached as well as the checkpoint. Both
+  Caveats sections replace "consistent with the network coming to compute things an 8-character window
+  cannot express" with what Figure 44 rules out (32 characters of history, eight of lookahead) and what it
+  cannot (structure beyond 40 characters, or structure that is not character identity), and record that
+  the wider families were fitted on the reference run only, at two checkpoints.
+- **New files.** `experiments/neuron_probe_family.py`, `results/neuron_probe_family_summary.json`,
+  `results/neuron_probe_family_raw.npz`, `results/neuron_probe_family.log`,
+  `plots/neuron_probe_family.png` → embedded as **Figure 44** in REPORT.md and RESULTS.md; the three
+  exploratory figures renumbered 44–46 → 45–47 in both files. REPORT.md's Methods gains a **Wider probe
+  families** paragraph with the family equations. Re-running the training also rewrote
+  `results/train_{hist,meta}_ref_pos.json` and `results/train_ref_pos.log` with the identical run (only
+  the wall-clock minutes differ). No published measurement was superseded.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 52 display / 1,193 inline equations / 47 figures; RESULTS 47 figures; 0 problems); embed count
+  equals caption count (94 = 47 + 47).
+- **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.

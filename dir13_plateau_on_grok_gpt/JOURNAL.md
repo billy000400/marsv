@@ -2780,3 +2780,51 @@ RESULTS.md` re-verified the curated state (ALL CHECKS PASS, 46 figures per file)
 
 On track? yes — the second-seed item is finished for both the developmental head measurements (S25) and
 the band decomposition (S26); blocker: none.
+
+
+## 2026-08-12 — S27: does the describability decline belong to the units or to the probe?
+
+**Why this one.** With the second-seed items closed (S25, S26), PLAN's remaining successor list had one
+item that neither more seeds nor more checkpoints could touch: every describability number in this block
+is read through a single feature family — the eight characters ending at the position — and both
+deliverables carried the caveat in as many words ("consistent with the network coming to compute things
+an 8-character window cannot express"). A caveat that names its own test is worth running.
+
+**Prerequisite, and a lesson about scratch.** /tmp had been wiped, taking the reference run's checkpoints
+and the corpus with it, so the first 24 minutes went to retraining the recipe from the published seeds.
+That turned out to be a free reproduction check rather than a tax: final validation accuracy 0.5502
+against 0.5502, top-8 unit pools identical at both checkpoints (Jaccard 1.00), per-unit probe $R^2$
+correlating 0.95 and 0.99 with the published fits. I re-derive the roles from the retrained run anyway,
+so the probe and the roles sit on the same weights.
+
+**Design.** Five families, one corpus pass per checkpoint: char1, past8 (both published), past32 (four
+times the history), next8 (the eight characters *after* the position — disjoint from every past family,
+and the family a unit that anticipates upcoming text would score well under), and all40. Fitting them
+from one pass needed the sufficient statistics of the union design, with each family read off as a
+column subset; the naive version of that accumulation (one bincount per pair of the 42 feature groups)
+took 100 s per batch, so the design matrix is materialized per batch and G, X'y come from two float64
+matmuls instead — same quantities exactly, 5x faster end to end, verified by reproducing the slow
+version's five medians to four decimals on a 640-window subset before the full run.
+
+**Result, and how it cuts both ways.** The decline is not a window artifact: widening from 8 to 40
+characters moves the demoted units' per-unit fall by 0.0002 (−0.0635 → −0.0637), and the forward-only
+family explains almost nothing anywhere. But three quarters of the *size* of the published decline is
+the one-character probe: the same units fall 0.26 under char1 and 0.06 under past8, because what they
+lose is current-character predictability rather than describability as such. I wrote the subsection
+around both halves rather than leading with the reassuring one, and the headline sentences in both files
+now carry the qualifier ("a fact about the units; its magnitude is a fact about the probe").
+
+**Figure.** One figure, three panels. Panel (a)'s first draft joined the five families with a line, which
+implies an ordering they do not have (next8 is not "between" past32 and all40); it is now a marker pair
+per family joined by a vertical bar, so each family is its own column. Groups differ by colour *and*
+marker shape, checkpoints by filled/open, so it survives grayscale.
+
+**Checks.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 52 display / 1,193 inline
+equations / 47 figures; RESULTS 47 figures; 0 problems), embeds = captions = 94. Exploratory figures
+renumbered 44–46 → 45–47 before the new Figure 44 was inserted.
+
+**Feedback state.** `human_feedback_7.txt` remains `review_pending` with its single checklist item done;
+this iteration changed no next-character-decision claim, and I re-checked that the narrowed wording is
+still in place after the edits. No STOP written.
+
+On track? yes — the probe-family question PLAN listed as item (iii) is answered; blocker: none.

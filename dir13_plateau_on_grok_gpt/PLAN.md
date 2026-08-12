@@ -590,6 +590,22 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S27 DONE 2026-08-12 — the describability decline survives a four-fold wider probe, at a quarter of its
+size.** `experiments/neuron_probe_family.py` (~5 min) refits the same ridge probe with five feature
+families at steps 831 and 30,000: char1, past8 (both published), past32 (24 more characters of history),
+next8 (the eight characters after the position, disjoint from the past families) and all40. /tmp had been
+wiped, so the recipe was retrained from the published seeds first (24 min) — and reproduced exactly where
+it can be checked (val acc 0.5502 vs 0.5502, top-8 pools Jaccard 1.00 at both checkpoints, per-unit $R^2$
+r = 0.95 and 0.99). **Not a window artifact:** the demoted units' per-unit fall moves by 0.0002 between
+past8 and all40 (−0.0635 → −0.0637, n = 141, p ≈ 1e-12), the network-wide fall stops shrinking
+(−0.055 → −0.045), the forward-only family explains almost nothing anywhere (0.087 → 0.043 network-wide),
+and the four roles keep their order under every family. **But its size is mostly the one-character
+probe:** falls of 0.26 (demoted) and 0.22 (network) under char1 become 0.06 and 0.05 under past8, since
+past8 adds a median +0.35 of $R^2$ over char1 network-wide against +0.014 for the stable head units.
+Curated as **Figure 44** in both deliverables (exploratory figures renumbered 45–47), with a Methods
+paragraph defining the families, narrowed Summary/Headline sentences and rewritten caveats.
+`check_render.py` → ALL CHECKS PASS (47 figures per file).
+
 **S26 DONE 2026-08-12 — the band decomposition gets its second seed.**
 `experiments/neuron_bands_seed2.py` (155 s, forward passes only) repeats the band decomposition on the
 seed-2024 run S25 trained, with the same 150 pairs, context, block, six rank bands and five checkpoints.
@@ -1291,6 +1307,24 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S27 DONE (2026-08-12) and curated — see "Current status". The probe-family question that stood as item
+(iii) on the previous list is answered, so all three items that list named are now closed (second seed for
+the head measurements, second seed for the band decomposition, probe family beyond the 8-character
+window).
+
+**What this leaves, in order of what a reader asks next.** (i) The wider families were fitted on the
+reference run at two checkpoints only; extending them to the seed-2024 run would cost ~5 min of forward
+passes *if* those checkpoints exist, but /tmp is scratch and both runs' checkpoints vanish with it —
+retraining seed 2024 is another 23 min. (ii) The depth series still has one seed for the five-block
+windows, so the 0.397-vs-0.476 gap that carries the depth argument has an across-seed bar at five of the
+nine conditions only. (iii) The residual decline that survives all40 is still unidentified: a unit reading
+structure beyond 40 characters, or structure that is not character identity (word/line position, syntactic
+role), would score low under every family fitted so far. That needs a genuinely different probe family and
+is the larger piece of work. **Standing cost note:** `/tmp` was wiped again this iteration, taking every
+checkpoint and the corpus; re-download tinyshakespeare (SHA in `allpairs_sweep.load_vocab`) and budget
+23–24 min per run that has to be retrained. Only `results/frozen_assay_raw.npz` and the per-run summary
+JSONs survive a wipe.
 
 **S25 DONE (2026-08-12) and curated — see "Current status". The second seed that every developmental
 claim in this block was waiting for is measured, so the block now separates what belongs to the recipe

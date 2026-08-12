@@ -252,20 +252,28 @@ def main():
                         steps=np.array(STEPS),
                         **{f"r2_{f}_{s}": R2[s][f] for s in STEPS for f in FAMILIES},
                         **{g: role[g] for g in GROUPS})
+    plot(R2, role, n_units)
+    print(json.dumps(summary, indent=2))
+    print(f"done in {time.time()-t0:.0f}s")
 
+
+def plot(R2, role, n_units):
     fig, ax = plt.subplots(1, 3, figsize=(15.5, 4.7))
     x = np.arange(len(FAMILIES))
 
     a = ax[0]
-    for s, c, ls, mk, fill in zip(STEPS, [CVD[0], CVD[1]], ["-", "--"], ["o", "s"], ["full", "none"]):
-        med = [np.median(R2[s][f][role["demoted"]]) for f in FAMILIES]
-        a.plot(x, med, ls, marker=mk, color=c, mfc=c if fill == "full" else "white",
-               lw=1.8, label=f"step {s:,}")
+    for u, c, dx, lab in [(role["demoted"], CVD[0], -0.13, "demoted units"),
+                          (np.arange(n_units), CVD[1], 0.13, "all 3,840 units")]:
+        m = {s: np.array([np.median(R2[s][f][u]) for f in FAMILIES]) for s in STEPS}
+        a.vlines(x + dx, m[STEPS[-1]], m[STEPS[0]], color=c, lw=1.4)
+        for s, mk, fill in zip(STEPS, ["o", "s"], [True, False]):
+            a.plot(x + dx, m[s], linestyle="none", marker=mk, color=c, ms=7,
+                   mfc=c if fill else "white", label=f"{lab}, step {s:,}")
     a.set_xticks(x); a.set_xticklabels(FAMILIES, rotation=20)
-    a.set_ylim(0, 1); a.set_xlabel("feature family the probe is fitted with")
-    a.set_ylabel("median held-out $R^2$, demoted units")
+    a.set_ylim(0, 1.3); a.set_xlabel("feature family the probe is fitted with")
+    a.set_ylabel("median held-out $R^2$")
     a.set_title("(a) the demoted units' fall,\nunder five probe families")
-    a.legend(fontsize=8); a.grid(alpha=0.3)
+    a.legend(fontsize=7, loc="upper left", ncol=2); a.grid(alpha=0.3)
 
     b = ax[1]
     for f, c, ls in zip(FAMILIES, CVD, LS):
@@ -281,7 +289,7 @@ def main():
     xg = np.arange(len(GROUPS))
     for f, c, ls, mk in zip(FAMILIES, CVD, LS, MK):
         med = [np.median(R2[STEPS[-1]][f][role[g]]) for g in GROUPS]
-        d.plot(xg, med, ls, marker=mk, color=c, lw=1.8, label=f)
+        d.plot(xg, med, linestyle=ls, marker=mk, color=c, lw=1.8, label=f)
     d.set_xticks(xg); d.set_xticklabels([g.replace("_", "-") for g in GROUPS], rotation=20)
     d.set_ylim(0, 1); d.set_ylabel("median held-out $R^2$ at step 30,000")
     d.set_xlabel("the unit's role at the two ends of training")
@@ -291,9 +299,11 @@ def main():
     fig.savefig(os.path.join(PLOTS, "neuron_probe_family.png"), dpi=150)
     plt.close(fig)
 
-    print(json.dumps(summary, indent=2))
-    print(f"done in {time.time()-t0:.0f}s")
-
 
 if __name__ == "__main__":
-    main()
+    if "--plot" in sys.argv:            # redraw from the saved fits, no GPU
+        z = np.load(os.path.join(RES, "neuron_probe_family_raw.npz"))
+        plot({s: {f: z[f"r2_{f}_{s}"] for f in FAMILIES} for s in STEPS},
+             {g: z[g] for g in GROUPS}, z[f"r2_char1_{STEPS[0]}"].size)
+    else:
+        main()
