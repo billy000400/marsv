@@ -46,7 +46,40 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 18 — COMPLETE; the transplant moves shape and width alike)
+## Current status (2026-08-12, iteration 19 — COMPLETE; what transports is not what a probe can read)
+
+**Iteration 19 ran the experiment both deliverables named as next** (`experiments/early_shape_probe.py`,
+`plot_early_shape.py`; Figure 34; deliverables now carry 34 figures each and pass `check_render.py`).
+Pattern 41's four probes refit from the block-0 MLP output $m_u$ and the post-block-0 residual state
+$x_u$ in place of the static embedding row — same 123 tokens, same four targets and ceilings, same 50
+splits, same 50-permutation nulls. 369 single-token forward passes, no interpolation curves; the cost is
+dominated by the twelve probes' permutation nulls on CPU rather than by the GPU.
+
+* **The width-specific component is readable nowhere early.** Width with shape removed: $+0.084$
+  (permutation $p = 0.31$) from $m_u$, $+0.115$ ($p = 0.22$) from $x_u$, $+0.072$ ($p = 0.26$) from the
+  embedding row — each inside its own null, against a ceiling of 0.630 the target's reliability does
+  allow ($R = 0.397$, [0.098, 0.591]). No probe moves by more than $+0.042$ across the three sites.
+* **So transport and linear decodability come apart on one quantity.** $m_u$ carries this component
+  (pattern 43: $+0.796$ with the donor's shape held constant) and does not make it linearly readable.
+  Stated as a bound on ridge with 2,048 features and 80 training tokens, not as a claim about every
+  readout.
+* **The refit embedding probes reproduce pattern 41 exactly** ($+0.783$, $+0.658$, $+0.072$, $+0.243$),
+  which is what makes the three panels of Figure 34 a comparison of features rather than of runs.
+* **Small real differences, all one way.** Split by split, $x_u$ beats the embedding row on shape
+  ($+0.025$, 80%), the width residual ($+0.042$, 80%) and the shape residual ($+0.038$, 82%), while
+  $m_u$ alone is $0.024$ behind it on width (26%). Block 0 adds a little readable information and it
+  arrives in the residual stream, not in the MLP's contribution alone — far too little to matter.
+* **Deliverable consequence:** no cheap upgrade from the shape-ranking free lookup to a width-ranking
+  one by moving the probe one block deeper. Recorded in both files.
+
+**Next step (only if reopened):** the same four probes from the residual state at blocks 6, 12 and 18,
+where the layer sweep (pattern 9) shows the median width climbing 0.553 → 0.800 and the across-token
+spread collapsing fivefold while the ordering survives at $+0.72$. Same protocol, targets and splits;
+one forward pass per token per frame with hidden states retained. Above chance at some depth → the
+component is made explicit downstream and a mid-network probe is the screen; at chance everywhere →
+the negative generalises from the three earliest sites to the residual stream at any depth.
+
+## Previous status (2026-08-12, iteration 18 — COMPLETE; the transplant moves shape and width alike)
 
 **Iteration 18 ran the experiment both deliverables named as next** (`experiments/transplant_shape.py`,
 `plot_transplant_shape.py`; Figure 33; deliverables now carry 33 figures each and pass

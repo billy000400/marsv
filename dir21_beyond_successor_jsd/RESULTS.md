@@ -43,7 +43,9 @@ spanning subword fragments, punctuation, numerals, capitalised names and rarer w
 measured widths correlate at $\rho = +0.60$ ($p = 3.0\times10^{-4}$). What that lookup ranks is narrower
 than "the width": it predicts how plateau-shaped a token's curves are, and predicts none of the width
 ordering that remains once curve shape is removed, so the free tier inherits its accuracy from the two
-properties nearly coinciding in this model.
+properties nearly coinciding in this model. That missing component stays unreadable one block deeper —
+from the block-0 MLP's output and from the whole post-block-0 residual state alike — so there is no
+cheap upgrade to a table that ranks the crossing width specifically.
 
 **And it is not a quirk of one network.** Repeating the measurement in three other Pythia sizes at the
 same checkpoint, with the same token ids, anchors and frames, gives the same ranking of tokens:
@@ -1413,16 +1415,75 @@ specifically, not the ordering between them. The partials also rest on the small
 ranking the two properties do not share, over 11 donors per recipient. 12 tokens, one frame, one model,
 and both properties come from the same curves.
 
+### Can the width-specific component be read from the vector that carries it?
+
+The two sections above leave one question open. The part of the width ordering that curve shape does not
+explain is unreadable from a token's embedding row ($+0.072$, $p = 0.255$), yet writing $m_u$ into
+another token transports that same part at $+0.796$. A failed probe bounds the probe, so both hold — but
+it is worth knowing whether the component becomes readable one block later, in the vector that carries
+it. If it did, the free lookup could be upgraded to a one-forward-pass lookup that ranks the crossing
+width specifically, which is the screen an auditor wants. Figure 34 refits the same four probes, with
+the same targets, ceilings and 50 splits, from two new feature sets at the same final token position:
+the block-0 MLP output $m_u$ (the vector the transplant overwrites) and the full post-block-0 residual
+state $x_u$ (the embedding plus everything block 0 wrote). Each is averaged over the three sentence
+frames to give one vector per token; for $m_u$ that costs nothing, since its cosine across the three
+frames is 1.0000. The embedding probes are refit alongside as a reference and must reproduce the earlier
+numbers exactly.
+
+![Three panels of four probe accuracies each, for the block-0 MLP output, the post-block-0 residual state, and the static embedding row](plots/early_shape.png)
+
+**Figure 34.** Pythia-1.4B, 123 endpoint tokens, 50 shared train/test splits. Each panel is the feature
+set the ridge probe reads: (left) block-0 MLP output $m_u$, (middle) post-block-0 residual state $x_u$,
+(right) static embedding row $W_E[u]$. y: the four targets — median edge drift $E_u$, plateau-filtered
+width $w_u$, and each with the other's across-token rank regressed out. x: mean held-out Spearman
+$\rho$ between predicted and measured target, error bars $\pm 1$ sd across splits. Hatched gray bars =
+the 50-permutation null (mean $\pm 1$ sd), carets = the ceiling $\sqrt{R}$ that target's split-half
+reliability allows (identical in all three panels, since ceilings belong to the targets), printed $p$ =
+a permutation $p$-value above 0.05.
+
+| held-out $\rho$ (123 tokens, 50 shared splits) | $m_u$ | $x_u$ | $W_E[u]$ | ceiling |
+|---|---|---|---|---|
+| shape $E_u$ | $+0.789$ | $+0.808$ | $+0.783$ | 0.927 |
+| width $w_u$ | $+0.634$ | $+0.666$ | $+0.658$ | 0.857 |
+| **width, shape removed** | **$+0.084$** ($p = 0.31$) | **$+0.115$** ($p = 0.22$) | **$+0.072$** ($p = 0.26$) | 0.630 |
+| shape, width removed | $+0.271$ | $+0.281$ | $+0.243$ | 0.739 |
+
+**The width-specific component is not linearly readable at any of the three sites, including the one
+that transports it.** Every probe except the three in the bold row is above chance at the smallest
+attainable permutation $p$ of 0.020; the bold row sits inside its own null everywhere, reaching at most
+0.18 of a ceiling of 0.630 that the target's reliability does allow ($R = 0.397$, [0.098, 0.591]). No
+probe changes by more than $+0.042$ between the three sites, and the refit embedding probes reproduce
+the earlier numbers to three decimals, which is what makes the three panels comparable. The detectable
+differences are small and one-directional: read split by split, $x_u$ beats the embedding row on shape
+($+0.025$, 80% of splits), on the width residual ($+0.042$, 80%) and on the shape residual ($+0.038$,
+82%), while $m_u$ alone is $0.024$ behind it on the width target (26% of splits). Block 0 does add a
+little linearly readable information, and it shows up in the residual stream rather than in the MLP's
+contribution by itself — but $+0.042$ on a probe worth $+0.072$ leaves it inside the null.
+
+Transport and linear decodability come apart here, which is the useful part. The same vector that hands
+a donor's crossing width to a recipient at $+0.796$ with shape held constant does not make that
+component readable to a ridge probe with 2,048 dimensions and 80 training tokens. For the deliverable
+this closes a door: there is no cheap upgrade from the shape-ranking lookup to a width-ranking one by
+moving the probe one block deeper.
+
+"Not readable" means "not by this probe" — a different probe family or a larger training set could
+still recover the component. The two properties are also entangled in the data ($\rho = +0.809$ across
+the 123 tokens), so the width residual is built from the smaller part of a strong correlation and is
+the least reliable of the four targets. And these are the three earliest representations only; nothing
+here tests the deeper sites where the layer sweep shows the crossing actually sharpening.
+
 ## Next experiment
 
-**Read the residual targets off $m_u$ instead of the embedding.** Two results above sit side by side:
-a probe on the static embedding leaves the width-with-shape-removed target at chance ($+0.072$,
-$p = 0.255$), while substituting $m_u$ transports exactly that component ($+0.796$ with the donor's
-shape held constant). Both can be true, since a failed probe bounds the probe. What is still unknown is
-whether the width-specific component can be read *anywhere* early in the network. The test refits the
-same four probes, unchanged in protocol and splits, from the block-0 MLP output $m_u$ and from the full
-post-block-0 residual state $x_u$ on the same 123 tokens. If the width residual becomes predictable from
-$m_u$, the free lookup upgrades to a one-forward-pass lookup that ranks the property the screen actually
-wants; if it stays at chance from every representation while the transplant keeps transporting it, that
-is a sharper version of this report's central negative. It needs 123 tokens $\times$ 3 frames of
-single-token forward passes and no interpolation curves — the cheapest experiment proposed here.
+**Read the same four targets from the middle of the network.** The three earliest representations are
+now tested and the width-specific component is at chance in all of them. The layer sweep says the
+sharpening happens further down: measured at blocks 6, 12 and 18 the token ordering survives
+($\rho = +0.72$ between block 0 and block 18) while the median width climbs 0.553 → 0.800 and the
+spread across tokens collapses fivefold. That is the natural place to look for a representation in
+which the crossing width is explicit. The test refits the same four probes, unchanged in protocol,
+targets and splits, from the residual state at blocks 6, 12 and 18 at the same final position, on the
+same 123 tokens. If the width residual rises above chance at some depth, the component becomes explicit
+downstream of where it is decided and a mid-network probe is the screen that ranks it; if it stays at
+chance everywhere while the transplant keeps transporting it, the negative strengthens from "no early
+site makes it explicit" to "no residual-stream site at any depth does, under a linear readout". One
+forward pass per token per frame with hidden states retained — 123 tokens $\times$ 3 frames, no
+interpolation curves.

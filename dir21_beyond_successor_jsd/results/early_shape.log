@@ -13,3 +13,22 @@ Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF
 --- resid_block0 (2048 features) ---
 [resid_block0] shape             rho +0.808 +- 0.036; reliability +0.859 [+0.798, +0.901] (ceiling 0.927) -> +0.871 of ceiling; null -0.041 +- 0.106, permutation p 0.020
 [resid_block0] width             rho +0.666 +- 0.059; reliability +0.734 [+0.598, +0.834] (ceiling 0.857) -> +0.777 of ceiling; null -0.001 +- 0.106, permutation p 0.020
+[resid_block0] width_given_shape rho +0.115 +- 0.133; reliability +0.397 [+0.098, +0.591] (ceiling 0.630) -> +0.182 of ceiling; null +0.014 +- 0.103, permutation p 0.216
+[resid_block0] shape_given_width rho +0.281 +- 0.108; reliability +0.546 [+0.310, +0.698] (ceiling 0.739) -> +0.380 of ceiling; null -0.022 +- 0.090, permutation p 0.020
+
+--- embedding (2048 features) ---
+[embedding] shape             rho +0.783 +- 0.046; reliability +0.859 [+0.798, +0.901] (ceiling 0.927) -> +0.844 of ceiling; null -0.029 +- 0.095, permutation p 0.020
+[embedding] width             rho +0.658 +- 0.067; reliability +0.734 [+0.598, +0.834] (ceiling 0.857) -> +0.767 of ceiling; null +0.004 +- 0.095, permutation p 0.020
+[embedding] width_given_shape rho +0.072 +- 0.125; reliability +0.397 [+0.098, +0.591] (ceiling 0.630) -> +0.115 of ceiling; null +0.011 +- 0.093, permutation p 0.255
+[embedding] shape_given_width rho +0.243 +- 0.102; reliability +0.546 [+0.310, +0.698] (ceiling 0.739) -> +0.329 of ceiling; null -0.015 +- 0.085, permutation p 0.020
+
+paired shape             mlp_out - embedding: +0.006 +- 0.029, mlp_out higher in 58% of 50 splits (Wilcoxon p 0.203)
+paired shape             resid_block0 - embedding: +0.025 +- 0.026, resid_block0 higher in 80% of 50 splits (Wilcoxon p 5.08e-07)
+paired width             mlp_out - embedding: -0.024 +- 0.048, mlp_out higher in 26% of 50 splits (Wilcoxon p 0.00061)
+paired width             resid_block0 - embedding: +0.008 +- 0.044, resid_block0 higher in 50% of 50 splits (Wilcoxon p 0.293)
+paired width_given_shape mlp_out - embedding: +0.012 +- 0.065, mlp_out higher in 60% of 50 splits (Wilcoxon p 0.157)
+paired width_given_shape resid_block0 - embedding: +0.042 +- 0.062, resid_block0 higher in 80% of 50 splits (Wilcoxon p 1.1e-05)
+paired shape_given_width mlp_out - embedding: +0.028 +- 0.049, mlp_out higher in 72% of 50 splits (Wilcoxon p 0.000136)
+paired shape_given_width resid_block0 - embedding: +0.038 +- 0.047, resid_block0 higher in 82% of 50 splits (Wilcoxon p 6.78e-07)
+
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/early_shape.json

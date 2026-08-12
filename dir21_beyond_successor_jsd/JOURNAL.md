@@ -1362,3 +1362,64 @@ current-best with Figure 33 embedded and `check_render.py` passing (33 embeds, 3
 No STOP written: the next experiment is named, cheap and real — refit iteration 17's four residual
 probes from $m_u$ and $x_u$ instead of the embedding row, to ask whether the width-specific component is
 readable anywhere early in the network now that we know substitution transports it.
+
+## 2026-08-12 — iteration 19: the vector that carries the trait does not spell it out
+
+**What I set out to do.** No unaddressed feedback, so ordinary plan work: the experiment both
+deliverables named as next. Pattern 41 fitted four probes to the static embedding row and found the
+width-with-shape-removed target at chance ($+0.072$, permutation $p = 0.255$). Pattern 43 then showed
+that writing a donor's $m_u$ into a recipient transports exactly that component ($+0.796$ with the
+donor's shape held constant). Refit the same four probes from $m_u$ and from the post-block-0 residual
+state $x_u$ and ask whether the component is readable one block later.
+
+**The answer is no, at every site, and the interesting part is that this is not a contradiction.**
+Width with shape removed comes out at $+0.084$ ($p = 0.31$) from $m_u$, $+0.115$ ($p = 0.22$) from
+$x_u$, $+0.072$ ($p = 0.26$) from the embedding row. All three sit inside their own permutation nulls.
+The ceiling is 0.630 and the target is reliably measured ($R = 0.397$, [0.098, 0.591]), so this is not
+a target made of noise. The same vector both transports the component and fails to expose it to a
+linear readout. I wrote that up as the report's sharpest negative rather than as a puzzle, because it
+is the one place where both halves — transport and decodability — are measured on the same quantity in
+the same model.
+
+**The design decision was to refit the embedding block rather than quote it.** The protocol is
+deterministic given the splits, so the refit had to reproduce pattern 41's four numbers exactly, and it
+does ($+0.783$, $+0.658$, $+0.072$, $+0.243$ to three decimals). That converts Figure 34 from three
+similar-looking panels into a controlled comparison where the only thing that varies is the feature
+set. It cost one extra feature set out of three. This is the same move as iteration 18's baseline-width
+reproduction check and it keeps paying for itself.
+
+**What I was careful not to claim.** Not "the width-specific component is not present in $m_u$" — the
+transplant says it is. The claim is about ridge regression with 2,048 features and 80 training tokens,
+and I said so in Results, Conclusion and Limitations. Also not "block 0 adds nothing": the paired
+split-by-split comparisons are small but real ($x_u$ over the embedding row by $+0.025$/$+0.042$/$+0.038$
+on three targets, 80% of splits or better), so the honest statement is that block 0 adds a little
+linearly readable information, in the residual stream rather than in the MLP's contribution alone, and
+far too little to change anything. Reporting a $+0.042$ improvement and then saying it does not matter
+reads oddly until you notice the probe it improves is worth $+0.072$.
+
+**One number surprised me and I left it in.** $m_u$ alone is $0.024$ *behind* the embedding row on the
+width target (26% of 50 splits, $p = 6\times10^{-4}$). Passing through the first MLP makes the width
+slightly harder to read linearly than it was in the row the MLP computed it from — consistent with
+pattern 24's null, but pattern 24 could not see the sign because its three sites were within one sd of
+each other on a single unfiltered target. Paired splits and a filtered target make the sign visible. I
+did not build a story on it.
+
+**Assumptions logged.** (a) Frame-averaging the features: exact for $m_u$ (cosine 1.0000 across frames,
+pattern 23) and a genuine simplification for $x_u$, which does see the frame through attention; the
+alternative — one probe per frame — would have tripled the run for a quantity the targets already
+average over. (b) The four targets and their ceilings are pattern 41's unchanged, so the reliability
+bootstrap is recomputed rather than reused, and it agrees. (c) Only the three earliest sites are
+tested; the layer sweep's deeper blocks are where the width is actually sharpened and are untested,
+which is now both a stated limitation and the named next experiment.
+
+**What I learned, beyond this direction.** "Carried by X" and "readable from X" are different claims
+about the same vector, and a project that establishes one is not entitled to the other. Both directions
+of the mistake are easy: the transplant tempts you to say the vector encodes the width, and the null
+probe tempts you to say the vector lacks it. Measuring both on one quantity is what lets you say
+neither.
+
+**On track?** Yes. The named experiment ran, answered its question with a clean negative, produced one
+figure with matched nulls and ceilings and an exact tie-check to the previous result, and both
+deliverables are curated to current-best with Figure 34 embedded and `check_render.py` passing (34
+embeds, 34 captions, 0 problems). No STOP written: the next experiment is named, cheap and real — the
+same four probes from the residual state at blocks 6, 12 and 18.

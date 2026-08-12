@@ -2,7 +2,7 @@
 
 Pattern 41 (iteration 17) split what the static embedding row W_E[u] holds into two parts: the curve's
 SHAPE (edge drift E) and the part of its WIDTH that shape does not already explain. Shape came out at
-+0.783 and the width residual at +0.072 (permutation p = 0.255) -- chance. Pattern 44 (iteration 18)
++0.783 and the width residual at +0.072 (permutation p = 0.255) -- chance. Pattern 43 (iteration 18)
 then showed that the width-specific component is nevertheless carried by the block-0 MLP output m_u:
 writing a donor's m_u into a recipient moves the recipient's landing width at +0.796 with the donor's
 shape held constant.

@@ -55,7 +55,10 @@ per-token experiment, and it still ranks unseen pairs about as well as the model
 difference, which needs both endpoints of every pair to be run. What the probe reads is narrower than
 "the width", though: it ranks how plateau-shaped a token's curves are, and the width follows because in
 this model the two orderings nearly coincide. Removing the shape ranking from the width ranking leaves a
-reliably measured quantity the probe cannot predict at all (pattern 41).
+reliably measured quantity the probe cannot predict at all (pattern 41), and moving the probe one block
+deeper does not help: the same target stays at chance when read from the block-0 MLP's output or from
+the full post-block-0 residual state (pattern 44). So there is no cheap upgrade from this shape-ranking
+table to a table that ranks the crossing width specifically.
 
 **The ranking is a token property; the level belongs to the context.** Re-measuring the same 123
 tokens in four differently shaped contexts — a mid-sentence continuation, an interrogative, a
@@ -237,7 +240,8 @@ all 780 pairs among them × 3 frames × 50 steps) and the anchor-set swap (123 t
 50 steps) and the two embedding interventions (16 tokens × 9 edits and 12 tokens × 13 edits, each edit
 re-measured over 3 frames × 6 anchors × 50 steps) and the displacement-norm ladder (12 tokens × 4 rungs
 × 24 probed directions plus 3 re-measurements each) and the two mode-split experiments (12 tokens ×
-24 probed directions plus 2 calibrated re-measurements each, twice) — about 1.6 million forward passes
+24 probed directions plus 2 calibrated re-measurements each, twice) and the early-site probes
+(123 tokens × 3 frames of single-token forward passes, no interpolation) — about 1.6 million forward passes
 in total, roughly four and a half hours on one GPU shared with three other jobs.
 
 **Corpus.** `EleutherAI/pile-deduped-pythia-preshuffled`, the tokenised stream Pythia was trained on.
@@ -1250,6 +1254,41 @@ taken over the first 3 anchors and over the last 3 — with a 95% percentile int
 bootstrap resamples of the 12 tokens. No disattenuation is applied to any number in this section: where
 an interval covers zero, the honest reading is that the corresponding comparison is not resolved, and
 that is what the Results say. Figure 33 reports all of it.
+
+### Reading the same four targets from two sites one block later
+
+The four probes above ask what a token's *embedding row* holds. The transplant asks what a token's
+$m_u$ — the block-0 MLP's output at the final position — *carries*. Those are different questions, and
+after the transplant result they meet at one point: the width-specific component travels with $m_u$, so
+the natural follow-up is whether it can be **read** from $m_u$ as well. This matters for the report's
+practical recommendation. The free lookup ranks curve shape; a screen that ranks the crossing width
+specifically would be a better instrument, and if one forward pass through the first block made that
+component explicit, the upgrade would cost almost nothing.
+
+The experiment changes only the features. Two new feature sets replace the embedding row, both taken at
+the same final position as the transplant:
+
+**mlp out $m_u$** — the block-0 MLP's output at the token's own position, the exact 2,048-dimensional
+vector the transplant overwrites.
+
+**post-block-0 residual $x_u$** — the residual stream immediately after block 0 at that position, which
+is the embedding plus what block 0's attention and MLP wrote into it. It asks whether any early
+activation carries the component, not just the MLP's contribution.
+
+Both depend on the sentence frame, whereas an embedding row does not, so each token's feature vector is
+the mean over the three frames — one vector per token, matching the embedding row's form. For $m_u$
+that averaging costs nothing at all, since this report already measured its cosine across the three
+frames at $1.0000$ (pattern 23): block 0's MLP output at the token's own position does not see the
+frame. For $x_u$ the average is a genuine simplification, because the attention path does read the
+frame.
+
+Everything else is held fixed: the same 123 tokens, the same four targets and their ceilings, the same
+ridge probe with 80 training tokens and 43 held out, the same 50 train/test splits, and the same
+50-permutation null per target. The splits are identical across feature sets as well as across targets,
+so any two of the three sites can also be compared split by split with a Wilcoxon signed-rank test on
+the 50 paired differences. The embedding probes are refit alongside rather than quoted from the earlier
+run; because the protocol is deterministic given the splits, they must reproduce the earlier numbers
+exactly, and that is checked. Figure 34 reports all twelve probes.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -2762,6 +2801,83 @@ of the donor ranking that the two properties do not share, over 11 donors per re
 test, but a low-powered one. Third, this is 12 tokens, one sentence frame, one model, and the two
 properties are computed from the same curves, so their measurement noise is shared.
 
+### Can the width-specific component be read anywhere early in the network?
+
+Patterns 41 and 43 together leave one question open, and it is the question an auditor would ask next.
+The part of the width ordering that curve shape does not explain is not recoverable from a token's
+embedding row ($+0.072$, permutation $p = 0.255$), yet writing $m_u$ into another token transports that
+same component at $+0.796$. Nothing is contradictory there — a linear probe failing bounds the probe,
+not the vector — but it does not say whether the component becomes *readable* one block later, in the
+vector that demonstrably carries it. If it did, this report's practical output would improve: the free
+lookup ranks curve shape, and a one-forward-pass readout that ranks the crossing width specifically
+would be the screen an auditor actually wants. Figure 34 refits the four probes from $m_u$ and from the
+post-block-0 residual state $x_u$, with the embedding probes refit alongside as a reference.
+
+![Three panels of four horizontal probe accuracies each, for the block-0 MLP output, the post-block-0 residual state, and the static embedding row](plots/early_shape.png)
+
+**Figure 34.** Pythia-1.4B, the same 123 endpoint tokens, four targets per site, 50 shared train/test
+splits. Each panel is one feature set the ridge probe reads: (left) the block-0 MLP output $m_u$,
+(middle) the post-block-0 residual state $x_u$, (right) the static embedding row $W_E[u]$ as the
+reference. y: the four targets — the shape target $E_u$ (median edge drift), the width target $w_u$
+(median plateau-filtered envelope width), and each with the other's across-token rank regressed out.
+x: mean held-out Spearman $\rho$ between predicted and measured target over the 50 splits, with the bar
+its standard deviation across splits. The hatched strip is the 50-permutation null ($\pm 1$ s.d. around
+its mean), the caret is the ceiling $\sqrt{R}$ that the target's own measurement noise allows, and a
+printed $p$ marks the probes whose permutation $p$-value exceeds 0.05. Higher is better; the ceilings
+are properties of the targets, so they are identical in all three panels.
+
+**Pattern 44 — the width-specific component is not linearly readable at any of the three early sites,
+including the vector that transports it.** The three panels of Figure 34 are nearly the same picture.
+
+| held-out $\rho$, 123 tokens, 50 shared splits | $m_u$ | $x_u$ | $W_E[u]$ | ceiling |
+|---|---|---|---|---|
+| shape $E_u$ | $+0.789$ | $+0.808$ | $+0.783$ | 0.927 |
+| width $w_u$ | $+0.634$ | $+0.666$ | $+0.658$ | 0.857 |
+| **width, shape removed** | **$+0.084$** ($p = 0.31$) | **$+0.115$** ($p = 0.22$) | **$+0.072$** ($p = 0.26$) | 0.630 |
+| shape, width removed | $+0.271$ | $+0.281$ | $+0.243$ | 0.739 |
+
+Every probe except the three in the bold row is above chance at the smallest attainable permutation
+$p$-value of 0.020. The bold row is the result: at all three sites the width-with-shape-removed target
+sits inside its own permutation null, reaching at most 0.18 of a ceiling of 0.630 — and that ceiling is
+not the problem, since the target is reliably measured ($R = 0.397$, interval [0.098, 0.591]). Moving
+from the embedding row through the first MLP and on to the full post-block-0 state changes no probe by
+more than $+0.042$. The refit embedding probes reproduce pattern 41's numbers to three decimals
+($+0.783$, $+0.658$, $+0.072$, $+0.243$), which is what makes the three panels comparable rather than
+merely similar.
+
+The differences that are statistically detectable are small and go one way. Read split by split, $x_u$
+beats the embedding row on three of the four targets — $+0.025$ on shape (80% of 50 splits,
+$p = 5\times10^{-7}$), $+0.042$ on the width residual (80%, $p = 1\times10^{-5}$) and $+0.038$ on the
+shape residual (82%, $p = 7\times10^{-7}$) — while $m_u$ alone is $0.024$ *behind* it on the width
+target (26%, $p = 6\times10^{-4}$). So block 0 does add a little linearly readable information about
+these curves, and it arrives in the residual stream rather than in the MLP's contribution by itself.
+The addition is far too small to change any conclusion: $+0.042$ on a probe whose value is $+0.072$
+still leaves it inside the null.
+
+This is the sharper version of the report's central negative, and it is worth stating in full because
+it is unusual to have both halves measured on the same quantity. The width-specific component of the
+token ordering is **carried** by $m_u$ — substituting one token's $m_u$ for another's moves the
+recipient's crossing width to the donor's at $+0.796$ with shape held constant (pattern 43) — and it is
+**not readable** from that same vector by a ridge probe that has 2,048 dimensions and 80 training
+tokens to work with. Transport and linear decodability come apart here. Pattern 24 had already found
+the three sites equivalent when the probe was fitted to the raw anchor width; splitting that target
+into its shape and width-specific parts shows the equivalence holds component by component, and that
+the component the transplant moves is the one no site makes explicit.
+
+The practical consequence is negative and useful: there is no cheap upgrade from the free lookup to a
+width-specific screen by moving the probe deeper. A single forward pass through block 0 buys $+0.042$
+on the component that matters, which is not a screen. What the free lookup ranks is curve shape, and
+for now that is what a practitioner gets.
+
+Three limits bound the claim. First, "not readable" means "not by this probe": ridge regression on
+2,048 features from 80 training tokens. A different probe family, a nonlinear readout, or a training
+set several times larger could still recover the component, and the permutation test says only that
+this probe does not. Second, the two components are entangled in the data — shape and width rank the
+123 tokens at $+0.809$ — so the width residual is built from the smaller part of a strong correlation
+and is the least reliable of the four targets ($R = 0.397$ against 0.859 for shape). Third, the sites
+are the three earliest ones; the report's layer sweep shows widths sharpening across the whole depth,
+and nothing here tests whether a deeper representation makes the component explicit.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -2905,21 +3021,33 @@ constant each still transports ($+0.796$ for width, $+0.517$ for shape). Writing
 the whole curve. The width-specific part of the ordering, which no probe on the embedding could recover,
 does travel with $m_u$.
 
-**The single most informative next experiment is a readout of $m_u$ against the residual targets.**
-Pattern 41 fitted four probes to the static embedding row and found the width-with-shape-removed target
-at chance ($+0.072$, $p = 0.255$); pattern 43 then showed that substituting $m_u$ transports exactly that
-component ($+0.796$ with the donor's shape held constant). Those two are consistent — a linear probe
-failing bounds the probe, not the vector — but they leave open the question an auditor cares about,
-which is whether the width-specific component can be *read* anywhere in the early network. The test
-refits pattern 41's four probes, unchanged in protocol and splits, from two new feature sets on the same
-123 tokens: the block-0 MLP output $m_u$ and the full post-block-0 residual state $x_u$. If the width
-residual becomes predictable from $m_u$, the first MLP makes explicit something the embedding only
-implies, and the free lookup can be upgraded to a one-forward-pass lookup that ranks the property the
-screen actually wants. If it stays at chance from every representation while the transplant keeps
-transporting it, then the width-specific component is carried in a form no linear readout of these
-sites reaches, which is a sharper statement of this report's central negative than any result now in it.
-The experiment needs 123 tokens $\times$ 3 frames of single-token forward passes in Pythia-1.4B and no
-interpolation curves at all, so it is the cheapest experiment proposed anywhere in this report.
+Pattern 44 then asked whether the component pattern 43 transports can also be read, and returned the
+report's sharpest negative. Refitting those same four probes from the block-0 MLP output $m_u$ and from
+the post-block-0 residual state $x_u$ — same tokens, same targets, same 50 splits — leaves the
+width-with-shape-removed target inside its permutation null at every site ($+0.084$, $p = 0.31$ from
+$m_u$; $+0.115$, $p = 0.22$ from $x_u$; $+0.072$, $p = 0.26$ from the embedding row, reproduced
+exactly). No probe changes by more than $+0.042$ across the three sites. The vector that transports the
+width-specific component at $+0.796$ does not make it linearly readable, so transport and decodability
+come apart, and there is no cheap upgrade from the free shape lookup to a width-specific screen by
+moving the probe one block deeper.
+
+**The single most informative next experiment is the same four probes read from the middle of the
+network.** Pattern 44 tested the three earliest representations available — the embedding row and the
+two sites one block in — and found the width-specific component at chance in all of them. The layer
+sweep (pattern 9) says the interesting thing happens further down: measured at blocks 6, 12 and 18 the
+token ordering survives ($\rho = +0.72$ between block 0 and block 18) while the median width climbs
+from 0.553 to 0.800 and the spread across tokens collapses fivefold. That is where the crossing is
+actually being sharpened, so it is the natural place to look for a representation in which the crossing
+width is explicit. The test refits pattern 41's four probes, unchanged in protocol, targets and splits,
+from the residual state at blocks 6, 12 and 18 at the same final position, on the same 123 tokens. If
+the width residual rises above chance at some depth, the component becomes explicit downstream of where
+it is decided, and a mid-network probe — not a free embedding lookup — is the screen that ranks what an
+auditor wants. If it stays at chance at every depth while the transplant keeps transporting it, the
+claim generalises from "no early site makes it explicit" to "no residual-stream site at any depth makes
+it explicit under a linear readout", which would be a much stronger statement of this report's central
+negative than pattern 44 can support on its own. The cost is one forward pass per token per frame with
+the hidden states retained — 123 tokens $\times$ 3 frames, no interpolation curves — the same price as
+pattern 44, which was the cheapest experiment in this report.
 
 ---
 
@@ -3027,6 +3155,15 @@ lookup result below should be read. A probe on the static embedding cannot recov
 once shape is removed from it, yet substituting $m_u$ transports exactly that component — so the
 width-specific information is present in the early computation, and what the probe result bounds is the
 reach of a linear readout.
+
+Following that up settles how far the readout gets. Fitting the same four probes to the block-0 MLP
+output and to the full post-block-0 residual state — the same tokens, targets and splits as the
+embedding probes — leaves the width-with-shape-removed target inside its permutation null at all three
+sites ($+0.084$, $+0.115$ and $+0.072$, permutation $p$ of 0.31, 0.22 and 0.26), and moves no probe by
+more than $+0.042$ between sites. So the component that an exact substitution of $m_u$ transports at
+$+0.796$ is not made linearly explicit by the computation that produces it, and the practical
+consequence is a closed door: the free lookup ranks how flat a token's transitions start, and one
+forward pass through the first block does not turn it into a lookup that ranks the crossing width.
 
 Four model sizes settle what that vector belongs to. Pythia-410M, 1B and 1.4B rank the 123 tokens
 identically once each model's own measurement reliability is accounted for ($\rho^{*} = +0.98$ to
@@ -3144,7 +3281,11 @@ there trains on 80 tokens with sd $\pm 0.10$. The edge-drift cut $E \le 0.1$ is 
 half the straight-line value — and the filtered widths are medians over whichever of a token's 18
 curves survive it, so different tokens are scored against slightly different anchor and frame subsets;
 the reliability it reports (0.661) is a reliability of that filtered measurement, not of the full
-protocol. The comparison of edge drift across models is six configurations at one checkpoint each, so
+protocol. Every "not readable" statement in this report is a statement about ridge regression with 80
+training tokens: the early-site probes (pattern 44) test three representations with one probe family,
+so they show that this readout does not recover the width-specific component, not that no readout
+could, and they cover only the three earliest representations — nothing here probes the deeper sites
+where the layer sweep shows the crossing actually sharpening. The comparison of edge drift across models is six configurations at one checkpoint each, so
 "plateau structure sharpens with scale" describes three Pythia sizes, not a scaling law, and the
 association between a model's ramp-like curves and its missing width ordering is a correspondence
 between two measurements, with no intervention behind it. The

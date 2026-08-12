@@ -1148,3 +1148,48 @@ the information.
 (REPORT 44 display eqs / 1387 inline eqs / 33 embeds / 0 problems; RESULTS 3 display eqs / 964 inline
 eqs / 33 embeds / 0 problems). Embed/caption counts match at 33 each; no bare `(plots/*.png)`
 references.
+
+## 2026-08-12 — iteration 19: the width-specific component transports but is not readable (Figure 34, pattern 44)
+
+**What changed and why.** The experiment both deliverables named as next: pattern 41's four probes
+refit from two new feature sets instead of the static embedding row — the block-0 MLP output $m_u$ and
+the post-block-0 residual state $x_u$ — on the same 123 tokens, same four targets, same 80/43 splits,
+same 50-permutation nulls (`experiments/early_shape_probe.py`, `plot_early_shape.py`,
+`results/early_shape.json`, `plots/early_shape.png`). It asks whether the width-specific component that
+pattern 43 showed the transplant transports ($+0.796$) can be *read* anywhere early. Answer: no.
+
+**Files edited.** `REPORT.md` — new Methods subsection "Reading the same four targets from two sites one
+block later"; new Results subsection "Can the width-specific component be read anywhere early in the
+network?" with Figure 34, its table and pattern 44; the Summary's embedding-probe paragraph, the
+Conclusion's transplant paragraph, the Limitations paragraph and the "Recommended next experiment"
+section updated. `RESULTS.md` — new section "Can the width-specific component be read from the vector
+that carries it?" with Figure 34 and its table; Headline's lookup paragraph extended; "Next experiment"
+replaced. Both files go from 33 to 34 figures.
+
+**Results added (no earlier number superseded; the embedding probes were refit and reproduce pattern
+41's values exactly).**
+- width with shape removed: $+0.084$ (permutation $p = 0.31$) from $m_u$, $+0.115$ ($p = 0.22$) from
+  $x_u$, $+0.072$ ($p = 0.26$) from $W_E[u]$ — every one inside its own permutation null, against a
+  ceiling of 0.630 from a reliably measured target ($R = 0.397$, [0.098, 0.591]).
+- shape: $+0.789$ / $+0.808$ / $+0.783$; width: $+0.634$ / $+0.666$ / $+0.658$; shape with width
+  removed: $+0.271$ / $+0.281$ / $+0.243$ ($m_u$ / $x_u$ / embedding). All above chance at $p = 0.020$.
+- paired across feature sets on the 50 shared splits: $x_u$ over the embedding row by $+0.025$ on shape
+  (80% of splits, $p = 5\times10^{-7}$), $+0.042$ on the width residual (80%, $p = 1\times10^{-5}$),
+  $+0.038$ on the shape residual (82%, $p = 7\times10^{-7}$); $m_u$ is $0.024$ *behind* the embedding
+  row on the width target (26%, $p = 6\times10^{-4}$).
+- tie-check: the refit embedding probes reproduce pattern 41's $+0.783$, $+0.658$, $+0.072$, $+0.243$
+  to three decimals, so the three panels of Figure 34 differ only in their features.
+
+**Interpretation.** Transport and linear decodability come apart on the same quantity: $m_u$ carries the
+width-specific component (pattern 43) and does not make it linearly readable (pattern 44). Stated as a
+bound on this probe family — ridge, 2,048 features, 80 training tokens — not as a claim that no readout
+could recover it. Practical consequence recorded in both deliverables: no cheap upgrade from the
+shape-ranking free lookup to a width-ranking one by moving the probe one block deeper.
+
+**Next experiment (recorded in both deliverables).** The same four probes from the residual state at
+blocks 6, 12 and 18, where the layer sweep shows the crossing sharpening while the ordering survives.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 44 display eqs / 1469 inline eqs / 34 embeds / 0 problems; RESULTS 3 display eqs / 1009 inline
+eqs / 34 embeds / 0 problems). Embed/caption counts match at 34 each; no bare `(plots/*.png)`
+references.
