@@ -34,3 +34,35 @@ embedding at position 15.
 - Not reported: JSD-from-A-endpoint across `t` (recorded in `results/delayed.json`) — `d(t)` answers
   the same question, so per rule 9 the unused metric is cut from the deliverables.
 - `check_render.py` passes on both files (0 problems).
+
+## 2026-08-12 — PLAN replaced with the capital-city example; verdict flipped to "delayed plateau"
+
+**Why.** PLAN.md was rewritten (by the operator) around a new fixed example — prefix
+`The capital of France is Paris. The capital of`, endpoints ` Japan`/` Germany`, shared successor
+` is`, expected delayed tokens ` Tokyo`/` Berlin` — replacing the codebook (`A = cat`, `B = dog`)
+example whose endpoints GPT-2 Large failed to reproduce. Status was reset to "fresh start", so this
+iteration re-ran S1–S4 on the new example and re-curated both deliverables.
+
+**RESULTS.md and REPORT.md — superseded numbers (old codebook example → new capital example).**
+- Verdict: conclusion 3, *invalid example* → **conclusion 1, delayed plateau**.
+- Endpoint validity: all four checks failed → all four pass (immediate top-1 ` is` 0.944 / 0.940;
+  delayed top-1 ` Tokyo` 0.928 / ` Berlin` 0.848).
+- Endpoint JSD: immediate 0.0861 nats, delayed 0.0115 nats → immediate **0.0014 bits**, delayed
+  **0.9945 bits** (unit changed to bits, as the new PLAN specifies).
+- Delayed transition width: `w = 0.38` → **`w = 0.28`**; midpoint 0.42 → 0.48; endpoint separation
+  75.4 → 462.5.
+- Behaviour: delayed top-1 never changed → delayed top-1 flips ` Tokyo`→` Berlin` at `t = 0.49`.
+- Immediate readout: top-1 was ` =` throughout (planned successor ` means` at 6.7e-4) → top-1 is
+  ` is` at all 101 positions, p in 0.931–0.944.
+
+**Figures.** `plots/immediate_readout.png` removed (it belonged to the retired example) and replaced
+by `plots/immediate_prediction.png`, the filename the new PLAN names. `plots/delayed_distance.png`
+and `plots/delayed_tokens.png` regenerated for the new example; the distance figure now shows only
+the delayed curve plus the linear reference, because the new PLAN forbids interpreting the immediate
+normalized-distance curve.
+
+**Metrics cut.** The delayed top-2 logit margin and the immediate `d(t)` curve are no longer reported
+— the first is superseded by the actual top-1 flip, the second is ruled out by PLAN's "out of scope".
+
+**Checks.** `python3 experiments/check_render.py REPORT.md RESULTS.md` passes (5 display equations,
+18 inline, 3 embedded figures with visible captions in REPORT.md; 3 embedded figures in RESULTS.md).

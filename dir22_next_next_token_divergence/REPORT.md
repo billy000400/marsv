@@ -2,217 +2,253 @@
 
 ## Summary
 
-A language model's hidden state changes smoothly as you smoothly change its input — except that
-sometimes it doesn't. Interpolating between two inputs often produces an **activation plateau**: the
-representation sits still over a wide range of the interpolation, then swings across quickly. If we
-want to audit what a model is "about to do", it matters whether a plateau organizes only the token
-the model outputs *right now*, or also information it will need *later*.
+**The research question.** When you change a language model's input continuously, its internal
+representation often does *not* change continuously: it sits still over a wide stretch of the change,
+then swings across quickly. That flat-then-swing behaviour is called an **activation plateau**. This
+report asks one narrow question about it: can a smooth interpolation between two input tokens produce
+a plateau in a prediction the model makes *later*, at a point where the model's *current* next-token
+prediction is essentially identical at both ends of the interpolation?
 
-We tested this with a designed example: a prompt whose two endpoints make the *same* immediate
-prediction but should diverge one token later. The example failed its own precondition — GPT-2 Large
-does not perform the codebook lookup the design assumed, so the verdict on the planned test is
-**invalid example** (conclusion 3 of the pre-registered three). The measurement that does survive is
-about propagation: with the interpolated embedding injected at the symbol position, the logit vector
-read out one position downstream — at a token that can reach the symbol only through attention — is
-still plateau-shaped, with transition width 0.38 against 0.80 for a linear response, and its
-transition sits at the same interpolation position as the immediate one. The information is
-attenuated roughly fourfold in the process and never changes the model's actual output token. So
-plateau structure does travel forward through the network's own routing, but this example gives no
-evidence that it organizes *behaviourally relevant* future information.
+Why this matters for safety. Interpretability tools increasingly try to read off what a model is
+"about to do" from its current activations. If plateaus organize only the token being emitted right
+now, they say little about the model's further intentions. If a plateau can exist in information the
+model has not yet used — information invisible in the immediate output — then the current
+representation carries a discrete, auditable commitment about the future, and reading it out is a
+meaningful thing to attempt.
+
+**The answer, for one designed example: yes.** We interpolate the input embedding of ` Japan` into
+that of ` Germany` inside `The capital of France is Paris. The capital of X is`. At both ends the
+model predicts the same next token, ` is`, with almost the same probability, and it keeps predicting
+` is` at all 101 interpolation positions (Figure 1). But the prediction one token later — the capital
+city — holds ` Tokyo` across the first 40% of the path, switches within a few steps near the middle,
+and holds ` Berlin` for the rest (Figures 2 and 3). The switch occupies 28% of the interpolation
+(`w = 0.28`) against 80% for a linear response, and the model's actual top-1 output flips at
+`t = 0.49`. This is conclusion 1 of the three pre-registered outcomes: **delayed plateau**.
 
 ## Methods
 
 ### Data & Model
 
 Pretrained **GPT-2 Large** (774M parameters, 36 transformer blocks), evaluation mode, float32, greedy
-readout with no sampling. No training or fine-tuning of any kind. There is no dataset: the experiment
-is one hand-designed prompt, run at 101 interpolation positions.
+readout with no sampling. No training or fine-tuning. There is no dataset: the experiment is one
+hand-designed prompt, run at 101 evenly spaced interpolation positions `t` from 0 to 1.
 
-The prompt is a codebook instruction followed by a symbol:
+The prompt supplies a fact the model must retrieve one token after the token we manipulate:
 
 ```text
-prefix P : "Use the codebook A = cat and B = dog. Complete: Symbol"
-endpoint A : " A"      endpoint B : " B"      shared successor S : " means"
+prefix P    : "The capital of France is Paris. The capital of"
+endpoint A  : " Japan"        endpoint B : " Germany"
+shared successor S : " is"
+expected after A + S : " Tokyo"        expected after B + S : " Berlin"
 ```
 
-` A`, ` B`, ` means`, ` cat` and ` dog` are each a single GPT-2 token, and appending them does not
-retokenize the prefix (both verified in code). The symbol occupies position 15.
+The first sentence (`The capital of France is Paris.`) is there to fix the format, so the model
+continues with a capital city rather than an arbitrary continuation. All five of ` Japan`,
+` Germany`, ` is`, ` Tokyo`, ` Berlin` are single GPT-2 tokens, and appending them does not
+retokenize the prefix (both verified in code). The manipulated token occupies position 10.
 
-Two sequences are run at every interpolation position, differing only in whether the shared successor
-is appended:
+**Hook point.** At each `t` we run the single sequence `P + [interpolated embedding] + " is"`. The
+interpolated vector replaces the *input embedding* at position 10, before transformer block 0, so it
+passes through the whole network; positional embeddings and all other tokens are untouched. From that
+one forward pass we take two readouts:
 
-- **immediate readout** — `P + [A→B]`, next-token logits at the symbol position;
-- **delayed readout** — `P + [A→B] + S`, next-token logits at the ` means` position.
+- **immediate logits** — at the interpolated position itself, which predict ` is`;
+- **delayed logits** — at the final ` is` position, which predict the capital city.
 
-**Hook point.** The interpolated vector replaces the *input embedding* at position 15, before block 0,
-so it is fed through the entire network. Position embeddings and all other tokens are untouched. This
-placement is what makes the delayed readout meaningful: at the ` means` position the network has no
-direct copy of the symbol embedding, so anything it knows about the interpolation must arrive through
-attention across positions.
+The delayed position never holds a copy of the manipulated embedding, so whatever it knows about the
+interpolation must arrive through attention from position 10.
 
 ### Metrics
 
-**Interpolation.** We need a path between the two token embeddings that keeps vector length in a range
-the model actually sees; naive averaging shrinks the norm in the middle and would create an artificial
-"nothing here" region that could masquerade as a plateau. We therefore use the norm-corrected SLERP of
-Matthew's activation-plateau experiment — spherical interpolation of the direction with a linear
-interpolation of the norm. With $e_A, e_B$ the token embeddings, $u = e_A/\lVert e_A\rVert$,
-$v = e_B/\lVert e_B\rVert$ and $\Omega = \arccos(u\cdot v)$:
+Each metric below answers one question, in the order the Results use them.
+
+**Interpolation path.** We need a path between the two token embeddings that keeps vector length in
+the range the model actually sees. Averaging the two vectors shrinks the norm in the middle of the
+path, which would create an artificial "nothing here" region that could be mistaken for a plateau. We
+therefore use the norm-corrected spherical interpolation (SLERP) of Matthew Shinkle's
+activation-plateau experiment: interpolate the *direction* along the shortest arc of the unit sphere,
+and interpolate the *length* linearly. With $e_A, e_B$ the two token embeddings,
+$u = e_A/\lVert e_A \rVert$, $v = e_B/\lVert e_B \rVert$ and $\Omega = \arccos(u \cdot v)$ the angle
+between them:
 
 ```math
-e(t) = \big[(1-t)\lVert e_A\rVert + t\lVert e_B\rVert\big]\,
-       \frac{\sin\!\big((1-t)\Omega\big)\,u + \sin\!\big(t\Omega\big)\,v}{\sin \Omega},
+e(t) = \big[(1-t)\lVert e_A\rVert + t\lVert e_B\rVert\big]\;
+       \frac{\sin\!\big((1-t)\Omega\big)\, u + \sin\!\big(t\Omega\big)\, v}{\sin \Omega},
 \qquad t \in \{0, 0.01, \dots, 1\}.
 ```
 
-Here $\Omega = 1.227$ rad ($\cos = 0.337$), so the two embeddings are far from parallel and the
-spherical path is genuinely curved.
+Here $\Omega = 1.115$ rad ($\cos = 0.44$) and the norms are 1.67 and 1.61, so the two embeddings are
+far from parallel and the path is genuinely curved. At $t=0$ and $t=1$ this reproduces the original
+embeddings exactly, so the sweep endpoints are the clean endpoint runs.
 
-**Endpoint validity.** The design only makes sense if both endpoints predict the same next token and
-different tokens after the successor. We check the top-1 token of all four endpoint sequences against
-the plan, and quantify how different two distributions are with the **Jensen–Shannon divergence**
-(JSD), a symmetric, bounded measure of distributional distance in nats — 0 means identical,
-larger means more different:
+**Endpoint validity, measured by Jensen–Shannon divergence.** The whole design rests on a
+precondition: the two endpoints must agree on the *immediate* next token and disagree on the
+*delayed* one. Checking only the top-1 token would hide how close or far the full distributions are,
+so we also quantify the distance between two probability distributions with the **Jensen–Shannon
+divergence** (JSD), reported in bits. JSD is symmetric and bounded: 0 means the two distributions are
+identical, 1 bit means they are effectively disjoint. With $m$ the average of the two distributions
+and KL the Kullback–Leibler divergence:
 
 ```math
-\mathrm{JSD}(p\,\Vert\,q) = \tfrac{1}{2}\mathrm{KL}(p\,\Vert\,m) + \tfrac{1}{2}\mathrm{KL}(q\,\Vert\,m),
+\mathrm{JSD}(p \Vert q) = \tfrac{1}{2}\mathrm{KL}(p \Vert m) + \tfrac{1}{2}\mathrm{KL}(q \Vert m),
 \qquad m = \tfrac{1}{2}(p+q).
 ```
 
-This decides the verdict, and is what Figure 1 reports.
+The endpoint-validation subsection reports the two JSD values; they establish that the example is
+usable at all.
 
-**Relative logit distance.** To ask *where along the interpolation* the output moves, we need a
-quantity that is 0 at one endpoint, 1 at the other, and insensitive to the overall size of the logit
-change — otherwise a readout with a small absolute swing would look flat for trivial reasons. With
-$z(t)$ the logit vector at interpolation position $t$ and $z_A = z(0)$, $z_B = z(1)$:
+**Immediate stability.** For the delayed result to be interesting, the immediate prediction must not
+move. We report the top-1 token at the interpolated position and the probability of ` is` there, at
+every `t`. Figure 1 plots the probability.
+
+**Relative logit distance.** To ask *where along the interpolation* the delayed output moves, we need
+a quantity that is 0 at one endpoint, 1 at the other, and insensitive to the overall size of the
+logit change — otherwise a readout with a small absolute swing would look flat for uninteresting
+reasons. With $z(t)$ the delayed logit vector at position `t`, and $z_A = z(0)$, $z_B = z(1)$:
 
 ```math
 d(t) = \frac{\lVert z(t) - z_A\rVert_2}{\lVert z(t) - z_A\rVert_2 + \lVert z(t) - z_B\rVert_2}.
 ```
 
-Read it as "what fraction of the way from A to B is the output at this point". Figure 2 plots it.
+Read it as "what fraction of the way from A to B the delayed output has travelled". Figure 2 plots
+it. We do not compute this for the immediate readout: its two endpoints are nearly identical, so
+normalising by a near-zero gap would amplify noise into a meaningless curve.
 
-**Transition width.** The plateau claim is about *shape*, so we summarise each curve by how much of
-the interpolation the crossing occupies. With $t_q$ the first interpolation position where
+**Transition width.** The plateau claim is about *shape*, so we summarise the curve by how much of
+the interpolation the crossing occupies. With $t_q$ the first interpolation position at which
 $d(t) \ge q$:
 
 ```math
 w = t_{0.9} - t_{0.1}.
 ```
 
-Small $w$ means flat regions at both ends and a fast swing between them — a plateau. We also report
-the midpoint $t_{0.5}$, which says *where* the swing happens; two readouts whose midpoints coincide
-are crossing the same boundary.
+Small `w` means flat regions at both ends and a fast swing between them, which is what "plateau"
+means here. We also report the midpoint $t_{0.5}$, which says *where* the swing happens. The plan set
+`w < 0.5` in advance as the threshold for calling the result a plateau.
 
-**Endpoint separation.** Because $d(t)$ is scale-free, it can make a negligible difference look like a
-dramatic transition. We report the absolute size of the gap being normalised, $\lVert z_A - z_B\rVert_2$,
-so the delayed curve can be read against how much signal actually reaches that position.
+**Endpoint separation.** Because `d(t)` is scale-free, it would report a dramatic-looking transition
+even for a negligible change. We therefore also report the absolute size of the gap being normalised,
+$\lVert z_A - z_B \rVert_2$, so the curve in Figure 2 can be read against how much signal is actually
+there.
 
-**Top-2 margin.** A change in the logit vector matters behaviourally only if it can change the output.
-At the delayed readout we track the gap between the largest and second-largest logit; a margin that
-never approaches 0 means no interpolation position comes close to flipping the prediction.
+**Behavioural flip.** Logit geometry can move without changing what the model does. We therefore
+track the top-1 token at the delayed readout and the probabilities of ` Tokyo` and ` Berlin` across
+`t`, and record the position where the top-1 changes. Figure 3 plots this.
 
 ### Baselines
 
-**Linear reference.** A model whose output moved uniformly with the input would trace $d(t) = t$,
+**Linear reference.** A model whose output moved uniformly with its input would trace $d(t) = t$,
 giving
 
 ```math
 w_{\mathrm{lin}} = t_{0.9} - t_{0.1} = 0.9 - 0.1 = 0.8 .
 ```
 
-This is the "no plateau" null shape, drawn as the dotted line in Figure 2, and $w$ below roughly 0.5
-was pre-registered as evidence of a plateau.
+This is the "no plateau" null shape. It is the dotted line in Figure 2 and the number every measured
+width is compared against.
 
-**Immediate readout as reference for the delayed one.** The immediate readout sees the interpolated
-embedding directly, so its plateau is the strongest form the effect can take in this prompt. Comparing
-the delayed curve against it separates "the plateau propagated" from "the plateau was created anew
-downstream": equal midpoints indicate the same boundary, and the change in $w$ measures how much
-propagation blurs it.
+**Endpoint predictions as the validity baseline.** The four clean endpoint runs (with no
+interpolation) fix what the sweep must reproduce at `t = 0` and `t = 1`. If any of them had failed —
+if the two endpoints had not agreed on ` is`, or had not diverged to ` Tokyo` and ` Berlin` — the
+pre-registered plan called for stopping with conclusion 3, invalid example, and no prompt editing to
+rescue it.
 
 ## Results
 
-### The designed example does not work in GPT-2 Large
+### The example is valid: identical now, different one token later
 
-The experiment is pre-registered to stop at conclusion 3 if the endpoints misbehave, and they do. After
-` A` the model's top-1 token is ` =` with probability 0.340 (after ` B`, ` =` with 0.525); the planned
-successor ` means` gets 6.68e-4 and 4.50e-4 — three orders of magnitude below. GPT-2 Large reads the
-prompt as continuing the codebook listing, so the two endpoints agree on the next token for the wrong
-reason. After ` A means` and ` B means` the top-1 is a quote mark in both cases; ` cat` gets 0.061 and
-0.046, ` dog` 0.010 and 0.011. The intended contrast is present only as a faint preference in the
-right direction, and it is swamped: endpoint JSD at the delayed readout is 0.0115 nats, seven times
-smaller than the 0.0861 nats the two endpoints already differ by *before* the successor. Figure 1
-shows the immediate failure across the whole interpolation.
+All four endpoint checks pass. After ` Japan` the top-1 next token is ` is` with probability 0.944;
+after ` Germany` it is ` is` with 0.940. Once the shared ` is` is appended, the top-1 tokens are
+` Tokyo` (0.928) and ` Berlin` (0.848). The runner-ups are sensible too — ` Kyoto` 0.025 and ` Osaka`
+0.019 in the Japan branch, ` Munich` 0.067 and ` Frankfurt` 0.031 in the Germany branch — so the
+model is doing capital-city retrieval, not landing on one lucky token.
 
-![Probability of the top-1 token and of ' means' across the interpolation](plots/immediate_readout.png)
+The two JSD values make the size of the effect concrete: the immediate endpoint distributions differ
+by **0.0014 bits**, the delayed ones by **0.9945 bits**, a factor of 690. A JSD near 1 bit is close to
+the maximum, meaning the two delayed distributions put their mass on essentially disjoint tokens. The
+precondition for the experiment therefore holds strongly: at the moment of the manipulation the two
+contexts are indistinguishable in the model's output, and one token later they are as different as
+they could be.
 
-**Figure 1.** The planned successor is never a live option, at any interpolation position. x:
-interpolation position `t` (0 = ` A`, 1 = ` B`); y: probability, log scale. Solid = probability of the
-model's own top-1 token (` =` at every `t`); dashed = probability of ` means`. The gap is roughly
-three orders of magnitude, so no choice of readout threshold rescues the design.
+### The immediate prediction does not move
 
-Following the pre-registered rule, we do not adjust the prompt to make the example work. The planned
-delayed-plateau question — does the output diverge sharply *after* a shared successor — is therefore
-unanswered for this prompt, and we make no claim about it.
+Across all 101 interpolation positions, the top-1 token at the interpolated position is ` is` every
+time, and its probability stays inside a band of width 0.013 (0.931 to 0.944), dipping only slightly
+at the middle of the path. Figure 1 shows this, and it is what licenses everything that follows: any
+divergence found downstream cannot be explained by the model already behaving differently at the
+manipulated position.
 
-### Plateau shape survives one token of propagation
+![Probability of ' is' at the interpolated position across the interpolation](plots/immediate_prediction.png)
 
-The interpolation sweep itself remains interpretable, and it answers a narrower question that the
-failed example does not touch: when the interpolated embedding is injected at the symbol, does the
-plateau structure still exist at a *different* position, reachable only through attention? It does.
-Figure 2 shows the delayed curve is flat near both endpoints and crosses quickly in the middle, with
-width $w = 0.38$ against the linear null's 0.80 — comfortably inside the pre-registered $w < 0.5$
-criterion, and monotone at every step.
+**Figure 1.** The immediate prediction is effectively constant along the whole path. x: interpolation
+position `t` (0 = ` Japan`, 1 = ` Germany`); y: probability of ` is` at the interpolated position,
+linear scale from 0 to 1. The single curve stays within 0.931–0.944, and ` is` is the top-1 token at
+every `t`.
 
-![Relative logit distance versus interpolation position for both readouts](plots/delayed_distance.png)
+### The delayed prediction is flat, switches sharply, and is flat again
 
-**Figure 2.** Both readouts are plateau-shaped, and they cross at the same place. x: interpolation
-position `t` (0 = ` A`, 1 = ` B`); y: relative logit distance `d(t)`, 0 at the ` A` endpoint and 1 at
-the ` B` endpoint. Solid = immediate readout ($w = 0.27$), dashed = delayed readout after ` means`
-($w = 0.38$), dotted = linear reference $d = t$ ($w = 0.80$). Thin horizontal lines mark the 0.1 and
-0.9 levels defining $w$.
+This is the central result. The delayed relative logit distance `d(t)` has the plateau shape: it
+stays below 0.077 for the first 30% of the path, rises steeply through the middle, and is above 0.89
+from `t = 0.60` onwards. The transition width is **`w = 0.28`** (`t₀.₁ = 0.34`, `t₀.₉ = 0.62`),
+comfortably inside the pre-registered `w < 0.5` criterion and 2.9 times narrower than the linear
+reference's 0.80. The curve is monotone at every one of the 101 steps, and its midpoint sits at
+`t₅₀ = 0.48`, near the centre of the path.
 
-The two midpoints agree closely — $t_{0.5} = 0.45$ immediate, $0.42$ delayed — which is the
-informative part. The downstream position is not forming its own boundary somewhere else; it is
-responding to the same switch in the symbol's representation, one token later and through attention
-only. Propagation does cost signal and sharpness: the endpoint separation drops from
-$\lVert z_A - z_B\rVert_2 = 300.2$ at the symbol to $75.4$ after ` means`, a factor of 4.0, and the
-transition broadens from $w = 0.27$ to $0.38$, moving about 15% of the way toward the linear null.
-The practical reading is that a plateau detected at one position is not a purely local artifact of the
-readout there — it is a property of a representation that keeps its shape while the network routes it
-forward. For interpretability work that reads plateaus off a single position, that is mild good news:
-the boundary is not an artifact of where you happened to look.
+![Relative logit distance at the delayed readout versus interpolation position](plots/delayed_distance.png)
 
-### The downstream divergence never reaches the output
+**Figure 2.** The delayed logits sit still, switch quickly, then sit still again — the plateau shape.
+x: interpolation position `t` (0 = ` Japan`, 1 = ` Germany`); y: relative logit distance `d(t)`, 0 at
+the ` Japan` endpoint and 1 at the ` Germany` endpoint. Solid with triangles = delayed readout after
+` is`; dotted gray = linear reference `d = t`. Thin horizontal lines mark the 0.1 and 0.9 levels that
+define `w`; the shaded band spans the transition interval, of width 0.28.
 
-The scale caveats matter, and Figure 3 makes the strongest one concrete. Across the whole
-interpolation the delayed top-1 token is a quote mark, and the gap between the top two logits stays in
-[0.43, 0.69] — never near 0, so no interpolation position comes close to flipping the prediction.
-p(` cat`) leads p(` dog`) everywhere, from a ratio of 6.0 at `t = 0` to 4.0 at `t = 1`.
+The transition is not an artifact of the scale-free normalisation: the endpoint logit gap being
+normalised is $\lVert z_A - z_B \rVert_2 = 462.5$, a large change in the delayed output, consistent
+with the near-1-bit endpoint JSD. So the flat regions are flat relative to a genuinely large swing,
+not relative to noise.
 
-![Probability of ' cat' and ' dog' at the delayed readout across the interpolation](plots/delayed_tokens.png)
+The strength of this result is that it isolates the plateau in information the model is not yet using.
+The immediate readout is pinned (Figure 1) while the delayed readout traverses almost the entire
+distance between two disjoint distributions (Figure 2), and it does so in one concentrated interval.
+For an interpretability method that wants to audit a model's near-future behaviour from its current
+state, this example shows there is something discrete to audit: at `t = 0.30` the network has already
+committed to ` Tokyo` and at `t = 0.60` to ` Berlin`, and nothing in the token it is emitting at that
+moment reveals which.
 
-**Figure 3.** The intended semantic flip never happens. x: interpolation position `t`; y: probability
-at the delayed readout. Solid = p(` cat`), dashed = p(` dog`). The curves move slightly in the
-expected directions but never cross, so the codebook lookup the design assumed is absent.
+### The switch is behavioural, not just geometric
 
-The delayed plateau in Figure 2 is thus a statement about the geometry of the logit vector, not about
-behaviour. The model's future output is unchanged by an input edit that its downstream representation
-clearly registers.
+The change in logit geometry corresponds to a change in what the model actually predicts. The delayed
+top-1 token is ` Tokyo` for `t ≤ 0.48` and ` Berlin` for `t ≥ 0.49` — a single flip, in the middle of
+the path, with no oscillation. The probabilities move just as abruptly: p(` Tokyo`) is still 0.902 at
+`t = 0.45` and has fallen to 0.070 by `t = 0.50`, while p(` Berlin`) rises from 0.002 at `t = 0.45`
+to 0.833 by `t = 0.55` and stays flat thereafter.
+
+![Probability of ' Tokyo' and ' Berlin' at the delayed readout across the interpolation](plots/delayed_tokens.png)
+
+**Figure 3.** The predicted capital swaps within a few interpolation steps rather than fading over
+the path. x: interpolation position `t`; y: probability at the delayed readout, linear scale. Solid
+with circles = p(` Tokyo`); dashed with squares = p(` Berlin`). The dash-dotted vertical line marks
+`t = 0.49`, the position where the top-1 token flips.
+
+Note that neither city's probability degrades much in its own region: the model is not becoming
+uncertain as the input drifts away from a real token, it stays confident in one answer and then
+confident in the other. The mixed-input regime that a smooth-response model would spread across the
+whole path is compressed into roughly five interpolation steps.
 
 ## Conclusion
 
-For this prompt, GPT-2 Large does not implement the codebook, so the delayed-plateau test as designed
-returns **conclusion 3: invalid example**. We report that as the verdict and do not generalise from
-the secondary measurement.
+For this example, the verdict is **conclusion 1: a delayed plateau**. GPT-2 Large can preserve a
+discrete, future-relevant distinction between two contexts even when their immediate next-token
+outputs are almost identical. The evidence is the combination of three measurements on the same
+101-point sweep: the immediate prediction is ` is` at every position with probability in a 0.013-wide
+band (Figure 1); the delayed logits traverse the endpoint gap in a transition of width `w = 0.28`
+against the linear null's 0.80, monotonically, over a genuinely large gap of 462.5 (Figure 2); and the
+delayed top-1 token flips once, from ` Tokyo` to ` Berlin`, at `t = 0.49` (Figure 3).
 
-That secondary measurement is still worth stating: plateau structure injected at one token is
-recoverable at a later token that sees it only through attention, with the transition in the same
-place ($t_{0.5}$ 0.45 vs 0.42), a modestly wider crossing ($w$ 0.27 vs 0.38) and roughly fourfold
-attenuation of the endpoint gap (300.2 vs 75.4). Limitations are severe and worth naming plainly:
-this is a single prompt, a single model, one injection site and one downstream position; there is no
-control prompt and no statistical test, so the width values describe this curve and nothing more.
-Most importantly, the downstream change never crosses a decision boundary, so nothing here shows that
-plateaus organize information the model will actually *act* on later. Testing that claim needs a
-prompt where the model demonstrably performs the delayed lookup — establishing which prompts those
-are, by checking endpoint behaviour first, is the prerequisite this iteration turned up.
+Following the plan, we do not generalise beyond this single example. The limitations are real and
+worth naming: one prompt, one model, one manipulated token, one downstream position, and no control
+prompt or statistical test — the widths describe these curves and nothing more. In particular, this
+experiment shows *that* the delayed distinction is plateau-shaped, not *how* the network maintains it;
+identifying the mechanism would require the layerwise and attention analyses that this plan placed out
+of scope. What the result does establish is that the effect exists and is large in a clean case, which
+is the precondition for asking those questions.

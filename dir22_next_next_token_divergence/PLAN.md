@@ -1,92 +1,105 @@
 # PLAN — Delayed-Successor Plateau
 
-> Working folder: `delayed_successor_plateau`. Rewrite “Current status” and “Next step” after each iteration.
+> Working folder: `delayed_successor_plateau`. Rewrite “Current status” and “Next step” after every iteration. Read `../BUDGET.md` and `../CLAUDE.md` every iteration.
 
 ## Research question
 
-Can an (A\rightarrow B) interpolation produce a plateau only after a shared successor, even when (A) and (B) initially make the same next-token prediction?
-
-This tests whether plateaus reflect only the current output or also future-relevant information preserved in the hidden state.
+Can an (A\rightarrow B) interpolation produce a plateau in a future prediction, even though both endpoints currently predict the same next token?
 
 ## Fixed example
 
-| Role                            | Text/token                                               |
-| ------------------------------- | -------------------------------------------------------- |
-| Prefix (P)                      | `Use the codebook A = cat and B = dog. Complete: Symbol` |
-| (A)                             | ` A`                                                     |
-| (B)                             | ` B`                                                     |
-| Shared successor (S)            | ` means`                                                 |
-| Expected next token after (A+S) | ` cat`                                                   |
-| Expected next token after (B+S) | ` dog`                                                   |
+| Role                            | Text/token                                       |
+| ------------------------------- | ------------------------------------------------ |
+| Prefix (P)                      | `The capital of France is Paris. The capital of` |
+| (A)                             | ` Japan`                                         |
+| (B)                             | ` Germany`                                       |
+| Shared successor (S)            | ` is`                                            |
+| Expected prediction after (A+S) | ` Tokyo`                                         |
+| Expected prediction after (B+S) | ` Berlin`                                        |
 
-Endpoint sequences:
-
-```text
-Use the codebook A = cat and B = dog. Complete: Symbol A
-Use the codebook A = cat and B = dog. Complete: Symbol B
-```
-
-Delayed-readout sequences:
+The two complete endpoint inputs are:
 
 ```text
-Use the codebook A = cat and B = dog. Complete: Symbol A means
-Use the codebook A = cat and B = dog. Complete: Symbol B means
+The capital of France is Paris. The capital of Japan is
+The capital of France is Paris. The capital of Germany is
 ```
+
+Preliminary GPT-2 Large results to reproduce:
+
+* After ` Japan` and ` Germany`, both predict ` is` with approximately 0.94 probability.
+* Immediate endpoint JSD is approximately 0.0014 bits.
+* After the shared ` is`, the predictions diverge to ` Tokyo` and ` Berlin`.
+* Delayed endpoint JSD is approximately 0.99 bits.
 
 ## Success criterion
 
-`REPORT.md` must give one of three conclusions:
+`REPORT.md` must give one of these conclusions:
 
-1. **Delayed plateau:** the endpoints both predict ` means`, but the output after ` means` changes sharply from ` cat` to ` dog`.
+1. **Delayed plateau:** the immediate prediction remains approximately unchanged, while the delayed output stays near ` Tokyo`, switches sharply, and then stays near ` Berlin`.
 2. **No delayed plateau:** the endpoint conditions hold, but the delayed output changes smoothly.
-3. **Invalid example:** GPT-2 Large does not produce the required endpoint predictions.
+3. **Invalid example:** the required GPT-2 Large endpoint behavior cannot be reproduced.
 
-Negative results count as complete.
+A negative result counts as complete.
+
+## Fallback
+
+If time runs short, finish the endpoint validation and delayed interpolation, save the two main figures, state the result, and create `STOP`.
 
 ## Setup
 
-* Model: pretrained GPT-2 Large.
-* Use the model in evaluation mode with no sampling.
-* Confirm that ` A`, ` B`, ` means`, ` cat`, and ` dog` are each single tokens.
-* Use 101 interpolation points, (t\in[0,1]).
-* Interpolate the token embeddings of ` A` and ` B` using the norm-corrected SLERP procedure from [Matthew’s experiment](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge).
-* Keep the positional embedding and every other token unchanged.
-* Inject the interpolated embedding before the first transformer layer so the interpolated information can causally affect the later ` means` position.
-* Do not install or train any model.
+* Model: pretrained `openai-community/gpt2-large`.
+* Evaluation mode; no sampling, training, or fine-tuning.
+* Use 101 evenly spaced interpolation points (t\in[0,1]).
+* Confirm that ` Japan`, ` Germany`, ` is`, ` Tokyo`, and ` Berlin` are each one GPT-2 token.
+* Interpolate the token embeddings of ` Japan` and ` Germany`.
+* Follow [Matthew Shinkle’s interpolation procedure](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge): use shortest-arc spherical interpolation for direction, then rescale each interpolated vector so its norm changes linearly between the endpoint norms.
+* Insert the interpolated embedding at the (A/B) token position before the first transformer layer. Keep the prefix, shared successor, and positional embeddings fixed.
+* For every (t), run:
+
+```text
+P + [interpolated Japan→Germany embedding] + " is"
+```
+
+* From the same forward pass, record:
+
+  * **Immediate logits:** logits at the interpolated (A/B) position, which predict ` is`.
+  * **Delayed logits:** logits at the shared ` is` position, which predict ` Tokyo` or ` Berlin`.
 
 ## Stages
 
-* [x] **S1 — Validate the example**
+* [x] **S1 — Validate endpoints**
 
-  * Run the four endpoint sequences.
-  * After ` A` and ` B`, record the full next-token distributions and verify that both top-1 predictions are ` means`.
-  * Report their endpoint JSD.
-  * After ` A means` and ` B means`, verify that the top-1 predictions are respectively ` cat` and ` dog`.
-  * If either condition fails, document the result and stop.
+  * Reproduce the two endpoint inputs.
+  * Record top-5 predictions and full probability distributions at both readout positions.
+  * Verify:
 
-* [x] **S2 — Run the interpolation**
+    * both immediate top-1 predictions are ` is`;
+    * delayed top-1 predictions are ` Tokyo` and ` Berlin`.
+  * Compute immediate and delayed endpoint JSD in bits.
+  * If either requirement fails, document the result and stop.
 
-  * For every (t), insert the same interpolated (A\rightarrow B) embedding into:
+* [x] **S2 — Run interpolation**
 
-    1. (P+[A\rightarrow B]), for the immediate readout.
-    2. (P+[A\rightarrow B]+S), for the delayed readout.
-  * At the immediate readout, record:
+  * Run all 101 interpolation points.
+  * At the immediate readout, save:
 
-    * (p(\texttt{ means}));
-    * the top-1 token;
-    * JSD from the (A)-endpoint distribution.
-  * At the delayed readout, record:
+    * (p(\texttt{ is}));
+    * top-1 token.
+  * At the delayed readout, save:
 
-    * the full logits;
-    * (p(\texttt{ cat})) and (p(\texttt{ dog}));
-    * the top-1 token.
+    * full logits;
+    * (p(\texttt{ Tokyo}));
+    * (p(\texttt{ Berlin}));
+    * top-1 token.
 
-* [x] **S3 — Measure the delayed plateau**
+* [x] **S3 — Measure the delayed transition**
 
-  * For delayed logits (z(t)), compute:
+  * Let (z(t)) be the delayed logit vector and (z_A,z_B) the endpoint delayed logits.
+  * Compute:
 
 [
-d(t)=\frac{\lVert z(t)-z_A\rVert_2}
+d(t)=
+\frac{\lVert z(t)-z_A\rVert_2}
 {\lVert z(t)-z_A\rVert_2+\lVert z(t)-z_B\rVert_2}.
 ]
 
@@ -96,36 +109,47 @@ d(t)=\frac{\lVert z(t)-z_A\rVert_2}
 w=t_{0.9}-t_{0.1},
 ]
 
-where (t_q) is the first interpolation point with (d(t)\ge q).
+where (t_q) is the first point at which (d(t)\ge q).
 
 * Save:
 
-  * `plots/immediate_readout.png`: (p(\texttt{ means})) and top-1 token across (t).
-  * `plots/delayed_distance.png`: delayed (d(t)), with the linear reference (d=t).
-  * `plots/delayed_tokens.png`: (p(\texttt{ cat})) and (p(\texttt{ dog})) across (t).
+  * `plots/immediate_prediction.png`: (p(\texttt{ is})) across (t).
+  * `plots/delayed_distance.png`: delayed (d(t)), including the reference line (d=t).
+  * `plots/delayed_tokens.png`: (p(\texttt{ Tokyo})) and (p(\texttt{ Berlin})) across (t).
 
-* Treat (w<0.5), together with visibly stable regions near both endpoints, as evidence of a clear delayed plateau.
+* Call the result a clear delayed plateau only if:
+
+  * the immediate prediction remains ` is` throughout most or all of the path;
+  * delayed (d(t)) has visibly stable regions near both endpoints;
+  * the delayed transition is concentrated in a narrow interval, with (w<0.5).
 
 * [x] **S4 — Write the verdict**
 
-  * If a delayed plateau exists, conclude that plateaus can organize future-relevant latent information even when the current next-token prediction is shared.
-  * If the delayed curve is smooth, conclude that future output divergence alone is insufficient to create a plateau.
-  * Do not generalize beyond this single example.
+  * If a delayed plateau appears, conclude:
+
+> GPT-2 Large can preserve a discrete, future-relevant distinction between two contexts even when their immediate next-token outputs are almost identical.
+
+* If the delayed transition is smooth, conclude:
+
+> Future output divergence alone is insufficient to produce an activation plateau in this example.
+
+* Do not generalize beyond this single example.
 
 ## Deliverables
 
-* `RESULTS.md`: endpoint checks, JSD, (w), and saved figure paths.
-* `REPORT.md`: question, method, three figures, and concise verdict.
-* `plots/`: all figures.
+* `RESULTS.md`: endpoint predictions, JSD values, transition width, and figure paths.
+* `REPORT.md`: research question, method, three figures, and concise verdict.
+* `plots/`: all saved figures.
 * Empty `STOP` file when complete.
 
 ## Out of scope
 
-* No additional prompts.
+* No additional prompts or token pairs.
 * No other models.
 * No training or fine-tuning.
-* No attention, MLP, Jacobian, or layerwise analysis.
-* Do not modify the prompt to rescue a failed example.
+* No layerwise, attention, MLP, neuron, or Jacobian analysis.
+* Do not modify the prompt to rescue a failed endpoint.
+* Do not interpret the immediate normalized-distance curve: its endpoints are nearly identical, making that normalization uninformative.
 
 ## On-track check
 
@@ -137,22 +161,16 @@ On track? <yes/no> — <stage, % done, blocker if any>
 
 ## Current status
 
-**Complete.** S1-S4 all run (2026-08-10). S1 FAILED its endpoint checks, which is the pre-registered
-verdict path: GPT-2 Large predicts ` =` after ` A`/` B` (p = 0.340/0.525) rather than ` means`
-(p = 6.68e-4/4.50e-4), and predicts a quote mark after ` A means`/` B means` rather than ` cat`/` dog`.
-REPORT.md therefore returns **conclusion 3 - invalid example**. The prompt was NOT modified to rescue
-it (out of scope).
-
-Secondary, clearly-scoped result kept from the same sweep: plateau shape survives one token of
-propagation - transition width w = 0.27 immediate vs 0.38 delayed vs 0.80 linear null, midpoints
-t50 = 0.45 vs 0.42, endpoint separation 300.2 vs 75.4 (4.0x attenuation), both monotone. The delayed
-top-1 token never changes, so the divergence is logit geometry and not behaviour.
-
-Deliverables done: RESULTS.md, REPORT.md (both pass `check_render.py`), the three named figures in
-plots/, `results/delayed.json`. `STOP` written; zero unaddressed feedback files.
+Complete. S1–S4 done in one iteration. All four endpoint checks pass (immediate top-1 ` is` at both
+endpoints, 0.944/0.940; delayed top-1 ` Tokyo` 0.928 / ` Berlin` 0.848; endpoint JSD 0.0014 bits
+immediate, 0.9945 bits delayed — matching the preliminary numbers in this plan). The 101-point sweep
+gives the verdict **conclusion 1, delayed plateau**: the immediate top-1 is ` is` at every `t`
+(p in 0.931–0.944) while the delayed `d(t)` is monotone with width `w = 0.28` (linear null 0.80),
+midpoint `t₅₀ = 0.48`, and the delayed top-1 flips ` Tokyo`→` Berlin` at `t = 0.49`. RESULTS.md and
+REPORT.md are curated to this verdict; the three named figures are saved and embedded;
+`check_render.py` passes on both; `STOP` written.
 
 ## Next step
 
-None - direction closed. If feedback arrives, delete `STOP`, address it, re-write `STOP` when clean.
-Follow-up if scope were reopened: locate a prompt where GPT-2 Large demonstrably performs the delayed
-lookup (check endpoint behaviour BEFORE interpolating), then rerun this pipeline unchanged.
+None — the plan is complete and `STOP` exists. If a human drops feedback later, delete `STOP`,
+address it, and re-write `STOP` only when clean again.

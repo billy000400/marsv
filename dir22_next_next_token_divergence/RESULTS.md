@@ -4,70 +4,80 @@
 
 ## Headline
 
-The planned codebook example is **invalid** for GPT-2 Large: after ` A` the model predicts ` =`,
-not ` means`, and after ` A means` / ` B means` it predicts a quote mark, never ` cat` / ` dog`.
-The planned delayed-plateau test therefore cannot be run as designed (PLAN conclusion 3).
+**Verdict: delayed plateau (PLAN conclusion 1).** Moving the token embedding continuously from
+` Japan` to ` Germany` inside `The capital of France is Paris. The capital of X is` leaves the
+*immediate* next-token prediction untouched — ` is` is the top-1 token at all 101 interpolation
+positions, with probability never leaving 0.931–0.944 — while the prediction *one token later*
+holds ` Tokyo`, switches abruptly near the middle of the path, and then holds ` Berlin`. The
+delayed transition width is `w = 0.28`, far narrower than the linear reference `w = 0.80`.
 
-What the same sweep does show: the plateau shape **survives one token of propagation**. Injecting the
-interpolated ` A`→` B` embedding and reading out *after* the shared successor ` means` — a position
-that can only see the symbol through attention — gives a sharp, monotone transition
-(width `w = 0.38`) instead of the linear `w = 0.80`, with its midpoint at the same place as the
-immediate readout's. The divergence never reaches the model's output: the delayed top-1 token is the
-same at every interpolation position.
+Both endpoint conditions the plan required were reproduced exactly, so the example is valid.
 
 ## Metrics — endpoint validation (S1)
 
-All four endpoint checks fail: the model continues the codebook listing with ` =` instead of the
-assumed successor ` means`, and after the successor it opens a quotation instead of retrieving
-` cat` / ` dog`. This is what makes the example invalid.
+Every one of the five tokens is a single GPT-2 token, and all four endpoint predictions match the
+plan. The two contexts are almost indistinguishable now and almost disjoint one token later.
 
-| Check | Sequence | Top-1 | p(top-1) | Planned token | p(planned) | Pass |
-|---|---|---|---|---|---|---|
-| Immediate | `…Symbol A` | ` =` | 0.340 | ` means` | 6.68e-4 | ✗ |
-| Immediate | `…Symbol B` | ` =` | 0.525 | ` means` | 4.50e-4 | ✗ |
-| Delayed | `…Symbol A means` | ` "` | 0.163 | ` cat` | 0.0606 | ✗ |
-| Delayed | `…Symbol B means` | ` "` | 0.150 | ` dog` | 0.0115 | ✗ |
+| Check | Sequence | Top-1 | p(top-1) | Required token | Pass |
+|---|---|---|---|---|---|
+| Immediate | `…The capital of Japan` | ` is` | 0.944 | ` is` | ✓ |
+| Immediate | `…The capital of Germany` | ` is` | 0.940 | ` is` | ✓ |
+| Delayed | `…The capital of Japan is` | ` Tokyo` | 0.928 | ` Tokyo` | ✓ |
+| Delayed | `…The capital of Germany is` | ` Berlin` | 0.848 | ` Berlin` | ✓ |
 
-Endpoint Jensen–Shannon divergence (JSD, nats): immediate **0.0861**, delayed **0.0115**.
+Endpoint Jensen–Shannon divergence (JSD, bits): immediate **0.0014**, delayed **0.9945** — a
+factor of 690. Runner-up predictions are also sensible (` Kyoto` 0.025, ` Osaka` 0.019 after
+` Japan`; ` Munich` 0.067, ` Frankfurt` 0.031 after ` Germany`), so the delayed divergence is a
+genuine capital-city lookup rather than one lucky token.
 
 ## Metrics — interpolation sweep (S2/S3, 101 points)
 
-Both readouts are far sharper than a linear response and cross at the same interpolation position, so
-the downstream position is tracking the same boundary rather than forming its own; propagation costs a
-factor of 4.0 in signal and broadens the crossing by 0.11.
+The delayed readout satisfies all three plateau criteria the plan set: the immediate prediction
+never changes, `d(t)` is visibly flat near both endpoints, and the transition is concentrated in a
+narrow interval well under the 0.5 threshold.
 
-| Readout | Width `w` | Midpoint `t₅₀` | Endpoint separation ‖z_A−z_B‖₂ | Monotone | Top-1 changes? |
-|---|---|---|---|---|---|
-| Immediate (at the symbol) | **0.27** | 0.45 | 300.2 | yes | no (` =` throughout) |
-| Delayed (after ` means`)  | **0.38** | 0.42 | 75.4 | yes | no (` "` throughout) |
-| Linear reference `d = t`  | 0.80 | 0.50 | — | — | — |
+| Quantity | Value |
+|---|---|
+| Immediate top-1 = ` is` | 101 / 101 positions (100%) |
+| Immediate p(` is`) range | 0.931 – 0.944 |
+| Delayed transition width `w = t₀.₉ − t₀.₁` | **0.28** (t₀.₁ = 0.34, t₀.₉ = 0.62) |
+| Linear reference width | 0.80 |
+| Delayed midpoint `t₅₀` | 0.48 |
+| Delayed top-1 flip (` Tokyo` → ` Berlin`) | t = 0.49 |
+| `d(t)` monotone in `t` | yes |
+| Delayed endpoint separation ‖z_A − z_B‖₂ | 462.5 |
 
-Delayed top-2 logit margin stays in [0.43, 0.69] across all `t` — the sweep never approaches a
-decision flip. p(` cat`) exceeds p(` dog`) at every `t` (ratio 6.0 at `t=0`, 4.0 at `t=1`).
+Outside the transition the delayed distribution barely moves: `d(t) ≤ 0.077` for `t ≤ 0.30` and
+`d(t) ≥ 0.89` for `t ≥ 0.60`. p(` Tokyo`) is still 0.902 at `t = 0.45` and has collapsed to 0.070
+by `t = 0.50`; p(` Berlin`) reaches 0.833 by `t = 0.55` and is flat thereafter.
 
 ## Figures
 
-The endpoint check that decides the verdict: does the model predict the successor ` means` the plan
-assumed?
+The first question is whether the immediate prediction really stays fixed — without that, a delayed
+switch would be unremarkable.
 
-![Probability of the top-1 token and of ' means' across the interpolation](plots/immediate_readout.png)
+![Probability of ' is' at the interpolated position across the interpolation](plots/immediate_prediction.png)
 
-**Figure 1.** The planned successor is three orders of magnitude below the actual prediction.
-x: interpolation position `t` (0 = ` A`, 1 = ` B`); y: probability, log scale. Solid = probability of
-the model's own top-1 token (` =` at every `t`); dashed = probability of ` means`.
+**Figure 1.** The immediate prediction is effectively constant. x: interpolation position `t`
+(0 = ` Japan`, 1 = ` Germany`); y: probability of ` is` at the interpolated position, linear scale
+0–1. The curve stays within 0.931–0.944 and ` is` is the top-1 token at every `t`.
 
-Whether the plateau shape propagates one position downstream:
+The plateau claim is about the shape of the delayed response, so we plot its relative logit distance
+against the linear reference.
 
-![Relative logit distance versus interpolation position for both readouts](plots/delayed_distance.png)
+![Relative logit distance at the delayed readout versus interpolation position](plots/delayed_distance.png)
 
-**Figure 2.** Both readouts are plateau-shaped and their transitions coincide. x: interpolation
-position `t`; y: relative logit distance `d(t)` (0 at the ` A` endpoint, 1 at the ` B` endpoint).
-Solid = immediate readout, dashed = delayed readout after ` means`, dotted = linear reference `d = t`.
-Thin horizontal lines mark the 0.1 and 0.9 levels that define the width `w`.
+**Figure 2.** The delayed logits are flat, switch sharply, then flat again. x: interpolation
+position `t`; y: relative logit distance `d(t)` (0 at the ` Japan` endpoint, 1 at the ` Germany`
+endpoint). Solid with triangles = delayed readout after ` is`; dotted gray = linear reference
+`d = t`. Thin horizontal lines mark the 0.1 and 0.9 levels; the shaded band is the transition
+interval of width `w = 0.28`.
 
-Whether the interpolation ever produces the codebook lookup the plan predicted:
+Finally, whether that geometric switch is also a behavioural one: which city the model actually
+predicts.
 
-![Probability of ' cat' and ' dog' at the delayed readout across the interpolation](plots/delayed_tokens.png)
+![Probability of ' Tokyo' and ' Berlin' at the delayed readout across the interpolation](plots/delayed_tokens.png)
 
-**Figure 3.** The intended semantic flip never happens. x: interpolation position `t`; y: probability
-at the delayed readout. Solid = p(` cat`), dashed = p(` dog`). The two curves never cross.
+**Figure 3.** The predicted capital swaps within a few interpolation steps. x: interpolation
+position `t`; y: probability at the delayed readout. Solid with circles = p(` Tokyo`), dashed with
+squares = p(` Berlin`). The dash-dotted vertical line marks `t = 0.49`, where the top-1 token flips.

@@ -51,3 +51,45 @@ natural follow-up, were scope reopened: find a prompt where GPT-2 Large *demonst
 delayed lookup — verify endpoint behaviour first, then interpolate.
 
 On track? yes — S1–S4 100% done, verdict = conclusion 3 (invalid example), no blocker.
+
+## 2026-08-12 — new PLAN example runs clean; verdict = delayed plateau
+
+**Did.** Checked for unaddressed `human_feedback*` / `*REVIEW*` files: none. Found PLAN.md rewritten
+around a new fixed example (capital-city lookup) with status reset to "fresh start" and the old
+`STOP` removed, so I re-ran the whole plan. Retargeted `experiments/run_delayed.py` to
+prefix `The capital of France is Paris. The capital of`, endpoints ` Japan`/` Germany`, successor
+` is`, targets ` Tokyo`/` Berlin`; switched JSD from nats to bits (the new PLAN quotes bits); folded
+the two sweeps into one forward pass per `t` reading out at both the interpolated position and the
+final ` is` position, which is what PLAN's "from the same forward pass" asks for. Rewrote
+`experiments/plot_delayed.py` for the three figure names PLAN specifies. Ran both on GPT-2 Large from
+the local HF cache (`HF_HOME=/workspace/hf_home`), 101 points, budget honoured
+(`set_per_process_memory_fraction(0.225)`, `set_num_threads(2)`, chunk 16; ~1 min, no OOM).
+Re-curated RESULTS.md and REPORT.md; `check_render.py` passes on both.
+
+**Learned.**
+1. **The example reproduces the PLAN's preliminary numbers essentially exactly.** Immediate endpoint
+   JSD 0.0014 bits (PLAN said ~0.0014), delayed 0.9945 bits (PLAN said ~0.99), p(` is`) 0.944/0.940
+   (PLAN said ~0.94). All four endpoint top-1 checks pass, so S1 does not stop the experiment.
+2. **Verdict is conclusion 1, delayed plateau, and it is clean.** Immediate top-1 is ` is` at 101/101
+   positions with p in [0.931, 0.944]; delayed `d(t)` is monotone with `w = 0.28` against the linear
+   null 0.80, `t₅₀ = 0.48`, flat tails (`d ≤ 0.077` for `t ≤ 0.30`, `d ≥ 0.89` for `t ≥ 0.60`).
+3. **Unlike the retired codebook example, the switch is behavioural.** Delayed top-1 flips
+   ` Tokyo`→` Berlin` once, at `t = 0.49`; p(` Tokyo`) 0.902 at `t = 0.45` → 0.070 at `t = 0.50`.
+   That removes the "logit geometry only" caveat that limited the previous write-up.
+4. **The scale-free caveat is worth checking every time.** `d(t)` would look dramatic even over a
+   trivial gap, so I report the gap it normalises: ‖z_A − z_B‖₂ = 462.5, large and consistent with the
+   near-1-bit endpoint JSD. The flat regions are flat relative to a real swing.
+
+**Assumptions logged (loop mode, no human to ask).**
+- Reported the immediate readout only as p(` is`) and the top-1 token, and did **not** compute or plot
+  an immediate `d(t)` curve. PLAN's "out of scope" explicitly forbids interpreting it; keeping it as an
+  unused number would violate rule 9's "a metric no Result uses gets cut". *Rejected alternative:*
+  compute it and show it as context, as the previous iteration did.
+- Deleted `plots/immediate_readout.png` (the retired example's figure) rather than leaving it beside
+  the new `plots/immediate_prediction.png`. It is my own output from the superseded plan, and PLAN
+  names the new filename; the old→new mapping is recorded in CHANGELOG.md.
+- Dropped the delayed top-2 margin metric: with an actual top-1 flip at `t = 0.49`, the margin no
+  longer answers a question the Results ask.
+
+**Next step.** None — the plan is complete (S1–S4 done, verdict rendered, three named figures embedded
+in both deliverables, render checks pass, no unaddressed feedback), so I wrote `STOP` per rule 11.
