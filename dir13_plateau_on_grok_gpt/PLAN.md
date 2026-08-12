@@ -543,10 +543,25 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
-**FINALIZED 2026-08-10 — wall-clock budget exhausted, `STOP` written.** Zero unaddressed feedback
-files; RESULTS.md and REPORT.md stand at current-best from S23 (below) and pass `check_render.py`
-with zero problems. The S24 candidates in "Next step" are open but unstarted. If new feedback lands,
-delete `STOP`, address it, and re-write `STOP` only when clean again.
+**F6 DONE 2026-08-12 — the basin criterion was redefined and validated; `STOP` is NOT written.**
+`human_feedback_6.txt` (now `.addressed.md`) reported that the old basin fraction classified the
+linear null $d(t)=t$ as owning a basin, because it required $t_{lo}\ge0.10$ / $t_{hi}\le0.90$ and the
+line hits those values exactly. Confirmed and fixed at the source: the basin test is now a **rest
+ratio** $R=r(\delta)/\delta$, identically 1 for the line at every $\delta$, with a basin claimed at
+$R\ge\kappa=2$, $\delta=0.10$. Validated against four null families through the identical code path —
+exact line, line + Gaussian noise ($\sigma$ 0.01/0.02/0.05), the untrained network's 2,080 curves, the
+200-pair block-11 patch — all at a **0.0%** false-positive rate (0/2, 0/12,000, 0/4,160, 0/400
+endpoints) against **90.3%** for the trained network (median rest ratio 3.18 vs 0.94–1.00 for the
+nulls). Headline narrowed from "every character owns a basin (65/65, min $\phi$ 0.86)" to **59/65
+characters hold a basin against a majority of partners** (median $\phi$ 1.00, mean 0.90); the six
+failures — `3`, `&`, `$`, `Z`, `X`, `z` — are the six rarest characters, and $\phi$ tracks training
+frequency at Spearman $\rho=0.56$ ($p=1.0\times10^{-6}$, n = 65). Transition-width, strict-count,
+variance-decomposition, intervention and frozen-run numbers are all unaffected (the strict rule also
+demands $w\le0.25$, which the line fails at 0.80). New: `experiments/basin_criterion.py`,
+`experiments/plot_basin_criterion.py`, `results/basin_criterion.json`, Figures 15 and 17
+(`plots/basin_criterion.png`, `plots/basin_vs_frequency.png`); Figures 16–28 renumbered to 18–30.
+`check_render.py REPORT.md RESULTS.md` passes with 0 problems. Zero unaddressed feedback files remain,
+but the S24 candidates in "Next step" are open, so the loop continues.
 
 **S23 DONE 2026-08-10 — the two remaining single-seed runs were replicated and both pre-registered
 predictions held.** Zero unaddressed feedback files (all six `human_feedback*` end in `.addressed.md`),

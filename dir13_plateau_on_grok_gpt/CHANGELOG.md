@@ -1501,3 +1501,49 @@ PLAN.md and REPORT.md Methods before it was scored.
 - **`STOP` written** this iteration: wall-clock budget is exhausted and no unaddressed feedback file
   exists (rule 11). Open work is recorded in PLAN.md "Next step" (S24: probe what the trainable blocks
   compute; non-final-token interpolation; a second model) for whoever picks this up.
+
+## 2026-08-12 — operator feedback #6: the basin criterion was redefined and validated against nulls
+
+- **Feedback addressed:** `human_feedback_6.txt` → `human_feedback_6.txt.addressed.md`. The operator
+  was right: the old basin fraction fired on the linear null. It required $t_{lo}\ge0.10$ (as $A$) or
+  $t_{hi}\le0.90$ (as $B$), and $d(t)=t$ gives *exactly* $t_{lo}=0.10$, $t_{hi}=0.90$ — the threshold
+  sat on the null, so the statistic could not fail and "all 65 characters own a basin" was unsupported.
+  The transition-width results are unaffected, as the operator anticipated: the strict plateau rule
+  also demands $w\le0.25$ and the line scores 0.80, so every width, strict-count, variance-decomposition,
+  intervention and frozen-run number in both deliverables is unchanged.
+- **New definition (REPORT.md Methods).** Rest length $r_c(\delta)$ = the path fraction staying within
+  $\delta$ of $c$'s output, read at whichever end $c$ occupies; **rest ratio** $R_c=r_c(\delta)/\delta$,
+  which is identically 1 for $d(t)=t$ at every $\delta$; basin iff $R\ge\kappa$ with $\delta=0.10$,
+  $\kappa=2$ (the path parks on $c$ at least twice as long as a uniform morph would).
+- **New baseline (REPORT.md Methods §Baselines).** Null-curve baseline: exact line; line + Gaussian
+  noise ($\sigma$ = 0.01/0.02/0.05, 2,000 draws each); the untrained network's 2,080 curves; the
+  200-pair block-11 patch. False-positive rate at $\kappa=2$: **0/2, 0/12,000, 0/4,160, 0/400**
+  endpoint decisions. Under the old criterion those same families passed at **50%, ~50%, 40.8%,
+  36.8%**. Trained network: **90.3%** of 4,160 endpoints, median rest ratio **3.18** (nulls 0.94–1.00).
+- **Superseded headline number (old → new).** "Every character owns a basin, $\phi\ge0.86$ for all
+  65, median 1.00" → "**59 / 65** characters hold a basin against a majority of partners (median
+  $\phi$ = 1.00, mean 0.90; 55 at $\phi\ge0.9$, 39 at $\phi=1$); six fail — `3` 0.03, `&` 0.16,
+  `$` 0.25, `Z` 0.31, `X` 0.47, `z` 0.47". Changed in RESULTS.md and REPORT.md in the Summary, the
+  all-pairs table, the per-character verdict, the hypothesis statement and the Conclusion.
+- **New supporting result.** The six failures are the six rarest characters: $\phi$ vs training-set
+  frequency, Spearman $\rho=0.56$, $p=1.0\times10^{-6}$, n = 65; every character seen $\ge$ 1,000
+  times has $\phi\ge0.68$ (53 characters). This is why the narrowed claim is stronger than the old
+  one — the criterion now discriminates, and what it discriminates by is interpretable.
+- **New caveat (REPORT.md, now item 3 of 8; later items renumbered).** Basin ownership is a majority
+  claim resting on $\kappa$ and $\delta$: at $\delta=0.20$ the trained pass rate falls 90.3% → 52.0%
+  (untrained stays 0.0%). The null separation and the character ordering do not depend on the threshold.
+- **Figures.** Two new: **Figure 15** `plots/basin_criterion.png` (rest-length definition; pass rate
+  vs $\kappa$ for trained and all null families; per-character $\phi$ with the untrained control and
+  the old criterion overlaid) and **Figure 17** `plots/basin_vs_frequency.png` ($\phi$ vs training
+  frequency). `plots/allpairs_width_by_char.png` (Figure 16) regenerated with the validated $\phi$ on
+  its right axis, replacing the old `flat_frac`; its title and the small-multiples titles updated.
+  Figures 16–28 renumbered to 18–30 in both deliverables, with every prose citation and range updated;
+  30 embeds / 30 captions / sequential numbering in each file.
+- **Code:** new `experiments/basin_criterion.py` (criterion + null validation + per-character table)
+  and `experiments/plot_basin_criterion.py`; `experiments/plot_allpairs.py` reads $\phi$ from the new
+  JSON. New data: `results/basin_criterion.json`. No model was re-run — the recomputation reuses the
+  stored 2,080-pair curves in `results/allpairs_raw.npz`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 31 display / 663 inline equations / 30 figures; RESULTS 30 figures; 0 problems).
+- **No `STOP`**: the direction is looping again after new feedback; zero unaddressed feedback files
+  remain as of this entry, but the S24 plan candidates are still open.

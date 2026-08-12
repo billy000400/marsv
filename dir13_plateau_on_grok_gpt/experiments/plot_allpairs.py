@@ -49,6 +49,10 @@ def main():
     chars, V = S["chars"], S["vocab_size"]
     pc = {p["idx"]: p for p in A["per_char"]}
     fin = S["final_block0"]
+    # basin fraction under the null-validated criterion (basin_criterion.py); the `flat_frac` in
+    # the analysis block used a threshold the straight-line null also passes.
+    phi = {p["idx"]: p["phi_new"] for p in
+           json.load(open(os.path.join(RES, "basin_criterion.json")))["per_char"]}
 
     # class-ordered permutation of the vocabulary
     order = [i for cl in CLASSES for i in range(V) if pc[i]["class"] == cl]
@@ -104,16 +108,16 @@ def main():
     ax.set_ylabel("$w_{10\\to90}$ over the 64 partners")
     ax.set_xlabel("character $c$, sorted by median width")
     ax2 = ax.twinx()
-    ax2.plot(range(1, V + 1), [pc[i]["flat_frac"] for i in srt], color=CVD[1],
-             ls="none", marker="D", ms=3.4, label="flat_frac(c)")
-    ax2.set_ylim(0, 1.05); ax2.set_ylabel("flat_frac($c$)  (diamonds)", color=CVD[1])
+    ax2.plot(range(1, V + 1), [phi[i] for i in srt], color=CVD[1],
+             ls="none", marker="D", ms=3.4, label="$\\phi(c)$")
+    ax2.set_ylim(0, 1.05); ax2.set_ylabel("basin fraction $\\phi(c)$  (diamonds)", color=CVD[1])
     ax2.tick_params(axis="y", colors=CVD[1])
     hs = [plt.Rectangle((0, 0), 1, 1, facecolor=CVD[0], alpha=.45, hatch=HATCHES[k],
                         edgecolor="0.25", label=CLASS_LABEL[cl]) for k, cl in enumerate(CLASSES)]
     ax.legend(handles=hs, fontsize=8, ncol=4, loc="upper center", bbox_to_anchor=(.5, -.24),
               frameon=False, title="box hatch = character class")
-    ax.set_title("Every character sits in a basin (flat_frac $\\approx$ 1), but how sharply it is "
-                 "left varies by character")
+    ax.set_title("59 of 65 characters hold a basin against most partners, and how sharply the "
+                 "basin is left varies by character")
     save(fig, "allpairs_width_by_char.png",
          "each box / diamond summarises the 64 pairs of one character, 1 d(t) curve of 50 points per pair")
 
@@ -134,7 +138,7 @@ def main():
             ax.plot(ts, d, color=CVD[0], lw=.5, alpha=.32)
         ax.plot([0, 1], [0, 1], **REF_DIAG)
         ax.set_title(f"'{disp(chars[i])}'  ({CLASS_LABEL[pc[i]['class']]})\n"
-                     f"median $w$={pc[i]['med_w']:.3f}, flat_frac={pc[i]['flat_frac']:.2f}",
+                     f"median $w$={pc[i]['med_w']:.3f}, $\\phi$={phi[i]:.2f}",
                      fontsize=9)
         ax.set_ylim(-.02, 1.02)
     for ax in axes[-1]:

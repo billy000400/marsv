@@ -1829,3 +1829,68 @@ zero unaddressed feedback files exist, so stopping is permitted under rule 11. I
 here later, delete `STOP`, address it, and re-write `STOP` only when clean again.
 
 On track? yes — deliverables final, all render checks passing, zero unaddressed feedback; blocker: wall-clock budget exhausted.
+
+## 2026-08-12 — feedback iteration: the basin criterion could not fail, so it was rebuilt
+
+**What I did.** Part C first: listed the direction root and found one unaddressed file,
+`human_feedback_6.txt` (no `STOP` present — it had already been cleared for this re-entry). That was
+the whole iteration. The operator's point checked out immediately on inspection of
+`matthew_assay.is_plateau` / `analyze_allpairs.py`: the basin fraction counted a partner when
+`t_lo >= 0.10` (character at the A end) or `t_hi <= 0.90` (B end), and the straight line `d(t)=t`
+produces exactly `t_lo=0.10` and `t_hi=0.90`. The threshold was the null value itself, so the
+statistic was measuring nothing and the "all 65 characters own a basin" claim had no content.
+
+I replaced the raw-length test with a **ratio to the null**: rest length `r(δ)` (path fraction within
+`δ` of the character's output, on the same isotonic copy the width uses) divided by `δ`, which is
+identically 1 for the straight line at every `δ`. Basin iff that ratio ≥ κ = 2 at δ = 0.10. Then I
+measured the false-positive rate on four null families through the identical code path — exact line,
+line + Gaussian noise at three σ, the untrained network's own 2,080 curves, and the 200-pair block-11
+patch. All four give 0.0% at κ = 2 (0/2, 0/12,000, 0/4,160, 0/400 endpoint decisions) with median rest
+ratios 0.94–1.00, while the trained network passes 90.3% of 4,160 endpoints at median ratio 3.18. The
+old criterion, run on the same families, passed 40.8% of untrained endpoints and about half of pure
+noise-around-a-line. No GPU work was needed: everything recomputes from the stored curves in
+`results/allpairs_raw.npz`.
+
+**Assumptions logged (loop mode, no one to ask).** (a) δ = 0.10 and κ = 2 are choices. I fixed δ at
+the tolerance the transition width already uses and κ at the smallest integer multiple that clears the
+null, then reported the whole φ-vs-κ curve (1→5) and the count at δ ∈ {0.05, 0.10, 0.20} so the
+threshold dependence is visible rather than hidden — and put it in the caveats. Rejected alternatives:
+an *area-between-curve-and-line* statistic (threshold-free, but no longer a per-partner count, so the
+per-character fraction φ would have had to be redefined as well and the PLAN case (i)/(ii)/(iii)
+verdict re-stated); and simply moving the constant to 0.15 (clears the null by 50% but with no
+principled unit, and the operator's objection would apply again at the next null).
+(b) I kept φ as the reported statistic rather than switching the deliverables to the continuous rest
+ratio, because the PLAN question ("does *each* character have a basin?") is a count.
+
+**What the numbers did to the story.** 59 of 65 characters clear φ ≥ 0.5 (median 1.00, mean 0.90, 39
+at exactly 1.00). Six fail: `3`, `&`, `$`, `Z`, `X`, `z` — and those are the six rarest characters in
+the training text (`$` appears once, `&` three times, `3` twenty-seven times). φ correlates with
+training frequency at Spearman ρ = 0.56 (p = 1.0e-6, n = 65), and every character seen ≥ 1,000 times
+has φ ≥ 0.68. So the narrowed claim is better evidence than the old universal one: the criterion now
+discriminates, it discriminates along an interpretable axis, and it says where the geometry a
+practitioner might rely on for steering or patching stops holding. Per rule 9b I reframed the claim in
+the Summary, the all-pairs table, the per-character verdict, the hypothesis block and the Conclusion of
+both deliverables rather than leaving a Summary promising something the numbers no longer deliver.
+
+**What I learned.** A threshold placed *at* a null's value is worse than no test: it produces a
+number that looks like evidence (0.86–1.00 for every character) and has zero discriminative power. The
+tell was visible in the old data all along — the old φ was 1.00 for 59/65 and never below 0.86 even
+though the underlying widths ranged 0.264–0.590. Any per-item criterion in this project should now be
+reported alongside its false-positive rate on the init checkpoint, which costs nothing because those
+curves are already stored.
+
+**Housekeeping.** Two new figures forced a renumber of Figures 16–28 → 18–30 across both deliverables;
+the plural-form references ("Figures 14–15", "Figures 6, 8, 16, 20", "Figures 24 and 25") do not match
+a `Figure N` regex and had to be fixed by hand — worth remembering before the next insertion. Both
+files now hold 30 embeds, 30 visible captions, sequential numbering, and every figure cited by number
+(Figures 3 and 4 via the range "Figures 2–4"). `check_render.py REPORT.md RESULTS.md` passes with 0
+problems.
+
+**Next step.** `human_feedback_6.txt` is renamed `.addressed.md` and no unaddressed file remains, so
+the plan is live again at S24 (probe what the trainable blocks compute; interpolation at non-final
+token positions; a second model). No `STOP` written — there is wall-clock left and the plan candidates
+are open.
+
+On track? yes — the operator's objection is fixed at the source rather than papered over, the replacement
+criterion is validated against four null families at a 0.0% false-positive rate, and both deliverables
+carry the narrowed claim plus the new frequency result; blocker: none.
