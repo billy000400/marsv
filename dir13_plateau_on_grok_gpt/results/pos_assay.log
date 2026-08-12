@@ -1,0 +1,20 @@
+self_test OK: step w=0.089 detected, line w=0.800 rejected
+[init] anchor (block0, final position): median w = 0.803
+[init] k=0 (len 15): read_final median w=0.8085 strict=0.0 sep=1.1672 | read_patch median w=0.8085 | ep_err=1.07e-06 [15s]
+[init] k=1 (len 16): read_final median w=0.8072 strict=0.0 sep=0.2303 | read_patch median w=0.8085 | ep_err=1.05e-06 [20s]
+[init] k=2 (len 17): read_final median w=0.8041 strict=0.0 sep=0.2366 | read_patch median w=0.8085 | ep_err=1.10e-06 [25s]
+[init] k=4 (len 19): read_final median w=0.804 strict=0.0 sep=0.2094 | read_patch median w=0.8085 | ep_err=1.03e-06 [30s]
+[init] k=8 (len 23): read_final median w=0.8066 strict=0.0 sep=0.1918 | read_patch median w=0.8085 | ep_err=1.19e-06 [35s]
+[matched] anchor (block0, final position): median w = 0.4428
+[matched] k=0 (len 15): read_final median w=0.3278 strict=0.28 sep=23.621 | read_patch median w=0.3278 | ep_err=1.24e-05 [14s]
+[matched] k=1 (len 16): read_final median w=0.3628 strict=0.1933 sep=13.6464 | read_patch median w=0.3278 | ep_err=7.15e-06 [19s]
+[matched] k=2 (len 17): read_final median w=0.3788 strict=0.1467 sep=10.7775 | read_patch median w=0.3278 | ep_err=7.63e-06 [25s]
+[matched] k=4 (len 19): read_final median w=0.4338 strict=0.0733 sep=8.9244 | read_patch median w=0.3278 | ep_err=8.58e-06 [30s]
+[matched] k=8 (len 23): read_final median w=0.3909 strict=0.0867 sep=3.5098 | read_patch median w=0.3278 | ep_err=8.58e-06 [35s]
+[last] anchor (block0, final position): median w = 0.3507
+[last] k=0 (len 15): read_final median w=0.2427 strict=0.5333 sep=44.4816 | read_patch median w=0.2427 | ep_err=1.53e-05 [15s]
+[last] k=1 (len 16): read_final median w=0.2902 strict=0.38 sep=31.6009 | read_patch median w=0.2427 | ep_err=1.34e-05 [20s]
+[last] k=2 (len 17): read_final median w=0.2492 strict=0.5133 sep=30.2359 | read_patch median w=0.2427 | ep_err=1.34e-05 [25s]
+[last] k=4 (len 19): read_final median w=0.2439 strict=0.52 sep=23.7527 | read_patch median w=0.2427 | ep_err=1.72e-05 [30s]
+[last] k=8 (len 23): read_final median w=0.257 strict=0.4733 sep=16.4044 | read_patch median w=0.2427 | ep_err=1.91e-05 [35s]
+DONE -> results/pos_assay.json

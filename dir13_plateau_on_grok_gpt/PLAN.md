@@ -442,6 +442,24 @@ Null results are complete when the validity gates pass. When complete, write an 
       New **Figure 25** (`plots/seed_replication.png`) in both deliverables; Figure 24 re-rendered with
       the two extra seed markers and leader-line labels.
 
+- [x] **S24a - Readout offset: interpolate a character the readout does not read.** DONE 2026-08-12,
+      all four pre-registered predictions HELD. The reference character run was retrained
+      (`train_frozen.py --tag ref_pos`, nothing frozen, seed 1337, 30,000 steps, 29.2 min) because
+      `/tmp` had been wiped, then `experiments/pos_assay.py` scored step-0, matched (step 2,500,
+      val 0.5522) and step-30,000 checkpoints on the same 150 pairs, with `k` = 0/1/2/4/8 filler
+      characters between the patched character (position 14) and the readout. Injection at the residual
+      stream entering block 0, the only exact site off the final position; anchor rows measured the
+      standard way tie the sweep to the rest of the report and reproduce it (0.803 / 0.4428 / 0.3507 vs
+      the reference's 0.803 / 0.443 / 0.351). **Step 30,000:** median `w` 0.243 / 0.290 / 0.249 / 0.244
+      / 0.257, offsets 2/4/8 paired-indistinguishable from `k`=0 (p = 0.27, 0.43, 0.22); untrained
+      0.804-0.809 at every offset (0/150 plateaus, trained-vs-init p = 2.3e-26); `read_patch` identical
+      throughout (0.2427, worst endpoint error 1.9e-5). **The finding:** endpoint-decision disagreement
+      falls 86.7% -> 8.7% at `k`=4 while 52.0% of pairs still meet the strict plateau rule, so the
+      switch outlives the next-character decision that described it. Distance-independence is built
+      late (matched accuracy still degrades: 0.328 -> 0.434 at `k`=4, p = 5.6e-20). New **Figure 28**
+      (`plots/pos_offset.png`) and a REPORT.md Methods subsection in both deliverables; verdict and two
+      caveats rewritten; exploratory figures renumbered 28-30 -> 29-31.
+
 - [x] **S20 - The interior/end split's own test: a five-block window at blocks 1-5.** DONE 2026-08-03; the prediction below was FALSIFIED (it landed at 0.363, with the sharp group) and the split was withdrawn from both deliverables.
       `train_frozen.py --freeze 0,6,7,8,9,10,11 --tag frozen_mid_low` freezes the same *seven* blocks
       (58.0%) and leaves five trainable, one block *down* from S19's sharp 2-6 window, so the usable
@@ -542,6 +560,29 @@ Prioritize in this order: Figure 9 validity gate, BPE training/validation, Matth
 End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker if any>`.
 
 ## Current status
+
+**S24a DONE 2026-08-12 — the readout was moved off the patched character; all four pre-registered
+predictions held, and the report's central description narrowed.** Zero unaddressed feedback files, so
+this iteration advanced the plan. The previous iteration had left a *partial* `results/pos_assay.json`
+(matched-accuracy checkpoint only) unreported on disk; `/tmp` had been wiped, so the reference
+character run was retrained from scratch (`train_frozen.py --tag ref_pos`, nothing frozen, seed 1337,
+30,000 steps, 29.2 min, val acc 0.5502, matched at step 2,500) and `pos_assay.py` was run over all
+three checkpoints. Results at step 30,000: median $w$ = **0.243 / 0.290 / 0.249 / 0.244 / 0.257** for
+$k$ = 0/1/2/4/8, with offsets 2, 4, 8 paired-indistinguishable from $k=0$ ($p$ = 0.27, 0.43, 0.22);
+untrained is the straight line at every offset (0.804–0.809, 0/150 plateaus, trained-vs-init
+$p=2.3\times10^{-26}$); the `read_patch` identity check is exact (0.2427 everywhere, worst endpoint
+error 1.9e-5). The load-bearing number: endpoint-decision disagreement collapses 86.7% → **8.7%** at
+$k=4$ while **52.0%** of pairs still meet the strict plateau rule, so the sharp switch outlives the
+next-character decision that has been describing it. Unpredicted extra: the distance-independence is
+built late — at matched accuracy the widths still degrade with offset (0.328 → 0.434 at $k=4$,
+$p=5.6\times10^{-20}$). Free reproduction check: the fresh run's anchor rows give 0.803 / 0.4428 /
+0.3507, matching the reference run quoted throughout the deliverables (0.803 / 0.443 / 0.351). Both
+deliverables now carry Figure 28 (`plots/pos_offset.png`), a REPORT.md Methods subsection for the
+offset assay, a rewritten verdict ("at the patched position they look like decision basins; the switch
+survives where the decision does not"), and two corrected caveats — "final-position interpolation only"
+is no longer true. Exploratory figures renumbered 28–30 → 29–31; `check_render.py REPORT.md RESULTS.md`
+passes with 0 problems. New: `results/pos_assay.json`, `pos_assay_raw.npz`, `pos_assay.log`,
+`train_ref_pos.log`.
 
 **F6 DONE 2026-08-12 — the basin criterion was redefined and validated; `STOP` is NOT written.**
 `human_feedback_6.txt` (now `.addressed.md`) reported that the old basin fraction classified the
@@ -916,6 +957,35 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
+**S24a DONE (2026-08-12) — all four predictions below HELD; see "Current status" for the numbers. The
+remaining candidates are S24 items 1 and 3 below (item 2 is now closed).**
+
+**S24a as pre-registered BEFORE the trained/untrained rows existed (kept for the record).** Every number in both deliverables patches
+the final sequence position and reads the final logits, so "the path bends sharply" and "the readout
+position's own state switches sharply" have never been separated. `experiments/pos_assay.py` puts the
+varied character at `pos = 14` and appends `k` filler characters after it (`k` = 0, 1, 2, 4, 8), so the
+readout sits `k` characters downstream of the patch. Injection is at the residual stream *entering*
+block 0, the only site that keeps both endpoints exact at every `k`. Two readouts come from the same
+forward pass: `read_final` (last position, the question) and `read_patch` (position 14, which causal
+masking makes independent of the suffix — it must be bit-identical across `k`, a built-in check).
+Only the matched-accuracy checkpoint was scored before the previous iteration ran out of budget; the
+reference run is retraining now so that the step-0 and step-30,000 rows exist too.
+
+Pre-registration, written with only the matched-accuracy row visible (median `w` 0.328 / 0.363 / 0.379
+/ 0.434 / 0.391 for k = 0/1/2/4/8) and no untrained baseline of any kind:
+
+1. **`read_patch` is identical for all five k** at every checkpoint (implementation check; a failure
+   invalidates the sweep).
+2. **The plateau survives the readout moving away:** trained median `w` stays **below 0.55** at every
+   k, i.e. far from the straight line's 0.80, at the step-30,000 checkpoint.
+3. **It is a training effect, not prompt geometry:** at every k the untrained (step 0) network is
+   **blunter by at least 0.15** in median `w`, with a paired Wilcoxon p < 1e-6.
+4. Endpoint separation at the readout falls steeply with k (it already does: 23.6 → 3.5 logit units),
+   and `frac_endpoints_differ` reaches 0 by k = 4 — so if 2 and 3 hold, the sharp switch is a property
+   of the network state and not of the readout position's next-character decision. If instead the
+   widths climb to ~0.8, the whole plateau result is a statement about the patched position only, and
+   both deliverables must say so.
+
 **S24 — nothing in the seed queue remains; the open questions all need new compute or a new model.**
 S23 closed the last two single-seed runs under load-bearing comparisons (2026-08-10), so no claim in
 either deliverable now rests on a single initialization except the six conditions whose gaps are
@@ -927,18 +997,21 @@ worth running:
    depth, and trainable parameter count), and the gap has not moved in six iterations: nothing here
    characterises the computation that bends the path, only where it can live and how much of it
    survives. This is the direction's real open problem and it needs a new probe, not another freeze.
-2. **Interpolation at positions other than the final token**, the one control Matthew's assay leaves
-   untested here — every number in this report patches the final sequence position only. It needs a
-   trained character checkpoint on disk (the reference run's are gone from `/tmp`), so ~21 min of
-   retraining plus one assay. Note the PLAN 5.5 freeze-and-retrain prediction is *not* open: S10's
-   `frozen_early` is exactly that experiment, and it was refuted — the sharpening relocated to blocks
-   5–8 rather than disappearing.
+2. ~~**Interpolation at positions other than the final token.**~~ **CLOSED 2026-08-12 by S24a** —
+   the readout was moved up to eight characters downstream of the patched character and the transition
+   width did not change; the decision-basin description was narrowed as a result. What is left on this
+   axis is incremental (longer offsets, more contexts, a second seed) and firms up a result rather than
+   answering a new question. Note the PLAN 5.5 freeze-and-retrain prediction is *not* open either:
+   S10's `frozen_early` is exactly that experiment, and it was refuted — the sharpening relocated to
+   blocks 5–8 rather than disappearing.
 3. **A longer character run whose second local-complexity descent separates from initial fit**, the
-   denser Figure-9 grid on the pilot run's local maximum, interpolation at non-final positions, or a
-   second model/tokenizer — each needs materially more compute than one 30,000-step frozen run.
+   denser Figure-9 grid on the pilot run's local maximum, or a second model/tokenizer — each needs
+   materially more compute than one 30,000-step frozen run.
 
 Practical notes for whoever picks this up: `results/checkpoints*` are symlinks into `/tmp` and do not
-survive a pod reset, so re-download the corpus to `/tmp/tinyshakespeare.txt` (SHA-256
+survive a pod reset (S24a had to retrain the reference run for exactly this reason; it now sits at
+`/tmp/dir13_frozen/checkpoints_ref_pos` with step-0, matched and step-30,000 checkpoints, until the
+next reset). Re-download the corpus to `/tmp/tinyshakespeare.txt` (SHA-256
 `86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed`, asserted by
 `allpairs_sweep.load_vocab`) before running anything, and read reference rows from
 `results/frozen_assay_summary.json` / `frozen_assay_raw.npz` rather than re-assaying vanished

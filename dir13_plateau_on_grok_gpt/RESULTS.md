@@ -1332,6 +1332,67 @@ at blocks 4–8, 2–6 and 1–5, the three-block window, and frozen-two) still 
 gaps they carry are 0.14–0.26, three to six times the spread, so a second initialization would have to
 be far more variable than any measured here to reach them.
 
+## Moving the readout away from the patch — the switch is not a fact about one token slot
+
+Every number above patches the last character of the prompt and reads the logits at that same
+position, which fuses two very different claims: that one token slot's output flips quickly when you
+interpolate that slot's input, and that the network's *state* switches discretely. To separate them the
+varied character is held at position 14 and `k` filler characters are appended after it (from
+`" and then"`), so the readout sits `k` characters downstream of the patch; `k` = 0, 1, 2, 4, 8 on the
+same 150 pairs. Injection moves to the residual stream *entering* block 0, the only site that keeps
+both endpoints exact at a non-final position. Four outcomes were pre-registered in `PLAN.md` before the
+untrained and step-30,000 rows existed, and all four held.
+
+- **Implementation check (pre-registered).** The logits read **at the patched position** give median
+  width **0.2427** in all five conditions, identical as causal masking requires; worst endpoint
+  reconstruction error over all pairs and conditions **1.9e-5** logit units.
+- **Distance costs essentially nothing (pre-registered: median `w` < 0.55 at every `k`).** At step
+  30,000, median `w` = **0.243 / 0.290 / 0.249 / 0.244 / 0.257** for `k` = 0/1/2/4/8, against the
+  straight line's 0.80. Paired against `k` = 0 the difference is **not significant** for `k` = 2, 4, 8
+  (Δ`w` = +0.010, +0.005, +0.017; p = 0.27, 0.43, 0.22); only `k` = 1 shifts (+0.040, p = 7.4e-8).
+  Strict plateau rate **53.3%** at `k` = 0 and **47.3%** at `k` = 8.
+- **It is learned (pre-registered: untrained blunter by ≥ 0.15 at every `k`, p < 1e-6).** The same
+  network at initialization gives **0.809 / 0.807 / 0.804 / 0.804 / 0.807** and 0/150 plateaus, so the
+  paired trained-vs-untrained gap is **−0.51 to −0.57** with **p = 2.3e-26** at every offset.
+- **The transition outlives the decision that describes it.** Endpoint separation at the readout falls
+  44.5 → 16.4 logit units with `k`, but the fraction of pairs whose endpoints predict a *different*
+  next character collapses far faster, 86.7% → **8.7%** at `k` = 4 — where **52.0%** of pairs still
+  meet the strict plateau rule. Four characters downstream the next-character decision is gone and the
+  discrete switch is still there.
+
+Figure 28 shows all three readings on the fully trained checkpoint: the paths at every offset, the
+width against the untrained baseline, and what signal the later readout still has.
+
+![median interpolation paths, transition width and endpoint signal as the readout moves away from the patched character](plots/pos_offset.png)
+
+**Figure 28.** Readout offset sweep, reference character GPT at step 30,000, 150 character pairs,
+context `"The house was "`, filler `" and then"`. **Left:** median relative distance `d(t)` (y) vs
+interpolation position `t` (x), one curve per offset `k` (own linestyle and marker per the legend);
+shaded bands are the inter-quartile range for `k` = 0 and `k` = 8; the gray dashed diagonal is the
+no-plateau line `d = t`. The five curves lie on top of one another. **Middle:** median transition width
+`w_10→90` (y, lower = sharper) vs `k` (x), trained (solid, circles; bars = inter-quartile range) and at
+initialization (dashed, squares); the black dotted horizontal line is the width read at the *patched*
+position, identical in every condition. **Right:** median endpoint separation `||x_A − x_B||` in logit
+units (left axis, solid, circles), and on the right axis the percentage of pairs meeting the strict
+plateau rule (dashed, squares) and the percentage whose endpoints predict a different next character
+(dotted, triangles).
+
+**Training builds the distance-independence, not just the sharpness.** At the matched-accuracy
+checkpoint (step 2,500, validation accuracy 0.5522) the widths *do* degrade with offset — **0.328 /
+0.363 / 0.379 / 0.434 / 0.391**, every `k` > 0 significantly wider than `k` = 0 (up to +0.094 at
+`k` = 4, p = 5.6e-20), strict rate 28.0% → 7.3%. Between that checkpoint and step 30,000 the paths
+sharpen at every offset and the penalty for reading further away disappears.
+
+**Anchor rows (and a reproduction check).** Measured the standard way (block-0 `resid_post`, final
+position) on the same 150 pairs, this freshly retrained reference run gives median `w` **0.803** at
+initialization, **0.4428** at matched accuracy and **0.3507** at step 30,000 — reproducing the
+reference run used throughout this report (0.803 / 0.443 / 0.351) from a fresh training run of the same
+recipe. The sweep's own `k` = 0 row is sharper (0.243) because its injection site is one block earlier.
+
+**Scope.** One context, one filler string, one seed, `k` ≤ 8 characters. The claim is that the switch
+survives being read a short distance away, not at arbitrary distance or across contexts.
+Data: `results/pos_assay.json`, `results/pos_assay_raw.npz`; code: `experiments/pos_assay.py`.
+
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
 > **Clearly labelled as exploratory and out of the headline** (PLAN out-of-scope forbids a new
@@ -1349,32 +1410,32 @@ be far more variable than any measured here to reach them.
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 28 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 29 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 28.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 29.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 29 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 30 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 29.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 30.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 30 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 31 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 30.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 31.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -1435,3 +1496,10 @@ five-block end condition, both near-readout runs (0.559, 0.590) stay below both 
 the five twice-trained conditions — smaller than either step, though the bottom-of-stack ordering is
 only 0.033 wide at matched accuracy and 0.010 at the end of training, so it rests on the per-pair
 tests rather than on the medians alone.
+The assay's last untested control moves the **readout away from the patched character**, and it
+narrows what "decision basin" can mean: with the readout up to **8 characters downstream**, the
+transition width is statistically unchanged (0.243 at offset 0, 0.244–0.257 at offsets 2–8, paired
+p = 0.22–0.43) while the untrained network stays on the straight line at every offset (0.804–0.809,
+paired p = 2.3e-26). At offset 4, **91.3%** of pairs end at the *same* next-character prediction and
+**52.0%** of them still give a strict plateau — so the discrete switch is a property of the network's
+state, and the next-character decision is how the patched position happens to display it.

@@ -1547,3 +1547,61 @@ PLAN.md and REPORT.md Methods before it was scored.
   (REPORT 31 display / 663 inline equations / 30 figures; RESULTS 30 figures; 0 problems).
 - **No `STOP`**: the direction is looping again after new feedback; zero unaddressed feedback files
   remain as of this entry, but the S24 plan candidates are still open.
+
+## 2026-08-12 (later) — S24a: the readout was moved off the patched character, and the "decision basin" description narrowed
+
+- **New experiment (the last untested control in Matthew's assay as run here).** Every previous number
+  in both deliverables patched the final sequence position and read the final logits, fusing "the
+  network's state switches sharply" with "the state at the position being read switches sharply".
+  `experiments/pos_assay.py` separates them: the varied character stays at position 14 of
+  `"The house was "` and $k$ filler characters (`" and then"[:k]`, $k\in\lbrace0,1,2,4,8\rbrace$) are
+  appended, so the readout sits $k$ characters downstream of the patch. Injection moves to the residual
+  stream *entering* block 0 — the only site that keeps both endpoints exact at a non-final position —
+  and each checkpoint also gets an anchor row measured the report's standard way.
+- **Model.** The reference character run was retrained from scratch (`train_frozen.py --tag ref_pos`,
+  nothing frozen, seed 1337, 30,000 steps, 29.2 min) because `/tmp` had been wiped; step-0,
+  matched-accuracy (step 2,500, val acc 0.5522) and step-30,000 checkpoints were all scored.
+- **Four predictions, pre-registered in PLAN.md before the untrained and step-30,000 rows existed, all
+  held.** (1) The logits at the patched position are identical for every $k$ (median $w$ = 0.2427
+  throughout; worst endpoint reconstruction error 1.9e-5). (2) Trained median $w$ stays below 0.55 at
+  every $k$: **0.243 / 0.290 / 0.249 / 0.244 / 0.257** for $k$ = 0/1/2/4/8, and paired against $k=0$ the
+  offsets 2, 4, 8 are **not** distinguishable ($p$ = 0.27, 0.43, 0.22). (3) The untrained network gives
+  the straight line at every $k$ (0.809/0.807/0.804/0.804/0.807, 0/150 plateaus), so trained-vs-init is
+  $-0.51$ to $-0.57$ at $p=2.3\times10^{-26}$ everywhere. (4) Endpoint separation falls 44.5 → 16.4
+  logit units and endpoint-decision disagreement collapses 86.7% → **8.7%** at $k=4$, where **52.0%**
+  of pairs still meet the strict plateau rule.
+- **Claim changed in both deliverables (old → new).** Summary/Headline and Conclusion previously read
+  "plateaus … are next-character decision basins", with "decision basin" qualified only as a
+  description rather than a mechanism. They now read: at the patched position the plateau looks like a
+  next-character decision basin, but that is a description read off one token slot — four characters
+  downstream the decision is gone for 91.3% of pairs while the sharp switch remains for 52.0% of them,
+  so what switches is the network's state. No previous number is superseded; this narrows what the
+  existing numbers are evidence *for*.
+- **New supporting result.** The distance-independence is built late in training: at the
+  matched-accuracy checkpoint the widths still degrade with offset (0.328/0.363/0.379/0.434/0.391,
+  every $k>0$ wider than $k=0$, up to $+0.094$ at $p=5.6\times10^{-20}$; strict rate 28.0% → 7.3%),
+  and by step 30,000 that penalty is gone.
+- **Reproduction check (free by-product).** The freshly retrained reference gives anchor median widths
+  **0.803 / 0.4428 / 0.3507** at init / matched / step 30,000, reproducing the reference run quoted
+  throughout both deliverables (0.803 / 0.443 / 0.351) from a fresh run of the same recipe.
+- **New figure.** **Figure 28** `plots/pos_offset.png` (median path per offset; width vs offset against
+  the untrained baseline; endpoint separation, strict plateau rate and endpoint-decision disagreement
+  vs offset). The exploratory Figures 28–30 are renumbered **29–31** in both files, with their prose
+  citations updated; both files now hold 31 embeds, 31 visible captions and sequential numbering.
+- **New Methods subsection (REPORT.md §Readout offset)** defining the offset $k$, the embedding-entry
+  injection site and why `resid_post` cannot be used off the final position, the `read_final` /
+  `read_patch` pair, endpoint separation $s=\lVert x_A-x_B\rVert_2$ and endpoint-decision disagreement.
+- **Caveats updated, not added.** "Final-position interpolation only" was true when written and is not
+  any more: Limitation 4 now records that the patch/readout separation has been tested to eight
+  characters (one context, one filler, one seed) and Limitation 7 records that the decision does not
+  even describe *where* the geometry appears. The `*(5)*` caveat in the all-pairs section was corrected
+  the same way.
+- **Code/data:** `experiments/pos_assay.py` (run to completion for the first time),
+  `experiments/plot_pos.py` (middle-panel title corrected — at the final checkpoint the width does not
+  widen with offset — and the right panel gained the endpoint-decision series); new
+  `results/pos_assay.json`, `results/pos_assay_raw.npz`, `results/pos_assay.log`,
+  `results/train_ref_pos.log`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 32 display / 733 inline equations / 31 figures; RESULTS 31 figures; 0 problems).
+- **No `STOP`**: wall-clock remains and PLAN's S24 candidates (what the trainable blocks compute; a
+  second model/tokenizer; a longer run) are still open. Zero unaddressed feedback files.

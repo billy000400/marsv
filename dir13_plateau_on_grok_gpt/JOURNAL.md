@@ -1894,3 +1894,78 @@ are open.
 On track? yes — the operator's objection is fixed at the source rather than papered over, the replacement
 criterion is validated against four null families at a 0.0% false-positive rate, and both deliverables
 carry the narrowed claim plus the new frequency result; blocker: none.
+
+## 2026-08-12 (later) — S24a: the one control Matthew's assay left untested here, run to completion
+
+**What I did.** Part C first: listed the direction root for `human_feedback*.md` / `*REVIEW*` without
+the `.addressed.md` suffix — none (all seven are addressed), so this iteration advanced the plan.
+Poking at `results/` turned up something the previous iteration had left behind: `pos_assay.py`,
+`plot_pos.py` and a *partial* `pos_assay.json` holding only the matched-accuracy checkpoint, written at
+20:48 on 2026-08-10 and never mentioned in JOURNAL, CHANGELOG or either deliverable. The script also
+carried paired-statistics code whose output was absent from the JSON, i.e. it had been edited after
+that run. So the cheapest real step was not a new experiment but finishing that one: the missing rows
+need an init and a step-30,000 checkpoint, and `/tmp` had been wiped again.
+
+Re-downloaded tinyshakespeare (SHA-256 verified against `allpairs_sweep.load_vocab`), retrained the
+reference character run from scratch (`train_frozen.py --tag ref_pos`, nothing frozen, seed 1337,
+30,000 steps, 29.2 min, final val acc 0.5502, matched at step 2,500), then ran `pos_assay.py` over all
+three checkpoints (~2 min). Before the untrained and final rows existed I wrote four predictions into
+PLAN.md — the built-in `read_patch` identity check, trained width < 0.55 at every offset, untrained
+blunter by ≥ 0.15 with p < 1e-6, and the decision-versus-switch reading that follows if the first three
+hold. All four held.
+
+**What the numbers say.** At step 30,000 the median transition width is 0.243 / 0.290 / 0.249 / 0.244 /
+0.257 for offsets k = 0/1/2/4/8, and paired against k = 0 the offsets 2, 4 and 8 are indistinguishable
+(p = 0.27, 0.43, 0.22); only k = 1 moves at all (+0.040). The untrained network is the straight line at
+every offset (0.804–0.809, 0/150 plateaus, paired p = 2.3e-26). The interesting panel is the third one:
+endpoint separation at the readout falls 44.5 → 16.4 logit units, but the fraction of pairs whose
+endpoints predict a *different* next character collapses much faster — 86.7% → 8.7% at k = 4 — and at
+that offset 52.0% of pairs still meet the strict plateau rule. That is the first evidence here that
+separates the switch from the description this report has been using for it: "next-character decision
+basin" is what the boundary looks like at the *patched* position, and four characters later the
+decision is gone while the discrete switch is not.
+
+A second thing fell out that I did not predict: the distance-independence is a *late-training*
+property. At the matched-accuracy checkpoint the widths still degrade with offset (0.328 → 0.434 at
+k = 4, p = 5.6e-20, strict rate 28.0% → 7.3%); by step 30,000 that penalty is gone. And a free
+reproduction check: the fresh run's anchor rows (block-0 `resid_post`, final position) give
+0.803 / 0.4428 / 0.3507, reproducing the reference numbers quoted throughout both deliverables
+(0.803 / 0.443 / 0.351) from an independent training run of the same recipe.
+
+**Assumptions logged (loop mode, no one to ask).** (a) The injection site had to change: patching
+`resid_post` at a non-final position is not exact, because positions after the patch have already read
+prompt A's token through block 0's attention, so t = 1 would not reproduce prompt B. I used the
+residual stream *entering* block 0 for every k including k = 0, which keeps the k-axis internally
+consistent and is verified per pair (worst endpoint error 1.9e-5). Rejected alternative: patching every
+position downstream of the varied character, which would have made the intervention a different
+experiment (it patches the model's own recomputation, not the interpolated input). The cost is that the
+sweep's k = 0 row (0.243) is not directly comparable to the report's block-0 rows (0.351) — hence the
+anchor row in every checkpoint, which is what ties the two together. (b) k ≤ 8 characters, one context,
+one filler string, one seed; stated as scope in both deliverables rather than smoothed over.
+
+**Deliverable work.** New Results subsection in both files with Figure 28 (`plots/pos_offset.png`),
+a new Methods subsection in REPORT.md, and the Summary/Headline/Conclusion verdict rewritten from
+"plateaus are next-character decision basins" to "at the patched position they look like decision
+basins; the switch survives where the decision does not". Two caveats were *corrected* rather than
+extended — "final-position interpolation only" had been true when written and no longer is. Exploratory
+Figures 28–30 renumbered 29–31 in both files; 31 embeds / 31 captions / sequential 1–31 in each;
+`check_render.py REPORT.md RESULTS.md` passes with 0 problems.
+
+**What I learned that changes how I work here.** Two things. First, a finished experiment can sit on
+disk unreported — the previous iteration's own JOURNAL entry listed this as an open candidate while its
+partial output was already in `results/`. Listing `results/` against the deliverables at the start of
+an iteration is cheap and would have caught it a day earlier. Second, the figure script that came with
+that unreported run had a middle-panel title asserting the plateau "widens with distance but survives",
+which is what the *matched-accuracy* data shows and is false at the final checkpoint the panel plots;
+titles written from a partial run are a trap, and I only caught it by reading the rendered PNG back.
+
+**Next step.** S24's remaining candidates are unchanged and all need new compute: (1) what the
+trainable blocks actually compute — still the direction's real open problem, untouched by seven
+iterations of freezes; (2) a second model or tokenizer; (3) a longer character run whose second
+local-complexity descent separates from initial fit. The offset axis itself could go further (longer
+offsets, more contexts, a second seed) but that firms up a result rather than answering a new question.
+No `STOP` written — wall-clock remains and the plan has open candidates.
+
+On track? yes — S24a complete, all four pre-registered predictions held, an experiment that had been
+stranded on disk is now reported, and the report's central description is narrowed to what the evidence
+actually supports; blocker: none.

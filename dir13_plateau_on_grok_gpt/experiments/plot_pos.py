@@ -56,28 +56,33 @@ ax[1].errorbar(KS, wt, yerr=[np.array(wt) - np.array(lo), np.array(hi) - np.arra
 ax[1].plot(KS, wi, color=CVD[1], ls="--", marker="s", ms=7, lw=2.0, label="untrained (step 0)")
 ax[1].axhline(C["k0"]["read_patch"]["median_w"], **REF_RULE)
 ax[1].annotate("readout at the patched position\n(same forward pass, every $k$)",
-               xy=(4.0, C["k0"]["read_patch"]["median_w"]), xytext=(1.4, 0.16), fontsize=8,
+               xy=(5.6, C["k0"]["read_patch"]["median_w"]), xytext=(1.1, 0.06), fontsize=8,
                arrowprops=dict(arrowstyle="->", color="k", lw=1.0))
 ax[1].set_xlabel("readout offset  $k$  (characters between patch and readout)")
 ax[1].set_ylabel("median transition width  $w_{10\\to90}$")
-ax[1].set_title("the plateau widens with distance but survives", fontsize=10)
+ax[1].set_title("distance from the patch does not blunt the transition", fontsize=10)
 ax[1].set_xticks(KS); ax[1].set_ylim(0, 1.0)
 ax[1].legend(fontsize=8, loc="center right")
 
 # ---- right: endpoint separation vs k -----------------------------------------------------------
 sep = [C[f"k{k}"]["read_final"]["median_sep"] for k in KS]
 stf = [100 * C[f"k{k}"]["read_final"]["strict_frac"] for k in KS]
-ax[2].plot(KS, sep, color=CVD[0], ls="-", marker="o", ms=7, lw=2.0, label="endpoint separation (left axis)")
+dif = [100 * C[f"k{k}"]["read_final"]["frac_endpoints_differ"] for k in KS]
+ax[2].plot(KS, sep, color=CVD[0], ls="-", marker="o", ms=7, lw=2.0,
+           label="endpoint separation (left axis)")
 ax[2].set_xlabel("readout offset  $k$")
 ax[2].set_ylabel("median $\\Vert x_A - x_B\\Vert_2$  (logit units)", color=CVD[0])
-ax[2].set_xticks(KS)
+ax[2].set_xticks(KS); ax[2].set_ylim(0, max(sep) * 1.95)
 ax2 = ax[2].twinx()
-ax2.plot(KS, stf, color=CVD[1], ls="--", marker="s", ms=7, lw=2.0, label="strict plateau rate (right axis)")
-ax2.set_ylabel("strict plateau rate (% of pairs)", color=CVD[1])
-ax2.set_ylim(0, max(stf) * 1.35 + 1)
+ax2.plot(KS, stf, color=CVD[1], ls="--", marker="s", ms=7, lw=2.0,
+         label="strict plateau rate (right axis)")
+ax2.plot(KS, dif, color=CVD[2], ls=":", marker="^", ms=7, lw=2.0,
+         label="endpoints predict different\nnext characters (right axis)")
+ax2.set_ylabel("% of the 150 pairs")
+ax2.set_ylim(0, 195)
 h1, l1 = ax[2].get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels()
-ax[2].legend(h1 + h2, l1 + l2, fontsize=8, loc="upper center")
-ax[2].set_title("the signal the later readout has left", fontsize=10)
+ax[2].legend(h1 + h2, l1 + l2, fontsize=7.5, loc="upper left", framealpha=0.92)
+ax[2].set_title("the transition outlives the decision it used to describe", fontsize=10)
 
 fig.suptitle("Interpolating a character that is not the position the readout reads "
              f"(reference character GPT, step {blob['checkpoints'][WHICH]['step']:,}, 150 pairs, "
