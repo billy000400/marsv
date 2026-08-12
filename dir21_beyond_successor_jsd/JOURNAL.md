@@ -819,3 +819,68 @@ deliverables named as "next" were both run and written up in the same iteration,
 (transplant transfers the trait) and one negative (no low-dimensional part of it does). Both files pass
 check_render.py at 21 figures. No STOP written: the direction has a concrete, cheap next experiment and
 budget remains.
+
+### 2026-08-12 — iteration 11: the second model, times three
+
+No unaddressed feedback (`human_feedback.addressed.md` only), so this iteration ran the experiment both
+deliverables named: repeat the cheap end of the pipeline on another Pythia size.
+
+**Scope decision.** The plan said "410M or 2.8B". 2.8B in fp32 is 11 GB against my 7.2 GB share, so it
+was out without switching precision (rejected: changing dtype would confound a cross-model comparison
+with a numerics change). 410M was already in the HF cache; 160M and 1B downloaded in seconds, and the
+whole per-model run costs 20–130 s, so I ran **three** models instead of one. That turned a
+yes/no replication into a size trend, which is what produced the interesting part.
+
+**What I ran.** `second_model.py` (anchor widths for the same 123 tokens × 6 anchors × 3 frames at
+block 0; embedding probe refitted inside the model; mean-ablation of every MLP and whole attention
+block in blocks 0–5), `second_ctrl.py` (dose2's per-token movement-matched control, code reused
+unchanged, on 410M), `second_analysis.py` (split-half reliability, disattenuated agreement, transfer of
+the 1.4B lookup), `plot_second.py`.
+
+**Result 1 — the strongest generalisation result in the direction.** 410M, 1B and 1.4B rank the 123
+tokens at rho +0.88 to +0.90, and at +0.98 to +1.00 after dividing by each model's own split-half
+reliability. Three networks differing in depth and width contain the same ranking, to the limit of what
+six anchors resolve. The level is the network's (median w 0.749 → 0.658 → 0.620 → 0.549 with size:
+transitions sharpen as models grow) — the same level/ordering split the frame-shape control found for
+context. The 1.4B embedding lookup predicts 410M's and 1B's measured widths (+0.760, +0.745) as well as
+it predicts 1.4B's own (+0.765).
+
+**Result 2 — a floor, and it was worth the extra 20 s of GPU.** 160M does NOT have the trait: rho
++0.207 against a ceiling of 0.806, refitted probe +0.233 ± 0.104 (R² = −0.02), lookup transfer +0.043.
+Had I run only 410M I would have reported "the trait generalises" and missed that it is *acquired*
+between 160M and 410M — which is what makes the next experiment (checkpoints) the obvious one.
+
+**Method note worth keeping: report the noise ceiling with every cross-model correlation.** 160M's raw
++0.21 is ambiguous on its own (weak trait, or noisy measurement?). Splitting the six anchors into halves
+and Spearman–Brown correcting settles it in one line — and it also converts 410M/1B/1.4B's "+0.89, quite
+high" into "+0.99, i.e. identical", which is a much stronger and more accurate statement than the raw
+number supports.
+
+**Result 3 — half the dose–response replicates, and I reported the failing half plainly.** The 410M
+rerun reproduces the raw per-token effect (dose moves widths ~2× its matched control, p ≤ 0.012 at the
+low rungs) and the harder spread compression, but the level-free paired test is null at all nine rungs
+and the MLP arm is below its matched control in exactly 9/18 rung × seed comparisons in the live band,
+with the rho = 0.6 crossing ratio running backwards (0.66× vs 1.3× at 1.4B). I first ran a 5-dose grid,
+noticed only two rungs landed in the live band (< 0.05 bits) where 1.4B had five, and reran with nine
+doses so the comparison was fair before drawing a conclusion; the finer grid did not rescue it. Both
+deliverables now say the *site* replicates and the *per-bit specificity* does not, and point at the
+transplant as the component's durable evidence.
+
+**Assumptions logged.** (a) Same token ids across models — asserted in code via the tokenizer, since all
+Pythia sizes share one. (b) 6 anchors and 3 frames kept identical rather than re-selected per model, so
+that any disagreement is about the models and not the measuring stick. (c) Ablation at block rather than
+head resolution in the new models (12 components instead of 102) to stay inside budget; the fine sweep
+stays a 1.4B-only result. (d) Reliability estimated by anchor split-half, not frame split-half, because
+frames were already shown to shift the level.
+
+**Next step.** Where does the trait come from? It is learned (absent at 160M) and shared across shapes,
+so measure anchor widths for the 123 tokens in Pythia-410M at step1000 / step8000 / step32000 /
+step143000 and correlate each checkpoint's ranking with the final one and with the token's unigram
+frequency and successor entropy (both already in dir18's manifest). Early-and-sharpening ⇒ the lookup is
+a corpus statistic an auditor could compute with no model at all; late-and-gradual ⇒ it reads what the
+network learned. ~15 min of GPU.
+
+**On track?** Yes — the named next experiment was run and widened to three models, it produced the
+direction's strongest generalisation result plus an honest partial-replication failure, both
+deliverables are curated to current-best with Figures 22–24 embedded, and `check_render.py` passes. No
+STOP written: budget remains and there is a concrete cheap next experiment.

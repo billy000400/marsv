@@ -1,0 +1,57 @@
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  28%|██▊       | 83/292 [00:00<00:00, 778.48it/s]Loading weights:  55%|█████▌    | 161/292 [00:00<00:00, 685.45it/s]Loading weights:  82%|████████▏ | 238/292 [00:00<00:00, 699.15it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 762.31it/s]
+baseline mean 0.646 sd 0.071
+alpha 0.1
+  mlp a=0.1: bits 0.0010 rho +0.94 mean 0.663 sd 0.065 (3s)
+  ctrl seed=0 a=0.1: bits 0.0010 rho +0.99 mean 0.650 sd 0.069 (4s)
+  ctrl seed=1 a=0.1: bits 0.0010 rho +0.97 mean 0.654 sd 0.071 (6s)
+  ctrl seed=2 a=0.1: bits 0.0010 rho +0.98 mean 0.652 sd 0.069 (7s)
+alpha 0.15
+  mlp a=0.15: bits 0.0023 rho +0.94 mean 0.673 sd 0.062 (9s)
+  ctrl seed=0 a=0.15: bits 0.0023 rho +0.99 mean 0.654 sd 0.066 (10s)
+  ctrl seed=1 a=0.15: bits 0.0023 rho +0.97 mean 0.661 sd 0.070 (12s)
+  ctrl seed=2 a=0.15: bits 0.0023 rho +0.96 mean 0.659 sd 0.065 (13s)
+alpha 0.2
+  mlp a=0.2: bits 0.0044 rho +0.94 mean 0.684 sd 0.057 (15s)
+  ctrl seed=0 a=0.2: bits 0.0044 rho +0.91 mean 0.662 sd 0.062 (16s)
+  ctrl seed=1 a=0.2: bits 0.0044 rho +0.96 mean 0.671 sd 0.069 (18s)
+  ctrl seed=2 a=0.2: bits 0.0044 rho +0.94 mean 0.666 sd 0.062 (19s)
+alpha 0.25
+  mlp a=0.25: bits 0.0074 rho +0.93 mean 0.696 sd 0.051 (21s)
+  ctrl seed=0 a=0.25: bits 0.0074 rho +0.83 mean 0.673 sd 0.058 (22s)
+  ctrl seed=1 a=0.25: bits 0.0074 rho +0.92 mean 0.680 sd 0.065 (24s)
+  ctrl seed=2 a=0.25: bits 0.0074 rho +0.89 mean 0.677 sd 0.059 (25s)
+alpha 0.3
+  mlp a=0.3: bits 0.0117 rho +0.83 mean 0.709 sd 0.046 (27s)
+  ctrl seed=0 a=0.3: bits 0.0117 rho +0.80 mean 0.694 sd 0.056 (28s)
+  ctrl seed=1 a=0.3: bits 0.0117 rho +0.86 mean 0.690 sd 0.062 (30s)
+  ctrl seed=2 a=0.3: bits 0.0117 rho +0.87 mean 0.694 sd 0.052 (31s)
+alpha 0.4
+  mlp a=0.4: bits 0.0256 rho +0.75 mean 0.735 sd 0.038 (33s)
+  ctrl seed=0 a=0.4: bits 0.0256 rho +0.69 mean 0.727 sd 0.051 (34s)
+  ctrl seed=1 a=0.4: bits 0.0256 rho +0.57 mean 0.712 sd 0.060 (36s)
+  ctrl seed=2 a=0.4: bits 0.0256 rho +0.41 mean 0.730 sd 0.043 (38s)
+alpha 0.5
+  mlp a=0.5: bits 0.0510 rho +0.41 mean 0.760 sd 0.038 (39s)
+  ctrl seed=0 a=0.5: bits 0.0510 rho +0.45 mean 0.757 sd 0.046 (40s)
+  ctrl seed=1 a=0.5: bits 0.0510 rho +0.27 mean 0.737 sd 0.059 (42s)
+  ctrl seed=2 a=0.5: bits 0.0510 rho +0.17 mean 0.753 sd 0.036 (44s)
+alpha 0.75
+  mlp a=0.75: bits 0.1966 rho +0.27 mean 0.800 sd 0.025 (45s)
+  ctrl seed=0 a=0.75: bits 0.1965 rho +0.10 mean 0.811 sd 0.038 (47s)
+  ctrl seed=1 a=0.75: bits 0.1966 rho -0.15 mean 0.802 sd 0.042 (48s)
+  ctrl seed=2 a=0.75: bits 0.1966 rho -0.55 mean 0.819 sd 0.020 (50s)
+alpha 1.0
+  mlp a=1.0: bits 0.4376 rho -0.06 mean 0.823 sd 0.021 (51s)
+  ctrl seed=0 a=1.0: bits 0.4376 rho +0.30 mean 0.823 sd 0.011 (53s)
+  ctrl seed=1 a=1.0: bits 0.4376 rho +0.37 mean 0.824 sd 0.016 (54s)
+  ctrl seed=2 a=1.0: bits 0.4376 rho -0.11 mean 0.837 sd 0.015 (56s)
+alpha 0.1: |dw| mlp 0.016 vs ctrl 0.008 (p 0.0024); centred 0.008 vs 0.007 (p 0.5693)
+alpha 0.15: |dw| mlp 0.027 vs ctrl 0.014 (p 0.0034); centred 0.013 vs 0.012 (p 0.7910)
+alpha 0.2: |dw| mlp 0.038 vs ctrl 0.022 (p 0.0049); centred 0.018 vs 0.017 (p 0.7334)
+alpha 0.25: |dw| mlp 0.049 vs ctrl 0.032 (p 0.0049); centred 0.023 vs 0.021 (p 0.8501)
+alpha 0.3: |dw| mlp 0.062 vs ctrl 0.048 (p 0.0122); centred 0.027 vs 0.028 (p 0.6221)
+alpha 0.4: |dw| mlp 0.089 vs ctrl 0.078 (p 0.1763); centred 0.039 vs 0.042 (p 0.7910)
+alpha 0.5: |dw| mlp 0.116 vs ctrl 0.103 (p 0.2036); centred 0.053 vs 0.049 (p 0.6221)
+alpha 0.75: |dw| mlp 0.154 vs ctrl 0.164 (p 0.0923); centred 0.053 vs 0.063 (p 0.0342)
+alpha 1.0: |dw| mlp 0.176 vs ctrl 0.181 (p 0.5186); centred 0.058 vs 0.057 (p 1.0000)
+wrote results/second_ctrl_410m.json

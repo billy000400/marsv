@@ -46,7 +46,33 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 10 — COMPLETE, feedback addressed)
+## Current status (2026-08-12, iteration 11 — COMPLETE; cross-model replication added)
+
+**Iteration 11 ran the experiment both deliverables named as next, on three extra models rather than
+one** (`experiments/second_model.py`, `second_ctrl.py`, `second_analysis.py`, `plot_second.py`;
+Figures 22–24; deliverables now carry 24 figures each and pass `check_render.py`).
+
+* **The ordering is the token's, not the network's.** Pythia-410M, 1B and 1.4B rank the same 123 tokens
+  at rho +0.884 / +0.898 (410M–1B +0.890), and at **+0.98 to +1.00 after dividing by each model's own
+  split-half reliability** (0.891 / 0.932 / 0.885) — identical to within measurement noise. The level is
+  the network's: median $\hat w_u$ falls 0.749 → 0.658 → 0.620 → 0.549 with size.
+* **The free lookup transfers.** The probe read off 1.4B's embedding matrix ranks 410M's measured widths
+  at +0.760 and 1B's at +0.745, against +0.765 on 1.4B itself.
+* **160M does not have the trait** (+0.207 against a 0.806 ceiling; refitted probe +0.233 ± 0.104;
+  lookup transfer +0.043, p = 0.63), so it is acquired between 160M and 410M.
+* **Localisation replicates, its matched-control margin does not.** The block-0 MLP is again the only
+  early component whose ablation collapses the spread and erases the ordering in all three models, but
+  the 410M rerun of the per-token movement-matched dose–response is null on the level-free statistic at
+  all nine rungs (9/18 rung × seed comparisons, chance; rho = 0.6 crossing ratio 0.66× against 1.3× at
+  1.4B). Deliverables now claim the site, not the per-bit specificity, and point at the transplant.
+
+**Next step (only if reopened):** where does the trait come from? Measure anchor widths for the 123
+tokens in Pythia-410M at `step1000`, `step8000`, `step32000`, `step143000`; correlate each checkpoint's
+ranking with the final one and with the token's unigram frequency and successor entropy (both in
+dir18's manifest). Early-and-sharpening ⇒ the lookup reads a corpus statistic computable with no model;
+late-and-gradual ⇒ it reads what the network learned. ~15 min GPU.
+
+## Previous status (2026-08-12, iteration 10 — COMPLETE, feedback addressed)
 
 **The direction is finished.** All stages S1–S5 are done, every required output is delivered, both
 deliverables pass `check_render.py`, and no unaddressed `human_feedback*` / `*REVIEW*` file remains
@@ -91,7 +117,8 @@ output movement; the discarded tail transfers nothing (−0.022) and a random 64
 complete one exchanges widths cleanly (mean 0.573, sd 0.076). The trait is a property of the whole
 vector, not a low-dimensional feature.
 
-**Next step (only if reopened):** leave this model. Repeat the cheap end of the pipeline on a second
+**Next step named at iteration 10 — DONE in iteration 11, see the current status above.** Leave this
+model. Repeat the cheap end of the pipeline on a second
 Pythia size (410M or 2.8B) — anchor widths for ~60 tokens, the embedding probe, the block-0 MLP
 ablation — and compare the probe's held-out rho (+0.76 here), the cross-model rank agreement of
 measured widths on shared tokens, and whether the block-0 MLP is again the single early carrier. That

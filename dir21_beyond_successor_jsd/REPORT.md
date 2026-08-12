@@ -127,6 +127,20 @@ its top 64 principal components, carrying 79% of the across-token variance, deli
 transfer while causing 95% of the output movement, so the trait is spread over the whole vector rather
 than sitting in a few directions an auditor could watch.
 
+None of this is a quirk of one network. Measuring the same 123 tokens in Pythia-160M, 410M and 1B at
+the same checkpoint, with the same anchors and frames, shows that **410M, 1B and 1.4B rank the tokens
+identically to within measurement noise**: $\rho = +0.88$ to $+0.90$ raw, and $+0.98$ to $+1.00$ once
+each correlation is divided by what the six-anchor measurement's own reliability allows. The absolute
+level is the network's — median width falls 0.749 → 0.658 → 0.620 → 0.549 as the models grow, so
+transitions sharpen with scale — but the ordering is the token's. The lookup travels with it: the probe
+read off Pythia-1.4B's embedding matrix ranks 410M's measured widths at $\rho = +0.760$ and 1B's at
+$+0.745$, against $+0.765$ in the model it was fitted in, so an auditor builds the table once and reuses
+it across the family. Pythia-160M is the exception and locates the transition: its ranking agrees at
+only $+0.21$ (ceiling-corrected $+0.26$, against its own reliability of 0.73), so the trait is acquired
+between 160M and 410M. The block-0 MLP is again the single early component whose removal erases the
+ordering in every model — though the finer claim that it does so faster *per bit* than a matched random
+disturbance holds only at 1.4B, and the reproducible evidence for the component is the transplant.
+
 We also ruled out the most deflationary explanation. Because `w` is a *fraction* of the path, a
 transition of fixed absolute size would look narrower on a longer path. If that were the mechanism,
 converting `w` into residual-stream distance units would make it more homogeneous. It does the
@@ -141,7 +155,10 @@ opposite: the coefficient of variation rises from 0.158 to 0.216.
 **Model and hook point.** `EleutherAI/pythia-1.4b-deduped` (1.4B parameters, 24 blocks, residual width
 2048) at revision `step143000`, the final checkpoint. All quantities are read at the **final token
 position of the residual stream immediately after transformer block 0**; blocks 1–23 then run
-normally and the final-position logits are read after the final LayerNorm and unembedding.
+normally and the final-position logits are read after the final LayerNorm and unembedding. The
+cross-model section repeats the per-token measurement, the embedding probe and a block-level ablation
+in `pythia-160m-deduped` (12 blocks, width 768), `pythia-410m-deduped` (24 blocks, width 1024) and
+`pythia-1b-deduped` (16 blocks, width 2048) at the same revision and the same hook point.
 
 **Pairs and frames.** The 1,000 token pairs built in `dir18` from 123 eligible endpoint tokens, each
 run in three fixed sentence frames — `The thing was`, `They said it was`, `I thought it was` — with the
@@ -759,6 +776,65 @@ subspace, which says whether any $k$ directions would do. Alongside the transfer
 output movement in bits and the mean and spread of the resulting widths, because a partial transplant
 can disturb the model without transferring anything, and those two failure modes need to be told apart.
 Figure 21 reports the sweep.
+
+### Does the trait belong to the token or to this network? The cross-model protocol
+
+Everything above is measured in one network, and the deliverable with practical value — a lookup table
+read off an embedding matrix — is only worth building if a token's width is a property of the token
+rather than a calibration of `pythia-1.4b-deduped`. To find out we repeat the cheap end of the pipeline
+in **Pythia-160M, 410M and 1B** (all `-deduped`, same `step143000` checkpoint): the same 123 endpoint
+tokens, the same 6 anchor tokens, the same 3 sentence frames, the same block-0 hook point and the same
+50-step interpolation, giving each model its own $\hat w_u$ for every token. All Pythia sizes share one
+tokenizer, so a token id denotes the same string in every model; the script asserts this before
+measuring. Inside each model we also refit the embedding probe (same 80/43 splits, 50 repetitions,
+shuffled-target control) from *that* model's embedding matrix to *that* model's measured widths, and
+mean-ablate every MLP and every whole attention block in blocks 0–5, exactly as in the component sweep
+but at block rather than head resolution.
+
+Comparing two models' rankings needs a yardstick, because a weak correlation can mean either that the
+models disagree or that one of them measures width unreliably. We measure reliability inside each model
+by splitting the six anchors into two halves — the even-indexed anchors and the odd-indexed ones — and
+recomputing every token's width from each half. The Spearman correlation $\rho_{\mathrm{half}}$ between
+the two halves scores a *three*-anchor measurement, so it is corrected to the six-anchor case with the
+Spearman–Brown formula:
+
+```math
+R_M \;=\; \frac{2\,\rho_{\mathrm{half}}}{1 + \rho_{\mathrm{half}}} .
+```
+
+$R_M$ is the **noise ceiling** of model $M$: no correlation involving its widths can exceed
+$\sqrt{R_M}$, and no correlation between two models can exceed the geometric mean of their ceilings.
+The **disattenuated agreement** between models $A$ and $B$ divides the observed rank correlation by that
+ceiling, so that 1.0 means "identical up to measurement noise":
+
+```math
+\rho^{*}_{AB} \;=\; \frac{\rho\!\left(\hat w^{A}, \hat w^{B}\right)}{\sqrt{R_A R_B}} .
+```
+
+Both numbers are reported, because $\rho^{*}$ can exceed 1 by chance and is only meaningful next to the
+raw value it corrects. Finally we test whether the *free* screen travels: the out-of-fold predictions
+$\tilde w_u$ of the ridge probe fitted on **Pythia-1.4B's** embedding matrix (the lookup of pattern 10)
+are correlated with each other model's *measured* widths, which asks whether an auditor could build one
+table and reuse it. Figures 22 and 23 report these.
+
+One more control is needed for the localisation. The component sweep in each model has the confound the
+1.4B sweep had — the block-0 MLP is the only early component whose removal the model registers — so the
+per-token movement-matched dose–response is rerun in Pythia-410M with `dose2.py`'s dose, per-prompt
+binary search and measurement code unchanged: the MLP's output is blended toward its mean with weight
+$\alpha \in \lbrace 0.1, \dots, 1 \rbrace$, and at each $\alpha$ a random direction added to the same
+residual stream is rescaled per endpoint prompt so that each token's output moves the same number of
+bits. Two statistics from that experiment carry the comparison. The raw paired per-token movement
+$\lvert \Delta \hat w_u \rvert$ asks whether the dose moves a token's width further than that token's
+own matched control; the **level-free** version removes each arm's mean shift first, so that only
+rearrangement of the tokens counts:
+
+```math
+\Delta^{\mathrm{free}}_u \;=\; \Bigl\lvert\, (\hat w_u^{\mathrm{after}} - \hat w_u^{\mathrm{before}})
+\;-\; \overline{\left(\hat w^{\mathrm{after}} - \hat w^{\mathrm{before}}\right)} \,\Bigr\rvert .
+```
+
+Both are compared between arms with a Wilcoxon signed-rank test over the 12 tokens. Figure 24 reports
+the result.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -1555,6 +1631,103 @@ whole-vector substitution moves the trait. The honest caveat is that a truncated
 token ever produces, so this is evidence about a distributed code only in so far as the model's
 response to off-manifold states is informative.
 
+**Pattern 26 — three other networks rank the tokens the same way, and after correcting for measurement
+noise they rank them identically.** Repeating the measurement in Pythia-160M, 410M and 1B at the same
+checkpoint gives each model its own $\hat w_u$ for the same 123 tokens.
+
+| model (same checkpoint, tokens, anchors, frames) | median $\hat w_u$ | sd across tokens | reliability $R_M$ | $\rho$ with 1.4B | disattenuated $\rho^{*}$ | embedding probe, held-out $\rho$ |
+|---|---|---|---|---|---|---|
+| Pythia-160M (12 blocks, $d = 768$) | 0.749 | 0.079 | 0.734 | $+0.207$ | $+0.256$ | $+0.233 \pm 0.104$ |
+| **Pythia-410M** (24 blocks, $d = 1024$) | 0.658 | 0.060 | 0.891 | $+0.884$ | $\mathbf{+0.995}$ | $\mathbf{+0.774 \pm 0.055}$ |
+| **Pythia-1B** (16 blocks, $d = 2048$) | 0.620 | 0.063 | 0.932 | $+0.898$ | $\mathbf{+0.989}$ | $\mathbf{+0.755 \pm 0.051}$ |
+| Pythia-1.4B (24 blocks, $d = 2048$) | 0.549 | 0.066 | 0.885 | \- | \- | $+0.764 \pm 0.045$ |
+
+410M, 1B and 1.4B agree at $+0.88$ to $+0.90$ raw and $+0.98$ to $+1.00$ once divided by what each
+model's own measurement reliability permits (410M vs 1B: $+0.890$ raw, $+0.977$ corrected). Three
+networks that differ in depth (16–24 blocks) and width (1024–2048) therefore contain the *same* ranking
+of tokens by transition width, to the limit of what six anchors can resolve. The level is a property of
+the network, not the token: median $\hat w_u$ falls monotonically with size (0.749 → 0.658 → 0.620 →
+0.549), i.e. transitions sharpen as models grow, the same level-versus-ordering split the frame-shape
+control found for context (pattern 12).
+
+**Pattern 27 — the free lookup transfers to other models with no measurable loss, but only above 160M.**
+The out-of-fold predictions of the probe fitted on Pythia-1.4B's embedding matrix rank 410M's measured
+widths at $\rho = +0.760$ ($p = 2 \times 10^{-24}$) and 1B's at $+0.745$ ($p = 5\times10^{-23}$),
+against $+0.765$ on the model it was fitted in — a table built once and reused across the family costs
+nothing in accuracy. Refitting the probe inside each model gives the same picture ($+0.774$, $+0.755$
+against $+0.764$), so nothing about the 1.4B embedding space was special. Pythia-160M is the exception,
+and not because its measurement is noisy: its reliability is 0.734, so its ceiling against 1.4B is
+0.806, and it reaches 0.207 — a quarter of what is available — while the 1.4B lookup tells us nothing
+at all about it ($\rho = +0.043$, $p = 0.63$). The trait, and with it the transferable screen, is
+acquired somewhere between 160M and 410M.
+
+![Per-token width in each model against Pythia-1.4B, the agreement against model size, and the 1.4B embedding lookup against every model's measured width](plots/cross_model.png)
+
+**Figure 22.** Left: each model's measured anchor width $\hat w_u$ (y) against Pythia-1.4B's (x), one
+marker per token; circles = 160M, squares = 410M, triangles = 1B. Centre: Spearman $\rho$ over the 123
+tokens (y) against model size (x, log scale, tick labels name the model) — circles/solid = raw
+agreement with 1.4B, squares/dashed = the same divided by the noise ceiling $\sqrt{R_A R_B}$,
+triangles/dotted = that model's own reliability $R_M$; dash-dotted line = perfect agreement. Right:
+each model's measured width (y) against $\tilde w_u$, the width predicted by the ridge probe read off
+**Pythia-1.4B's** embedding matrix (x); circles = 160M, squares = 410M, triangles = 1B, diamonds = 1.4B.
+
+**Pattern 28 — the block-0 MLP is again the single early carrier in every model, but the matched-control
+margin does not replicate.** Mean-ablating each MLP and each whole attention block in blocks 0–5 leaves
+the ordering intact everywhere except one component, in all three new models.
+
+| mean-ablated component (12 tokens, 6 anchors, 1 frame) | 160M | 410M | 1B | 1.4B |
+|---|---|---|---|---|
+| unablated sd of $\hat w_u$ across tokens | 0.169 | 0.071 | 0.096 | 0.084 |
+| **block-0 MLP**: sd after ablation | **0.023** | **0.021** | **0.019** | **0.018** |
+| **block-0 MLP**: $\rho$(before, after) | $+0.55$ | $-0.06$ | $-0.14$ | $-0.10$ |
+| **block-0 MLP**: output movement | 0.404 bits | 0.438 bits | 0.445 bits | 0.451 bits |
+| every other early component: median $\rho$ | $+0.91$ | $+0.97$ | $+0.98$ | $+0.99$ |
+| every other early component: worst $\rho$ | $+0.67$ | $+0.93$ | $+0.86$ | $+0.90$ |
+| every other early component: loudest | 0.030 bits | 0.017 bits | 0.013 bits | 0.007 bits |
+
+![Held-out accuracy of the embedding probe in each model, and the across-token spread left by ablating each early component](plots/second_repl.png)
+
+**Figure 23.** Left: held-out Spearman $\rho$ between predicted and measured $\hat w_u$ (y) for a ridge
+probe fitted inside each model from that model's own embedding matrix, against model size (x, log
+scale); circles/solid = probe, error bars $\pm 1$ sd over 50 random 80/43 splits; squares/dashed = the
+same probe with shuffled targets. Right: standard deviation of $\hat w_u$ across the 12 test tokens (y)
+after mean-ablating one early component (x: the MLP and the whole attention block of blocks 0–5);
+circles = 160M, squares = 410M, triangles = 1B; each model's dotted horizontal line is its own
+unablated spread. Pythia-1.4B's finer sweep over all 102 individual heads and MLPs is Figure 18.
+
+Rerunning the per-token movement-matched dose–response in Pythia-410M splits the 1.4B result in two.
+The part that replicates is the raw per-token movement: the dose moves a token's width further than
+that token's own exactly matched control at the low rungs (0.016 vs 0.008 at 0.0010 bits, 0.049 vs
+0.032 at 0.0074 bits, 0.062 vs 0.048 at 0.0117 bits; Wilcoxon $p = 0.002$, $0.005$, $0.012$), and it
+compresses the across-token spread harder at every matched dose (0.038 vs 0.051 at 0.026 bits). The
+part that does **not** replicate is the part the localisation claim rested on. With each arm's mean
+shift removed, the level-free paired test is null at all nine rungs ($p \ge 0.62$ in the live band,
+against $p = 0.034$ and $0.016$ at 1.4B), and the ordering is not damaged faster by the dose: over the
+six rungs below 0.05 bits the MLP arm sits below its matched control in 9 of 18 rung × seed
+comparisons — exactly chance — and the $\rho = 0.6$ crossing puts the control at 0.023 bits against the
+MLP's 0.035, so the ratio runs backwards ($0.66\times$ here against $1.3\times$ at 1.4B).
+
+![Rank agreement against output movement for the block-0 MLP dose and its matched control in 410M and 1.4B, and the level-free per-token movement in 410M](plots/second_ctrl.png)
+
+**Figure 24.** Left: rank agreement $\rho$ between each token's anchor width before and after the
+perturbation (y) against the output movement it causes (x, bits, log scale). Circles/solid = the 410M
+block-0 MLP dose ($\alpha = 0.1 \dots 1$), squares/dashed = a random direction added to the same
+residual stream, rescaled so **each token's** output moves the same number of bits (mean of 3 seeds,
+error bars 1 sd across seeds); triangles/dotted and diamonds/dash-dotted = the same two arms in
+Pythia-1.4B (Figure 19); gray dash-dotted line = ordering intact. Right: the level-free per-token width
+change $\Delta^{\mathrm{free}}_u$ averaged over the 12 tokens (y) at each dose (x, bits); hatched `//`
+bars = the MLP dose, dotted `..` bars = the matched control; annotations are Wilcoxon $p$.
+
+Read together, patterns 26–28 move the weight of the mechanistic claim. What reproduces across four
+model sizes is the **site**: the block-0 MLP's contribution to the final-position residual stream is
+where the width-relevant information sits, it is the only early component whose removal collapses the
+across-token spread by a factor of 3–7, and disturbing it changes the level and spread of $\hat w_u$
+more than an equally loud random disturbance. What does not reproduce is the finer claim that it
+rearranges the *ordering* faster per bit than a generic disturbance of the same stream — modest at 1.4B
+($1.3\times$, $n = 12$), absent and sign-reversed at 410M. The reproducible positive evidence for the
+component is therefore the transplant (patterns 23–25), which does not depend on a matched control at
+all: its evidence is that the *donor's identity* sets the recipient's width.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -1636,17 +1809,26 @@ the across-token variance) deliver 30% of the transfer at 95% of the output move
 transported by that vector as a whole rather than made explicit in any part of it, which is why every
 steering attempt in this report failed while an exact substitution succeeds.
 
-The next experiment should therefore leave this model. Everything above is one network, one hook point
-and one checkpoint, and the result with practical value — the free static-embedding screen — rests on
-an untested assumption: that a token's width trait belongs to the token's representation rather than to
-this particular network. Repeat the cheap end of the pipeline on a second Pythia size (410M or 2.8B):
-measure anchor widths for about 60 tokens, fit the embedding probe, and compare three numbers with this
-report — the probe's held-out $\rho$ (here $+0.76$), the rank agreement between the two models'
-measured widths on the shared tokens, and whether the block-0 MLP is again the one early component that
-carries the ordering. Agreement makes the screen a property of tokens and gives it a claim to
-generality; disagreement makes it a per-model calibration, still usable but needing a refit for every
-model an auditor cares about. Cost: roughly the anchor-width measurement of pattern 6, about twenty
-minutes of GPU time.
+Patterns 26–28 then left this model, and answered the question that mattered for the deliverable: the
+ranking of tokens by width is shared, to within measurement noise, by three networks of different depth
+and width, the 1.4B lookup predicts their measured widths as well as it predicts 1.4B's own, and the
+block-0 MLP is the single early carrier in each. They also cost the mechanism a claim: the 1.4B
+dose–response's ordering-specific margin over a movement-matched control is absent at 410M, so what
+survives across models is the site plus the transplant, not the per-bit specificity.
+
+That makes the next question **where the trait comes from**, not whether it generalises. It is learned
+rather than architectural — 160M does not have it and 410M does — and it is shared by models that
+differ in shape but share a training corpus and a tokenizer. Pythia's released checkpoints make the
+cheapest discriminating experiment straightforward: measure anchor widths for the same 123 tokens in
+Pythia-410M at `step1000`, `step8000`, `step32000` and `step143000`, and correlate each checkpoint's
+ranking with the final one and with two corpus quantities already inherited from `dir18` — the token's
+unigram frequency and its successor entropy. If the ranking is largely in place by `step8000` and only
+sharpens afterwards, the trait is tracking a simple corpus statistic that an auditor could compute with
+no model at all, and the embedding probe is a roundabout way of reading it. If it emerges late and
+gradually, it tracks the model's acquisition of that token's successor distribution, and the lookup is
+genuinely reading something the network learned. The two outcomes call for different tools, which is
+what makes the experiment worth running before anything else. Cost: four anchor-width runs at about a
+minute and a half each on 410M, under fifteen minutes of GPU time.
 
 ---
 
@@ -1743,7 +1925,20 @@ causing 95% of the output movement, and the discarded tail gives none. The first
 width as a whole vector without making any part of it more explicit — which is why an exact
 substitution moves the trait and every steering direction tried here did not.
 
-**Limitations.** One model, one hook point (after block 0) and one checkpoint. The pair bank, the
+Four model sizes settle what that vector belongs to. Pythia-410M, 1B and 1.4B rank the 123 tokens
+identically once each model's own measurement reliability is accounted for ($\rho^{*} = +0.98$ to
+$+1.00$), while the absolute widths sharpen with scale, and the lookup built on 1.4B's embedding matrix
+predicts the other models' measured widths as accurately as it predicts 1.4B's own. The screen is
+therefore a property of tokens in this family rather than a calibration of one network — with a floor:
+Pythia-160M ranks tokens differently, well beyond what its noisier measurement explains, so the trait
+is acquired between 160M and 410M. The same models reproduce the localisation to the block-0 MLP, and
+they also bound it: with a per-token movement-matched control the ordering-specific margin measured at
+1.4B is absent at 410M, so the durable evidence for that component is the transplant rather than the
+damage.
+
+**Limitations.** The main analysis is one model, one hook point (after block 0) and one checkpoint; the
+cross-model section adds three further sizes but only for the per-token measurement, the embedding
+probe and the block-level ablation, not for the pair bank or the screens. The pair bank, the
 fitted token effects and both screens rest on three sentence frames of a single shape, so
 frame-specific effects there are common to both sides of the transfer test; the frame-shape control
 addresses this for the per-token measurement (the ranking survives four other context shapes) but not
@@ -1776,6 +1971,10 @@ the hybrid state about three-quarters of the way from the recipient to the donor
 that the width-relevant content of the block-0 state is in the MLP's contribution, not that the trait
 occupies a small or isolated part of that vector. The rank sweep that shows it does not is itself
 limited by construction: a truncated $m$ is a vector no token produces, so its failure to transfer is
-evidence about a distributed code only in so far as off-manifold states are informative. The
+evidence about a distributed code only in so far as off-manifold states are informative. The four
+models compared in patterns 26–28 share a tokenizer and a training corpus, so that comparison tests
+portability across networks, not across token inventories or data; the matched-control rerun there
+covers one model (410M), the same 12 tokens and one frame, and its null is a null at $n = 12$ rather
+than a demonstration that the arms are identical. The
 0.2-bit movement gate is a judgement call: it keeps 929 of
 1,000 pairs, and the headline correlation is reported both with and without it.

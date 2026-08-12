@@ -1,0 +1,31 @@
+Loading weights:   0%|          | 0/196 [00:00<?, ?it/s]Loading weights:   1%|          | 1/196 [00:00<02:46,  1.17it/s]Loading weights: 100%|██████████| 196/196 [00:00<00:00, 209.76it/s]
+[A] anchor widths, 123 tokens x 6 anchors x 3 frames
+  frame 0 token 0/123 ' about' w=0.596
+  frame 0 token 40/123 ' fun' w=0.678
+  frame 0 token 80/123 ' over' w=0.616
+  frame 0 token 120/123 ' wrong' w=0.715
+  frame 1 token 0/123 ' about' w=0.601
+  frame 1 token 40/123 ' fun' w=0.672
+  frame 1 token 80/123 ' over' w=0.620
+  frame 1 token 120/123 ' wrong' w=0.705
+  frame 2 token 0/123 ' about' w=0.593
+  frame 2 token 40/123 ' fun' w=0.672
+  frame 2 token 80/123 ' over' w=0.620
+  frame 2 token 120/123 ' wrong' w=0.705
+[A] done in 87s: valid 1.000, median w 0.620, sd 0.063
+[C] cross-model rho vs 1.4B = +0.898 (p 4.9e-45, n 123)
+[B] probe rho +0.755 +- 0.051 (null -0.072), R2 +0.521
+[D] baseline (frame 0, 12 tokens): mean 0.588 sd 0.096
+[D] block 0 mlp: mean 0.825 sd 0.019 rho -0.14 bits 0.445 (97s)
+[D] block 0 attn: mean 0.599 sd 0.083 rho +0.97 bits 0.003 (99s)
+[D] block 1 mlp: mean 0.621 sd 0.084 rho +0.94 bits 0.004 (102s)
+[D] block 1 attn: mean 0.585 sd 0.099 rho +0.99 bits 0.002 (104s)
+[D] block 2 mlp: mean 0.610 sd 0.085 rho +0.97 bits 0.013 (107s)
+[D] block 2 attn: mean 0.588 sd 0.095 rho +0.99 bits 0.001 (109s)
+[D] block 3 mlp: mean 0.614 sd 0.085 rho +0.97 bits 0.009 (112s)
+[D] block 3 attn: mean 0.588 sd 0.089 rho +0.98 bits 0.002 (114s)
+[D] block 4 mlp: mean 0.601 sd 0.093 rho +0.99 bits 0.008 (116s)
+[D] block 4 attn: mean 0.588 sd 0.096 rho +0.99 bits 0.001 (119s)
+[D] block 5 mlp: mean 0.619 sd 0.085 rho +0.86 bits 0.008 (121s)
+[D] block 5 attn: mean 0.590 sd 0.095 rho +0.99 bits 0.001 (124s)
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/second_1b.json

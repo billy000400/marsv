@@ -733,3 +733,59 @@ calibration." Cost ~20 min GPU.
 **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
 (REPORT 29 display eqs / 669 inline eqs / 21 embeds / 0 problems; RESULTS 428 inline eqs / 21 embeds /
 0 problems); 42 figure captions for 42 embeds across the two files.
+
+## 2026-08-12 — iteration 11: the second model (and third, and fourth) — the trait is the token's
+
+The experiment both deliverables named as next was run, and widened from one extra model to three:
+`experiments/second_model.py` (per-model pipeline: anchor widths, embedding probe, block-level ablation)
+on `pythia-160m/410m/1b-deduped` @ `step143000`, `experiments/second_ctrl.py` (per-token
+movement-matched dose–response rerun on 410M, reusing `dose2.py`'s code unchanged),
+`experiments/second_analysis.py` (reliability, disattenuated agreement, lookup transfer) and
+`experiments/plot_second.py`. Results in `results/second_{160m,410m,1b}.json`,
+`results/second_ctrl_410m.json`, `results/second_summary.json` (+ `.log`s). Three new figures —
+`plots/cross_model.png`, `plots/second_repl.png`, `plots/second_ctrl.png` — embedded as **Figures
+22–24** in both deliverables (figure count 21 → 24).
+
+**Added to RESULTS.md and REPORT.md (new results; nothing superseded).**
+- **Cross-model agreement, the headline.** Same 123 tokens, same 6 anchors, same 3 frames, same block-0
+  site in each model. Pythia-410M / 1B / 1.4B rank the tokens at $\rho$ = **+0.884 / +0.898 / +0.890**
+  (410M–1B) and, divided by each model's split-half (Spearman–Brown) reliability ceiling,
+  **+0.995 / +0.989 / +0.977** — identical to within measurement noise. Reliabilities: 0.734 (160M),
+  0.891 (410M), 0.932 (1B), 0.885 (1.4B).
+- **Level vs ordering.** Median $\hat w_u$ falls 0.749 → 0.658 → 0.620 → 0.549 with size: transitions
+  sharpen with scale while the ordering is preserved.
+- **The free lookup transfers.** The probe read off 1.4B's embedding matrix ranks 410M's measured widths
+  at **+0.760** and 1B's at **+0.745**, against **+0.765** on 1.4B itself. Refitting inside each model
+  gives +0.774 (410M), +0.755 (1B) against +0.764 (1.4B).
+- **160M is a genuine exception, not noise.** $\rho$ = +0.207 with 1.4B against a ceiling of 0.806
+  (+0.256 corrected); the 1.4B lookup gives +0.043 (p = 0.63) and the refitted probe only
+  +0.233 ± 0.104 (R² = −0.02). The trait is acquired between 160M and 410M.
+- **Localisation replicates.** Mean-ablating every MLP and whole attention block in blocks 0–5: only the
+  block-0 MLP collapses the across-token spread (0.169 → 0.023, 0.071 → 0.021, 0.096 → 0.019 for
+  160M/410M/1B) and erases the ordering (+0.55 / −0.06 / −0.14), and it is again the only early
+  component the model feels (0.40–0.45 bits vs ≤ 0.030 for every other).
+- **But the matched-control margin does NOT replicate, and this is stated as a partial failure.** The
+  410M rerun (9 doses × 3 seeds) reproduces the raw paired per-token effect (|Δŵ| 0.016 vs 0.008 at
+  0.0010 bits, 0.049 vs 0.032 at 0.0074, 0.062 vs 0.048 at 0.0117; Wilcoxon p = 0.002 / 0.005 / 0.012)
+  and the harder spread compression (sd 0.038 vs 0.051 at 0.026 bits), but the **level-free** paired
+  test is null at all nine rungs (p ≥ 0.62 in the live band, vs p = 0.034 / 0.016 at 1.4B), the MLP arm
+  is below its matched control in **9/18** rung × seed comparisons below 0.05 bits (chance), and the
+  ρ = 0.6 crossing runs backwards (control 0.023 bits vs MLP 0.035, i.e. **0.66×** against 1.3× at
+  1.4B). Both deliverables now say the *site* replicates and the *per-bit specificity* does not, and
+  that the durable positive evidence for the component is the transplant (which needs no matched
+  control).
+- REPORT.md Methods gains a cross-model subsection defining the reliability correction
+  $R_M = 2\rho_{\mathrm{half}}/(1+\rho_{\mathrm{half}})$, the disattenuated agreement
+  $\rho^{*}_{AB}$ and the level-free per-token statistic $\Delta^{\mathrm{free}}_u$; Data & model names
+  the three extra models; Results gains patterns 26–28; Summary, Conclusion and Limitations updated.
+
+**Recommended next experiment replaced** (old → new): "test the lookup on a second model" (now done for
+three) → "**where does the trait come from?** — measure anchor widths for the 123 tokens in Pythia-410M
+at `step1000` / `step8000` / `step32000` / `step143000` and correlate each checkpoint's ranking with the
+final one and with the token's unigram frequency and successor entropy. Early-and-sharpening ⇒ the
+lookup is reading a corpus statistic computable with no model; late-and-gradual ⇒ it is reading what the
+network learned about that token's successors." ~15 min GPU.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 32 display eqs / 769 inline eqs / 24 embeds / 0 problems; RESULTS 501 inline eqs / 24 embeds /
+0 problems).
