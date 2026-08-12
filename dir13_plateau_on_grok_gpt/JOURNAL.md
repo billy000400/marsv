@@ -2933,3 +2933,48 @@ written.
 
 On track? yes — the successor list's item (i) is answered as far as one read-out can answer it;
 blocker: none.
+
+## 2026-08-12 — S30: the describability decline was the probe's size all along
+
+**Where I came in.** The previous iteration wrote `experiments/neuron_probe_capacity.py` and the REPORT
+Methods paragraph for it, then ran out of time mid-run. What it left on disk was a trap: the committed
+summary, raw npz and figure came from a `--smoke` invocation (400 windows), and the full run was still
+alive as a detached process. Two things had to be caught before any writing. First, `n_windows: 400` in
+the summary — the smoke fits made both *larger* probes look worse than the width-768 one, which is what
+40× less training data does to a bigger model, and would have been a clean-looking, entirely wrong
+result. Second, I launched my own copy of the same script before checking `ps`, so for about a minute two
+runs were competing for the same GPU budget and the same output files; killing mine and keeping the older
+one saved eight minutes. Cost of that slip: my `>` redirect truncated the running process's log, so the
+step-831 lines it had already printed are gone from `results/neuron_probe_capacity.log`. Nothing was lost
+scientifically — every number is in the summary JSON, which the process writes at the end — but the log
+file starts with a hole.
+
+**The result, and it is the one that closes the thread.** Vary only the probe's capacity: width 1,536 with
+one hidden layer, and width 768 with two, against the published width-768 fit. At step 30,000 the median
+held-out R² over all 797 units goes 0.726 (linear) → 0.889 → 0.929 → 0.940, on the demoted units
+0.778 → 0.921 → 0.949 → 0.952. The demoted units' median per-unit fall from step 831 to step 30,000 goes
+−0.064 → −0.026 → −0.005 (p = 0.015) → −0.004 (p = 0.13). So the last surviving piece of "units that lose
+head membership become harder to describe" does not survive either; it tracks how big the read-out is.
+Two details make the reading sharper. At step 831 the three nonlinear probes agree to within 0.004 — the
+extra capacity buys nothing early — and the fits need 28–41 epochs there against 336–485 at step 30,000
+under the same patience rule. What development changes is the *form* of the description, not its quality.
+
+**What I did not claim.** The capacity curve has not flattened, so the 4.8% of a demoted unit still
+unexplained is a bound set by the largest probe I fitted, not a property of the unit. I wrote that
+distinction into its own paragraph in REPORT and its own bullet in RESULTS, because it is exactly the
+inference the previous three iterations kept having to walk back.
+
+**Writing.** Rule 9b re-framing again, and this time it reverses a sentence that had survived several
+iterations: REPORT Summary's "the drain … is a fact about the units and its magnitude is a fact about the
+probe" is now "its size is already a fact about the probe's feature set", with the decline attributed to
+the probe two sentences later. Same in RESULTS' Headline. The S29 subsection's "the exception that keeps
+the earlier finding alive" became "the exception at this probe size", pointing forward to Figure 47.
+
+**Checks.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 56 display / 1,260 inline
+equations / 50 figures; RESULTS 50 figures; 0 problems), embeds = captions = 100.
+
+**Feedback state.** `human_feedback_7.txt` remains `review_pending` with its single checklist item done;
+this iteration touched no next-character-decision claim, verified by grep (REPORT Conclusion, REPORT
+Summary verdict, RESULTS Question & verdict item 5 all unchanged). No STOP written.
+
+On track? yes — PLAN successor (i) is answered; blocker: none.

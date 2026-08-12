@@ -1,4 +1,335 @@
+[note: this file was accidentally truncated by a shell redirect while the run was in progress, which erased the two step-831 fit lines it had already printed. Their numbers are in results/neuron_probe_capacity_summary.json, reproduced in full at the end of this log: w1536 best epoch 41, w768x2 best epoch 28.]
   step 831: activations cached (690096, 797), rows [552112, 68992, 68992] (8s)
-  step 831 w1536: best epoch 41 of 62 run, val median R2 0.8789, test median R2 0.8814 (166s)
-  step 831 w768x2: best epoch 28 of 49 run, val median R2 0.8787, test median R2 0.8796 (216s)
-  step 30000: activations cached (690096, 797), rows [552112, 68992, 68992] (219s)
+  step 30000 w1536: best epoch 336 of 357 run, val median R2 0.9287, test median R2 0.9292 (744s)
+  step 30000 w768x2: best epoch 485 of 506 run, val median R2 0.9409, test median R2 0.9402 (1175s)
+{
+  "steps": [
+    831,
+    30000
+  ],
+  "probes": [
+    "linear",
+    "w768",
+    "w1536",
+    "w768x2"
+  ],
+  "capacity": {
+    "linear": {
+      "width": 768,
+      "hidden_layers": 0
+    },
+    "w768": {
+      "width": 768,
+      "hidden_layers": 1
+    },
+    "w1536": {
+      "width": 1536,
+      "hidden_layers": 1
+    },
+    "w768x2": {
+      "width": 768,
+      "hidden_layers": 2
+    }
+  },
+  "reused_from_neuron_probe_nonlinear": [
+    "linear",
+    "w768"
+  ],
+  "epochs_max": 600,
+  "patience": 20,
+  "lr": 0.001,
+  "weight_decay": 0.0,
+  "best_epoch_selected": {
+    "831": {
+      "w1536": 41,
+      "w768x2": 28
+    },
+    "30000": {
+      "w1536": 336,
+      "w768x2": 485
+    }
+  },
+  "n_design_columns": 6826,
+  "n_units_probed": 797,
+  "n_windows": 7842,
+  "positions_per_window": 88,
+  "group_sizes": {
+    "stable": 75,
+    "demoted": 141,
+    "promoted": 181,
+    "never_head": 400
+  },
+  "medians": {
+    "linear": {
+      "831": {
+        "stable": 0.9754,
+        "demoted": 0.9543,
+        "promoted": 0.8318,
+        "never_head": 0.7097,
+        "all_probed": 0.8205
+      },
+      "30000": {
+        "stable": 0.9866,
+        "demoted": 0.7783,
+        "promoted": 0.9176,
+        "never_head": 0.5989,
+        "all_probed": 0.7257
+      }
+    },
+    "w768": {
+      "831": {
+        "stable": 0.9809,
+        "demoted": 0.9692,
+        "promoted": 0.8788,
+        "never_head": 0.7839,
+        "all_probed": 0.8782
+      },
+      "30000": {
+        "stable": 0.986,
+        "demoted": 0.9214,
+        "promoted": 0.9346,
+        "never_head": 0.8609,
+        "all_probed": 0.8893
+      }
+    },
+    "w1536": {
+      "831": {
+        "stable": 0.9812,
+        "demoted": 0.9691,
+        "promoted": 0.8814,
+        "never_head": 0.7824,
+        "all_probed": 0.8814
+      },
+      "30000": {
+        "stable": 0.991,
+        "demoted": 0.949,
+        "promoted": 0.9681,
+        "never_head": 0.8883,
+        "all_probed": 0.9292
+      }
+    },
+    "w768x2": {
+      "831": {
+        "stable": 0.9799,
+        "demoted": 0.9671,
+        "promoted": 0.8799,
+        "never_head": 0.7878,
+        "all_probed": 0.8796
+      },
+      "30000": {
+        "stable": 0.9867,
+        "demoted": 0.9516,
+        "promoted": 0.9594,
+        "never_head": 0.9227,
+        "all_probed": 0.9402
+      }
+    }
+  },
+  "change": {
+    "linear": {
+      "stable": {
+        "median": 0.0037,
+        "frac_down": 0.373,
+        "n": 75,
+        "p_wilcoxon": 0.41307953000068665
+      },
+      "demoted": {
+        "median": -0.0638,
+        "frac_down": 0.716,
+        "n": 141,
+        "p_wilcoxon": 9.164347882992252e-13
+      },
+      "promoted": {
+        "median": 0.0408,
+        "frac_down": 0.387,
+        "n": 181,
+        "p_wilcoxon": 0.2921965718269348
+      },
+      "never_head": {
+        "median": -0.054,
+        "frac_down": 0.583,
+        "n": 400,
+        "p_wilcoxon": 7.292611826414941e-06
+      },
+      "all_probed": {
+        "median": -0.0114,
+        "frac_down": 0.542,
+        "n": 797,
+        "p_wilcoxon": 6.164602162073152e-09
+      }
+    },
+    "w768": {
+      "stable": {
+        "median": 0.002,
+        "frac_down": 0.413,
+        "n": 75,
+        "p_wilcoxon": 0.5160097479820251
+      },
+      "demoted": {
+        "median": -0.0257,
+        "frac_down": 0.688,
+        "n": 141,
+        "p_wilcoxon": 4.0642777321409085e-07
+      },
+      "promoted": {
+        "median": 0.0481,
+        "frac_down": 0.293,
+        "n": 181,
+        "p_wilcoxon": 1.7685267313105602e-12
+      },
+      "never_head": {
+        "median": 0.0666,
+        "frac_down": 0.335,
+        "n": 400,
+        "p_wilcoxon": 1.3206828732543347e-18
+      },
+      "all_probed": {
+        "median": 0.0192,
+        "frac_down": 0.395,
+        "n": 797,
+        "p_wilcoxon": 1.5500635105943467e-17
+      }
+    },
+    "w1536": {
+      "stable": {
+        "median": 0.0062,
+        "frac_down": 0.28,
+        "n": 75,
+        "p_wilcoxon": 0.0017399261705577374
+      },
+      "demoted": {
+        "median": -0.005,
+        "frac_down": 0.582,
+        "n": 141,
+        "p_wilcoxon": 0.014862283132970333
+      },
+      "promoted": {
+        "median": 0.067,
+        "frac_down": 0.166,
+        "n": 181,
+        "p_wilcoxon": 9.79840873957202e-22
+      },
+      "never_head": {
+        "median": 0.0944,
+        "frac_down": 0.255,
+        "n": 400,
+        "p_wilcoxon": 9.011479365454342e-27
+      },
+      "all_probed": {
+        "median": 0.0394,
+        "frac_down": 0.295,
+        "n": 797,
+        "p_wilcoxon": 4.341217037284426e-39
+      }
+    },
+    "w768x2": {
+      "stable": {
+        "median": 0.0051,
+        "frac_down": 0.32,
+        "n": 75,
+        "p_wilcoxon": 0.0015331514878198504
+      },
+      "demoted": {
+        "median": -0.0042,
+        "frac_down": 0.582,
+        "n": 141,
+        "p_wilcoxon": 0.12905941903591156
+      },
+      "promoted": {
+        "median": 0.0772,
+        "frac_down": 0.122,
+        "n": 181,
+        "p_wilcoxon": 5.126350962820525e-27
+      },
+      "never_head": {
+        "median": 0.103,
+        "frac_down": 0.198,
+        "n": 400,
+        "p_wilcoxon": 3.4392007602083845e-33
+      },
+      "all_probed": {
+        "median": 0.0476,
+        "frac_down": 0.26,
+        "n": 797,
+        "p_wilcoxon": 0.0
+      }
+    }
+  },
+  "gain_over_w768_step30000": {
+    "w1536": {
+      "stable": {
+        "median_gain": 0.0047,
+        "frac_up": 0.973,
+        "median_residual_w768": 0.014,
+        "median_residual": 0.009,
+        "p_wilcoxon": 6.205462982659601e-14
+      },
+      "demoted": {
+        "median_gain": 0.0162,
+        "frac_up": 0.957,
+        "median_residual_w768": 0.0786,
+        "median_residual": 0.051,
+        "p_wilcoxon": 5.1019809486459265e-18
+      },
+      "promoted": {
+        "median_gain": 0.011,
+        "frac_up": 1.0,
+        "median_residual_w768": 0.0654,
+        "median_residual": 0.0319,
+        "p_wilcoxon": 1.8745285151616543e-31
+      },
+      "never_head": {
+        "median_gain": 0.0229,
+        "frac_up": 0.89,
+        "median_residual_w768": 0.1391,
+        "median_residual": 0.1117,
+        "p_wilcoxon": 3.0974276144167276e-32
+      },
+      "all_probed": {
+        "median_gain": 0.0185,
+        "frac_up": 0.935,
+        "median_residual_w768": 0.1107,
+        "median_residual": 0.0708,
+        "p_wilcoxon": 0.0
+      }
+    },
+    "w768x2": {
+      "stable": {
+        "median_gain": 0.0001,
+        "frac_up": 0.507,
+        "median_residual_w768": 0.014,
+        "median_residual": 0.0133,
+        "p_wilcoxon": 0.0526275597512722
+      },
+      "demoted": {
+        "median_gain": 0.0149,
+        "frac_up": 0.709,
+        "median_residual_w768": 0.0786,
+        "median_residual": 0.0484,
+        "p_wilcoxon": 4.508884585141537e-12
+      },
+      "promoted": {
+        "median_gain": 0.0093,
+        "frac_up": 0.685,
+        "median_residual_w768": 0.0654,
+        "median_residual": 0.0406,
+        "p_wilcoxon": 1.468644804497577e-15
+      },
+      "never_head": {
+        "median_gain": 0.0405,
+        "frac_up": 0.87,
+        "median_residual_w768": 0.1391,
+        "median_residual": 0.0773,
+        "p_wilcoxon": 6.656761856091755e-39
+      },
+      "all_probed": {
+        "median_gain": 0.0271,
+        "frac_up": 0.765,
+        "median_residual_w768": 0.1107,
+        "median_residual": 0.0598,
+        "p_wilcoxon": 0.0
+      }
+    }
+  }
+}
+done in 1176s

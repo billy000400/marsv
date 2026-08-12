@@ -590,6 +590,25 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S30 DONE 2026-08-12 — the describability decline does not survive a LARGER nonlinear probe; it belongs
+to the read-out, not to the units.** S29 left 40% of the demoted units' fall and 8% of a demoted unit's
+response standing under a width-768 one-hidden-layer probe. `experiments/neuron_probe_capacity.py`
+(19.6 min on the reference-run checkpoints in `/tmp/dir13_frozen/checkpoints_ref_pos`) holds the all40
+design, the rows, the 80/10/10 split, Adam at 1e-3, batches of 4,096, the 20-epoch patience rule, the
+600-epoch cap and the seed fixed and varies only capacity: width 1,536 with one hidden layer, and width
+768 with two. **Level (step 30,000, median held-out R² over all 797 units):** 0.726 linear -> 0.889 w768
+-> **0.929** w1536 -> **0.940** w768x2; demoted units 0.778 -> 0.921 -> **0.949** -> **0.952** (median
+per-unit gain over w768 +0.016, 96% of 141 up, p = 5e-18; +0.015, 71% up, p = 5e-12). **Decline (median
+per-unit change, step 831 -> 30,000):** demoted −0.064 -> −0.026 -> **−0.005** (p = 0.015) -> **−0.004**
+(p = 0.13); never-head +0.094 and +0.103, promoted +0.067 and +0.077, stable +0.006 and +0.005.
+**Early checkpoint:** the three nonlinear probes agree to within 0.004 at step 831 (all-unit medians
+0.878 / 0.881 / 0.880) and converge in 28–41 epochs there against 336–485 at step 30,000 — what the units
+compute late is a harder function to fit, and still a function of the same 40 characters. **Not claimed:**
+the curve has not flattened, so the 4.8% of a demoted unit left unexplained is a bound on this probe, not
+a property of the unit. Curated as **Figure 47** in both deliverables (exploratory figures renumbered
+48–50); the previous iteration's `--smoke` summary/figure (400 windows) were replaced by the full run.
+`check_render.py` -> ALL CHECKS PASS (50 figures per file).
+
 **S29 DONE 2026-08-12 — most of what the linear character probes miss is a NONLINEAR function of the same
 characters, and that removes the network-wide describability decline.** Nine feature families had bounded
 the demoted units' residual without naming it, but all nine were fitted by ridge, i.e. linear in their
@@ -1347,6 +1366,36 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S30 DONE (2026-08-12) and curated — see "Current status". Item (i) of the previous list is answered,
+and against the reading it was written under: the demoted units' surviving fall was a limit of the
+probe's size. `experiments/neuron_probe_capacity.py` (19.6 min, full run; the previous iteration's
+committed summary/figure came from a `--smoke` invocation with 400 of 7,842 windows and has been
+replaced) fits the same all40 design, rows, split, optimiser, patience rule and seed at two larger
+capacities — width 1,536 with one hidden layer, and width 768 with two. **Level at step 30,000**
+(all 797 units): 0.726 linear -> 0.889 (w768) -> **0.929** (w1536) -> **0.940** (w768x2); demoted units
+0.778 -> 0.921 -> **0.949** -> **0.952**, i.e. their unexplained share falls 7.9% -> 5.1% -> 4.8%
+(median per-unit gain over w768 +0.016, 96% up, p = 5e-18; and +0.015, 71% up, p = 5e-12).
+**Decline:** the demoted units' median per-unit fall goes −0.064 -> −0.026 -> **−0.005** (p = 0.015) ->
+**−0.004** (p = 0.13), while every other role rises further with capacity. **Early checkpoint:** at step
+831 the three nonlinear probes agree to within 0.004 and converge in 28–41 epochs, against 336–485 at
+step 30,000 — the late units are a harder function to fit, of the same 40 characters. Curated as
+**Figure 47** in both deliverables (exploratory figures renumbered 48–50), with rewritten
+Summary/Headline sentences and caveats. `check_render.py` -> ALL CHECKS PASS (50 figures per file).
+
+**What this leaves.** (i) The capacity curve has not flattened, so the 4.8% still unexplained is a bound
+on the largest probe fitted, not a property of the units; the sweep could continue (width 3,072, or three
+hidden layers, ~20 min per fit on the same cached activations), but each step now buys less than the last
+and the developmental question it was built to answer is settled. (ii) Nothing in the whole probe series
+has been fitted on the seed-2024 run; its checkpoints are gone after the last /tmp wipe (23 min to
+retrain, then ~6 min of forward passes per family or ~20 min per nonlinear fit). This is now the largest
+single-run assumption left in the describability thread. (iii) The depth series still has one seed for
+the five-block windows, so the 0.397-vs-0.476 gap that carries the depth argument has an across-seed bar
+at five of the nine conditions only. **Standing cost note:** `/tmp` is scratch; the reference run's
+checkpoints (`/tmp/dir13_frozen/checkpoints_ref_pos`) and the corpus are there now but vanish with any
+wipe — re-download tinyshakespeare (SHA in `allpairs_sweep.load_vocab`) and budget 23–24 min per run that
+has to be retrained. Only `results/frozen_assay_raw.npz` and the per-run summary JSONs survive a wipe.
+
 
 **S29 DONE (2026-08-12) and curated — see "Current status". The residual question that headed the
 successor list is now answered in the part that was answerable cheaply: most of it is a nonlinear

@@ -2235,3 +2235,46 @@ display / 1,247 inline equations / 49 figures; RESULTS 49 figures; 0 problems); 
 count (98 = 49 + 49).
 
 **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
+
+## 2026-08-12 — S30: a larger nonlinear probe removes the demoted units' describability decline
+
+**What changed.** Added the result of `experiments/neuron_probe_capacity.py` to both curated
+deliverables: two further fits of the same one-hidden-layer probe on the same all40 character design,
+rows, split, optimiser, stopping rule and seed, varying only capacity (width 1,536 with one hidden layer;
+width 768 with two hidden layers), compared with the width-768 fit and its linear control from S29.
+
+- **New Figure 47** in REPORT.md and RESULTS.md (`plots/neuron_probe_capacity.png`), with its caption, a
+  new Results subsection (REPORT) / method paragraph plus bulleted block (RESULTS). The Methods paragraph
+  ("Probe capacity") was already in REPORT.md from the previous iteration. The three exploratory figures
+  were renumbered 47–49 → 48–50.
+- **Invalid numbers replaced.** The previous iteration committed
+  `results/neuron_probe_capacity_summary.json`, `_raw.npz` and `plots/neuron_probe_capacity.png` from a
+  `--smoke` run (400 windows of 7,842) whose small training set made both larger probes look *worse* than
+  the width-768 one: at step 30,000 over all probed units the smoke run gave 0.693 (width 1,536) and 0.702
+  (two hidden layers) against 0.889 for width 768, where the full run (7,842 windows, 690,096 rows,
+  1,176 s) gives 0.929 and 0.940. No report text had been written from the smoke numbers.
+- **Superseded framing (rule 9b).** REPORT Summary and RESULTS Headline previously ended with "about 40%
+  of the demoted units' own fall (−0.064 → −0.026) unexplained by any probe fitted here". They now report
+  that the fall goes with the probe's size: −0.064 (linear) → −0.026 (width 768, one hidden layer) →
+  **−0.005** (width 1,536) and **−0.004** (two hidden layers, p = 0.13 at n = 141), so the decline belongs
+  to the probe rather than to the units, and what is left is the level (4.8% of a demoted unit's response
+  at step 30,000). REPORT Summary's "the drain … is a fact about the units and its magnitude is a fact
+  about the probe" and the same clause in RESULTS Headline were corrected to "its size is already a fact
+  about the probe's feature set".
+- **Caveats rewritten** in both files: the S29 caveat that the nonlinear probe was "one architecture at
+  one width (768) … so it lower-bounds what a nonlinear read-out could recover" is replaced by what the
+  capacity series shows (the decline does not survive more capacity) and its own limit (two architectures,
+  one learning rate, one stopping rule; it does not identify how much capacity is enough).
+- **Softened** the S29 subsection's closing sentence, which called the demoted units "the exception that
+  keeps the earlier finding alive"; it now reads "the exception at this probe size" and points to
+  Figure 47.
+- The "Why this matters" sentence attaching an interpretability fraction to its checkpoint now attaches
+  the probe's size as well as its feature family and read-out form (Figures 44, 46 and 47).
+- Data/code lists in both files gained `results/neuron_probe_capacity_summary.json` and
+  `experiments/neuron_probe_capacity.py`.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 56
+display / 1,260 inline equations / 50 figures; RESULTS 50 figures; 0 problems); embed count equals caption
+count (100 = 50 + 50).
+
+**No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
