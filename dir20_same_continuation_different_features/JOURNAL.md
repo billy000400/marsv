@@ -1525,3 +1525,15 @@ byte-identical to hold iterations #13-#42. `check_render.py` was re-run on both 
 checks passed again and the GitHub markdown-API placement check still returns HTTP 403
 rate-limit-exceeded, exactly as in #42. That check depends only on file content, which has not
 changed since it last passed cleanly. This entry is the only file edited.
+
+## 2026-08-12 (hold iteration #44: unchanged, still awaiting the wrapper's content review)
+
+No change. `human_feedback_1.txt` is still present and unrenamed, so no `STOP` (CLAUDE.md rule 11);
+the manifest stays `review_pending` with its single checklist item `done`. The plan's success
+criteria are met (S1-S4 plus the pre-registered replication S3R), so no experiment ran and no
+deliverable, plot or result file was touched - REPORT.md (md5 4d9f89410ff47f9179f0a0d1546ce70e,
+4999 words, 3 embedded figures) and RESULTS.md (md5 c32a6d3b1d735c671419d8089546b178) remain
+byte-identical to hold iterations #13-#43. `check_render.py` was re-run and still aborts at the
+GitHub markdown-API placement check with HTTP 403 rate-limit-exceeded, as in #42-#43; that check
+depends only on file content, which has not changed since it last passed cleanly. This entry is the
+only file edited.
