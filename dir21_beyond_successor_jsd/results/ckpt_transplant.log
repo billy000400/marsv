@@ -1,0 +1,142 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  32%|███▏      | 92/292 [00:00<00:00, 895.99it/s]Loading weights:  62%|██████▏   | 182/292 [00:00<00:00, 861.59it/s]Loading weights:  95%|█████████▌| 278/292 [00:00<00:00, 889.78it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 900.07it/s]
+[m] step143000: median ||m_u|| = 11.057 (13s)
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:  22%|██▏       | 64/292 [00:00<00:00, 614.90it/s]Loading weights:  52%|█████▏    | 151/292 [00:00<00:00, 758.47it/s]Loading weights:  83%|████████▎ | 241/292 [00:00<00:00, 822.25it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 802.76it/s]
+[m] step128: median ||m_u|| = 1.941 (26s)
+=== step128<-step143000 (kappa 0.176) ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4532.17it/s]
+  -- base
+    frame 0 token 0/123 ' about' w=0.801
+    frame 0 token 60/123 ' meant' w=0.829
+    frame 0 token 120/123 ' wrong' w=0.814
+    frame 1 token 0/123 ' about' w=0.801
+    frame 1 token 60/123 ' meant' w=0.832
+    frame 1 token 120/123 ' wrong' w=0.824
+    frame 2 token 0/123 ' about' w=0.801
+    frame 2 token 60/123 ' meant' w=0.832
+    frame 2 token 120/123 ' wrong' w=0.824
+  [base] median w 0.819 sd 0.022 valid 1.000 bits 0.0000 (63s)
+  -- self
+    frame 0 token 0/123 ' about' w=0.801
+    frame 0 token 60/123 ' meant' w=0.829
+    frame 0 token 120/123 ' wrong' w=0.814
+    frame 1 token 0/123 ' about' w=0.801
+    frame 1 token 60/123 ' meant' w=0.832
+    frame 1 token 120/123 ' wrong' w=0.824
+    frame 2 token 0/123 ' about' w=0.801
+    frame 2 token 60/123 ' meant' w=0.832
+    frame 2 token 120/123 ' wrong' w=0.824
+  [self] median w 0.819 sd 0.022 valid 1.000 bits 0.0000 (99s)
+  -- donor
+    frame 0 token 0/123 ' about' w=0.843
+    frame 0 token 60/123 ' meant' w=0.842
+    frame 0 token 120/123 ' wrong' w=0.853
+    frame 1 token 0/123 ' about' w=0.837
+    frame 1 token 60/123 ' meant' w=0.842
+    frame 1 token 120/123 ' wrong' w=0.851
+    frame 2 token 0/123 ' about' w=0.839
+    frame 2 token 60/123 ' meant' w=0.841
+    frame 2 token 120/123 ' wrong' w=0.851
+  [donor] median w 0.842 sd 0.009 valid 1.000 bits 0.0605 (135s)
+  -- donor_scaled
+    frame 0 token 0/123 ' about' w=0.818
+    frame 0 token 60/123 ' meant' w=0.835
+    frame 0 token 120/123 ' wrong' w=0.825
+    frame 1 token 0/123 ' about' w=0.835
+    frame 1 token 60/123 ' meant' w=0.843
+    frame 1 token 120/123 ' wrong' w=0.838
+    frame 2 token 0/123 ' about' w=0.835
+    frame 2 token 60/123 ' meant' w=0.841
+    frame 2 token 120/123 ' wrong' w=0.835
+  [donor_scaled] median w 0.831 sd 0.011 valid 1.000 bits 0.0243 (172s)
+  -- shuffle
+    frame 0 token 0/123 ' about' w=0.842
+    frame 0 token 60/123 ' meant' w=0.839
+    frame 0 token 120/123 ' wrong' w=0.849
+    frame 1 token 0/123 ' about' w=0.838
+    frame 1 token 60/123 ' meant' w=0.837
+    frame 1 token 120/123 ' wrong' w=0.849
+    frame 2 token 0/123 ' about' w=0.837
+    frame 2 token 60/123 ' meant' w=0.833
+    frame 2 token 120/123 ' wrong' w=0.846
+  [shuffle] median w 0.842 sd 0.009 valid 1.000 bits 0.0745 (208s)
+  -- shuffle_scaled
+    frame 0 token 0/123 ' about' w=0.821
+    frame 0 token 60/123 ' meant' w=0.831
+    frame 0 token 120/123 ' wrong' w=0.834
+    frame 1 token 0/123 ' about' w=0.838
+    frame 1 token 60/123 ' meant' w=0.840
+    frame 1 token 120/123 ' wrong' w=0.839
+    frame 2 token 0/123 ' about' w=0.833
+    frame 2 token 60/123 ' meant' w=0.839
+    frame 2 token 120/123 ' wrong' w=0.839
+  [shuffle_scaled] median w 0.833 sd 0.011 valid 1.000 bits 0.0360 (244s)
+=== step143000<-step128 (kappa 5.697) ===
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4763.86it/s]
+  -- base
+    frame 0 token 0/123 ' about' w=0.668
+    frame 0 token 60/123 ' meant' w=0.701
+    frame 0 token 120/123 ' wrong' w=0.720
+    frame 1 token 0/123 ' about' w=0.637
+    frame 1 token 60/123 ' meant' w=0.701
+    frame 1 token 120/123 ' wrong' w=0.719
+    frame 2 token 0/123 ' about' w=0.613
+    frame 2 token 60/123 ' meant' w=0.709
+    frame 2 token 120/123 ' wrong' w=0.721
+  [base] median w 0.658 sd 0.060 valid 1.000 bits 0.0000 (290s)
+  -- self
+    frame 0 token 0/123 ' about' w=0.668
+    frame 0 token 60/123 ' meant' w=0.701
+    frame 0 token 120/123 ' wrong' w=0.720
+    frame 1 token 0/123 ' about' w=0.637
+    frame 1 token 60/123 ' meant' w=0.701
+    frame 1 token 120/123 ' wrong' w=0.719
+    frame 2 token 0/123 ' about' w=0.613
+    frame 2 token 60/123 ' meant' w=0.709
+    frame 2 token 120/123 ' wrong' w=0.721
+  [self] median w 0.658 sd 0.060 valid 1.000 bits 0.0000 (333s)
+  -- donor
+    frame 0 token 0/123 ' about' w=0.775
+    frame 0 token 60/123 ' meant' w=0.765
+    frame 0 token 120/123 ' wrong' w=0.796
+    frame 1 token 0/123 ' about' w=0.782
+    frame 1 token 60/123 ' meant' w=0.781
+    frame 1 token 120/123 ' wrong' w=0.770
+    frame 2 token 0/123 ' about' w=0.782
+    frame 2 token 60/123 ' meant' w=0.776
+    frame 2 token 120/123 ' wrong' w=0.770
+  [donor] median w 0.763 sd 0.028 valid 0.978 bits 0.6388 (377s)
+  -- donor_scaled
+    frame 0 token 0/123 ' about' w=0.709
+    frame 0 token 60/123 ' meant' w=0.659
+    frame 0 token 120/123 ' wrong' w=0.695
+    frame 1 token 0/123 ' about' w=0.691
+    frame 1 token 60/123 ' meant' w=0.647
+    frame 1 token 120/123 ' wrong' w=0.695
+    frame 2 token 0/123 ' about' w=0.686
+    frame 2 token 60/123 ' meant' w=0.639
+    frame 2 token 120/123 ' wrong' w=0.689
+  [donor_scaled] median w 0.744 sd 0.036 valid 0.995 bits 0.5755 (422s)
+  -- shuffle
+    frame 0 token 0/123 ' about' w=0.794
+    frame 0 token 60/123 ' meant' w=0.694
+    frame 0 token 120/123 ' wrong' w=0.759
+    frame 1 token 0/123 ' about' w=0.796
+    frame 1 token 60/123 ' meant' w=0.717
+    frame 1 token 120/123 ' wrong' w=0.754
+    frame 2 token 0/123 ' about' w=0.796
+    frame 2 token 60/123 ' meant' w=0.742
+    frame 2 token 120/123 ' wrong' w=0.760
+  [shuffle] median w 0.763 sd 0.024 valid 0.982 bits 0.6409 (461s)
+  -- shuffle_scaled
+    frame 0 token 0/123 ' about' w=0.730
+    frame 0 token 60/123 ' meant' w=0.741
+    frame 0 token 120/123 ' wrong' w=0.708
+    frame 1 token 0/123 ' about' w=0.752
+    frame 1 token 60/123 ' meant' w=0.733
+    frame 1 token 120/123 ' wrong' w=0.721
+    frame 2 token 0/123 ' about' w=0.752
+    frame 2 token 60/123 ' meant' w=0.733
+    frame 2 token 120/123 ' wrong' w=0.716
+  [shuffle_scaled] median w 0.740 sd 0.033 valid 0.997 bits 0.6858 (497s)
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/ckpt_transplant.json

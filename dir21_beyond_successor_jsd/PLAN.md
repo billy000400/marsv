@@ -46,7 +46,43 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 15 — COMPLETE; the free lookup does not port to GPT-2)
+## Current status (2026-08-12, iteration 16 — COMPLETE; the last causal test inside Pythia is done)
+
+**Iteration 16 ran candidate (a) named below** (`experiments/ckpt_transplant.py`,
+`ckpt_transplant_analysis.py`, `ckpt_transplant_geom.py`, `plot_ckpt_transplant.py`; Figure 31;
+deliverables now carry 31 figures each and pass `check_render.py`). 12 full anchor-width sweeps of
+Pythia-410M (123 tokens × 6 anchors × 3 frames each), ~8 minutes of GPU.
+
+* **The premise needed correcting first.** `step128` does not lack the ordering: it ranks with
+  `step143000` at $+0.443$, half of the 0.883 its own measurement noise allows. The experiment is
+  therefore "does the transplant supply the missing half", and the deliverables say so.
+* **Partial sufficiency, with a matched control.** Writing `step143000`'s $m_u$ in leaves `step128`
+  agreeing with the final ordering at $+0.329$ (as measured) and $+0.189$ (norm-matched,
+  $\kappa = 0.176$); the identity-shuffled write of the same vectors gives $-0.030$ and $-0.141$ at
+  equal or larger output shift. Gaps $+0.357$ $[+0.151, +0.553]$ and $+0.324$ $[+0.075, +0.572]$
+  (2,000-resample paired bootstrap over tokens).
+* **The norm-matched condition is the clean one:** it erases the recipient's own ordering ($-0.009$)
+  while keeping $+0.189$ with the final one, so the residual can only have arrived in the vectors.
+  Partial correlations: $+0.240$ removing the recipient's baseline, $+0.272$ also removing the donor
+  vector's length ($\lVert m_u \rVert$ ranks the final widths at only $-0.098$).
+* **It does not install the trait.** Untouched `step128` is at $+0.443$; the best transplant is
+  $+0.329$. The write costs more than it delivers, so pattern 23's strong sufficiency stays a
+  token-to-token statement inside one network.
+* **Why the ceiling exists:** the two checkpoints' $m_u$ share almost no geometry — same-token cosine
+  $+0.178$ ($+0.198$ centred), pairwise-arrangement agreement $+0.031$ ($+0.096$ centred), length
+  ordering $-0.043$, median norm 1.94 vs 11.06. Training rewrites the component's output space.
+* **The reverse direction is uninformative and reported as such:** `step128`'s $m_u$ into the finished
+  model destroys its ordering ($+1.000 \to +0.148$) without replacing it ($+0.027$; gap over control
+  $+0.088$ $[-0.091, +0.263]$) at 0.64 bits, past the 0.4 bits where pattern 15 shows any disturbance
+  flattens the ordering.
+
+**Next step (only if reopened):** the GPT-2 candidate (b) below is the only one left and is unchanged —
+fit the same ridge probe, same tokens and same 50 splits, to a token's edge drift $E$ and to its
+plateau-filtered width separately, to find out whether GPT-2's embedding holds curve shape or crossing
+width. Zero forward passes; both targets are already stored. The Pythia causal line is closed: with the
+$m_u$ geometries this different across checkpoints, no further cross-checkpoint edit will do better.
+
+## Previous status (2026-08-12, iteration 15 — COMPLETE; the free lookup does not port to GPT-2)
 
 **Iteration 15 ran the experiment both deliverables named as next** (`experiments/gpt2_embed_probe.py`,
 `plot_gpt2_probe.py`; Figure 30; deliverables now carry 30 figures each and pass `check_render.py`).

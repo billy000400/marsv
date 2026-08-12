@@ -1155,3 +1155,79 @@ Figure 30 is included for scale and keeps its single-draw null, which the captio
 claim on the strength of a better control, and both deliverables are curated to current-best with
 Figure 30 embedded and `check_render.py` passing (30 embeds, 30 captions, 0 problems). No STOP written:
 the remaining Pythia transplant-into-`step128` experiment is well specified and budget remains.
+
+---
+
+## 2026-08-12 — iteration 16: writing a trained vector into an untrained network
+
+**What I set out to do.** No unaddressed feedback in the folder, so ordinary plan work: candidate (a)
+from iteration 15's next-step list — the one remaining causal test inside Pythia. Write the final
+checkpoint's block-0 MLP output `m_u` into the `step128` model and see whether the width ordering
+appears. Twelve anchor-width sweeps of Pythia-410M, about eight minutes on the shared GPU.
+
+**The premise was wrong and I fixed it before running anything.** Both deliverables and PLAN.md said
+`step128` is "where the ordering does not yet exist". The checkpoint table from iteration 12 says
+otherwise: `step128` ranks with `step143000` at +0.443, which is 0.50 of the 0.883 ceiling its own
+split-half reliability allows. The ordering is *half* there. That number had been sitting in
+`results/checkpoints_summary.json` since iteration 12 and the prose around it drifted. The experiment is
+still worth running — it just asks whether the transplant supplies the missing half, not whether it
+creates something from nothing — and the deliverables now say the half-present figure everywhere.
+
+**The design decision that made the result readable.** A transplant is a large perturbation, and
+pattern 15 already established that any disturbance above ~0.4 bits flattens the width ordering. So
+"the widths changed" proves nothing. Every transplant therefore runs beside a write of the *same donor
+vectors under a fixed derangement* — every token receives some other token's vector. Same vectors, same
+magnitudes, same output shift; only the identity pairing differs. Two more conditions guard the
+mechanics: writing a network's own `m_u` back (must reproduce baseline exactly — it did, 0.000 bits,
+ρ = +1.000) and a norm-matched donor, because the median ‖m_u‖ is 1.94 at `step128` and 11.06 at
+`step143000` and an unscaled write is a 6× oversized intervention rather than a transplant.
+
+**What it found.** The transfer is real and small. Donor `m_u` leaves `step128` agreeing with the final
+ordering at +0.329 (as measured) and +0.189 (norm-matched); the shuffled write of the same vectors gives
+−0.030 and −0.141 at equal or larger output shift. Gaps +0.357 [+0.151, +0.553] and +0.324
+[+0.075, +0.572] on a 2,000-resample paired bootstrap over tokens. The norm-matched condition is the one
+I would show a skeptic: it erases the recipient's own ordering completely (−0.009 against `step128`'s
+untouched widths) while still agreeing with the final ordering at +0.189, so that residual has nowhere
+to come from except the transplanted vectors. But no transplant beats leaving the model alone (+0.443).
+The honest headline is partial sufficiency, and pattern 23's "one vector carries the whole trait" is now
+explicitly scoped to token-to-token substitution inside one network.
+
+**The alternative explanation I checked, and the one that turned the negative into a finding.** A
+cheaper story for the +0.19 is magnitude: bigger vector in, wider curve out. It fails — ‖m_u‖ in the
+final checkpoint ranks that checkpoint's own widths at −0.098, and partialling the donor's length out of
+the transfer *raises* it (+0.240 → +0.272). Then the geometry diagnostic, which I added after seeing the
+first two conditions come back compressed: the two checkpoints' `m_u` are nearly unrelated. Same-token
+cosine +0.178, +0.198 after centring; the 7,503 pairwise cosines within each checkpoint agree at +0.031
+(+0.096 centred); the ordering of vector lengths agrees at −0.043. Training rewrites this component's
+output space, so the transplanted vector arrives in a code the receiving network never learned to read.
+That reframes the result: +0.19–0.33 surviving translation into a foreign code is the interesting half,
+and it explains why the ceiling exists. Without the geometry numbers this would have read as a flat
+negative.
+
+**The reverse direction, reported as uninformative.** Writing `step128`'s `m_u` into the finished model
+destroys its ordering (+1.000 → +0.148) without replacing it with `step128`'s (+0.027, gap over control
++0.088 [−0.091, +0.263]). But that write moves the output by 0.64 bits, well past the 0.4 bits where
+pattern 15 shows any disturbance flattens the ordering, so the measurement cannot discriminate there. I
+ran it because it was three extra minutes and its failure mode is diagnostic; I am not reading a
+conclusion out of it beyond "this direction cannot answer".
+
+**What I learned, beyond this direction.** Two things. First, prose about a number drifts away from the
+number even when both live in the same repository — "the ordering does not yet exist" survived three
+iterations next to a table saying ρ = +0.443. Checking the premise against the stored value cost two
+minutes and changed what the experiment was. Second, a null intervention needs a geometry check before
+it is written up: "we wrote X in and nothing happened" and "we wrote X into a coordinate system that no
+longer exists" are different papers, and only a direct measurement of the two representations tells you
+which one you have.
+
+**Assumptions logged.** (a) The derangement is one fixed permutation (rng 0, rejection-sampled to have
+no fixed point) rather than several, so the shuffled control is a single draw; the bootstrap intervals
+are over tokens, not over permutations, and the report claims only what those intervals support.
+(b) κ is one global scale factor from the median norms, which preserves the relative lengths that carry
+token identity. (c) `m_u` is captured per frame in the donor, so a token receives the vector its donor
+computed in that same sentence. (d) Reliability and the partial-correlation machinery are reused
+unchanged from `checkpoints_analysis.py` so the numbers are comparable with the checkpoint sweep.
+
+**On track?** Yes. The named experiment ran, returned a bounded positive with a matched control, forced
+one framing correction and one narrowed claim, and both deliverables are curated to current-best with
+Figure 31 embedded and `check_render.py` passing (31 embeds, 31 captions, 0 problems). No STOP written:
+the GPT-2 edge-drift-versus-width probe is still open, well specified, and costs no forward passes.

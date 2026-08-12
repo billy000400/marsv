@@ -1000,3 +1000,54 @@ find which curve property its embedding holds).
 (REPORT 38 display eqs / 1101 inline eqs / 30 embeds / 0 problems; RESULTS 1 display eq / 798 inline eqs
 / 30 embeds / 0 problems). The stored single-draw control was reproduced bit-for-bit (+0.275) before
 being reinterpreted, which doubles as a determinism check on the probe code.
+
+---
+
+## 2026-08-12 — iteration 16: the cross-checkpoint transplant (Figure 31, patterns 39–40)
+
+**New experiment** (`experiments/ckpt_transplant.py`, `ckpt_transplant_analysis.py`,
+`ckpt_transplant_geom.py`, `plot_ckpt_transplant.py`; `results/ckpt_transplant{,_summary,_geom}.json`;
+`plots/ckpt_transplant.png`). Pythia-410M-deduped, 123 tokens × 6 anchors × 3 frames, block-0 site.
+Twelve full anchor-width sweeps: six write conditions (none / own m_u / donor m_u / donor norm-matched /
+identity-shuffled / shuffled norm-matched) in each of two directions (step143000 → step128 and the
+reverse). The `base` sweeps reproduce the stored checkpoint-sweep widths (median 0.819 sd 0.022 at
+step128; 0.658 / 0.060 at step143000) and the `self` sweeps reproduce them exactly at 0.000 bits, which
+is the hook sanity check.
+
+**Added to REPORT.md:** a Methods subsection ("Can the block-0 MLP output install the ordering? The
+cross-checkpoint transplant", after the checkpoint-sweep methods) defining the six conditions, κ, the
+two scored agreements, the two partial correlations, the paired bootstrap, and the three geometry
+measurements; a Results subsection with **Figure 31** carrying patterns 39 and 40; a Summary paragraph;
+a Conclusion paragraph. **Added to RESULTS.md:** the corresponding section with Figure 31 and the
+geometry table, plus the transplant in the Setting paragraph.
+
+**Findings recorded.** Donor m_u into step128: agreement with the final ordering +0.329 (as measured)
+and +0.189 (norm-matched, κ = 0.176) against −0.030 and −0.141 for the identity-shuffled write at equal
+or larger output shift; gaps +0.357 [+0.151, +0.553] and +0.324 [+0.075, +0.572] (2,000-resample paired
+bootstrap over tokens). Norm-matched erases the recipient's own ordering (−0.009) while keeping +0.189
+with the final one; partial +0.240 removing the recipient's baseline and +0.272 also removing the donor
+vector's length (‖m_u‖ ranks the final widths at −0.098). No transplant beats leaving step128 alone
+(+0.443). Geometry: same-token cosine +0.178 (+0.198 centred), pairwise-arrangement agreement +0.031
+(+0.096 centred), length ordering −0.043, median ‖m_u‖ 1.94 vs 11.06. Reverse direction reported as
+uninformative: +1.000 → +0.148 own ordering, +0.027 with step128's, gap over control +0.088
+[−0.091, +0.263], at 0.64 bits.
+
+**Framing corrected (old → new).** Both deliverables and PLAN.md previously described `step128` as the
+checkpoint "where the ordering does not yet exist". It is where the ordering is *half* present
+(ρ = +0.443 with the final checkpoint, 0.50 of the 0.883 ceiling its own reliability allows) — the
+number was already in the iteration-12 checkpoint table and the framing did not match it. Every
+occurrence is now stated as the half-present figure.
+
+**Claim narrowed (old → new).** "The transplant is decisive on sufficiency: one vector, m_u, carries
+the whole trait" → unchanged as a statement about token-to-token substitution *inside one network*, and
+now explicitly scoped that way, because the same substitution across two moments of training transfers
+only +0.19 to +0.33 of the ordering and never beats doing nothing.
+
+**Recommended next experiment replaced** (old → new): "write the final checkpoint's m_u into the
+`step128` model" (done, above) → "**inside GPT-2, fit the same probe to edge drift E and to the
+plateau-filtered width separately**", with the note that the Pythia causal line is closed because the
+two checkpoints' m_u geometries are too different for any further cross-checkpoint edit to do better.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 40 display eqs / 1188 inline eqs / 31 embeds / 0 problems; RESULTS 1 display eq / 841 inline eqs
+/ 31 embeds / 0 problems). Embed/caption counts match at 31 each; no bare `(plots/*.png)` references.

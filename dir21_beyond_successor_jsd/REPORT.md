@@ -155,6 +155,20 @@ ranking's rank variance, and the agreement between an early checkpoint and the f
 partialling them out at $+0.6$ to $+0.8$. So the free lookup cannot be replaced by a count table, and
 what it reads is fixed very early rather than refined late.
 
+**One vector carries part of the trait across training, but it is not a portable code.** Combining the
+last two results would suggest that what training installs is the block-0 MLP output $m_u$. Testing it
+directly — writing `step143000`'s $m_u$ into the `step128` network, changing no weights — gives a small
+positive answer with a hard ceiling on it. `step128`'s widths then rank with the finished model's
+ordering at $+0.33$ (as measured) and $+0.19$ (after matching vector length), where the same vectors
+written with the token identities shuffled give $-0.03$ and $-0.14$; the gaps are $+0.357$ and $+0.324$
+with 95% bootstrap intervals clear of zero, and in the length-matched case the recipient's own ordering
+is wiped out ($-0.009$) so the residual agreement can only have come from the transplanted vectors. But
+every transplant leaves `step128` *further* from the final ordering than doing nothing ($+0.443$
+untouched), and the geometry says why: the same token's $m_u$ at the two checkpoints has a cosine of
+only $+0.18$, and the tokens' arrangement relative to each other agrees at $\rho = +0.03$. Training
+rewrites this component's output space, so the vector arrives in a code the receiving network never
+learned to read. The trait travels in $m_u$ together with the weights that consume it.
+
 **The trait belongs to a token of a training corpus, not to the string.** Measuring the same 123
 strings in GPT-2 small — a different corpus, a different BPE vocabulary, a serial residual block —
 gives a ranking that correlates with Pythia-1.4B's at $\rho = -0.22$, where two Pythia sizes agree at
@@ -944,6 +958,83 @@ R^2_{\mathrm{corpus}} \;=\; 1 \;-\;
 ```
 
 Figures 25 and 26 report these.
+
+### Can the block-0 MLP output install the ordering? The cross-checkpoint transplant
+
+Two results above are correlational with respect to training. The checkpoint sweep shows *when* the
+ordering appears; the transplant (pattern 23) shows that inside the finished model one vector, $m_u$,
+moves a token's width. Neither shows that $m_u$ is what training installs. The checkpoints make a
+direct test possible, because they give two networks that differ in how much of the ordering they
+have: at `step128` the ranking agrees with the end of training at $\rho = +0.443$, half of the
+$0.883$ its measurement noise allows, and at `step143000` it is complete by definition. If $m_u$ is
+what carries the trait, then copying `step143000`'s $m_u$ into the `step128` network — changing
+nothing else, not one weight — should push `step128`'s widths toward `step143000`'s ranking.
+
+The write is the same hook used in pattern 23: during the forward pass that produces the token's
+endpoint state, the block-0 MLP's output at the final position is replaced by a supplied vector. The
+interpolation path itself is unaffected, because measuring a curve overwrites the entire post-block-0
+state with the interpolation bank, so the substitution can only act through the endpoint the path
+starts from. Anchors are never edited. Each condition is a complete anchor-width sweep of the 123
+tokens against the 6 anchors in all 3 frames, and $m_u$ is captured per frame in the donor checkpoint,
+so a token receives the vector its donor computed in that same sentence.
+
+Six conditions run in each direction, and the last two are what make the result readable:
+
+**base** — nothing written. Reproduces the checkpoint sweep's stored widths and gives the ordering the
+recipient network already had.
+
+**self** — the recipient's own $m_u$ written back. This must return the baseline exactly; it is the
+check that the hook writes where we think it does.
+
+**donor** — the other checkpoint's $m_u$, at the length it was measured.
+
+**donor_scaled** — the same vectors multiplied by one global constant that matches the two
+checkpoints' typical vector length, since the block-0 MLP output grows during training (median
+$\lVert m_u \rVert$ is 1.94 at `step128` and 11.06 at `step143000`) and an oversized write would be a
+different intervention from a transplant:
+
+```math
+\kappa \;=\; \frac{\mathrm{median}_u \lVert m_u^{\text{recipient}} \rVert}
+                  {\mathrm{median}_u \lVert m_u^{\text{donor}} \rVert} .
+```
+
+**shuffle** and **shuffle_scaled** — the same donor vectors under a fixed permutation with no token
+kept in place, so every token receives some other token's vector. This is the control the experiment
+turns on. A transplant necessarily disturbs the network, and any disturbance of this kind flattens the
+width ordering (pattern 15), so the question is never "did the widths change" but "did they change in
+a way that depends on *which* token's vector arrived". The shuffled write is matched in everything
+except that dependence.
+
+Each condition is scored by two rank correlations over the same 123 tokens: agreement with the **donor
+checkpoint's** own measured ordering (the ordering we are asking about) and agreement with the
+**recipient's** own baseline ordering (the one it started with). A transplant that installs the trait
+raises the first and lowers the second; a write that merely damages the measurement lowers both. Since
+the recipient's ordering is itself correlated with the donor's ($+0.443$), we also report the partial
+Spearman correlation with the donor's ordering after regressing out the recipient's baseline ranking,
+using the rank-projection defined above — the part of the agreement that cannot be inherited from what
+the recipient already had. A second partial additionally removes the donor vector's length
+$\lVert m_u \rVert$, which rules out a transplant that works only by writing longer vectors into some
+tokens than others. Uncertainty on the difference between two agreements measured on the same tokens
+comes from a paired bootstrap over tokens (2,000 resamples, percentile interval), which needs no
+distributional assumption. We also record the median Jensen-Shannon divergence in bits between the
+token's next-token distribution before and after the write, so the size of each disturbance can be
+compared with its matched control, and the split-half reliability of every condition's widths.
+
+Finally, three measurements ask whether the two checkpoints' block-0 MLP outputs are even written in
+the same coordinates, which decides how a negative result should be read. **Same-token cosine** is
+$\cos(m_u^{(T)}, m_u^{(t)})$ averaged over the 123 tokens, computed on the raw vectors and after
+subtracting the across-token mean (the mean is the part every token shares, so the centred version
+isolates what distinguishes tokens). **Arrangement agreement** compares the two checkpoints' internal
+geometry without requiring their axes to match: form all 7,503 pairwise cosines within one checkpoint,
+
+```math
+G_{uv} \;=\; \frac{\langle m_u,\, m_v \rangle}{\lVert m_u \rVert \, \lVert m_v \rVert},
+\qquad u < v ,
+```
+
+and take the Spearman correlation between the two checkpoints' $G$. This is high when both checkpoints
+place the same tokens near each other, even if the whole space has rotated. Figure 31 and the table
+beside it report all of this.
 
 ### Does the ordering survive a different tokenizer and corpus? The GPT-2 protocol, and a width that always exists
 
@@ -2276,6 +2367,87 @@ wanted — a refit of the embedding probe against a properly estimated permutati
 against a probe on $\log_{10} N_u$ and $H_u$, which costs nothing and is the bar GPT-2's embedding
 barely clears.
 
+### Can one vector install the ordering in a network that only half has it?
+
+Every causal claim in this report so far lives inside one finished network. The checkpoint sweep
+(patterns 29–31) says the ordering is in place within a few hundred optimizer steps; the transplant
+(pattern 23) says that in the finished model one vector moves a token's width. Putting those together
+into "the block-0 MLP output is what training installs" would be reading a mechanism out of two
+correlations, so we tested it directly, by writing `step143000`'s $m_u$ into the `step128` network and
+asking whether `step128`'s width ranking moves toward `step143000`'s. To show that any movement depends
+on *which* token's vector arrived, each transplant is run beside a write of the same vectors with the
+token identities shuffled. Figure 31 puts every condition on one axis.
+
+![Two panels of dot-and-interval plots comparing transplant conditions against shuffled controls, in both transplant directions](plots/ckpt_transplant.png)
+
+**Figure 31.** Pythia-410M-deduped, 123 tokens, 6 anchors, 3 frames, block-0 site. x: Spearman $\rho$
+over the 123 tokens; y: the six write conditions defined in Methods. Filled circles are agreement with
+the *donor* checkpoint's own measured width ordering, with 95% bootstrap intervals over tokens; open
+squares are agreement with the *recipient's* own baseline ordering (no interval drawn — the baseline
+row is a self-comparison and sits at $+1.0$ by construction). The gray numbers on the right of each
+panel are the median output shift the write causes, in bits of Jensen-Shannon divergence between the
+token's next-token distribution before and after. Left: `step143000`'s $m_u$ written into `step128`.
+Right: the reverse. The two lower rows in each panel are the identity-shuffled controls.
+
+**Pattern 39 — the vector carries the ordering across training time, but only a fraction of it.** The
+sanity check passes first: writing a network's own $m_u$ back reproduces its baseline widths exactly
+(agreement $+1.000$, 0.000 bits), so the hook edits what we claim it edits. With the correct donor's
+vector in place, `step128`'s widths agree with `step143000`'s ordering at $+0.329$ (donor as measured)
+and $+0.189$ (norm-matched, $\kappa = 0.176$). The shuffled writes, which move the output by as much or
+more (0.075 and 0.036 bits against 0.060 and 0.024), land at $-0.030$ and $-0.141$. The gap is
+$+0.357$ (95% bootstrap interval $[+0.151, +0.553]$) and $+0.324$ ($[+0.075, +0.572]$) — so which
+token's vector arrives changes where that token's width ends up, in a network that never learned to
+produce that vector.
+
+The norm-matched condition is the cleaner of the two, because it erases the recipient's own ordering
+entirely: after the write, `step128`'s widths rank at $-0.009$ with the widths `step128` produced
+untouched, while still agreeing with `step143000`'s ordering at $+0.189$. That residual agreement has
+nowhere to come from except the transplanted vectors. The partial correlations say the same thing in
+one number: removing the recipient's baseline ranking leaves $+0.240$, and additionally removing the
+donor vector's length leaves $+0.272$. Length is not the channel — $\lVert m_u \rVert$ in the final
+checkpoint ranks that checkpoint's own widths at only $-0.098$.
+
+What the experiment does *not* show is equally clear, and it is the reason the headline is "a fraction
+of it". Every transplant lowers agreement with the final ordering relative to doing nothing: `step128`
+already ranks at $+0.443$ untouched, and the best transplant leaves it at $+0.329$. The write costs
+more than it delivers. So $m_u$ is partially sufficient across training time — enough to be detected
+against a matched control, far short of enough to install the trait — and the strong sufficiency claim
+in pattern 23 remains a statement about token-to-token substitution inside one network, not about
+transplanting across training.
+
+**Pattern 40 — the two checkpoints do not write $m_u$ in the same coordinates, which bounds what the
+transplant could have shown.** The table reads the geometry of the same 123 vectors in the two
+checkpoints.
+
+| | `step128` vs `step143000` |
+|---|---|
+| median $\lVert m_u \rVert$ | 1.94 vs 11.06 |
+| cosine between the same token's two vectors | $+0.178$ |
+| the same, after subtracting the across-token mean | $+0.198$ |
+| rank agreement of $\lVert m_u \rVert$ across tokens | $-0.043$ |
+| rank agreement of the 7,503 within-checkpoint pairwise cosines | $+0.031$ |
+| the same, after centring | $+0.096$ |
+
+These numbers are close to what unrelated vectors would give. The same token's block-0 MLP output at
+the two checkpoints points in almost unrelated directions, the tokens are not arranged the same way
+relative to each other, and even the ordering of vector lengths does not survive. Training rewrites
+this component's output space, so the transplanted vector arrives in a code the receiving network never
+learned to read. Read against that, pattern 39's $+0.19$ to $+0.33$ is the more surprising half of the
+result: enough of the width trait survives translation into a foreign code for a matched control to
+detect it. It also explains why the transplant cannot install the ordering outright, and it makes the
+reverse direction uninformative — writing `step128`'s $m_u$ into the finished model destroys that
+model's ordering ($+1.000 \to +0.148$) without replacing it with `step128`'s ($+0.027$, and its gap
+over the shuffled control is $+0.088$, interval $[-0.091, +0.263]$, indistinguishable from zero). That
+write moves the output by 0.64 bits, well past the 0.4 bits at which pattern 15 showed a disturbance of
+any kind flattens the ordering, so the finished model is in the regime where the measurement stops
+discriminating. The informative direction is the one that writes a well-trained vector into an early
+network, where the disturbance stays under 0.08 bits.
+
+Two limits belong with this. It is one model and one pair of checkpoints, and the conclusion that the
+trait travels in $m_u$ *as read by a particular network* — a vector plus the weights that consume it —
+rather than in a vector that means the same thing throughout training, rests on patterns 39 and 40
+together: the transfer is real and small, and the geometry says why it could not have been large.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -2395,15 +2567,22 @@ a held-out $R^2$ of $-0.021$, and only $0.067$ ahead of a probe built from two c
 free lookup is a Pythia result; a new model can carry a reproducible width ordering that its static
 embedding does not hold.
 
-**The single most informative next experiment is now inside Pythia, where the trait is readable.**
-Write the final checkpoint's block-0 MLP output vector $m_u$ into the `step128` model, where the
-ordering does not yet exist, and see whether it appears — tying patterns 23 and 29 together. It is the
-one remaining test that could turn a set of correlations between the embedding, the block-0 MLP and the
-measured width into a statement about which of them produces which. For GPT-2 the cheap follow-up is
-different: pattern 38 localised the shortfall to *which* widths the embedding predicts (the all-curve
-target beats the filtered one), so the next step there is to probe the two components separately — fit
-the same probe to a token's edge drift $E$ and to its filtered width, on the same tokens and splits, and
-see whether GPT-2's embedding is holding curve shape rather than crossing width.
+Patterns 39 and 40 then ran the test that tied patterns 23 and 29 together, and returned a bounded
+positive. Writing the finished model's $m_u$ into `step128` leaves that network's widths agreeing with
+the final ordering at $+0.33$ against $-0.03$ for an identity-shuffled write of the same vectors, so the
+vector does carry the trait across training time; but no transplant beats leaving `step128` alone
+($+0.443$), and the two checkpoints' $m_u$ share almost no geometry (same-token cosine $+0.18$,
+arrangement agreement $+0.03$). The mechanism is a vector plus the weights that read it, and that closes
+the causal line of attack inside Pythia: with the coordinate systems this different, no cross-checkpoint
+edit will do better, and every within-model intervention has been run.
+
+**The single most informative next experiment is now in GPT-2.** Pattern 38 localised its shortfall to
+*which* widths the embedding predicts — the all-curve target beats the plateau-filtered one, so what
+GPT-2's embedding holds is concentrated in the curves the filter discards. The next step is to fit the
+same probe, on the same tokens and the same 50 splits, to two targets separately: a token's edge drift
+$E$ and its plateau-filtered width. If the edge-drift probe is the stronger of the two, GPT-2's
+embedding holds curve *shape*, and the report's screen would need a shape check before a width lookup is
+attempted in a new model. It costs no forward passes: both targets are already stored.
 
 ---
 
@@ -2526,6 +2705,22 @@ ranking's rank variance, while the early-to-final agreement holds at $+0.6$–$+
 out. The free lookup therefore reads a learned quantity — but one learned in the first 0.4% of
 training, and a mature model's lookup detects it in a young checkpoint ($\rho = +0.54$ at `step128`)
 several hundred steps before that checkpoint's own embedding matrix makes it linearly readable.
+
+Those two findings — one vector moves the width, and the ordering appears in the first few hundred
+steps — invite the conclusion that $m_u$ is what training installs, so we tested it by writing
+`step143000`'s $m_u$ into the `step128` network and changing nothing else. The transfer is real and
+small. `step128` then ranks with the finished model's ordering at $+0.33$ as measured and $+0.19$ with
+vector lengths matched, against $-0.03$ and $-0.14$ when the same vectors are written with the token
+identities shuffled (gaps of $+0.357$ and $+0.324$, 95% bootstrap intervals clear of zero); in the
+length-matched case the recipient's own ordering is gone ($-0.009$), so the surviving agreement can
+only have arrived in the vectors. It is nowhere near installation: untouched, `step128` already ranks
+at $+0.443$, and every transplant leaves it worse. The geometry explains the ceiling — the same token's
+$m_u$ at the two checkpoints has a cosine of $+0.18$, the tokens' arrangement relative to each other
+agrees at $+0.03$, and even the ordering of vector lengths does not survive — so training rewrites this
+component's output space and the transplanted vector lands in a code the receiving network never
+learned to read. What the trait travels in is that vector together with the weights that consume it,
+which is why substitution works between two tokens of one network and only partly between two moments
+of one training run.
 
 The limit of all of that is the training corpus. The same 123 strings measured in GPT-2 small, whose
 vocabulary contains every one of them, produce a ranking that correlates with Pythia-1.4B's at
