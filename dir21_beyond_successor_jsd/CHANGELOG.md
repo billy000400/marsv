@@ -1290,3 +1290,41 @@ caveat that still applies to every cell of pattern 46 — 80 training tokens.
 (REPORT 47 display eqs / 1633 inline eqs / 36 embeds / 0 problems; RESULTS 3 display eqs / 1115 inline
 eqs / 36 embeds / 0 problems). Figure 36 numbered sequentially after Figure 35 in both files and cited
 by number in the prose; no bare `(plots/*.png)` references.
+
+## 2026-08-12 — iteration 22: pattern 47, the negative at four training-set sizes (Figure 37)
+
+**What changed in RESULTS.md and REPORT.md.** Added one Results section to each — "Would more training
+tokens have found it?" — carrying new Figure 37 (`plots/curve.png`), an 8-row (REPORT) / 6-row
+(RESULTS) table of the width-with-shape-removed target at four training sizes x six feature sets x two
+readouts, and the prose that reads them. REPORT.md gained a matching Methods subsection ("How much of
+the negative is just 80 training tokens?"). Both files' next-experiment sections were rewritten, and
+both summaries updated to state the negative as covering three readouts and four sample sizes.
+
+**New result.** `experiments/curve_probe.py`, `plot_curve.py`, `curve_table.py` → `results/curve.json`.
+Ridge and RBF kernel ridge refit at training sizes 30/50/80/100 (test halves 93/73/43/23) on the same
+123 tokens, six feature sets, four targets and ceilings, with the 50 splits and 50-permutation null
+redrawn at each size. All 48 size-by-site-by-readout cells for width-with-shape-removed are inside
+their nulls: at every size 0 of 12 cells clear their null mean by 2 s.d., and the smallest permutation
+$p$ anywhere is 0.078. Controls (mean over the six sites, ridge) rise with size — shape
+$+0.755 \to +0.787 \to +0.809 \to +0.800$, width $+0.573 \to +0.617 \to +0.640 \to +0.632$ — against
+$+0.029 \to +0.056 \to +0.059 \to +0.039$ on the width residual. The null's $\pm 2$ s.d. band grows
+$0.114 \to 0.145 \to 0.183 \to 0.217$ as the test half shrinks, following
+$0.572/\sqrt{n_{\rm test}}$. One cell rises monotonically and stays open: kernel ridge at block 6,
+$+0.055 \to +0.106 \to +0.145 \to +0.176$ (0.28 of ceiling, $p = 0.078$), one of 3 monotone cells out
+of 12 and of 48 cells fitted.
+
+**Superseded claims.** No earlier number changed. The standing negative's scope changed again: "not
+readable by any of three readout families at 80 training tokens" (pattern 46) becomes "…at any training
+size 30–100 that 123 tokens allow", and both deliverables' limits paragraphs now price the sample-size
+caveat instead of merely naming it — a true $\rho$ of $+0.15$ needs a test half of ~58 tokens, i.e. a
+pool of ~150 measured tokens, to sit 2 null s.d. clear. The previous next-experiment recommendation
+(this learning curve) is replaced in both files by the token-pool measurement it points to.
+
+**Verification.** Ridge was refit here in dual form ($X'(XX' + \lambda I)^{-1}$, algebraically the same
+estimator as `embed_probe.probe` but with 123x123 inverses); at $n_{\rm train} = 80$ all 24 probes
+reproduce patterns 44/45 to four decimals in both the real $\rho$ and all 50 permutation draws each
+(largest $|{\rm diff}| = 0.0000$, largest null-draw difference $0.0000$).
+`python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 47 display eqs /
+1792 inline eqs / 37 embeds / 0 problems; RESULTS 3 display eqs / 1226 inline eqs / 37 embeds / 0
+problems). Figure 37 numbered after Figure 36 in both files and cited by number; no bare
+`(plots/*.png)` references.

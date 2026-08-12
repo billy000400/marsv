@@ -1549,3 +1549,56 @@ check to the previous run has been what makes a new panel a comparison rather th
 with matched nulls and ceilings and an exact 24-probe tie-check, and both deliverables are curated to
 current-best with Figure 36 embedded and `check_render.py` passing (36 embeds, 36 captions, 0
 problems). No STOP written: the next experiment is named, cheap and real.
+
+## 2026-08-12 — iteration 22: pricing the last caveat instead of restating it
+
+**What I set out to do.** No unaddressed feedback, so ordinary plan work: the experiment both
+deliverables named as next. After three readout families came back at chance for the width-specific
+component, every cell still shared one property — 80 of the 123 tokens for training. A learning curve is
+the only way to tell "the signal is absent" from "the probe was short of data", because the two differ in
+their *trend*, not in any single fit. Sizes 30/50/80/100, same tokens, features, targets, ceilings and
+permutation seeds, splits and nulls redrawn per size, ridge and kernel ridge only.
+
+**Result: 48 cells, all inside their nulls, and the controls prove the curve can see.** At every size,
+0 of 12 site-by-readout cells clear their null mean by 2 s.d.; the smallest permutation $p$ over all 48
+is 0.078. Meanwhile the same fits on the same features gain about $+0.05$ (shape) and $+0.06$ (width)
+between 30 and 80 training tokens. That contrast is the whole result: 50 extra tokens visibly help a
+target that is there and do not move the one that is not.
+
+**The trap I had to design around.** With a fixed pool of 123 tokens, every training token comes out of
+the test half, so raw $\rho$ at $n = 100$ is measured on 23 tokens and is noisier by construction. The
+permutation null absorbs this exactly — its $\pm 2$ s.d. band grows $0.114 \to 0.217$ — but only if it is
+redrawn at every size, which is why I did not reuse the published nulls this time (unlike iteration 21,
+where the splits were identical and reuse was provably exact). Reading each cell against its own null is
+what makes "the best cell rose from $+0.061$ to $+0.176$ and got no closer to significance" a sentence
+about power rather than about noise.
+
+**The temptation I avoided, again.** Kernel ridge at block 6 rises at every step and reaches $p = 0.078$.
+It would be easy to call that an emerging signal. Three of 12 cells rise monotonically and 48 cells were
+fitted, so chance produces exactly this; I wrote it as a candidate with a named test rather than a
+finding. What makes it worth naming at all is that it is the same cell that was best at $n = 80$.
+
+**What turns the negative into something actionable.** Fitting $\mathrm{null\_sd} = c/\sqrt{n_{\rm test}}$
+over the 48 cells gives $c = 0.572$, so a true $\rho$ of $+0.15$ needs a test half of ~58 tokens to sit
+2 s.d. clear — a pool of ~150 measured tokens against the 123 that exist. The caveat is now priced, not
+removed: within this pool the negative is not a power artifact, and closing the last cell costs about 60
+more measured tokens, not another readout. That is the recommended next experiment in both files.
+
+**Engineering note worth keeping.** Ridge was the expensive part of the earlier runs (13 penalties x 5
+folds x 2,049-dimensional solves, ~8 min per site). Rewriting it in dual form,
+$X'(XX' + \lambda I)^{-1}$, makes every fit a 123x123 inverse and turns the whole learning curve into
+matrix-vector products — the same estimator, verified by reproducing all 24 published probes *and* all
+50 permutation draws of each to four decimals. The lesson generalises: when $p \gg n$, the tie-check
+against the slow implementation is cheap and it is what licenses swapping in the fast one.
+
+**Assumptions logged.** (a) Two readouts, not three — $k$-NN would add a third curve without a distinct
+answer, since ridge and kernel ridge already bracket "was the constraint linearity?". (b) Sizes stop at
+100 because the test half is already down to 23 tokens there and both controls have started to fall;
+past that the measurement stops being informative for a reason unrelated to the question. (c) Nulls
+redrawn per size rather than reused, for the reason above.
+
+**On track?** Yes. The named experiment ran, priced the last caveat that applied to every cell of the
+standing negative, produced one figure with per-size nulls and an exact 24-probe / 1,200-draw tie-check,
+and both deliverables are curated to current-best with Figure 37 embedded and `check_render.py` passing
+(37 embeds, 37 captions, 0 problems). No STOP written: the next experiment is named, concrete and worth
+running.

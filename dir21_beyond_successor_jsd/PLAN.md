@@ -46,7 +46,42 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 21 — COMPLETE; the negative no longer depends on "linear")
+## Current status (2026-08-12, iteration 22 — COMPLETE; the sample-size caveat is now priced)
+
+**Iteration 22 ran the experiment both deliverables named as next** (`experiments/curve_probe.py`,
+`plot_curve.py`, `curve_table.py`; Figure 37; deliverables now carry 37 figures each and pass
+`check_render.py`). Ridge and RBF kernel ridge were refit at training sizes 30/50/80/100 (test halves
+93/73/43/23) on the same 123 tokens, six feature sets, four targets and ceilings, with the 50 splits and
+the 50-permutation null redrawn at each size. No forward passes: the features were cached from iteration
+21 (`results/curve_features.npz`).
+
+* **All 48 size-by-site-by-readout cells for width-with-shape-removed are inside their nulls.** At every
+  size, 0 of 12 cells clear their null mean by 2 s.d.; the smallest permutation $p$ over all 48 is
+  0.078.
+* **The controls set the scale and rise.** Mean over the six sites (ridge): shape
+  $+0.755 \to +0.787 \to +0.809 \to +0.800$, width $+0.573 \to +0.617 \to +0.640 \to +0.632$, against
+  $+0.029 \to +0.056 \to +0.059 \to +0.039$ on the width residual. 50 extra training tokens are worth
+  about $+0.05$–$+0.07$ on a target that is there.
+* **The null widens as the test half shrinks** ($\pm 2$ s.d. $0.114 \to 0.145 \to 0.183 \to 0.217$,
+  following $0.572/\sqrt{n_{\rm test}}$), which is why every cell is read against the null at its own
+  size. Both controls peak at 80 and dip at 100, so 80/43 was near the best this pool allows.
+* **One cell stays open:** kernel ridge at block 6 rises at every step ($+0.055 \to +0.106 \to +0.145
+  \to +0.176$, 0.28 of ceiling, $p = 0.078$). 3 of 12 cells rise monotonically and 48 were fitted — a
+  candidate with a named test, not a finding.
+* **The ridge tie-check is exact:** at $n_{\rm train} = 80$ all 24 dual-form ridge probes reproduce
+  patterns 44/45 to four decimals in both $\rho$ and all 50 permutation draws each.
+* **Deliverable consequence:** the negative now covers three readouts and four sample sizes, and the
+  sample-size caveat is priced — a true $\rho$ of $+0.15$ needs a test half of ~58 tokens (a pool of
+  ~150 measured tokens). Recorded in both files.
+
+**Next step (only if reopened):** measure more tokens. Measure $\hat w_u$ and edge drift for ~60–130
+further endpoint tokens with the same six anchors, three frames and block-0 site (pool → ~150–250), then
+refit exactly the open cell — block 6, RBF kernel ridge, same targets, 50 splits, 50-permutation null.
+Above the null → the component is readable and the negative narrows to "not readable from 123 tokens";
+inside it → carried but not stated, at a size where $\rho = +0.15$ could not have hidden. Cost:
+interpolation curves for the new tokens; the analysis code exists.
+
+## Previous status (2026-08-12, iteration 21 — COMPLETE; the negative no longer depends on "linear")
 
 **Iteration 21 ran the experiment both deliverables named as next** (`experiments/readout_probe.py`,
 `plot_readout.py`, `readout_table.py`; Figure 36; deliverables now carry 36 figures each and pass

@@ -60,8 +60,11 @@ does not help: the same target stays at chance when read from the block-0 MLP's 
 post-block-0 residual state (pattern 44), and from the residual stream at blocks 6, 12 and 18, where
 it drifts down to exactly zero rather than up (pattern 45). Swapping the linear probe for RBF kernel
 ridge or nearest neighbours on those same six representations leaves all 18 combinations at chance
-(pattern 46), so the miss is not an artifact of linearity. There is no cheap upgrade from this
-shape-ranking table to a table that ranks the crossing width specifically, at any depth we tested.
+(pattern 46), so the miss is not an artifact of linearity, and refitting at 30, 50, 80 and 100 training
+tokens leaves all 48 size-by-site-by-readout cells inside their nulls while the same fits gain about
+$+0.05$ on the readable targets (pattern 47), so it is not an artifact of sample size either. There is
+no cheap upgrade from this shape-ranking table to a table that ranks the crossing width specifically, at
+any depth we tested.
 
 **The ranking is a token property; the level belongs to the context.** Re-measuring the same 123
 tokens in four differently shaped contexts — a mid-sentence continuation, an interrogative, a
@@ -1362,6 +1365,31 @@ is refit here as a tie-check against the two rounds above; its permutation null 
 published for each site and target, which is the same 50 numbers by construction, since the null is a
 deterministic function of the features, splits and permutation seeds this round holds fixed. Figure 36
 reports the resulting 18 site-by-readout cells per target.
+
+### How much of the negative is just 80 training tokens?
+
+After three readout families and six feature sets, one property is shared by every probe above and by
+nothing else: each is fitted on 80 of the 123 tokens. A probe can miss a real signal simply because it
+was not given enough examples to find it, and no single fit can tell that apart from the signal being
+absent. What separates them is the *trend*: a signal a probe is merely short of data for improves as the
+training set grows, whereas an absent one does not move.
+
+So a fourth round changes only the number of training tokens. **Training size $n$** takes the values 30,
+50, 80 and 100, with the other $123 - n$ tokens (93, 73, 43, 23) held out and scored as before. The
+features, the four targets, the ceilings, the readouts' hyper-parameter grids and the permutation seeds
+are the ones already defined; the 50 random splits and the 50 permutation nulls are redrawn at each size,
+because both depend on how the tokens are divided. $n = 80$ reproduces the earlier runs exactly, which
+is the tie-check that nothing else moved. Two readouts are carried through it — linear ridge and RBF
+kernel ridge, the strict generalisation of it — since these two bracket the question and $k$-NN adds a
+third curve without a distinct answer.
+
+Two things make this curve readable. First, the **control targets set the scale**: shape $E_u$ and raw
+width $w_u$ are recovered well above chance at every site, so their curves show how much a real signal in
+these features gains from 30 extra training tokens, and the width residual is read against that. Second,
+raising $n$ shrinks the test half, which makes every held-out $\rho$ noisier and widens the permutation
+null — a rising null band, not a rising probe, is the sign of that. Comparing each probe to its own null
+at its own size, rather than comparing raw $\rho$ across sizes, keeps the two effects apart. Figure 37
+reports the resulting 4 sizes $\times$ 6 sites $\times$ 2 readouts, per target.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -3100,6 +3128,85 @@ at $+0.809$ across the 123 tokens, so the width residual stays the least reliabl
 ($R = 0.397$). What no longer applies is "not readable means not readable by ridge": that was the
 motivation for this experiment, and it is answered.
 
+### Would more training tokens have found it?
+
+Every probe in this report was fitted on 80 of the 123 tokens. A probe can also miss a real signal for
+the dull reason that 80 examples in 2,048 dimensions are not many, and one fit cannot distinguish that
+from the signal being absent. A learning curve can: a signal a probe is merely short of data for gets
+better as the training set grows. Figure 37 refits ridge and kernel ridge at four training sizes — 30,
+50, 80 and 100 tokens, leaving 93, 73, 43 and 23 held out — on the same six feature sets, with the
+splits and permutation nulls redrawn at each size. The three control targets say what "getting better"
+looks like on these same features.
+
+![Eighteen small panels: three targets by six feature sets, each plotting held-out accuracy against the number of training tokens for two readouts](plots/curve.png)
+
+**Figure 37.** Pythia-1.4B, the same 123 endpoint tokens. Columns are the six feature sets in depth
+order — the static embedding row $W_E[u]$, the block-0 MLP output $m_u$, and the residual stream after
+blocks 0, 6, 12 and 18. Rows are targets: width with shape removed (top, the open question), raw width
+$w_u$ (middle, control) and shape $E_u$ (bottom, control), where $E_u$ is the token's median edge drift
+and $w_u$ its median plateau-filtered envelope width. x: number of training tokens, 30 to 100 of 123.
+y: mean held-out Spearman $\rho$ between predicted and measured target over 50 random splits at that
+size, error bars $\pm 1$ standard deviation across splits. Lines are the readouts: linear ridge (solid,
+circles) and RBF kernel ridge (dashed, squares). The hatched gray strip is the permutation null at that
+size ($\pm 2$ standard deviations around its mean, whichever readout gives the wider band), and it
+widens to the right because raising the training size shrinks the test half. The dash-dot line is the
+ceiling $\sqrt{R}$ that the target's own measurement noise allows.
+
+**Pattern 47 — 30 more training tokens are worth about $+0.05$ on a target that is there, and nothing
+on the width residual.** All 48 cells stay inside their nulls.
+
+| width with shape removed, held-out $\rho$ (ceiling 0.630) | $W_E[u]$ | $m_u$ | block 0 | block 6 | block 12 | block 18 |
+|---|---|---|---|---|---|---|
+| linear ridge, 30 tokens | $+0.036$ ($p = 0.29$) | $+0.044$ ($p = 0.31$) | $+0.061$ ($p = 0.25$) | $+0.028$ ($p = 0.29$) | $+0.016$ ($p = 0.39$) | $-0.011$ ($p = 0.67$) |
+| linear ridge, 50 | $+0.069$ ($p = 0.24$) | $+0.087$ ($p = 0.24$) | $+0.102$ ($p = 0.16$) | $+0.065$ ($p = 0.20$) | $+0.029$ ($p = 0.37$) | $-0.014$ ($p = 0.67$) |
+| linear ridge, 80 | $+0.072$ ($p = 0.25$) | $+0.084$ ($p = 0.31$) | $+0.115$ ($p = 0.22$) | $+0.089$ ($p = 0.18$) | $+0.021$ ($p = 0.45$) | $-0.026$ ($p = 0.73$) |
+| linear ridge, 100 | $+0.088$ ($p = 0.27$) | $+0.063$ ($p = 0.35$) | $+0.090$ ($p = 0.37$) | $+0.050$ ($p = 0.37$) | $-0.004$ ($p = 0.61$) | $-0.052$ ($p = 0.78$) |
+| kernel ridge, 30 | $+0.017$ ($p = 0.37$) | $+0.014$ ($p = 0.37$) | $+0.034$ ($p = 0.29$) | $+0.055$ ($p = 0.18$) | $+0.054$ ($p = 0.16$) | $+0.007$ ($p = 0.51$) |
+| kernel ridge, 50 | $+0.050$ ($p = 0.27$) | $+0.045$ ($p = 0.27$) | $+0.064$ ($p = 0.20$) | $+0.106$ ($p = 0.10$) | $+0.088$ ($p = 0.14$) | $+0.006$ ($p = 0.47$) |
+| kernel ridge, 80 | $+0.049$ ($p = 0.33$) | $+0.059$ ($p = 0.31$) | $+0.087$ ($p = 0.24$) | $+0.145$ ($p = 0.12$) | $+0.120$ ($p = 0.18$) | $+0.026$ ($p = 0.41$) |
+| kernel ridge, 100 | $+0.050$ ($p = 0.41$) | $+0.059$ ($p = 0.37$) | $+0.068$ ($p = 0.35$) | $+0.176$ ($p = 0.08$) | $+0.132$ ($p = 0.16$) | $+0.028$ ($p = 0.41$) |
+
+The controls are what make the top row of Figure 37 a measurement rather than a shrug. Averaged over the
+six feature sets, ridge on the shape target goes $+0.755 \to +0.787 \to +0.809$ as the training set goes
+30 → 50 → 80, and on raw width $+0.573 \to +0.617 \to +0.640$; kernel ridge moves the same way
+($+0.756 \to +0.807$ and $+0.578 \to +0.655$). So on these very features, 50 extra training tokens are
+worth roughly $+0.05$ to $+0.07$ in held-out $\rho$ when the target is present. The width residual over
+the same range goes $+0.029 \to +0.059$ (ridge) and $+0.030 \to +0.081$ (kernel ridge) — movement in the
+same direction, but a fifth of the size, and its null moves with it.
+
+That last point is the one the curve exists to settle, so it is worth reading off the figure rather than
+the table. Adding training tokens costs test tokens, one for one, out of a fixed pool of 123. The
+permutation null's $\pm 2$ standard-deviation band on the width residual therefore widens from $0.114$
+at 93 test tokens to $0.145$, $0.183$ and $0.217$ at 73, 43 and 23 — the flaring gray strips in the top
+row of Figure 37. Every cell is compared with the null at *its own* size for that reason, and on that
+comparison the answer is flat: at each of the four sizes, 0 of the 12 site-by-readout cells clear their
+null's mean by 2 standard deviations, and no permutation $p$ falls below 0.078. The best cell moves from
+$+0.061$ at 30 tokens to $+0.176$ at 100, and gets no closer to significance because the yardstick grows
+just as fast.
+
+Two secondary readings. The controls peak at 80 training tokens and dip slightly at 100 (shape
+$+0.809 \to +0.800$, width $+0.640 \to +0.632$): with 123 tokens in total, the last 20 training tokens
+cost more precision on a 23-token test half than they buy, so 80/43 was a reasonable operating point and
+not a limitation this pool can escape. And the tie-check is exact — at 80 training tokens all 24 ridge
+probes reproduce patterns 44 and 45 to four decimals, including all 50 permutation draws of each
+(largest absolute difference $0.0000$), so the four sizes differ in nothing but sample size.
+
+One cell is left open, and it is worth naming precisely because the rest of the picture is flat. Kernel
+ridge at block 6 is the only cell that rises at every step — $+0.055$, $+0.106$, $+0.145$, $+0.176$,
+reaching 0.28 of the ceiling with permutation $p = 0.078$ at 100 training tokens. Three of the 12 cells
+rise monotonically, and with 48 cells in the experiment a handful below $p = 0.10$ is what chance
+produces, so this is a candidate and not a finding. It is also a testable one, and the curve says what
+the test costs. The null's spread on this target follows $0.572/\sqrt{n_{\text{test}}}$ across all 48
+cells, so a true correlation of $+0.15$ would sit two null standard deviations clear given a test half of
+about 58 tokens — a pool of roughly 150 tokens measured the same way, against the 123 that exist. The
+decisive experiment is therefore not a better probe but about 60 more measured tokens.
+
+The sample-size caveat is not removed by this; it is priced. Within the range this pool allows, more
+training tokens raise the readable targets and leave the width-specific component inside its null, so
+the report's negative is not an artifact of fitting 80 tokens — while a genuine effect of size $+0.15$
+would still be invisible here, which is exactly why the next test needs more tokens rather than more
+readouts.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -3270,18 +3377,27 @@ shape and width at every site — kernel ridge within $0.008$ of ridge on shape 
 width, $k$-NN well above chance on both. Three readout families, six representations, no readout finds
 the component.
 
-**The single most informative next experiment raises the training set.** With linearity ruled out, the
-one caveat that still applies to every cell of pattern 46 is that each readout saw 80 training tokens.
-That is a small sample for a flexible learner, and $k$-NN's shortfall on the easy targets is a direct
-measurement of what it costs. The experiment is a learning curve on data already in hand: refit ridge
-and kernel ridge on the same 123 tokens at training sizes of 30, 50, 80 and 100, with the same six
-feature sets, four targets and 50-permutation nulls, and read the width residual's accuracy against its
-null at each size. The three control targets set the scale, since shape and width should improve
-visibly with training size on these same features. If the width residual climbs towards its null
-boundary as training tokens are added, the negative was partly a power problem and the curve names the
-sample size a decisive test would need; if it stays flat at chance while the controls climb, the
-representations do not expose the component and more tokens of this kind will not change that. The cost
-is CPU-bound algebra on features that already exist — no forward passes, no new measurement.
+Pattern 47 then priced the last caveat those cells shared: each was fitted on 80 of the 123 tokens.
+Refitting ridge and kernel ridge at 30, 50, 80 and 100 training tokens keeps all 48 cells inside their
+nulls — 0 of 12 cells clear their null by 2 standard deviations at any size, and the smallest
+permutation $p$ anywhere is 0.078 — while the same fits on the same features gain $+0.05$ (shape) and
+$+0.06$ (width) between 30 and 80 tokens. The negative is not an artifact of the sample size in the
+range this pool allows.
+
+**The single most informative next experiment measures more tokens.** Pattern 47 leaves exactly one
+cell open and states the price of closing it. Kernel ridge at block 6 is the only cell that rises at
+every training size ($+0.055 \to +0.106 \to +0.145 \to +0.176$, reaching 0.28 of the ceiling at
+$p = 0.078$), which with 48 cells in play is what chance also produces, so it is a candidate rather than
+a result. The null's spread on this target follows $0.572/\sqrt{n_{\text{test}}}$, so a true correlation
+of $+0.15$ clears two null standard deviations only with a test half of about 58 tokens — a pool of
+roughly 150 measured tokens against the 123 that exist. The experiment is therefore to measure
+$\hat w_u$ and the edge-drift shape for about 60 to 130 further endpoint tokens with the same six
+anchors, three frames and block-0 site, then refit exactly this probe at block 6 with kernel ridge and
+its permutation null. Above the null on a pool that size, the width-specific component is readable
+after all and the report's central negative narrows to "not readable from 123 tokens"; still inside it,
+the component is carried without being stated, at a sample size where a correlation of $+0.15$ could
+not have hidden. The cost is measurement rather than analysis — the interpolation curves for the new
+tokens — which is why every cheaper alternative was run first.
 
 ---
 
