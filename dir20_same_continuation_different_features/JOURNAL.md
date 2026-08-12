@@ -2016,3 +2016,16 @@ deliverable, plot or result file was touched - REPORT.md (md5 4d9f89410ff47f9179
 to hold iterations #13-#86. `check_render.py` again completed the GitHub markdown API placement
 check: ALL CHECKS PASS (REPORT.md 11 display / 195 inline equations, 3 figures, 0 problems;
 RESULTS.md 196 inline equations, 6 figures, 0 problems). This entry is the only file edited.
+
+## 2026-08-12 (hold iteration #88: unchanged; render check rate-limited, files byte-identical)
+
+No change. `human_feedback_1.txt` is still present and unrenamed, so no `STOP` (CLAUDE.md rule 11);
+the manifest stays `review_pending` with its single checklist item `done`. The plan's success
+criteria are met (S1-S4 plus the pre-registered replication S3R), so no experiment ran and no
+deliverable, plot or result file was touched - REPORT.md (md5 4d9f89410ff47f9179f0a0d1546ce70e,
+4999 words, 3 figures) and RESULTS.md (md5 c32a6d3b1d735c671419d8089546b178) remain byte-identical
+to hold iterations #13-#87. `check_render.py` could not complete this iteration: the GitHub markdown
+API returned HTTP 403 rate-limit-exceeded on the first file, and the checker aborts there before
+printing its local KaTeX/figure results. Because both deliverables are byte-identical to the state
+that passed in full at hold iteration #87, the render verdict from that run still holds; nothing was
+edited that could invalidate it. This entry is the only file edited.
