@@ -25,13 +25,30 @@ held-out WikiText-103 **test** paragraphs, and locked 101 within-prefix contrast
 prompt-pairs sharing a prefix, using four distinct final tokens, matched on successor divergence and
 four endpoint-geometry confounds and differing only in the feature-difference score $F$ — writing the
 manifest and its SHA-256 to disk before computing a single interpolation curve. Then we swept them.
+We call this the **amended analysis**, for a reason stated in the next paragraph. We then ran a
+second, fully pre-registered **independent replication** on a different corpus split, with the bank
+size and the stopping rule fixed in writing before any of its data was scored.
 
-**What we found.** The prediction holds, with a large effect and a mechanism behind it.
+**Why "amended".** The written plan fixed the bank at 300 prefixes and said to stop and report an
+underpowered verdict if fewer than 40 matched contrasts survived. At 300 prefixes only 21 survived,
+and the bank was enlarged to 1395 prefixes instead of stopping. Nothing about the analysis changed
+and no transition width had been computed at the time, so the enlargement could not have been steered
+by the outcome — but it broke a rule that had been frozen in advance, and a result whose sample size
+was chosen after looking at the data is no longer a clean pre-registered test. The 101-contrast result
+is therefore reported as an amended analysis throughout, and the confirmatory claim rests on the
+replication described below rather than on it.
 
-- The higher-feature-difference member has the sharper switch in **83 of 101** contrasts. Median
-  transition width drops from $w_{TV} = 0.203$ to $0.098$; the median paired difference is
-  $\Delta w = -0.071$ with a bootstrap 95% CI of $[-0.087, -0.058]$ and a paired permutation
-  $p < 10^{-4}$. Every clause of the pre-registered success gate is met.
+**What we found.** The prediction holds in both banks, with a large effect and a mechanism behind it.
+
+- *Amended analysis (101 contrasts).* The higher-feature-difference member has the sharper switch in
+  **83 of 101** contrasts. Median transition width drops from $w_{TV} = 0.203$ to $0.098$; the median
+  paired difference is $\Delta w = -0.071$ with a bootstrap 95% CI of $[-0.087, -0.058]$ and a paired
+  permutation $p < 10^{-4}$.
+- *Independent replication (99 contrasts, pre-registered, bank size and stopping rule frozen before
+  any of its data was seen).* The effect reappears at nearly the same size: median
+  $\Delta w = -0.064$, 95% CI $[-0.091, -0.043]$, 78.8% with the predicted sign, permutation
+  $p < 10^{-4}$. All four clauses of the replication's pre-registered gate are met, so the
+  association is reported as a confirmed result.
 - The matching works: successor divergence, block-0 norm ratio and token surprisal are balanced to
   within 3% of a standard deviation, against a 1.51-standard-deviation separation on $F$.
 - A residual quarter-standard-deviation imbalance on two confounds does not produce the effect. In the
@@ -51,8 +68,13 @@ opposite reading — a sharp switch alone tells you a *different set of neurons*
 about whether either set is interpretable.
 
 **Scope.** One model (GPT-2 Large), one patch site (block-0 `resid_post` at the final token), one
-interpolation rule, and a neuron-level proxy for "feature". The pre-specified primary calipers yielded
-only 4 contrasts; the single pre-specified relaxation was applied, which is what produced the 101.
+interpolation rule, and a neuron-level proxy for "feature". In both banks the pre-specified primary
+calipers yielded very few contrasts (4 and 5), so the single pre-specified relaxation was applied,
+which is what produced the 101 and the 99. "Independent" in this report means independent data and a
+frozen protocol: the replication draws from a corpus split no analysis in this direction has touched,
+and its sample size and stopping rule were written down before any of its data was scored. It was run
+by the same code and the same authors, so replication by another group remains outstanding. The causal
+experiment was run on the amended bank only.
 
 ---
 
@@ -65,17 +87,25 @@ per block), the pretrained Hugging Face checkpoint, frozen, `eval()` mode, float
 no sampling anywhere. This is the model the phenomenon was originally reported in, which is why it is
 the only model here.
 
-**Corpus.** The **test** split of WikiText-103 (raw). Every paragraph of at least 400 characters that
-does not begin with a section marker qualifies; there are 1395 of them. From each we take one random
-contiguous span of 20–40 tokens (NumPy generator seeded at 31) as a shared **prefix**. Using the test
-split, and every eligible paragraph in it, keeps this bank disjoint from any earlier exploratory work in
-this direction.
+**Corpus (amended analysis).** The **test** split of WikiText-103 (raw). Every paragraph of at least
+400 characters that does not begin with a section marker qualifies; there are 1395 of them. From each
+we take one random contiguous span of 20–40 tokens (NumPy generator seeded at 31) as a shared
+**prefix**. Using the test split, and every eligible paragraph in it, keeps this bank disjoint from any
+earlier exploratory work in this direction.
+
+**Corpus (independent replication).** The **train** split of the same corpus, which no analysis in this
+direction has ever touched. 80000 rows are drawn uniformly at random (generator seed 132) and scanned
+in order under the identical paragraph filter until **exactly 1400** prefixes are collected, one 20–40
+token span each (generator seed 131). The bank size was fixed at 1400 in writing before any of these
+paragraphs was scored; the reason this matters, and the protocol it belongs to, are given under
+*Pre-registration, locking, and the amendment* below.
 
 **Candidate final tokens.** For each prefix we run the model once and take the top 24 next tokens that
 are printable and non-special. A **pair** is the prefix plus one of these tokens as its final token,
 against the prefix plus another. Building inputs as `prefix_ids + [token_id]` makes "identical prefix,
 exactly one differing single final token" exact by construction. All $\binom{24}{2} = 276$ unordered
-pairs per prefix are scored: 385020 candidate pairs in total.
+pairs per prefix are scored: 385020 candidate pairs in the amended bank and 386400 in the replication
+bank.
 
 **Hook point and interpolation site.** The patch site is `resid_post` after block 0 — the residual
 stream immediately after the first transformer block — at the **final token position only**. Because
@@ -84,9 +114,10 @@ bit-identical, so a single forward pass per interpolation point fully determines
 are the "downstream" blocks referred to throughout; block 0 is excluded from the feature score because
 its output is the thing being interpolated.
 
-**Sample sizes.** 608 interpolation sweeps of 101 forward evaluations each: 2 for the S1 sanity check,
-202 for the primary test (both members of 101 contrasts), and 404 for the causal test (two intervention
-conditions on each of the same 202 pairs). Endpoint reproduction error never exceeded
+**Sample sizes.** 806 interpolation sweeps of 101 forward evaluations each: 2 for the S1 sanity check,
+202 for the amended analysis's matched test (both members of 101 contrasts), 198 for the replication's
+matched test (both members of 99 contrasts), and 404 for the causal test (two intervention conditions
+on each of the amended analysis's 202 pairs). Endpoint reproduction error never exceeded
 $9.2 \times 10^{-7}$ (relative L2 on the final-token logit vector) in any of them.
 
 ### Metrics
@@ -267,12 +298,38 @@ endpoint activation gap $\lvert a_j(A) - a_j(B) \rvert$, output-weight norm $\lV
 The control therefore linearizes the same count of neurons, in the same blocks, with the same activation
 statistics — so any difference in effect is attributable to which neurons were chosen.
 
-**Pre-registration and locking.** Every metric, caliper and success criterion above was written into
-`PLAN.md` before the bank was mined. The chosen contrasts, their endpoint metrics and the matching
-version were written to `results/matched_pairs.json` and its SHA-256
+**Pre-registration, locking, and the amendment.** Pre-registration here means writing the metrics,
+filters, sample size and decision rule to disk before any of the data that will be analysed has been
+scored, so that the analysis cannot be tuned to the answer. Every metric, caliper and success
+criterion above was written into `PLAN.md` before the bank was mined. The chosen contrasts, their
+endpoint metrics and the matching version were written to `results/matched_pairs.json` and its SHA-256
 (`2415f5ff6dfcf88fb9cc7a67b87c93d859434296310f4b8d406c6f545e23ff56`) recorded before any interpolation
 curve existed. The success gate — $n \ge 80$, median $\Delta w \le -0.05$, at least 60% with the
 predicted sign, and a 95% CI entirely below zero — was likewise fixed in advance.
+
+One clause was not honoured. The plan fixed the bank at 300 prefixes and instructed us to stop with an
+underpowered verdict if fewer than 40 contrasts survived; at 300 prefixes 21 survived, and the bank was
+extended to all 1395 eligible test paragraphs. All definitions, filters and calipers were unchanged and
+no interpolation curve had been computed, so the enlargement was blind to the outcome, but the stopping
+rule was frozen and we departed from it. Everything computed on that bank is labelled the **amended
+analysis** for this reason.
+
+**The independent replication and its frozen protocol.** To recover a clean pre-registered test, a
+second bank was built and the following was written to `JOURNAL.md` before a single replication prefix
+was scored: corpus = the WikiText-103 **train** split (the only split untouched by any analysis in this
+direction; the amended analysis used *test*, earlier exploratory work used *validation*), 80000 rows
+sampled with generator seed 132, same paragraph filter, one 20–40 token span per paragraph with
+generator seed 131; **bank size fixed at exactly 1400 prefixes**; the bank to be run **once**, with no
+enlargement, re-seeding or re-drawing for any reason and no second relaxation of the calipers; every
+other element of the protocol — model, patch site, interpolation rule, 101 $\alpha$ values, top-24
+candidate tokens, top-64 neurons per block, $F$, the eligibility window, the primary calipers and the
+one pre-specified relaxation — identical to the amended analysis; the same four-clause gate as the
+decision rule, with $40 \le n < 80$ to be reported as underpowered and $n < 40$ as a failure to power.
+The 1400 figure follows from the amended analysis's observed yield of 101 contrasts per 1395 prefixes,
+which puts the expected replication yield just above the gate's $n \ge 80$. The replication bank was
+locked to `results/matched_pairs_rep.json` with SHA-256
+(`ed1df0866f012b6195521dcda0d81306c7c6cb9d00e5dca2b30cda62e9af6d6b`) before its first interpolation
+curve was computed. No replication width existed at any point while these choices were being made.
 
 ---
 
@@ -305,13 +362,15 @@ position $\alpha$; the dotted horizontals mark the 0.25 and 0.75 levels whose $\
 $w_{TV}$. Solid with circles = ` big`/` in` (the plateau case); dashed with squares = ` big`/` large`
 (the smooth case); dotted gray = the linear response $d(\alpha) = \alpha$.
 
-### 101 contrasts, matched on everything except the feature difference
+### 101 contrasts, matched on everything except the feature difference (amended analysis)
 
 The design's whole claim to causal relevance is that the contrasts were chosen without any knowledge of
 the outcome, so this subsection reports what the locking produced before reporting any width. Across
 1395 prefixes, 385020 candidate pairs were scored; 26275 passed the eligibility window; the primary
-calipers left 4 contrasts, so the single pre-specified relaxation was applied and 101 survived — above
-the plan's floor of 80 and comfortably past the fallback threshold of 40.
+calipers left 4 contrasts, so the single pre-specified relaxation was applied and 101 survived. The
+1395 prefixes are themselves the amendment: the plan had fixed 300, which yielded 21, below the plan's
+own floor of 40 at which it required us to stop. Sections up to and including the counterexamples below
+report this amended bank; the replication follows.
 
 | Quantity | Value |
 |---|---|
@@ -358,12 +417,15 @@ Points on the diagonal mean the variable is matched — the five confound panels
 feature difference $F$, sits entirely above the diagonal because it is the variable the contrast
 varies. Panel titles give the standardized mean difference.
 
-### Pairs that engage more different features switch more sharply
+### Pairs that engage more different features switch more sharply (amended analysis)
 
-This is the primary result. Every locked contrast was swept identically — 101 interpolation points at
-block-0 `resid_post` of the final token, readout at the final-token logits — with endpoint reproduction
-exact to $9.2 \times 10^{-7}$ across all 202 sweeps, so the widths describe the model and not patching
-error.
+This is the primary result of the amended analysis. Every locked contrast was swept identically — 101
+interpolation points at block-0 `resid_post` of the final token, readout at the final-token logits —
+with endpoint reproduction exact to $9.2 \times 10^{-7}$ across all 202 sweeps, so the widths describe
+the model and not patching error. Because the bank reached this size by breaking the plan's stopping
+rule, the gate column below records that the amended analysis clears the same four thresholds the plan
+set, not that a pre-registered test was passed; the pre-registered test is the replication two
+subsections down.
 
 | Summary | Value | Gate | Met |
 |---|---|---|---|
@@ -412,8 +474,8 @@ effect for a perfectly matched contrast in its intercept.
 The adjusted estimate is slightly *larger* in magnitude than the raw one, and the five confound
 differences together explain only 5.2% of the variance in $\Delta w$, so the residual imbalance is
 suppressing the effect if anything. These analyses were run after the primary result and are labelled
-post-hoc; the pre-registered number stands unchanged at $-0.0708$. The both-at-once cell has 5
-contrasts and settles nothing.
+post-hoc; the amended analysis's primary number stands unchanged at $-0.0708$. The both-at-once cell
+has 5 contrasts and settles nothing.
 
 **Where the prediction fails.** A median can hide a bimodal population, so Figure 4 plots the extremes
 of the $\Delta w$ distribution as raw curves.
@@ -433,11 +495,65 @@ its high-$F$ partner to add and the comparison can only go the wrong way. The pr
 headroom when the baseline member is already maximally sharp — a floor effect, and one that biases the
 reported effect toward zero.
 
+### The independent replication passes its pre-registered gate
+
+Everything above rests on a bank whose size was chosen after seeing that a smaller bank was too small.
+That is enough to make the amended analysis a hypothesis-generating result rather than a confirmatory
+one, however blind the enlargement was: with the stopping rule broken once, a reader has no guarantee
+it would not have been broken again had the numbers come out differently. The replication removes that
+doubt by committing in advance to a bank size and to running the bank once, on a corpus split that has
+never been analysed here, and then reporting whatever came out.
+
+The commitment held. The replication bank produced 1400 prefixes, 386400 candidate pairs and 25321
+eligible pairs; the primary calipers left 5 contrasts, so the one pre-specified relaxation was applied
+and 99 survived — enough for the gate, and not enlarged, re-seeded or re-drawn. The confound balance
+came out as in the amended bank: standardized mean differences of $+0.03$ on successor JSD, $-0.05$ on
+the block-0 log norm ratio and $+0.09$ on surprisal, against $+1.63$ on the feature difference $F$,
+with the same residual imbalance of about a fifth to three-tenths of a standard deviation on
+final-logit distance ($+0.20$) and block-0 angle ($+0.29$).
+
+| Summary | Amended analysis | Replication | Gate | Replication meets gate |
+|---|---|---|---|---|
+| Contrasts $n$ | 101 | 99 | $\ge 80$ | yes |
+| Median $\Delta w$ | $-0.0708$ | **$-0.0641$** | $\le -0.05$ | yes |
+| Bootstrap 95% CI on the median | $[-0.0866, -0.0582]$ | $[-0.0908, -0.0426]$ | below 0 | yes |
+| Fraction with the predicted sign | 82.2% (83/101) | **78.8%** (78/99) | $\ge 60$% | yes |
+| Paired permutation $p$ (10000 sign flips) | $< 10^{-4}$ | $< 10^{-4}$ | — | — |
+| Median $w_{TV}$, low-$F$ → high-$F$ | $0.203 \rightarrow 0.098$ | $0.173 \rightarrow 0.095$ | — | — |
+| Corpus split | test | train | — | — |
+| **Verdict** | supported (amended) | **supported (pre-registered)** | | |
+
+The replication reproduces the amended analysis closely: an effect of $-0.064$ against $-0.071$, with
+each estimate inside the other's confidence interval, and the same near-halving of the median width
+from the low-$F$ to the high-$F$ member. Its confidence interval is wider — $0.048$ across against
+$0.028$ — which is what 99 contrasts drawn from a different split of the corpus should look like, and
+its upper end sits at $-0.043$, still clear of zero but closer to it than the amended estimate's
+$-0.058$. Figure 5 puts the two side by side so the agreement and the difference in precision can be
+read directly.
+
+![Two horizontal confidence intervals and paired bars comparing the amended analysis with the replication](plots/replication_forest.png)
+
+**Figure 5.** The amended analysis against the pre-registered independent replication. Left — x: median
+paired difference $\Delta w = w_{TV}(\text{high-}F) - w_{TV}(\text{low-}F)$, negative meaning the
+high-$F$ member switches more sharply; each horizontal bar is one bank's bootstrap 95% CI with its
+median marked (circle = amended analysis, test split, $n = 101$; square = replication, train split,
+$n = 99$); the dashed vertical is the gate threshold $-0.05$ and the dotted vertical is zero. Right —
+x: which member of the contrast; y: that group's median transition width $w_{TV}$; bars hatched `//`
+are the amended analysis and `xx` the replication; the dotted horizontal at $0.5$ marks a perfectly
+proportional response.
+
+The consequence for the report's claim is specific. The association between feature difference and
+transition sharpness is now a confirmed result: it was predicted in advance, tested once on data
+chosen in advance, and passed every clause of a decision rule written before that data was scored.
+The 202 amended contrasts still supply the report's better-powered estimate and are the pairs the
+causal experiment below was run on, but the claim that the effect exists no longer depends on them.
+
 ### The differential neurons cause the switch
 
 The matched design supports the association but cannot order the causation, so the final experiment
-intervenes on exactly the quantity the hypothesis names. For both members of all 101 contrasts — 202
-pairs — the sweep was re-run twice: once with the symmetric-difference neurons forced to interpolate
+intervenes on exactly the quantity the hypothesis names. It was run on the amended analysis's bank,
+before the replication existed, and has no pre-registered counterpart of its own. For both members of
+all 101 amended contrasts — 202 pairs — the sweep was re-run twice: once with the symmetric-difference neurons forced to interpolate
 linearly, once with the size- and statistics-matched control set forced the same way. Both conditions
 reproduce both endpoints bit-identically (verified to $8.9 \times 10^{-7}$), so all three widths
 describe switches between the same two states.
@@ -464,11 +580,12 @@ The width difference the primary result measured is carried by the neurons that 
 endpoints, and neutralising their nonlinearity removes both the switch and the group difference at
 once. This is what makes the report's claim mechanistic and not just predictive — a practitioner who
 wants to know *why* an interpolation snaps has a specific, testable answer and a 1.7%-of-neurons
-handle on it.
+handle on it. Figure 6 shows that this is not a story about the median: every one of the 202 pairs
+moves the same way.
 
 ![Per-pair widths under three conditions and the distribution of the differential-minus-control gap](plots/causal_linearization.png)
 
-**Figure 5.** The causal test. Left — each thin line is one of the 202 pairs; x: condition (unablated,
+**Figure 6.** The causal test. Left — each thin line is one of the 202 pairs; x: condition (unablated,
 control linearized, differential linearized); y: transition width $w_{TV}$; the heavy black line with
 circles joins the medians and the dotted horizontal marks the linear response $w_{TV} = 0.5$. Right —
 x: the per-pair gap $g$, how much more the differential linearization widened the switch than the
@@ -486,18 +603,32 @@ this report shows those neurons are monosemantic or human-interpretable. The hon
 causal result is that the *set of neurons that differ between the endpoints* carries the switch; a
 sparse-autoencoder or attention-head version of the same test would be a different experiment.
 
-**The relaxation was used.** The pre-specified primary calipers produced 4 contrasts, so the reported
-101 come from the relaxed rule ($\lvert \Delta \mathrm{JSD} \rvert \le 0.02$, confound distance
-$\le 0.75$, $\Delta F \ge 0.08$). The relaxation was fixed in advance and applied once, but the
-resulting contrasts are matched somewhat less tightly than the primary design intended, which is
-visible in the $+0.23$/$+0.25$ SMDs.
+**The relaxation was used in both banks.** The pre-specified primary calipers produced 4 contrasts in
+the amended bank and 5 in the replication bank, so both reported samples come from the relaxed rule
+($\lvert \Delta \mathrm{JSD} \rvert \le 0.02$, confound distance $\le 0.75$, $\Delta F \ge 0.08$).
+The relaxation was fixed in advance and applied once in each bank, but the resulting contrasts are
+matched somewhat less tightly than the primary design intended, which is visible in the residual
+standardized mean differences of $+0.20$ to $+0.29$ on final-logit distance and block-0 angle. The
+robustness checks above address that imbalance in the amended bank; they were not repeated in the
+replication, whose role is the single pre-registered decision.
 
-**The bank was enlarged to reach power.** The plan specified 300 prefixes; at that size only 21
-contrasts survived the relaxed rule, below the plan's own 40-contrast fallback floor. The bank was
-therefore extended to every eligible test paragraph (1395), with all metric definitions, eligibility
-filters and calipers unchanged, before any width was computed. This is a change to sampling, not to the
-analysis, and it happened while the outcome was still unobserved — but it is a deviation from the
-written plan and is reported as one.
+**The amended analysis broke the plan's stopping rule, and only the replication is confirmatory.** The
+plan specified 300 prefixes and required us to stop with an underpowered verdict if fewer than 40
+contrasts survived; at 300 prefixes 21 survived and the bank was extended to all 1395 eligible test
+paragraphs instead. All metric definitions, eligibility filters and calipers were unchanged and no
+width had been computed, so the change was blind to the outcome and cannot have selected the effect —
+but it is a departure from a rule frozen in advance, and everything computed on that bank is labelled
+an amended analysis for that reason. The pre-registered replication is what supports the confirmatory
+claim.
+
+**The replication is independent in data, not in personnel.** Its corpus split, sample size and
+stopping rule were fixed before any of its data was scored, and it was run once. It was nevertheless
+run with the same code, the same patch site and the same authors as the amended analysis, so it cannot
+detect a systematic error shared by both — a bug in the width metric or in the patching harness, for
+instance. Replication by another group, and on another model, remains outstanding. The causal
+experiment has no pre-registered replication at all: it was run on the amended bank only, so the
+mechanism it supports should be read as the amended analysis's strongest evidence rather than as a
+confirmed result.
 
 **The intervention is large in effect and specific in target, but blunt in one respect.** Forcing 3063
 activations to a straight line is a strong manipulation; the control set establishes that the *choice*
@@ -509,13 +640,20 @@ minimal sufficient set is unmeasured.
 ## Conclusion
 
 Among GPT-2 Large prompt pairs matched on successor JSD and endpoint geometry, the pair that engages
-more different downstream MLP features has the sharper block-0 transition. The pre-registered gate is
-met on all four conditions: 101 contrasts, median $\Delta w = -0.071$ with 95% CI $[-0.087, -0.058]$,
-82.2% with the predicted sign, permutation $p < 10^{-4}$. The result survives the residual confound
-imbalance under both subset and covariate-adjusted analyses, and a causal test confirms the mechanism —
-forcing the 1.7% of neurons that distinguish the two endpoints to interpolate linearly collapses the
-switch from $w_{TV} = 0.144$ to $0.471$, essentially proportional response, while a size- and
-statistics-matched control set leaves it at $0.167$.
+more different downstream MLP features has the sharper block-0 transition. Two banks say so. The
+amended analysis — 101 contrasts on the test split, whose size was set after seeing that the planned
+300 prefixes were too few — gives median $\Delta w = -0.071$, 95% CI $[-0.087, -0.058]$, 82.2% with the
+predicted sign, permutation $p < 10^{-4}$. The pre-registered independent replication — 99 contrasts on
+the train split, with the bank size and the single-run stopping rule written down before any of its
+data was scored — gives $-0.064$, 95% CI $[-0.091, -0.043]$, 78.8% predicted sign, $p < 10^{-4}$, and
+meets all four clauses of its gate (Figure 5). The association is therefore reported as a confirmed
+result, and the amended analysis as the better-powered estimate of its size.
+
+Two further findings come from the amended bank alone and are labelled accordingly. The effect survives
+the residual confound imbalance under both subset and covariate-adjusted analyses. And a causal test
+supports the mechanism — forcing the 1.7% of neurons that distinguish the two endpoints to interpolate
+linearly collapses the switch from $w_{TV} = 0.144$ to $0.471$, essentially proportional response,
+while a size- and statistics-matched control set leaves it at $0.167$, in all 202 pairs.
 
 The practical upshot is a cheap, label-free probe of an internal claim. Sharpness of the switch between
 two prompts' activations measures how disjoint the machinery producing their outputs is — a quantity
@@ -523,4 +661,5 @@ you would otherwise need a feature dictionary to estimate. The corresponding cau
 switch says the neuron sets are different and says nothing about whether either set means anything;
 interpretation still has to be earned separately.
 
-**Verdict: supported.**
+**Verdict: supported — the matched association is confirmed by a pre-registered independent
+replication; the causal mechanism rests on the amended analysis and awaits one.**

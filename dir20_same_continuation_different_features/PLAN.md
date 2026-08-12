@@ -199,7 +199,8 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-**COMPLETE — verdict: supported, with a causal test behind it.** S1 passed its gate
+**COMPLETE — verdict: supported, confirmed by a pre-registered independent replication (S3R), with a
+causal test behind it.** S1 passed its gate
 ($w_{TV}$ 0.012 vs 0.292, endpoint error 3.5e-7). S2 locked **101** matched contrasts under the single
 pre-specified relaxation (manifest sha256 `2415f5ff6dfcf88fb9cc7a67b87c93d859434296310f4b8d406c6f545e23ff56`,
 recorded before any sweep). S3 met all four gate clauses: median `Delta w = -0.0708`, 95% CI
@@ -211,11 +212,26 @@ matched control, 202/202 pairs.
 bank was enlarged from the specified 300 prefixes to all 1395 eligible WikiText-103 test paragraphs,
 because 300 yielded only 21 contrasts — below this plan's own 40-contrast fallback floor. Every metric
 definition, eligibility filter and caliper was unchanged and no interpolation width had been computed.
+Because that stopping rule was frozen in advance, S1-S4 are labelled the **amended analysis**
+throughout both deliverables (operator feedback #1).
+
+**S3R — pre-registered independent replication: PASSED.** Protocol frozen in JOURNAL.md
+2026-08-12T02:44Z, before any replication data was scored: WikiText-103 **train** split (untouched by
+any analysis here), bank size fixed at exactly 1400 prefixes, run once with no enlargement, re-seeding,
+re-drawing or second relaxation, everything else identical, same four-clause gate. Outcome: 5 contrasts
+under the primary calipers -> 99 under the one pre-specified relaxation; median `Delta w = -0.0641`,
+95% CI `[-0.0908, -0.0426]`, 78.8% predicted sign, permutation p < 1e-4 — all four clauses met.
+Manifest sha256 `ed1df0866f012b6195521dcda0d81306c7c6cb9d00e5dca2b30cda62e9af6d6b`, recorded before its
+first sweep. The confirmatory claim for the matched association now rests on S3R; S4's causal result
+still rests on the amended bank only.
 
 ## Next step
 
-None required — the success criterion is met. Two extensions if the direction is continued:
-1. the **minimal sufficient differential set** (S4 shows 1.7% of neurons suffice, not that they are
+None required — the success criterion is met and the association is confirmed by S3R. Three extensions
+if the direction is continued:
+1. a pre-registered replication of the **causal** experiment (S4) on the S3R bank, which would put the
+   mechanism on the same footing as the association;
+2. the **minimal sufficient differential set** (S4 shows 1.7% of neurons suffice, not that they are
    necessary at that size);
-2. the same locked matched design with an **SAE-feature or attention-head** version of `F`, testing
+3. the same locked matched design with an **SAE-feature or attention-head** version of `F`, testing
    whether "different machinery" is a neuron-level or a feature-level fact.

@@ -726,3 +726,52 @@ embedded with visible numbered captions in both files; `experiments/check_render
   229 inline eqs, RESULTS.md 0 / 143).
 - **New limitation stated in REPORT.md:** the bank enlargement (300 → 1395 prefixes) is a deviation
   from the written plan, made pre-outcome and with the analysis frozen, and is reported as such.
+
+## 2026-08-12 — operator feedback #1: amended-analysis relabel + pre-registered independent replication
+
+**Source:** `human_feedback_1.txt`. Two asks: relabel the S1–S4 result as an amended analysis rather
+than a fully pre-registered confirmatory one (the plan fixed 300 prefixes and required stopping with
+an underpowered verdict below 40 contrasts; the bank was enlarged to 1395 after 21 survived), and
+require an independent replication before any confirmatory claim. Both addressed.
+
+- **New experiment S3R (pre-registered independent replication) — PASSED.** Protocol frozen in
+  JOURNAL.md at 2026-08-12T02:44Z, before any replication data was scored: WikiText-103 **train**
+  split (the only split untouched in this direction), 80000 rows at generator seed 132, spans at seed
+  131, **bank size fixed at exactly 1400 prefixes**, bank run **once** with no enlargement, re-seeding,
+  re-drawing or second relaxation, every other protocol element identical to the amended analysis, and
+  the same four-clause gate. Bank built by `experiments/s2_bank.py` under `S2_TAG=_rep`
+  (`results/s2_bank_rep.log`): 386400 candidate pairs → 25321 eligible → 5 contrasts under the primary
+  calipers → **99** under the one pre-specified relaxation. Manifest
+  `results/matched_pairs_rep.json` sha256
+  `ed1df0866f012b6195521dcda0d81306c7c6cb9d00e5dca2b30cda62e9af6d6b`, recorded before its first sweep.
+  Test by `experiments/s3_test.py` under `S2_TAG=_rep` (198 sweeps, worst endpoint error
+  $1.5\times10^{-6}$): median $\Delta w = -0.0641$, bootstrap 95% CI $[-0.0908, -0.0426]$, **78.8%**
+  (78/99) predicted sign, paired permutation $p < 10^{-4}$, median $w_{TV}$
+  $0.173 \rightarrow 0.095$. All four gate clauses met. Balance SMDs: JSD +0.026, log norm ratio
+  −0.050, surprisal +0.089, final-logit distance +0.198, block-0 angle +0.293, $F$ +1.628.
+  Outputs: `results/matched_metrics_rep.json`, `results/matched_sweeps_rep.npz`,
+  `results/s3_test_rep.log`, `plots/matching_balance_rep.png`, `plots/matched_widths_rep.png`,
+  `plots/example_curves_rep.png`.
+- **New figure `plots/replication_forest.png` (Figure 5 in both deliverables),** from
+  `experiments/plot_replication.py`: the two banks' median $\Delta w$ with bootstrap 95% CIs against
+  the gate threshold, and the median widths by group. Distinguished by hue, marker (circle/square) and
+  hatch (`//` vs `xx`), so it reads without colour.
+- **REPORT.md relabelled and extended.** Summary now states the amendment and what it costs the claim;
+  a new "Why 'amended'" paragraph; Methods gained a replication corpus paragraph and a rewritten
+  "Pre-registration, locking, and the amendment" section carrying the full frozen replication protocol;
+  Results gained "The independent replication passes its pre-registered gate" (comparison table +
+  Figure 5); the S2/S3 headings are marked "(amended analysis)"; the causal figure renumbered 5 → 6;
+  Limitations rewrote the enlargement item and added "The replication is independent in data, not in
+  personnel"; Conclusion and the verdict line rewritten so the confirmatory claim rests on S3R.
+- **RESULTS.md relabelled and extended.** Headline splits the test into the amended analysis and the
+  replication; stage table gained an S3R row; new section "S3R — the pre-registered independent
+  replication" with the two-bank comparison table and Figure 5; causal figure renumbered 5 → 6; Verdict
+  rewritten into two tiers (confirmed association from S3R, better-powered estimate and the causal
+  mechanism from the amended bank).
+- **Superseded wording, not numbers:** "the pre-registered gate is met" (of the 101-contrast result)
+  → "the amended analysis clears the same four thresholds; the pre-registered test is the
+  replication". No amended-analysis number changed: median $\Delta w$ stays $-0.0708$, CI
+  $[-0.0866, -0.0582]$, 82.2%, and S4 stays 0.144 → 0.471 vs 0.167.
+- **Checks.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → 0 problems (REPORT.md 11
+  display / 279 inline eqs, 6 figures; RESULTS.md 0 / 189, 6 figures); every embed followed by a
+  visible numbered caption; figures in reading order 1–6 in both files and each cited by number.

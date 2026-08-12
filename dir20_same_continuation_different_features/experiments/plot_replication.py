@@ -26,7 +26,7 @@ def main():
         ("Independent replication\n(train split, n=%d)" % rep["n_contrasts"], rep, CVD[1], "s"),
     ]
 
-    fig, ax = plt.subplots(1, 2, figsize=(11.5, 4.2))
+    fig, ax = plt.subplots(1, 2, figsize=(12.4, 4.2))
 
     # --- forest ------------------------------------------------------------------
     for k, (lab, s, col, mk) in enumerate(rows):
@@ -34,15 +34,15 @@ def main():
         lo, hi = s["ci95"]
         ax[0].plot([lo, hi], [y, y], "-", color=col, lw=2.4)
         ax[0].plot([s["median_dw"]], [y], mk, color=col, ms=9)
-        ax[0].text(hi + 0.004, y, f"  {s['median_dw']:+.3f} [{lo:+.3f}, {hi:+.3f}]",
-                   va="center", fontsize=9)
+        ax[0].text(0.012, y + 0.16, f"{s['median_dw']:+.3f} [{lo:+.3f}, {hi:+.3f}]",
+                   va="center", fontsize=9, color=col)
     ax[0].axvline(0, color="0.35", ls=":", lw=1.5)
     ax[0].axvline(-0.05, color="0.35", ls="--", lw=1.5)
-    ax[0].text(-0.05, len(rows) - 0.42, " gate: median $\\leq -0.05$", fontsize=8, color="0.3")
+    ax[0].text(-0.049, -0.5, "gate:\nmedian $\\leq -0.05$", fontsize=8, color="0.3")
     ax[0].set_yticks(range(len(rows)))
     ax[0].set_yticklabels([r[0] for r in rows][::-1], fontsize=9)
-    ax[0].set_ylim(-0.6, len(rows) - 0.25)
-    ax[0].set_xlim(min(r[1]["ci95"][0] for r in rows) - 0.02, 0.035)
+    ax[0].set_ylim(-0.75, len(rows) - 0.2)
+    ax[0].set_xlim(min(r[1]["ci95"][0] for r in rows) - 0.02, 0.075)
     ax[0].set_xlabel(r"median $\Delta w = w_{TV}(\mathrm{high}\,F) - w_{TV}(\mathrm{low}\,F)$")
     ax[0].set_title("Effect size and 95% CI in both banks")
 
@@ -52,7 +52,7 @@ def main():
     for k, (lab, s, col, mk) in enumerate(rows):
         vals = [s["w_tv_low"][0], s["w_tv_high"][0]]
         ax[1].bar(x + (k - 0.5) * w, vals, w, color=col,
-                  hatch=["//", "\\\\"][k], edgecolor="k", lw=0.6,
+                  hatch=["//", "xx"][k], edgecolor="k", lw=0.6,
                   label=lab.replace("\n", " "))
         for xi, v in zip(x + (k - 0.5) * w, vals):
             ax[1].text(xi, v + 0.004, f"{v:.3f}", ha="center", fontsize=8)

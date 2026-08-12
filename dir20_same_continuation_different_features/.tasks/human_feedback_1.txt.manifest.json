@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "state": "review_pending",
+  "source_feedback": "human_feedback_1.txt",
+  "source_sha256": "5688dbe729f05aca938644e5b217ca7f2a37046542d3f9b59d90d308c83f7848",
+  "required_outputs": [
+    "REPORT.md",
+    "RESULTS.md"
+  ],
+  "may_modify": [
+    "REPORT.md",
+    "RESULTS.md",
+    "PLAN.md",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "experiments/*",
+    "plots/*",
+    "results/*"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback_1.txt",
+    "human_feedback.txt.addressed.md",
+    "JOURNAL.md entries dated on or before 2026-08-12T02:45Z (append-only; in particular the frozen replication pre-registration written at 2026-08-12T02:44Z)",
+    "CHANGELOG.md entries already written (append-only)",
+    "results/matched_pairs.json, results/matched_pairs.sha256, results/matched_features.npz (the amended analysis's locked bank)",
+    "results/matched_pairs_rep.json, results/matched_pairs_rep.sha256, results/matched_features_rep.npz (the replication bank, locked 2026-08-12T02:53Z before any replication width was analysed)"
+  ],
+  "unresolved_ambiguities": [
+    "RESOLVED (documented assumption, not blocking): 'independent replication' does not name a specific kind of independence. Interpreted as an independent-sample replication: a new pre-registered run on the WikiText-103 train split, a corpus split no analysis in this direction has ever touched, with the bank size and stopping rule frozen in writing before any replication width existed. The reports state explicitly that this is independence of data and protocol, not of team or codebase, and that external replication remains outstanding.",
+    "RESOLVED (documented assumption, not blocking): the feedback names no output file. Both deliverables that carry the claim (REPORT.md and RESULTS.md) are relabelled; no new report path is created, because none was requested."
+  ],
+  "checklist": [
+    {
+      "request": "The fixed-path intervention problem is now resolved, and the matched association is substantially cleaner. However, this cannot be described as a fully pre-registered confirmatory result: the PLAN fixed 300 prefixes and explicitly required an underpowered verdict and stop when fewer than 40 contrasts survived, but the bank was expanded from 300 to 1,395 prefixes after only 21 survived. Because no widths had been observed, this blinded sample-size change does not necessarily bias the effect, but it violates the frozen stopping rule. Please relabel this as an amended analysis and require an independent replication before making a confirmatory claim.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Both asks addressed. (a) RELABEL: the 101-contrast S1-S4 result is now called the \"amended analysis\" everywhere in REPORT.md and RESULTS.md. REPORT.md gained a \"Why 'amended'\" paragraph in the Summary stating the 300->1395 enlargement, the 40-contrast stop rule that was broken, and that the enlargement was blind to outcome but still voids a pre-registered reading; the S2/S3 Results headings are marked \"(amended analysis)\"; the gate table's caption text now says the amended analysis clears the same four thresholds rather than that a pre-registered test was passed; 'the pre-registered number stands at -0.0708' became 'the amended analysis's primary number'; Methods section \"Pre-registration, locking, and the amendment\" states the violated clause; Limitations item rewritten as \"The amended analysis broke the plan's stopping rule, and only the replication is confirmatory\"; Conclusion and verdict line rewritten. RESULTS.md headline, stage table, section headings and Verdict relabelled the same way. No amended-analysis number was changed. (b) INDEPENDENT REPLICATION REQUIRED AND RUN: the protocol was frozen in JOURNAL.md at 2026-08-12T02:44Z before any replication data was scored - WikiText-103 train split (untouched by any analysis here), bank size fixed at exactly 1400 prefixes, run once with no enlargement, re-seeding, re-drawing or second relaxation, all other protocol elements identical, same four-clause gate. Result: 99 contrasts, median dw = -0.0641, 95% CI [-0.0908, -0.0426], 78.8% predicted sign, permutation p < 1e-4 - all four clauses met. The deliverables now state that the confirmatory claim for the matched association rests on this replication, and that the causal experiment (S4) has no pre-registered replication and rests on the amended bank alone.",
+        "evidence": "REPORT.md: Summary paragraphs \"Why 'amended'\" and \"What we found\" (two labelled bullets) and the Scope paragraph; Methods > Data & Model > \"Corpus (independent replication)\"; Methods > Baselines > \"Pre-registration, locking, and the amendment\" and \"The independent replication and its frozen protocol\"; Results > \"101 contrasts, matched on everything except the feature difference (amended analysis)\"; Results > \"Pairs that engage more different features switch more sharply (amended analysis)\"; Results > \"The independent replication passes its pre-registered gate\" (two-bank comparison table + Figure 5, plots/replication_forest.png); Limitations items \"The relaxation was used in both banks\", \"The amended analysis broke the plan's stopping rule, and only the replication is confirmatory\", \"The replication is independent in data, not in personnel\"; Conclusion and the closing verdict line. RESULTS.md: Headline (\"The test, in two banks\", \"The result: supported in both banks\", stage table row \"S3R replication (pre-registered)\", \"What it does not show\"); section \"S3R - the pre-registered independent replication\" (comparison table + Figure 5); headings \"S2 ... (amended analysis)\", \"S3 ... (amended analysis)\", \"S4 ... (amended analysis)\"; Verdict. Experiment artifacts: experiments/s2_bank.py and experiments/s3_test.py run with S2_TAG=_rep; results/s2_bank_rep.log, results/matched_pairs_rep.json (sha256 ed1df0866f012b6195521dcda0d81306c7c6cb9d00e5dca2b30cda62e9af6d6b), results/matched_metrics_rep.json, results/matched_sweeps_rep.npz, results/s3_test_rep.log; experiments/plot_replication.py -> plots/replication_forest.png. Frozen pre-registration: JOURNAL.md entry dated 2026-08-12 (\"operator feedback #1\"), written 02:44Z, before the bank finished at 02:53Z. PLAN.md > Current status > \"S3R - pre-registered independent replication: PASSED\". CHANGELOG.md entry \"2026-08-12 - operator feedback #1\".",
+        "ambiguity": "None. Two readings were resolved by documented assumption rather than left open: the feedback names no output file, so both deliverables carrying the claim (REPORT.md, RESULTS.md) were relabelled and no new report path was created; and \"independent\" was implemented as independence of data and protocol (untouched corpus split, sample size and stopping rule frozen before scoring), with the reports stating plainly that it is not independence of code or personnel and that external replication remains outstanding."
+      }
+    }
+  ]
+}

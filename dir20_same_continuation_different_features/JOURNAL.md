@@ -956,3 +956,37 @@ change afterwards:
 - The replication manifest is hashed before S3 runs, exactly as the amended one was.
 
 Result and interpretation appended below once the run finishes.
+
+**Replication result (run 2026-08-12T05:2xZ, after the pre-registration above).** Bank: 386400
+candidate pairs from the 1400 frozen train-split prefixes → 25321 eligible → 5 contrasts under the
+primary calipers → **99** under the one pre-specified relaxation, locked to
+`results/matched_pairs_rep.json` (sha256 `ed1df0866f012b61…`) before the first sweep. Test: 198 sweeps,
+worst endpoint relative error 1.5e-6. **Median dw = -0.0641, bootstrap 95% CI [-0.0908, -0.0426],
+78.8% (78/99) predicted sign, permutation p < 1e-4, median w_TV 0.173 -> 0.095.** All four gate
+clauses met → **supported, pre-registered**. Balance SMDs: JSD +0.026, |log norm ratio| -0.050,
+surprisal +0.089, final-logit distance +0.198, block-0 angle +0.293, F +1.628 — the same shape as the
+amended bank, including the residual quarter-SD imbalance on the last two.
+
+**Interpretation.** The replication effect (-0.064) sits inside the amended analysis's CI and vice
+versa, so the two banks agree on size as well as sign; the replication's interval is wider (0.048 vs
+0.028 across) as 99 contrasts from a different split should be. What the feedback asked for is now
+true: the association between feature difference and transition sharpness was predicted in advance,
+tested once on data fixed in advance, and passed a decision rule written before that data was scored.
+Deliverables now separate two tiers of evidence — the confirmed association (S3R) and the
+better-powered estimate plus the causal mechanism (amended bank, S3/S4). S4 has no pre-registered
+replication and is labelled as resting on the amended bank in both deliverables; that is the first
+listed extension in PLAN.md.
+
+**Honesty note on the word "independent".** The replication is independent in data (a corpus split
+never analysed here) and in protocol (frozen before scoring). It is not independent in code or
+personnel, so it cannot detect an error shared by both runs — e.g. a bug in w_TV or in the patching
+harness. Stated explicitly in REPORT.md Limitations, RESULTS.md "What it does not show" and the
+Summary's Scope paragraph, rather than letting "independent" imply more than it does.
+
+**Assumptions logged (loop mode, no operator to ask).** (1) The feedback names no output file, so both
+deliverables carrying the claim — REPORT.md and RESULTS.md — were relabelled and no new report path
+was created. (2) "Require an independent replication before making a confirmatory claim" was read as
+both running one and stating the requirement; running it satisfies the stronger reading, and the
+weaker reading is preserved because the reports say plainly which claims are confirmed and which are
+not. Rejected alternative: relabel only, and defer the replication to a future iteration — rejected
+because the deliverables would then carry an unconfirmed headline for an unbounded time.

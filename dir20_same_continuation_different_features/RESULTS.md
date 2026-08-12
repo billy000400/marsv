@@ -12,20 +12,30 @@ explanation for that difference and finds it holds.
 **The prediction.** Among prompt pairs matched on how much their outputs differ, the pair that engages
 more *different* downstream MLP neurons switches more sharply.
 
-**The test.** In GPT-2 Large we mined every eligible paragraph of the WikiText-103 **test** split — 1395
-prefixes, 385020 candidate final-token pairs — and locked 101 within-prefix contrasts before computing a
-single interpolation curve. Each contrast holds two pairs that share a prefix, use four distinct final
-tokens, are matched on successor JSD and four endpoint-geometry confounds, and differ in the feature
-difference $F$. The manifest was hashed (`2415f5ff…`) before any width was measured.
+**The test, in two banks.** In GPT-2 Large we mined every eligible paragraph of the WikiText-103
+**test** split — 1395 prefixes, 385020 candidate final-token pairs — and locked 101 within-prefix
+contrasts before computing a single interpolation curve. Each contrast holds two pairs that share a
+prefix, use four distinct final tokens, are matched on successor JSD and four endpoint-geometry
+confounds, and differ in the feature difference $F$. The manifest was hashed (`2415f5ff…`) before any
+width was measured. We call this the **amended analysis**: the plan had fixed the bank at 300 prefixes
+and required us to stop with an underpowered verdict below 40 contrasts, and when 300 prefixes yielded
+21 contrasts the bank was enlarged to 1395 rather than stopped. No width had been computed at the time,
+so the enlargement was blind to the outcome, but it broke a rule frozen in advance. A second,
+**pre-registered independent replication** was therefore run on the WikiText-103 **train** split — a
+split untouched by any analysis here — with the bank size fixed at 1400 prefixes and a single-run
+stopping rule written to disk before any of its data was scored.
 
-**The result: supported, with a large effect.** The high-$F$ member has the sharper switch in 83 of 101
-contrasts. Median transition width falls from $w_{TV} = 0.203$ (low-$F$) to $0.098$ (high-$F$); the
-median paired difference is $\Delta w = -0.071$, 95% CI $[-0.087, -0.058]$, paired permutation
-$p < 10^{-4}$. The pre-registered gate ($n \ge 80$, median $\Delta w \le -0.05$, $\ge 60$% predicted
-sign, CI below zero) is met on all four conditions. The confounds are matched to standardized mean
-differences of $0.03$ (JSD), $0.005$ (norm ratio) and $0.02$ (surprisal), against $1.51$ for $F$ itself.
+**The result: supported in both banks, with a large effect.** In the amended analysis the high-$F$
+member has the sharper switch in 83 of 101 contrasts; median transition width falls from
+$w_{TV} = 0.203$ (low-$F$) to $0.098$ (high-$F$), a median paired difference of $\Delta w = -0.071$,
+95% CI $[-0.087, -0.058]$, paired permutation $p < 10^{-4}$. The replication returns $-0.064$, 95% CI
+$[-0.091, -0.043]$, 78.8% predicted sign, $p < 10^{-4}$ over 99 contrasts, and meets all four clauses
+of the gate written before it was run ($n \ge 80$, median $\Delta w \le -0.05$, $\ge 60$% predicted
+sign, CI below zero). The association is therefore a confirmed result; the amended analysis is the
+better-powered estimate of its size. Confounds are matched to standardized mean differences of $0.03$
+(JSD), $0.005$ (norm ratio) and $0.02$ (surprisal) in the amended bank, against $1.51$ for $F$ itself.
 
-**And the same neurons carry the switch causally.** Forcing exactly the neurons that distinguish the
+**And the same neurons carry the switch causally (amended bank only).** Forcing exactly the neurons that distinguish the
 two endpoints to interpolate linearly — 1.7% of the MLP neurons below the patch, with both endpoints
 left bit-identical — widens the median switch from $w_{TV} = 0.144$ to $0.471$, essentially the linear
 response of 0.5. An equal-size control set matched on activation magnitude, endpoint gap and
@@ -35,15 +45,20 @@ the 202 pairs shows it.
 | Stage | What it establishes | Headline number |
 |---|---|---|
 | S1 sanity | The harness reproduces the reported contrast | $w_{TV}$ 0.012 (`big`/`in`) vs 0.292 (`big`/`large`) |
-| S2 locking | 101 matched contrasts, outcome-blind | $\Delta F$ median 0.095; JSD SMD +0.030 |
-| S3 primary | Higher feature difference → sharper switch | median $\Delta w = -0.071$, CI $[-0.087, -0.058]$ |
-| S3 robustness | Effect survives the residual imbalance | adjusted intercept $-0.085 \pm 0.013$ |
-| S4 causal | The differential neurons carry the switch | median $w_{TV}$ 0.471 (differential) vs 0.167 (control) |
+| S2 locking (amended) | 101 matched contrasts, outcome-blind | $\Delta F$ median 0.095; JSD SMD +0.030 |
+| S3 primary (amended) | Higher feature difference → sharper switch | median $\Delta w = -0.071$, CI $[-0.087, -0.058]$ |
+| S3 robustness (amended) | Effect survives the residual imbalance | adjusted intercept $-0.085 \pm 0.013$ |
+| S3R replication (pre-registered) | The same effect on an untouched corpus split | median $\Delta w = -0.064$, CI $[-0.091, -0.043]$, $n = 99$ |
+| S4 causal (amended) | The differential neurons carry the switch | median $w_{TV}$ 0.471 (differential) vs 0.167 (control) |
 
 **What it does not show.** $F$ counts top-scoring MLP neurons; those neurons are a proxy for features,
-not proven semantic units. The bank is one model (GPT-2 Large), one patch site (block-0 `resid_post` at
-the final token) and one interpolation rule. The primary calipers had to be relaxed once, as
-pre-specified, before 101 contrasts survived.
+not proven semantic units. Both banks are one model (GPT-2 Large), one patch site (block-0
+`resid_post` at the final token) and one interpolation rule. The primary calipers had to be relaxed
+once, as pre-specified, in each bank (4 and 5 contrasts before relaxation, 101 and 99 after). The
+replication is independent in data and protocol, not in personnel: same code, same authors, so a
+systematic error shared by both banks would survive it, and replication by another group remains
+outstanding. The causal experiment was run on the amended bank only and has no pre-registered
+counterpart.
 
 ---
 
@@ -75,13 +90,14 @@ defines $w_{TV}$. Solid with circles = ` big`/` in` (the plateau case); dashed w
 
 ---
 
-## S2 — the locked matched bank
+## S2 — the locked matched bank (amended analysis)
 
 The whole design rests on choosing the contrasts before seeing any width. We scored all 385020
 candidate pairs on successor JSD, the feature difference $F$ and four confounds, applied the
 pre-specified eligibility window, and only then searched within each prefix for one matched contrast.
 The primary calipers yielded 4 contrasts, so the single pre-specified relaxation was applied, giving
-101 — above the plan's floor of 80.
+101. The 1395 prefixes are the amendment: the plan fixed 300, which yielded 21 contrasts, below the
+plan's own floor of 40 at which it required us to stop.
 
 | Quantity | Value |
 |---|---|
@@ -127,7 +143,7 @@ by the pooled standard deviation.
 
 ---
 
-## S3 — the matched prediction, and it holds
+## S3 — the matched prediction, and it holds (amended analysis)
 
 Every locked contrast was swept identically: 101 interpolation points at block-0 `resid_post` of the
 final token, readout at the final-token logits. Endpoint reproduction was exact to $9.2\times10^{-7}$
@@ -202,7 +218,54 @@ sharp are where the prediction has no headroom, which is a floor effect and not 
 
 ---
 
-## S4 — the differential neurons carry the switch
+## S3R — the pre-registered independent replication
+
+S3's bank reached 101 contrasts only because the planned 300 prefixes were enlarged to 1395 after the
+first count came in low, so S3 cannot be read as a confirmatory test however outcome-blind that
+enlargement was. S3R fixes that. Before any of its data was scored we wrote to disk: the corpus (the
+WikiText-103 **train** split, never analysed in this direction), the sampling seeds, a bank size of
+**exactly 1400 prefixes**, an instruction to run the bank **once** with no enlargement, re-seeding,
+re-drawing or second relaxation, an identical protocol in every other respect, and the same four-clause
+decision rule. The bank was locked to `results/matched_pairs_rep.json` and hashed
+(`ed1df0866f012b61…`) before its first interpolation curve existed.
+
+| Quantity | Amended (S2/S3) | Replication (S3R) |
+|---|---|---|
+| Corpus split | WikiText-103 test | WikiText-103 train |
+| Prefixes | 1395 (planned 300, enlarged) | 1400 (fixed in advance, run once) |
+| Candidate final-token pairs | 385020 | 386400 |
+| Eligible pairs | 26275 | 25321 |
+| Contrasts: primary calipers → relaxation | 4 → **101** | 5 → **99** |
+| Median $\Delta w$ | $-0.0708$ | **$-0.0641$** |
+| Bootstrap 95% CI on the median | $[-0.0866, -0.0582]$ | $[-0.0908, -0.0426]$ |
+| Fraction with the predicted sign | 82.2% (83/101) | 78.8% (78/99) |
+| Paired permutation $p$ | $< 10^{-4}$ | $< 10^{-4}$ |
+| Median $w_{TV}$, low-$F$ → high-$F$ | $0.203 \rightarrow 0.098$ | $0.173 \rightarrow 0.095$ |
+| Gate ($n \ge 80$, median $\le -0.05$, $\ge 60$% sign, CI $< 0$) | met | **met, as pre-registered** |
+
+The replication's balance matches S2's: standardized mean differences of $+0.03$ on successor JSD,
+$-0.05$ on the block-0 log norm ratio and $+0.09$ on surprisal, against $+1.63$ on $F$, with the same
+residual imbalance on final-logit distance ($+0.20$) and block-0 angle ($+0.29$). The effect sizes agree
+— $-0.064$ against $-0.071$, each inside the other's confidence interval — and both banks show the
+median width of the high-$F$ member at roughly half that of its matched low-$F$ partner. The
+replication's interval is the wider of the two ($0.048$ across against $0.028$) and its upper end
+$-0.043$ sits closer to zero, which is what 99 contrasts from a different corpus split should look
+like. Figure 5 shows both estimates on one axis.
+
+![Two horizontal confidence intervals and paired bars comparing the amended analysis with the replication](plots/replication_forest.png)
+
+**Figure 5.** The amended analysis against the pre-registered independent replication. Left — x: median
+paired difference $\Delta w = w_{TV}(\text{high-}F) - w_{TV}(\text{low-}F)$, negative meaning the
+high-$F$ member switches more sharply; each horizontal bar is one bank's bootstrap 95% CI with its
+median marked (circle = amended analysis, test split, $n = 101$; square = replication, train split,
+$n = 99$); the dashed vertical is the gate threshold $-0.05$, the dotted vertical is zero. Right — x:
+which member of the contrast; y: that group's median transition width $w_{TV}$; bars hatched `//` are
+the amended analysis, `xx` the replication; the dotted horizontal at $0.5$ marks a perfectly
+proportional response.
+
+---
+
+## S4 — the differential neurons carry the switch (amended analysis)
 
 S3 establishes an association, so S4 asks whether the differential neurons are doing the work. For both
 members of all 101 contrasts — 202 pairs — we re-ran the identical sweep twice more. In the
@@ -228,11 +291,11 @@ neurons were linearized. The two S3 groups converge under the intervention: the 
 $0.098 \rightarrow 0.467$ and the low-$F$ member $0.203 \rightarrow 0.474$, ending at the same place.
 That is what a mechanism looks like — the width difference S3 measured lives in the neurons that
 distinguish the endpoints, and removing their nonlinearity removes the difference along with the
-switch.
+switch. Figure 6 shows that the effect is not confined to the median: all 202 pairs move the same way.
 
 ![Per-pair widths under three conditions and the distribution of the differential-minus-control gap](plots/causal_linearization.png)
 
-**Figure 5.** The causal test. Left — each thin line is one of the 202 pairs across the three
+**Figure 6.** The causal test. Left — each thin line is one of the 202 pairs across the three
 conditions; x: condition (unablated, control linearized, differential linearized); y: transition width
 $w_{TV}$; the heavy black line with circles joins the medians and the dotted horizontal marks the
 linear response $w_{TV} = 0.5$. Right — x: the per-pair gap, how much more the differential
@@ -244,9 +307,13 @@ distribution lies above zero.
 
 ## Verdict
 
-The primary hypothesis is **supported**, on a held-out bank, under an outcome-blind matched design, and
-with a causal test behind it. Among GPT-2 Large prompt pairs matched on successor JSD and endpoint
-geometry, the pair engaging more different downstream MLP features has the sharper block-0 transition
-(median $\Delta w = -0.071$, CI $[-0.087, -0.058]$, 82.2% predicted sign), the effect survives removing
-the residual confound imbalance, and forcing exactly those differential neurons to interpolate linearly
-collapses the switch to the linear response while a matched control does not.
+The primary hypothesis is **supported**, and the support now has two tiers. Among GPT-2 Large prompt
+pairs matched on successor JSD and endpoint geometry, the pair engaging more different downstream MLP
+features has the sharper block-0 transition. The pre-registered replication S3R establishes this as a
+confirmed result — 99 contrasts on an untouched corpus split, median $\Delta w = -0.064$, CI
+$[-0.091, -0.043]$, 78.8% predicted sign, all four gate clauses met under a stopping rule fixed in
+advance. The amended analysis S2/S3 gives the better-powered estimate of the same effect
+($-0.071$, CI $[-0.087, -0.058]$, 82.2% predicted sign) and carries the two supporting findings: the
+effect survives removing the residual confound imbalance, and forcing exactly the differential neurons
+to interpolate linearly collapses the switch to the linear response while a matched control does not.
+Those two rest on the amended bank alone and await a pre-registered replication of their own.

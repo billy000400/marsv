@@ -1,0 +1,9 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+lock: 99 contrasts, rule=relaxed, sha256=ed1df0866f012b61
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  21%|██▏       | 93/436 [00:00<00:00, 881.06it/s]Loading weights:  42%|████▏     | 182/436 [00:00<00:00, 762.17it/s]Loading weights:  60%|█████▉    | 260/436 [00:00<00:00, 736.58it/s]Loading weights:  80%|████████  | 350/436 [00:00<00:00, 783.05it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 797.00it/s]
+  20/99 contrasts swept
+  40/99 contrasts swept
+  60/99 contrasts swept
+  80/99 contrasts swept
+n=99 median dw=-0.0641 CI=[-0.0908110899790674, -0.04256369914289787] frac<0=0.788 p=0.0000 -> supported
