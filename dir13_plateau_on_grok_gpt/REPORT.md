@@ -1094,6 +1094,24 @@ budget, so this probe is fitted for 797 of them: all 75 stable, 141 demoted and 
 fixed random 400 of the 3,443 never-head units. Every comparison is unit by unit against the ridge all40
 fit re-read for exactly those 797 units. Consumed in Figure 46.
 
+**Probe capacity** — the check that separates a statement about the units from a statement about the
+read-out's size. The nonlinear probe above leaves part of a demoted unit unexplained, and a *larger*
+probe of the same kind might close it, in which case nothing about the units follows from what is left.
+Three fits therefore vary only the capacity of that network and hold everything else — the all40 design,
+the rows, the same 80/10/10 split, Adam at learning rate $10^{-3}$, batches of 4,096 positions, the
+20-epoch patience rule, the 600-epoch cap and the seed — at the values just described: hidden width 768
+with one hidden layer (the fit already reported), hidden width **1,536** with one hidden layer, and hidden
+width 768 with **two** hidden layers,
+
+```math
+\hat y_j(p)=w_j^{\top}\,\mathrm{gelu}\Bigl(W\,\mathrm{gelu}\bigl(\sum_{g=1}^{42} E_{\,\mathrm{code}_g(p)}\bigr)\Bigr)+b_j ,
+```
+
+where $W$ is the extra 768 $\times$ 768 layer. Weight decay is fixed at 0 because the validation split
+chose 0 for every fit of the previous run. Reading the three in order of capacity answers the question
+directly: if the probe's size were the binding constraint, the median held-out $R^2$ at step 30,000 would
+keep climbing and the demoted units' fall would keep shrinking as capacity grows. Consumed in Figure 47.
+
 **Probe selection score** — the rule this turns into. The assay always patches the final character of
 `"The house was ␣X"`, so the probe can be evaluated at that exact context: substitute the seven
 context characters into the fitted coefficients and vary only $x_p$, giving a predicted activation

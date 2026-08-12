@@ -1,0 +1,4 @@
+  step 831: activations cached (690096, 797), rows [552112, 68992, 68992] (8s)
+  step 831 w1536: best epoch 41 of 62 run, val median R2 0.8789, test median R2 0.8814 (166s)
+  step 831 w768x2: best epoch 28 of 49 run, val median R2 0.8787, test median R2 0.8796 (216s)
+  step 30000: activations cached (690096, 797), rows [552112, 68992, 68992] (219s)
