@@ -1759,3 +1759,45 @@ listed it as the direction's real open problem since 2026-08-03.
   `results/neuron_bigram_summary.json`, `results/neuron_bigram_raw.npz`.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 43 display / 873 inline equations / 35 figures; RESULTS 35 figures; 0 problems).
+
+## 2026-08-12 (S24e) — a fitted probe reads the missed units, and the real limit turns out to be the standardization
+
+- **What was added.** `experiments/neuron_probe.py` (21 s of forward passes, no training) fits, for
+  every block-1–4 hidden unit, a ridge regression predicting its post-GeLU activation from the eight
+  characters ending at the position plus a full previous×current interaction table, on the model's own
+  90% training split, with windows split 80/10/10 so the penalty is chosen on one held-out slice and
+  every $R^2$ is reported on another. It replaces S24d's hand-built conditioning with a fitted one and
+  turns it into a new blind selection rule evaluated at the assay's own context.
+  `experiments/neuron_probe_control.py` (23 s) adds the two controls that decompose that rule.
+- **New numbers.** (i) *Describability:* the recruits the character rule misses reach median held-out
+  $R^2$ **0.29 → 0.53 → 0.78** across window lengths 1 → 8 → 8+interaction, against **0.92 → 0.93 →
+  0.97** for the recruits it finds (Mann–Whitney $p=1.5\times10^{-116}$ on the full model,
+  $p=8.3\times10^{-185}$ for the context gain) — so "context-dependent" is literal and local, not
+  diffuse. (ii) *New blind rule:* scoring units by the probe's predicted activation difference at
+  `"The house was ␣X"` and linearizing the top 32 removes **56.5%** of the trained→untrained width gap,
+  against 28.9% (standardized character rule), 22.5% (bigram rule), 19.0% (global assay-derived set)
+  and 1.2% (random), all paired $p\le2.3\times10^{-26}$; it also clears the pair-fitted top-32's 50.9%
+  (paired $p=2.3\times10^{-17}$), so that ranking was never a ceiling. (iii) *Decomposition:* the
+  character profile with per-unit standardization removed reaches **56.3%** on its own, while the
+  probe's prediction re-standardized reaches **34.8%** — the scale is worth ~27 points and the fitted
+  context ~6, together 0.2 more than scale alone (paired $p=0.0022$); median overlap between the probe
+  rule's and the character rule's top-32 is 9 units. Built-in checks: the unmodified baseline
+  reproduces per pair to 0.3507 (max difference 0.000000) and the worst endpoint deviation is
+  $10^{-6}$.
+- **Claims updated (no result superseded).** No earlier number changed; S24d's *interpretation* is
+  corrected in place. Where both deliverables said a 32-unit corpus rule is limited by "precision at
+  the top of the ranking", they now also say the larger limit was the per-unit standardization both
+  earlier rules applied, and that the fitted per-pair ranking is not a ceiling at $k=32$. The caveat
+  "a richer conditioning — more history, or a learned feature — might yet select them well" was
+  **true and is now tested**; both files carry the outcome. REPORT Summary, Conclusion and Limitation
+  7, and the RESULTS.md hypothesis paragraph and Headline, gained the new result.
+- **New figure.** **Figure 33** `plots/neuron_probe.png` — (a) median held-out $R^2$ vs probe window
+  length for found / missed / all units, (b) seven blind selection rules at $k=32$ against the
+  pair-fitted reference, (c) recovered fraction vs $k$ for five rules. Exploratory Figures 33–35
+  renumbered **34–36**; both files now hold 36 embeds, 36 visible captions, sequential numbering 1–36.
+- **Code/data:** new `experiments/neuron_probe.py`, `experiments/neuron_probe_control.py`,
+  `experiments/plot_neuron_probe.py`; new `results/neuron_probe_summary.json`,
+  `results/neuron_probe_raw.npz`, `results/neuron_probe_control.json`,
+  `results/neuron_probe_control_raw.npz` and their logs.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 46 display / 928 inline equations / 36 figures; RESULTS 36 figures; 0 problems).

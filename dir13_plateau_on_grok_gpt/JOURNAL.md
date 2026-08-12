@@ -2217,3 +2217,69 @@ written — wall-clock remains and the plan has open candidates.
 
 On track? yes — S24d done, the residual half of the mechanism is characterised and the obvious fix for
 it is tested and refuted, with both results in the deliverables; blocker: none.
+
+---
+
+## 2026-08-12 (S24e) — fitting the description of the missed units, and an unexpected correction
+
+**Feedback check first.** Listed the direction root: all seven `human_feedback*` files end in
+`.addressed.md`. Zero unaddressed feedback, so this iteration advanced the plan — and PLAN's own
+"Next step" named exactly this experiment (a *learned* description of the context-dependent recruits
+in place of another hand-built conditioning).
+
+**What I ran.** Two scripts, no training, 44 s of forward passes in total, on the same reference
+character run (`/tmp/dir13_frozen/checkpoints_ref_pos`, step 30,000, seed 1337) and the same 150 pairs
+as every intervention in this series.
+
+1. `experiments/neuron_probe.py`. One corpus pass over the model's own 90% training split accumulates
+   ridge sufficient statistics for a regression predicting each block-1–4 unit's post-GeLU activation
+   from one-hot codes of the eight characters ending at the position, plus a full previous×current
+   interaction table (4,746 features, 3,840 units). Because every feature group is one-hot, the Gram
+   matrix is assembled from `bincount` co-occurrence blocks and the cross term from `index_add`, which
+   is why the whole pass takes 8 s rather than minutes of dense matmul. Windows split 80/10/10 by
+   index: fit, choose $\lambda$ from $10^0..10^4$, report. Nested models $L=1,2,4,8$ are column
+   prefixes of the same Gram matrix, so all five fits come from one pass. Then the fitted probe is
+   evaluated at the assay's exact context and its predicted endpoint difference used as a *blind*
+   selection rule fed to `neuron_path.py`'s chord linearization.
+2. `experiments/neuron_probe_control.py`. The probe rule differs from the earlier character rule in
+   two ways at once (it knows the context, and it is in raw activation units rather than $z$-scored),
+   so this runs the two rules that isolate each: the character profile with standardization removed,
+   and the probe's prediction re-standardized.
+
+**What came out.** (i) The missed recruits are *describable*: median held-out $R^2$ 0.29 (current
+character) → 0.53 (eight characters) → 0.78 (plus interaction), against 0.92 → 0.97 for the found
+ones. They read short, local character context. (ii) The probe rule's top-32 removes **56.5%** of the
+width gap — beating the pair-fitted top-32's 50.9% (paired $p=2.3\times10^{-17}$). A rule blind to
+$d(t)$ beating one fitted to it is only a contradiction if you call the fitted ranking optimal; it
+ranks by *individual* importance $I_j$, so a jointly better set is reachable. (iii) **The correction
+I did not expect:** the controls say scale, not context, carries the win — the plain character profile
+with per-unit standardization removed already reaches 56.3%, while the fitted context alone reaches
+34.8%. S24d's diagnosis (the bigram rule fails on estimation noise at the top of the ranking) is not
+wrong but is second-order: both earlier rules were handicapped mainly by $z$-scoring, which asks which
+character a unit prefers when the intervention cares how many activation units the swap moves.
+
+**Assumption logged.** I compared rules on all 150 pairs rather than S24d's 84-pair well-sampled
+subset, because the fitted probe is defined for every character and restricting would only weaken $n$;
+the rejected alternative was re-scoring on the 84 pairs for continuity with the previous section. Both
+figures state which pair set each number uses.
+
+**Deliverable work.** New Results section in both files with **Figure 33** (`plots/neuron_probe.png`,
+three panels) and a new REPORT.md Methods subsection defining the probe, held-out $R^2$, the context
+and interaction gains, the probe selection score $D^{\mathrm{probe}}$ and the two decomposition
+controls. REPORT Summary, Conclusion and Limitation 7 and the RESULTS hypothesis paragraph and
+Headline carry the result and the corrected reading of S24d. Exploratory Figures 33–35 renumbered
+34–36; 36 embeds / 36 captions / sequential 1–36 in each file; `check_render.py REPORT.md RESULTS.md`
+passes with 0 problems.
+
+**Next step.** The "what do the responsible units compute" thread is now closed as far as text
+statistics reach: the units are identified, described out of sample, and a text-only rule selects them
+better than the assay-fitted ranking at small $k$. The natural successor is the same scale insight run
+backwards — rank units by predicted displacement rather than by preference for *every* earlier rule in
+the report (the global set, the per-block scan) and see whether other conclusions shift — but that is a
+consolidation, not a new question. Everything else open is PLAN S24 item 3 (a longer character run
+whose second local-complexity descent separates from initial fit, the denser Figure-9 grid on the pilot
+run's local maximum, or a second model/tokenizer) and needs materially more compute than one
+30,000-step run. No `STOP` written — the plan retains open candidates.
+
+On track? yes — S24e done, the missed units are described from held-out corpus data and the selection
+limit is re-attributed from conditioning to scale, with both results in the deliverables; blocker: none.

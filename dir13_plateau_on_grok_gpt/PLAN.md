@@ -590,6 +590,31 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S24e DONE 2026-08-12 — the missed units are described from held-out corpus data, and the selection
+limit is re-attributed from conditioning to scale.** Zero unaddressed feedback files, so this iteration
+advanced the plan (PLAN's own "Next step" named this experiment: a *learned* description in place of
+another hand-built conditioning). Two scripts, no training, 44 s of forward passes.
+`experiments/neuron_probe.py` fits a ridge regression per block-1–4 unit predicting its post-GeLU
+activation from the eight characters ending at the position plus a previous×current interaction table
+(4,746 features, 3,840 units), on the model's own training split, windows split 80/10/10 so $\lambda$
+is chosen on one held-out slice and every $R^2$ reported on another. **Descriptive:** the recruits the
+character rule misses reach median held-out $R^2$ **0.29 → 0.53 → 0.78** for window lengths
+1 → 8 → 8+interaction, against **0.92 → 0.97** for the ones it finds ($p=1.5\times10^{-116}$;
+$p=8.3\times10^{-185}$ for the context gain) — "context-dependent" is literal and local, not diffuse.
+**Causal:** scoring units by the probe's predicted activation difference at the assay's own context and
+linearizing the top 32 removes **56.5%** of the width gap, against 28.9% (standardized character rule),
+22.5% (bigram), 19.0% (global) and 1.2% (random), all paired $p\le2.3\times10^{-26}$ — and past the
+pair-fitted top-32's **50.9%** ($p=2.3\times10^{-17}$), so that ranking was never a ceiling (it orders
+by individual importance $I_j$). **The unexpected correction:** `experiments/neuron_probe_control.py`
+decomposes the win — the character profile with per-unit standardization *removed* reaches **56.3%**
+alone, the fitted context alone **34.8%**; scale is worth ~27 points and context ~6 (together 0.2 more
+than scale alone, paired $p=0.0022$). S24d's noise diagnosis stands but is second-order. Free checks:
+baseline reproduces per pair to 0.3507 (max difference 0.000000), worst endpoint deviation $10^{-6}$.
+New `experiments/neuron_probe.py`, `experiments/neuron_probe_control.py`,
+`experiments/plot_neuron_probe.py`, `results/neuron_probe_{summary.json,raw.npz,control.json,control_raw.npz}`,
+**Figure 33** (`plots/neuron_probe.png`); exploratory Figures 33–35 renumbered 34–36, 36 embeds /
+36 captions / sequential 1–36 in both files; `check_render.py` passes with 0 problems.
+
 **S24d DONE 2026-08-12 — the residual half of the mechanism is characterised, and the obvious fix for
 it is refuted.** Zero unaddressed feedback files, so this iteration advanced the plan (PLAN's own
 "Next step" named this experiment). One script, no training, 19 s of forward passes.
@@ -1068,6 +1093,17 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
+**S24e DONE (2026-08-12) — see "Current status". The "what do the responsible units compute" thread is
+closed as far as text statistics reach: the units are identified, described out of sample by a fitted
+probe (median held-out $R^2$ 0.78 for the previously unexplained half), and a text-only rule now
+selects them better than the assay-fitted ranking at $k=32$. The successor it opens is a consolidation
+rather than a new question — the scale insight applies to every earlier selection rule in the report
+(the global assay-derived set, the per-block scan), which were all built on preference rather than
+predicted displacement, so re-ranking them would test how far the correction reaches. S24 item 3 (a
+longer character run whose second local-complexity descent separates from initial fit, the denser
+Figure-9 grid on the pilot run's local maximum, or a second model/tokenizer) still needs materially
+more compute than one 30,000-step run.**
+
 **S24d DONE (2026-08-12) — see "Current status". Single-character and bigram corpus statistics have now
 been taken as far as they go: the missed units are context-dependent, and sharpening the conditioning
 makes the *ranking* better and the *selection* worse. The honest successor is a learned description of
@@ -1137,8 +1173,12 @@ worth running:
    as corpus statistics reach:** the units that rule misses are context-dependent (median 51% of their
    corpus response explained by the current character, against 96% for the ones it finds) and carry
    about a third as much bend each, and conditioning the profile on the previous character ranks the
-   population better but selects worse. What is still open is a *learned* description of those
-   context-dependent units. Original framing, kept for the record: five
+   population better but selects worse. **S24e (2026-08-12) closed the learned-description question
+   too:** a ridge probe over the eight characters ending at the position explains a median 78% of the
+   missed units' corpus response out of sample, and used as a selection rule in raw activation units it
+   removes 56.5% of the width gap — past the fitted per-pair ranking's 50.9% — with controls showing
+   that dropping the per-unit standardization, not the added context, carries the gain. Original
+   framing, kept for the record: five
    candidate mechanisms had been excluded in turn (the
    next-character decision, endpoint plausibility, the specific weights of blocks 1–4, any particular
    depth, and trainable parameter count), and the gap has not moved in six iterations: nothing here

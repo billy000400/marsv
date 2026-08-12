@@ -1,0 +1,174 @@
+self_test OK: step w=0.089 detected, line w=0.800 rejected
+4746 features, 3840 units, 7842 windows
+  window 0/7842 (1s)
+  window 1280/7842 (2s)
+  window 2560/7842 (3s)
+  window 3840/7842 (4s)
+  window 5120/7842 (6s)
+  window 6400/7842 (7s)
+  window 7680/7842 (8s)
+statistics done: [752880, 94080, 94080] positions per split (8s)
+  model 1: lambda=1.0, median held-out R2=0.1544 (8s)
+  model 2: lambda=10.0, median held-out R2=0.2964 (8s)
+  model 4: lambda=1.0, median held-out R2=0.3637 (8s)
+  model 8: lambda=10.0, median held-out R2=0.3963 (8s)
+  model full: lambda=1.0, median held-out R2=0.5858 (11s)
+  pair 50/150 (15s)
+  pair 100/150 (18s)
+  pair 150/150 (21s)
+{
+  "lambda_selected": {
+    "1": 1.0,
+    "2": 10.0,
+    "4": 1.0,
+    "8": 10.0,
+    "full": 1.0
+  },
+  "r2_by_order_median": {
+    "1": 0.1544,
+    "2": 0.2964,
+    "4": 0.3637,
+    "8": 0.3963,
+    "full": 0.5858
+  },
+  "describability": {
+    "found": {
+      "n": 2819,
+      "r2_1_median": 0.9188,
+      "r2_2_median": 0.9265,
+      "r2_4_median": 0.9297,
+      "r2_8_median": 0.9316,
+      "r2_full_median": 0.9695,
+      "gain_context_median": 0.0133,
+      "gain_interaction_median": 0.0305,
+      "frac_explained_by_lag0_median": 0.9524
+    },
+    "missed": {
+      "n": 1981,
+      "r2_1_median": 0.2896,
+      "r2_2_median": 0.4392,
+      "r2_4_median": 0.4886,
+      "r2_8_median": 0.5281,
+      "r2_full_median": 0.7818,
+      "gain_context_median": 0.1077,
+      "gain_interaction_median": 0.1332,
+      "frac_explained_by_lag0_median": 0.4544
+    },
+    "all_units": {
+      "n": 3840,
+      "r2_1_median": 0.1544,
+      "r2_2_median": 0.2964,
+      "r2_4_median": 0.3637,
+      "r2_8_median": 0.3963,
+      "r2_full_median": 0.5858,
+      "gain_context_median": 0.1656,
+      "gain_interaction_median": 0.128,
+      "frac_explained_by_lag0_median": 0.3114
+    },
+    "p_r2full_missed_lt_found": 1.4945984491084514e-116,
+    "p_gain_context_missed_gt_found": 8.282100141212569e-185
+  },
+  "causal": {
+    "reproduction_check": {
+      "median_w_baseline_here": 0.3507,
+      "max_abs_diff_per_pair": 0.0
+    },
+    "untrained_median_w": 0.803,
+    "worst_endpoint_error": 1e-06,
+    "k_list": [
+      8,
+      32,
+      128
+    ],
+    "n_pairs": 150,
+    "probe_selected": {
+      "median_w": [
+        0.4964,
+        0.6064,
+        0.6427
+      ],
+      "recovered_frac": [
+        0.3221,
+        0.5653,
+        0.6455
+      ]
+    },
+    "character_rule": {
+      "median_w": [
+        0.4002,
+        0.4816,
+        0.5653
+      ],
+      "recovered_frac": [
+        0.1095,
+        0.2894,
+        0.4746
+      ]
+    },
+    "bigram_rule": {
+      "median_w": [
+        0.3894,
+        0.4523,
+        0.5591
+      ],
+      "recovered_frac": [
+        0.0857,
+        0.2246,
+        0.4607
+      ]
+    },
+    "reference_rules": {
+      "pair": {
+        "median_w": [
+          0.4865,
+          0.581,
+          0.6602
+        ],
+        "recovered_frac": [
+          0.3003,
+          0.5091,
+          0.6842
+        ]
+      },
+      "global": {
+        "median_w": [
+          0.3895,
+          0.4367,
+          0.4904
+        ],
+        "recovered_frac": [
+          0.086,
+          0.1901,
+          0.3089
+        ]
+      },
+      "random": {
+        "median_w": [
+          0.3511,
+          0.356,
+          0.3648
+        ],
+        "recovered_frac": [
+          0.001,
+          0.0118,
+          0.0313
+        ]
+      }
+    },
+    "paired_at_k32": {
+      "p_vs_character_rule": 2.2996057560669792e-26,
+      "p_vs_bigram_rule": 2.2996057560669792e-26,
+      "p_vs_pair_ranked": 2.332453325829238e-17,
+      "p_vs_random": 2.2996057560669792e-26,
+      "frac_pairs_wider_than_baseline": 1.0
+    },
+    "median_overlap_top32_with_character_rule": 9.0
+  }
+}
+unit 1917 b2 missed 81x R2 0.14->0.84 :: [(2, '3', -1.026), (1, ' ', 0.524), (6, 'Q', -0.507)] :: 't.\n\nDUCHESS OF Y'
+unit 3578 b4 missed 72x R2 0.25->0.83 :: [(2, '3', -3.114), (7, 'Q', 1.776), (1, ' ', 1.75)] :: ',\nIn lists, on T'
+unit 2325 b3 missed 69x R2 0.25->0.93 :: [(2, '3', -3.128), (1, ' ', 1.83), (0, 'V', 1.352)] :: ',\nIn lists, on T'
+unit 106 b1 missed 54x R2 0.96->0.98 :: [(0, 'H', 1.276), (0, 'X', 1.109), (0, 'U', 1.062)] :: 'im!\n\nSenators, &'
+unit 19 b1 missed 50x R2 0.98->1.00 :: [(0, 'T', 3.324), (0, 'H', 3.296), (0, 'B', 3.078)] :: ", and deposed\n'T"
+unit 2943 b4 missed 47x R2 0.53->0.82 :: [(0, 'x', 2.83), (0, 'X', 2.309), (0, 'K', 2.251)] :: 'h.\nMy Lord of Ox'
+done in 21s

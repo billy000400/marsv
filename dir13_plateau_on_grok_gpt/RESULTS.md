@@ -708,7 +708,12 @@ interpolation involved, predicts which pairs recruit them at AUROC 0.847 (Figure
 selected by that tuning alone remove 28.9% of the width gap when linearized (Figure 31). The units
 that rule misses are the ones whose corpus response depends on the preceding context rather than the
 character at the position — they carry about a third as much bend each, and conditioning the corpus
-profile on the previous character does not select them any better (Figure 32).
+profile on the previous character does not select them any better (Figure 32). Fitting the description
+instead of hand-building it closes the gap: a ridge probe over an eight-character window explains a
+median 78% of those missed units' corpus response out of sample, and scoring units by the activation
+difference that probe predicts at the assay's own context removes **56.5%** of the width gap — past
+the 50.9% of the pair's own fitted ranking — with the controls showing that keeping each unit's own
+activation scale, not the added context, is what carries the improvement (Figure 33).
 
 ### The readout-rebalancing intervention — the plateau is upstream of the decision
 
@@ -1663,6 +1668,88 @@ baseline reproduces to 0.3507 per pair, and both endpoints stay exact (worst dev
 pairs, one context, one checkpoint, one model. Data: `results/neuron_bigram_summary.json`,
 `results/neuron_bigram_raw.npz`; code: `experiments/neuron_bigram.py`.
 
+## A fitted description reads the missed units — and shows the real limit was the standardization
+
+The section above left "context-dependent" as a label, not a description: it said what the missed
+units are *not* (character-pure) without saying what they read. It also left a puzzle — hand-built
+bigram conditioning ranked the population better and selected worse. Both are answered by replacing
+the hand-built profile with a **fitted** one. For every block-1–4 unit we fit a ridge regression that
+predicts its post-GeLU activation from the characters in the eight-position window ending at that
+position, plus a full previous×current interaction table, on the model's own training split, with
+windows split 80/10/10 so the penalty is chosen on one held-out slice and every $R^2$ is reported on
+another. Shrinkage is exactly what the raw bigram table lacked: a rare cell is pulled toward the
+additive fit instead of being estimated from a handful of positions.
+
+That gives two things at once. First, a *describability* measurement: how much of each unit's corpus
+response a short character window explains, and how much of that needs history. Second, a new blind
+selection rule — evaluate the fitted probe at the assay's own context `"The house was ␣X"`, score unit
+$j$ for pair (a, b) by the predicted activation difference $|\hat{y}_j(\text{ctx}+a) -
+\hat{y}_j(\text{ctx}+b)|$, linearize the top 32 and measure how much of the width gap disappears. Both
+halves are shown in Figure 33.
+
+![three panels: held-out R-squared against probe window length for found, missed and all units; a bar chart of the width gap removed at k=32 by seven selection rules; and recovered fraction against the number of linearized units](plots/neuron_probe.png)
+
+**Figure 33.** A fitted probe describes the missed recruits and selects better than the hand-built
+profiles. Reference character GPT at step 30,000, blocks 1–4, 3,840 units, 150 pairs, 94,080 held-out
+corpus positions. **(a)** Median held-out $R^2$ of the fitted probe (y) against how many characters
+its window covers (x: 1 = current character only, then 2, 4, 8, then 8 characters plus the
+previous×current interaction table); bands are the interquartile range. Solid = the 2,819 recruits the
+character ranking finds, dashed = the 1,981 it misses, dotted = all 3,840 units. **(b)** Percentage of
+the trained→untrained median width gap removed (y) by linearizing the top 32 units chosen by each
+blind rule (x). Bars hatched `//` are assay-derived or random references, `\\` are the standardized
+corpus profiles from the previous two sections, `..` are the two rules that isolate scale and context,
+solid is the fitted probe; the dashed vertical line is the pair-fitted top-32, which is fitted on the
+curve it is scored against. **(c)** Percentage of the gap removed (y) against how many units are
+linearized per pair (x, log scale), for the fitted probe, the raw-scale character profile, the
+standardized character profile, the pair-fitted ranking and random selection.
+
+- **The missed units are readable from a short character window.** Their median held-out $R^2$ rises
+  **0.29 → 0.53 → 0.78** as the window grows from the current character to eight characters and then
+  gains the previous×current interaction, against **0.92 → 0.93 → 0.97** for the units the character
+  rule finds (Mann–Whitney p = 1.5e-116 on the full model). "Context-dependent" is therefore literal
+  and local: roughly half of a missed unit's response is invisible to the current character
+  (p = 8.3e-185 for the context gain) and most of that half is recovered by the seven characters before
+  it. They are not diffuse.
+- **The fitted rule beats every hand-built one, and beats the fitted per-pair ranking.** Its top-32
+  removes **56.5%** of the width gap against **28.9%** for the standardized character profile, 22.5%
+  for the bigram profile and 1.2% for random (all paired p ≤ 2.3e-26, 150 pairs), and it clears the
+  50.9% of the pair's own fitted top-32 (paired p = 2.3e-17). A selection rule that has never seen
+  `d(t)` beating one fitted to it says the fitted ranking was never a ceiling: it ranks units by
+  individual importance, so it cannot see that a set of units works better together than its members
+  do apart.
+- **Almost all of that gain is the activation scale, not the context.** Two controls split the
+  difference: the character profile *without* per-unit standardization removes **56.3%**, and the
+  probe's prediction *with* standardization removes **34.8%**. So dropping the standardization is
+  worth about 27 points and the fitted context about 6, and the two together are worth 0.2 points more
+  than scale alone (paired p = 0.0022, so the increment is real but tiny). The two rules also disagree
+  about which units to take — a median of **9 of 32** shared between the probe rule and the
+  standardized character rule.
+
+**What this adds.** It replaces a label with a measurement and corrects the previous section's
+diagnosis. The measurement: the half of the mechanism that single-character tuning missed is not
+mysterious — an eight-character window plus one interaction table explains a median 78% of those
+units' corpus response out of sample, so what they read is short, local character context. The
+correction: the reason those units were not being *selected* was mostly not conditioning at all, but
+the per-unit standardization that both earlier rules applied. Standardizing asks "which character does
+this unit prefer"; the intervention cares "how many activation units does swapping the character
+move", and a residual stream is moved by absolute displacement. Restoring the scale takes a blind,
+text-only rule from 28.9% to 56.3%, past the ranking that was fitted to the curve. For anyone
+predicting which units govern a new pair's geometry from text statistics, the operative advice
+reverses: keep the units in their own scale first, and refine the conditioning second.
+
+**Caveats.** The probe is linear in one-hot characters with a single interaction table, so "readable
+from a short window" is a statement about that family; a unit needing longer or non-local structure
+would show up as low $R^2$, and the missed group's median 0.78 leaves a fifth of its response
+unexplained. The found/missed split is the previous section's top-decile cut on a graded quantity. The
+scale-versus-context decomposition is measured at $k=32$; at $k=128$ the pair-fitted ranking is ahead
+again (68.4% vs 64.6%), so "beats the fitted ranking" is a statement about small sets. Selection rules
+are compared on all 150 pairs here, unlike the previous section's 84-pair like-for-like subset, because
+the fitted probe is defined for every character. Free checks: the unmodified baseline reproduces to
+0.3507 per pair (max per-pair deviation 0.000000) and both endpoints stay exact (worst deviation 1e-6).
+150 pairs, one context, one checkpoint, one model. Data: `results/neuron_probe_summary.json`,
+`results/neuron_probe_raw.npz`, `results/neuron_probe_control.json`; code:
+`experiments/neuron_probe.py`, `experiments/neuron_probe_control.py`.
+
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
 > **Clearly labelled as exploratory and out of the headline** (PLAN out-of-scope forbids a new
@@ -1680,32 +1767,32 @@ pairs, one context, one checkpoint, one model. Data: `results/neuron_bigram_summ
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 33 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 34 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 33.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 34.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 34 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 35 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 34.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 35.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 35 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 36 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 35.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 36.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -1788,4 +1875,13 @@ reused units are capital-letter detectors that fire on proper-name onsets. Selec
 corpus tuning alone — blind to the assay — and linearizing them removes **28.9%** of the width gap
 against 1.2% for random units and 19.0% for the best assay-derived pair-blind set, so the tuning is
 causal and not only predictive. A plateau boundary is where the detectors for the two endpoint
-characters hand over.
+characters hand over. The half of the recruited units that this single-character rule misses is
+context-dependent rather than mysterious: a ridge probe over the eight characters ending at the
+position, fitted on the training corpus and scored out of sample, explains a median **78%** of those
+units' response (against 29% from the current character alone). Scoring units by the activation
+difference that probe predicts at the assay's own context removes **56.5%** of the width gap — more
+than the 50.9% of the ranking fitted to the curve itself, so that ranking was never a ceiling. The
+controls locate the gain: the same character profile with per-unit standardization *removed* already
+reaches 56.3%, while the fitted context alone reaches 34.8%. What a text-only rule needs in order to
+find the units that bend a path is each unit's own activation scale first and finer conditioning
+second.

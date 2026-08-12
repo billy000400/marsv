@@ -1,0 +1,66 @@
+self_test OK: step w=0.089 detected, line w=0.800 rejected
+  pair 50/150 (6s)
+  pair 100/150 (11s)
+  pair 150/150 (17s)
+{
+  "reproduction_check": {
+    "median_w_baseline_here": 0.3507,
+    "max_abs_diff_per_pair": 0.0
+  },
+  "untrained_median_w": 0.803,
+  "worst_endpoint_error": 1e-06,
+  "k_list": [
+    8,
+    32,
+    128
+  ],
+  "n_pairs": 150,
+  "raw_char": {
+    "median_w": [
+      0.4861,
+      0.6054,
+      0.6372
+    ],
+    "recovered_frac": [
+      0.2994,
+      0.5631,
+      0.6334
+    ]
+  },
+  "probe_z": {
+    "median_w": [
+      0.4049,
+      0.5079,
+      0.5829
+    ],
+    "recovered_frac": [
+      0.1199,
+      0.3475,
+      0.5135
+    ]
+  },
+  "reference": {
+    "probe": [
+      0.3221,
+      0.5653,
+      0.6455
+    ],
+    "character_rule": [
+      0.1095,
+      0.2894,
+      0.4746
+    ],
+    "pair_ranked": [
+      0.3003,
+      0.5091,
+      0.6842
+    ]
+  },
+  "paired_at_k32": {
+    "raw_char_vs_character_rule": 2.2996057560669792e-26,
+    "probe_vs_raw_char": 0.0021606467901334773,
+    "probe_vs_probe_z": 2.3939507369660054e-26,
+    "probe_z_vs_character_rule": 8.073938015461105e-07
+  }
+}
+done in 17s
