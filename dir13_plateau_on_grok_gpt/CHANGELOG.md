@@ -1724,3 +1724,38 @@ listed it as the direction's real open problem since 2026-08-03.
   `results/neuron_feature_causal_raw.npz`, `results/neuron_feature_causal.log`.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 39 display / 832 inline equations / 34 figures; RESULTS 34 figures; 0 problems).
+
+## 2026-08-12 (S24d) — the residual half of the path-bending units, and a refuted fix
+
+- **What was added.** `experiments/neuron_bigram.py` — one further pass over the same 90% training
+  split, tabulating each block-1–4 hidden unit's mean post-GeLU activation against the (previous,
+  current) character pair. It answers the residual the previous iteration left open (corpus-selected
+  32 units remove 28.9% of the width gap; the fitted per-pair 32 remove 50.9%) with a description of
+  what the missed units are, and a causal test of the obvious fix. 19 s of forward passes, no training.
+- **New numbers.** (i) *Descriptive:* for recruited units the character ranking finds (top decile of
+  $D_j$), the current character explains a median **96%** of the corpus response; for the ones it
+  misses, **51%**, with the interaction share rising 18% → **49%** (Mann–Whitney
+  $p=1.4\times10^{-186}$); the population median is 37%. (ii) *Matched-size ablation:* 8 missed
+  recruits remove **11.5%** of the gap against **29.1%** for 8 found recruits (paired
+  $p=1.2\times10^{-20}$, 138 pairs). (iii) *The fix fails:* the context-matched (previous character =
+  space) profile ranks the whole population better — mean AUROC **0.886** vs **0.869** for the
+  current-character rule on the same 84 pairs ($p=1.4\times10^{-5}$) — and selects worse: its top 32
+  remove **21.9%** of the gap against **31.9%** (paired $p=1.9\times10^{-11}$), with the fitted
+  ceiling at 52.6% and random at 0.6% on those pairs; precision@32 foretells it (20.3% vs 25.6%).
+  Built-in checks: marginalizing the bigram table reproduces the previous section's tuning scores $z$
+  to **0.0000**, the unmodified baseline reproduces per pair to 0.3507 (max difference 0.000000), and
+  the worst endpoint deviation is $10^{-6}$.
+- **Claims updated (no result superseded).** The caveat "what the remaining half responds to is not
+  established here" (REPORT Results + Caveats, RESULTS Caveats) was **true and is now answered**; both
+  files point to the new subsection instead. REPORT Summary, Conclusion and Limitation 7, and the
+  RESULTS.md hypothesis paragraph, gained the context-dependence result and the negative on bigram
+  conditioning. The older caveat "a unit that responds to a longer pattern would be summarized
+  crudely" now points forward to the measurement of how many such units there are.
+- **New figure.** **Figure 32** `plots/neuron_bigram.png` — (a) cumulative current-character variance
+  share for found / missed / all units, (b) matched-size ablation of found vs missed recruits, (c)
+  five selection rules at $k=32$ re-scored on the 84 like-for-like pairs. Exploratory Figures 32–34
+  renumbered **33–35**; both files now hold 35 embeds, 35 visible captions, sequential numbering 1–35.
+- **Code/data:** new `experiments/neuron_bigram.py`, `experiments/plot_neuron_bigram.py`; new
+  `results/neuron_bigram_summary.json`, `results/neuron_bigram_raw.npz`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 43 display / 873 inline equations / 35 figures; RESULTS 35 figures; 0 problems).

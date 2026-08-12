@@ -1,0 +1,169 @@
+{
+  "ckpt_dir": "/tmp/dir13_frozen/checkpoints_ref_pos",
+  "step": 30000,
+  "context": "The house was ",
+  "early_blocks": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "n_units": 3840,
+  "n_pairs": 150,
+  "min_cell_n": 20,
+  "n_cells_used": 1009,
+  "top_decile": 384,
+  "marginal_check_max_abs_z_diff": 0.0,
+  "n_chars_sampled_under_context": 47,
+  "prediction": {
+    "ctx": {
+      "auroc_mean": 0.8858,
+      "auroc_ci99": [
+        0.8781,
+        0.8942
+      ],
+      "prec32_mean": 0.2028
+    },
+    "all": {
+      "auroc_mean": 0.8694,
+      "auroc_ci99": [
+        0.8589,
+        0.8795
+      ],
+      "prec32_mean": 0.2556
+    },
+    "p_ctx_vs_all": 1.4289617832251312e-05,
+    "n_pairs_scored": 84,
+    "min_char_n_under_context": 100
+  },
+  "recruit_split": {
+    "found": {
+      "n": 2819,
+      "share_cur_median": 0.956,
+      "share_prev_median": 0.075,
+      "share_int_median": 0.1782,
+      "sharpness_median": 5.68
+    },
+    "missed": {
+      "n": 1981,
+      "share_cur_median": 0.5132,
+      "share_prev_median": 0.163,
+      "share_int_median": 0.4939,
+      "sharpness_median": 4.606
+    },
+    "all_units": {
+      "n": 3840,
+      "share_cur_median": 0.3716,
+      "share_prev_median": 0.2477,
+      "share_int_median": 0.4197,
+      "sharpness_median": 4.592
+    },
+    "frac_recruits_found": 0.5873,
+    "p_share_cur_found_gt_missed": 3.0852651209595282e-148,
+    "p_share_int_missed_gt_found": 1.3513601096696812e-186
+  },
+  "variance_shares_all_units": {
+    "cur_median": 0.3716,
+    "prev_median": 0.2477,
+    "int_median": 0.4197
+  },
+  "causal": {
+    "reproduction_check": {
+      "median_w_baseline_here": 0.3507,
+      "max_abs_diff_per_pair": 0.0
+    },
+    "untrained_median_w": 0.803,
+    "worst_endpoint_error": 1e-06,
+    "k_list": [
+      8,
+      32,
+      128
+    ],
+    "ctx_selected": {
+      "median_w": [
+        0.3894,
+        0.4523,
+        0.5591
+      ],
+      "recovered_frac": [
+        0.0857,
+        0.2246,
+        0.4607
+      ]
+    },
+    "all_context_selected": {
+      "median_w": [
+        0.4002,
+        0.4816,
+        0.5653
+      ],
+      "recovered_frac": [
+        0.1095,
+        0.2894,
+        0.4746
+      ]
+    },
+    "reference_rules": {
+      "pair": {
+        "median_w": [
+          0.4865,
+          0.581,
+          0.6602
+        ],
+        "recovered_frac": [
+          0.3003,
+          0.5091,
+          0.6842
+        ]
+      },
+      "global": {
+        "median_w": [
+          0.3895,
+          0.4367,
+          0.4904
+        ],
+        "recovered_frac": [
+          0.086,
+          0.1901,
+          0.3089
+        ]
+      },
+      "random": {
+        "median_w": [
+          0.3511,
+          0.356,
+          0.3648
+        ],
+        "recovered_frac": [
+          0.001,
+          0.0118,
+          0.0313
+        ]
+      }
+    },
+    "paired_at_k32": {
+      "p_vs_all_context": 1.1923227775777673e-12,
+      "p_vs_pair_ranked": 3.1079158350089683e-26,
+      "p_vs_global": 0.00032105693869002866,
+      "frac_pairs_wider_than_baseline": 0.9333
+    },
+    "restricted_to_well_sampled_pairs_k32": {
+      "n_pairs": 84,
+      "ctx": 0.2194,
+      "all_context": 0.3191,
+      "pair_ranked": 0.5263,
+      "global": 0.169,
+      "random": 0.0061,
+      "p_ctx_vs_all_context": 1.8623778559719144e-11
+    },
+    "found_vs_missed_recruits": {
+      "k_each": 8,
+      "n_pairs": 138,
+      "found_median_w": 0.4784,
+      "missed_median_w": 0.3974,
+      "found_recovered_frac": 0.2913,
+      "missed_recovered_frac": 0.1146,
+      "p_paired": 1.1582383692271831e-20
+    }
+  }
+}

@@ -140,7 +140,13 @@ the 32 units with the largest differential tuning — chosen blind to the assay 
 trained→untrained width gap against 1.2% for 32 random units, beating every previous rule that does not
 see the individual pair. A plateau boundary is where the character detectors for the two endpoints hand
 over, and the units that will control a new pair can be named from corpus statistics before any
-interpolation is run.
+interpolation is run. The units that rule misses are identified too: their corpus response is
+context-dependent rather than character-pure (median 51% of it explained by the character at the
+position, against 96% for the units the rule finds) and they carry about a third as much bend each.
+Conditioning the corpus profile on the preceding character does not select them — it improves the
+ranking of the whole population (AUROC 0.886 vs 0.869) while making the top-32 selection causally
+weaker (21.9% vs 31.9% of the gap), because what a 32-unit rule needs is precision at the top of the
+ranking, not resolution across the tail.
 **Verdict: plateaus are real in this model, and at the patched position they look like next-character
 decision basins** — but that is a *description* read off one token slot, not the phenomenon: the sharp
 switch is still there several characters downstream where the decision is not, and its mechanism sits
@@ -841,6 +847,71 @@ from ordinary text and tested causally. It is run at $k \in \lbrace 8,32,128,512
 against the three rules already measured at those sizes: the assay's per-pair top-$k$ (fitted on the
 curve it is tested on, hence an upper reference), the assay-derived global top-$k$ (pair-blind but not
 assay-blind), and random $k$.
+
+### Bigram tuning: is the residual explained by conditioning on only one character?
+
+The corpus rule above recovers a bit more than half of what the fitted per-pair ranking recovers, so
+some of the responsible units are invisible to it. The tuning profile itself is the obvious suspect,
+because it conditions on the single character *at* the position and therefore summarizes a unit that
+responds to a two-character pattern very badly. Two measurements test that, both from one further pass
+over the same training split, which now tabulates the mean activation against the (previous, current)
+character pair. Writing $x_{p-1}$ for the preceding character, the **bigram profile** of unit $j$ is
+
+```math
+m_{q,c,j}=\frac{1}{|P_{q,c}|}\sum_{p\in P_{q,c}}a_j(p),\qquad
+P_{q,c}=\lbrace p:\ x_{p-1}=q,\ x_p=c,\ p \bmod 128 \ge 8\rbrace ,
+```
+
+with $n_{q,c}=|P_{q,c}|$. Cells with $n_{q,c}<20$ are dropped as too noisy to enter any average
+(1,009 of the $65\times65$ cells survive). Marginalizing $m$ over $q$ reproduces $\mathrm{sel}_{c,j}$
+above, which is used as a free consistency check between the two passes.
+
+The first measurement asks **how much of a unit is the current character**. Each unit's surviving
+cells are decomposed, weighted by their occupancy $n_{q,c}$, into a current-character main effect, a
+previous-character main effect and a residual interaction. With $N=\sum n_{q,c}$, grand mean
+$g_j=\frac1N\sum n_{q,c}m_{q,c,j}$, and the weighted marginals $\bar m^{\,\mathrm{cur}}_{c,j}$ and
+$\bar m^{\,\mathrm{prev}}_{q,j}$, the total weighted variance splits as
+
+```math
+T_j=\frac1N\sum_{q,c} n_{q,c}\bigl(m_{q,c,j}-g_j\bigr)^2,\qquad
+C_j=\frac1N\sum_{c} n_{\cdot c}\bigl(\bar m^{\,\mathrm{cur}}_{c,j}-g_j\bigr)^2,
+```
+
+```math
+E_j=\frac1N\sum_{q,c} n_{q,c}\bigl(m_{q,c,j}-\bar m^{\,\mathrm{cur}}_{c,j}
+-\bar m^{\,\mathrm{prev}}_{q,j}+g_j\bigr)^2 .
+```
+
+The **current-character share** $C_j/T_j$ is the quantity plotted: 1 means the unit's corpus response
+is fully described by the character at the position, 0 means it is not described by it at all, and the
+**interaction share** $E_j/T_j$ is the part no single-character profile of either kind can capture.
+(The design is unbalanced, so the three shares need not sum exactly to 1.) These are compared between
+the recruited units the character ranking **finds** — those in the top decile, rank $<384$ of 3,840, of
+that pair's $D_j(a,b)$ — and the recruited units it **misses**. Since "found" is a graded quantity cut
+at a threshold, the split is a convenience, and it is reported as such.
+
+The second measurement is causal and is the one that could have replaced the corpus rule. The assay
+interpolates the final character of `"The house was ␣X"`, so the patched position's previous character
+is always a space $\sqcup$. Restricting the profile to that row gives a **context-matched tuning
+score**, standardized exactly as $z$ was but over the 47 characters occurring at least 100 times after
+a space:
+
+```math
+z^{\sqcup}_{c,j}=\frac{m_{\sqcup,c,j}-\mu^{\sqcup}_j}{\sigma^{\sqcup}_j},\qquad
+D^{\sqcup}_j(a,b)=\bigl|z^{\sqcup}_{a,j}-z^{\sqcup}_{b,j}\bigr| .
+```
+
+$D^{\sqcup}$ is scored as a ranking (AUROC, precision@32) and then handed the selection: its top $k$
+units are linearized by the same chord substitution and scored by the same recovered fraction
+$\rho(S)$, at $k\in\lbrace 8,32,128\rbrace$. It is as blind to the assay as $D$ is. Because
+$z^{\sqcup}$ only exists for well-sampled characters, every $k=32$ rule — random, global, $D$,
+$D^{\sqcup}$ and the fitted per-pair ceiling — is re-scored on the 84 pairs whose two characters both
+clear that bar, so the two corpus rules are compared like for like.
+
+One further intervention separates the two recruit groups directly. For each pair, the strongest
+$K=8$ found recruits and the strongest 8 missed recruits (both taken in $I_j$ order) are linearized as
+separate sets, over the 138 pairs where each group has at least 8 members. Matching the set size makes
+the comparison a statement about which units carry the bend rather than about how many were edited.
 
 ### Spherical interpolation and patching
 
@@ -2431,14 +2502,80 @@ in advance, from corpus statistics, before any interpolation is run.
 
 **Caveats.** The corpus-selected edit removes 28.9% of the gap where the fitted ranking's removes
 50.9%, so tuning at the two endpoint characters identifies a large part of the responsible units but
-not all of them; what the remaining half responds to is not established here. AUROC 0.847 likewise
+not all of them; the next subsection characterises the remainder. AUROC 0.847 likewise
 leaves real residual, and the assay-derived ranking's
 0.913 bounds how much of it any pair-blind description could close, so endpoint-character tuning is
 not the whole story. Three characters occur fewer than 100 times in the corpus; re-standardizing over
 the 62 well-sampled characters and keeping the 143 pairs built from them slightly *raises* the result
 (AUROC **0.858**, precision@32 21.4%), so rare-character noise is not driving it. Tuning is
 conditioned on the current character only, so a unit responding to a longer pattern is summarized
-crudely by this profile. One context, one checkpoint, one model, 150 pairs.
+crudely by this profile; the next subsection quantifies how many of the responsible units that
+describes. One context, one checkpoint, one model, 150 pairs.
+
+### The residual units are context-dependent, and a bigram profile does not select them
+
+Half the effect sits in units the corpus rule does not find, and the profile's conditioning is the
+obvious suspect: it describes a unit by the character *at* the position, which is a poor summary of a
+unit that responds to a two-character pattern. Testing that needs two things — a description of what
+the missed units actually are, and a check on whether the obvious fix selects them. Both come from one
+further pass over the same training split, tabulating activations against the (previous, current)
+character pair. Figure 32 shows the descriptive half in panel (a), the direct comparison of the two
+recruit groups in (b), and the causal test of the fix in (c).
+
+![cumulative distributions of the current-character variance share for found, missed and all units; a matched-size ablation of found versus missed recruits; and a five-rule comparison of the width gap removed at k equals 32](plots/neuron_bigram.png)
+
+**Figure 32.** What the units missed by character tuning are, and whether previous-character
+conditioning recovers them; reference character GPT at step 30,000, blocks 1–4, 3,840 units, 150 pairs,
+block-0 interpolation, context `"The house was "`. **(a)** Cumulative fraction of units (y) against the
+current-character share $C_j/T_j$ (x) defined in Methods. Solid = the 2,819 recruited units the
+character ranking finds (top decile of $D_j$), dashed = the 1,981 it misses, dotted = all 3,840 units;
+medians in the legend. **(b)** Recovered fraction $\rho$ as a percentage (y) from linearizing 8 found
+recruits (hatched `//`) versus 8 missed recruits (hatched `\\`), matched in size, over the 138 pairs
+where both groups have at least 8 members. **(c)** Recovered fraction at $k=32$ (y) for five selection
+rules (x), all re-scored on the 84 pairs whose two characters are both well sampled after a space;
+dashed line marks the current-character rule. Random and the fitted per-pair ceiling are Figure 31's
+floor and ceiling, re-scored on the same 84 pairs.
+
+**The missed units are the context-dependent ones.** For the recruits the character ranking finds, the
+current character explains a median **96%** of the corpus response; for the ones it misses, **51%**,
+while the interaction share $E_j/T_j$ rises from 18% to **49%** (Mann–Whitney
+$p=1.4\times10^{-186}$). The population median is 37%, so the found recruits are the extreme tail of
+character-purity and the missed recruits sit near an ordinary unit. This is the predicted shape: what
+the profile misses is exactly what the profile cannot represent.
+
+**They carry real bend, about a third as much per unit.** Eight missed recruits remove **11.5%** of
+the gap against **29.1%** for eight found recruits at the same set size (paired
+$p=1.2\times10^{-20}$). Since eight random units remove around 1%, the missed group is not ranking
+noise — it is a genuine second population, weaker unit for unit.
+
+**The obvious fix does not work.** Restricting the profile to corpus positions following a space —
+the assay's own context, and still blind to $d(t)$ — gives a rule that ranks the whole population
+*better*, mean AUROC **0.886** against **0.869** for the current-character rule on the same 84 pairs
+($p=1.4\times10^{-5}$), and selects *worse*: its top 32 remove **21.9%** of the gap against **31.9%**
+(paired $p=1.9\times10^{-11}$), where the fitted ceiling is 52.6% and random is 0.6%. Precision@32
+foretells it (20.3% vs 25.6%): conditioning on the preceding space splits the corpus roughly fourteen
+ways, and the resulting estimation noise bites hardest at the very top of the ranking, which is the
+only part the intervention reads.
+
+**Why this matters.** It resolves the residual of the previous subsection into a fact about the units
+rather than a gap in the evidence: the second half of the path-bending population is context-dependent,
+and its members contribute less individually. The negative half is the more useful one for anyone
+building a text-statistics rule to predict which units govern a new pair's geometry. Improving the
+*resolution* of the corpus description made the average ordering better and the practical selection
+worse, because a rule that must name 32 units out of 3,840 is limited by precision at the top of the
+ranking, not by fidelity across the tail. That is a design constraint on the whole approach, and it is
+visible only because the ranking metric and the causal metric were both measured.
+
+**Caveats.** Only the previous character was tested, so "context-dependent" means "not explained by the
+current character alone"; it does not identify which longer patterns these units respond to, and a
+richer conditioning — more history, or a learned feature — might select them well. The found/missed
+split cuts a graded quantity at the top decile, and the ranking that defines "found" is the same one
+whose misses are being described. Cells with fewer than 20 occurrences are dropped (1,009 of 4,225
+survive) and only 47 of 65 characters occur at least 100 times after a space, which is why the
+like-for-like comparison uses 84 of the 150 pairs. Free checks: marginalizing the bigram table
+reproduces the previous subsection's tuning scores to 0.0000, the unmodified baseline reproduces per
+pair to 0.3507, and both endpoints stay exact (worst deviation $10^{-6}$). One context, one
+checkpoint, one model.
 
 ### Exploratory corroboration: 40 natural minimal pairs
 
@@ -2448,11 +2585,11 @@ character natural prefixes rather than one short shared context.)* With interpol
 recording at final logits, 14 of 40 pairs meet the strict frozen rule (IDs 0, 4, 5, 6, 7, 9, 14, 20,
 21, 22, 28, 34, 36, 37); 24/40 have $w \le 0.35$; only 2/40 are near-straight (#10, #19, $w \ge 0.6$);
 0/40 are non-monotone. Median width is 0.309 (range [0.110, 0.773]) against the straight line's 0.8.
-The structure is visible pair by pair, with no averaging involved (Figure 32).
+The structure is visible pair by pair, with no averaging involved (Figure 33).
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 32.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
+**Figure 33.** *(Exploratory.)* Raw relative distance $d(t)$ (y) vs interpolation position $t$ (x) in
 final-logit space, one panel per frozen pair; panel titles give the pair ID, the two endpoint
 characters, and the transition width $w$. Gray dashed = the straight-line reference $d = t$. Most
 curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) track the straight line.
@@ -2461,11 +2598,11 @@ curves hug $d\approx0$, cross rapidly, then hug $d\approx1$; two (#10, #19) trac
 and recording $d(t)$ at each later block's final-position residual, median width falls strictly
 monotonically from 0.777 (block 1) to 0.445 (block 11) and 0.309 at the logits; the strict rule is
 passed only at the logits (14 pairs), never at intermediate residuals. The plateau is *formed* by the
-downstream stack, not present in the interpolated activation itself (Figure 33).
+downstream stack, not present in the interpolated activation itself (Figure 34).
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 33.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
+**Figure 34.** *(Exploratory.)* Layerwise emergence for four fixed representative pairs (IDs 0–3,
 frozen before inspection): $d(t)$ (y) vs interpolation position $t$ (x). Thin lines are the recording
 blocks, shaded on the cividis scale from block 1 (dark) to block 11 (light) per the colour bar; the
 thick black line is the final logits and the gray dashed line the straight-line reference. Early-block
@@ -2474,11 +2611,11 @@ curves are near-straight and progressively sharpen into plateau–boundary–pla
 **Later interpolation kills the plateau — the predicted control.** If downstream layers create the
 plateau, interpolating later (fewer layers left) must weaken it. It does, monotonically: median
 $w_{10\to 90}$ = 0.309, 0.564, 0.647, 0.733, 0.757, 0.802 for interpolation blocks 0, 2, 4, 6, 8, 10 —
-reaching the straight-line reference 0.8 when only one block remains (Figure 34).
+reaching the straight-line reference 0.8 when only one block remains (Figure 35).
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 34.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
+**Figure 35.** *(Exploratory.)* Left: median final-logit $d(t)$ (y) vs interpolation position $t$ (x)
 per interpolation block, shaded on the cividis scale from block 0 (dark) to block 10 (light) as given
 in the legend; the block-0 curve is strongly sigmoid and later blocks collapse onto the gray dashed
 straight line. Right: median transition width $w_{10\to90}$ (y; bars = inter-quartile range across the
@@ -2574,7 +2711,11 @@ of that pair's endpoints **9.8×** more often than chance, and the three most re
 capital-letter detectors firing on proper-name onsets. The rule is causal as well as predictive:
 linearizing the 32 units it selects, blind to the assay, removes **28.9%** of the width gap against
 1.2% for random units and 19.0% for the best assay-derived pair-blind set. A plateau boundary is where
-the detectors for the two endpoint characters hand over. No geometric rule over which blocks must be trainable has
+the detectors for the two endpoint characters hand over. The remaining half of the responsible units
+are the context-dependent ones — a median 51% of their corpus response is explained by the character
+at the position against 96% for the units the rule finds — and they carry about a third as much bend
+each; conditioning the profile on the preceding character ranks the population better (AUROC 0.886)
+yet selects worse (21.9% vs 31.9% of the gap at 32 units). No geometric rule over which blocks must be trainable has
 survived a test.
 
 **Joint Grokking↔plateau verdict: primary not testable (PLAN case 5); character analogues temporally
@@ -2649,7 +2790,9 @@ natural activation-to-activation directions.
    (Figure 29), and identifiable in advance as the character detectors tuned to the pair's own
    endpoints (Figure 30, AUROC 0.847; linearizing 32 units chosen that way, blind to the assay,
    removes 28.9% of the width gap against 1.2% for random units) — though that corpus rule recovers
-   less than the fitted per-pair ranking's 50.9%, so it names much of the mechanism and not all of it,
+   less than the fitted per-pair ranking's 50.9%, and the units it misses are context-dependent rather
+   than character-pure (Figure 32), which conditioning the profile on the preceding character does not
+   fix,
    and the freezing
    experiments bound the claim further:
    networks trained with blocks 1–4, 1–7, 5–11, 0–3&9–11, 0–4&8–11, 0–1&7–11 or 1–10 held at

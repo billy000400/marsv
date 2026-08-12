@@ -442,6 +442,20 @@ Null results are complete when the validity gates pass. When complete, write an 
       New **Figure 25** (`plots/seed_replication.png`) in both deliverables; Figure 24 re-rendered with
       the two extra seed markers and leader-line labels.
 
+- [x] **S24d - What the residual half of the responsible units are: bigram-conditioned corpus tuning.**
+      DONE 2026-08-12, closing the successor S24c named. `experiments/neuron_bigram.py` tabulates each
+      block-1-4 unit's mean post-GeLU activation against the (previous, current) character pair over
+      the same 90% training split, then (a) decomposes each unit's table into current-character,
+      previous-character and interaction shares, (b) linearizes 8 found vs 8 missed recruits at matched
+      size, and (c) hands the selection to a context-matched profile (previous character = space, the
+      assay's own context) and re-scores every k=32 rule on the 84 like-for-like pairs. 19 s, no
+      training. **Result: the missed units are context-dependent, and the fix is refuted.** Found
+      recruits are 96% current-character, missed ones 51% (interaction 18% -> 49%, p = 1.4e-186,
+      population median 37%); 8 missed recruits remove 11.5% of the width gap against 29.1% for 8 found
+      (p = 1.2e-20); the context-matched rule ranks better (AUROC 0.886 vs 0.869, p = 1.4e-5) and
+      selects worse (21.9% vs 31.9% at k=32, p = 1.9e-11; ceiling 52.6%, random 0.6%), foretold by
+      precision@32 (20.3% vs 25.6%). Figure 32 (`plots/neuron_bigram.png`) in both deliverables.
+
 - [x] **S24b - What the early MLPs compute: chord linearization of individual units.** DONE 2026-08-12,
       the first answer to S24 item 1 (open since 2026-08-03). `experiments/neuron_path.py` replaces a
       chosen set of block-1-4 MLP hidden units' post-GeLU activations along the path by the chord
@@ -575,6 +589,30 @@ Prioritize in this order: Figure 9 validity gate, BPE training/validation, Matth
 End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker if any>`.
 
 ## Current status
+
+**S24d DONE 2026-08-12 — the residual half of the mechanism is characterised, and the obvious fix for
+it is refuted.** Zero unaddressed feedback files, so this iteration advanced the plan (PLAN's own
+"Next step" named this experiment). One script, no training, 19 s of forward passes.
+`experiments/neuron_bigram.py` re-runs the corpus pass tabulating each block-1–4 unit's mean post-GeLU
+activation against the (previous, current) character pair, which supports two tests at once.
+**Descriptive:** a weighted two-way decomposition of each unit's bigram table shows the recruited units
+the character ranking *finds* (top decile of $D_j$) are near-pure character detectors — median **96%**
+of their corpus response explained by the current character alone — while the ones it *misses* sit at
+**51%**, interaction share rising 18% → **49%** ($p=1.4\times10^{-186}$), against a population median
+of 37%. They are not ranking noise: 8 missed recruits remove **11.5%** of the width gap against
+**29.1%** for 8 found recruits at matched set size (paired $p=1.2\times10^{-20}$, 138 pairs), where 8
+random units remove about 1%. **Causal, and negative:** the context-matched profile (previous character
+= space, i.e. the assay's own context) *ranks* the population better — mean AUROC **0.886** vs **0.869**
+on the same 84 pairs ($p=1.4\times10^{-5}$) — and *selects* worse: its top 32 remove **21.9%** of the
+gap against **31.9%**, paired $p=1.9\times10^{-11}$, with the fitted ceiling at 52.6% and random at
+0.6% on those pairs. Precision@32 foretells it (20.3% vs 25.6%): the bigram split estimates each cell
+from ~14× fewer positions, and that noise bites hardest at the top of the ranking, which is the only
+part a 32-unit intervention reads. Free checks: marginalizing the bigram table reproduces $z$ to
+**0.0000**, baseline reproduces per pair to 0.3507, worst endpoint deviation $10^{-6}$. New
+`experiments/neuron_bigram.py`, `experiments/plot_neuron_bigram.py`,
+`results/neuron_bigram_summary.json`, `results/neuron_bigram_raw.npz`, **Figure 32**
+(`plots/neuron_bigram.png`); exploratory Figures 32–34 renumbered 33–35, 35 embeds / 35 captions /
+sequential 1–35 in both files; `check_render.py` passes with 0 problems.
 
 **S24c DONE 2026-08-12 — the direction's named open problem is now answered on both halves: how many
 units bend a path, and what those units detect.** Zero unaddressed feedback files, so this iteration
@@ -1030,6 +1068,16 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
+**S24d DONE (2026-08-12) — see "Current status". Single-character and bigram corpus statistics have now
+been taken as far as they go: the missed units are context-dependent, and sharpening the conditioning
+makes the *ranking* better and the *selection* worse. The honest successor is a learned description of
+the missed units rather than another hand-built conditioning — fit a probe on their corpus activations
+and ask what it reads, testing whether "context-dependent" resolves into nameable features or stays
+diffuse. It needs forward passes only, no training of the model. S24 item 3 (a longer character run
+whose second local-complexity descent separates from initial fit, the denser Figure-9 grid on the pilot
+run's local maximum, or a second model/tokenizer) still needs materially more compute than one
+30,000-step run.**
+
 **S24c DONE (2026-08-12) — S24 item 1 is answered on both halves; see "Current status". The successor
 it opens is what the *other* half of the responsible units respond to: the corpus rule recovers 28.9%
 of the width gap where the fitted per-pair ranking recovers 50.9%, and tuning conditioned on the
@@ -1085,8 +1133,12 @@ worth running:
 1. ~~**What the trainable blocks compute.**~~ **ANSWERED 2026-08-12 by S24b + S24c** — a few dozen
    MLP units per path carry the bend (top-32 of 3,840 recover 50.9%), drawn from a 668-unit pool, and
    those units are character detectors: corpus tuning predicts recruitment at AUROC 0.847 and units
-   selected by it alone remove 28.9% of the width gap. What remains is the other half of the effect
-   and units whose feature is not a single character. Original framing, kept for the record: five
+   selected by it alone remove 28.9% of the width gap. **S24d (2026-08-12) closed the remainder as far
+   as corpus statistics reach:** the units that rule misses are context-dependent (median 51% of their
+   corpus response explained by the current character, against 96% for the ones it finds) and carry
+   about a third as much bend each, and conditioning the profile on the previous character ranks the
+   population better but selects worse. What is still open is a *learned* description of those
+   context-dependent units. Original framing, kept for the record: five
    candidate mechanisms had been excluded in turn (the
    next-character decision, endpoint plausibility, the specific weights of blocks 1–4, any particular
    depth, and trainable parameter count), and the gap has not moved in six iterations: nothing here

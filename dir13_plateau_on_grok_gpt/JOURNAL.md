@@ -2144,3 +2144,76 @@ compute than remains. No `STOP` written — wall-clock remains and the plan has 
 
 On track? yes — the tuning result is now causal and held out, and both deliverables carry it with an
 honest residual; blocker: none.
+
+## 2026-08-12 (later still, III) — S24d: the residual has a name, and the obvious fix is refuted
+
+**What I did.** Part C first: listed the direction root for `human_feedback*.md` / `*REVIEW*` lacking
+`.addressed.md` — none of the seven, so this iteration advanced the plan. I also checked `results/`
+against the deliverables (the lesson from three iterations ago, when a finished run sat unreported on
+disk) — everything there is reported. `/tmp/dir13_frozen/checkpoints_ref_pos` and
+`/tmp/tinyshakespeare.txt` had both survived again, so no retraining.
+
+The target was the residual the previous iteration named as its next step: corpus character tuning
+selects 32 units that remove 28.9% of the width gap, the pair's own fitted top-32 removes 50.9%, so
+roughly half the effect lives in units the corpus rule does not find. The stated suspect was the
+conditioning — a profile over single characters describes a unit that responds to a two-character
+pattern badly. `experiments/neuron_bigram.py` tests that from one further corpus pass tabulating
+activations against the (previous, current) character pair, which supports both halves at once: a
+weighted two-way decomposition of each unit's bigram table (how much of a unit *is* the current
+character), and a context-matched tuning profile restricted to positions after a space — which is the
+assay's own context, since every interpolated character sits in `"The house was ␣X"`.
+
+**What the numbers say.** The descriptive half confirmed the suspicion cleanly. Units the character
+ranking finds are near-pure character detectors — median 96% of their corpus response explained by the
+current character alone; the ones it misses sit at 51%, with the interaction share rising from 18% to
+49% (p = 1.4e-186) against a population median of 37%. And they are not ranking noise: 8 missed
+recruits remove 11.5% of the gap against 29.1% for 8 found recruits at matched set size (p = 1.2e-20),
+where 8 random units remove about 1%. So the second population is real, context-dependent, and weaker
+per unit.
+
+The causal half refuted the fix. The context-matched rule is a *better ranking* — mean AUROC 0.886 vs
+0.869 on the same 84 pairs, p = 1.4e-5 — and a *worse selector*: its top 32 remove 21.9% of the gap
+against the current-character rule's 31.9% (p = 1.9e-11), on pairs where the ceiling is 52.6%. That
+dissociation is the most useful thing here and it is not a contradiction: precision@32 already fell
+(20.3% vs 25.6%). Conditioning on the preceding space splits the corpus roughly fourteen ways, so each
+cell is estimated from far fewer positions, and the noise lands hardest at the very top of the
+ranking — the only part an intervention that edits 32 units ever reads.
+
+**Assumptions logged (loop mode, no one to ask).** (a) "Context" here is the previous character only.
+A richer conditioning (more history, or a learned feature) might select the missed units well; I say so
+in both files rather than concluding that context-dependence is unreachable. Rejected alternative:
+conditioning on a longer suffix, which makes the sparsity problem that already sank the bigram rule
+strictly worse. (b) The found/missed split cuts a graded quantity (the character ranking's own rank) at
+the top decile, and the ranking that defines "found" is the same one whose misses are being described —
+stated as a caveat; the matched-size ablation is what makes the split more than a definition. (c) Cells
+with < 20 occurrences are dropped and only 47 of 65 characters occur ≥ 100 times after a space, so the
+like-for-like comparison uses 84 of 150 pairs; I re-scored *every* k=32 rule on exactly those 84 rather
+than comparing a restricted rule against a full-sample one, which would have flattered the new rule's
+opponent.
+
+**What I learned.** A ranking metric and a selection metric can disagree, and which one you believe
+depends on what the downstream use reads. AUROC integrates over the whole 3,840-unit ordering;
+the intervention reads only the top 32. Improving average order while degrading the top is a perfectly
+coherent outcome, and it would have been invisible had I reported AUROC alone — I would have written
+"bigram conditioning improves the description" and been wrong about what it buys. Worth carrying: when
+a measurement exists to serve an intervention, score it the way the intervention consumes it.
+
+**Deliverable work.** New Results section in both files with Figure 32 (`plots/neuron_bigram.png`,
+three panels) and a new REPORT.md Methods subsection defining the bigram profile, the two-way variance
+decomposition (current / previous / interaction shares) and the context-matched score
+$D^{\sqcup}$. The two places that named the residual as unestablished (REPORT Results caveats, RESULTS
+caveats) now point to the answer; REPORT Summary, Conclusion and Limitation 7 and the RESULTS
+hypothesis paragraph carry it. Exploratory Figures 32–34 renumbered 33–35; 35 embeds / 35 captions /
+sequential 1–35 in each file; `check_render.py REPORT.md RESULTS.md` passes with 0 problems.
+
+**Next step.** The mechanism question is now answered on both halves as far as single-character and
+bigram corpus statistics can take it. The honest successor is a *learned* description of the missed
+units — e.g. fit a linear probe on their activations over the corpus and ask what it reads — which
+would test whether "context-dependent" resolves into nameable features or stays diffuse; it needs no
+training of the model itself. Everything else in PLAN S24 item 3 (a longer character run whose second
+local-complexity descent separates from initial fit, the denser Figure-9 grid on the pilot run's local
+maximum, or a second model/tokenizer) still needs materially more compute than remains. No `STOP`
+written — wall-clock remains and the plan has open candidates.
+
+On track? yes — S24d done, the residual half of the mechanism is characterised and the obvious fix for
+it is tested and refuted, with both results in the deliverables; blocker: none.
