@@ -956,3 +956,66 @@ appears), which would tie the transplant result to the emergence result.
 result that changed the answer rather than confirming a guess; both deliverables are curated to
 current-best with Figures 25–26 embedded and `check_render.py` passes. No STOP written: budget remains
 and there is a concrete cheap next experiment.
+
+### 2026-08-12 — iteration 13: GPT-2, and the first result that takes a claim back
+
+No unaddressed feedback (`human_feedback.addressed.md` only), so this iteration ran the experiment both
+deliverables named: does the per-token width ordering survive a different tokenizer and training corpus?
+
+**What I ran.** All 123 endpoint strings and all 6 anchor strings turn out to be single tokens in
+GPT-2's vocabulary, so the transfer needed no substitution at all — same strings, anchors, frames,
+block-0 site. `xmodel_width.py` measures widths in `gpt2`, `pythia-410m` and `pythia-1.4b`;
+`xmodel_analysis.py` pools them; `gpt2_sites.py` repeats GPT-2 at six depths; `xcurve_examples.py`
+saves raw curves; `plot_xmodel.py` makes Figures 27–28. ~5 min of GPU in total.
+
+**The experiment broke on first contact, and the break was the finding.** My first run reported valid
+fraction 0.112 and a median width of NaN. The cause is not a bug: 88.8% of GPT-2's block-0 `d(t)`
+curves are non-monotone (median backslide 0.107), so dir18's `w` is undefined for them, where every
+Pythia curve in this project passes. Rather than loosen the validity criteria (which would have made
+the two models incomparable in an unstated way), I defined an **envelope width** on the running maximum
+of `d`, which exists for every curve and coincides with `w` exactly on monotone ones, and validated the
+substitution inside Pythia before using it: rank correlation with `w` is 1.0000 per curve and per token
+in both Pythia models, and re-measuring 1.4B/410M with it reproduces every previously reported number
+(median 0.549/0.658, probe +0.764/+0.774, cross-model +0.884). That validation is what makes the
+negative interpretable instead of a metric artifact.
+
+**Result — the ordering does not port.** GPT-2 vs Pythia-1.4B $\rho = -0.219$ (ceiling 0.53) against
+$+0.884$ between two Pythias; the free lookup transfers at $-0.200$ against $+0.76$; a probe refitted
+inside GPT-2 sits on its shuffled control (+0.295 vs +0.275); GPT-2's widths do not even track unigram
+frequency ($-0.038$ vs $-0.52$). Partialling out frequency and successor entropy changes nothing.
+
+**The control that makes it a result rather than a shrug.** GPT-2's own reliability is 0.319, so I
+could not have concluded much from a small correlation — the ceiling is 0.53. Two things settle it.
+First, $|\rho| \le 0.22$ is well inside that ceiling. Second, the site sweep: moving the interpolation
+site down to block 8 repairs the curves (validity 0.112 → 0.801, backslide → 0) and raises the level
+(0.442 → 0.671) exactly as depth does in Pythia, yet reliability peaks at 0.462 and agreement with
+Pythia never exceeds $+0.141$ ($p = 0.12$). The block-0 negative sign does not reproduce anywhere else,
+so the honest statement is *no relationship*, not a reversed one.
+
+**What I changed in the story (rule 9b).** The report has claimed since iteration 11 that "the ordering
+belongs to the token, the level to the network". That is now qualified everywhere: the ordering belongs
+to a token *as trained in a particular corpus*, the screen is per-model, and the split-half reliability
+check is the go/no-go test an auditor can run with no reference model (0.89 where the screen works,
+0.32 where it does not). The 160M floor is re-read the same way — a fact about that training run, not
+about parameter count. I did not delete or soften any Pythia result; the cross-model and checkpoint
+sections stand as measured.
+
+**Assumptions logged.** (a) GPT-2 small rather than GPT-2 medium/large — cheapest and the plan named
+`gpt2`; a size sweep would confound corpus with scale, and the Pythia scale sweep already covers scale.
+(b) Envelope width on the running maximum rather than relaxing MONO_TOL or fitting a sigmoid: it is the
+only choice that is exactly `w` on the curves where `w` exists, which the other two are not. (c) The
+ablation comparison in GPT-2 uses the same 12 tokens as every intervention here, so it inherits their
+n = 12 and is reported as suggestive. (d) Corpus statistics are dir18's Pile-sampled counts, so they
+are the *wrong* corpus for GPT-2 — used only to show the mismatch is not a frequency artifact, and the
+partial correlation is reported alongside the raw one for that reason.
+
+**Next step.** Separate the two ways GPT-2 could fail, at zero GPU cost: edge drift `E` on the 2,214
+curves already stored per model and per site. Straight-line-like `E` in GPT-2 means it has no plateau
+to measure and the negative is about plateau structure (and predicts Pythia-160M looks the same);
+Pythia-like `E` means genuine plateaus in a different token order, and the next question is what that
+order correlates with.
+
+**On track?** Yes — the named next experiment was run, returned a clean negative with the control that
+makes it interpretable, and forced a scope correction that both deliverables now carry; RESULTS.md and
+REPORT.md are curated to current-best with Figures 27–28 embedded and `check_render.py` passes. No STOP
+written: budget remains and the next experiment costs no GPU.

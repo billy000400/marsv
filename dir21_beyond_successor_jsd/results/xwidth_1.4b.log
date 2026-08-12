@@ -1,0 +1,19 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:15,  1.08s/it]Loading weights:  21%|██        | 60/292 [00:01<00:03, 66.12it/s]Loading weights:  29%|██▉       | 85/292 [00:01<00:02, 73.96it/s]Loading weights:  35%|███▌      | 103/292 [00:01<00:02, 74.09it/s]Loading weights:  40%|████      | 117/292 [00:01<00:02, 77.49it/s]Loading weights:  44%|████▍     | 129/292 [00:02<00:01, 82.86it/s]Loading weights:  48%|████▊     | 141/292 [00:02<00:02, 63.44it/s]Loading weights:  53%|█████▎    | 156/292 [00:02<00:01, 76.42it/s]Loading weights:  58%|█████▊    | 170/292 [00:02<00:01, 79.00it/s]Loading weights:  62%|██████▏   | 182/292 [00:02<00:01, 76.72it/s]Loading weights:  66%|██████▌   | 192/292 [00:02<00:01, 80.74it/s]Loading weights:  71%|███████   | 206/292 [00:02<00:00, 88.69it/s]Loading weights:  74%|███████▍  | 216/292 [00:03<00:00, 82.88it/s]Loading weights:  79%|███████▉  | 230/292 [00:03<00:00, 89.83it/s]Loading weights:  83%|████████▎ | 242/292 [00:03<00:00, 94.43it/s]Loading weights:  86%|████████▋ | 252/292 [00:03<00:00, 89.40it/s]Loading weights:  90%|████████▉ | 262/292 [00:03<00:00, 84.65it/s]Loading weights:  93%|█████████▎| 272/292 [00:03<00:00, 84.28it/s]Loading weights:  97%|█████████▋| 284/292 [00:03<00:00, 91.85it/s]Loading weights: 100%|██████████| 292/292 [00:03<00:00, 74.99it/s]
+[1.4b] 123/123 token strings are single tokens here
+  frame 0 token 0/123 ' about' w_env=0.553 valid=1.00
+  frame 0 token 40/123 ' fun' w_env=0.592 valid=1.00
+  frame 0 token 80/123 ' over' w_env=0.550 valid=1.00
+  frame 0 token 120/123 ' wrong' w_env=0.695 valid=1.00
+  frame 1 token 0/123 ' about' w_env=0.506 valid=1.00
+  frame 1 token 40/123 ' fun' w_env=0.591 valid=1.00
+  frame 1 token 80/123 ' over' w_env=0.540 valid=1.00
+  frame 1 token 120/123 ' wrong' w_env=0.647 valid=1.00
+  frame 2 token 0/123 ' about' w_env=0.533 valid=1.00
+  frame 2 token 40/123 ' fun' w_env=0.593 valid=1.00
+  frame 2 token 80/123 ' over' w_env=0.540 valid=1.00
+  frame 2 token 120/123 ' wrong' w_env=0.647 valid=1.00
+[A] 118s: median w_env 0.549, sd 0.066, strict-valid fraction 1.000
+[B] probe rho +0.764 +- 0.045 (shuffled -0.201), R2 +0.514
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/xwidth_1.4b.json

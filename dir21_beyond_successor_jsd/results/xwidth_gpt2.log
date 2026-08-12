@@ -1,0 +1,32 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 7422.04it/s]
+[gpt2] 123/123 token strings are single tokens here
+  frame 0 token 0/123 ' about' w_env=0.664 valid=0.00
+  frame 0 token 40/123 ' fun' w_env=0.518 valid=0.17
+  frame 0 token 80/123 ' over' w_env=0.605 valid=0.00
+  frame 0 token 120/123 ' wrong' w_env=0.327 valid=0.00
+  frame 1 token 0/123 ' about' w_env=0.599 valid=0.00
+  frame 1 token 40/123 ' fun' w_env=0.518 valid=0.17
+  frame 1 token 80/123 ' over' w_env=0.700 valid=0.00
+  frame 1 token 120/123 ' wrong' w_env=0.304 valid=0.08
+  frame 2 token 0/123 ' about' w_env=0.581 valid=0.00
+  frame 2 token 40/123 ' fun' w_env=0.502 valid=0.28
+  frame 2 token 80/123 ' over' w_env=0.716 valid=0.00
+  frame 2 token 120/123 ' wrong' w_env=0.317 valid=0.28
+[A] 20s: median w_env 0.442, sd 0.132, strict-valid fraction 0.112
+[B] probe rho +0.295 +- 0.092 (shuffled +0.275), R2 +0.025
+[C] baseline: mean 0.415 sd 0.116
+[C] block 0 mlp: mean 0.642 sd 0.201 rho +0.06 bits 0.228
+[C] block 0 attn: mean 0.460 sd 0.092 rho +0.65 bits 0.002
+[C] block 1 mlp: mean 0.472 sd 0.125 rho +0.70 bits 0.004
+[C] block 1 attn: mean 0.449 sd 0.117 rho +0.86 bits 0.000
+[C] block 2 mlp: mean 0.473 sd 0.169 rho +0.38 bits 0.007
+[C] block 2 attn: mean 0.396 sd 0.100 rho +0.90 bits 0.000
+[C] block 3 mlp: mean 0.463 sd 0.133 rho +0.71 bits 0.008
+[C] block 3 attn: mean 0.443 sd 0.086 rho +0.86 bits 0.001
+[C] block 4 mlp: mean 0.474 sd 0.089 rho +0.08 bits 0.011
+[C] block 4 attn: mean 0.436 sd 0.126 rho +0.93 bits 0.001
+[C] block 5 mlp: mean 0.435 sd 0.111 rho +0.52 bits 0.010
+[C] block 5 attn: mean 0.422 sd 0.116 rho +0.97 bits 0.001
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/xwidth_gpt2.json

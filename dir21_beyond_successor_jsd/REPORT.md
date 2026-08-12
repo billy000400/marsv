@@ -155,6 +155,16 @@ ranking's rank variance, and the agreement between an early checkpoint and the f
 partialling them out at $+0.6$ to $+0.8$. So the free lookup cannot be replaced by a count table, and
 what it reads is fixed very early rather than refined late.
 
+**The trait belongs to a token of a training corpus, not to the string.** Measuring the same 123
+strings in GPT-2 small — a different corpus, a different BPE vocabulary, a serial residual block —
+gives a ranking that correlates with Pythia-1.4B's at $\rho = -0.22$, where two Pythia sizes agree at
+$+0.88$; the free lookup transfers at $-0.20$ and a probe refitted inside GPT-2 sits on its shuffled
+control. The measurement fails there first: 88.8% of GPT-2's block-0 curves are non-monotone, so `w`
+is undefined for them, and its per-token width has a split-half reliability of 0.32 against Pythia's
+0.89 — at every one of six interpolation sites we tried, including the ones where its curves are well
+behaved. So the screen is per-model, and the split-half reliability check, which needs no reference
+model, is what tells an auditor whether it applies to theirs.
+
 We also ruled out the most deflationary explanation. Because `w` is a *fraction* of the path, a
 transition of fixed absolute size would look narrower on a longer path. If that were the mechanism,
 converting `w` into residual-stream distance units would make it more homogeneous. It does the
@@ -915,6 +925,49 @@ R^2_{\mathrm{corpus}} \;=\; 1 \;-\;
 ```
 
 Figures 25 and 26 report these.
+
+### Does the ordering survive a different tokenizer and corpus? The GPT-2 protocol, and a width that always exists
+
+The four Pythia sizes and the 17 checkpoints share one tokenizer and one training corpus, so "the
+ordering belongs to the token" is so far a claim about tokens *of the Pile*. **GPT-2 small** (124M, 12
+blocks, width 768, trained on WebText, its own BPE vocabulary, and a serial rather than parallel
+residual block) tests that claim at the lowest possible cost in comparability: all 123 endpoint token
+strings and all 6 anchor strings are single tokens in GPT-2's vocabulary as well, so the *same strings*,
+anchors and three frames transfer with no substitution. We measure $\hat w_u$ there exactly as in every
+Pythia run — final-token residual state at the output of block 0, 50-step norm-rescaled SLERP toward
+each anchor's state — refit the embedding probe inside GPT-2 (its own $W_E$, same 80/43 splits and
+shuffled-target control), and mean-ablate the MLP and the attention block of blocks 0–5 on the same 12
+tokens used for every intervention above.
+
+One thing has to change, and it is itself a result. Transition width `w` is only defined when `d(t)`
+rises monotonically and crosses 0.1 and 0.9 exactly once each; that holds for every Pythia curve in
+this report and for one GPT-2 curve in nine. To compare models at all we score every curve with the
+**envelope width**, which replaces the curve by its running maximum
+
+```math
+e(t) \;=\; \max_{s \le t} d(s),
+```
+
+and measures the same 0.1-to-0.9 rise on it:
+
+```math
+\hat w^{\mathrm{env}} \;=\; t\bigl(e = 0.9\bigr) \;-\; t\bigl(e = 0.1\bigr).
+```
+
+Because $e$ is non-decreasing and runs from $d(0) = 0$ to $d(1) = 1$ by construction, each level is
+crossed exactly once and $\hat w^{\mathrm{env}}$ exists for every curve; on a monotone curve $e = d$ and
+$\hat w^{\mathrm{env}} = w$ exactly. The substitution is validated inside Pythia, where both statistics
+are defined, before it is used on GPT-2: it must reproduce `w`'s ranking there. Reliability $R_M$,
+the noise ceiling and the disattenuated agreement $\rho^{*}_{AB}$ are the split-half quantities defined
+in the cross-model protocol above, computed on $\hat w^{\mathrm{env}}$.
+
+Two further controls decide how to read a negative. First, **site**: GPT-2's block 0 is not at Pythia's
+relative depth, so the whole measurement is repeated with the interpolation site at blocks 0, 1, 2, 4, 6
+and 8, and validity, reliability, level and agreement with Pythia are reported at each. Second,
+**corpus statistics**: the agreement with Pythia is recomputed with the token's unigram count
+$\log_{10} N_u$ and successor entropy $H_u$ (`dir18`'s manifest, the same two used in the checkpoint
+sweep) partialled out of both rankings, so that a mismatch in what the two corpora contain cannot by
+itself explain the result. Figures 27 and 28 report all of this.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -1891,6 +1944,97 @@ two predictions of it — circles/solid = a ridge probe refitted inside that che
 $\pm 1$ sd over 50 random 80/43 splits), squares/dashed = the fixed lookup read off Pythia-1.4B's
 embedding matrix, triangles/dotted = the refitted probe with shuffled targets.
 
+### GPT-2: the ordering is a property of the token *in a training corpus*, not of the string
+
+Every generalisation above holds the tokenizer and the training data fixed, so "the ordering belongs to
+the token" was still a statement about Pythia and the Pile. GPT-2 small is the cheapest way outside
+that family — a different corpus (WebText), a different BPE vocabulary, and a serial rather than
+parallel residual block — and it costs nothing in comparability, because **all 123 endpoint token
+strings and all 6 anchor strings are single tokens in GPT-2's vocabulary too**. The same strings, the
+same anchors, the same three frames, the same block-0 site.
+
+The first thing the test found is not about the ordering at all: **dir18's width `w` is undefined for
+most GPT-2 curves.** `w` requires the output-distance score `d(t)` to rise monotonically and to cross
+0.1 and 0.9 once each. Every Pythia curve in this report does (validity 1.000 at 410M and at 1.4B,
+median backslide 0.000). At GPT-2's block 0, **88.8% of curves fail** — they rise, fall back and rise
+again, with a median backslide of 0.107. So we score every curve with an **envelope width** $\hat w_u$,
+which replaces `d` by its running maximum and is therefore defined for every curve; on monotone curves
+it is exactly `w`. Inside Pythia the substitution changes nothing (rank correlation with `w` = 1.0000
+per curve and per token, both models), which is what licenses using it on GPT-2.
+
+To show what breaks, Figure 27 puts three raw curves from each model side by side and then compares the
+per-token rankings, with a second Pythia size as the positive control.
+
+![Raw interpolation curves in both models, and scatter plots of per-token width in Pythia-410M and in GPT-2 against Pythia-1.4B](plots/xmodel_agreement.png)
+
+**Figure 27.** Left: raw `d(t)` for three endpoint tokens against the anchor ` close` in the first of the three frames,
+Pythia-1.4B (solid) and GPT-2 small (dashed); x = interpolation position `t`, y = relative output
+distance `d(t)`; grey lines mark the 0.1 and 0.9 levels whose crossings define the width. Pythia's
+curves rise once; GPT-2's fall back below a level they have already crossed. Middle and right: each
+model's per-token envelope width $\hat w_u$ (y) against Pythia-1.4B's (x), one point per token, 123
+tokens, same axes in both panels; dotted line = equality. Middle is the positive control
+(Pythia-410M), right is GPT-2. Titles give raw $\rho$, the noise ceiling $\sqrt{R_A R_B}$ from the two
+models' split-half reliabilities, and $\rho$ divided by it.
+
+| | GPT-2 small | Pythia-410M | Pythia-1.4B |
+|---|---|---|---|
+| strict-validity rate of `w` | **0.112** | 1.000 | 1.000 |
+| median curve backslide | 0.107 | 0.000 | 0.000 |
+| median $\hat w_u$ (level) | 0.442 | 0.658 | 0.549 |
+| sd of $\hat w_u$ across tokens | 0.132 | 0.060 | 0.066 |
+| split-half reliability | **0.319** | 0.891 | 0.885 |
+| $\rho$ with Pythia-1.4B's ranking (÷ ceiling) | $\mathbf{-0.219}$ ($-0.41$) | $+0.884$ ($+0.99$) | — |
+| fixed 1.4B embedding lookup → this model | $-0.200$ | $+0.760$ | $+0.765$ |
+| probe refitted inside this model (shuffled control) | $+0.295$ ($+0.275$) | $+0.774$ ($+0.032$) | $+0.764$ ($-0.201$) |
+| $\rho$ with $\log_{10}$ unigram count $N_u$ | $-0.038$ | $-0.525$ | $-0.517$ |
+
+**Pattern 32 — nothing transfers to GPT-2: not the ordering, not the lookup, not even the frequency signal.** GPT-2 ranks the 123 tokens at $\rho = -0.219$ with Pythia-1.4B and $-0.189$ with
+410M, against $+0.884$ between the two Pythias; the free lookup read off Pythia-1.4B's embedding matrix
+ranks GPT-2's widths at $-0.200$ where it reaches $+0.76$ on both Pythias; a probe refitted inside
+GPT-2 is at its shuffled-target control ($+0.295$ against $+0.275$); and even the frequency signal that
+survives everything else in Pythia ($-0.52$) is absent ($-0.038$). Removing unigram count and successor
+entropy leaves the cross-model figure where it was ($-0.211$), so this is not a corpus-statistic
+mismatch.
+
+**And this is not simply GPT-2 being too noisy to say.** Its measurement reliability is 0.319 against
+0.885, which caps any correlation it could show at 0.53 — but the observed $|\rho| \le 0.22$ is well
+inside that cap, and the sign is not even stable ($-0.22$ at block 0, $+0.01$ to $+0.14$ at every other
+site below). The correct reading is *no relationship*, not a reversed one.
+
+The obvious objection is the site: block 0 of GPT-2's 12 blocks is not block 0 of Pythia's 24, and
+GPT-2's curves are badly behaved exactly there. Figure 28 answers it by repeating the whole measurement
+at six depths.
+
+![GPT-2 depth sweep: curve validity, measurement reliability, agreement with Pythia and width level against the interpolated block](plots/gpt2_sites.png)
+
+**Figure 28.** GPT-2 small, same 123 tokens, 6 anchors and 3 frames, with the interpolation site moved
+across blocks 0, 1, 2, 4, 6 and 8 (x, both panels). Left, y: fraction of curves passing dir18's strict
+validity (circles/solid) and the split-half reliability of the per-token width (squares/dashed);
+horizontal dotted and dash-dotted lines mark Pythia-1.4B's values (1.000 and 0.885). Right, y: Spearman
+$\rho$ between GPT-2's ranking at that site and Pythia-1.4B's block-0 ranking (triangles/solid) and
+GPT-2's own median envelope width (diamonds/dashed, the level), with Pythia-1.4B's level (0.549) dotted.
+
+**Pattern 33 — depth repairs GPT-2's curves but does not recover the trait.** Moving down GPT-2, the curves become well behaved —
+validity 0.112 → 0.801 and median backslide 0.105 → 0.000 between blocks 0 and 8 — and the level rises
+0.442 → 0.671, the same sharpening-with-depth direction Pythia shows. But the per-token measurement
+never becomes reliable (peak 0.462 at block 6, against Pythia's 0.885) and agreement with Pythia's
+ranking never leaves noise (maximum $+0.141$, $p = 0.12$; $p > 0.2$ at every site except block 0's
+negative). At GPT-2's most reliable site the ceiling is 0.64 and the observed value is 0.14.
+
+**Pattern 34 — the one thing that replicates is the site.** Mean-ablating each early component of GPT-2 in turn (12 tokens, first frame)
+leaves the block-0 MLP as the only one the model feels — 0.228 bits of output movement against
+$\le 0.011$ for the other eleven — and the only one that inflates the across-token spread (0.116 →
+0.201) and erases what ordering there is ($\rho = +0.06$, against $+0.38$ to $+0.97$ elsewhere). With
+12 tokens and a reliability of 0.32 this is suggestive, not established, but the site of the effect is
+where Pythia puts it.
+
+**What this costs the report.** The width ordering is a property of a token *as trained in a particular
+corpus*, not of the token string. The practical screen is therefore per-model: an auditor must run the
+split-half reliability check first, because it is exactly the statistic that separates the two regimes
+here (0.89 in a model where the screen works, 0.32 in one where it does not) and it needs no reference
+model to compute. The 160M floor found earlier reads the same way — as a fact about that training run,
+not about parameter count.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -1988,23 +2132,31 @@ story only up to `step128`, and in the finished model frequency and successor en
 $+0.6$–$+0.8$. What the lookup reads is fixed in the first few hundred optimizer steps and is more than
 a count table.
 
-**The single most informative next experiment is now a change of tokenizer and training corpus.** Every
-generalisation result here — four model sizes, 17 checkpoints — holds the token inventory and the
-training data fixed, so "the ordering belongs to the token" is so far a statement about the Pile and
-Pythia's tokenizer. The test is cheap: take the token *strings* from this report's pool that are also
-single tokens in GPT-2's BPE vocabulary (most of the 123 are common words with a leading space, so the
-overlap should be large), measure anchor widths for them in `gpt2` (12 blocks, width 768) at the same
-relative hook point and in the same three frames with six anchors chosen the same way, and correlate
-the resulting ranking with Pythia's on the shared strings, against the split-half reliability of each.
-Agreement near the ceiling would make the width ordering a property of the token in English text and
-turn the lookup into something an auditor can port to a model it was not built on; disagreement well
-below the ceiling would confine every result here to one training corpus and one tokenizer, and would
-make the 160M floor a statement about Pythia rather than about scale. Cost: `gpt2` is small and already
-cached, so about ten minutes of GPU time. The cheaper mechanistic alternative, if that comes back
-positive, is a cross-checkpoint transplant: write the *final* checkpoint's block-0 MLP output vector
-$m_u$ into the `step128` model, where the ordering does not yet exist, and see whether the width
-ordering appears — which would tie patterns 23 and 29 together by showing that what training builds in
-the first few hundred steps is exactly the vector the transplant moves.
+Pattern 32 then left the Pythia family, and cost the report its broadest claim. The same 123 token
+strings measured in GPT-2 small rank at $\rho = -0.22$ with Pythia-1.4B, where two Pythia sizes agree
+at $+0.88$; the free lookup transfers at $-0.20$; a probe refitted inside GPT-2 sits on its shuffled
+control; and even the frequency signal is gone. Before any of that, the measurement itself fails there —
+88.8% of GPT-2's block-0 curves are non-monotone, and its per-token width has a split-half reliability
+of 0.32 against Pythia's 0.89, at every site we tried. The ordering is a property of a token *as
+trained in a particular corpus*, and the screen is per-model.
+
+**The single most informative next experiment is now to separate two ways GPT-2 could fail.** The
+GPT-2 result shows the ordering does not port and hints at why, but it does not distinguish a model
+that has plateau-shaped transitions in a *different* token order from a model that lacks the plateau
+structure the width statistic presupposes. The quantity that separates them already exists in this
+project: edge drift `E`, the movement of `d(t)` inside the outer 20% of the path, which is near 0 for a
+plateau and near 0.18 for a straight line (a formal definition is in Methods). It costs no forward
+passes — compute `E` for the 2,214 curves already stored per model and per site, for GPT-2,
+Pythia-410M and Pythia-1.4B, and compare the distributions. If GPT-2's `E` sits near the straight-line
+value while Pythia's sits near zero, GPT-2 small has no plateau to measure, the negative is a statement
+about plateau structure rather than about token ordering, and the prediction is that Pythia-160M — the
+size that also lacks the trait — looks the same way, which would unify patterns 26 and 32 under one
+mechanism. If GPT-2's `E` is as small as Pythia's, it has genuine plateaus in a different order, and
+the question becomes what *its* ordering correlates with, which is the first evidence available about
+what a different corpus writes into the same slot. Either way the scope claim gets sharper, at a cost
+of minutes. The mechanistic follow-up inside Pythia is unchanged and still cheap: write the final
+checkpoint's block-0 MLP output vector $m_u$ into the `step128` model, where the ordering does not yet
+exist, and see whether it appears — tying patterns 23 and 29 together.
 
 ---
 

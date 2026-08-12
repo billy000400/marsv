@@ -1,0 +1,37 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+shared single tokens: 123/123; anchors [' and', ' significant', ' close', ' playing', ' bigger', ' buried']
+Loading weights:   0%|          | 0/148 [00:00<?, ?it/s]Loading weights:  51%|█████     | 75/148 [00:00<00:00, 746.69it/s]Loading weights: 100%|██████████| 148/148 [00:00<00:00, 1124.17it/s]
+[A] anchor widths, 123 tokens x 6 anchors x 3 frames
+/workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/experiments/second_model.py:109: RuntimeWarning: All-NaN slice encountered
+  f"w={np.nanmedian(raw[s]):.3f}", flush=True)
+  frame 0 token 0/123 ' about' w=nan
+  frame 0 token 40/123 ' fun' w=0.268
+  frame 0 token 80/123 ' over' w=nan
+  frame 0 token 120/123 ' wrong' w=nan
+  frame 1 token 0/123 ' about' w=nan
+  frame 1 token 40/123 ' fun' w=0.430
+  frame 1 token 80/123 ' over' w=nan
+  frame 1 token 120/123 ' wrong' w=0.324
+  frame 2 token 0/123 ' about' w=nan
+  frame 2 token 40/123 ' fun' w=0.543
+  frame 2 token 80/123 ' over' w=nan
+  frame 2 token 120/123 ' wrong' w=0.407
+/workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/experiments/second_model.py:110: RuntimeWarning: All-NaN slice encountered
+  med = {s: float(np.nanmedian(v)) for s, v in raw.items()}
+[A] done in 19s: valid 0.112, median w nan, sd nan
+[B] probe rho +0.028 +- 0.232 (null +0.208), R2 -0.096
+[C] baseline (frame 0, 12 tokens): mean nan sd nan
+[C] block 0 mlp: mean 0.600 sd 0.142 rho -0.80 bits 0.228 (23s)
+[C] block 0 attn: mean 0.580 sd 0.292 rho +1.00 bits 0.002 (23s)
+[C] block 1 mlp: mean 0.445 sd 0.245 rho +nan bits 0.004 (24s)
+[C] block 1 attn: mean 0.551 sd 0.312 rho +1.00 bits 0.000 (25s)
+[C] block 2 mlp: mean 0.366 sd 0.111 rho +nan bits 0.007 (26s)
+[C] block 2 attn: mean 0.505 sd 0.276 rho +1.00 bits 0.000 (27s)
+[C] block 3 mlp: mean 0.351 sd 0.167 rho +nan bits 0.008 (27s)
+[C] block 3 attn: mean 0.359 sd 0.161 rho +nan bits 0.001 (28s)
+[C] block 4 mlp: mean 0.375 sd 0.259 rho +nan bits 0.011 (29s)
+[C] block 4 attn: mean 0.452 sd 0.268 rho +nan bits 0.001 (30s)
+[C] block 5 mlp: mean 0.421 sd 0.301 rho +nan bits 0.010 (30s)
+[C] block 5 attn: mean 0.428 sd 0.157 rho +nan bits 0.001 (31s)
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/gpt2.json

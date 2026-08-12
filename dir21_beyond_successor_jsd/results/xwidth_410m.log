@@ -1,0 +1,23 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights: 100%|██████████| 292/292 [00:00<00:00, 4750.89it/s]
+[410m] 123/123 token strings are single tokens here
+  frame 0 token 0/123 ' about' w_env=0.668 valid=1.00
+  frame 0 token 40/123 ' fun' w_env=0.693 valid=1.00
+  frame 0 token 80/123 ' over' w_env=0.646 valid=1.00
+  frame 0 token 120/123 ' wrong' w_env=0.720 valid=1.00
+  frame 1 token 0/123 ' about' w_env=0.637 valid=1.00
+  frame 1 token 40/123 ' fun' w_env=0.683 valid=1.00
+  frame 1 token 80/123 ' over' w_env=0.675 valid=1.00
+  frame 1 token 120/123 ' wrong' w_env=0.719 valid=1.00
+  frame 2 token 0/123 ' about' w_env=0.613 valid=1.00
+  frame 2 token 40/123 ' fun' w_env=0.683 valid=1.00
+  frame 2 token 80/123 ' over' w_env=0.694 valid=1.00
+  frame 2 token 120/123 ' wrong' w_env=0.721 valid=1.00
+[A] 38s: median w_env 0.658, sd 0.060, strict-valid fraction 1.000
+[B] probe rho +0.774 +- 0.055 (shuffled +0.032), R2 +0.540
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/xwidth_410m.json
+w_env=0.721 valid=1.00
+[A] 38s: median w_env 0.658, sd 0.060, strict-valid fraction 1.000
+[B] probe rho +0.774 +- 0.055 (shuffled +0.032), R2 +0.540
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/xwidth_410m.json

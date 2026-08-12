@@ -46,7 +46,36 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 12 — COMPLETE; training-checkpoint sweep added)
+## Current status (2026-08-12, iteration 13 — COMPLETE; GPT-2 cross-tokenizer test added)
+
+**Iteration 13 ran the experiment both deliverables named as next** (`experiments/envwidth.py`,
+`xmodel_width.py`, `xmodel_analysis.py`, `gpt2_sites.py`, `xcurve_examples.py`, `plot_xmodel.py`;
+Figures 27–28; deliverables now carry 28 figures each and pass `check_render.py`). It is a negative,
+and it narrows the report's broadest claim.
+
+* **The ordering does not survive a change of corpus and tokenizer.** All 123 endpoint strings and all
+  6 anchors are single tokens in GPT-2's vocabulary, so the same strings/anchors/frames/site transfer.
+  GPT-2 ranks them at rho −0.219 with Pythia-1.4B (ceiling 0.53) against +0.884 between two Pythias;
+  the free 1.4B lookup transfers at −0.200 against +0.76; a probe refitted inside GPT-2 is on its
+  shuffled control (+0.295 vs +0.275); GPT-2's widths do not track unigram frequency (−0.038 vs −0.52).
+* **The measurement fails there before the ordering does.** 88.8% of GPT-2's block-0 curves are
+  non-monotone, so `w` is undefined for them (validity 0.112 vs 1.000 in Pythia). Both deliverables now
+  define an **envelope width** on the running maximum of `d(t)`, validated inside Pythia (rank
+  correlation with `w` = 1.0000 per curve and per token; every previously reported number reproduces).
+* **Not a site artifact.** Blocks 0/1/2/4/6/8: validity 0.112 → 0.801 and level 0.442 → 0.671, but
+  reliability peaks at 0.462 (Pythia 0.885) and agreement with Pythia never exceeds +0.141 (p = 0.12).
+* **Claim narrowed:** the ordering belongs to a token *as trained in a particular corpus*; the screen is
+  per-model and the split-half reliability check (0.89 vs 0.32) is the go/no-go test for porting it.
+  The 160M floor re-reads as a fact about that training run, not about parameter count.
+
+**Next step (only if reopened):** separate two ways GPT-2 could fail, at zero GPU cost — compute edge
+drift `E` (movement of `d(t)` in the outer 20% of the path; ~0 for a plateau, ~0.18 for a straight
+line) on the 2,214 curves already stored per model and per site for GPT-2, 410M and 1.4B.
+Straight-line-like `E` in GPT-2 ⇒ no plateau to measure, the negative is about plateau structure, and
+Pythia-160M should look the same; Pythia-like `E` ⇒ genuine plateaus in a different token order, and
+the question becomes what that order correlates with.
+
+## Previous status (2026-08-12, iteration 12 — COMPLETE; training-checkpoint sweep added)
 
 **Iteration 12 ran the experiment both deliverables named as next, on 17 checkpoints rather than four**
 (`experiments/checkpoints.py`, `checkpoints_analysis.py`, `plot_checkpoints.py`; Figures 25–26;
@@ -69,12 +98,9 @@ deliverables now carry 26 figures each and pass `check_render.py`).
 * **Consistency:** this sweep's `step143000` reproduces iteration 11's independent 410M run at
   rho = +1.0000 (n = 123).
 
-**Next step (only if reopened):** the last untested generalisation — a different tokenizer and training
-corpus. Measure anchor widths in `gpt2` for the token strings that are single tokens in both
-vocabularies, same three frames and six anchors chosen the same way, and compare the ranking with
-Pythia's against each model's split-half reliability. ~10 min GPU (`gpt2` is cached). If positive,
-follow with a cross-checkpoint transplant: write the final checkpoint's $m_u$ into the `step128` model
-and ask whether the ordering appears.
+**Next step named at iteration 12 — DONE in iteration 13, see the current status above.** The last
+untested generalisation: a different tokenizer and training corpus (`gpt2`, same frames and anchor
+protocol, compared against each model's split-half reliability).
 
 ## Previous status (2026-08-12, iteration 11 — COMPLETE; cross-model replication added)
 

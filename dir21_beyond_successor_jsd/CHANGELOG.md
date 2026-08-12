@@ -844,3 +844,64 @@ ordering appears.
 **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
 (REPORT 35 display eqs / 887 inline eqs / 26 embeds / 0 problems; RESULTS 633 inline eqs / 26 embeds /
 0 problems); 52 figure captions for 52 embeds across the two files.
+
+## 2026-08-12 — iteration 13: GPT-2 cross-tokenizer test (Figures 27–28); the ordering does NOT port
+
+**Ran the experiment both deliverables named as next** (`experiments/envwidth.py`, `xmodel_width.py`,
+`xmodel_analysis.py`, `gpt2_sites.py`, `xcurve_examples.py`, `plot_xmodel.py`; new
+`results/xwidth_{gpt2,410m,1.4b}.json`, `xmodel_summary.json`, `gpt2_sites.json`, `xcurves.json`;
+new `plots/xmodel_agreement.png`, `plots/gpt2_sites.png`). All 123 endpoint strings and all 6 anchor
+strings are single tokens in GPT-2's vocabulary, so the comparison uses the same strings, anchors,
+frames and block-0 site with no substitution.
+
+**Result — negative, and it narrows a claim the report has been making since iteration 11.**
+- GPT-2 ranks the 123 tokens at $\rho = -0.219$ with Pythia-1.4B and $-0.189$ with 410M (ceiling 0.53),
+  against $+0.884$ (ceiling 0.888, disattenuated $+0.995$) between the two Pythias. Partialling out
+  unigram count and successor entropy leaves it at $-0.211$.
+- The fixed 1.4B embedding lookup ranks GPT-2's widths at $-0.200$, against $+0.760$/$+0.765$ on the
+  Pythias. A probe refitted inside GPT-2 gives $+0.295$ against a shuffled control of $+0.275$ (null),
+  against $+0.774$ (control $+0.032$) at 410M. GPT-2's widths do not even track $\log_{10} N_u$
+  ($-0.038$ vs $-0.52$ in Pythia).
+- Measurement failure comes first: 88.8% of GPT-2's block-0 curves are non-monotone (median backslide
+  0.107, strict-validity 0.112 against 1.000 in both Pythias), and its split-half reliability is 0.319
+  against 0.885/0.891.
+- Site sweep (blocks 0/1/2/4/6/8) rules out the obvious confound: validity climbs 0.112 → 0.801 and
+  the level 0.442 → 0.671, but reliability peaks at 0.462 and agreement with Pythia never exceeds
+  $+0.141$ ($p = 0.12$); the negative sign at block 0 does not reproduce at any other site, so the
+  reading is *no relationship*, not a reversed one.
+- One replication: GPT-2's block-0 MLP is again the only early component the model registers
+  (0.228 bits vs $\le 0.011$) and the only one that inflates the spread (0.116 → 0.201) and erases the
+  ordering ($\rho = +0.06$) — suggestive at n = 12 and reliability 0.32, not established.
+
+**New metric.** `w` is undefined for most GPT-2 curves, so both deliverables now define an **envelope
+width** $\hat w^{\mathrm{env}}$ on the running maximum $e(t) = \max_{s\le t} d(s)$, which exists for
+every curve and equals `w` exactly on monotone ones. Validated inside Pythia before use: rank
+correlation with `w` = 1.0000 per curve and per token in both Pythia models (0.999998 per curve on
+GPT-2's valid subset). Re-measuring 1.4B and 410M with it reproduces the existing numbers exactly
+(median 0.549 / 0.658, probe $\rho = +0.764$ / $+0.774$, cross-model $\rho = +0.884$), so no previously
+reported number changes.
+
+**Deliverable changes.** RESULTS.md gains the section "GPT-2: the ordering is a property of the token
+*in a training corpus*, not of the string" with Figures 27–28 and a six-row comparison table, a new
+Headline paragraph stating the scope limit, and `gpt2` in the Setting line. REPORT.md gains a Methods
+subsection (GPT-2 protocol, the envelope-width equations, the site and corpus-statistic controls), the
+same Results section as patterns 32–34 with Figures 27–28, and a Summary paragraph. Both files now
+carry 28 figures each.
+
+**Claim narrowed** (old → new): "the ordering belongs to the token, the level to the network" (stated
+without qualification) → "the ordering belongs to a token **as trained in a particular corpus**; the
+practical screen is per-model, and the split-half reliability check — 0.89 where it works, 0.32 where
+it does not, computable with no reference model — is the go/no-go test for porting it." The 160M floor
+is re-read the same way: a fact about that training run rather than about parameter count.
+
+**Recommended next experiment replaced** (old → new): "a different tokenizer and corpus" (now done and
+negative) → "**separate two ways GPT-2 could fail**: compute edge drift `E` (movement of `d(t)` in the
+outer 20% of the path; ~0 for a plateau, ~0.18 for a straight line) on the 2,214 curves already stored
+per model and per site for GPT-2, 410M and 1.4B. Straight-line-like `E` in GPT-2 ⇒ it has no plateau to
+measure and the negative is about plateau structure (predicting Pythia-160M looks the same);
+Pythia-like `E` ⇒ genuine plateaus in a different token order, and the question becomes what that order
+correlates with." No new forward passes.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 37 display eqs / 955 inline eqs / 28 embeds / 0 problems; RESULTS 684 inline eqs / 28 embeds /
+0 problems); 56 figure captions for 56 embeds across the two files.
