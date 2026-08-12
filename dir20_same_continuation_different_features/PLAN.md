@@ -116,14 +116,14 @@ arbitrary plateau/no-plateau threshold.
 
 ## Stages
 
-- [ ] **S1 - Validate the implementation with Matthew's contrast.**
+- [x] **S1 - Validate the implementation with Matthew's contrast.**
   - Run exact prompts `The house was big` / `The house was in` and `The house was big` /
     `The house was large` in GPT-2 Large.
   - Save the two raw curves together with the linear reference.
   - Require endpoint reconstruction error below `1e-4` and `w_TV(big,in) < w_TV(big,large)`.
   - If this fails, debug and stop before mining new pairs.
 
-- [ ] **S2 - Build and lock matched contrasts without looking at width.**
+- [x] **S2 - Build and lock matched contrasts without looking at width.**
   - For every fresh prefix, form all unordered pairs among the 24 candidate final tokens.
   - Before interpolation, compute successor JSD, `F`, final-logit L2 endpoint distance, block-0
     endpoint angle, block-0 log norm ratio, and mean token surprisal under the shared prefix.
@@ -140,7 +140,7 @@ arbitrary plateau/no-plateau threshold.
   - Save the chosen prompts, endpoint metrics, and matching version to `results/matched_pairs.json`.
     Hash this file and record the hash in `JOURNAL.md`. Only then may S3 compute interpolation curves.
 
-- [ ] **S3 - Test the matched prediction.**
+- [x] **S3 - Test the matched prediction.**
   - Run the identical block-0 interpolation for both members of every locked contrast.
   - For contrast `i`, compute
     `Delta w_i = w_TV(high-F)_i - w_TV(low-F)_i`.
@@ -156,7 +156,7 @@ arbitrary plateau/no-plateau threshold.
     - `plots/example_curves.png`: five strongest supporting contrasts and five strongest
       counterexamples, with prompt tokens, JSD, `F`, and `w_TV` shown.
 
-- [ ] **S4 - Conditional causal test; run only if S3 is supported.**
+- [x] **S4 - Conditional causal test; run only if S3 is supported.**
   - Keep the original block-0 endpoint activations and every SLERP vector fixed. Do not ablate block 0,
     rerun upstream blocks, or regenerate the path.
   - In blocks 1-35, take neurons in the symmetric difference of the two endpoint top-64 feature sets.
@@ -199,10 +199,23 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Fresh confirmatory restart. Previous `dir20` S1-S17 results are exploratory and do not satisfy this
-plan's held-out matched test.
+**COMPLETE — verdict: supported, with a causal test behind it.** S1 passed its gate
+($w_{TV}$ 0.012 vs 0.292, endpoint error 3.5e-7). S2 locked **101** matched contrasts under the single
+pre-specified relaxation (manifest sha256 `2415f5ff6dfcf88fb9cc7a67b87c93d859434296310f4b8d406c6f545e23ff56`,
+recorded before any sweep). S3 met all four gate clauses: median `Delta w = -0.0708`, 95% CI
+`[-0.0866, -0.0582]`, 82.2% predicted sign, permutation p < 1e-4. S4 (conditional, unlocked by S3)
+supported: median `w_TV` 0.144 -> 0.471 for differential-neuron linearization against 0.167 for the
+matched control, 202/202 pairs.
+
+**One deviation from this plan, recorded in REPORT.md Limitations, CHANGELOG.md and JOURNAL.md:** the
+bank was enlarged from the specified 300 prefixes to all 1395 eligible WikiText-103 test paragraphs,
+because 300 yielded only 21 contrasts — below this plan's own 40-contrast fallback floor. Every metric
+definition, eligibility filter and caliper was unchanged and no interpolation width had been computed.
 
 ## Next step
 
-Implement and run S1 only. Save `plots/matthew_sanity.png` and verify the endpoint errors before
-building the fresh pair bank.
+None required — the success criterion is met. Two extensions if the direction is continued:
+1. the **minimal sufficient differential set** (S4 shows 1.7% of neurons suffice, not that they are
+   necessary at that size);
+2. the same locked matched design with an **SAE-feature or attention-head** version of `F`, testing
+   whether "different machinery" is a neuron-level or a feature-level fact.

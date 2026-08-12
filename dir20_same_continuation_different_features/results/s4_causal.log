@@ -1,0 +1,14 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 4449.70it/s]
+  10/101 contrasts
+  20/101 contrasts
+  30/101 contrasts
+  40/101 contrasts
+  50/101 contrasts
+  60/101 contrasts
+  70/101 contrasts
+  80/101 contrasts
+  90/101 contrasts
+  100/101 contrasts
+n=202 median gap=+0.2753 CI=[0.25119414579572, 0.29811458652594125] frac>0=1.000 p=0.0000 -> supported

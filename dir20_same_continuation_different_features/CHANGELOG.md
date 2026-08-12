@@ -676,3 +676,53 @@ embedded with visible numbered captions in both files; `experiments/check_render
   path appears unembedded.
 - **Feedback state.** The direction's only operator feedback file is `human_feedback.txt.addressed.md`
   (addressed in S8). Zero unaddressed files, so `STOP` is written.
+
+## 2026-08-12 — Fresh confirmatory direction: S1–S4 run, both deliverables rebuilt around the matched test
+
+- **Scope change (recorded once, here).** `PLAN.md` was replaced by a fresh confirmatory plan that
+  supersedes the previous exploratory dir20 plan and puts most of the earlier report out of scope
+  (model-size comparison, depth sweep, continuation-offset study, head-ablation localisation).
+  RESULTS.md and REPORT.md have therefore been **rewritten around the new question** — "do internal
+  feature differences explain transition width at matched successor JSD?" — and the previous
+  fourteen-experiment plateau/depth report no longer appears in them. That report's numbers were
+  correct for its own question; it remains in git history at commit `4faa150`. Nothing from it is
+  carried forward as evidence, per the new plan's instruction that those results are exploratory.
+- **S1 (sanity) — pass.** `experiments/s1_sanity.py`, GPT-2 Large: `The house was` + ` big`/` in`
+  gives $w_{TV} = 0.012$ ($w_{10-90} = 0.044$), ` big`/` large` gives $w_{TV} = 0.292$
+  ($w_{10-90} = 0.592$); endpoint reconstruction error $3.5\times10^{-7}$. Both gate clauses met.
+  New figure `plots/matthew_sanity.png` (Figure 1).
+- **S2 (locking) — 21 → 101 contrasts after enlarging the bank.** The plan's 300-prefix bank yielded
+  only 21 contrasts under the relaxed rule, below the plan's own 40-contrast fallback floor. The bank
+  was extended to **every** eligible WikiText-103 test paragraph (1395) with all metric definitions,
+  eligibility filters and calipers unchanged, and before any width was computed: 385020 candidate
+  pairs → 26275 eligible → 4 contrasts (primary calipers) → **101** (single pre-specified relaxation).
+  Superseded: n_prefixes 6 (leftover smoke test) → 300 → 1395; n_contrasts 0 → 21 → **101**.
+  Manifest sha256 recorded before S3: `2415f5ff6dfcf88fb9cc7a67b87c93d859434296310f4b8d406c6f545e23ff56`.
+- **S3 (primary test) — supported.** 202 sweeps. Median $\Delta w = -0.0708$, bootstrap 95% CI
+  $[-0.0866, -0.0582]$, 82.2% (83/101) with the predicted sign, paired permutation $p < 10^{-4}$;
+  median $w_{TV}$ $0.203 \rightarrow 0.098$ (low-$F$ → high-$F$), median $w_{10-90}$
+  $0.512 \rightarrow 0.316$. All four gate clauses met. Balance SMDs: JSD +0.030, log norm ratio
+  +0.005, surprisal +0.025, final-logit distance +0.231, block-0 angle +0.252, $F$ +1.506.
+  New figures `plots/matching_balance.png` (Figure 2), `plots/matched_widths.png` (Figure 3),
+  `plots/example_curves.png` (Figure 4).
+- **S3 robustness (new, post-hoc).** `experiments/s3_robust.py`. Effect holds where the high-$F$
+  member is not favoured on final-logit distance (n=30, median $-0.056$, CI $[-0.092, -0.019]$) or on
+  block-0 angle (n=25, median $-0.082$, CI $[-0.156, -0.026]$); covariate-adjusted intercept
+  $-0.0847 \pm 0.0131$, CI $[-0.110, -0.059]$, confound differences explain 5.2% of $\Delta w$
+  variance. Both-at-once cell has n=5 and is reported as settling nothing.
+- **S4 (causal, gated on S3) — supported.** `experiments/s4_causal.py`, 404 sweeps over the same 202
+  pairs. Median $w_{TV}$: unablated **0.144** → control-set linearized **0.167** ($+0.019$) →
+  differential-set linearized **0.471** ($+0.308$). Median gap $+0.275$, 95% CI $[0.251, 0.298]$,
+  **202/202** predicted sign, $p < 10^{-4}$; median 3063 neurons forced (1.7% of the 179200 below the
+  patch); worst endpoint error $8.9\times10^{-7}$. High-$F$ and low-$F$ members converge under the
+  intervention ($0.098 \rightarrow 0.467$ and $0.203 \rightarrow 0.474$). New figure
+  `plots/causal_linearization.png` (Figure 5).
+- **Deliverables.** RESULTS.md and REPORT.md rewritten to current-best; five figures each, all
+  embedded with visible numbered captions in reading order. REPORT.md Methods defines the
+  interpolation path, successor JSD, the contribution score and $F$, $d(\alpha)$, $w_{TV}$ and its two
+  secondary diagnostics, $\Delta w$, SMD, the causal intervention and its gap statistic, plus four
+  baselines (linear response, matched low-$F$ member, matching rule and relaxation, matched control
+  neuron set). `experiments/check_render.py REPORT.md RESULTS.md` → 0 problems (REPORT.md 11 display /
+  229 inline eqs, RESULTS.md 0 / 143).
+- **New limitation stated in REPORT.md:** the bank enlargement (300 → 1395 prefixes) is a deviation
+  from the written plan, made pre-outcome and with the analysis frozen, and is reported as such.

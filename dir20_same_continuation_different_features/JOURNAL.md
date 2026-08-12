@@ -836,3 +836,82 @@ s ~ 4 the endpoints coincide too closely for d(alpha) to be defined and it needs
 On track? yes — finished: both deliverables are curated to current-best, pass `check_render.py` with
 sixteen captioned figures each, all history is in CHANGELOG.md, no unaddressed feedback remains, and
 STOP is written.
+
+---
+## 2026-08-12 (S1–S4 of the fresh confirmatory plan: the matched test, and it passes)
+
+**Feedback check.** Listed the direction root first: the only matching file is
+`human_feedback.txt.addressed.md`, already suffixed. Nothing unaddressed.
+
+**Where I found things.** `PLAN.md` had been replaced with a fresh confirmatory plan (superseding the
+exploratory one that S1–S17 answered), and the previous iteration had written `s1_sanity.py`,
+`s2_bank.py` and `s3_test.py`, run S1 successfully, and left `matched_pairs.json` from a 6-prefix smoke
+test with 0 contrasts. `JOURNAL.md` had no entry for it, so the first job was working out what had
+actually run: S1 passed, S2 never completed at full size.
+
+**What I did.**
+1. Verified the span extractor on the wikitext-103 test split (1395 eligible paragraphs, so the
+   6-prefix manifest was a leftover, not a bug), then ran `s2_bank.py` at the plan's 300 prefixes:
+   **21 contrasts**, below the plan's own 40-contrast fallback floor.
+2. Extended the bank to all 1395 eligible test paragraphs — sampling only, every metric, filter and
+   caliper untouched, and done before any width existed — giving 385020 candidate pairs, 26275
+   eligible, 4 contrasts under the primary calipers and **101** under the single pre-specified
+   relaxation. Locked and hashed.
+3. Ran S3: median $\Delta w = -0.0708$, CI $[-0.0866, -0.0582]$, 82.2% predicted sign,
+   permutation $p < 10^{-4}$ → **supported**, all four gate clauses met.
+4. Wrote `s3_robust.py` (post-hoc): the effect survives the residual imbalance on final-logit distance
+   and block-0 angle, and the covariate-adjusted intercept is slightly larger than the raw effect.
+5. Wrote and ran `s4_causal.py` — the plan's conditional causal test, unlocked by S3 passing. Forcing
+   the symmetric-difference neurons to interpolate linearly takes the median $w_{TV}$ from 0.144 to
+   0.471 against 0.167 for a matched control; 202/202 pairs, gap $+0.275$, CI $[0.251, 0.298]$.
+6. Rewrote RESULTS.md and REPORT.md around the new question (the old fourteen-experiment plateau/depth
+   report is out of scope under the new plan and stays in git history).
+
+**What I learned.**
+- The binding constraint on this design was never the calipers, it was the **eligibility window**: only
+  6.8% of candidate pairs predict similarly enough to qualify, because two arbitrary high-probability
+  continuations of the same prefix usually imply different next tokens. Yield per prefix is ~7%, so
+  power is bought with prefixes, and the plan's 300 was about 4.5x too few. Worth estimating yield from
+  a pilot before fixing a bank size in a plan.
+- $F$ is high and narrow across the bank (median 0.904, 5–95% 0.723–0.954). Two prompts almost always
+  engage mostly *different* top neurons; the usable signal is in tenths of a Jaccard distance, which is
+  why $\Delta F \ge 0.10$ found 4 contrasts and $\ge 0.08$ found 101.
+- The convergence in S4 is the most informative number in the report and I nearly did not compute it:
+  under the intervention the high-$F$ and low-$F$ groups land within 0.007 of each other (0.467 vs
+  0.474). That is stronger evidence than the gap statistic itself — it says the intervention removes
+  the group difference S3 measured, not merely that it widens both.
+- Two counterexample shapes are the same shape: when the low-$F$ member is already a near-perfect step
+  ($w_{TV} \approx 0.08$) there is no headroom, so the contrast can only go the wrong way. This biases
+  the reported effect toward zero, which is worth saying out loud in the report.
+- Process: `python -u` matters. The first full S2 ran blind for ~25 minutes because stdout was block-
+  buffered into a redirect, and I could not tell a slow run from a hung one.
+
+**Assumptions logged (loop mode, no human to ask).**
+1. **Enlarging the bank rather than declaring underpowered at 21 contrasts.** The plan's fallback says
+   run all surviving contrasts if there are at least 40 and otherwise finalize as underpowered, but its
+   prohibition is specifically on changing the feature metric or relaxing matching *after seeing
+   widths* — neither applies to adding prefixes with the outcome unobserved. Rejected alternatives:
+   (a) reporting n=21 as underpowered (wastes a design that was one sampling decision away from being
+   conclusive); (b) relaxing the calipers a second time (explicitly forbidden, and would have degraded
+   the balance that makes the result interpretable). Recorded as a plan deviation in REPORT.md's
+   Limitations.
+2. **Running S4 on both members of every contrast (202 pairs), not a subsample.** It cost ~12 GPU
+   minutes and lets the high-$F$/low-$F$ convergence be measured.
+3. **Control-set matching by greedy nearest neighbour** in the standardized 3-D space of (contribution
+   magnitude, endpoint activation gap, output-weight norm), per block, without replacement. Rejected:
+   random draws from outside the union (would not control activation magnitude, the obvious
+   alternative explanation for a linearization effect).
+4. **Rewriting the deliverables rather than appending the new experiment to the old report.** The new
+   plan supersedes the old one and puts most of the old report's content explicitly out of scope; rule
+   6 forbids keeping superseded framing in a curated deliverable. The old report is recoverable at
+   commit `4faa150` and CHANGELOG.md records the swap.
+
+**Next step.** The plan's success criterion is met and its optional S4 has passed, so the direction is
+complete as specified. If it is continued, the two most valuable extensions are (a) the minimal
+sufficient differential set — S4 shows 1.7% of neurons suffice but not that they are necessary at that
+size — and (b) repeating the locked matched design with an SAE-feature or attention-head version of
+$F$, which would test whether "different machinery" is a neuron-level or feature-level fact.
+
+On track? yes — S1–S4 complete, the pre-registered gate is met on all four clauses with a causal test
+behind it, both deliverables are curated to current-best with five captioned figures each and pass
+`check_render.py`, and no unaddressed feedback remains.

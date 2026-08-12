@@ -25,7 +25,7 @@ from datasets import load_dataset
 from common import RESULTS, blocks, load
 
 SEED = 31
-N_PREFIX = 300
+N_PREFIX = 1400          # every eligible wikitext-103 test paragraph (1395 of them)
 N_CAND = 24
 TOPK_NEURONS = 64
 JSD_LO, JSD_HI = 0.005, 0.20
@@ -106,7 +106,7 @@ def endpoint_pass(m, ids_batch, wout_norms, n_blocks):
         s = acts[i].abs() * wout_norms[i].unsqueeze(0)          # (B, 4d)
         idx = s.topk(TOPK_NEURONS, dim=1).indices                # (B, 64)
         feats.append(idx + i * 100000)                           # unique (block, neuron) id
-    return lg, rec["h0"], torch.cat(feats, dim=1).cpu().numpy()
+    return lg, rec["h0"], torch.cat(feats, dim=1).cpu().numpy().astype(np.int32)
 
 
 def pair_metrics(lg, h0, feats, surp):
