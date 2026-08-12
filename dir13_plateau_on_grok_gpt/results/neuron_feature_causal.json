@@ -1,0 +1,80 @@
+{
+  "reproduction_check": {
+    "median_w_baseline_here": 0.3507,
+    "median_w_baseline_neuron_path": 0.3507,
+    "max_abs_diff_per_pair": 0.0
+  },
+  "untrained_median_w": 0.803,
+  "worst_endpoint_error": 1e-06,
+  "k_list": [
+    8,
+    32,
+    128,
+    512
+  ],
+  "n_pairs": 150,
+  "tuning_selected": {
+    "median_w": [
+      0.4002,
+      0.4816,
+      0.5653,
+      0.6509
+    ],
+    "recovered_frac": [
+      0.1095,
+      0.2894,
+      0.4746,
+      0.6636
+    ]
+  },
+  "reference_rules": {
+    "pair": {
+      "median_w": [
+        0.4865,
+        0.581,
+        0.6602,
+        0.729
+      ],
+      "recovered_frac": [
+        0.3003,
+        0.5091,
+        0.6842,
+        0.8364
+      ]
+    },
+    "global": {
+      "median_w": [
+        0.3895,
+        0.4367,
+        0.4904,
+        0.6102
+      ],
+      "recovered_frac": [
+        0.086,
+        0.1901,
+        0.3089,
+        0.5737
+      ]
+    },
+    "random": {
+      "median_w": [
+        0.3511,
+        0.356,
+        0.3648,
+        0.422
+      ],
+      "recovered_frac": [
+        0.001,
+        0.0118,
+        0.0313,
+        0.1578
+      ]
+    }
+  },
+  "paired_at_k32": {
+    "p_vs_random": 2.492131574142924e-26,
+    "p_vs_pair_ranked": 7.3381138912753e-26,
+    "p_vs_global": 2.7088402511084284e-11,
+    "frac_pairs_wider_than_baseline": 0.98
+  }
+}

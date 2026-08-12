@@ -576,6 +576,37 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S24c DONE 2026-08-12 — the direction's named open problem is now answered on both halves: how many
+units bend a path, and what those units detect.** Zero unaddressed feedback files, so this iteration
+advanced the plan (PLAN's own "Next step" named this experiment). Two scripts, no training, 31 s of
+forward passes total. `experiments/neuron_feature.py` characterises the units from a data source the
+assay never touches: the model's own 90% training split, tiled into 7,842 non-overlapping 128-character
+windows (941,040 scored positions), accumulating each block-1–4 hidden unit's mean post-GeLU activation
+per current character and standardizing that 65-character profile within the unit ($z_{c,j}$).
+**Corpus tuning predicts recruitment:** ranking units by differential tuning $|z_a-z_b|$ finds a pair's
+recorded top-32 at mean **AUROC 0.847** (99% CI 0.834–0.858), precision@32 **21.6%** = **26×** chance,
+against **0.562** for an overall-activity control and 0.498 for a shuffle ($p=2.3\times10^{-26}$); the
+assay-derived global ranking, which has seen the experiment, reaches 0.913. Recruitment falls 4.9% →
+0.09% monotonically across tuning deciles; a recruited unit's preferred character is one of the pair's
+endpoints for **27.2%** of recruitments vs a 2.8% base rate (**9.8×**); the 668 pool units are the
+sharply tuned population (median $\max_c|z_c|$ 5.45 vs 4.47, $p=5.8\times10^{-27}$). The most reused
+unit (block 2, 88/150 pairs) is a capital-letter detector whose top corpus contexts are proper-name
+onsets (`DUCHESS OF Y`, `Duke of Y`, `Henry the F`). Robustness: re-standardizing over the 62
+characters with ≥100 occurrences and keeping the 143 pairs built from them gives 0.858. Then
+`experiments/neuron_feature_causal.py` makes it causal and held out: linearizing the 32 units the
+corpus rule selects — blind to $d(t)$, $I_j$ and the pair's curve — removes **28.9%** of the
+trained→untrained width gap (0.351 → 0.482, 98% of pairs widen) against **1.2%** for 32 random units
+and **19.0%** for the assay-derived global set ($p=2.7\times10^{-11}$), below the fitted per-pair
+ceiling of 50.9% ($p=7.3\times10^{-26}$). Baseline reproduces per pair exactly (0.3507) and endpoints
+stay exact ($10^{-6}$). Both deliverables gained two Results sections, a REPORT.md Methods subsection
+(tuning profile, $z_{c,j}$, sharpness, differential/max scores, AUROC, precision@32, three baselines,
+held-out selection rule) and **Figures 30–31** (`plots/neuron_feature.png`,
+`plots/neuron_feature_causal.png`); the five places that named "what those units detect" as open now
+carry the result with its real residual. Exploratory figures renumbered 30–32 → 32–34;
+`check_render.py REPORT.md RESULTS.md` passes with 0 problems (34 embeds / 34 captions / sequential
+1–34 in each). New: `results/neuron_feature_{summary.json,raw.npz,causal.json,causal_raw.npz}` and
+their logs.
+
 **S24b DONE 2026-08-12 — the direction's named open problem (S24 item 1, "what the trainable blocks
 compute") has its first quantitative answer, and it needed no training.** Zero unaddressed feedback
 files, so this iteration advanced the plan. `experiments/neuron_path.py` linearizes individual
@@ -999,8 +1030,17 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
-**S24b DONE (2026-08-12) — S24 item 1 has its first quantitative answer; see "Current status". The
-successor it opens, and the cheapest next step, is *what those units detect*: take the 668 pool units
+**S24c DONE (2026-08-12) — S24 item 1 is answered on both halves; see "Current status". The successor
+it opens is what the *other* half of the responsible units respond to: the corpus rule recovers 28.9%
+of the width gap where the fitted per-pair ranking recovers 50.9%, and tuning conditioned on the
+current character alone cannot describe a unit that responds to a longer pattern. Conditioning the
+same corpus pass on the (previous, current) bigram, or on a short suffix, would test that directly and
+needs no training. S24 item 3 (a longer character run whose second local-complexity descent separates
+from initial fit, or a second model/tokenizer) still needs materially more compute than one
+30,000-step run.**
+
+**S24b DONE (2026-08-12) — superseded by S24c above; kept for the record. The successor it named was
+*what those units detect*: take the 668 pool units
 (`results/neuron_path_raw.npz`, `counts` and `imp_mean`) and find each one's maximally activating
 characters/contexts in the SHA-verified corpus, then ask whether a unit's top-activating contexts
 predict which pairs recruit it. That needs forward passes only — no training — and it would turn "a few
@@ -1042,7 +1082,12 @@ either deliverable now rests on a single initialization except the six condition
 0.14–0.26 wide, three to six times the measured 0.040 spread. Candidates, in the order they would be
 worth running:
 
-1. **What the trainable blocks compute.** Five candidate mechanisms have been excluded in turn (the
+1. ~~**What the trainable blocks compute.**~~ **ANSWERED 2026-08-12 by S24b + S24c** — a few dozen
+   MLP units per path carry the bend (top-32 of 3,840 recover 50.9%), drawn from a 668-unit pool, and
+   those units are character detectors: corpus tuning predicts recruitment at AUROC 0.847 and units
+   selected by it alone remove 28.9% of the width gap. What remains is the other half of the effect
+   and units whose feature is not a single character. Original framing, kept for the record: five
+   candidate mechanisms had been excluded in turn (the
    next-character decision, endpoint plausibility, the specific weights of blocks 1–4, any particular
    depth, and trainable parameter count), and the gap has not moved in six iterations: nothing here
    characterises the computation that bends the path, only where it can live and how much of it

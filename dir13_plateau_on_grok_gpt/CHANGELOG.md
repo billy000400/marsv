@@ -1650,3 +1650,77 @@ listed it as the direction's real open problem since 2026-08-03.
   (REPORT 35 display / 780 inline equations / 32 figures; RESULTS 32 figures; 0 problems).
 - **No `STOP`**: wall-clock remains and PLAN S24 item 3 (a longer character run / second model) is open.
   Zero unaddressed feedback files.
+
+## 2026-08-12 (S24c) — what the path-bending units detect: character tuning measured in ordinary text
+
+- **Feedback check first (CLAUDE.md Part C).** Listed the direction root for `human_feedback*.md` /
+  `*REVIEW*` without the `.addressed.md` suffix: none of the seven. This iteration advanced the plan
+  (PLAN "Next step" named this experiment).
+- **What was added.** `experiments/neuron_feature.py` characterises the units that Figure 29 found,
+  using a data source outside the interpolation assay: the model's own 90% training split, tiled into
+  7,842 non-overlapping 128-character windows (941,040 scored positions, the first 8 positions of each
+  window dropped). Per block-1–4 hidden unit it accumulates the mean post-GeLU activation conditioned
+  on the current character, standardizes that 65-character profile within the unit
+  ($z_{c,j}$), and asks whether tuning at a pair's two endpoint characters predicts which units that
+  pair recruited into its top-32. Forward passes only, 9 s, no training.
+- **New numbers.** Differential tuning $|z_a-z_b|$ ranks recruited units at mean **AUROC 0.847**
+  (99% CI 0.834–0.858, median 0.857), precision@32 **21.6%** = **26×** the 0.83% chance rate;
+  $\max(z_a,z_b)$ 0.840 / 24.1%; assay-derived global importance (in-domain reference) 0.913 / 27.5%;
+  overall-activity control **0.562** / 3.3%; random 0.498 / 0.79% (paired Wilcoxon vs random
+  $p=2.3\times10^{-26}$; vs the activity control $p=2.3\times10^{-26}$). Recruitment falls
+  monotonically **4.9% → 0.09%** across deciles of differential tuning. A recruited unit's preferred
+  character is one of the pair's endpoints for **27.2%** of recruitments vs a **2.8%** base rate
+  (**9.8×**, $p=2.3\times10^{-26}$). The 668 pool units have median sharpness $\max_c|z_c|$ **5.45**
+  vs **4.47** for the other 3,172 (Mann–Whitney $p=5.8\times10^{-27}$). Robustness: re-standardizing
+  over the 62 characters with ≥100 corpus occurrences and keeping the 143 pairs built from them gives
+  **0.858** / 21.4%, so rare-character noise is not driving it. Qualitative: the most reused unit
+  (block 2, 88/150 pairs) is a capital-letter detector whose top contexts are proper-name onsets
+  (`DUCHESS OF Y`, `Duke of Y`, `Henry the F`).
+- **Claims updated (no result superseded; nothing removed).** The four places that named "what those
+  units detect" as the open part — REPORT.md Summary, Conclusion, Limitation 7, and the RESULTS.md
+  hypothesis paragraph and Headline — now carry the tuning result, with the correlational nature of
+  the link stated in each. Old wording "…a few dozen gated units per path … what the individual units
+  detect remains open" → new "…identifiable in advance as the character detectors tuned to the pair's
+  own endpoints (AUROC 0.847), though that link is correlational".
+- **New figure.** **Figure 30** `plots/neuron_feature.png` — A: AUROC per ranking rule (per-pair
+  points); B: recruitment rate by tuning decile; C: tuning sharpness, pool vs never-recruited;
+  D: tuning profiles of the three most-reused units. The exploratory Figures 30–32 are renumbered
+  **31–33** in both files with their prose citations updated; both files now hold 33 embeds, 33 visible
+  captions, sequential numbering 1–33.
+- **Code/data:** new `experiments/neuron_feature.py`, `experiments/plot_neuron_feature.py`;
+  new `results/neuron_feature_summary.json`, `results/neuron_feature_raw.npz`,
+  `results/neuron_feature.log`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 39 display / 808 inline equations / 33 figures; RESULTS 33 figures; 0 problems). Caption
+  check: 33 embeds / 33 `**Figure` captions in each file.
+- **No `STOP`**: wall-clock remains and PLAN S24 item 3 (a longer character run / second model) is
+  open. Zero unaddressed feedback files.
+
+## 2026-08-12 (S24c, second half) — the corpus tuning rule made causal and held out
+
+- **What was added.** `experiments/neuron_feature_causal.py` feeds the corpus-tuning ranking back into
+  the chord-linearization intervention: for each pair, the $k$ units with the largest differential
+  tuning $|z_a-z_b|$ are linearized, selected with no quantity from the assay (not $d(t)$, not $I_j$,
+  not the pair's own curve). 22 s of forward passes, no training.
+- **New numbers.** Corpus-selected top-32 removes **28.9%** of the trained→untrained width gap (median
+  $w$ 0.351 → **0.482**, 98% of pairs widen) against **1.2%** for 32 random units
+  ($p=2.5\times10^{-26}$) and **19.0%** for the assay-derived global set, the strongest previous
+  pair-blind rule ($p=2.7\times10^{-11}$); it stays below the fitted per-pair ceiling of 50.9%
+  ($p=7.3\times10^{-26}$). At $k$ = 8 / 128 / 512 the held-out rule gives 11.0 / 47.5 / **66.4%**
+  against the global set's 8.6 / 30.9 / 57.4% and random's 0.1 / 3.1 / 15.8%. Built-in checks: the
+  unmodified baseline reproduces per pair exactly (0.3507, max per-pair difference 0.000000) and the
+  worst endpoint deviation is $10^{-6}$.
+- **Claims updated (no result superseded).** The caveat added earlier this iteration — "correlation
+  between two measurements, not an intervention" — is now **wrong** and was replaced in both files by
+  the residual it leaves ("the corpus-selected edit removes 28.9% where the fitted ranking's removes
+  50.9%, so tuning names much of the responsible population and not all of it"). REPORT Summary,
+  Conclusion and Limitation 7 and the RESULTS.md hypothesis paragraph and Headline gained the causal
+  number.
+- **New figure.** **Figure 31** `plots/neuron_feature_causal.png` — recovered fraction vs $k$ for the
+  held-out corpus rule against the fitted per-pair, global and random rules. Exploratory Figures 31–33
+  renumbered **32–34**; both files now hold 34 embeds, 34 visible captions, sequential numbering 1–34.
+- **Code/data:** new `experiments/neuron_feature_causal.py`,
+  `experiments/plot_neuron_feature_causal.py`; new `results/neuron_feature_causal.json`,
+  `results/neuron_feature_causal_raw.npz`, `results/neuron_feature_causal.log`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 39 display / 832 inline equations / 34 figures; RESULTS 34 figures; 0 problems).

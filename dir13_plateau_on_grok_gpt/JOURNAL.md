@@ -2036,3 +2036,111 @@ No `STOP` written — wall-clock remains and the plan has open candidates.
 
 On track? yes — S24b done, the direction's named open problem now has its first quantitative answer
 (sparse per path, pooled across paths), and both deliverables carry it; blocker: none.
+
+## 2026-08-12 (later still, II) — S24c: the units have names
+
+**What I did.** Part C first: listed the direction root for `human_feedback*.md` / `*REVIEW*` lacking
+`.addressed.md` — none of the seven, so this iteration advanced the plan. I also listed `results/`
+against the deliverables (the lesson from two iterations ago, when a finished run sat unreported on
+disk) — everything there is reported. `/tmp/dir13_frozen/checkpoints_ref_pos` and
+`/tmp/tinyshakespeare.txt` had both survived, so no retraining was needed.
+
+PLAN's own next step was the successor S24b opened: S24b said *how many* units bend a path (a few
+dozen per pair, from a pool of 668) but nothing about what they are. The trap in answering that is
+circularity — any description derived from the interpolation assay would be a restatement of the
+ranking. So the tuning measurement uses a completely different data source: the model's own 90%
+training split, tiled into 7,842 non-overlapping 128-character windows (941,040 scored positions,
+first 8 of each window dropped for want of context), with each block-1–4 hidden unit's mean post-GeLU
+activation accumulated per current character and standardized within the unit across the 65
+characters. Then the test: rank all 3,840 units by how differently they respond to a pair's two
+endpoint characters, and score that ranking against the top-32 the chord linearization recorded.
+
+**What the numbers say.** Differential tuning predicts recruitment at mean AUROC **0.847** (99% CI
+0.834–0.858), precision@32 **21.6%** — 26× the 0.83% chance rate — against 0.498 for a shuffle and,
+the control that matters, **0.562** for ranking units by overall corpus activity. So it is character
+tuning and not busyness. The assay-derived global importance ranking, which has seen the experiment
+but not the pair, gets 0.913, which bounds how much any pair-blind ranking could achieve and says
+corpus tuning recovers most of it. Three further rows: recruitment falls monotonically 4.9% → 0.09%
+across deciles of differential tuning; a recruited unit's single preferred character is one of that
+pair's two endpoints for 27.2% of recruitments against a 2.8% base rate (9.8×); and the 668 pool units
+are the sharply tuned population (median max|z| 5.45 vs 4.47, p = 5.8e-27). The qualitative half is
+the part I did not expect to be so clean: the most reused unit (block 2, 88 of 150 pairs) is a
+capital-letter detector whose six highest-activating corpus contexts are proper-name onsets —
+`DUCHESS OF Y`, `Duke of Y`, `Bishop of Y`, `And I the house of Y`. Ordinary character-identity
+detectors, driven through their switching point by the assay.
+
+**Assumptions logged (loop mode, no one to ask).** (a) Tuning is conditioned on the *current*
+character only. That matches the assay (the interpolated position holds the varied character) and it
+is why the profiles read as character identity; a unit responding to a longer pattern is summarized
+crudely, and both deliverables say so. Rejected alternative: conditioning on the (previous, current)
+bigram, which would have 4,225 cells and leave the rare ones unusable. (b) The differential score
+$|z_a - z_b|$ was chosen as primary before looking, on the argument that a unit must distinguish the
+endpoints to switch along the path; $\max(z_a,z_b)$ was computed at the same time and is reported —
+they differ by 0.007 AUROC, so nothing rests on the choice. (c) Three characters occur < 100 times, so
+their conditional means are noisy; rather than drop them silently I ran the whole analysis a second
+time re-standardized over the 62 well-sampled characters, on the 143 pairs built from them. It comes
+out slightly *higher* (0.858), which is the honest way to retire the concern.
+
+**What I learned.** The value here came from where the evidence was measured, not from a cleverer
+statistic. Every previous mechanism probe in this direction was an intervention inside the assay, so
+each one could only ever bound the mechanism from inside; one pass over the training corpus — 9
+seconds of forward passes — produced a description of the same units that the assay never saw, and the
+agreement between the two is the result. Worth remembering the next time an open question looks like
+it needs another intervention: ask first whether it needs another *data source*.
+
+**Deliverable work.** New Results section in both files with Figure 30 (`plots/neuron_feature.png`,
+four panels) and a new REPORT.md Methods subsection defining the tuning profile, the tuning score
+$z_{c,j}$, sharpness, the differential and max scores, AUROC and precision@32, and the three
+baselines. The four places that named "what those units detect" as the open part (REPORT Summary,
+Conclusion, Limitation 7; RESULTS hypothesis paragraph and Headline) now carry the result with its
+correlational caveat. Exploratory Figures 30–32 renumbered 31–33; 33 embeds / 33 captions /
+sequential 1–33 in each file; `check_render.py REPORT.md RESULTS.md` passes with 0 problems. One
+render bug caught by the checker and not by eye: `$32/3840=0.83\%$` inline — GitHub strips the
+backslash before `%`, turning the rest of the line into a LaTeX comment (CLAUDE.md rule 8b, exactly
+the documented failure). Fixed by moving the percent out of math.
+
+**Next step.** The obvious successor is causal: high-tuning units are *predicted* to carry the bend,
+so linearizing a pair's top-32 units chosen purely by corpus tuning — never having run the importance
+ranking — and comparing the recovered fraction against the assay-ranked top-32 (50.9%) and random
+(1.2%) would turn this correlation into a held-out causal test. It reuses `neuron_path.py`'s machinery
+with a different selection rule and needs no training. Beyond that, PLAN S24 item 3 (a longer
+character run, or a second model/tokenizer) still needs materially more compute than remains.
+No `STOP` written — wall-clock remains and the plan has open candidates.
+
+On track? yes — S24c done, the direction's named open problem now has both halves (how many units, and
+what they detect), and the answer came from data the assay never touched; blocker: none.
+
+## 2026-08-12 (same iteration, second half) — S24c made causal
+
+**What I did.** With wall-clock left after the tuning result, I ran the successor the JOURNAL entry
+above had named as "next step", because it was cheap (22 s) and it removes the main weakness of that
+result: a ranking agreeing with another ranking is not a causal claim.
+`experiments/neuron_feature_causal.py` reuses `neuron_path.py`'s chord machinery with one change —
+the units to linearize are chosen by corpus tuning $|z_a - z_b|$, blind to $d(t)$, to $I_j$ and to the
+pair's own curve.
+
+**What the numbers say.** 32 corpus-selected units remove **28.9%** of the trained→untrained width gap
+(0.351 → 0.482, 98% of pairs widen) against 1.2% for 32 random units. The comparison I care about is
+against the assay-derived *global* set — the best previous rule that does not see the individual pair —
+which removes 19.0% at the same size ($p = 2.7\times10^{-11}$): a rule fitted on ordinary text beats a
+rule fitted on the assay itself, as long as neither is allowed to see the pair. And it sits below the
+per-pair fitted ceiling (50.9%, $p = 7.3\times10^{-26}$), which is exactly the ordering a held-out
+prediction should show against one fitted on its own test curve. Two free checks passed: the
+unmodified baseline reproduced per pair to 0.0000 (same checkpoint, same 150 pairs as S24b) and the
+worst endpoint deviation was 1e-6.
+
+**What I got wrong within the same iteration.** The caveat I wrote an hour earlier — "correlation
+between two measurements, not an intervention" — was true when written and false by the end of the
+iteration; I replaced it in both files rather than leaving it as a hedge, and stated the residual that
+actually remains (28.9% vs the fitted 50.9%, so tuning names much of the responsible population and
+not all of it). Worth noting as a pattern: a caveat is a claim too, and it goes stale like any other.
+
+**Next step.** The open half is what the *other* half of the responsible units respond to — the corpus
+rule finds a bit more than half of the fitted ranking's effect, and conditioning tuning on the current
+character only cannot describe a unit that responds to a longer pattern; conditioning on the
+(previous, current) bigram over the same corpus pass would test that directly and needs no training.
+PLAN S24 item 3 (a longer character run, or a second model/tokenizer) still needs materially more
+compute than remains. No `STOP` written — wall-clock remains and the plan has open candidates.
+
+On track? yes — the tuning result is now causal and held out, and both deliverables carry it with an
+honest residual; blocker: none.

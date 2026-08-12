@@ -702,7 +702,10 @@ their random initialization — are 0.072 sharper than the full 12-block referen
 reproduced it to within 0.002 of width. What that relocatable computation *is* has now been narrowed
 too: linearizing a pair's own 32 most path-nonlinear MLP units (of 3,840) removes half the sharpness
 while 32 random units remove 1.2%, and no fixed global set reproduces that (19.0% at the same size),
-so the bend is carried by a few dozen gated units recruited per path from a shared pool (Figure 29).
+so the bend is carried by a few dozen gated units recruited per path from a shared pool (Figure 29),
+and those units are character detectors: their tuning measured in ordinary text, with no
+interpolation involved, predicts which pairs recruit them at AUROC 0.847 (Figure 30), and units
+selected by that tuning alone remove 28.9% of the width gap when linearized (Figure 31).
 
 ### The readout-rebalancing intervention — the plateau is upstream of the decision
 
@@ -1469,6 +1472,119 @@ blocks 2–4, so the intervention is not an additive decomposition. 150 pairs, o
 checkpoint, one model. Data: `results/neuron_path_summary.json`, `results/neuron_path_raw.npz`;
 code: `experiments/neuron_path.py`.
 
+## What those units detect — character detectors, measured in ordinary text
+
+The previous section counts the units that bend a path but says nothing about what they are for, and
+the count alone is compatible with an uninterpretable answer: the "few dozen" could be an arbitrary
+subset with no meaning outside the interpolation experiment. To find out, we measure each unit's
+behaviour **outside that experiment entirely** — in ordinary Shakespeare, with no interpolation, no
+patching and no shared context — and then ask whether that independent measurement predicts which
+paths recruit it. Because the two measurements share no data, agreement between them cannot be an
+artifact of the assay.
+
+We tile the model's own 90% training split into non-overlapping 128-character windows (7,842 windows,
+941,040 scored positions after dropping the first 8 positions of each window, which have too little
+context), run them through the trained network, and record for every block-1–4 hidden unit its mean
+post-GeLU activation conditioned on the character sitting at that position. Standardizing each unit's
+65-character profile gives a **tuning score** `z_c(j)`: how much more unit `j` fires on character `c`
+than on a typical character, in units of its own spread. For a pair (`a`, `b`) we then rank all 3,840
+units by **differential tuning** `|z_a(j) − z_b(j)|` — a unit that fires at one endpoint and not the
+other is the kind of unit that could switch along the path — and score that ranking against the
+recorded top-32 by AUROC (the chance a recruited unit is ranked above a non-recruited one; 0.5 is
+chance) and precision@32 (of the 32 units the ranking picks, how many were actually recruited; chance
+is 32/3,840 = 0.83%).
+
+![four panels: AUROC per ranking rule, recruitment rate by tuning decile, tuning sharpness of pool vs never-recruited units, and tuning profiles of the three most-reused units](plots/neuron_feature.png)
+
+**Figure 30.** Character tuning measured on the training corpus versus recruitment in the
+interpolation assay; reference character GPT at step 30,000, blocks 1–4, 150 pairs, 3,840 units.
+**A**: AUROC (y) of each ranking rule (x); one point per pair (jittered), black bar = mean, printed
+above; dashed line = chance 0.5. Rules: differential tuning `|z_a−z_b|` and `max(z_a,z_b)` are
+computed from the corpus only; "global importance" is the assay-derived global ranking of Figure 29
+(an in-domain reference that sees the assay but not the pair); "overall activity" is each unit's mean
+activation over all corpus positions (pair-blind control); "random" is a shuffled ranking. **B**:
+percentage of units recruited into a pair's top-32 (y, log scale) against the decile of differential
+tuning (x, 1 = most sharply differentiating); dashed line = the 0.83% chance rate. **C**: density (y)
+of tuning sharpness `max_c |z_c(j)|` (x) for the 668 units recruited by at least one pair (hatched
+`\\`, solid median line) and the 3,172 never recruited (hatched `..`, dashed median line); the
+right-hand pile-up sits at the ceiling √64 = 8, reached by a unit that fires on exactly one character.
+**D**: tuning profile of the three most-reused units — standardized activation `z_c(j)` (y) against
+characters sorted by that unit's own tuning (x), one line per unit (solid, dashed, dash-dotted, each
+labelled with its block, top character and recruitment count) — against the median profile of the pool
+(grey, triangles) and of the never-recruited units (grey dotted).
+
+- **Corpus tuning predicts recruitment, and it is not close.** Differential tuning reaches mean AUROC
+  **0.847** (99% CI 0.834–0.858; median 0.857) and precision@32 **21.6%**, i.e. **26×** the chance
+  rate, against **0.498** / 0.79% for a random ranking (paired p = 2.3e-26 over the 150 pairs). A
+  ranking that knows the assay but not the pair — the global importance ordering of Figure 29 —
+  reaches 0.913, so a measurement taken entirely outside the experiment recovers most of the
+  predictable structure.
+- **It is the tuning, not general activity.** Ranking units by overall mean activation gives AUROC
+  **0.562** and precision@32 3.3%. Recruited units are not simply the busy ones.
+- **The relationship is graded.** Units in the top decile of differential tuning are recruited at
+  **4.9%**, falling monotonically to **0.09%** in the bottom decile — a 53× range across a quantity
+  measured without ever running the assay.
+- **The units detect the pair's own characters.** A recruited unit's single most-preferred character
+  is one of that pair's two endpoints for **27.2%** of recruitments, against a **2.8%** base rate
+  across all units — a **9.8×** lift (paired p = 2.3e-26). Two characters out of 65 account for over a
+  quarter of the preferences of the units that bend the path between them.
+- **The pool is the sharply tuned population.** The 668 units ever recruited have median sharpness
+  `max_c |z_c|` **5.45** against **4.47** for the other 3,172 (Mann–Whitney p = 5.8e-27). Which units
+  can be recruited is visible in their natural-text behaviour alone.
+- **They are legible.** The most reused unit (block 2, recruited by 88 of 150 pairs) is tuned to
+  capital letters — top characters `J`, `I`, `Y`, `P`, `V` — and its top-activating corpus contexts
+  are proper-name onsets: `DUCHESS OF Y`, `Duke of Y`, `Bishop of Y`, `And I the house of Y`. The next
+  two (blocks 3 and 4, 82 and 81 pairs) share that profile with contexts such as `on T`, `gentle T`,
+  `Henry the F`. The units bending these paths are ordinary character-identity detectors, not
+  interpolation-specific machinery.
+
+**A held-out causal test.** Everything above compares two rankings, so the obvious objection is that
+tuning might predict the *ranking* without the tuned units actually carrying the bend. Figure 31
+settles that by handing the selection rule to the corpus: for each pair we take the 32 units with the
+largest differential tuning — chosen without ever computing `d(t)`, the importance score, or anything
+else from the assay — and linearize exactly those.
+
+![recovered fraction of the width gap against the number of linearized units, for corpus-tuning selection and three assay-derived reference rules](plots/neuron_feature_causal.png)
+
+**Figure 31.** Chord linearization with units selected by corpus tuning alone. x: number of units
+linearized, `k` (log₂, of 3,840 in blocks 1–4); y: percentage of the trained→untrained median width gap
+removed (0% = no change, 100% = paths as straight as at initialization). Solid/circles = the held-out
+corpus-tuning rule `|z_a−z_b|`; dashed/squares = the assay's own per-pair top-`k`, which is fitted on
+the very curve it is tested on and so is the ceiling; dash-dotted/triangles = one fixed global set from
+the assay, the strongest previous rule that does not see the individual pair; dotted/diamonds = random
+`k`, the floor. Same 150 pairs, block-0 interpolation, step-30,000 checkpoint; the unmodified baseline
+reproduces to 0.3507 per pair exactly, and both endpoints stay exact (worst deviation 1e-6).
+
+Thirty-two units picked from corpus statistics remove **28.9%** of the gap (median width 0.351 → 0.482;
+98% of pairs widen), against **1.2%** for 32 random units — a 24× effect from a rule that never saw the
+experiment. It beats the best previous pair-blind rule, the assay-derived global set, at every size
+(28.9% vs 19.0% at `k` = 32, paired p = 2.7e-11; 66.4% vs 57.4% at `k` = 512), and it sits below the
+fitted per-pair ceiling of 50.9% (p = 7.3e-26), which is what an honest held-out prediction should do.
+So the character detectors are not merely correlated with the units the assay selects: choosing units
+by what they detect in ordinary text is enough to remove a quarter of the sharpness with 0.83% of the
+population.
+
+**What this adds.** The mechanism now has content rather than only a location and a count. A plateau
+boundary is where the character detectors tuned to the two endpoints hand over: the path stays flat
+while the same detectors keep firing, and turns where the set that is on switches. That also explains
+the pair-dependence of Figure 29 without any extra assumption — each pair recruits the detectors for
+*its* characters, so no fixed 32-unit circuit can serve every pair, and the 668-unit pool is simply
+the sharply tuned part of the early MLP population. It gives a practitioner something usable: the
+units that will control a new pair's geometry can be identified from corpus statistics, before running
+any interpolation.
+
+**Caveats.** The corpus-selected edit removes 28.9% of the gap where the fitted per-pair ranking's
+removes 50.9%, so endpoint-character tuning identifies much of the responsible population but not all
+of it, and what the rest responds to is not established here. AUROC 0.847 leaves real residual too: tuning at the two endpoint characters is not the whole story, and the 0.913 of the
+assay-derived ranking bounds how much of the gap is recoverable at all. Three characters (`$`, `&`,
+`3`) occur fewer than 100 times in the corpus, so their tuning means are noisy; re-standardizing over
+the 62 well-sampled characters and keeping only the 143 pairs built from them *raises* the result
+slightly (AUROC 0.858, precision@32 21.4%), so the rare characters are not driving it. Tuning is
+conditioned on the current character only, which is why the profiles read as character identity; a
+unit that responds to a longer pattern would be summarized crudely. 150 pairs, one context, one
+checkpoint, one model. Data: `results/neuron_feature_summary.json`,
+`results/neuron_feature_raw.npz`; code: `experiments/neuron_feature.py`.
+
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
 > **Clearly labelled as exploratory and out of the headline** (PLAN out-of-scope forbids a new
@@ -1486,32 +1602,32 @@ code: `experiments/neuron_path.py`.
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 30 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 32 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 30.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 32.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 31 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 33 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 31.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 33.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 32 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 34 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 32.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 34.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -1586,3 +1702,12 @@ endpoints exact — removes **86.7%** of the sharpness when applied to all 3,840
 No fixed set does it for everyone: one global set of 32 removes 19.0%, and a typical pair shares only
 9 of its 32 units with it. The bend is carried by a few dozen gated units per path, drawn from a
 shared pool of about 668, not by a distributed rotation and not by a single reusable circuit.
+Those units are legible: each unit's character tuning, measured in ordinary Shakespeare with no
+interpolation and no patching, predicts which pairs recruit it at **AUROC 0.847** (precision@32
+**21.6%**, 26× chance, against 0.562 for an activity-matched control), a recruited unit's preferred
+character is one of that pair's own endpoints **9.8×** more often than chance, and the three most
+reused units are capital-letter detectors that fire on proper-name onsets. Selecting units by that
+corpus tuning alone — blind to the assay — and linearizing them removes **28.9%** of the width gap
+against 1.2% for random units and 19.0% for the best assay-derived pair-blind set, so the tuning is
+causal and not only predictive. A plateau boundary is where the detectors for the two endpoint
+characters hand over.

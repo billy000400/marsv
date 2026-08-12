@@ -1,0 +1,133 @@
+  window 0/7842 (1s)
+  window 2560/7842 (3s)
+  window 5120/7842 (5s)
+  window 7680/7842 (7s)
+tuning done: 941040 positions, rarest char n=1 ('$') (7s)
+/usr/local/lib/python3.11/dist-packages/scipy/stats/_wilcoxon.py:181: RuntimeWarning: invalid value encountered in scalar divide
+  z = (r_plus - mn) / se
+{
+  "prediction": {
+    "differential": {
+      "auroc_mean": 0.8466,
+      "auroc_ci99": [
+        0.8339,
+        0.8579
+      ],
+      "auroc_median": 0.857,
+      "prec32_mean": 0.2162,
+      "lift_over_chance": 25.95,
+      "p_vs_random": 2.2995481506182782e-26,
+      "p_vs_mean_act": 2.2996057560669792e-26,
+      "p_vs_global_imp": 1.9989476533720294e-18,
+      "p_vs_max": 0.007378274807906493
+    },
+    "max": {
+      "auroc_mean": 0.8398,
+      "auroc_ci99": [
+        0.8264,
+        0.8525
+      ],
+      "auroc_median": 0.853,
+      "prec32_mean": 0.241,
+      "lift_over_chance": 28.92,
+      "p_vs_random": 2.2996057560669792e-26
+    },
+    "mean_act": {
+      "auroc_mean": 0.5619,
+      "auroc_ci99": [
+        0.5464,
+        0.5796
+      ],
+      "auroc_median": 0.559,
+      "prec32_mean": 0.0327,
+      "lift_over_chance": 3.92,
+      "p_vs_random": 1.20349559305709e-11
+    },
+    "global_imp": {
+      "auroc_mean": 0.9133,
+      "auroc_ci99": [
+        0.907,
+        0.9203
+      ],
+      "auroc_median": 0.9112,
+      "prec32_mean": 0.2748,
+      "lift_over_chance": 32.98,
+      "p_vs_random": 2.2996057560669792e-26
+    },
+    "random": {
+      "auroc_mean": 0.4982,
+      "auroc_ci99": [
+        0.486,
+        0.51
+      ],
+      "auroc_median": 0.4938,
+      "prec32_mean": 0.0079,
+      "lift_over_chance": 0.95,
+      "p_vs_random": NaN
+    }
+  },
+  "restricted": {
+    "min_char_n": 100,
+    "n_chars_kept": 62,
+    "n_pairs_kept": 143,
+    "differential": {
+      "auroc_mean": 0.8576,
+      "prec32_mean": 0.2144
+    },
+    "max": {
+      "auroc_mean": 0.8531,
+      "prec32_mean": 0.2419
+    },
+    "mean_act": {
+      "auroc_mean": 0.5647,
+      "prec32_mean": 0.0339
+    },
+    "global_imp": {
+      "auroc_mean": 0.9114,
+      "prec32_mean": 0.2699
+    },
+    "random": {
+      "auroc_mean": 0.5006,
+      "prec32_mean": 0.0085
+    }
+  },
+  "pref_char_is_endpoint": {
+    "recruited_mean": 0.2717,
+    "all_units_mean": 0.0278,
+    "lift": 9.77,
+    "p_paired": 2.2987418205385162e-26
+  },
+  "tuning_sharpness": {
+    "pool_median": 5.451,
+    "nonpool_median": 4.466,
+    "n_pool": 668,
+    "p_greater": 5.7995322770530306e-27
+  },
+  "decile_recruit_rate": [
+    0.04894,
+    0.0133,
+    0.00611,
+    0.00448,
+    0.00273,
+    0.00186,
+    0.00203,
+    0.00158,
+    0.00139,
+    0.00092
+  ],
+  "corpus": {
+    "n_positions": 941040,
+    "n_windows": 7842,
+    "min_pos": 8,
+    "rarest_char": "$",
+    "rarest_char_n": 1,
+    "median_char_n": 4266
+  }
+}
+unit 1917 (block 2, 88 pairs) top chars ['J', 'I', 'Y', 'P', 'V'] :: ' rest.\n\nDUCHESS OF Y'
+unit 2325 (block 3, 82 pairs) top chars ['V', 'I', 'J', 'P', 'R'] :: 'lour,\nIn lists, on T'
+unit 3578 (block 4, 81 pairs) top chars ['V', 'J', 'I', 'P', 'R'] :: 'lour,\nIn lists, on T'
+unit 106 (block 1, 65 pairs) top chars ['H', 'Q', 'X', 'V', 'U'] :: 'th him!\n\nSenators, &'
+unit 19 (block 1, 65 pairs) top chars ['Q', 'B', 'H', 'T', 'P'] :: "eady, and deposed\n'T"
+unit 2607 (block 3, 63 pairs) top chars ['K', 'W', 'H', 'A', 'D'] :: 'wing this usurping H'
+done in 9s
