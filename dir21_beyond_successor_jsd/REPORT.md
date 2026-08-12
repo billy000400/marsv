@@ -54,17 +54,21 @@ compresses the predicted range, but it makes the screen a table over the vocabul
 per-token experiment, and it still ranks unseen pairs about as well as the model's own endpoint output
 difference, which needs both endpoints of every pair to be run. What the probe reads is narrower than
 "the width", though: it ranks how plateau-shaped a token's curves are, and the width follows because in
-this model the two orderings nearly coincide. Removing the shape ranking from the width ranking leaves a
-reliably measured quantity the probe cannot predict at all (pattern 41), and moving the probe deeper
-does not help: the same target stays at chance when read from the block-0 MLP's output, from the full
-post-block-0 residual state (pattern 44), and from the residual stream at blocks 6, 12 and 18, where
-it drifts down to exactly zero rather than up (pattern 45). Swapping the linear probe for RBF kernel
-ridge or nearest neighbours on those same six representations leaves all 18 combinations at chance
-(pattern 46), so the miss is not an artifact of linearity, and refitting at 30, 50, 80 and 100 training
-tokens leaves all 48 size-by-site-by-readout cells inside their nulls while the same fits gain about
-$+0.05$ on the readable targets (pattern 47), so it is not an artifact of sample size either. There is
-no cheap upgrade from this shape-ranking table to a table that ranks the crossing width specifically, at
-any depth we tested.
+this model the two orderings nearly coincide.
+
+**The part of the width that curve shape does not explain is readable — but only once enough tokens are
+measured.** Removing the shape ranking from the width ranking leaves a separately measured quantity that
+the static embedding cannot predict (pattern 41), and for a long stretch of this report nothing else
+could either: not the block-0 MLP output or the post-block-0 residual state (pattern 44), not the
+residual stream at blocks 6, 12 or 18 (pattern 45), not RBF kernel ridge or nearest neighbours in place
+of ridge (pattern 46), and not training sets of 30, 50, 80 or 100 tokens (pattern 47). Every one of
+those tests was run on the same 123 measured tokens, and that is the assumption that fails. Measuring
+127 further tokens by the identical protocol lifts the residual stream after block 6 to $\rho = +0.265$
+on this target against a permutation null of $\pm 0.13$ — 0.38 of the ceiling its measurement noise
+allows — and the same probe reaches $+0.286$ on those 127 new tokens *alone*, a sample no earlier probe
+was fitted on (pattern 48). The negative that stood through four experiments was a statement about the
+sample size, not about the representation. A width-specific screen therefore does exist: it costs one
+forward pass as far as block 6, and enough measured tokens to fit it.
 
 **The ranking is a token property; the level belongs to the context.** Re-measuring the same 123
 tokens in four differently shaped contexts — a mid-sentence continuation, an interrogative, a
@@ -1390,6 +1394,47 @@ raising $n$ shrinks the test half, which makes every held-out $\rho$ noisier and
 null — a rising null band, not a rising probe, is the sign of that. Comparing each probe to its own null
 at its own size, rather than comparing raw $\rho$ across sizes, keeps the two effects apart. Figure 37
 reports the resulting 4 sizes $\times$ 6 sites $\times$ 2 readouts, per target.
+
+### Measuring 127 more tokens, and reading the one cell that stayed open
+
+The round above holds the *pool* of measured tokens fixed at 123 and moves the training/test boundary
+inside it, so every configuration it can reach trades training tokens against test tokens. It also
+quantified what that costs: the spread of the permutation null on the width residual tracked
+$0.572/\sqrt{n_{\text{test}}}$ across all 48 of its cells, which puts a floor on the smallest correlation
+any 123-token configuration can distinguish from chance. Enlarging the pool is the only way past it, so
+this round measures more tokens.
+
+**The new tokens.** dir18 chose the original 123 by ranking a pool of 527 single-token candidates by
+their mean log-probability as the next token under the three sentence frames, and taking the top of that
+ranking. The 127 new tokens are simply the next entries in that same ranking, so the sample is extended
+the way it was drawn rather than by a new criterion. They occupy ranks 48–262 of the pool against the
+originals' 0–186, and none of them was used anywhere earlier in this report. Each is put through the
+identical measurement: the same six anchor tokens, the same three frames, the same block-0 interpolation
+site and the same SLERP path, giving the same 18 curves per token from which $E_u$ and $w_u$ are computed
+exactly as before. The result is a pool of 250 tokens whose measurements are interchangeable with the
+originals by construction.
+
+**What is refit.** Only the cell that pattern 47 left open: the residual stream after block 6, with RBF
+kernel ridge, plus linear ridge alongside it as the reference. The four targets, the plateau filter, the
+ceilings, the hyper-parameter grids, the 50 random splits and the 50-permutation null are all as defined
+above, redrawn at each new sample size because they depend on how the tokens are divided. Block-6
+features for the new tokens are built by the same code path as the originals, and reproduce the cached
+features of the original 123 exactly (largest absolute difference 0.0), so old and new tokens sit in one
+feature space.
+
+Four configurations answer four different questions, and one control removes the artifact that pooling
+two samples can create:
+
+- **original 123, 80 train / 43 test** — the tie-check. This must reproduce the published cell, and does, to four decimals.
+- **new 127, 80 train / 47 test** — an independent replication on tokens no earlier probe has seen, at essentially the original sample size and the original statistical power.
+- **all 250, 80 train / 170 test** and **all 250, 125 train / 125 test** — the powered tests, whose test halves of 170 and 125 are well past the ~58 the pricing rule asked for.
+- **the within-sample control** — pooling two samples that differ on the target would let a probe score by telling the samples apart instead of by ranking tokens inside either. To close that route the residual targets are formed *within* each sample and z-scored there before pooling, so the two groups have equal means by construction and knowing which sample a token came from says nothing about its target.
+
+One reading note applies throughout this round. The permutation $p$ is the fraction of 50 shuffled draws
+at or above the measured $\rho$, so its smallest attainable value is $1/51 = 0.02$; several cells report
+exactly that and it should be read as "no shuffle came close", not as a precise probability. The
+informative quantity is the margin between $\rho$ and the null's mean plus two standard deviations, which
+is reported alongside it. Figure 38 shows all five configurations against their own nulls.
 
 ### Is anything left after the additive model, or is it noise?
 
@@ -3207,6 +3252,89 @@ the report's negative is not an artifact of fitting 80 tokens — while a genuin
 would still be invisible here, which is exactly why the next test needs more tokens rather than more
 readouts.
 
+### Buying the tokens: the open cell on a pool of 250
+
+The experiment above ends by naming its own successor. It leaves one cell unresolved — kernel ridge at
+block 6 — and it states the price of resolving it: about 60 more measured tokens. So we measured 127,
+by the identical protocol, and refit that one cell. Figure 38 puts all five configurations side by side.
+The three panels of its top row are the three targets; the two panels below them ask whether the new
+tokens are comparable to the old ones, and the last whether the null still behaves as the 123-token run
+predicted.
+
+![Six panels: three showing held-out accuracy across five fitting configurations, two comparing the two token samples, one plotting null spread against test-set size](plots/pool.png)
+
+**Figure 38.** Pythia-1.4B, residual stream after block 6, 2,048 features. **Top row**, one panel per
+target: width with shape removed (left, the open question), raw width $w_u$ (middle, control) and shape
+$E_u$ (right, control). x: the five fitting configurations, labelled with the sample, the number of
+training tokens and the number of held-out tokens; the fifth is the within-sample control, in which each
+sample's residual target is z-scored inside that sample before the two are pooled. y: mean held-out
+Spearman $\rho$ over 50 random splits, error bars $\pm 1$ standard deviation across splits. Lines are the
+readouts: linear ridge (solid, circles) and RBF kernel ridge (dashed, squares). The hatched gray band is
+the permutation null at that configuration ($\pm 2$ standard deviations around its mean, whichever
+readout gives the wider band); it narrows to the right because the test half grows. The dash-dot line
+with tick markers is the ceiling $\sqrt{R}$ that the target's own measurement noise allows, which is
+sample-specific and so is not drawn for the z-scored control. **Bottom row, left and middle:** the
+cumulative distribution of shape $E_u$ and width $w_u$ over the original 123 tokens (solid) and the 127
+new ones (dashed) — x is the target value, y the fraction of tokens at or below it. **Bottom right:** the
+standard deviation of the permutation null (y) against the number of held-out tokens (x), for every
+configuration and both readouts, with the $0.572/\sqrt{n_{\text{test}}}$ rule fitted on the 123-token run
+drawn as the dash-dot curve.
+
+**Pattern 48 — with 250 measured tokens the width-specific component is readable from block 6, by both
+readouts.** The result that stood through patterns 44–47 reverses.
+
+| width with shape removed, held-out $\rho$ | original 123, 80/43 | new 127, 80/47 | all 250, 80/170 | all 250, 125/125 | within-sample control |
+|---|---|---|---|---|---|
+| linear ridge | $+0.089$ | $+0.264$ | $+0.216$ | $+0.228$ | $+0.224$ |
+| RBF kernel ridge | $+0.145$ | $+0.286$ | $+0.248$ | $+0.265$ | $+0.255$ |
+| null mean $+2$ s.d. (the bar to clear) | $+0.193$ | $+0.188$ | $+0.104$ | $+0.131$ | $+0.129$ |
+| ceiling $\sqrt{R}$ | $0.630$ | $0.708$ | $0.698$ | $0.698$ | — |
+
+Read across the top row of the table: the original 123 tokens put kernel ridge at $+0.145$ against a bar
+of $+0.193$ — inside the null, which is the published result, reproduced here to four decimals. Every
+other column clears its bar. On the full 250 tokens kernel ridge reaches $+0.265$ against a bar of
+$+0.131$, which is $0.38$ of the ceiling that this target's measurement noise allows, and linear ridge
+clears the bar too ($+0.228$). The permutation $p$ is $0.02$ in every one of those cells, the smallest
+value 50 shuffles can produce.
+
+**The result does not depend on pooling two samples.** Two checks establish that, and they matter more
+than the pooled number itself. First, the 127 new tokens on their own — a sample disjoint from every
+probe fitted anywhere in this report, at 80 training tokens and 47 held out, so with essentially the
+statistical power the original 123 had — give $+0.286$ (kernel ridge) and $+0.264$ (ridge) against a bar
+of $+0.188$. The effect is present in a sample that has never been fitted before, at the sample size
+where the original negative was measured. Second, the within-sample control: forming each sample's
+residual target inside that sample and z-scoring it there makes the two groups identical in mean, so no
+probe can gain by recognising which sample a token came from. It changes almost nothing ($+0.265 \to
++0.255$ for kernel ridge, $+0.228 \to +0.224$ for ridge, last column of the table and rightmost point in
+the top-left panel of Figure 38). What the probe has learned is a ranking of tokens, not a group label.
+
+**Why 123 tokens missed it.** The bar the original sample had to clear was $+0.193$, and the effect
+measured on 250 tokens is about $+0.25$ — so the old configuration sat right at the edge of being able to
+see an effect of this size, and its own estimate came in below the bar at $+0.145$. Both the limited
+power and an unlucky sample estimate contribute, and this experiment does not separate them: what it
+settles is that the component *is* readable, which the disjoint 127-token sample shows without any help
+from the original 123. The controls confirm the fits themselves are healthy at the new size — shape is
+recovered at $+0.776$ and raw width at $+0.604$ on the 250-token pool (kernel ridge, 125 training
+tokens), both far above their nulls, and the residual target is also better measured in the larger pool
+(reliability $R = 0.487$, interval $[0.317, 0.607]$, against $0.397$, $[0.098, 0.591]$ for the original
+123).
+
+Two honest qualifications attach to this. The first is that the new tokens are not a copy of the old
+ones. They sit lower in the context-probability ranking, and they measure differently: median shape
+$0.092$ against $0.081$ and median width $0.554$ against $0.529$ (bottom-left and bottom-middle panels of
+Figure 38; Mann-Whitney $p < 0.001$ and $p = 0.001$), and $0.652$ of their curves pass the plateau filter
+against $0.779$. The 250-token pool is therefore a broader sample of tokens than the original 123, and
+the claim this experiment supports is that the component is readable across that broader pool — not that
+it would have been readable inside the narrow original sample, where it still measures $+0.145$.
+
+The second concerns the pricing rule that motivated the experiment. It held where it was fitted and
+drifted where it was extrapolated: at 43 and 47 held-out tokens the null's spread matched
+$0.572/\sqrt{n_{\text{test}}}$ to within 3%, but at 125 and 170 held-out tokens the real null was 18–35%
+wider than predicted (bottom-right panel of Figure 38). The extrapolation was optimistic, so the actual
+bar on 250 tokens is $\pm 0.13$ rather than the $\pm 0.09$ it implied. The effect clears the real bar
+comfortably; the rule should be read as an order-of-magnitude guide to how many tokens an experiment
+needs, not as a precise null width at sizes it was never fitted on.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -3384,20 +3512,30 @@ permutation $p$ anywhere is 0.078 — while the same fits on the same features g
 $+0.06$ (width) between 30 and 80 tokens. The negative is not an artifact of the sample size in the
 range this pool allows.
 
-**The single most informative next experiment measures more tokens.** Pattern 47 leaves exactly one
-cell open and states the price of closing it. Kernel ridge at block 6 is the only cell that rises at
-every training size ($+0.055 \to +0.106 \to +0.145 \to +0.176$, reaching 0.28 of the ceiling at
-$p = 0.078$), which with 48 cells in play is what chance also produces, so it is a candidate rather than
-a result. The null's spread on this target follows $0.572/\sqrt{n_{\text{test}}}$, so a true correlation
-of $+0.15$ clears two null standard deviations only with a test half of about 58 tokens — a pool of
-roughly 150 measured tokens against the 123 that exist. The experiment is therefore to measure
-$\hat w_u$ and the edge-drift shape for about 60 to 130 further endpoint tokens with the same six
-anchors, three frames and block-0 site, then refit exactly this probe at block 6 with kernel ridge and
-its permutation null. Above the null on a pool that size, the width-specific component is readable
-after all and the report's central negative narrows to "not readable from 123 tokens"; still inside it,
-the component is carried without being stated, at a sample size where a correlation of $+0.15$ could
-not have hidden. The cost is measurement rather than analysis — the interpolation curves for the new
-tokens — which is why every cheaper alternative was run first.
+Pattern 48 then ran the experiment pattern 47 had named, and reversed the negative. Measuring 127
+further tokens by the identical protocol and refitting that one open cell lifts the width-specific
+component clear of its null: $+0.265$ on the 250-token pool against a bar of $+0.131$, $0.38$ of the
+ceiling, with linear ridge clearing it as well. The 127 new tokens on their own reach $+0.286$ at the
+original sample size, so the effect appears in a sample no earlier probe touched, and z-scoring the
+target inside each sample before pooling leaves it at $+0.255$, so it is not an artifact of joining two
+samples. What patterns 44–47 established was a bound on 123 measured tokens, not on the representation.
+
+**The single most informative next experiment repeats pattern 48 at the other five sites.** Every
+readability result in this report except pattern 48 was measured on 123 tokens, and the one site now
+known to be underpowered at that size was tested at all six. So the depth profile of patterns 44 and 45
+— embedding row, block-0 MLP output $m_u$, post-block-0 residual state, and blocks 12 and 18 — should be
+refit on the same 250 tokens, with the same 125/125 splits, permutation null and within-sample control.
+The experiment is cheap, because the measurement is already paid for: the interpolation curves exist,
+and the five feature sets are single-token forward passes for the 127 new tokens, a few minutes of GPU
+time. What it decides is where the component becomes explicit, and that has a direct practical
+consequence. If the static embedding row also clears its null at 250 tokens, the free vocabulary-wide
+lookup can be upgraded from a shape table to a width-specific table with no forward pass at all, which is
+the cheapest useful form this screen could take. If instead readability appears only from block 6, the
+component is built rather than looked up, the screen costs one partial forward pass, and the depth at
+which the profile turns becomes a fact about where the model computes the crossing width — a
+substantially more informative result than the flat negative it replaces. Either way the interpretive
+claim in pattern 44, that transport and decodability come apart, needs re-testing at the larger sample
+size, since its evidence was the block-0 sites at 123 tokens.
 
 ---
 
@@ -3431,10 +3569,15 @@ the pool's own range. Nor is it confined to the context it was built in: measure
 continuation, an interrogative, a colon-list and a code prefix, the token ranking holds at $\rho$ from
 $+0.84$ down to $+0.50$, against $+0.82$ for two frames of the original shape. The level of `w` is a
 different matter — its median moves from 0.53 to 0.71 across those contexts — so the ordering travels
-and the calibration does not. What the table encodes is best described as curve shape rather than
+and the calibration does not. What the free table encodes is best described as curve shape rather than
 crossing width: the same probe predicts a token's edge drift better than its width, and predicts nothing
 of the width once shape is removed, so the free tier ranks tokens by how flat their transitions start
-and inherits the width ordering from the two being nearly the same in this model.
+and inherits the width ordering from the two being nearly the same in this model. The part of the width
+that shape does not explain is not lost, though — it is simply more expensive to read. Measuring 250
+tokens instead of 123 and probing the residual stream after block 6 recovers it at $\rho = +0.265$
+against a permutation bar of $+0.131$, $0.38$ of the ceiling its measurement noise allows, with the same
+effect appearing at $+0.286$ on 127 tokens that no earlier probe had seen. Four earlier experiments had
+called this component unreadable; all four were run on 123 tokens, and that is what they were measuring.
 
 Three things qualify this. The measurement is anchor-dependent: two disjoint anchor sets rank the
 tokens at $\rho = 0.46$ while each still recovers the fitted effect at $\rho \approx 0.6$, so the trait
@@ -3638,11 +3781,16 @@ there trains on 80 tokens with sd $\pm 0.10$. The edge-drift cut $E \le 0.1$ is 
 half the straight-line value — and the filtered widths are medians over whichever of a token's 18
 curves survive it, so different tokens are scored against slightly different anchor and frame subsets;
 the reliability it reports (0.661) is a reliability of that filtered measurement, not of the full
-protocol. Every "not readable" statement in this report is a statement about ridge regression with 80
-training tokens: patterns 44 and 45 together test six representations — the embedding row, the block-0
-MLP output, and the residual stream after blocks 0, 6, 12 and 18 — with one probe family, so they show
-that this readout does not recover the width-specific component from any of those sites, not that no
-readout could. The sites now span most of the network's depth; the probe family does not. The comparison of edge drift across models is six configurations at one checkpoint each, so
+protocol. Every "not readable" statement in this report except pattern 48's is a statement about 123
+measured tokens, and pattern 48 shows what that restriction was worth: the one site refit on 250 tokens
+went from inside its null to $+0.265$ against a bar of $+0.131$. The five sites of patterns 44 and 45
+that have not been refit at the larger size — the embedding row, the block-0 MLP output, the
+post-block-0 residual state, and blocks 12 and 18 — therefore carry an open question rather than a
+negative result, and the interpretive claim built on them, that transport and decodability come apart,
+is weaker than it was when written. Pattern 48's own positive result has a matching limit in the other
+direction: it is established on a 250-token pool that is broader than the original 123 — lower in
+context probability, with more of its curves failing the plateau filter — and within the original 123
+the same probe still measures $+0.145$, inside that sample's null. The comparison of edge drift across models is six configurations at one checkpoint each, so
 "plateau structure sharpens with scale" describes three Pythia sizes, not a scaling law, and the
 association between a model's ramp-like curves and its missing width ordering is a correspondence
 between two measurements, with no intervention behind it. The

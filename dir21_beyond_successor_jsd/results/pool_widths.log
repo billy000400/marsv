@@ -1,0 +1,13 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+0 already measured, 127 to go (ranks 48-262)
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:56,  1.23s/it]Loading weights:  21%|██        | 60/292 [00:01<00:04, 57.06it/s]Loading weights:  27%|██▋       | 79/292 [00:01<00:03, 64.31it/s]Loading weights:  32%|███▏      | 94/292 [00:01<00:02, 69.20it/s]Loading weights:  37%|███▋      | 107/292 [00:02<00:03, 60.51it/s]Loading weights:  42%|████▏     | 122/292 [00:02<00:02, 65.47it/s]Loading weights:  45%|████▌     | 132/292 [00:02<00:02, 68.82it/s]Loading weights:  49%|████▉     | 144/292 [00:02<00:02, 64.67it/s]Loading weights:  54%|█████▍    | 158/292 [00:02<00:01, 73.78it/s]Loading weights:  58%|█████▊    | 168/292 [00:02<00:01, 76.15it/s]Loading weights:  62%|██████▏   | 180/292 [00:03<00:01, 64.71it/s]Loading weights:  68%|██████▊   | 200/292 [00:03<00:01, 84.16it/s]Loading weights:  72%|███████▏  | 210/292 [00:03<00:01, 71.43it/s]Loading weights:  75%|███████▌  | 219/292 [00:03<00:01, 62.29it/s]Loading weights:  81%|████████  | 236/292 [00:03<00:00, 79.75it/s]Loading weights:  85%|████████▍ | 248/292 [00:03<00:00, 76.64it/s]Loading weights:  89%|████████▉ | 260/292 [00:04<00:00, 75.36it/s]Loading weights:  95%|█████████▍| 276/292 [00:04<00:00, 87.33it/s]Loading weights:  99%|█████████▊| 288/292 [00:04<00:00, 92.20it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 65.40it/s]
+16/127 tokens; median edge 0.089, median w_env 0.583
+32/127 tokens; median edge 0.091, median w_env 0.590
+48/127 tokens; median edge 0.091, median w_env 0.590
+64/127 tokens; median edge 0.091, median w_env 0.590
+80/127 tokens; median edge 0.093, median w_env 0.593
+96/127 tokens; median edge 0.093, median w_env 0.593
+112/127 tokens; median edge 0.093, median w_env 0.593
+127/127 tokens; median edge 0.092, median w_env 0.592
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/pool_widths.json

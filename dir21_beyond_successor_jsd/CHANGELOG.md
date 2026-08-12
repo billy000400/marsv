@@ -1328,3 +1328,60 @@ reproduce patterns 44/45 to four decimals in both the real $\rho$ and all 50 per
 1792 inline eqs / 37 embeds / 0 problems; RESULTS 3 display eqs / 1226 inline eqs / 37 embeds / 0
 problems). Figure 37 numbered after Figure 36 in both files and cited by number; no bare
 `(plots/*.png)` references.
+
+---
+
+## 2026-08-12 — iteration 23: the standing negative is reversed (pattern 48, Figure 38)
+
+**What ran.** The experiment both deliverables named as next. `experiments/pool_widths.py` measured 127
+further endpoint tokens by the identical protocol — the same six anchors, three sentence frames, block-0
+interpolation site and SLERP path — taking the measured pool from 123 to 250 tokens. The new tokens are
+the next entries in the same ranking dir18 used to pick the original 123 (pool tokens by mean next-token
+log-probability under the three frames), so the sample is extended the way it was drawn; ranks 48–262
+against the originals' 0–186. `experiments/pool_probe.py` then refit the single cell pattern 47 left
+open: residual stream after block 6, RBF kernel ridge, with linear ridge alongside as the reference.
+`plot_pool.py` and `pool_table.py` produced Figure 38 and the table.
+
+**New in RESULTS.md and REPORT.md — pattern 48.** With 250 measured tokens the width-specific component
+(width with curve shape removed) is readable from block 6 by both readouts: kernel ridge $+0.265$ and
+ridge $+0.228$ against a null bar (mean $+2$ s.d.) of $+0.131$, i.e. 0.38 of the ceiling. Two checks rule
+out the pooling artifact: the 127 new tokens alone, at 80 train / 47 test and so at the original power,
+give $+0.286$ against a bar of $+0.188$; and z-scoring each sample's residual target within that sample
+before pooling leaves $+0.255$. The original 123 reproduce their published cell exactly ($+0.145$, inside
+its $+0.193$ bar). Controls on the 250-token pool: shape $+0.776$, raw width $+0.604$.
+
+**Superseded claims — this is a reversal, not an extension.** The report's central negative,
+"the width-specific component is not readable from any of six representations, by any of three readout
+families, at any training size 30–100" (patterns 44–47), is now bounded to what it actually measured:
+123 measured tokens. Both deliverables' Summary, Results, Conclusion and limits sections are rebuilt
+around this. Specifically: RESULTS.md's "That missing component stays unreadable at every site we tried
+… there is no cheap upgrade to a table that ranks the crossing width specifically" → "The width-specific
+part is readable after all — it needed more measured tokens, not a better probe"; REPORT.md's Summary
+clause "There is no cheap upgrade from this shape-ranking table … at any depth we tested" → the
+pattern-48 paragraph; the limits paragraph now records that the five sites not yet refit at 250 tokens
+carry an open question rather than a negative result, and that pattern 44's "transport and decodability
+come apart" is weaker than when written. The next-experiment recommendation in both files changes from
+"measure more tokens" (now done) to "refit the other five sites at 250 tokens".
+
+**Numbers that changed, old → new.** Width-with-shape-removed at block 6, kernel ridge: $+0.145$ inside
+its null at 123 tokens → $+0.265$ clear of its null at 250. Reliability of that target: $0.397$, interval
+$[0.098, 0.591]$ (123 tokens) → $0.487$, $[0.317, 0.607]$ (250). The $0.572/\sqrt{n_{\rm test}}$ pricing
+rule from iteration 22 is now reported with its measured error: within 3% at 43–47 test tokens where it
+was fitted, but 18–35% optimistic at 125–170, so the real bar on 250 tokens is $\pm 0.13$, not the
+$\pm 0.09$ it implied.
+
+**Stated limits.** The 250-token pool is broader than the original 123 — median shape 0.092 against
+0.081 and median width 0.554 against 0.529 (Mann-Whitney $p < 0.001$ and $p = 0.001$), with 0.652 of its
+curves passing the plateau filter against 0.779 — so the claim is readability across that broader pool,
+not inside the narrow original sample, where the same probe still measures $+0.145$. Whether the 123
+missed the effect through limited power or an unlucky estimate is not separated by this run. Permutation
+$p = 0.02$ is the floor for 50 shuffles and is reported as such, with the margin over the null bar as
+the informative quantity.
+
+**Verification.** Feature tie-check: block-6 features of the 123 shared tokens rebuilt by the new code
+path match the cached ones exactly (largest absolute difference 0.00e+00). Probe tie-check: at
+$n_{\rm train} = 80$ on the original 123, all 8 block-6 probes reproduce pattern 46 to four decimals
+(largest $|\rho$ diff$| = 0.0000$). `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL
+CHECKS PASS (REPORT 47 display eqs / 1872 inline eqs / 38 embeds / 0 problems; RESULTS 3 display eqs /
+1279 inline eqs / 38 embeds / 0 problems). Figure 38 numbered after Figure 37 in both files and cited by
+number; 38 embeds and 38 captions per file; no bare `(plots/*.png)` references.

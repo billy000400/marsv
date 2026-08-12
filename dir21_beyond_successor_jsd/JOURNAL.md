@@ -1602,3 +1602,66 @@ standing negative, produced one figure with per-size nulls and an exact 24-probe
 and both deliverables are curated to current-best with Figure 37 embedded and `check_render.py` passing
 (37 embeds, 37 captions, 0 problems). No STOP written: the next experiment is named, concrete and worth
 running.
+
+## 2026-08-12 — iteration 23: the negative was about the sample, not the network
+
+**What I set out to do.** No unaddressed feedback, so ordinary plan work: the experiment both
+deliverables named as next. Iteration 22 had priced the last caveat on the standing negative — every
+probe that failed to find the width-specific component was fitted inside a pool of 123 measured tokens,
+and the permutation null's spread followed $0.572/\sqrt{n_{\rm test}}$, so no configuration of 123 tokens
+could distinguish a true $\rho$ of $+0.15$ from chance. The named fix was to buy tokens. I measured 127
+more and refit the one cell left open.
+
+**Result: the negative reverses.** At block 6 on 250 tokens, kernel ridge reads the width-with-shape-
+removed target at $+0.265$ and ridge at $+0.228$, against a null bar of $+0.131$ — 0.38 of the ceiling.
+Four experiments (patterns 44–47: six sites, three readout families, four training sizes) had called this
+component unreadable. All four were run on the same 123 tokens. They were measuring the pool.
+
+**The trap I had to design around, and the check that mattered most.** Pooling two token samples that
+differ on the target lets a probe score by telling the samples apart rather than by ranking tokens inside
+either — the result would be real arithmetic and a fake finding. Two things rule that out. The decisive
+one is that the 127 new tokens *alone* give $+0.286$ against a bar of $+0.188$: a sample disjoint from
+every probe in the report, at 80 train / 47 test, i.e. at the original sample size and the original
+power. No pooling is involved in that number at all. The second is the within-sample control — z-score
+each sample's residual target inside that sample before pooling, so the groups have equal means by
+construction and group membership carries no information — which leaves $+0.255$. I would not have
+published the pooled number without the disjoint-sample number; it is the one that does the work.
+
+**What I could not settle, and did not claim.** The original 123 measured $+0.145$ against a bar of
+$+0.193$, and the pooled effect is about $+0.25$. So that sample sat right at the edge of being able to
+see an effect this size and its estimate came in low. Whether the 123 were underpowered or unlucky is
+not separable here, and I wrote it that way rather than picking the flattering reading. The new tokens
+are also genuinely broader than the old — lower in context probability, median shape 0.092 vs 0.081,
+median width 0.554 vs 0.529, 0.652 of curves passing the plateau filter vs 0.779 — so the claim is
+readability across the 250-token pool, not inside the original narrow sample. Both qualifications are in
+the deliverables next to the result, not in a footnote.
+
+**The pricing rule got a grade.** Iteration 22's $0.572/\sqrt{n_{\rm test}}$ was fitted on test halves of
+23–93 and used to extrapolate to ~58. Measured out of sample it is accurate to 3% at 43 and 47 test
+tokens and 18–35% optimistic at 125 and 170, so the real bar at 250 tokens is $\pm 0.13$ rather than the
+$\pm 0.09$ it implied. The effect clears the real bar comfortably, but the rule is now reported as an
+order-of-magnitude guide to how many tokens an experiment needs, which is what it earned.
+
+**Reporting note.** With 50 permutations the smallest attainable $p$ is $1/51 = 0.02$, and several cells
+report exactly that. I stated the floor explicitly in Methods and used the margin over the null's mean
+$+2$ s.d. as the effect measure throughout, because a table of "$p = 0.02$" across a row invites a reader
+to think each cell is independently that surprising.
+
+**Assumptions logged.** (a) New tokens taken as the next entries in dir18's own candidate ranking rather
+than sampled randomly from the pool, so the sample is extended the way it was drawn; the rank ranges
+(48–262 vs 0–186) and the resulting distribution shift are reported rather than hidden. (b) Only the one
+open cell was refit, not all six sites — the plan named that cell, and refitting everything would have
+left no time to check the pooling artifact, which mattered more. (c) Ridge carried alongside kernel ridge
+at no real cost, because a linear reference that moves with the pool is what shows the effect is not a
+kernel artifact.
+
+**Story re-framing (rule 9b).** Old story: "the width-specific component is transported but unreadable
+anywhere, by any readout, at any training size." New story: "it is readable, and the four experiments
+that said otherwise were bounded by a 123-token pool." Forced by pattern 48. Both deliverables' Summary,
+Results, Conclusion, limits and next-experiment sections were rebuilt; patterns 44–47 stay in place,
+reframed as what they actually measured.
+
+**On track?** Yes, and the direction is in a better place than the plan expected — a null result turned
+into a positive one with a concrete mechanism-locating follow-up. No STOP: the next experiment is named
+and cheap (refit the other five sites at 250 tokens), and it decides whether the free embedding lookup
+can be upgraded to a width-specific table or whether readability begins in the middle of the network.

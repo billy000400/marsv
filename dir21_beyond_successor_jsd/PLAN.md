@@ -46,7 +46,43 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 22 — COMPLETE; the sample-size caveat is now priced)
+## Current status (2026-08-12, iteration 23 — COMPLETE; the standing negative is REVERSED)
+
+**Iteration 23 ran the experiment both deliverables named as next, and it overturned the result**
+(`experiments/pool_widths.py`, `pool_probe.py`, `plot_pool.py`, `pool_table.py`; Figure 38; deliverables
+now carry 38 figures each and pass `check_render.py`). 127 further endpoint tokens were measured by the
+identical protocol — same six anchors, three frames, block-0 site, SLERP path — taking the pool from 123
+to 250, and the one cell pattern 47 left open (residual stream after block 6, RBF kernel ridge on
+width-with-shape-removed) was refit.
+
+* **The width-specific component is readable at 250 tokens.** Kernel ridge $+0.265$, linear ridge
+  $+0.228$, against a null bar (mean $+2$ s.d.) of $+0.131$ — 0.38 of the ceiling. Permutation
+  $p = 0.02$, which is the floor for 50 shuffles.
+* **Not a pooling artifact, by two checks.** The 127 new tokens alone (80 train / 47 test, i.e. the
+  original power, and a sample no earlier probe saw) give $+0.286$ against a bar of $+0.188$. Z-scoring
+  each sample's residual target within that sample before pooling leaves $+0.255$.
+* **The original 123 reproduce exactly.** $+0.145$, inside its $+0.193$ bar, matching pattern 46 to four
+  decimals; the block-6 features of the shared tokens match the cached ones to 0.0.
+* **Why 123 missed it.** Its bar was $+0.193$ against an effect of about $+0.25$, and its own estimate
+  came in low at $+0.145$. Power and sample variation both contribute; this run does not separate them.
+* **Two honest limits.** The new tokens are broader than the old (median shape 0.092 vs 0.081, width
+  0.554 vs 0.529, both $p \le 0.001$; 0.652 of curves pass the plateau filter vs 0.779), so the claim is
+  about the 250-token pool. And the $0.572/\sqrt{n_{\rm test}}$ pricing rule held to 3% where fitted
+  (43–47 test tokens) but under-predicted the null by 18–35% at 125–170.
+* **Deliverable consequence:** the Summary, Results, Conclusion, limitations and next-experiment
+  sections of both files are rebuilt around the reversal; patterns 44–47 are reframed as bounds on 123
+  measured tokens rather than on the representations.
+
+**Next step (only if reopened):** refit the other five sites at 250 tokens. The embedding row $W_E[u]$,
+the block-0 MLP output $m_u$, the post-block-0 residual state, and blocks 12 and 18 were each tested only
+at 123 tokens, which is now known to be underpowered for this target. Same 125/125 splits, permutation
+null and within-sample control. Cost is minutes: the curves exist, and the five feature sets are
+single-token forward passes for the 127 new tokens. If $W_E[u]$ clears its null, the free vocabulary-wide
+lookup becomes width-specific with no forward pass; if readability starts at block 6, the depth where the
+profile turns says where the model computes the crossing width. It also re-tests pattern 44's claim that
+transport and decodability come apart.
+
+## Previous status (2026-08-12, iteration 22 — COMPLETE; the sample-size caveat is now priced)
 
 **Iteration 22 ran the experiment both deliverables named as next** (`experiments/curve_probe.py`,
 `plot_curve.py`, `curve_table.py`; Figure 37; deliverables now carry 37 figures each and pass
