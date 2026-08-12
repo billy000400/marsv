@@ -603,8 +603,28 @@ labels the basins nor explains them"), RESULTS.md Question & verdict item 5, Fig
 files, and the hypothesis paragraph's "decodes to the same prediction" description. Every measurement
 is unchanged. `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (39 figures each, 0 problems).
 
-**S24h DONE 2026-08-12 — the tail is redundant, weak and continuous, not a second population.
-Measured, not yet curated into the deliverables (see the note at the end of this block).**
+**S24i DONE 2026-08-12 — the final head units are promoted from just below the head, not recruited
+from the anonymous middle.** `experiments/neuron_head_origin.py` (14 s, one recording pass per pair per
+checkpoint, no ablations) reads the importance *rank* of each pair's step-30,000 top-8 units at every
+earlier checkpoint and the mirror trajectory of its step-831 top-8. Median rank of the eventual head:
+**113.5 → 31 → 7 → 4 → 3.5** of 3,840 across steps 831 → 30,000 (a random unit sits at 1,919.5), with
+**51.8%** already inside the step-831 top 128 and **75.5%** inside its top 512; **75%** of the climb is
+complete by step 2,038, while membership of the top 8 itself is the last thing to arrive (9.8 / 23.3 /
+51.6 / 72.0 / 100%). The displaced step-831 leaders fall only to median rank **100.5**. This resolves
+the ambiguity left by S24h's zero overlap: training re-orders a broad candidate pool that is already
+recognizable early. Curated as **Figure 39** in both deliverables.
+
+**S24h CURATED into both deliverables 2026-08-12 (later iteration).** REPORT.md gained a Methods
+subsection ("Band decomposition: why the last third of the bend costs hundreds of units" — bands,
+marginal-in-prefix, redundancy ratio $\Lambda$, the two random controls, best-rank unit assignment, the
+checkpoint series) and a Results subsection ("The tail is weak, redundant and continuous, and training
+keeps rewriting the head") carrying the three arms; RESULTS.md gained the matching self-contained
+section with its methods inline. Both files: new **Figure 37** (`plots/neuron_bands.png`) and
+**Figure 38** (`plots/neuron_bands_time.png`), the three exploratory figures renumbered 37–39 → 39–41,
+and a Summary/Headline paragraph. `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(41 figures each, 0 problems).
+
+**S24h DONE 2026-08-12 — the tail is redundant, weak and continuous, not a second population.**
 `experiments/neuron_bands.py` cuts the per-pair importance ranking into six bands
 (0–8, 8–32, 32–128, 128–512, 512–2,048, 2,048–3,840) and linearizes each band **on its own**, plus the
 nested prefix ending at each band edge, plus two size-matched random controls (drawn from all 3,840
@@ -1223,11 +1243,28 @@ before finishing, and re-write `STOP` only when clean again.
 
 ## Next step
 
-**S24h DONE (2026-08-12) — see "Current status". Two things follow, in this order. (i) Curation:
-embed `plots/neuron_bands.png` in REPORT.md and RESULTS.md as the S24 section's next figure, with the
-Methods paragraph that defines the band decomposition, the within-region control and the
-best-rank unit assignment, and renumber the later figures. Do this once feedback #7 clears review.
-(ii) The successor the three arms name. Both developmental questions this iteration raised are already
+**S24h curation DONE and S24i DONE (2026-08-12, same iteration).** `plots/neuron_bands.png`
+(Figure 37), `plots/neuron_bands_time.png` (Figure 38) and the new `plots/neuron_head_origin.png`
+(Figure 39) are embedded in REPORT.md and RESULTS.md with their methods, captions and Summary/Headline
+paragraphs; the exploratory figures are renumbered 40–42. S24i (`experiments/neuron_head_origin.py`,
+14 s, no ablations) answered the question the head-turnover result raised — smooth climb or late
+arrival — and the answer is **promotion from just below the head**: a pair's step-30,000 top-8 units sit
+at median rank 113.5 of 3,840 at step 831 (random 1,919.5), 51.8% already inside that checkpoint's top
+128, climbing 113.5 → 31 → 7 → 4 → 3.5 with 75% of the climb done by step 2,038, while entry into the
+top 8 itself comes last (9.8 → 23.3 → 51.6 → 72.0 → 100%). The displaced step-831 leaders drift only to
+median rank 100.5, an order of magnitude above chance. So the churn is a re-ordering inside a broad
+candidate pool that is recognizable early, consistent with the 668-unit shared pool.
+
+**The next question this leaves, and it is nearly free.** Are the promoted units *describable* in a way
+the demoted ones are not? Every ingredient exists on disk: `results/neuron_probe_*` holds each unit's
+held-out $R^2$ (full description and current character alone) and
+`results/neuron_head_origin_raw.npz` holds both trajectories, so comparing the final-head units against
+the step-831 head units they displaced is a Mann–Whitney over distinct units with no GPU work at all.
+A positive result would say training promotes the units a short character window predicts; a null would
+say the promotion is invisible to that description. Either way it stays one run, one context, and a
+second seed remains the honest generality check for every developmental claim in this block.
+
+**S24h DONE (2026-08-12) — see "Current status". The successor the three arms named. Both developmental questions this iteration raised are already
 answered: redundancy does not grow with training (ratio ~1.2 → ~1.18), and the head band strengthens
 by *replacing* its members (0 of the step-831 top-8 survive to step 30,000). The question that leaves
 is where the final head units come from — do they climb the ranking smoothly from the start, or appear

@@ -1926,3 +1926,69 @@ listed it as the direction's real open problem since 2026-08-03.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 49 display / 1,059 inline equations / 39 figures; RESULTS 39 figures; 0 problems).
 - **No `STOP`**: feedback #7 is complete pending review, and the S24 plan candidates remain open.
+
+## 2026-08-12 — S24h curated into both deliverables: the band decomposition of the unit ranking
+
+- **What changed.** The three S24h arms measured in the previous iteration (band decomposition at the
+  final checkpoint, the same decomposition across five checkpoints, and the identity of the top-$k$
+  units over training) are now in REPORT.md and RESULTS.md. They were on disk but not in the
+  deliverables, because REPORT.md and RESULTS.md were feedback #7's declared outputs and adding a figure
+  renumbers every later figure; with feedback #7's edit stable, the curation is done here.
+- **REPORT.md.** New Methods subsection "Band decomposition: why the last third of the bend costs
+  hundreds of units" (bands at rank edges 0/8/32/128/512/2048/3840, the marginal-inside-the-prefix
+  comparison $\Delta_b$, the redundancy ratio $\Lambda$, the two size-matched random controls and why
+  the within-region one is the one claims rest on, the best-rank unit assignment, and the
+  five-checkpoint series with its 94-pair common subset). New Results subsection "The tail is weak,
+  redundant and continuous, and training keeps rewriting the head" with **Figure 37**
+  (`plots/neuron_bands.png`) and **Figure 38** (`plots/neuron_bands_time.png`), plus a Summary paragraph
+  before the verdict.
+- **RESULTS.md.** Matching self-contained section "The tail of the ranking is weak, redundant and
+  continuous — and training keeps rewriting the head" with its methods inline, the same two figures, and
+  a Headline paragraph.
+- **Numbers now reported (all new to the deliverables, none superseded).** Band-alone recovered
+  fractions 27.9 / 25.9 / 24.1 / 20.4 / 10.4 / −0.1%, summing to 111.5% against the 85.2% all-units
+  ceiling ($\Lambda=1.29$, paired $p=6\times10^{-20}$, 86.7% of 150 pairs above 1); every band except
+  the last beats a same-size draw from its own region ($p\le10^{-25}$, 98–100% of pairs) while the
+  bottom 1,792 units remove −0.1%; per-unit worth falls ~500-fold (34.8 → 0.067% per 1,000 units);
+  probe held-out $R^2$ by best-rank band 0.97 / 0.70 / 0.66 / 0.59 / 0.52 / 0.50 (full) and
+  0.91 / 0.30 / 0.22 / 0.14 / 0.12 / 0.13 (current character alone), head vs tail 0.80 vs 0.51
+  ($p=2\times10^{-67}$) and 0.42 vs 0.12 ($p=2\times10^{-97}$); redundancy ratio flat across steps
+  831–30,000 (1.21 / 1.01 / 1.08 / 1.21 / 1.18) while the all-units effect grows 46.2 → 81.0%; median
+  top-8 overlap with the step-30,000 top-8 of 0 / 2 / 4 / 6 / 8 units (top-32: 6 / 10 / 16 / 23 / 32,
+  chance 0.02 / 0.27).
+- **Figure numbering.** The three exploratory figures move 37 → 39, 38 → 40, 39 → 41 in both files;
+  every prose reference moved with them. Figure count 39 → 41 in each file.
+- **Nothing removed or superseded.** No earlier result changed; feedback #7's narrowed headline,
+  conclusion, Limitation 7 and Figure 21 caption are untouched.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 51 display / 1,113 inline equations / 41 figures; RESULTS 41 figures; 0 problems); embed
+  count equals caption count (82 = 41 + 41).
+- **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review, and the S24
+  plan candidates remain open.
+
+## 2026-08-12 — S24i: where the finished network's head units come from (Figure 39, both deliverables)
+
+- **New experiment.** `experiments/neuron_head_origin.py` (14 s, no ablations, one recording pass per
+  pair per checkpoint) answers the question S24h's head-turnover result raised. S24h showed the median
+  overlap between a pair's step-831 top-8 units and its step-30,000 top-8 is 0 of 8, which is consistent
+  with two developmental stories — a smooth climb from just below the head, or a late jump from the
+  anonymous middle. Rank separates them.
+- **Result.** Promotion, not recruitment. A pair's step-30,000 top-8 units sit at median rank **113.5**
+  of 3,840 at step 831 (a random unit: 1,919.5), with **51.8%** already inside that checkpoint's top 128
+  and **75.5%** inside its top 512; they climb **113.5 → 31 → 7 → 4 → 3.5** with **75%** of the climb
+  complete by step 2,038, while entry into the running top 8 comes last (9.8 / 23.3 / 51.6 / 72.0 /
+  100%). The displaced step-831 leaders drift only to median rank **100.5**, an order of magnitude above
+  chance.
+- **Where it is written.** REPORT.md: Methods paragraph "Where the final head units come from" added to
+  the band-decomposition subsection; Results paragraph "They are promoted from just below the head, not
+  recruited from nowhere" with **Figure 39** (`plots/neuron_head_origin.png`); the third "why this
+  matters" point now states the bound this puts on cross-checkpoint transfer of unit identity; Summary
+  paragraph extended by one sentence. RESULTS.md: matching paragraph, figure, Headline sentence and
+  caveat/data lines.
+- **Figure numbering.** The three exploratory figures move 39 → 40, 40 → 41, 41 → 42 in both files;
+  every prose reference moved with them. Figure count 41 → 42 in each file.
+- **Nothing superseded.** No earlier number changed; this is a new measurement on the same run.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 51 display / 1,114 inline equations / 42 figures; RESULTS 42 figures; 0 problems); embed count
+  equals caption count (84 = 42 + 42).
+- **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.

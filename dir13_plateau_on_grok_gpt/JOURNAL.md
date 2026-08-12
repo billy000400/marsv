@@ -2573,3 +2573,72 @@ way in the deliverables at curation.
 On track? yes — PLAN's saturation question answered plus two successors run; blocker: none, the three
 S24h figures/panels are on disk and curation into REPORT.md/RESULTS.md is the next iteration's first
 item, deferred only because those two files are feedback #7's declared outputs and are in review.
+
+## 2026-08-12 — curating S24h into the deliverables (the deferred half of last iteration)
+
+**Feedback check first.** `human_feedback_7.txt` is still un-renamed and its manifest is
+`review_pending` with the single checklist item `done`. The wrapper's independent reviewer has not run,
+and nothing in the manifest is `rejected`, so there is nothing to repair; the iteration instructions
+send me to PLAN's "Next step", whose item (i) was the curation I deliberately deferred last time.
+
+**Why now.** Last iteration I held the curation back because REPORT.md and RESULTS.md are feedback #7's
+declared outputs and inserting a figure renumbers every later figure — a large unrelated diff landing
+mid-review. Holding it a second time would leave three measured arms out of the deliverables
+indefinitely, which rule 12 explicitly forbids ("do not defer report figures"). The feedback-#7 edit is
+small, stable and localized (Conclusion, Interpretation, Limitation 7, verdict item 5, two captions), and
+none of it lives in the S24 section, so the two diffs do not touch each other. Verified after editing:
+`grep` finds the narrowed wording intact and no revived decision-basin identity claim.
+
+**What I wrote.** REPORT.md: a Methods subsection before "Spherical interpolation and patching" defining
+the bands, the marginal-inside-the-prefix comparison, the redundancy ratio, both random controls (with
+the reason the within-region one is the one the claims rest on — a random 1,536-unit draw already
+contains ~40% of the top 32), the best-rank unit assignment and why mean rank fails, and the
+five-checkpoint series with its 94-pair common subset; then a Results subsection carrying the three arms
+with Figures 37 and 38. RESULTS.md: the matching self-contained section with methods inline, same two
+figures. Both files got a Summary/Headline paragraph, since the band result changes how the top-$k$
+curve in those summaries should be read. The three exploratory figures renumbered 37–39 → 39–41 in both
+files, prose references included.
+
+**Framing (rule 9a).** The "why this matters" paragraph states the consequence the numbers actually
+support: a nested-prefix curve overstates how concentrated the mechanism is, so an ablation argument
+built on top-$k$ recovery would overstate what it removed. The developmental panels are written as a
+description of one run at five checkpoints, and Figure 37c is written as a rank–describability
+association at one checkpoint with no mechanism attached.
+
+**Checks.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 51 display / 1,113 inline
+equations / 41 figures; RESULTS 41 figures; 0 problems). Embed count equals caption count (82). One
+8b hazard of my own making fixed before running it: I had written the inline per-unit-worth expression
+with `\,`, which GitHub strips inside `$…$`; it is `\thinspace` now. Four pre-existing `\,` hits in
+older inline math are left alone (rule 3 — they compile, and they are not mine to rewrite here).
+
+On track? yes — PLAN "Next step" item (i) is done and item (ii) (where the final head units come from:
+smooth climb up the ranking or late appearance) is now the head of the list; blocker: none.
+
+**S24i, same iteration — where the head units come from.** With the curation done and time left, I ran
+PLAN's item (ii). `experiments/neuron_head_origin.py` records the full importance vector per pair per
+checkpoint (no ablations, 14 s) and reads *ranks* instead of set overlaps, because rank is what
+distinguishes the two stories S24h's zero overlap left open: a smooth climb from just below the head, or
+a late jump from the anonymous middle.
+
+The answer is the first, and more strongly than I expected. A pair's step-30,000 top-8 units already sit
+at median rank 113.5 of 3,840 at step 831 — a random unit sits at 1,919.5 — with 51.8% inside that
+checkpoint's top 128. They climb 113.5 → 31 → 7 → 4 → 3.5, and 75% of that climb (in median rank) is
+done by step 2,038, even though membership of the top 8 itself arrives last (9.8 → 23.3 → 51.6 → 72.0 →
+100%). The mirror trajectory matters as much: the step-831 leaders fall only to median rank 100.5, so
+they are demoted, not discarded.
+
+*What this changes in the write-up.* S24h's headline sentence ("training builds a head whose membership
+it keeps rewriting") is true but was easy to over-read as recruitment from nowhere. The Results
+paragraph and the third "why this matters" point now state the bound: an early checkpoint identifies the
+right neighbourhood of the ranking (half the finished head is inside its top 128) and the wrong order
+within it, so a study needing unit identities should use the checkpoint it reasons about or widen $k$.
+Both deliverables carry it as Figure 39 with the exploratory figures renumbered 40–42.
+
+*Free check.* Both trajectories hit their tautological endpoints exactly (median 3.5 at their own
+checkpoint), which is the pipeline check for this script.
+
+*Successor named in PLAN.* Whether the promoted units are more describable from short character context
+than the ones they displaced — a Mann–Whitney over distinct units using `results/neuron_probe_*` and
+`results/neuron_head_origin_raw.npz`, no GPU work.
+
+On track? yes — PLAN "Next step" items (i) and (ii) both done this iteration; blocker: none.
