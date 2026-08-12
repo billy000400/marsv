@@ -226,6 +226,10 @@ Feedback tasks use the active JSON manifest. In state triage, do no research: cl
 For ready/in_progress/rejected tasks, answer or repair the verbatim checklist and write only to declared paths. Read an existing report section only when editing it. For every checklist item, fill completion.what_was_done, completion.evidence (exact figure/table/experiment/section/file), and completion.ambiguity (use "None" when none remains), then set status to done. Set state to review_pending only when every item and every required output is complete. Never rename feedback or create STOP yourself; the wrapper does that only after format checks and an independent content review.
 
 Your final response must enumerate every checklist item with what was done, its exact evidence location, and any remaining ambiguity. For ordinary plan work with no active feedback, take one focused step from Current status/Next step and load only the files needed for that step.
+
+Before ordinary plan work, compare Current status against the success criterion. If the criterion is already satisfied, do not run another experiment or follow a speculative "next step if reopened." Finalize the concise deliverables and create STOP.
+
+Do not add every completed experiment to REPORT*.md. Preserve detailed evidence in RESULTS.md and keep only the shortest result chain needed for the report's core question.
 """
 
 
@@ -264,7 +268,13 @@ def files_for_review(path: Path, data: dict) -> list[str]:
     return list(dict.fromkeys(outputs))
 
 
-REVIEW_RULES = """Act as a fresh completion reviewer. Inspect only the bundled original feedback, task checklist, and every declared output. Reject if any request was omitted or reinterpreted; the work answers a different research question; unrequested analysis displaced requested analysis; jargon is important but undefined; correlation is called a mechanism or causal explanation; a claim is stronger than its evidence; or technically formatted prose is difficult for a new researcher. Rendering success is necessary but never sufficient. Return pass=false with concrete failures whenever in doubt. List every exact declared output path in inspected_outputs after inspecting it."""
+REVIEW_RULES = 
+"""Act as a fresh completion reviewer. Inspect only the bundled original feedback, task checklist, and every declared output. Reject if any request was omitted or reinterpreted; the work answers a different research question; unrequested analysis displaced requested analysis; jargon is important but undefined; correlation is called a mechanism or causal explanation; a claim is stronger than its evidence; or technically formatted prose is difficult for a new researcher. Rendering success is necessary but never sufficient. Return pass=false with concrete failures whenever in doubt. List every exact declared output path in inspected_outputs after inspecting it.
+
+Reject if a report exceeds its declared/default word or figure budget; duplicates the
+detailed result archive; includes secondary experiments unnecessary to answer the core
+question; or has grown by appending one experiment per iteration instead of being curated.
+"""
 
 
 def make_bundle(manifest: Path, bundle: Path) -> None:

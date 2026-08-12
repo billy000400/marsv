@@ -329,7 +329,19 @@ complete AND (b) zero unaddressed feedback files remain. If you re-enter and fin
 feedback next to a stale `STOP`, delete `STOP`, address the feedback, and only re-write `STOP` when
 clean again.
 
-## 12. Embed every plot as a RENDERED image in every affected REPORT*.md and RESULTS.md.
+## 12. Render selected plots; do not duplicate every result in REPORT*.md.
+
+Save a PNG for every useful quantitative result, but do not embed every result in every
+deliverable.
+
+- `RESULTS.md` is the detailed evidence record and may include all current useful results.
+- `REPORT*.md` is a concise synthesis. Embed only figures necessary for its central argument.
+- A result may remain in `RESULTS.md` without appearing in the report.
+- Robustness checks, failed interventions, secondary model comparisons, and exploratory
+  follow-ups belong in `RESULTS.md` or a declared technical appendix unless they materially
+  change the report's main conclusion.
+- “Self-contained” means explaining the evidence selected for the argument. It does not mean
+  documenting every experiment performed.
 
 A bare path like `(plots/foo.png)` in prose does NOT render — it is just text, and the figure never
 appears. **Every quantitative result must be embedded as an actual Markdown image** so it renders on
