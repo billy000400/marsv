@@ -35,13 +35,24 @@ def _cross(e, grid, level):
     return float(grid[k - 1] + (level - lo) / (hi - lo) * (grid[k] - grid[k - 1]))
 
 
+def edge_drift(d, grid=GRID):
+    """How much d(t) moves in the outer 10% of the path at each end: d(0.1) + (1 - d(0.9)).
+
+    d(0) = 0 and d(1) = 1 by construction, so this is the total rise over the first and last tenth
+    of the path. A flat plateau leaves the endpoints alone (E ~ 0); a straight line in output space
+    gives d(t) = t and E = 0.2 exactly.
+    """
+    d = np.asarray(d, float)
+    return float(np.interp(0.1, grid, d) + 1.0 - np.interp(0.9, grid, d))
+
+
 def env_metrics(d, grid=GRID):
     """Envelope width, the strict width, and how far the raw curve backslides."""
     d = np.asarray(d, float)
     e = np.maximum.accumulate(d)
     m = curve_metrics.metrics(d, grid)
     return dict(w_env=_cross(e, grid, 0.9) - _cross(e, grid, 0.1), w=m["w"],
-                valid=bool(m["valid"]), backslide=m["backslide"],
+                valid=bool(m["valid"]), backslide=m["backslide"], edge=edge_drift(d, grid),
                 span=bool(m["span"]), mono=bool(m["mono"]), single=bool(m["single"]))
 
 
@@ -65,7 +76,7 @@ def run_pair(model, patcher, ids_a, xa, za, xb, zb):
 
 def token_widths(model, patcher, tok, ids_by_str, anchors, frames, log_every=40):
     """Per-token lists of the 18 (frame, anchor) measurements of each statistic."""
-    keys = ("w_env", "w", "backslide", "out_jsd", "valid", "mono", "single")
+    keys = ("w_env", "w", "backslide", "edge", "out_jsd", "valid", "mono", "single")
     raw = {s: {k: [] for k in keys} for s in ids_by_str}
     for fi, frame in enumerate(frames):
         pre = tok(frame, return_tensors="pt").input_ids.cuda()
