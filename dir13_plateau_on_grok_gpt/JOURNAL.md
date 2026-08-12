@@ -2428,3 +2428,55 @@ materially more compute than one 30,000-step run. No `STOP` written — the plan
 On track? yes — S24g done, joint unit interactions are bounded at 3.4 points (≈ a fifth of the
 remaining gap) at $k=128$ and zero at $k=32$, with two pre-registered predictions refuted and last
 iteration's attribution corrected in both deliverables; blocker: none.
+
+## 2026-08-12 — operator feedback #7: narrowing the claim from decision basins to character basins
+
+**Feedback check first.** `ls` shows `human_feedback_7.txt` without `.addressed.md`, so this iteration
+is feedback work, not plan work. `.tasks/human_feedback_7.txt.manifest.json` arrived in state `triage`.
+
+**Triage (no research).** The feedback names no output file. The claim it targets — "one next-character
+decision basin per character" — is a headline/conclusion claim of the two curated deliverables that
+carry it, and both have the literal sections the operator names: RESULTS.md has `## Headline` (and the
+`## Question & verdict` summary at the top), REPORT.md has `## Conclusion` (and the `## Summary`
+verdict). So the routing is REPORT.md + RESULTS.md, and there is nothing materially ambiguous to block
+on. `REPORT_followup.md` is feedback #5's deliverable (frequency / asymmetry / character-class
+re-analysis); it makes no decision-class claim, so it stays unchanged. Manifest set to `in_progress`
+with those routing fields recorded.
+
+**What I found.** The supporting analysis the operator quotes already exists in both files — the
+Results subsection "What labels a basin: the endpoint character, not the decision class" with Figure 16
+and `results/basin_decision.json` (15 distinct endpoint predictions, 31.6% of paths at exactly two,
+median 3, 9.9% of pairs sharing an endpoint prediction). It arrived in the previous iteration and,
+oddly, was never journaled or changelogged, so I recorded its provenance in the CHANGELOG entry. The
+Summary verdict and the RESULTS.md Headline had already been narrowed with those counts. What had
+**not** been narrowed was the Conclusion, which still read "Our reading: **a plateau here is a
+next-character decision basin**" and, one paragraph later, "what the basins *index* is the model's
+next-character decision". That is exactly the conflation the operator is objecting to, so no new
+measurement was needed — only the claim had to come down to the evidence.
+
+**What I changed.** REPORT.md Conclusion: the reading is now a character-conditioned logit-space basin
+whose transition coincides with a prediction change, with the three counts stated inline and an
+explicit refusal of the one-basin-per-character phrasing. The Interpretation paragraph now says the
+basins are indexed by the endpoint character and keeps the 91% coincidence as a coincidence between two
+labellings. Limitation 7 was re-titled from ""Decision basin" is a description, not a demonstrated
+mechanism" to "The next-character decision neither labels the basins nor explains them", with the
+labelling failure first and the (unchanged) mechanism argument second. RESULTS.md Question & verdict
+item 5 gained the three counts. Consistency edits in both files: Figure 21's caption said the plateau
+boundary *is* the decision boundary — now *coincides with* a prediction change, pointing at Figure 16;
+"the decision reading survives" → "the coincidence survives"; and the hypothesis paragraph's "decodes
+to the same prediction … stands as a description" is now "at best a loose description", because one
+prediction can label the basins at both ends of a path and the typical path visits a third.
+
+**What I did not change.** Every number. The rest-ratio criterion and its null families, 59/65
+characters holding a basin, the frequency correlation, the 78% per-character variance share, every
+transition width, intervention, frozen-block run and unit-selection result stand as measured — the
+operator anticipated this, and it is true here for the same reason it was true for feedback #6: all of
+those are computed from the geometry of $d(t)$, not from the decision labelling.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 49 display / 1,059 inline equations / 39 figures; RESULTS 39 figures; 0 problems). Manifest set
+to `review_pending`. No `STOP` written and no feedback file renamed — the wrapper does that after the
+independent content review.
+
+On track? yes — feedback #7 answered by narrowing the Conclusion, Interpretation, Limitation 7 and the
+RESULTS verdict to what the prediction counts support, with no measurement affected; blocker: none.

@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "state": "review_pending",
+  "source_feedback": "human_feedback_7.txt",
+  "source_sha256": "48d7bc762873b26833274375f773bf92501199f9462b8a1685280d6d40f915dc",
+  "required_outputs": [
+    "REPORT.md",
+    "RESULTS.md"
+  ],
+  "may_modify": [
+    "REPORT.md",
+    "RESULTS.md",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md"
+  ],
+  "must_remain_unchanged": [
+    "REPORT_followup.md",
+    "human_feedback_7.txt",
+    "results/basin_criterion.json",
+    "results/basin_decision.json",
+    "plots/basin_criterion.png",
+    "plots/basin_decision.png",
+    "experiments/basin_decision.py"
+  ],
+  "unresolved_ambiguities": [],
+  "triage_notes": [
+    "The feedback names no output file. The claim it targets ('one next-character decision basin per character') is a headline/conclusion claim of the two curated deliverables that carry it: REPORT.md (Summary verdict, Conclusion, Interpretation, Limitation 7) and RESULTS.md (Question & verdict item 5, Headline). RESULTS.md has a literal '## Headline' section and REPORT.md a literal '## Conclusion' section, so 'headline and conclusion' routes to both files. Routing is therefore clear, not ambiguous.",
+    "REPORT_followup.md is the deliverable for feedback #5 (frequency / asymmetry / character-class re-analysis). It contains no next-character-decision claim, so it must remain unchanged.",
+    "No new experiment is required: the supporting counts (15 distinct endpoint predictions, 31.6% of paths at exactly two, median 3, 9.9% of pairs sharing an endpoint prediction) already exist in results/basin_decision.json and Figure 16. The request is an interpretation narrowing, not new analysis."
+  ],
+  "checklist": [
+    {
+      "request": "The revised basin criterion correctly fixes the linear-null problem. However, the interpretation still conflates endpoint characters with next-character decision classes. The 65 endpoint characters produce only 15 distinct endpoint argmax predictions, only 32% of paths visit exactly two predictions, and the median is three. Therefore, the evidence supports character-conditioned logit-space basins whose transitions coincide with prediction changes, not “one next-character decision basin per character.” Please narrow the headline and conclusion accordingly.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Narrowed the headline and conclusion in both curated deliverables to character-conditioned logit-space basins whose transitions coincide with prediction changes, and removed every remaining statement of the decision-basin identity. (1) REPORT.md Conclusion: 'Our reading: a plateau here is a next-character decision basin.' replaced by 'a plateau here is a character-conditioned basin in logit space whose transition coincides with a change in the model's next-character prediction', followed inline by the operator's three counts (65 characters -> 15 distinct endpoint predictions, largest class 13; 31.6% of paths visit exactly two predictions against a median of 3; 9.9% of pairs share one endpoint prediction while still resting near each end) and an explicit statement that we do not claim one decision basin per character. (2) REPORT.md Conclusion / Interpretation paragraph: 'what the basins index is the model's next-character decision - the flat arms are constant-prediction regions' replaced by a statement that a basin is indexed by the endpoint character, with the 91% boundary coincidence kept as a coincidence between two different labellings. (3) REPORT.md Limitation 7 re-titled from '\"Decision basin\" is a description, not a demonstrated mechanism' to 'The next-character decision neither labels the basins nor explains them', with the labelling failure stated first (the three counts) and the unchanged mechanism argument second. (4) RESULTS.md Question & verdict item 5 (the top-of-file verdict) gained the three counts and the explicit refusal of the one-basin-per-character phrasing; RESULTS.md's '## Headline' section already carried the narrowed wording and needed no change. (5) Consistency edits so no residual identity claim survives elsewhere: Figure 21's caption in both files changed from 'The plateau boundary is the model's next-character decision boundary' to 'coincides with the model's next-character prediction change (the two labellings are compared in Figure 16)'; 'The decision reading survives the sharper form of the test' -> 'The coincidence survives ...' in both files; the hypothesis paragraph's '\"decodes to the same prediction\" ... stands as a description' now says it is at best a loose description that does not individuate basins, because one prediction can label the basins at both ends of a path (9.9% of pairs) and the typical path passes through a third prediction belonging to neither endpoint; REPORT.md Summary's 'the decision-basin description no longer applies there' -> 'so no prediction change marks the boundary there at all'. No new experiment was run and no measurement changed: the rest-ratio basin criterion, its null validation, the 59/65 basin count, the frequency correlation, the 78% per-character variance share, and every transition width, intervention, frozen-block and unit-selection number are as previously reported, since all are computed from the geometry of d(t) rather than from the decision labelling. Verified with 'python3 experiments/check_render.py REPORT.md RESULTS.md' -> ALL CHECKS PASS (REPORT 49 display / 1,059 inline equations / 39 figures; RESULTS 39 figures; 0 problems).",
+        "evidence": "REPORT.md '## Conclusion' section, paragraph beginning 'Running all 2,080 character pairs then answers the structural question' (the narrowed reading and the three counts, ~line 3052); REPORT.md Conclusion 'Interpretation' paragraph (~line 3165); REPORT.md Conclusion 'Limitations' item 7 (~line 3207); REPORT.md '## Summary' verdict paragraph beginning 'Verdict: plateaus are real in this model' (~line 172) and the readout-offset sentence at ~line 118; RESULTS.md '## Question & verdict' item 5 'Most characters own a logit-space basin, and its boundary coincides with a prediction change' (~line 62) and the '## Headline' section paragraph beginning 'That last coincidence is not an identity' (~line 2027); Figure 21 caption in REPORT.md (~line 1759) and RESULTS.md (~line 653); the hypothesis-description sentences in REPORT.md (~line 1903) and RESULTS.md (~line 805). Supporting measurements (unchanged): Results subsection 'What labels a basin: the endpoint character, not the decision class' with Figure 16 (plots/basin_decision.png) in REPORT.md (~line 1634) and RESULTS.md (~line 530), computed by experiments/basin_decision.py into results/basin_decision.json (n_distinct_endpoint_predictions 15, frac_paths_exactly_two_predictions 0.3163, median_predictions_visited 3.0, frac_pairs_endpoints_share_prediction 0.0995, n_pairs 2080, n_characters 65). History recorded in CHANGELOG.md entry '2026-08-12 - operator feedback #7: the headline and conclusion narrowed to character-conditioned basins'.",
+        "ambiguity": "None"
+      }
+    }
+  ]
+}

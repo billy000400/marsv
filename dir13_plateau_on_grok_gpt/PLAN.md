@@ -590,6 +590,19 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**Operator feedback #7 addressed 2026-08-12 (pending review) — the claim is narrowed from decision
+basins to character-conditioned basins.** No new experiment: the counts the operator cites were already
+measured (`results/basin_decision.json`, Figure 16 — 65 endpoint characters → 15 distinct endpoint
+predictions, 31.6% of paths at exactly two, median 3, 9.9% of pairs sharing an endpoint prediction).
+The Summary verdict and the RESULTS.md Headline already reflected them; the **Conclusion** did not, and
+still read "a plateau here is a next-character decision basin". It now reads "a character-conditioned
+basin in logit space whose transition coincides with a change in the model's next-character
+prediction", with the counts inline and an explicit refusal of one-basin-per-character. Also narrowed:
+REPORT.md's Interpretation paragraph, Limitation 7 (re-titled "The next-character decision neither
+labels the basins nor explains them"), RESULTS.md Question & verdict item 5, Figure 21's caption in both
+files, and the hypothesis paragraph's "decodes to the same prediction" description. Every measurement
+is unchanged. `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (39 figures each, 0 problems).
+
 **S24g DONE 2026-08-12 — unit interactions are measured and small: worth 3.4 points at $k=128$ and
 nothing at $k=32$.** Zero unaddressed feedback files, so this iteration advanced the plan (PLAN's own
 "Next step" named this experiment). One script, no training, 77 s of forward passes.

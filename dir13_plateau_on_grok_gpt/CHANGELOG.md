@@ -1880,3 +1880,49 @@ listed it as the direction's real open problem since 2026-08-03.
   `results/neuron_greedy_summary.json`, `results/neuron_greedy_raw.npz`, `results/neuron_greedy.log`.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 49 display / 1,057 inline equations / 38 figures; RESULTS 38 figures; 0 problems).
+
+## 2026-08-12 — operator feedback #7: the headline and conclusion narrowed to character-conditioned basins
+
+- **Feedback addressed:** `human_feedback_7.txt`. The operator accepted the revised (rest-ratio) basin
+  criterion but objected that the *interpretation* still conflated endpoint characters with
+  next-character decision classes, and asked for the headline and conclusion to be narrowed to
+  "character-conditioned logit-space basins whose transitions coincide with prediction changes".
+- **No new experiment.** The counts the operator cites were already measured and are unchanged:
+  15 distinct endpoint predictions from 65 endpoint characters, 31.6% of paths visiting exactly two
+  predictions, median 3, and 9.9% of pairs whose two endpoints share one prediction
+  (`results/basin_decision.json`, Figure 16). What changed is what the deliverables *claim* from them.
+- **Superseded claim (old → new), REPORT.md Conclusion.** "Our reading: **a plateau here is a
+  next-character decision basin.**" → "a plateau here is a **character-conditioned basin in logit space
+  whose transition coincides with a change in the model's next-character prediction**", followed by the
+  three counts and an explicit statement that we do not claim one decision basin per character.
+- **REPORT.md Conclusion, Interpretation paragraph (old → new).** "what the basins *index* is the
+  model's next-character decision — the flat arms are constant-prediction regions" → the basins are
+  indexed by the **endpoint character**; the 91% boundary coincidence is retained as a coincidence
+  between two different labellings, with the 65→15 collapse and the third intermediate prediction named.
+- **REPORT.md Limitation 7 (old → new).** ""Decision basin" is a description, not a demonstrated
+  mechanism" → "The next-character decision neither labels the basins nor explains them", with the
+  labelling failure (15 classes, median 3 predictions, 9.9% shared endpoints) stated before the
+  mechanism argument, which is unchanged.
+- **RESULTS.md Question & verdict item 5.** The three counts added directly after the 91% figure, with
+  the explicit "we do not claim one next-character decision basin per character". The RESULTS.md
+  Headline already carried the narrowed wording and is unchanged.
+- **Consistency edits in both files.** Figure 21's caption "The plateau boundary **is** the model's
+  next-character decision boundary" → "**coincides with** the model's next-character prediction change
+  (the two labellings are compared in Figure 16)"; "The decision reading survives the sharper form of
+  the test" → "The coincidence survives …"; the hypothesis paragraph's "'decodes to the same
+  prediction' … stands as a *description*" now says it is at best a **loose** description and does not
+  individuate basins, since one prediction can label both ends of a path and the typical path passes
+  through a third. In REPORT.md's Summary, "the decision-basin description no longer applies there" →
+  "so no prediction change marks the boundary there at all".
+- **Unchanged:** every measurement. The rest-ratio criterion and its null validation, the per-character
+  basin fractions (59/65), the frequency correlation, the 78% variance share, all transition widths,
+  interventions, frozen-block runs and unit-selection results are untouched, as are `REPORT_followup.md`
+  and every file under `results/` and `plots/`.
+- **Provenance note.** `experiments/basin_decision.py`, `results/basin_decision.json`,
+  `plots/basin_decision.png` and the Results subsection "What labels a basin: the endpoint character,
+  not the decision class" (Figure 16 in both files) entered the deliverables in the previous iteration
+  without a CHANGELOG entry of their own; this entry records them. That is why the figure count moves
+  38 → 39 against the S24g entry above.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 49 display / 1,059 inline equations / 39 figures; RESULTS 39 figures; 0 problems).
+- **No `STOP`**: feedback #7 is complete pending review, and the S24 plan candidates remain open.

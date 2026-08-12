@@ -60,7 +60,11 @@ PLAN case 1, "temporally associated," for the character analogues.**
    untrained-network endpoints, and the six characters that fail it are the six rarest in the training
    text), **78%** of the variance in how sharply a basin is
    left is explained by per-character terms alone, and **91%** of all next-character prediction changes
-   along a path fall inside the transition window. The basins are **learned** — at initialization all
+   along a path fall inside the transition window. That coincidence is not an identity, so we do not
+   claim one next-character decision basin per character: the 65 endpoint characters produce only
+   **15** distinct endpoint predictions, only **31.6%** of paths visit exactly two predictions (median
+   **3**), and on **9.9%** of pairs both endpoints predict the same character while the path still
+   rests near each end (Figure 16). The basins are **learned** — at initialization all
    2,080 paths are straight lines (median width 0.803 → 0.355 trained) — and are built by the
    **shallow blocks** (median width 0.34 patching at block 0 vs 0.81 at block 8). That site is
    contingent rather than necessary: seven retraining runs, each matching or beating the reference's
@@ -646,7 +650,8 @@ Figure 21 is the readout-decision test itself.
 
 ![readout decision test panels](plots/allpairs_readout_decision.png)
 
-**Figure 21.** The plateau boundary is the model's next-character decision boundary. Left: histogram
+**Figure 21.** The plateau boundary coincides with the model's next-character prediction change (the
+two labellings are compared in Figure 16). Left: histogram
 of `t* − t_flip` (x), the offset between the `d(t)` midpoint and the first change in the model's
 predicted next character; y = number of pairs; black dotted line at 0. Median `|t* − t_flip|` = 0.045,
 i.e. 2.2 steps of the 50-point grid. Middle: how many distinct next-character predictions a path
@@ -656,7 +661,7 @@ fractions (y) — the mean fraction of prediction changes falling inside the tra
 the fraction of pairs whose two flat arms are each a single prediction (0.80). Bars carry distinct
 hatches as well as colours.
 
-The decision reading survives the sharper form of the test. Paths do not simply flip once: the median
+The coincidence survives the sharper form of the test. Paths do not simply flip once: the median
 path visits **3** distinct next-character predictions, and only 32% visit exactly 2, so there are
 usually one or two short-lived intermediate predictions. But those changes are **not spread over the
 plateaus** — **91%** of all prediction changes fall inside the transition window, **79%** of pairs
@@ -802,8 +807,10 @@ Two findings, one of them algebraic and one empirical.
 evidence that the decision creates the plateau — the causal arrow runs the other way. The prediction
 flip and the `d(t)` transition coincide because both are driven by the same sharp change in the
 residual stream, produced by blocks 1–4; the readout is a steep but passive reader of it. The wording
-"a plateau is the set of states that decode to the same prediction" therefore stands as a *description*
-of the basins, not as a mechanism, and the mechanism sits upstream of the unembedding.
+"a plateau is the set of states that decode to the same prediction" is therefore never a mechanism —
+that sits upstream of the unembedding — and only a loose *description*, since one prediction can label
+the basins at both ends of a path (9.9% of pairs) and the typical path passes through a third
+prediction belonging to neither endpoint (Figure 16).
 
 ### The MLP-gain intervention — blocks 1–4 causally set the sharpness
 

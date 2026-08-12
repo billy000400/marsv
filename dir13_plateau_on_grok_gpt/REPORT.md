@@ -115,8 +115,8 @@ the logits at that same slot — turns out to change the interpretation rather t
 Moving the readout up to **8 characters downstream** of the patched character leaves the transition
 width statistically **unchanged** (0.243 at offset 0 vs 0.244–0.257 at offsets 2–8, paired
 $p = 0.22$–$0.43$), while the untrained network stays on the straight line (0.80) at every offset. At
-offset 4 the two endpoints predict the *same* next character for **91.3%** of pairs — the
-decision-basin description no longer applies there — and **52.0%** of pairs still give a strict
+offset 4 the two endpoints predict the *same* next character for **91.3%** of pairs — so no prediction
+change marks the boundary there at all — and **52.0%** of pairs still give a strict
 plateau. So what switches discretely is the network's state, which the patched position happens to
 expose as a prediction flip.
 With that settled, the last experiment opens the mechanism itself. Replacing an MLP unit's activation
@@ -1756,7 +1756,8 @@ Figure 21 is the readout-decision test itself.
 
 ![readout decision test panels](plots/allpairs_readout_decision.png)
 
-**Figure 21.** The plateau boundary is the model's next-character decision boundary. Left: histogram
+**Figure 21.** The plateau boundary coincides with the model's next-character prediction change (the
+two labellings are compared in Figure 16). Left: histogram
 of $t^{*}-t_{\text{flip}}$ (x), the offset between the curve's midpoint and the first change in the
 model's predicted next character; y = number of pairs; black dotted line at 0. Median
 $|t^{*}-t_{\text{flip}}|$ = 0.045, i.e. 2.2 steps of the 50-point grid. Middle: number of distinct
@@ -1766,7 +1767,7 @@ the transition window $[t_{lo},t_{hi}]$ (0.91), the fraction of pairs whose chan
 it (0.79), and the fraction of pairs whose two flat arms are each a single constant prediction (0.80).
 Bars carry distinct hatches as well as colours.
 
-The decision reading survives the sharper form of the test. Paths do not simply flip once: the median
+The coincidence survives the sharper form of the test. Paths do not simply flip once: the median
 path visits **3** distinct next-character predictions and only 32% visit exactly 2, so there are
 usually one or two short-lived intermediate predictions. But those changes are **not spread over the
 plateaus** — **91%** of all prediction changes fall inside the transition window, **79%** of pairs have
@@ -1900,8 +1901,11 @@ unmodified, **0.015** equalised and **0.035** midpoint-forced.
 evidence that the decision creates the plateau; the causal arrow runs the other way. The prediction
 flip and the $d(t)$ transition coincide because both are driven by the same sharp change in the
 residual stream, produced by blocks 1–4, and the readout is a steep but passive reader of it. So the
-sentence "a plateau is the set of states that decode to the same prediction" survives as a
-*description* of the basins, not as their mechanism; the mechanism sits upstream of the unembedding.
+sentence "a plateau is the set of states that decode to the same prediction" is at best a loose
+*description* of the basins and never their mechanism: the mechanism sits upstream of the unembedding,
+and as a description it does not individuate them either, since one prediction can label the basins at
+both ends of a path (9.9% of pairs) and a single path typically passes through a third prediction
+belonging to neither endpoint (Figure 16).
 
 #### The MLP-gain intervention: blocks 1–4 causally set the sharpness
 
@@ -3049,8 +3053,15 @@ the variance in transition
 width is explained by per-character terms rather than pair chemistry, **91%** of the model's
 next-character prediction changes fall inside the transition window, and the whole structure is
 **learned** (median width 0.803 at initialization → 0.355 trained) and **built by blocks 1–4** (0.34
-patching at block 0 vs 0.81 at block 8). Our reading: **a plateau here is a next-character decision
-basin.** Two interventions locate its mechanism: no readout bias can move the plateau ($d(t)$ is
+patching at block 0 vs 0.81 at block 8). Our reading, stated at the strength the counts support:
+**a plateau here is a character-conditioned basin in logit space whose transition coincides with a
+change in the model's next-character prediction.** The coincidence is not an identity, and we do not
+claim one decision basin per character: the 65 endpoint characters yield only **15** distinct endpoint
+predictions (largest class 13 characters), only **31.6%** of paths visit exactly two predictions
+against a median of **3**, and on **9.9%** of pairs both endpoints predict the same character while the
+path still rests near each end and switches sharply between them (Figure 16). What the basin is
+conditioned on is the endpoint character; the prediction change marks where the path leaves it.
+Two interventions locate its mechanism: no readout bias can move the plateau ($d(t)$ is
 algebraically invariant to one), whereas scaling the MLP branch of blocks 1–4 sets the sharpness
 directly and monotonically (width 0.80 at gain 0 → 0.35 unmodified → 0.31 at gain 1.5), while the same
 manipulation of blocks 8–11 changes nothing. The basins are therefore *built* shallow and only *read*
@@ -3155,9 +3166,11 @@ recipe — outside this run's compute budget (~30k vs the paper's ~1e5 steps).
 input mixture; blocks 1–4 then collapse it toward one of the two endpoint computations, and the
 remaining blocks add nothing. That collapse is the work of a few dozen MLP units per path (Figure 30),
 drawn from a shared pool but selected pair by pair. The all-pairs sweep sharpens the earlier reading that plateaus are "a
-distributed property of the whole stack": the sharpening is concentrated shallow, and what the basins
-*index* is the model's next-character decision — the flat arms are constant-prediction regions and 91%
-of prediction changes sit inside the boundary. Note this coexists with an earlier finding on the same
+distributed property of the whole stack": the sharpening is concentrated shallow, and what a basin is
+indexed by is the endpoint **character** patched in, not the model's next-character decision. The two
+run together at the boundary — 91% of prediction changes sit inside the transition window — but they
+are different labellings: 65 characters share 15 endpoint predictions and the typical path passes
+through a third prediction belonging to neither endpoint (Figure 16). Note this coexists with an earlier finding on the same
 model (see CHANGELOG, 2026-07-15) that responses to *random-direction* perturbations are smooth and
 saturating — that assay answered a different question; the plateau structure lives specifically along
 natural activation-to-activation directions.
@@ -3195,7 +3208,12 @@ natural activation-to-activation directions.
    was −0.74 in the first context we measured but has median −0.41 (range −0.05 … −0.74) across nine
    contexts, and −0.46 on the all-pairs set. The direction is solid; the magnitude should be quoted as
    a range.
-7. **"Decision basin" is a description, not a demonstrated mechanism.** The alignment between the
+7. **The next-character decision neither labels the basins nor explains them.** It fails as a label
+   first: 65 endpoint characters produce 15 distinct endpoint predictions, the median path visits three
+   predictions rather than two, and 9.9% of pairs share one endpoint prediction (Figure 16), so
+   "one decision basin per character" is not what the sweep measured — the basins are
+   character-conditioned and the prediction change is a marker at their boundary. It fails as a
+   mechanism second. The alignment between the
    transition and the prediction flip is correlational, and the three interventions since have taken
    the mechanism *away* from the decision rather than confirming it: no readout bias can move $d(t)$
    at all, the block-1–4 MLPs set the sharpness causally, and the decision structure survives the
