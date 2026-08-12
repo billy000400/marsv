@@ -24,7 +24,11 @@ from datasets import load_dataset
 
 from common import RESULTS, blocks, load
 
-SEED = 31
+# The amended analysis runs with the defaults (test split, seed 31). The pre-registered
+# independent replication sets S2_SPLIT=train, S2_SEED=131, S2_TAG=_rep; nothing else changes.
+SPLIT = os.environ.get("S2_SPLIT", "test")
+SEED = int(os.environ.get("S2_SEED", "31"))
+TAG = os.environ.get("S2_TAG", "")
 N_PREFIX = 1400          # every eligible wikitext-103 test paragraph (1395 of them)
 N_CAND = 24
 TOPK_NEURONS = 64
@@ -35,10 +39,21 @@ RELAXED = dict(version="relaxed", djsd=0.02, conf=0.75, df=0.08)
 
 
 def get_spans(tok, rng):
-    """N_PREFIX random 20-40-token spans from the wikitext-103 test split."""
-    ds = load_dataset("Salesforce/wikitext", "wikitext-103-raw-v1", split="test")
+    """N_PREFIX random 20-40-token spans from the wikitext-103 SPLIT split.
+
+    The test split is scanned in order because every eligible paragraph is taken anyway
+    (1395 < N_PREFIX). The train split is 1.8M rows ordered by article, so a paragraph
+    subset is drawn uniformly at random first (with its own generator, leaving the span-offset
+    stream identical across splits).
+    """
+    ds = load_dataset("Salesforce/wikitext", "wikitext-103-raw-v1", split=SPLIT)
+    if SPLIT == "train":
+        idx = np.random.default_rng(SEED + 1).permutation(len(ds))[:80000]
+        texts = ds.select(np.sort(idx))["text"]
+    else:
+        texts = ds["text"]
     out = []
-    for t in ds["text"]:
+    for t in texts:
         s = t.strip()
         if len(s) < 400 or s.startswith("="):
             continue
@@ -213,7 +228,7 @@ def main():
 
     pref_by_idx = {p["idx"]: p for p in prefixes}
     out = dict(
-        matching_version=rule["version"], rule=rule, seed=SEED, model="gpt2-large",
+        matching_version=rule["version"], rule=rule, seed=SEED, split=SPLIT, model="gpt2-large",
         n_prefixes=len(prefixes), n_candidate_pairs=len(all_rows), n_eligible=len(elig),
         logit_dist_p10=ld_p10, confound_sd=sd, topk_neurons=TOPK_NEURONS,
         n_contrasts=len(contrasts), contrasts=[], bank_summary=dict(
@@ -235,18 +250,18 @@ def main():
             e[lab]["str_b"] = p["cand_str"][r["j"]]
         out["contrasts"].append(e)
 
-    path = os.path.join(RESULTS, "matched_pairs.json")
+    path = os.path.join(RESULTS, f"matched_pairs{TAG}.json")
     with open(path, "w") as f:
         json.dump(out, f, indent=2)
     h = hashlib.sha256(open(path, "rb").read()).hexdigest()
-    print("matched_pairs.json sha256:", h)
-    with open(os.path.join(RESULTS, "matched_pairs.sha256"), "w") as f:
+    print(f"matched_pairs{TAG}.json sha256:", h)
+    with open(os.path.join(RESULTS, f"matched_pairs{TAG}.sha256"), "w") as f:
         f.write(h + "\n")
-    np.savez_compressed(os.path.join(RESULTS, "matched_features.npz"),
+    np.savez_compressed(os.path.join(RESULTS, f"matched_features{TAG}.npz"),
                         **{k: feat_store[k] for k in
                            {str(c["prefix"]) for c in contrasts}})
     # Bank-level scatter data for the balance figure / power reporting.
-    np.savez_compressed(os.path.join(RESULTS, "bank_pairs.npz"),
+    np.savez_compressed(os.path.join(RESULTS, f"bank_pairs{TAG}.npz"),
                         jsd=np.array([r["jsd"] for r in all_rows]),
                         F=np.array([r["F"] for r in all_rows]),
                         logit_dist=ld,

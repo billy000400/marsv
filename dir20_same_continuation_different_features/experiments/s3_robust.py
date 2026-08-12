@@ -17,6 +17,7 @@ import numpy as np
 
 from common import RESULTS
 
+TAG = os.environ.get("S2_TAG", "")   # "" = amended analysis, "_rep" = replication
 CONF = ["jsd", "logit_dist", "angle0", "lognorm_ratio", "mean_surprisal"]
 SEED = 31
 N_BOOT = 10000
@@ -29,7 +30,7 @@ def boot_ci(x, rng):
 
 
 def main():
-    s3 = json.load(open(os.path.join(RESULTS, "matched_metrics.json")))
+    s3 = json.load(open(os.path.join(RESULTS, f"matched_metrics{TAG}.json")))
     rows = s3["contrasts"]
     rng = np.random.default_rng(SEED)
     dw = np.array([r["dw"] for r in rows])
@@ -62,7 +63,7 @@ def main():
         coefs={c: [float(beta[i + 1]), float(se[i + 1])] for i, c in enumerate(CONF)},
         r2=float(1 - resid.var() / dw.var()))
 
-    with open(os.path.join(RESULTS, "s3_robust.json"), "w") as f:
+    with open(os.path.join(RESULTS, f"s3_robust{TAG}.json"), "w") as f:
         json.dump(out, f, indent=2)
     for k, v in out.items():
         if k == "adjusted":

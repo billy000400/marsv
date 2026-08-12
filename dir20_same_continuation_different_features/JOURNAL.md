@@ -915,3 +915,44 @@ $F$, which would test whether "different machinery" is a neuron-level or feature
 On track? yes — S1–S4 complete, the pre-registered gate is met on all four clauses with a causal test
 behind it, both deliverables are curated to current-best with five captioned figures each and pass
 `check_render.py`, and no unaddressed feedback remains.
+
+---
+## 2026-08-12 (operator feedback #1: relabel as amended, run a pre-registered independent replication)
+
+**Feedback check.** `human_feedback_1.txt` was unaddressed. Its two asks: (1) relabel the S1–S4
+result as an **amended analysis** rather than a fully pre-registered confirmatory one, because the
+bank was enlarged from the planned 300 prefixes to 1395 after seeing that only 21 contrasts survived
+— blinded to width, but still a departure from the frozen stopping rule; (2) require an
+**independent replication** before any confirmatory claim. Both are correct and I am doing both.
+
+**Pre-registration of the replication — written to disk at 2026-08-12T02:44Z, BEFORE any
+replication prefix was scored and before any replication width existed.** Frozen now, no clause may
+change afterwards:
+
+- **Corpus (independent of the amended analysis):** WikiText-103 **train** split, which no analysis
+  in this direction has ever touched. (The amended analysis used the *test* split; the older
+  exploratory dir20 used *validation*. Train is the only untouched split.) 80000 rows drawn
+  uniformly at random with generator seed 132, scanned in order, keeping paragraphs of >= 400
+  characters that do not start with `=`.
+- **Bank size fixed in advance: exactly 1400 prefixes.** This is the fix for the violated stopping
+  rule — the amended analysis measured a contrast yield of 101/1395 = 7.2% per prefix, so 1400
+  prefixes has an expected yield of ~101 contrasts, comfortably above the gate's n >= 80. Span
+  length 20-40 tokens, generator seed 131.
+- **Everything else identical to the frozen protocol:** gpt2-large, block-0 `resid_post` final-token
+  SLERP-with-linear-norm, 101 alphas, top-24 printable candidate final tokens, top-64
+  neurons/block in blocks 1-35 scored by |a| * ||W^out_j||, F = Jaccard distance, eligibility
+  0.005 <= JSD <= 0.20 and final-logit distance > bank p10, primary calipers
+  (|dJSD| <= 0.01, confound distance <= 0.50, dF >= 0.10), and if fewer than 80 contrasts survive,
+  the SAME single pre-specified relaxation (0.02 / 0.75 / 0.08) and no other.
+- **Stopping rule (the clause that was violated before, now binding):** the bank is run ONCE at
+  1400 prefixes. It will NOT be enlarged, re-seeded, or re-drawn for any reason, and the calipers
+  will not be relaxed a second time. Whatever n comes out is what is analysed.
+- **Decision rule, identical to the amended analysis's gate:** replication succeeds iff n >= 80 AND
+  median dw <= -0.05 AND >= 60% of contrasts have dw < 0 AND the prefix-bootstrap 95% CI on the
+  median lies below 0. If 40 <= n < 80 the replication is reported as **underpowered** and no
+  confirmatory claim is made. If n < 40 it is reported as a **failure to power** with the same
+  consequence. Any outcome, including a null, is reported in RESULTS.md and REPORT.md.
+- **Primary outcome:** median dw = w_TV(high-F) - w_TV(low-F) over the replication contrasts.
+- The replication manifest is hashed before S3 runs, exactly as the amended one was.
+
+Result and interpretation appended below once the run finishes.

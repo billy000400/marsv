@@ -1,0 +1,36 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 5105.85it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+1400 spans
+  prefix 50: 13800 candidate pairs
+  prefix 100: 27600 candidate pairs
+  prefix 150: 41400 candidate pairs
+  prefix 200: 55200 candidate pairs
+  prefix 250: 69000 candidate pairs
+  prefix 300: 82800 candidate pairs
+  prefix 350: 96600 candidate pairs
+  prefix 400: 110400 candidate pairs
+  prefix 450: 124200 candidate pairs
+  prefix 500: 138000 candidate pairs
+  prefix 550: 151800 candidate pairs
+  prefix 600: 165600 candidate pairs
+  prefix 650: 179400 candidate pairs
+  prefix 700: 193200 candidate pairs
+  prefix 750: 207000 candidate pairs
+  prefix 800: 220800 candidate pairs
+  prefix 850: 234600 candidate pairs
+  prefix 900: 248400 candidate pairs
+  prefix 950: 262200 candidate pairs
+  prefix 1000: 276000 candidate pairs
+  prefix 1050: 289800 candidate pairs
+  prefix 1100: 303600 candidate pairs
+  prefix 1150: 317400 candidate pairs
+  prefix 1200: 331200 candidate pairs
+  prefix 1250: 345000 candidate pairs
+  prefix 1300: 358800 candidate pairs
+  prefix 1350: 372600 candidate pairs
+  prefix 1400: 386400 candidate pairs
+386400 candidate pairs -> 25321 eligible (JSD in [0.005,0.2], logit_dist > p10=228.03)
+rule=primary: 5 contrasts
+rule=relaxed: 99 contrasts
+matched_pairs_rep.json sha256: ed1df0866f012b6195521dcda0d81306c7c6cb9d00e5dca2b30cda62e9af6d6b

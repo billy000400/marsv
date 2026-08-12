@@ -20,6 +20,7 @@ from s1_sanity import nonmono, w_tv
 N_ALPHA = 101
 N_BOOT = 10000
 SEED = 31
+TAG = os.environ.get("S2_TAG", "")   # "" = amended analysis, "_rep" = independent replication
 CVD = ["#0072B2", "#D55E00", "#CC79A7", "#56B4E9", "#E69F00"]
 CONFOUNDS = ["jsd", "logit_dist", "angle0", "lognorm_ratio", "mean_surprisal"]
 CLABEL = {"jsd": "successor JSD", "logit_dist": "final-logit distance",
@@ -41,8 +42,9 @@ def run_pair(m, ids_prefix, tok_a, tok_b, alphas):
 
 def main():
     alphas = np.linspace(0, 1, N_ALPHA)
-    lock = json.load(open(os.path.join(RESULTS, "matched_pairs.json")))
-    h = hashlib.sha256(open(os.path.join(RESULTS, "matched_pairs.json"), "rb").read()).hexdigest()
+    lock_path = os.path.join(RESULTS, f"matched_pairs{TAG}.json")
+    lock = json.load(open(lock_path))
+    h = hashlib.sha256(open(lock_path, "rb").read()).hexdigest()
     print(f"lock: {lock['n_contrasts']} contrasts, rule={lock['matching_version']}, sha256={h[:16]}")
 
     tok, m = load("gpt2-large")
@@ -100,9 +102,9 @@ def main():
     print(f"n={n} median dw={med:+.4f} CI={summary['ci95']} "
           f"frac<0={summary['frac_predicted_sign']:.3f} p={p:.4f} -> {summary['verdict']}")
 
-    with open(os.path.join(RESULTS, "matched_metrics.json"), "w") as f:
+    with open(os.path.join(RESULTS, f"matched_metrics{TAG}.json"), "w") as f:
         json.dump(summary, f, indent=2)
-    np.savez_compressed(os.path.join(RESULTS, "matched_sweeps.npz"), alphas=alphas, **curves)
+    np.savez_compressed(os.path.join(RESULTS, f"matched_sweeps{TAG}.npz"), alphas=alphas, **curves)
     plots(alphas, curves, rows, summary, lock)
     return summary
 
@@ -125,7 +127,7 @@ def plots(alphas, curves, rows, summary, lock):
         a.set_title(f"{CLABEL[f]}\nSMD = {summary['balance'][f]['smd']:+.3f}", fontsize=9)
     fig.suptitle("Matched-contrast balance: every variable except $F$ sits on the diagonal", y=1.0)
     fig.tight_layout()
-    fig.savefig(os.path.join(PLOTS, "matching_balance.png"), dpi=150)
+    fig.savefig(os.path.join(PLOTS, f"matching_balance{TAG}.png"), dpi=150)
     plt.close(fig)
 
     # --- paired widths -----------------------------------------------------------
@@ -153,7 +155,7 @@ def plots(alphas, curves, rows, summary, lock):
                     f"{100 * summary['frac_predicted_sign']:.0f}% predicted sign")
     ax[1].legend(fontsize=8)
     fig.tight_layout()
-    fig.savefig(os.path.join(PLOTS, "matched_widths.png"), dpi=150)
+    fig.savefig(os.path.join(PLOTS, f"matched_widths{TAG}.png"), dpi=150)
     plt.close(fig)
 
     # --- example curves ----------------------------------------------------------
@@ -180,7 +182,7 @@ def plots(alphas, curves, rows, summary, lock):
     fig.suptitle("Top row: five strongest supporting contrasts. "
                  "Bottom row: five strongest counterexamples.", y=1.0)
     fig.tight_layout()
-    fig.savefig(os.path.join(PLOTS, "example_curves.png"), dpi=150)
+    fig.savefig(os.path.join(PLOTS, f"example_curves{TAG}.png"), dpi=150)
     plt.close(fig)
 
 
