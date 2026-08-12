@@ -2876,3 +2876,60 @@ this iteration changed no next-character-decision claim, and the narrowed wordin
 STOP written.
 
 On track? yes — the last item on PLAN's successor list is answered; blocker: none.
+
+## 2026-08-12 — S29: the leftover is mostly a nonlinear function of the characters we already had
+
+**Why this one.** S28 closed the last item on PLAN's successor list by excluding the two cheap feature
+candidates for the demoted units' residual (structure that is not character identity; text past the
+window). But S28's own framing named the remaining possibility out loud: every probe in the series is
+fitted by ridge, so every probe is linear in its one-hot design. A unit reading a *combination* of nearby
+characters would score low under all nine families no matter how wide the window. That is a property of
+the read-out, not of the feature set, and it is testable with the same rows and the same checkpoints.
+
+**Design.** Keep all40's design (6,826 columns), change the estimator: embed each of the 42 one-hot groups
+in 768 dimensions, sum, GeLU, linear read-out per unit. The control is the identical network with the GeLU
+deleted — same parameters, optimiser, stopping rule — so the difference between them is the nonlinearity
+alone, and the control against the published ridge fit is the pipeline check. That check came out clean
+(median −0.002 per unit, r = 1.00 and 0.9994), which is what licenses reading the rest as nonlinearity.
+797 units rather than 3,840: caching activations for all of them at fp16 is 5.3 GB, over budget, so all
+75 stable, 141 demoted and 181 promoted units plus a fixed random 400 never-head units.
+
+**The thing I nearly got wrong.** The first pass used a 25-epoch budget and reported that the nonlinearity
+buys almost nothing (+0.002 per demoted unit). Every mlp fit had stopped on its last epoch. At 60 epochs
+the same fit gave +0.033; with a patience rule and a 600-epoch cap it gave +0.044, and the step-30,000 fit
+took 572 epochs to converge against 66 at step 831. An under-trained probe looks exactly like a probe
+whose extra capacity is useless, and the conclusion flipped from "no" to "mostly yes" between the two.
+Worth remembering as a general hazard for capacity comparisons: the negative result is the one you get for
+free.
+
+**Result.** At step 30,000 the demoted units go 0.778 -> 0.921 (70% of 141 up, p = 5e-15) and the
+never-head units 0.599 -> 0.861 (94% up); the stable units, with 1.3% left over, gain nothing. As a share
+of each group's residual the gain is 45 / 20 / 15 / −4%, so it tracks how much was left rather than
+landing uniformly the way S28's extra features did. The developmental consequence is the headline: the
+demoted units' fall shrinks −0.064 -> −0.026, and network-wide the fall reverses to +0.019. The
+"units become harder to describe over training" finding is, for the network as a whole, a fact about
+linear read-outs; for the demoted units about 40% of it survives.
+
+**Writing it.** This forced a re-framing (rule 9b) of two Summary/Headline sentences and both caveat
+paragraphs, which previously said nine families "bound the change without naming it" and that anything
+outside them would score low. Both now say what is actually true: most of what the families miss is a new
+*shape* rather than new material, and what survives is narrower — 40% of the demoted fall and 8% of a
+demoted unit's response. The old sentence in the S28 subsection claiming the fall was "the strongest
+statement available that the decline belongs to the units" was softened to point forward to this test,
+since Figure 46 answers exactly that question and partly against it.
+
+**Figure.** Three panels: probe-by-probe medians with a bar joining the checkpoints, the per-unit gain
+distribution by role at step 30,000 (the specificity test), and the median per-unit change by role under
+each probe (the decline test). Panel (b)'s x limit went from 0.30 to 0.60 once the gains grew; 0.8% of
+units lie above it and the caption says so.
+
+**Checks.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 55 display / 1,247 inline
+equations / 49 figures; RESULTS 49 figures; 0 problems), embeds = captions = 98.
+
+**Feedback state.** `human_feedback_7.txt` remains `review_pending` with its single checklist item done;
+this iteration changed no next-character-decision claim, and the narrowed wording is still in place
+(verified by grep: REPORT Conclusion, REPORT Summary verdict, RESULTS Question & verdict item 5). No STOP
+written.
+
+On track? yes — the successor list's item (i) is answered as far as one read-out can answer it;
+blocker: none.

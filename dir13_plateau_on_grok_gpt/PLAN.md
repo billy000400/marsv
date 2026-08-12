@@ -590,6 +590,26 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S29 DONE 2026-08-12 — most of what the linear character probes miss is a NONLINEAR function of the same
+characters, and that removes the network-wide describability decline.** Nine feature families had bounded
+the demoted units' residual without naming it, but all nine were fitted by ridge, i.e. linear in their
+one-hot design. `experiments/neuron_probe_nonlinear.py` (16 min, forward passes plus probe training, on
+the reference-run checkpoints still on /tmp) keeps all40's design and changes the ESTIMATOR: a
+sum-of-embeddings (width 768) -> GeLU -> per-unit read-out, trained by Adam on the same rows and the same
+80/10/10 split, with the epoch and the weight decay (0 or 1e-4) chosen on validation and a patience of 20;
+the same network with the GeLU deleted is the linear control. 797 units (all 75 stable, 141 demoted, 181
+promoted, a fixed random 400 never-head) because caching activations for all 3,840 exceeds the memory
+budget. **Estimator check:** the linear control reproduces the published ridge all40 fit unit by unit
+(median −0.002 at both checkpoints, r = 1.00 and 0.999). **Level:** at step 30,000 the demoted units go
+0.778 -> **0.921** (median per-unit gain +0.044, 70% up, p = 5e-15), never-head 0.599 -> **0.861**
+(+0.179, 94% up), promoted 0.918 -> 0.935, stable −0.0005 (p = 0.53); as a share of each group's residual
+45 / 20 / 15 / −4%, i.e. the gain tracks how much a group has left over rather than being the flat 9–12%
+the extra feature families gave. **Decline:** the demoted units' fall shrinks −0.064 -> **−0.026**
+(p = 4e-7) and network-wide it reverses, −0.011 -> **+0.019** (p = 2e-17). **Diagnostic:** the same
+stopping rule needed 66 epochs at step 831 and 572 at step 30,000. Curated as **Figure 46** in both
+deliverables (exploratory figures renumbered 47–49), with a Methods paragraph, rewritten Summary/Headline
+sentences and rewritten caveats. `check_render.py` -> ALL CHECKS PASS (49 figures per file).
+
 **S28 DONE 2026-08-12 — the fifth of a demoted unit that no character family explains is not line/word
 position, word identity, or the text before the probe's window.** `experiments/neuron_probe_struct.py`
 (6.2 min, forward passes only, on the reference-run checkpoints S27 left on /tmp) adds three families to
@@ -1327,6 +1347,26 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S29 DONE (2026-08-12) and curated — see "Current status". The residual question that headed the
+successor list is now answered in the part that was answerable cheaply: most of it is a nonlinear
+function of the characters the design already holds, so the network-wide half of the describability
+decline is a property of linear read-outs rather than of the units.
+
+**What this leaves, in order of what a reader asks next.** (i) About 40% of the *demoted* units' fall
+survives the nonlinear read-out, and 8% of a demoted unit's response at step 30,000 is still unexplained.
+Naming that part needs either range beyond the 40-character neighbourhood (windows longer than the
+128-token training window, or a different corpus slicing) or a probe family none of the ten fits here can
+express; a wider or deeper read-out would bound it further, which is a cheap sweep (width 768 -> 1,536 or
+two hidden layers, ~8 min per fit on cached activations). (ii) The nonlinear probe was fitted on the
+reference run at two checkpoints only; extending it to the seed-2024 run costs ~16 min of probe training
+*if* those checkpoints exist, which they do not after a /tmp wipe (23 min to retrain). (iii) The depth
+series still has one seed for the five-block windows, so the 0.397-vs-0.476 gap that carries the depth
+argument has an across-seed bar at five of the nine conditions only. **Standing cost note:** `/tmp` is
+scratch; the reference run's checkpoints and the corpus are there now but vanish with any wipe —
+re-download tinyshakespeare (SHA in `allpairs_sweep.load_vocab`) and budget 23–24 min per run that has to
+be retrained. Only `results/frozen_assay_raw.npz` and the per-run summary JSONs survive a wipe.
+
 
 **S28 DONE (2026-08-12) and curated — see "Current status". Item (iii) of the previous list — the
 unidentified residual — is now answered as far as cheap probe families can answer it: it is not word or

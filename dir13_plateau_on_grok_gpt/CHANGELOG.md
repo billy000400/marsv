@@ -2202,3 +2202,36 @@ listed it as the direction's real open problem since 2026-08-03.
   (REPORT 54 display / 1,218 inline equations / 48 figures; RESULTS 48 figures; 0 problems); embed count
   equals caption count (96 = 48 + 48).
 - **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
+
+## 2026-08-12 — a nonlinear read-out of the same characters (new Figure 46 in REPORT.md and RESULTS.md)
+
+**What changed.** Added the result of `experiments/neuron_probe_nonlinear.py` to both curated
+deliverables: a one-hidden-layer probe fitted on the all40 character design at steps 831 and 30,000, with
+the same network minus its nonlinearity as the control, over 797 block-1..4 units.
+
+- **New Figure 46** in REPORT.md and RESULTS.md (`plots/neuron_probe_nonlinear.png`), with its caption,
+  a new Results subsection (REPORT) / bulleted block (RESULTS), and a new Methods paragraph
+  ("A nonlinear read-out of the same characters"). The three exploratory figures were renumbered 46–48 →
+  47–49.
+- **Superseded framing (rule 9b).** REPORT Summary and RESULTS Headline previously ended the
+  describability thread with "nine feature families now bound the change without naming it". They now
+  report that most of what those families miss is a nonlinear function of the same 40 characters: demoted
+  units 0.78 → 0.92 at step 30,000, the network-wide developmental change −0.011 → **+0.019** (it
+  reverses), and the demoted units' own fall −0.064 → **−0.026**, leaving about 40% of that fall and 8%
+  of a demoted unit's response unexplained.
+- **Caveats rewritten** in both files: "Describable still means describable by the nine families fitted
+  here" and "structure … would score low everywhere in this table" replaced by what Figure 46 establishes
+  (the linear form of the read-out was the binding limitation network-wide) and by the nonlinear probe's
+  own limits (one architecture, one width, one stopping rule, reference run only).
+- **Softened** the S28 subsection's claim that the unmoved fall was "the strongest statement available
+  that the decline belongs to the units"; it now points to the next subsection, which tests it.
+- **Free check added:** the linear control reproduces the published ridge all40 fit per unit (median
+  −0.002, r = 1.00 at step 831 and 0.999 at step 30,000).
+- Data/code lists in both files gained `results/neuron_probe_nonlinear_summary.json` and
+  `experiments/neuron_probe_nonlinear.py`.
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 55
+display / 1,247 inline equations / 49 figures; RESULTS 49 figures; 0 problems); embed count equals caption
+count (98 = 49 + 49).
+
+**No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.

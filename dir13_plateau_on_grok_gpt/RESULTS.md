@@ -2331,6 +2331,56 @@ family fitted alone (x), demoted units (circles/blue) against stable units (tria
 - **The probe is losing ground overall.** Union closes 18.2% of all40's network-wide residual at step
   831 and only 11.5% at step 30,000.
 
+**Is the leftover a nonlinear function of the same characters?** All nine families are fitted by ridge,
+so all nine are linear in their design, and a unit that fires for a *combination* of nearby characters —
+an apostrophe inside a capitalised word — is invisible to every one of them however wide the window. The
+last probe keeps all40's design and changes the estimator: a network that embeds each of the 42 one-hot
+groups of that design in 768 dimensions, sums the embeddings, applies a GeLU and reads out one number per
+unit (Adam, learning rate 1e-3, batches of 4,096 positions; the epoch and the weight decay, 0 or 1e-4,
+chosen on the same validation split ridge uses for $\lambda$; training stops after 20 epochs without
+improvement). Deleting the GeLU leaves the **linear control** — same parameters, optimiser and stopping
+rule — so the gap between the two is the nonlinearity alone. Caching activations for all 3,840 units
+exceeds the memory budget, so this probe covers 797 of them: all 75 stable, 141 demoted and 181 promoted
+units and a fixed random 400 of the never-head units, compared unit by unit with the ridge all40 fit for
+those same units (Figure 46).
+
+![three panels: median probe R-squared for the ridge, linear-network and one-hidden-layer probes at two checkpoints; cumulative distributions of the per-unit gain from the hidden layer by unit role; and the median per-unit change between checkpoints under each probe](plots/neuron_probe_nonlinear.png)
+
+**Figure 46.** A nonlinear read-out of the same 40 characters recovers a large part of what the linear
+probes miss and reverses the network-wide describability decline, but leaves 40% of the demoted units'
+fall in place. Reference run, 797 block-1–4 units, same rows and split as Figures 44 and 45. **(a)** y =
+median held-out $R^2$; x = the probe (ridge = the published all40 fit; linear = the same design fitted as
+a network with the nonlinearity deleted; one hidden layer = the nonlinear read-out); each vertical bar
+joins a group's step-831 value (filled marker) to its step-30,000 value (open marker), circles/blue = the
+141 demoted units, squares/vermillion = all 797 probed units. **(b)** Cumulative distribution over units
+of the per-unit $R^2$ gain from the hidden layer (nonlinear minus linear) at step 30,000: x = gain, y =
+fraction of units at or below, one line per role with its own marker, x clipped at 0.60 (0.8% of units
+lie above). **(c)** y =
+median per-unit change in $R^2$ from step 831 to step 30,000 (negative = harder to describe); x = the
+unit's role, one marker per probe; the ridge and linear markers coincide.
+
+- **The estimator swap is clean.** The linear control reproduces the published ridge fit unit by unit
+  (median difference −0.002 at both checkpoints, r = 1.00 and 0.999, n = 797), so anything the hidden
+  layer adds is the nonlinearity and not the change of optimiser.
+- **The nonlinearity recovers a large part of what the linear probes miss.** At step 30,000 the demoted units go
+  from median $R^2$ **0.778** (linear) to **0.921** (nonlinear); the median per-unit gain is **+0.044**
+  with 70% of the 141 units up (p = 5e-15).
+- **It helps in proportion to what a group had left over.** Never-head units 0.599 → **0.861** (median
+  gain +0.179, 94% of 400 up), promoted 0.918 → 0.935, and the stable units — 1.3% unexplained to begin
+  with — gain nothing (−0.0005, p = 0.53). Per unit, the median unit's own unexplained variance shrinks by
+  53% (never-head), 26% (demoted), 15% (promoted) and −5% (stable) (Figure 46b). The extra feature
+  families of Figure 45 closed a similar share for every role; this gain grows with the size of the
+  residual instead.
+- **The network-wide decline reverses.** Median per-unit change from step 831 to step 30,000 across all
+  797 units: **−0.011** under ridge, **+0.019** under the nonlinear probe (p = 2e-17) — the median unit is
+  better described late than early once the probe may combine characters. For the demoted units the fall
+  shrinks from **−0.064** to **−0.026** (n = 141, p = 4e-7): about 60% of the fall does not appear once
+  the probe may combine those same characters nonlinearly (Figure 46c).
+- **What survives.** About 40% of the demoted units' fall, and 8% of a demoted unit's response at step
+  30,000, resist nine feature families and this read-out. Under the same stopping rule the nonlinear probe
+  reached its best validation score after 66 epochs at step 831 and 572 at step 30,000, so the late
+  checkpoint is a harder function to fit as well as a less well explained one.
+
 **What this adds.** The concentrated picture suggested by the top-$k$ curve is an artifact of scoring
 nested prefixes, in both training runs: the same bend is available in several places at once, so straightening the top 32 units
 removes the most efficient copy of a capability and leaves others behind — an ablation argument built on
@@ -2345,8 +2395,10 @@ character window explains well are the early-selected ones at every rank we can 
 training runs show readability draining away from the units that lose the head while the network as a
 whole becomes less character-readable. A description harvested at one checkpoint describes that
 checkpoint's head, so a claim that some fraction of a mechanism is "interpretable" needs the checkpoint
-attached to it — and, on the evidence of Figure 44, the probe's feature family attached to it as well,
-since the same decline is four times smaller once the probe may use seven characters of context. The second run also fixes the limit of that reading: whether promotion comes with a gain
+attached to it — and, on the evidence of Figures 44 and 46, the probe's feature family and the form of
+its read-out attached to it as well, since the same decline is four times smaller once the probe may use
+seven characters of context, and its network-wide half reverses sign once the probe may combine those
+characters nonlinearly. The second run also fixes the limit of that reading: whether promotion comes with a gain
 in absolute describability is seed-dependent, and neither run lets an early checkpoint predict which
 units will be promoted.
 
@@ -2364,14 +2416,17 @@ stay associational:
 nothing in them shows that a unit is promoted *because* of what it computes. Of Figure 40's six tests,
 five survive a Holm correction across the six; the exception is the unconditional full-window contrast
 (p = 0.079), which does not separate promoted from demoted units at all. "Describable" still means
-describable by the nine families fitted here. Figures 44 and 45 remove the nearest alternatives — 32
+always relative to a probe. Figures 44 and 45 remove the nearest alternative feature sets — 32
 characters of history, eight of lookahead, position in the line and word, word and trigram identity, and
-the character composition of the earlier window — and the decline survives all of them, which bounds
-what these units came to compute without identifying it: 18% of a demoted unit's response at step 30,000
-is still unexplained, and structure at a range beyond the 128-character window, or a function of the
-characters that none of these families spells out, would score low everywhere in this table. Both
-figures are two-checkpoint measurements on the reference run; the second seed was not refitted with any
-of the wider families. Free checks: the nested-prefix column
+the character composition of the earlier window — and the decline survives all of them; Figure 46 removes
+the linear form of the read-out, and that is the change that matters, since a large part of what the
+linear families miss is a nonlinear function of the characters they already hold. What survives is about a third
+of the demoted units' fall and 8% of a demoted unit's response at step 30,000, and the candidates left
+for it are structure beyond the 40-character neighbourhood and functions no probe fitted here can
+express. The nonlinear probe is one architecture at one width (768) fitted under one stopping rule, so it
+lower-bounds what a nonlinear read-out could recover. All three figures are
+two-checkpoint measurements on the reference run; the second seed was not refitted with any of the wider
+families or with the nonlinear probe. Free checks: the nested-prefix column
 reproduces the published curve to within 1.5 points at every $k$ (27.9 / 47.3 / 65.6 / 82.5 / 85.3 /
 85.2% here against 30.0 / 50.9 / 68.4 / 83.6 / 86.8 / 86.7% there, the difference being per-pair versus
 median-of-medians $\rho$), both endpoints stay exact under every edit (worst deviation 1e-6), and both
@@ -2380,12 +2435,14 @@ checkpoint). Data: `results/neuron_bands_summary.json`, `results/neuron_bands_ti
 `results/neuron_head_identity_summary.json`, `results/neuron_head_origin_summary.json`,
 `results/neuron_head_describe_summary.json`, `results/neuron_probe_early_summary.json`,
 `results/neuron_seed2_summary.json`, `results/neuron_bands_seed2_summary.json`,
-`results/neuron_probe_family_summary.json`, `results/neuron_probe_struct_summary.json`; code:
+`results/neuron_probe_family_summary.json`, `results/neuron_probe_struct_summary.json`,
+`results/neuron_probe_nonlinear_summary.json`; code:
 `experiments/neuron_bands.py`, `experiments/neuron_bands_time.py`,
 `experiments/neuron_head_identity.py`, `experiments/neuron_head_origin.py`,
 `experiments/neuron_head_describe.py`, `experiments/neuron_probe_early.py`,
 `experiments/neuron_seed2.py`, `experiments/neuron_bands_seed2.py`,
-`experiments/neuron_probe_family.py`, `experiments/neuron_probe_struct.py`.
+`experiments/neuron_probe_family.py`, `experiments/neuron_probe_struct.py`,
+`experiments/neuron_probe_nonlinear.py`.
 
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
@@ -2404,32 +2461,32 @@ checkpoint). Data: `results/neuron_bands_summary.json`, `results/neuron_bands_ti
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 46 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 47 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 46.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 47.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 47 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 48 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 47.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 48.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 48 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 49 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 48.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 49.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -2565,7 +2622,10 @@ the eight characters that follow leaves that drain in place at about a quarter o
 is a fact about the units and its magnitude is a fact about the probe. What the units moved *to* is
 still open: adding where the position sits in its line and word, which word and three-character string
 it is inside, and the character composition of the earlier text closes only **9%** of what the character
-families miss on those units and leaves the fall unmoved at −0.064, so nine feature families now bound
-the change without naming it. A second training run of the same recipe
+families miss on those units and leaves the fall unmoved at −0.064, so nine feature families bound the
+change without naming it. A large part of what they miss is not new material but a new *shape*: a one-hidden-layer
+read-out of the same 40 characters lifts those units from **0.78** to **0.92** at step 30,000 and reverses
+the network-wide decline outright (−0.011 → **+0.019**), leaving about 40% of the demoted units' own
+fall (−0.064 → **−0.026**) unexplained by any probe fitted here. A second training run of the same recipe
 (model seed 2024) reproduces the turnover, the promotion from just below the head and this draining, but
 not the reference run's rise in the promoted units' describability.
