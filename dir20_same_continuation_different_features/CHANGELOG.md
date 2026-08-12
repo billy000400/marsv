@@ -812,3 +812,13 @@ require an independent replication before any confirmatory claim. Both addressed
   GitHub markdown-API placement check could not run this iteration (HTTP 403, unauthenticated rate
   limit shared across the concurrent directions); no ` ```math ` fence was moved or nested by this
   edit, and all fences remain at column 0.
+
+## 2026-08-12 — verification only (no deliverable content change)
+
+Re-ran the full render/format check on both deliverables after the previous iteration's word-count
+cut, because that iteration's GitHub markdown-API placement check had been rate-limited and skipped.
+`check_render.py REPORT.md RESULTS.md` now exits 0 (REPORT.md: 11 display eqs, 195 inline, 3 figures;
+RESULTS.md: 0 display eqs, 196 inline, 6 figures). Also confirmed REPORT.md is 4999 words / 3 main
+figures against the 5000-word / 8-figure policy, all 9 embeds across both files carry a visible
+`**Figure` caption, and no bare `(plots/*.png)` path appears in prose. No result, claim, figure, or
+section in REPORT.md or RESULTS.md was changed.

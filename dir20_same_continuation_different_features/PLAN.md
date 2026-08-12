@@ -584,8 +584,10 @@ If the agent finds itself inventing a new scalar metric to summarize "conceptual
   moves median $w_{TV}$ 0.144 → 0.471 against 0.167 for a matched control, 202/202 pairs. No
   pre-registered replication of its own.
 - **Deliverables:** REPORT.md (4999 words, 3 figures) and RESULTS.md are current-best and within the
-  report policy below. Feedback `human_feedback_1.txt` is complete in the manifest and awaiting the
-  wrapper's independent content review.
+  report policy below. `check_render.py` now passes in full on both files, including the GitHub
+  markdown-API placement check that was rate-limited during the length cut. Feedback
+  `human_feedback_1.txt` is complete in the manifest and awaiting the wrapper's independent content
+  review.
 - **Open discrepancy for the operator (not acted on):** the "Core research question" line in the
   report policy below still names cross-model agreement with Pythia, while the accepted work — and
   operator feedback #1 — concerns the GPT-2 Large matched-pair question the report answers. The

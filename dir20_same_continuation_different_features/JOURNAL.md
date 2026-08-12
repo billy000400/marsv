@@ -1026,3 +1026,23 @@ keep all six figures and cut Methods rigor — rejected because rules 8 and 9 ar
 Local render checks pass on both deliverables; the GitHub markdown-API placement check was
 rate-limited (HTTP 403) this iteration and could not be run, and no ` ```math ` fence was moved or
 nested by the edit.
+
+## 2026-08-12 (verification-only iteration: full render check now runs clean)
+
+**Why this iteration did nothing else.** The plan's success criteria are met (S1 harness check, S2/S3
+amended analysis, S3R pre-registered replication, S4 causal test) and the feedback manifest for
+`human_feedback_1.txt` is complete at `review_pending`. Per the operator rules I do not run another
+experiment when the criterion is satisfied, and I never rename feedback or write STOP myself — the
+wrapper does that after its independent content review. So the only open item was the one defect the
+previous entry recorded: the GitHub markdown-API half of the render check had been rate-limited
+(HTTP 403) and never actually ran against the shortened REPORT.md.
+
+**What I checked, and the result.** `python3 ../check_render.py REPORT.md RESULTS.md` completed in
+full this time and exits 0: REPORT.md 11 display equations, 195 inline equations, 3 embedded figures,
+0 problems; RESULTS.md 0 display equations, 196 inline, 6 embedded figures, 0 problems. Separately:
+word count 4999 (limit 5000) and 3 main figures (limit 8) for REPORT.md; 9 `![` embeds across the two
+files and 9 visible `**Figure` caption lines, so every embed is captioned; no bare `(plots/*.png)`
+prose path in either file; REPORT.md's figure captions are numbered 1–3 in reading order.
+
+**State.** No file content changed except this entry and the corresponding PLAN.md status line and
+CHANGELOG.md note. No number, claim, figure, or section was touched.
