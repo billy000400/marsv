@@ -713,7 +713,11 @@ instead of hand-building it closes the gap: a ridge probe over an eight-characte
 median 78% of those missed units' corpus response out of sample, and scoring units by the activation
 difference that probe predicts at the assay's own context removes **56.5%** of the width gap — past
 the 50.9% of the pair's own fitted ranking — with the controls showing that keeping each unit's own
-activation scale, not the added context, is what carries the improvement (Figure 33).
+activation scale, not the added context, is what carries the improvement (Figure 33). That text-only
+score is at the ceiling of its family: reading the network's own endpoint activations instead of
+predicting them from the corpus does no better (56.6%, p = 0.27), and converting either score to
+residual displacement by multiplying in the unit's write norm slightly hurts, because the write norms
+span only a factor of 1.71 across the population (Figure 34).
 
 ### The readout-rebalancing intervention — the plateau is upstream of the decision
 
@@ -1750,6 +1754,83 @@ the fitted probe is defined for every character. Free checks: the unmodified bas
 `results/neuron_probe_raw.npz`, `results/neuron_probe_control.json`; code:
 `experiments/neuron_probe.py`, `experiments/neuron_probe_control.py`.
 
+## The score has saturated: neither the write norm nor the network's own activations improve on it
+
+"Keep each unit's own scale" left two things unfinished, and both have an obvious next move that turns
+out to be wrong. First, *which* scale: a hidden unit reaches the residual stream only through its write
+vector $W_\text{proj}[:,j]$, so the displacement it actually causes is the activation swing times that
+vector's length $n_j = \lVert W_\text{proj}[:,j]\rVert_2$. Every blind rule so far ignores $n_j$; the
+pair-fitted ranking includes it but measures curvature along the path rather than endpoint
+displacement. Second, *whether the estimate is the limit*: the corpus rules predict a unit's endpoint
+swing from text, and the network's own activations at those endpoints can simply be read off — an
+oracle for exactly the quantity being estimated. Five more selection rules, run through the identical
+chord intervention on the same 150 pairs, close both questions (Figure 34). Three predictions were
+registered before running; the first two failed, which is the informative part.
+
+![three panels: a bar chart of the width gap removed at k=32 by ten selection rules, an empirical CDF of the per-pair width change caused by write-norm weighting, and recovered fraction against the number of linearized units for the pair-blind floor](plots/neuron_scale.png)
+
+**Figure 34.** Neither converting the score to residual-displacement units nor replacing the corpus
+estimate with the network's own activations improves selection. Reference character GPT at step
+30,000, blocks 1–4, 3,840 units, 150 pairs, top-$k$ units chord-linearized. **(a)** Percentage of the
+trained→untrained median width gap removed (y) by each selection rule (x); `//` hatching marks the
+pair-blind and random controls, `\\` the standardized corpus profile, `..` the three scores multiplied
+by the write norm, solid the scores in plain activation units, and the black bar the pair-fitted
+ranking that is fitted to the curve it is scored against. **(b)** Empirical cumulative distribution
+(y: fraction of the 150 pairs) of the per-pair change in transition width $w$ caused by multiplying a
+score by the write norm (x; negative = the weighted rule removes less of the gap). Solid = character
+profile, dashed = fitted probe, dotted = measured endpoint swing; the vertical line is no change.
+**(c)** Percentage of the gap removed (y) against units linearized per pair (x, log scale) for the
+oracle, the raw-scale character profile, the pair-fitted ranking, the write norm alone and random
+selection.
+
+- **Weighting by the write norm does not help, and slightly hurts.** At $k=32$ the character profile
+  goes **56.3% → 55.4%** (paired p = 0.049, only 39% of pairs improve), the fitted probe holds its
+  median (56.5% → 56.6%) while losing on 62% of pairs individually (mean change −0.003 in width,
+  paired p = 2.7e-4), and the oracle goes **56.6% → 55.3%** (paired p = 1.1e-9). The mechanism is
+  visible in the weights themselves: write norms are nearly uniform across the 3,840 units — median
+  **1.66**, interquartile range 1.49–1.82, a factor of only **1.71** between the 5th and 95th
+  percentiles — so multiplying by $n_j$ mostly reshuffles the top of the ranking without adding
+  information.
+- **The oracle ties the text-only estimate.** Reading the network's own endpoint activations at the
+  assay's context and ranking by the true swing $|a_j(1)-a_j(0)|$ removes **56.6%**, against the
+  probe's **56.5%** — indistinguishable (paired p = 0.27). A rule computed from Shakespeare character
+  statistics alone, which never touches the assay, is as good as one that measures the network doing
+  the thing. So at $k=32$ the corpus rules are not estimation-limited; the remaining distance to the
+  pair-fitted ranking at larger sets ($k=128$: 62.9% for the oracle against 68.4%) is a property of
+  the score's *form* — every rule here ranks units by their individual displacement, and none of them
+  can see that a set of units works better together than its members do apart.
+- **Endpoint displacement beats path curvature.** The pair-fitted ranking scores units by their
+  maximum deviation from their own chord, already weighted by the write norm; ranking the same units
+  by endpoint displacement instead removes **55.3%** against its **50.9%** (paired p = 2.2e-17),
+  despite the two rules sharing a median **20 of 32** units. How far a unit moves between the endpoints
+  predicts its causal role better than how far its trajectory bows in between.
+- **Which units write hardest says nothing about which units bend a path.** The write norm alone —
+  the same 32 units for every pair — removes **0.3%** of the gap at $k=32$, below the 1.2% of random
+  selection, and only 12.0% at $k=128$. Selection has to be pair-dependent; there is no "these are the
+  big units" shortcut.
+
+**What this adds.** It marks the end of this family of rules rather than another step up it. The
+practical statement is now sharp: to predict which units govern a new pair's plateau boundary from
+text alone, score each unit by the raw activation swing the endpoint swap causes, and stop — do not
+standardize it (that costs 27 points), do not convert it to residual displacement (that costs about
+one), and do not expect the network's own activations to do better (they do not). The one score that
+still beats it at larger set sizes is fitted per pair *and* measures something different in kind
+(joint rather than individual effect), which is where any further improvement has to come from. The
+negative result on the write norm is worth stating on its own: the intuitive picture in which a few
+"loud" units dominate the residual stream is wrong here — the units are near-uniform writers and what
+distinguishes them is entirely what they compute, not how loudly they say it.
+
+**Caveats.** All comparisons are at three set sizes (8, 32, 128) on 150 pairs at one checkpoint, one
+context and one model, and the write-norm effects are small — 0.9 to 1.3 points of recovered fraction,
+significant because the test is paired across 150 pairs, not because any single pair moves much. The
+oracle reads endpoint activations only; a rule using the whole recorded path would be a different and
+strictly stronger oracle, and the pair-fitted ranking is exactly that. "The score has saturated" is a
+statement about scores of the form "rank by individual displacement", not about text-only prediction in
+general. Free checks: the unmodified baseline reproduces the stored per-pair widths exactly (median
+0.3507, max per-pair deviation 0.000000) and both endpoints stay exact under every rule (worst
+deviation 1e-6). Data: `results/neuron_scale_summary.json`, `results/neuron_scale_raw.npz`; code:
+`experiments/neuron_scale.py`.
+
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
 > **Clearly labelled as exploratory and out of the headline** (PLAN out-of-scope forbids a new
@@ -1767,32 +1848,32 @@ the fitted probe is defined for every character. Free checks: the unmodified bas
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 34 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 35 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 34.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 35.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 35 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 36 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 35.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 36.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 36 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 37 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 36.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 37.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -1884,4 +1965,10 @@ than the 50.9% of the ranking fitted to the curve itself, so that ranking was ne
 controls locate the gain: the same character profile with per-unit standardization *removed* already
 reaches 56.3%, while the fitted context alone reaches 34.8%. What a text-only rule needs in order to
 find the units that bend a path is each unit's own activation scale first and finer conditioning
-second.
+second. That rule is then at the ceiling of its family: the oracle that reads the network's own
+endpoint activations instead of predicting them removes **56.6%** (p = 0.27 against the probe), and
+multiplying any of these scores by the unit's write norm — the physically natural conversion into
+residual displacement — costs about a point rather than gaining one, because the write norms are
+nearly uniform (a factor of 1.71 between the 5th and 95th percentiles). Ranking by that norm alone,
+the same units for every pair, removes **0.3%**: the units that carry a plateau boundary are
+distinguished entirely by what they detect, not by how loudly they write.

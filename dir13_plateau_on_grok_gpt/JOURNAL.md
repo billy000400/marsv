@@ -2283,3 +2283,69 @@ run's local maximum, or a second model/tokenizer) and needs materially more comp
 
 On track? yes — S24e done, the missed units are described from held-out corpus data and the selection
 limit is re-attributed from conditioning to scale, with both results in the deliverables; blocker: none.
+
+---
+
+## 2026-08-12 — S24f: does the intervention read activation units or residual displacement?
+
+**Feedback check first.** `ls` of the direction root shows seven `human_feedback*` files, all already
+ending in `.addressed.md`. Zero unaddressed, so this iteration advanced the plan — and PLAN's own
+"Next step" named exactly this consolidation (rank by predicted *displacement* rather than preference,
+for the rules the report already carries, and see whether other conclusions shift).
+
+**Why this experiment.** S24e ended with "keep each unit's own activation scale", which left two
+loose ends that both have an obvious next move. (1) *Which* scale: a hidden unit only reaches the
+residual stream through its write vector, so the physically natural score is
+$|\Delta a_j|\cdot\lVert W_{\mathrm{proj}}[:,j]\rVert$, and every blind rule so far ignores that norm.
+(2) *Is the corpus estimate the limit?* The corpus rules predict an endpoint swing that can simply be
+read off the network — an oracle for the same quantity with the estimation error removed.
+
+**Pre-registered before running** (in the script docstring, `experiments/neuron_scale.py`): P1 the two
+write-norm-weighted rules each gain ≥2 points at $k=32$; P2 the oracle beats every corpus-estimated
+rule and the pair-fitted 50.9%; P3 the write norm alone recovers <20%.
+
+**What came out — P1 and P2 refuted, and that is the result.** Write-norm weighting *hurts*: character
+rule 56.3% → 55.4% (paired p = 0.049), probe 56.5% → 56.6% in median but worse on 62% of pairs
+individually (p = 2.7e-4), oracle 56.6% → 55.3% (p = 1.1e-9). The reason is in the weights themselves —
+write norms span a factor of only 1.71 between the 5th and 95th percentiles, so $n_j$ carries almost no
+information and mostly reshuffles the top of the ranking. The oracle *ties* the text-only probe
+(56.6% vs 56.5%, p = 0.27): a rule built from Shakespeare character statistics is as good as one that
+watches the network do the thing, so at $k=32$ these rules are not estimation-limited. P2's second half
+did hold — weighted endpoint displacement beats the pair-fitted curvature ranking, 55.3% vs 50.9%
+(p = 2.2e-17), while sharing a median 20 of 32 picks, so endpoint displacement is a better score than
+maximum deviation from the chord. P3 held far more strongly than predicted: the write norm alone
+removes 0.3% at $k=32$, *below* random's 1.2%.
+
+**What I learned.** The selection thread has a ceiling, and it is not where I expected. The limit on a
+text-only rule is the *form* of the score — every rule here ranks units by individual displacement and
+none can see that a set works better jointly than its members do apart — not the quality of the corpus
+estimate. Also a clean negative worth keeping: the "a few loud units dominate the residual stream"
+intuition is false in this model; the units are near-uniform writers and what distinguishes the ones
+that carry a plateau boundary is entirely what they detect.
+
+**Assumption logged.** I scored all five rules at the same three set sizes (8, 32, 128) used by the
+S24e control rather than the full 13-point $k$ grid of `neuron_path.py`, because the comparisons that
+matter are paired against rules already measured at those three sizes; the rejected alternative was the
+full grid, which would have cost ~4× the compute to add points no claim uses. Consequence: the $k=128$
+statements are read off three points, not a curve.
+
+**Deliverable work.** New Results section in both files with **Figure 34** (`plots/neuron_scale.png`,
+three panels) and a new REPORT.md Methods subsection defining $n_j$, the weighted rules, and the
+endpoint-swing oracle $E_j$ with its relation to the pair-fitted $I_j$. REPORT Summary, Conclusion and
+Limitation 7, and the RESULTS.md hypothesis paragraph and Headline, carry the ceiling result.
+Exploratory Figures 34–36 renumbered 35–37; 37 embeds / 37 captions / sequential 1–37 in each file;
+`check_render.py REPORT.md RESULTS.md` passes with 0 problems.
+
+**Next step.** The individual-displacement family is closed. The one score still ahead at $k=128$ is
+the pair-fitted ranking, and the reason is now named rather than guessed: it is a *joint* effect that
+no per-unit score can see. The honest successor is therefore a greedy or residual-corrected selection —
+pick the next unit by how much of the *remaining* bend it removes given the ones already linearized —
+which would test directly whether joint effects account for the whole gap; it needs forward passes
+only, but ~k× the passes of one ranking. Everything else open is PLAN S24 item 3 (a longer character
+run whose second local-complexity descent separates from initial fit, the denser Figure-9 grid on the
+pilot run's local maximum, or a second model/tokenizer) and needs materially more compute than one
+30,000-step run. No `STOP` written — the plan retains open candidates.
+
+On track? yes — S24f done, the text-only selection score is shown to be at the ceiling of its family
+with two pre-registered predictions refuted and the remaining limit identified as joint rather than
+individual effect; blocker: none.

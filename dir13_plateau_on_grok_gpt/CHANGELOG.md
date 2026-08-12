@@ -1801,3 +1801,42 @@ listed it as the direction's real open problem since 2026-08-03.
   `results/neuron_probe_control_raw.npz` and their logs.
 - **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
   (REPORT 46 display / 928 inline equations / 36 figures; RESULTS 36 figures; 0 problems).
+
+## 2026-08-12 — S24f: the text-only selection score is at its ceiling (write norm and oracle both fail to beat it)
+
+- **Context.** Zero unaddressed `human_feedback*`/`*REVIEW*` files (all seven end in `.addressed.md`),
+  so this iteration advanced the plan; PLAN's own "Next step" named this consolidation — re-rank the
+  report's selection rules by *displacement* rather than preference. One script, no training, 62 s of
+  forward passes on the same reference character run (step 30,000, seed 1337) and the same 150 pairs.
+- **New experiment (`experiments/neuron_scale.py`), pre-registered before running.** Five more blind
+  selection rules through the identical chord intervention at $k\in\{8,32,128\}$: the character
+  profile and the fitted probe each multiplied by the unit's write norm
+  $n_j=\lVert W_{\mathrm{proj}}[:,j]\rVert_2$; the *measured* endpoint swing
+  $E_j=|a_j(1)-a_j(0)|$ (an oracle for what the corpus rules estimate) with and without $n_j$; and
+  $n_j$ alone as a pair-blind floor. Predictions registered: (P1) the write norm adds $\ge 2$ points;
+  (P2) the oracle beats every corpus rule; (P3) $n_j$ alone recovers $<20\%$.
+- **Outcome — P1 and P2 refuted, P3 held more strongly than predicted.** At $k=32$, recovered fraction
+  of the trained→untrained width gap: write-norm weighting takes the character rule **56.3% → 55.4%**
+  (paired $p=0.049$), the probe 56.5% → 56.6% in median but worse on 62% of pairs individually (mean
+  width change $-0.003$, paired $p=2.7\times10^{-4}$), and the oracle **56.6% → 55.3%** (paired
+  $p=1.1\times10^{-9}$); write norms span only **1.71×** between the 5th and 95th percentiles (median
+  1.66, IQR 1.49–1.82). The oracle **ties** the text-only probe (56.6% vs 56.5%, paired $p=0.27$), so
+  the corpus rules are not estimation-limited at $k=32$. Weighted endpoint displacement beats the
+  pair-fitted curvature ranking (**55.3%** vs **50.9%**, paired $p=2.2\times10^{-17}$) while sharing a
+  median 20 of 32 picks. The write norm alone removes **0.3%** at $k=32$ (below random's 1.2%) and
+  12.0% at $k=128$. Built-in checks: baseline reproduces the stored per-pair widths exactly (median
+  0.3507, max difference 0.000000), worst endpoint deviation $10^{-6}$.
+- **Claims updated (no result superseded).** No earlier number changed. Both deliverables previously
+  ended the selection thread at "keep each unit's own activation scale"; they now add that the score is
+  at the ceiling of its family, name the remaining limit as the score's *form* (individual rather than
+  joint displacement) rather than estimate quality, and state the negative write-norm result. REPORT
+  Summary, Conclusion and Limitation 7, and the RESULTS.md hypothesis paragraph and Headline, carry it.
+- **New figure.** **Figure 34** `plots/neuron_scale.png` — (a) ten selection rules at $k=32$,
+  (b) empirical CDF of the per-pair width change caused by write-norm weighting for three scores,
+  (c) recovered fraction vs $k$ for the oracle, the character rule, the pair-fitted ranking, the
+  pair-blind write norm and random. Exploratory Figures 34–36 renumbered **35–37**; both files now hold
+  37 embeds, 37 visible captions, sequential numbering 1–37.
+- **Code/data:** new `experiments/neuron_scale.py`, `experiments/plot_neuron_scale.py`; new
+  `results/neuron_scale_summary.json`, `results/neuron_scale_raw.npz`, `results/neuron_scale.log`.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 48 display / 981 inline equations / 37 figures; RESULTS 37 figures; 0 problems).

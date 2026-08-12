@@ -590,6 +590,31 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S24f DONE 2026-08-12 — the text-only selection score is at the ceiling of its family, and two
+pre-registered predictions were refuted.** Zero unaddressed feedback files, so this iteration advanced
+the plan (PLAN's own "Next step" named this consolidation). One script, no training, 62 s of forward
+passes. `experiments/neuron_scale.py` runs five more blind rules through the identical chord
+intervention on the same 150 pairs at $k\in\lbrace 8,32,128\rbrace$: the character profile and the
+fitted probe each multiplied by the write norm $n_j=\lVert W_{\mathrm{proj}}[:,j]\rVert_2$; the
+*measured* endpoint swing $E_j=|a_j(1)-a_j(0)|$ (an oracle for what the corpus rules estimate) with and
+without $n_j$; and $n_j$ alone as a pair-blind floor. **P1 (write norm gains ≥2 points) REFUTED — it
+hurts:** character rule **56.3% → 55.4%** (paired $p=0.049$), probe 56.5% → 56.6% in median but worse
+on 62% of pairs ($p=2.7\times10^{-4}$), oracle **56.6% → 55.3%** ($p=1.1\times10^{-9}$); write norms
+span only **1.71×** between the 5th and 95th percentiles (median 1.66, IQR 1.49–1.82), so $n_j$ carries
+almost no information. **P2 (the oracle beats the corpus rules) REFUTED on its first half — it ties
+them:** 56.6% vs the probe's 56.5%, paired $p=0.27$, so at $k=32$ these rules are not
+estimation-limited and the remaining distance to the fitted ranking at $k=128$ (62.9% vs 68.4%) is the
+score's *form* — all of them rank by individual displacement and cannot see joint effects. P2's second
+half held: weighted endpoint displacement beats the pair-fitted curvature ranking, **55.3%** vs
+**50.9%** ($p=2.2\times10^{-17}$), sharing a median 20 of 32 picks. **P3 held more strongly than
+predicted:** the write norm alone removes **0.3%** at $k=32$, below random's 1.2%, and 12.0% at
+$k=128$ — which units write hardest says nothing about which bend a path. Free checks: baseline
+reproduces per pair exactly (0.3507, max difference 0.000000), worst endpoint deviation $10^{-6}$.
+New `experiments/neuron_scale.py`, `experiments/plot_neuron_scale.py`,
+`results/neuron_scale_{summary.json,raw.npz,log}`, **Figure 34** (`plots/neuron_scale.png`);
+exploratory Figures 34–36 renumbered 35–37, 37 embeds / 37 captions / sequential 1–37 in both files;
+`check_render.py` passes with 0 problems.
+
 **S24e DONE 2026-08-12 — the missed units are described from held-out corpus data, and the selection
 limit is re-attributed from conditioning to scale.** Zero unaddressed feedback files, so this iteration
 advanced the plan (PLAN's own "Next step" named this experiment: a *learned* description in place of
@@ -1092,6 +1117,18 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S24f DONE (2026-08-12) — see "Current status". The individual-displacement family of selection rules
+is closed: the write norm adds nothing (it hurts), and an oracle reading the network's own endpoint
+activations ties the text-only probe, so the corpus rules are not estimation-limited. The successor is
+named by that result rather than guessed at: the only score still ahead at $k=128$ is the pair-fitted
+ranking, and the reason is a *joint* effect no per-unit score can see, so the direct test is a greedy /
+residual-corrected selection — choose the next unit by how much of the *remaining* bend it removes
+given those already linearized, and compare the resulting $\rho(S)$ curve against the ranked one at
+matched $k$. Forward passes only, but roughly $k\times$ the passes of one ranking, so run it at
+$k\le 32$ on a subsample of the 150 pairs first. S24 item 3 (a longer character run whose second
+local-complexity descent separates from initial fit, the denser Figure-9 grid on the pilot run's local
+maximum, or a second model/tokenizer) still needs materially more compute than one 30,000-step run.**
 
 **S24e DONE (2026-08-12) — see "Current status". The "what do the responsible units compute" thread is
 closed as far as text statistics reach: the units are identified, described out of sample by a fitted
