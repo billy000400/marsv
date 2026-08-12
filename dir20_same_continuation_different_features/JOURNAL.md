@@ -1267,3 +1267,13 @@ in hold iterations #13–#14. `python3 ../check_render.py REPORT.md RESULTS.md` 
 HTTP 403 (GitHub markdown API rate limit) before any document check ran; since the files are
 unchanged since the last full pass, this remains a transient API limit, not an outstanding
 verification. This entry is the only file edited.
+
+## 2026-08-12 (hold iteration #22: unchanged, still awaiting the wrapper's content review)
+
+No change. `human_feedback_1.txt` is present and unrenamed, so no `STOP` (CLAUDE.md rule 11); the
+manifest stays `review_pending` with its single checklist item `done`. Plan success criteria are met,
+so no experiment ran and no deliverable, plot or result file was touched — REPORT.md 18:48 /
+RESULTS.md 18:49, the same bytes verified in hold iterations #13–#14. `python3 ../check_render.py
+REPORT.md RESULTS.md` again aborted on HTTP 403 (GitHub markdown API rate limit) before any document
+check ran; the files are byte-identical to the last full pass, so this is the same transient limit,
+not an open verification. This entry is the only file edited.
