@@ -1389,3 +1389,32 @@ number; 38 embeds and 38 captions per file; no bare `(plots/*.png)` references.
 ## 2026-08-12 — concise report curation
 
 Preserved the previous full REPORT.md verbatim as TECHNICAL_APPENDIX.md and rewrote REPORT.md around the shortest evidence chain answering the original question. No experiment or metric changed; detailed and secondary evidence remains in RESULTS.md and the appendix. The curated report selects seven figures and stays within the canonical report budget.
+
+## 2026-08-12 — report restores the plan's required sections (final)
+
+REPORT.md only. The concise curation of the previous iteration had dropped four of the plan's
+required outputs while shortening the report; they are restored inside the 5,000-word / 8-figure
+budget (report is now 3,308 words and still 7 figures, no new experiment, no changed number).
+
+* **Table 1 added** — the seven largest matched narrow-vs-wide contrasts, with the three selection
+  criteria stated in the prose above it (successor JSD within 0.02 bits, endpoint movement within
+  0.05 bits, width gap at least 0.15 in each of the three frames), plus the counts 1,529 contrasts
+  and 21 sharing a token. Previously only the single largest contrast appeared, in prose.
+* **"Observed patterns"** is now the heading over the five direct-evidence subsections, which were
+  demoted to level 4; the lead sentence states that the section is evidence only.
+* **"Candidate hypotheses"** added as a separate top-level section, explicitly marked as
+  interpretation: H1 per-token trait, H2 how sharply the model reads the token, H3 endpoint
+  geometry, ranked by fit to the evidence, each with its alternative reading and one discriminating
+  experiment; the dropped basin hypothesis is recorded with the numbers that killed it
+  ($\rho = +0.39$ anchor directions, $-0.02$ random).
+* **"Recommended next experiment"** added: refit the width-specific readability probe at all six
+  representation sites on the 250-token pool, self-contained (states the $+0.265$ against $+0.131$
+  reversal that motivates it and both practical outcomes).
+
+Numbers are unchanged from RESULTS.md and TECHNICAL_APPENDIX.md; nothing was superseded.
+
+**Verification.** `python3 ../check_render.py REPORT.md` local half: 3 display eqs, 85 inline eqs,
+7 embedded figures, 0 problems (KaTeX compile, macro denylist, table-prose rule 9a, contrast budget
+rule 9d, plot embeds). The GitHub-API half of the check was rate-limited (HTTP 403, shared IP) and
+was retried in the background; no display equation was added or moved this iteration, so the
+placement result is unchanged from the previous passing run.

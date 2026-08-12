@@ -56,7 +56,11 @@ The primary baseline predicts width from corpus successor JSD alone. Additional 
 
 ## Results
 
-### Width is meaningful, but successor JSD is incomplete
+### Observed patterns
+
+This section reports direct evidence only. Interpretation is separated into **Candidate hypotheses** below.
+
+#### Width is meaningful, but successor JSD is incomplete
 
 Across all 1,000 pairs, widths agree across sentence frames with mean correlation $0.825$, producing the $R^2=0.934$ reproducibility ceiling. Seventy-one pairs fail the 0.2-bit endpoint gate. They are not unusually noisy, but they are systematically wide because their endpoints barely move. On the remaining 929 pairs, successor JSD still correlates with width at $\rho=-0.409$, but its held-out $R^2$ is only $0.149$.
 
@@ -66,13 +70,27 @@ Figure 1 shows both the overall relation and why the gate is needed.
 
 **Figure 1.** Transition width $w$ against corpus successor JSD (left) and endpoint output movement (right) for 1,000 pairs. Filled circles pass the 0.2-bit gate; open squares fail it. Black linked diamonds are matched pairs of pairs with similar successor JSD and endpoint movement but widths differing by as much as 0.44. Axes are labelled in the plot; marker shape as well as colour identifies gate status.
 
-The mismatch is visible directly. There are 1,529 matched narrow-versus-wide contrasts among gated pairs. The strongest compares ` her` / ` when`, with $w=0.34$, against ` kind` / ` wrong`, with $w=0.77$, although both have successor JSD near 0.70 bits and endpoint movements of 0.86 and 0.90 bits. The full curves show a sharp middle switch for the first pair and an almost proportional change for the second.
+The mismatch is visible directly, in many cases rather than one anecdote. A matched narrow-versus-wide contrast is a pair of gated pairs selected by three criteria: their successor JSD values differ by at most 0.02 bits, their endpoint output movements differ by at most 0.05 bits, and one pair's width exceeds the other's by at least 0.15 in every one of the three sentence frames separately. Under these criteria 1,529 contrasts exist among the 929 gated pairs, and only 21 of them share a token between the two sides, so the effect is not one unusual token dragging its partners along. The seven largest are listed below; they are the concrete cases the rest of the report tries to explain.
+
+| narrow pair | $w$ | wide pair | $w$ | $\Delta w$ | $J$ (bits) | endpoint movement, narrow / wide (bits) |
+|---|---|---|---|---|---|---|
+| ` her` / ` when` | 0.34 | ` kind` / ` wrong` | 0.77 | 0.44 | 0.70 | 0.86 / 0.90 |
+| ` our` / ` very` | 0.32 | ` never` / ` nothing` | 0.69 | 0.37 | 0.73 | 0.84 / 0.82 |
+| ` from` / ` one` | 0.43 | ` kind` / ` wrong` | 0.77 | 0.35 | 0.70 | 0.90 / 0.90 |
+| ` our` / ` very` | 0.32 | ` most` / ` now` | 0.67 | 0.35 | 0.72 | 0.84 / 0.83 |
+| ` one` / ` when` | 0.38 | ` hard` / ` kind` | 0.72 | 0.34 | 0.74 | 0.91 / 0.96 |
+| ` completely` / ` interesting` | 0.44 | ` kind` / ` wrong` | 0.77 | 0.34 | 0.70 | 0.90 / 0.90 |
+| ` because` / ` being` | 0.45 | ` kind` / ` wrong` | 0.77 | 0.33 | 0.69 | 0.90 / 0.90 |
+
+**Table 1.** The seven largest matched contrasts. Each row holds corpus successor JSD $J$ and endpoint output movement approximately fixed while width differs by at least 0.33. The narrow side is built mostly from function words (determiners, possessives, prepositions, ` when`), the wide side mostly from evaluative adjectives and adverbs. The same tokens recur on the same side across rows, which is the observation the per-token analysis below follows up.
+
+The strongest contrast compares ` her` / ` when`, with $w=0.34$, against ` kind` / ` wrong`, with $w=0.77$, although both have successor JSD near 0.70 bits and endpoint movements of 0.86 and 0.90 bits. The full curves show a sharp middle switch for the first pair and an almost proportional change for the second.
 
 ![Three matched narrow-versus-wide transition curves](plots/contrast_curves.png)
 
 **Figure 2.** Normalised output distance $d(t)$ against interpolation position $t$ for three matched contrasts and three frames per pair. Solid curves are narrow pairs and dashed curves are wide pairs. Horizontal guides at 0.1 and 0.9 define $w$. Line style distinguishes the conditions without relying on red–green colour.
 
-### Each token contributes much of the missing width
+#### Each token contributes much of the missing width
 
 A per-token additive term explains the main gap. The token term alone reaches held-out $R^2=0.365$, already above successor JSD alone at $0.149$ and model-output endpoint JSD at $0.187$. Combining successor JSD with the two token effects reaches $0.578$, or 62% of the reproducible variance. Adding model-output JSD reaches $0.648$; adding block-0 geometry reaches $0.723$.
 
@@ -94,11 +112,11 @@ The strongest predictive test uses 40 tokens never seen in the original bank. A 
 
 Together, Figures 3–5 answer why equal successor JSD does not imply equal width: the tokens themselves bring different, transferable contributions to the curve.
 
-### A reproducible pair-specific remainder also remains
+#### A reproducible pair-specific remainder also remains
 
 Additivity is dominant, not complete. When the additive model is fitted separately in independent sentence frames, its pair residuals correlate at $r=0.67$. The leftover is therefore not just measurement noise. Pair-level geometry at block 0 helps: adding endpoint norms, cosine, and distances raises held-out $R^2$ from $0.648$ for token effects plus both JSD measures to $0.723$. This result supports a smaller relational contribution: how the two endpoint states sit relative to one another changes width after their individual effects are accounted for. It does not identify one geometric variable as a causal mechanism.
 
-### The first MLP output carries the token effect
+#### The first MLP output carries the token effect
 
 The causal evidence comes from overwriting the block-0 MLP output of a recipient token with the corresponding vector from a donor token. The recipient's post-transplant width follows the donor at $\rho=0.968$, with regression slope $0.913$, while correlation with the recipient's untouched state is $-0.104$. Between-donor variance is 66 times between-recipient variance. A self-transplant reproduces baseline width to four decimal places.
 
@@ -108,7 +126,7 @@ The causal evidence comes from overwriting the block-0 MLP output of a recipient
 
 In this architecture, the block-0 MLP vector is computed from the token embedding before attention has added context; its cosine across the three frames is 1.0000. The transplant therefore explains why the same token effect recurs across partners. The intervention is large—median endpoint output movement is 0.738 bits—so the justified claim is that this vector is sufficient to carry the width-relevant content inside this setup, not that a small or one-dimensional edit can steer width.
 
-### Generalization is limited to models with the same learned ordering
+#### Generalization is limited to models with the same learned ordering
 
 The per-token ordering reproduces across Pythia-410M, 1B, and 1.4B at raw $\rho=0.88$–$0.90$, close to each measurement's reliability ceiling. Absolute widths still sharpen with model size. Pythia-160M is different: its median edge drift is 0.183, near the 0.2 value of a straight ramp, so it largely lacks the plateau structure whose width is being explained.
 
@@ -117,6 +135,24 @@ GPT-2 small has plateau-shaped curves at the median, but 88.8% of its block-0 cu
 ![Curve shape and reliability across GPT-2 and Pythia](plots/edgedrift.png)
 
 **Figure 7.** Edge-drift distributions across GPT-2 sites and Pythia sizes (left), and GPT-2 reliability and agreement with Pythia before and after filtering to plateau-shaped curves (right). A straight response has edge drift 0.2. Line styles and direct labels make model comparisons readable without colour.
+
+## Candidate hypotheses
+
+Everything above is measurement. This section is interpretation: three hypotheses about *why* the observed patterns hold, ranked by how well they fit that evidence, each with the cheapest experiment that would separate it from its main alternative.
+
+**H1 — Width is a per-token trait that a token carries into any pairing.** This fits the evidence best. It predicts the abundance of matched contrasts at fixed successor JSD (Table 1), the accuracy of the additive model (Figure 3), and the part it was actually tested on and passed: a token's width measured against six strangers predicts its fitted effect and the widths of pairs of unseen tokens (Figures 4 and 5). What it does not explain is the reproducible pair-specific remainder, roughly a third of the explainable variance, and the fact that a token's anchor width shifts somewhat with the choice of anchors. The competing reading is that anchor width is just "how unlike a typical token this token is" — a similarity statistic wearing a trait's clothes. Replacing the anchors with a disjoint set from a different word class still recovers the fitted effects at $\rho\approx0.6$, which argues against the pure-similarity reading without settling it. *Discriminating experiment:* measure $\widehat w_u$ using a single anchor averaged over many sentence frames instead of six anchors over three frames. A token property should survive that change; a relational statistic should degrade.
+
+**H2 — The trait reflects how sharply the model reads the token, not the string itself.** Five weak correlations point the same way: tokens that are frequent ($\rho=-0.33$ between a token's fitted effect and corpus log-frequency), that precede low-entropy continuations ($-0.24$), that are surprising in the frame ($+0.26$), and that produce low-entropy model outputs ($-0.30$) tend toward narrower transitions. All of these are correlations across tokens at one checkpoint, and none is strong enough to be the mechanism. The cross-model result is the strongest support: the token ordering survives across Pythia sizes but not into GPT-2 (Figure 7), so the trait belongs to the token *as this model family learned it*. The competing reading is that these five statistics are proxies for a function-word versus content-word split, which Table 1 also shows. *Discriminating experiment:* hold the token fixed and change only the sentence frame so that its surprisal moves by several bits, then re-measure $\widehat w_u$. Manipulating context within a token separates "how the model reads it here" from a property of the string.
+
+**H3 — The pair-specific remainder is endpoint geometry at the interpolation site.** Adding the endpoint norms, their cosine, and their distance at block 0 raises held-out $R^2$ from $0.648$ to $0.723$, and it cuts the across-frame agreement of the leftover residuals from $0.67$ to $0.54$, so some of the reproducible pair-specific part is geometric. This is the weakest of the three: the evidence is predictive, not causal, and the geometric variables might partly re-express successor JSD, although they add accuracy on top of it. *Discriminating experiment:* hold the token pair fixed and change only the path — interpolate through a third state, or use straight-line instead of spherical interpolation — and see whether width tracks the geometry of the new path.
+
+One hypothesis was tested and dropped. The idea that each token owns a region of output insensitivity whose size sets the width predicts that tokens with larger such regions have wider transitions; the measured relation ran in the opposite direction along anchor directions ($\rho=+0.39$) and was absent along random directions ($\rho=-0.02$). The evidence is in [RESULTS.md](RESULTS.md).
+
+## Recommended next experiment
+
+The single most informative next experiment asks **where in the network the width becomes explicit**, using measurements that already exist. The transplant shows that the block-0 MLP output vector carries the trait between tokens, yet no probe reads a number off that vector beyond what the curve's overall shape already gives — transport and decodability came apart. That negative was established on 123 measured tokens. Enlarging the pool to 250 tokens and refitting one representation (the residual state after block 6) reversed it: the width-specific part, meaning width after the component shared with overall curve shape is removed, became readable at $+0.265$ against a permutation bar of $+0.131$. The other five representations were only ever tested at the sample size now known to be too small.
+
+So refit all six — the static embedding row, the block-0 MLP output, the post-block-0 residual state, and the states after blocks 6, 12 and 18 — on the same 250 tokens, with identical splits, permutation nulls and within-sample controls. The curves are already measured and the features are single-token forward passes, so the cost is minutes of GPU time. The outcome is decisive either way. If the static embedding row clears its null, the screen becomes a vocabulary-wide lookup table requiring no forward pass, which is the cheapest useful form this result could take. If readability instead begins at block 6, the screen costs one partial forward pass, and the depth where the profile turns is a fact about where the model computes the crossing width.
 
 ## Conclusion
 

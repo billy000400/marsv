@@ -54,7 +54,32 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 23 — COMPLETE; the standing negative is REVERSED)
+## Current status (2026-08-12, iteration 24 — DIRECTION COMPLETE; STOP written)
+
+**No new experiment.** Iteration 24 compared the status below against the success criterion, found
+the research complete, and repaired the one gap the previous iteration's report-shortening had left:
+REPORT.md had lost four of this plan's literally named required outputs. All four are restored, with
+no number, figure or metric changed (REPORT.md 2,085 → 3,308 words, still 7 of 8 figures):
+
+* **Table 1** — the seven largest matched narrow-vs-wide contrasts, with the three selection criteria
+  in the prose above it and the counts (1,529 contrasts, 21 sharing a token).
+* **Observed patterns** — now the heading over the five direct-evidence subsections, stated as
+  evidence only.
+* **Candidate hypotheses** — separate section, marked as interpretation: H1 per-token trait, H2 how
+  sharply the model reads the token, H3 endpoint geometry; ranked, each with its alternative reading
+  and one discriminating experiment, plus the dropped basin hypothesis.
+* **Recommended next experiment** — refit the width-specific readability probe at all six sites on
+  the 250-token pool, written self-contained.
+
+Success criterion, item by item: reproducible matched contrasts at equal successor JSD (Table 1,
+Figures 1–2); unreliable widths separated by the 0.2-bit endpoint-movement gate (Figure 1, right);
+concrete differences described (curve shape, per-token contribution, block-0 MLP transport); three
+ranked hypotheses; one discriminating experiment each. Required outputs all present in REPORT.md,
+with the full evidence record in RESULTS.md and the long-form report in TECHNICAL_APPENDIX.md. No
+unaddressed feedback file exists, so `STOP` is written. If feedback arrives later, delete `STOP`,
+address it, and rewrite `STOP` only when clean again.
+
+## Previous status (2026-08-12, iteration 23 — COMPLETE; the standing negative is REVERSED)
 
 **Iteration 23 ran the experiment both deliverables named as next, and it overturned the result**
 (`experiments/pool_widths.py`, `pool_probe.py`, `plot_pool.py`, `pool_table.py`; Figure 38; deliverables

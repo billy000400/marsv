@@ -1669,3 +1669,31 @@ can be upgraded to a width-specific table or whether readability begins in the m
 ## 2026-08-12 — concise report curation
 
 Preserved the previous full REPORT.md verbatim as TECHNICAL_APPENDIX.md and rewrote REPORT.md around the shortest evidence chain answering the original question. No experiment or metric changed; detailed and secondary evidence remains in RESULTS.md and the appendix. The curated report selects seven figures and stays within the canonical report budget.
+
+## 2026-08-12 — iteration 24: restore the plan's required report sections, then finish
+
+Checked Current status (iteration 23, COMPLETE) against the success criterion before doing anything
+else. Four of the five criterion/required-output items were satisfied by the deliverables; the
+previous iteration's shortening of REPORT.md had, however, removed the plan's literally named
+outputs — the contrast table with its selection criteria, the section titled **Observed patterns**,
+the separate section titled **Candidate hypotheses**, and the final next-experiment recommendation.
+They survived only in TECHNICAL_APPENDIX.md, which is a declared appendix, not the primary report.
+
+Assumption logged (loop mode, no operator available): the plan's "Required outputs" belong in the
+primary report named by the report policy, not merely somewhere in the direction. Rejected
+alternative: leave them in the appendix and call the report complete — rejected because a reader
+holding only PLAN.md and REPORT.md would find the required sections missing. Second rejected
+alternative: rename `## Results` to `## Observed patterns` — rejected because rule 8 fixes the
+Summary → Methods → Results → Conclusion skeleton; instead "Observed patterns" became the heading
+over the evidence subsections, matching the structure the full report had used.
+
+No experiment was run and no number changed; every figure, metric and result is as measured in
+iteration 23. Word count 2,085 → 3,308 against the 5,000 limit; figures unchanged at 7 of 8.
+
+Verification: local half of `check_render.py` passes on REPORT.md (0 problems). The GitHub markdown
+API returned HTTP 403 rate-limit (four agents share the IP), so the placement half was retried in
+the background; this iteration added no display math, so the previously passing placement result
+still holds.
+
+The plan is complete and no unaddressed feedback file exists (`human_feedback.addressed.md` only),
+so STOP is written.
