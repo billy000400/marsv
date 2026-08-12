@@ -1184,3 +1184,15 @@ document problem. RESULTS.md is byte-identical to the copy that passed the full 
 iteration #13 (last modified 18:49, before that check), so no re-verification is outstanding.
 `wc -w REPORT.md` = 4999 words, 3 embedded figures — within the 5,000-word / 8-figure report policy.
 This entry is the only file edited.
+
+## 2026-08-12 (hold iteration #15: still waiting on the wrapper's content review)
+
+No change. `human_feedback_1.txt` is still present and unrenamed, so no `STOP` is written (CLAUDE.md
+rule 11); the manifest stays `review_pending` with its single checklist item `done`. Plan success
+criteria are met, so no experiment was run and no deliverable, plot or result file was touched.
+Re-verified only: REPORT.md and RESULTS.md are unmodified (mtimes 18:48 / 18:49, i.e. the copies that
+passed `check_render.py` in hold iterations #13–#14), `wc -w REPORT.md` = 4999 words with 3 embedded
+figures, RESULTS.md has 6. A retry of `python3 ../check_render.py RESULTS.md` again aborted on HTTP
+403 (GitHub markdown API rate limit) before any document check ran — the limit has not reset since
+iteration #14. Since RESULTS.md is byte-identical to the copy that passed the full check, this is a
+transient API limit, not an outstanding verification. This entry is the only file edited.
