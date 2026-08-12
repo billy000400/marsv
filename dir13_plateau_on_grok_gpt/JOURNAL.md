@@ -2828,3 +2828,51 @@ this iteration changed no next-character-decision claim, and I re-checked that t
 still in place after the edits. No STOP written.
 
 On track? yes — the probe-family question PLAN listed as item (iii) is answered; blocker: none.
+
+## 2026-08-12 — S28: naming the fifth of a demoted unit that no character family explains
+
+**Why this one.** S27 answered "is the decline a probe artifact?" (no) but its own numbers opened the
+next question: under the widest character family the demoted units still sit at 0.78, so a fifth of what
+they do is not a linear function of any character within 40 positions. PLAN's successor list named the
+two candidates — longer range, or something that is not character identity — and both are testable with
+the estimator already written. The reference run's checkpoints were still on /tmp from S27's retrain, so
+this cost forward passes only.
+
+**Design.** Three new families in one union design, fitted on exactly S27's rows: structural features
+(offset in the line, offset in the word, previous-word length, distance to the next separator,
+capital-run length — none of which names a character), lexical features (current partial word, previous
+word, trigram — conjunctions that a sum of per-position character effects cannot represent), and a bag
+of character frequencies over the part of the window *before* lag 32, the only feature here that reaches
+past all40. Keeping the old families inside the same design gave a free exactness check, and it came out
+exact: char1 and past8 reproduce S27 to 0.0 per unit, all40 to 5e-13.
+
+**Result.** Both candidates fail, and they fail in an informative way. Union adds +0.020 to the demoted
+units (0.780 → 0.815) — real, every unit gains, p = 7e-25 — but that is 9.2% of what all40 misses, and
+the same union closes 9–12% of *every* role's residual, including the stable units who have almost
+nothing left. So it is a small uniform improvement to the probe, not the thing these units switched to.
+The fall is identical to four decimals (−0.0637 → −0.0637). Alone, struct explains 0.05, bag explains
+0.0002 — nothing — and lex's 0.35 is not independent evidence, since its features are conjunctions of
+the characters the past families already use, and it declines over training as well.
+
+**Writing it.** The honest shape here is a negative result with a positive by-product, so the subsection
+leads with the size of the gap, states what closes it (a tenth) and who benefits (everyone equally),
+and only then reports the per-family numbers. The caveat sentence in both files changes from "would
+score low under every family fitted here" (a hypothetical) to a list of what is now excluded and what is
+not: range beyond the 128-character window, and any function of the characters these families do not
+spell out. Nine families now bound the change without naming it — that is the claim, and it is weaker
+than "we found what they read", which is what the evidence supports.
+
+**Figure.** One figure, three panels: family-by-family medians with a bar joining the two checkpoints,
+the per-unit gain distribution by role (the specificity test), and each family alone. Panel (b)'s first
+draft ran to x = 0.8 because 1.6% of units gain that much, which squashed the mass near zero; clipped to
+0.30 with the clipped fraction stated in the caption.
+
+**Checks.** `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 54 display / 1,218 inline
+equations / 48 figures; RESULTS 48 figures; 0 problems), embeds = captions = 96. Exploratory figures
+renumbered 45–47 → 46–48 before the new Figure 45 was inserted.
+
+**Feedback state.** `human_feedback_7.txt` remains `review_pending` with its single checklist item done;
+this iteration changed no next-character-decision claim, and the narrowed wording is still in place. No
+STOP written.
+
+On track? yes — the last item on PLAN's successor list is answered; blocker: none.

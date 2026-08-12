@@ -2159,3 +2159,46 @@ listed it as the direction's real open problem since 2026-08-03.
   (REPORT 52 display / 1,193 inline equations / 47 figures; RESULTS 47 figures; 0 problems); embed count
   equals caption count (94 = 47 + 47).
 - **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
+
+## 2026-08-12 — S28: the leftover response is not line/word position, word identity, or the earlier window (new Figure 45 in both deliverables)
+
+- **Question.** S27 (Figure 44) showed the describability decline is not an artifact of the probe's
+  8-character window, but left the *level* unexplained: at step 30,000 the demoted units sit at median
+  held-out $R^2$ 0.78 under the widest character family (all40), so a fifth of their corpus response is
+  not linear in the identity of any character in a 40-character neighbourhood. PLAN's remaining successor
+  named two candidates for that fifth — structure past the probe's window, and structure that is not
+  character identity. `experiments/neuron_probe_struct.py` (6.2 min, forward passes only, reference-run
+  checkpoints still on scratch from S27) fits both with the same ridge estimator, the same $\lambda$ grid,
+  the same 80/10/10 split and the same rows, adding three families: **struct** (85 columns: characters
+  since the last newline, since the last space/newline, previous-word length, distance to the next
+  separator within 8, capital-run length), **lex** (1,027 columns: current partial word, previous word,
+  three-character string — conjunctions of characters), **bag** (67 columns: character frequencies in the
+  window before lag 32, plus that stretch's length), and their combinations **nonchar** and **union**.
+- **Answer: neither candidate accounts for it.** Union raises the demoted units 0.780 → **0.815** at step
+  30,000 (median +0.020 per unit, 141/141 up, p = 7e-25), which closes only **9.2%** of all40's residual
+  (0.220 → 0.185). The gain is not specific to them: 10.1% of the stable units' residual, 9.2% of the
+  promoted units', 11.6% of the never-head units'. The developmental fall is unchanged to four decimals
+  (−0.0637 under all40, −0.0637 under union, n = 141, p = 5e-13); network-wide it grows (−0.045 →
+  −0.058). Alone at step 30,000: struct 0.053 network-wide, bag **0.0002**, lex 0.35 (and lex is built
+  from the same characters, and declines too, −0.12 on the demoted units). Union closes 18.2% of the
+  network-wide residual at step 831 against 11.5% at step 30,000.
+- **Free reproduction check.** char1, past8 and all40 refitted inside the larger design reproduce
+  Figure 44's per-unit fits exactly: largest deviation over 3,840 units 0, 0 and 5e-13. The structural
+  and bag features were checked against a plain-Python rebuild at random corpus positions before the run.
+- **Claims adjusted.** REPORT.md's Summary and RESULTS.md's headline paragraph now add that what the
+  units moved *to* is still open (9% of the miss closed, fall unmoved at −0.064, "nine feature families
+  now bound the change without naming it"). Both Caveats sections replace "a unit reading structure
+  beyond 40 characters, or structure that is not character identity at all, would score low under every
+  family fitted here" with what Figures 44–45 now rule out (32 characters of history, eight of lookahead,
+  line and word position, word and trigram identity, the earlier window's composition) and what is still
+  open (range beyond the 128-character window; a function of the characters no family spells out; 18% of
+  a demoted unit still unexplained). No published measurement was superseded.
+- **New files.** `experiments/neuron_probe_struct.py`, `results/neuron_probe_struct_summary.json`,
+  `results/neuron_probe_struct_raw.npz`, `results/neuron_probe_struct.log`,
+  `plots/neuron_probe_struct.png` → embedded as **Figure 45** in REPORT.md and RESULTS.md; the three
+  exploratory figures renumbered 45–47 → 46–48 in both files. REPORT.md's Methods gains a **Non-character
+  probe families** paragraph with the three family equations and every feature defined.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 54 display / 1,218 inline equations / 48 figures; RESULTS 48 figures; 0 problems); embed count
+  equals caption count (96 = 48 + 48).
+- **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.

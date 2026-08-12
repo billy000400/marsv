@@ -590,6 +590,26 @@ End each `JOURNAL.md` entry with: `On track? <yes/no> - <stage, % done, blocker 
 
 ## Current status
 
+**S28 DONE 2026-08-12 — the fifth of a demoted unit that no character family explains is not line/word
+position, word identity, or the text before the probe's window.** `experiments/neuron_probe_struct.py`
+(6.2 min, forward passes only, on the reference-run checkpoints S27 left on /tmp) adds three families to
+S27's design, fitted on exactly the same rows with the same estimator: **struct** (85 columns —
+characters since the last newline, since the last space/newline, previous-word length, distance to the
+next separator within 8, capital-run length), **lex** (1,027 columns — current partial word, previous
+word, three-character string; conjunctions a per-character sum cannot express), **bag** (67 columns —
+character frequencies in the part of the window before lag 32, plus that stretch's length; the only
+feature reaching past all40), plus **nonchar** and **union**. **Neither candidate accounts for the
+residual:** union raises the demoted units 0.780 → **0.815** at step 30,000 (+0.020 per unit, 141/141 up,
+p = 7e-25) but closes only **9.2%** of all40's miss, and it closes 9–12% of *every* role's residual
+(stable 10.1%, promoted 9.2%, never-head 11.6%) — a uniform improvement to the probe. The developmental
+fall is unchanged to four decimals (−0.0637 under all40, −0.0637 under union); network-wide it grows
+(−0.045 → −0.058). Alone at step 30,000: struct 0.053, bag **0.0002**, lex 0.35 (not independent — its
+features are conjunctions of the same characters — and it declines too). Free check: char1/past8/all40
+refitted inside the larger design reproduce Figure 44 per unit (0, 0, 5e-13). Curated as **Figure 45** in
+both deliverables (exploratory figures renumbered 46–48), with a Methods paragraph defining every new
+feature, narrowed Summary/Headline sentences and rewritten caveats. `check_render.py` → ALL CHECKS PASS
+(48 figures per file).
+
 **S27 DONE 2026-08-12 — the describability decline survives a four-fold wider probe, at a quarter of its
 size.** `experiments/neuron_probe_family.py` (~5 min) refits the same ridge probe with five feature
 families at steps 831 and 30,000: char1, past8 (both published), past32 (24 more characters of history),
@@ -1307,6 +1327,26 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S28 DONE (2026-08-12) and curated — see "Current status". Item (iii) of the previous list — the
+unidentified residual — is now answered as far as cheap probe families can answer it: it is not word or
+line position, not word or trigram identity, and not the composition of the text before the probe's
+window, and none of these changes the developmental fall.
+
+**What this leaves, in order of what a reader asks next.** (i) The residual itself is still unnamed and
+what remains of it is harder to reach: structure at a range beyond the 128-token training window (which
+needs windows longer than the model was trained on, or a different corpus slicing), or a *nonlinear*
+function of nearby characters that no additive-plus-conjunction family here spells out (the natural next
+family is a small nonlinear read-out — e.g. a one-hidden-layer probe on the same one-hot design — which
+is a different estimator, not a different feature set, and would take an evening rather than an
+iteration). (ii) The nine families are all fitted on the reference run at two checkpoints; extending any
+of them to the seed-2024 run costs ~6 min of forward passes *if* its checkpoints exist, which they do
+not after the last wipe (23 min to retrain). (iii) The depth series still has one seed for the five-block
+windows, so the 0.397-vs-0.476 gap that carries the depth argument has an across-seed bar at five of the
+nine conditions only. **Standing cost note:** `/tmp` is scratch; the reference run's checkpoints and the
+corpus are there now (from S27's retrain) but vanish with any wipe — re-download tinyshakespeare (SHA in
+`allpairs_sweep.load_vocab`) and budget 23–24 min per run that has to be retrained. Only
+`results/frozen_assay_raw.npz` and the per-run summary JSONs survive a wipe.
 
 **S27 DONE (2026-08-12) and curated — see "Current status". The probe-family question that stood as item
 (iii) on the previous list is answered, so all three items that list named are now closed (second seed for

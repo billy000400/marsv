@@ -2283,6 +2283,54 @@ family.
   short-range context, and a claim like "four times harder to describe" is a statement about a
   one-character probe.
 
+**So what is the leftover response?** Even the widest character family leaves about a fifth of a demoted
+unit unexplained at step 30,000 (median $R^2$ 0.78), and naming that fifth would say what these units
+came to compute. Three further families, fitted on the same rows with the same estimator, test the two
+cheap candidates — structure that is not character identity, and text outside the probe's window
+(Figure 45). **struct** (85 columns) is where the position sits in its line and word: characters since
+the last newline (capped at 40), characters since the last space or newline (capped at 12), the length
+of the previous word, the distance to the next space or newline within eight characters, and the length
+of the run of capital letters ending at the position — none of these names a character. **lex** (1,027
+columns) is which word and which three-character string the position is inside: the 255 most frequent
+partial words, the 255 most frequent previous words and the 511 most frequent three-character strings,
+each with an "other" bucket; these are conjunctions of characters, which a sum of per-character effects
+cannot express. **bag** (67 columns) is how often each of the 65 characters occurs in the part of the
+window before lag 32, as a frequency, plus the length of that stretch (1 to 88 characters, median 44.5) —
+the only family reaching past all40's neighbourhood. **nonchar** is the three together and **union** is
+nonchar plus all40. Refitting char1, past8 and all40 inside the same design reproduces Figure 44's fits
+unit by unit (largest deviation 0, 0 and 5e-13 over 3,840 units).
+
+![three panels: median probe R-squared under character-only and extended families at two checkpoints; cumulative distributions of the per-unit gain from the extended features by unit role; and median R-squared of each family on its own](plots/neuron_probe_struct.png)
+
+**Figure 45.** Line and word position, word and trigram identity, and the composition of the earlier
+text close about a tenth of what the character families miss, equally for every group of units, and
+leave the developmental decline exactly where it was. Reference run, same 3,840 block-1–4 units, same
+four roles and same rows as Figure 44. **(a)** y = median held-out $R^2$; x = feature family (char1,
+past8, all40 as in Figure 44; nonchar = struct, lex and bag together; union = all40 with nonchar); each
+vertical bar joins a group's step-831 value (filled marker) to its step-30,000 value (open marker),
+circles/blue = the 141 demoted units, squares/vermillion = all 3,840 units. **(b)** Cumulative
+distribution over units of the per-unit $R^2$ gain from adding the new features (union minus all40) at
+step 30,000: x = gain, y = fraction of units at or below, one line per role with its own marker, x
+clipped at 0.30 (1.6% of units lie above). **(c)** Median held-out $R^2$ at step 30,000 (y) for each
+family fitted alone (x), demoted units (circles/blue) against stable units (triangles/reddish purple).
+
+- **The new features close about a tenth of the gap, for everyone.** Union raises the demoted units from
+  0.780 to **0.815** at step 30,000 (median +0.020 per unit, 141 of 141 up, p = 7e-25), which is 9.2% of
+  what all40 was missing (residual 0.220 → 0.185). The same union closes 10.1% of the stable units'
+  residual, 9.2% of the promoted units' and 11.6% of the never-head units' (Figure 45b) — a small
+  uniform improvement to the probe, not a discovery about the demoted units.
+- **The developmental fall does not move.** Median per-unit change from step 831 to step 30,000: −0.0637
+  under all40, −0.0637 under union (n = 141, p = 5e-13); network-wide it grows, −0.045 → −0.058
+  (Figure 45a). Nine families have now been fitted at both ends of training and none of them shrinks the
+  fall below what the eight-character window already gave.
+- **Alone, the new families are weak where the residual is.** At step 30,000, struct reaches median
+  $R^2$ 0.053 network-wide (0.047 demoted) and bag reaches **0.0002** — the earlier text in the window
+  carries nothing separable. lex reaches 0.35 (0.45 demoted), but its features are conjunctions of the
+  same characters the past families use, so this is not a separate lexical variable, and it declines
+  over training as well (−0.12 on the demoted units) (Figure 45c).
+- **The probe is losing ground overall.** Union closes 18.2% of all40's network-wide residual at step
+  831 and only 11.5% at step 30,000.
+
 **What this adds.** The concentrated picture suggested by the top-$k$ curve is an artifact of scoring
 nested prefixes, in both training runs: the same bend is available in several places at once, so straightening the top 32 units
 removes the most efficient copy of a capability and leaves others behind — an ablation argument built on
@@ -2316,12 +2364,14 @@ stay associational:
 nothing in them shows that a unit is promoted *because* of what it computes. Of Figure 40's six tests,
 five survive a Holm correction across the six; the exception is the unconditional full-window contrast
 (p = 0.079), which does not separate promoted from demoted units at all. "Describable" still means
-describable by a *character* probe: Figure 44 rules out the two nearest alternatives — 32 characters of
-history and eight of lookahead leave the decline in place — but a unit reading structure beyond 40
-characters, or structure that is not character identity at all, would score low under every family
-fitted here, so the residual decline bounds rather than identifies what these units came to compute.
-Figure 44 is a two-checkpoint measurement on the reference run only; the second seed was not refitted
-with the wider families. Free checks: the nested-prefix column
+describable by the nine families fitted here. Figures 44 and 45 remove the nearest alternatives — 32
+characters of history, eight of lookahead, position in the line and word, word and trigram identity, and
+the character composition of the earlier window — and the decline survives all of them, which bounds
+what these units came to compute without identifying it: 18% of a demoted unit's response at step 30,000
+is still unexplained, and structure at a range beyond the 128-character window, or a function of the
+characters that none of these families spells out, would score low everywhere in this table. Both
+figures are two-checkpoint measurements on the reference run; the second seed was not refitted with any
+of the wider families. Free checks: the nested-prefix column
 reproduces the published curve to within 1.5 points at every $k$ (27.9 / 47.3 / 65.6 / 82.5 / 85.3 /
 85.2% here against 30.0 / 50.9 / 68.4 / 83.6 / 86.8 / 86.7% there, the difference being per-pair versus
 median-of-medians $\rho$), both endpoints stay exact under every edit (worst deviation 1e-6), and both
@@ -2330,12 +2380,12 @@ checkpoint). Data: `results/neuron_bands_summary.json`, `results/neuron_bands_ti
 `results/neuron_head_identity_summary.json`, `results/neuron_head_origin_summary.json`,
 `results/neuron_head_describe_summary.json`, `results/neuron_probe_early_summary.json`,
 `results/neuron_seed2_summary.json`, `results/neuron_bands_seed2_summary.json`,
-`results/neuron_probe_family_summary.json`; code:
+`results/neuron_probe_family_summary.json`, `results/neuron_probe_struct_summary.json`; code:
 `experiments/neuron_bands.py`, `experiments/neuron_bands_time.py`,
 `experiments/neuron_head_identity.py`, `experiments/neuron_head_origin.py`,
 `experiments/neuron_head_describe.py`, `experiments/neuron_probe_early.py`,
 `experiments/neuron_seed2.py`, `experiments/neuron_bands_seed2.py`,
-`experiments/neuron_probe_family.py`.
+`experiments/neuron_probe_family.py`, `experiments/neuron_probe_struct.py`.
 
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
@@ -2354,32 +2404,32 @@ checkpoint). Data: `results/neuron_bands_summary.json`, `results/neuron_bands_ti
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 45 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 46 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 45.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 46.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 46 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 47 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 46.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 47.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 47 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 48 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 47.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 48.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -2512,6 +2562,10 @@ describable early than late (median $R^2$ from the current character **0.39** ag
 units that lose the head fall faster still (**0.92 → 0.41**) — character readability drains away with
 head membership rather than marking a fixed set of units. Giving the probe 32 characters of history and
 the eight characters that follow leaves that drain in place at about a quarter of its size, so the drain
-is a fact about the units and its magnitude is a fact about the probe. A second training run of the same recipe
+is a fact about the units and its magnitude is a fact about the probe. What the units moved *to* is
+still open: adding where the position sits in its line and word, which word and three-character string
+it is inside, and the character composition of the earlier text closes only **9%** of what the character
+families miss on those units and leaves the fall unmoved at −0.064, so nine feature families now bound
+the change without naming it. A second training run of the same recipe
 (model seed 2024) reproduces the turnover, the promotion from just below the head and this draining, but
 not the reference run's rise in the promoted units' describability.
