@@ -2480,3 +2480,96 @@ independent content review.
 
 On track? yes — feedback #7 answered by narrowing the Conclusion, Interpretation, Limitation 7 and the
 RESULTS verdict to what the prediction counts support, with no measurement affected; blocker: none.
+
+## 2026-08-12 — S24h: band decomposition of the unit ranking (why the tail costs hundreds of units)
+
+**Feedback check first.** `human_feedback_7.txt` is still un-renamed, but its manifest is
+`review_pending` with the single checklist item `done` — the wrapper's independent reviewer has not run
+yet and there is nothing for me to repair. I re-verified the fix rather than redoing it: `grep` over
+REPORT.md / RESULTS.md finds no surviving identity claim (the only "decision basin" hits are the two
+sentences that explicitly *refuse* the phrasing, plus the readout `t_gap` decision boundary, which is a
+different, separately defined object). So this iteration advanced the plan.
+
+**What PLAN's "Next step" asked for.** A saturation analysis of $\rho(k)$ with pair-level resolution:
+does the tail of the ranking behave like many small independent contributions, or like a second
+population of units with a different character profile? The nested-prefix curve in `neuron_path.py`
+cannot answer it — $\rho(k)$ confounds "units out there are individually weaker" with "units out there
+only work together".
+
+**Design (`experiments/neuron_bands.py`, 63 s of forward passes, no training).** Cut the per-pair
+importance ranking into six bands (0–8, 8–32, 32–128, 128–512, 512–2,048, 2,048–3,840) and linearize
+each band **alone**; also the nested prefix at each band edge (a free reproduction of `neuron_path`)
+and two size-matched random controls. The second control is the one that matters and it is new: draw
+the random set only from the units ranked at or below the band's own lower edge, so for the
+512–2,048 band it is 1,536 units drawn from the 3,328 ranked ≥ 512. My first run used only the
+draw-from-all control and it was misleading — a random 1,536-unit set contains ~40% of the top-32
+units, so it "recovers" 40.6% and makes the tail band look worse than chance. Same 150 pairs /
+context / block 0 / step 30,000 as the rest of the section.
+
+**Result 1 — redundant, not independent.** Band-alone: 27.9 / 25.9 / 24.1 / 20.4 / 10.4 / −0.1%.
+Sum 111.5% against the 85.2% all-units ceiling (ratio 1.29, paired $p=6\times10^{-20}$, 86.7% of
+pairs). Every band alone exceeds its marginal contribution inside the prefix. So the answer to the
+first half of the question is neither "independent" nor "jointly necessary": the bands overlap.
+
+**Result 2 — the ranking has signal to rank 2,048 and none below.** Each band beats a same-size draw
+from its own region (0.15 / 1.19 / 2.24 / 3.90% for bands 2–5 against 25.9 / 24.1 / 20.4 / 10.4%,
+$p\le10^{-25}$, 98–100% of pairs), while the last 1,792 units bend nothing (−0.1%). Per-unit worth
+falls ~500-fold down the ranking (34.8 → 0.067% per 1,000 units).
+
+**Result 3 — a continuum, not a second population.** Assign each unit to the band of its *best* rank
+over the 150 pairs (mean rank was useless: a unit that matters for one pair sits near the middle on
+average, and my first version put zero units in the head), then read off `neuron_probe.py`'s fitted
+text description. Held-out $R^2$ declines smoothly: full description 0.97 / 0.70 / 0.66 / 0.59 / 0.52 /
+0.50; current-character-only 0.91 / 0.30 / 0.22 / 0.14 / 0.12 / 0.13. Head (best rank < 32, n=668) vs
+tail (best rank ≥ 512, n=1,623): 0.80 vs 0.51 ($p=2\times10^{-67}$) and 0.42 vs 0.12
+($p=2\times10^{-97}$), Mann–Whitney over distinct units, no pseudo-replication across pairs. This is a
+rank–describability association at one checkpoint, not a mechanism, and it is written that way.
+
+**Assumption logged (rule 1).** Band edges are the dyadic-ish edges the existing $k$ grid already
+uses, so the prefix column reproduces `neuron_path`'s published $\rho$ at $k=8\ldots3{,}840$
+(0.279 / 0.473 / 0.656 / 0.825 / 0.853 / 0.852 here against 0.300 / 0.509 / 0.684 / 0.836 / 0.868 /
+0.867 there — same curve, small differences from the per-pair rather than median-of-medians
+definition of $\rho$). Rejected alternative: a per-pair parametric saturation fit, which would have
+put a model between the reader and the measurement for no gain.
+
+**Curation deferred by one iteration, deliberately.** REPORT.md and RESULTS.md are feedback #7's
+declared outputs and are awaiting the independent content review; adding a figure to the S24 section
+renumbers every later figure in both files, which would land a large unrelated diff in the middle of
+that review. PLAN's "Next step" now carries the curation as step (i), ahead of the successor
+experiment. The figure and both result files are on disk (`plots/neuron_bands.png`,
+`results/neuron_bands_{raw.npz,summary.json,log}`).
+
+On track? yes — the saturation question in PLAN's "Next step" is answered and its successor is named
+(does the redundancy ratio grow with training? repeat the decomposition on an early checkpoint and on
+the frozen-early run); blocker: none, but the S24h figure is not yet in the deliverables by design.
+
+**S24h, second and third arms (same iteration).** With the one-checkpoint decomposition done and time
+left, I ran the developmental version PLAN's successor named, then the question it in turn raised.
+
+*Second arm — `experiments/neuron_bands_time.py` (96 s).* Band-alone and all-units runs at steps
+831 / 2,038 / 5,000 / 12,500 / 30,000. Early checkpoints have fewer pairs with a usable
+trained→untrained gap (94 / 140 / 146 / 148 / 150 pass the 0.10 filter), so the per-checkpoint rows
+are not comparable as-is; the script therefore also reports the trend on the **94 pairs usable at
+every checkpoint**, and that is the row I read. Redundancy ratio: **1.21 / 1.01 / 1.08 / 1.21 / 1.18**
+— flat, with a dip at step 2,038. So the prediction I wrote into PLAN last iteration ("does redundancy
+grow with training?") is **not supported**: the overlap between bands is there as soon as there is a
+bend to share. What does grow is how much of the bend those units carry at all (all-units effect
+46.2 → 81.0%), concentrated at the top of the ranking (top-8 band 7.2 → 23.9%, deep tail 0 throughout).
+
+*Third arm — `experiments/neuron_head_identity.py` (14 s, no ablations).* The obvious reading of "the
+head strengthens" is that the same units grow, and it is wrong. Median overlap of a checkpoint's
+per-pair top-8 with the step-30,000 top-8: **0 / 2 / 4 / 6 / 8** units (top-32: 6 / 10 / 16 / 23 / 32;
+chance 0.02 / 0.27). At step 831 the top eight units already remove 7.2% of the gap and **none** of
+them is a unit the finished network ranks in its top eight. Consecutive-checkpoint overlap (3 / 3 / 5 /
+6 of 8) says the churn continues late. Figure panel (d) added to `plots/neuron_bands_time.png`.
+
+*Framing (rule 9b / rule 7).* Two of the three arms came back against the guess I had written down,
+and I let the evidence set the framing rather than the reverse: the S24h story is now "the tail is
+weak, redundant and continuous; the redundancy is not what training builds; what training builds is a
+head whose membership it keeps rewriting", not "redundancy accumulates". All three arms are
+descriptions of one training run at five checkpoints — stated that way in PLAN and to be stated that
+way in the deliverables at curation.
+
+On track? yes — PLAN's saturation question answered plus two successors run; blocker: none, the three
+S24h figures/panels are on disk and curation into REPORT.md/RESULTS.md is the next iteration's first
+item, deferred only because those two files are feedback #7's declared outputs and are in review.

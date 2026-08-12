@@ -1,0 +1,92 @@
+self_test OK: step w=0.089 detected, line w=0.800 rejected
+{"step": 831, "median_w_baseline": 0.6533, "n_pairs_used": 94, "rho_all_units": 0.4618, "rho_band_alone": [0.0719, 0.1034, 0.1428, 0.148, 0.0776, 0.0122], "sum_of_band_alone": 0.545, "redundancy_ratio": 1.2132, "frac_pairs_ratio_gt_1": 0.8404} (22s)
+{"step": 2038, "median_w_baseline": 0.4842, "n_pairs_used": 140, "rho_all_units": 0.5681, "rho_band_alone": [0.1147, 0.1481, 0.1576, 0.1372, 0.0273, -0.0003], "sum_of_band_alone": 0.5962, "redundancy_ratio": 1.0945, "frac_pairs_ratio_gt_1": 0.6357} (41s)
+{"step": 5000, "median_w_baseline": 0.3683, "n_pairs_used": 146, "rho_all_units": 0.6886, "rho_band_alone": [0.154, 0.1852, 0.2227, 0.1714, 0.0555, 0.0002], "sum_of_band_alone": 0.7826, "redundancy_ratio": 1.1914, "frac_pairs_ratio_gt_1": 0.774} (59s)
+{"step": 12500, "median_w_baseline": 0.3651, "n_pairs_used": 148, "rho_all_units": 0.8231, "rho_band_alone": [0.2361, 0.2232, 0.2093, 0.2324, 0.1043, -0.001], "sum_of_band_alone": 1.0228, "redundancy_ratio": 1.2666, "frac_pairs_ratio_gt_1": 0.9324} (78s)
+{"step": 30000, "median_w_baseline": 0.3507, "n_pairs_used": 150, "rho_all_units": 0.852, "rho_band_alone": [0.2785, 0.2593, 0.2414, 0.2038, 0.1036, -0.0009], "sum_of_band_alone": 1.1148, "redundancy_ratio": 1.292, "frac_pairs_ratio_gt_1": 0.8667} (96s)
+{
+  "n_pairs": 94,
+  "checkpoints": [
+    {
+      "step": 831,
+      "median_w_baseline": 0.5153,
+      "rho_all_units": 0.4618,
+      "rho_band_alone": [
+        0.0719,
+        0.1034,
+        0.1428,
+        0.148,
+        0.0776,
+        0.0122
+      ],
+      "sum_of_band_alone": 0.545,
+      "redundancy_ratio": 1.2132,
+      "frac_pairs_ratio_gt_1": 0.8404
+    },
+    {
+      "step": 2038,
+      "median_w_baseline": 0.4004,
+      "rho_all_units": 0.467,
+      "rho_band_alone": [
+        0.0875,
+        0.1185,
+        0.1231,
+        0.1036,
+        0.0242,
+        -0.0003
+      ],
+      "sum_of_band_alone": 0.4373,
+      "redundancy_ratio": 1.0056,
+      "frac_pairs_ratio_gt_1": 0.5106
+    },
+    {
+      "step": 5000,
+      "median_w_baseline": 0.32,
+      "rho_all_units": 0.6185,
+      "rho_band_alone": [
+        0.124,
+        0.1478,
+        0.1868,
+        0.1526,
+        0.0451,
+        -0.0002
+      ],
+      "sum_of_band_alone": 0.6389,
+      "redundancy_ratio": 1.0772,
+      "frac_pairs_ratio_gt_1": 0.7021
+    },
+    {
+      "step": 12500,
+      "median_w_baseline": 0.3372,
+      "rho_all_units": 0.7643,
+      "rho_band_alone": [
+        0.191,
+        0.1928,
+        0.1872,
+        0.2122,
+        0.0925,
+        -0.0009
+      ],
+      "sum_of_band_alone": 0.9192,
+      "redundancy_ratio": 1.2086,
+      "frac_pairs_ratio_gt_1": 0.9149
+    },
+    {
+      "step": 30000,
+      "median_w_baseline": 0.3157,
+      "rho_all_units": 0.8097,
+      "rho_band_alone": [
+        0.239,
+        0.2257,
+        0.2124,
+        0.1901,
+        0.0995,
+        -0.0005
+      ],
+      "sum_of_band_alone": 0.95,
+      "redundancy_ratio": 1.1847,
+      "frac_pairs_ratio_gt_1": 0.7979
+    }
+  ]
+}
+done in 96s

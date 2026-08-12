@@ -603,6 +603,71 @@ labels the basins nor explains them"), RESULTS.md Question & verdict item 5, Fig
 files, and the hypothesis paragraph's "decodes to the same prediction" description. Every measurement
 is unchanged. `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (39 figures each, 0 problems).
 
+**S24h DONE 2026-08-12 — the tail is redundant, weak and continuous, not a second population.
+Measured, not yet curated into the deliverables (see the note at the end of this block).**
+`experiments/neuron_bands.py` cuts the per-pair importance ranking into six bands
+(0–8, 8–32, 32–128, 128–512, 512–2,048, 2,048–3,840) and linearizes each band **on its own**, plus the
+nested prefix ending at each band edge, plus two size-matched random controls (drawn from all 3,840
+units, and drawn only from the units ranked at or below the band's own lower edge). Same 150 pairs /
+context / block-0 interpolation / step-30,000 checkpoint; 63 s of forward passes, no training.
+Three findings. **(1) Not independent contributions — redundant ones.** Band-alone recovered
+fractions are 27.9 / 25.9 / 24.1 / 20.4 / 10.4 / −0.1%, which sum to **111.5%** against the
+all-units ceiling of **85.2%** (ratio 1.29, paired $p=6\times10^{-20}$, 86.7% of pairs above), so
+bands overlap in what they bend rather than adding up. Each band alone also beats its own marginal
+contribution inside the nested prefix (27.9 vs 27.9, 25.9 vs 20.0, 24.1 vs 17.9, 20.4 vs 16.5, 10.4
+vs 2.7%), which is the same statement pair by pair. **(2) The ranking carries real signal to rank
+2,048 and none below.** Every band except the last beats a random set of the same size drawn from its
+own region — 0.15 vs 25.9%, 1.19 vs 24.1%, 2.24 vs 20.4%, 3.90 vs 10.4%, all $p\le10^{-25}$, 98–100%
+of pairs — while the 2,048–3,840 band bends nothing at all (−0.1%, indistinguishable from its
+control, which for that band *is* the band). The per-unit worth falls ~500-fold across the ranking
+(34.8 → 0.067% per 1,000 units). The naive size-matched random control (drawn from all units)
+recovers 40.6 / 48.2% for the two large bands purely because a random 1,536-unit set contains ~40% of
+the top-32 units; that control answers a budget question only and is reported as such.
+**(3) A continuum, not a second kind of unit.** Assigning each unit to the band of its *best* rank
+over the 150 pairs and reading off `neuron_probe.py`'s fitted text description gives medians that
+decline smoothly with rank — held-out $R^2$ of the full description 0.97 / 0.70 / 0.66 / 0.59 / 0.52 /
+0.50, of the current-character-only description 0.91 / 0.30 / 0.22 / 0.14 / 0.12 / 0.13 — with no
+break separating a tail population. Head units (best rank < 32, $n=668$) are far more describable
+than tail units (best rank ≥ 512, $n=1{,}623$): $R^2$ 0.80 vs 0.51 ($p=2\times10^{-67}$) full, 0.42
+vs 0.12 ($p=2\times10^{-97}$) current-character-only, Mann–Whitney over distinct units. This is an
+association between rank and describability measured at one checkpoint, not a mechanism.
+Raw → `results/neuron_bands_raw.npz`, stats → `results/neuron_bands_summary.json`, figure →
+`plots/neuron_bands.png` (three panels: band-alone vs marginal vs control; per-unit worth on a log
+axis; describability by band).
+
+**S24h, second arm — the redundancy is not built by training; what training builds is the head.**
+`experiments/neuron_bands_time.py` repeats the band-alone and all-units measurements at five
+checkpoints of the same run (steps 831 / 2,038 / 5,000 / 12,500 / 30,000; 96 s of forward passes).
+Early checkpoints have fewer pairs with a usable trained→untrained gap (94 / 140 / 146 / 148 / 150),
+so the trend is read on the **94 pairs usable at every checkpoint**. The redundancy ratio is
+**1.21 / 1.01 / 1.08 / 1.21 / 1.18** — present as soon as there is any bend to share and not growing
+steadily, so the prediction that redundancy accumulates with training is **not supported**. What does
+grow is how much of the bend those units carry at all: the all-units effect goes **46.2 → 46.7 → 61.9
+→ 76.4 → 81.0%**, and the gain is concentrated at the top of the ranking — the eight highest-ranked
+units alone go **7.2 → 23.9%** while the 1,792 lowest-ranked stay at 0 throughout. Raw →
+`results/neuron_bands_time_raw.npz`, stats → `results/neuron_bands_time_summary.json`, figure →
+`plots/neuron_bands_time.png` panels (a)–(c). One run, five checkpoints: this describes that run's
+development, and is not evidence that training causes the redundancy.
+
+**S24h, third arm — the head is re-selected, not amplified.** If training strengthens the head band,
+the obvious reading is that the same units grow. `experiments/neuron_head_identity.py` (14 s, one
+recording pass per pair per checkpoint, no ablations) refutes it: the median overlap between a
+checkpoint's per-pair **top-8** set and the step-30,000 top-8 set is **0 / 2 / 4 / 6 / 8** units at
+steps 831 / 2,038 / 5,000 / 12,500 / 30,000, and for the **top-32** set **6 / 10 / 16 / 23 / 32**
+(chance overlap 0.02 and 0.27 units). So at step 831 — where the top eight units already remove 7.2%
+of the gap — not one of them is a unit the finished network will rank in its top eight. The set also
+keeps churning late: consecutive-checkpoint top-8 overlap is only 5 of 8 between steps 5,000 and
+12,500 and 6 of 8 between 12,500 and 30,000. Stats →
+`results/neuron_head_identity_summary.json`, raw → `results/neuron_head_identity_raw.npz`, figure →
+`plots/neuron_bands_time.png` panel (d).
+
+**Curation deferred by one iteration on purpose:** REPORT.md and
+RESULTS.md are the declared outputs of feedback #7 and are awaiting the independent content review,
+and inserting figures into the neuron-selection section renumbers every later figure in both files.
+The next iteration embeds `plots/neuron_bands.png` and `plots/neuron_bands_time.png` as two new
+figures in the S24 section of both deliverables and adds the Methods paragraph defining the band
+decomposition, the two controls and the best-rank unit assignment.
+
 **S24g DONE 2026-08-12 — unit interactions are measured and small: worth 3.4 points at $k=128$ and
 nothing at $k=32$.** Zero unaddressed feedback files, so this iteration advanced the plan (PLAN's own
 "Next step" named this experiment). One script, no training, 77 s of forward passes.
@@ -1157,6 +1222,23 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S24h DONE (2026-08-12) — see "Current status". Two things follow, in this order. (i) Curation:
+embed `plots/neuron_bands.png` in REPORT.md and RESULTS.md as the S24 section's next figure, with the
+Methods paragraph that defines the band decomposition, the within-region control and the
+best-rank unit assignment, and renumber the later figures. Do this once feedback #7 clears review.
+(ii) The successor the three arms name. Both developmental questions this iteration raised are already
+answered: redundancy does not grow with training (ratio ~1.2 → ~1.18), and the head band strengthens
+by *replacing* its members (0 of the step-831 top-8 survive to step 30,000). The question that leaves
+is where the final head units come from — do they climb the ranking smoothly from the start, or appear
+late? The measurement is one recording pass per pair per checkpoint (~15 s, no ablations, checkpoints
+on disk): record the FULL importance vector at each checkpoint and report the rank trajectory of each
+pair's step-30,000 top-8 units. A smooth climb and a late jump are different developmental stories and
+this distinguishes them; either way it stays a description of one run. The exhaustive one-at-a-time greedy at $k=32$ is now *less* attractive than
+it looked: with band-alone effects redundant at every scale, a better batched ranking cannot be what
+limits $k=32$. S24 item 3 (a longer character run whose second local-complexity descent separates from
+initial fit, the denser Figure-9 grid on the pilot run's local maximum, or a second model/tokenizer)
+still needs materially more compute than one 30,000-step run.**
 
 **S24g DONE (2026-08-12) — see "Current status". The selection thread is finished. The units are
 identified, described from held-out corpus text, selected better by a blind text-only rule than by the
