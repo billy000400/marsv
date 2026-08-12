@@ -158,8 +158,9 @@ what it reads is fixed very early rather than refined late.
 **The trait belongs to a token of a training corpus, not to the string.** Measuring the same 123
 strings in GPT-2 small — a different corpus, a different BPE vocabulary, a serial residual block —
 gives a ranking that correlates with Pythia-1.4B's at $\rho = -0.22$, where two Pythia sizes agree at
-$+0.88$; the free lookup transfers at $-0.20$ and a probe refitted inside GPT-2 sits on its shuffled
-control. The measurement fails there first: 88.8% of GPT-2's block-0 curves are non-monotone, so `w`
+$+0.88$; the free lookup transfers at $-0.20$, and a probe refitted inside GPT-2's own embedding matrix
+recovers only 0.30 of the ordering its target allows, against 0.81 inside Pythia — so the lookup, the
+cheapest form of the screen, is a Pythia result. The measurement fails there first: 88.8% of GPT-2's block-0 curves are non-monotone, so `w`
 is undefined for them, and its per-token width has a split-half reliability of 0.32 against Pythia's
 0.89 — at every one of six interpolation sites we tried, including the ones where its curves are well
 behaved. So the screen is per-model, and the split-half reliability check, which needs no reference
@@ -475,6 +476,11 @@ over 50 random splits; $\lambda$ is chosen inside each training set by 5-fold cr
 $10^{-1} \ldots 10^{5}$. We report the mean held-out Spearman $\rho$ and $R^2$ across splits, and two
 controls. The first is a **shuffled-target control**: the identical procedure with the targets randomly
 permuted, which measures how much apparent skill 2048 features can manufacture from 80 training points.
+One permuted draw is a noisy estimate of that quantity, so where the probe's accuracy is small enough
+for the comparison to matter — the GPT-2 probes of patterns 37 and 38 — we draw 50 independent
+permutations instead, each scored over the same 50 splits, and report the mean and spread of those 50
+values together with a **permutation $p$-value**: the fraction of permuted draws whose mean $\rho$ is at
+least the probe's, computed as (number of such draws + 1) / 51.
 The second is an **embedding-norm baseline**: the same probe using only $\lVert W_E[u]\rVert$ as its
 single feature, since embedding norm tracks token frequency in Pythia and would be the boring
 explanation for any probe success.
@@ -951,6 +957,15 @@ Pythia run — final-token residual state at the output of block 0, 50-step norm
 each anchor's state — refit the embedding probe inside GPT-2 (its own $W_E$, same 80/43 splits and
 shuffled-target control), and mean-ablate the MLP and the attention block of blocks 0–5 on the same 12
 tokens used for every intervention above.
+
+That GPT-2 probe is later refitted twice more (patterns 37 and 38), against the 50-permutation null
+just defined. The first refit changes only the target: instead of a token's width over all 18 of its
+curves it uses the width over that token's plateau-shaped curves alone (the $E \le 0.1$ filter defined
+below), which is the same tokens scored more reliably. The second changes the features: a probe with
+exactly two of them, $\log_{10} N_u$ and the successor entropy $H_u$, both of which an auditor can count
+from a corpus without touching the model. It is the reference an embedding probe has to beat before its
+768 dimensions can be said to hold anything specific to the model. Both refits read stored curves and
+GPT-2's embedding matrix and run no forward passes.
 
 One thing has to change, and it is itself a result. Transition width `w` is only defined when `d(t)`
 rises monotonically and crosses 0.1 and 0.9 exactly once each; that holds for every Pythia curve in
@@ -2036,14 +2051,15 @@ models' split-half reliabilities, and $\rho$ divided by it.
 | split-half reliability | **0.319** | 0.891 | 0.885 |
 | $\rho$ with Pythia-1.4B's ranking (÷ ceiling) | $\mathbf{-0.219}$ ($-0.41$) | $+0.884$ ($+0.99$) | — |
 | fixed 1.4B embedding lookup → this model | $-0.200$ | $+0.760$ | $+0.765$ |
-| probe refitted inside this model (shuffled control) | $+0.295$ ($+0.275$) | $+0.774$ ($+0.032$) | $+0.764$ ($-0.201$) |
+| probe refitted inside this model | $+0.295$ | $+0.774$ | $+0.764$ |
 | $\rho$ with $\log_{10}$ unigram count $N_u$ | $-0.038$ | $-0.525$ | $-0.517$ |
 
 **Pattern 32 — nothing transfers to GPT-2: not the ordering, not the lookup, not even the frequency signal.** GPT-2 ranks the 123 tokens at $\rho = -0.219$ with Pythia-1.4B and $-0.189$ with
 410M, against $+0.884$ between the two Pythias; the free lookup read off Pythia-1.4B's embedding matrix
 ranks GPT-2's widths at $-0.200$ where it reaches $+0.76$ on both Pythias; a probe refitted inside
-GPT-2 is at its shuffled-target control ($+0.295$ against $+0.275$); and even the frequency signal that
-survives everything else in Pythia ($-0.52$) is absent ($-0.038$). Removing unigram count and successor
+GPT-2 reaches $+0.295$ where the same probe reaches $+0.76$–$+0.77$ inside either Pythia (how far above
+chance that is takes a better control than this run used — pattern 37); and even the frequency signal
+that survives everything else in Pythia ($-0.52$) is absent ($-0.038$). Removing unigram count and successor
 entropy leaves the cross-model figure where it was ($-0.211$), so this is not a corpus-statistic
 mismatch.
 
@@ -2165,6 +2181,101 @@ checks are cheap and neither needs a reference model, so the honest recommendati
 edge-drift distribution to see whether the model has plateaus, and the split-half reliability on the
 plateau-shaped curves to see whether its widths are measurable.
 
+### Does GPT-2's embedding hold GPT-2's own widths?
+
+The cheapest form of this report's screen is the lookup: inside Pythia, a token's width can be read off
+its static embedding row by a ridge probe at $\rho = +0.76$, so an auditor can rank tokens without
+running the model at all (pattern 10). Whether that shortcut exists in a second model decides how much
+of the method ports. Pattern 36 is what makes the question answerable — until GPT-2 had a reproducible
+width ordering there was no target worth fitting, because a probe cannot beat the noise in its own
+labels. We now refit the same probe inside GPT-2, against the plateau-filtered widths (reliability
+0.661, so a probe can reach at most $\sqrt{0.661} = 0.813$), and against the all-curve widths for
+comparison.
+
+Doing this exposed a flaw in how every probe in this report was checked against chance. The
+shuffled-target control permutes the targets once and reuses that permutation across the 50 splits, so
+it reports one draw from the chance distribution. Figure 30 (left) draws 50 of them. To read a probe's
+accuracy against the chance distribution rather than against one sample of it, Figure 30 (right) puts
+each probe next to the ceiling its target allows and next to the spread of those 50 draws.
+
+![Left: histogram of 50 shuffled-target draws with the probe and the earlier single-draw control marked. Right: held-out accuracy of four probes with their noise ceilings and null bands](plots/gpt2_probe.png)
+
+**Figure 30.** Left, x: mean held-out Spearman $\rho$ over the 50 train/test splits, y: how many of 50
+independently shuffled targets landed there (bars, hatched). The dashed vertical line is GPT-2's actual
+probe on the all-curve target ($+0.295$); the dash-dotted vertical line is the single shuffled draw the
+earlier run used as its control ($+0.275$). Right, x: mean held-out $\rho$ with error bars of $\pm 1$
+standard deviation across the 50 splits; y: four probes, top to bottom — GPT-2's embedding against its
+all-curve widths (circle), against its plateau-filtered widths (square), two corpus statistics against
+the plateau-filtered widths (triangle), and Pythia-1.4B's embedding against its strict widths (diamond,
+for scale). Gray dotted bands are the 50-draw null (mean $\pm 1$ sd); the black vertical tick marked
+"ceiling" is $\sqrt{R}$ for that row's target reliability $R$. Pythia's row has no null band because
+only one shuffled draw was run for it.
+
+**Pattern 37 — the "probe sits on its control" reading was an artifact of a one-draw control.** GPT-2's
+control value of $+0.275$ reproduces exactly, and it is the largest of 50 independent shuffled draws,
+whose distribution is centred at $-0.002$ with a standard deviation of $0.093$ and a range of $-0.274$
+to $+0.157$ (Figure 30, left). One permutation of 123 targets is therefore worth about $\pm 0.2$ of
+apparent skill, which is the size of every effect being tested here. Against the full distribution
+GPT-2's probe is above chance: $+0.295$, permutation $p = 0.020$. The same caution applies to the other
+single-draw controls in this report ($+0.032$ at 410M, $-0.201$ at 1.4B); it changes nothing there,
+because those probes sit at $+0.77$, far outside any draw we observed, but it is why the GPT-2 numbers
+had to be recomputed before anything could be concluded from them.
+
+**Pattern 38 — GPT-2's embedding holds a weak trace of its width ordering, worth about two corpus
+statistics, and a more reliable target does not improve it.** The table below reads across the four
+probes of Figure 30 (right).
+
+| | GPT-2, all curves | GPT-2, plateau curves | GPT-2, 2 corpus statistics | Pythia-1.4B (reference) |
+|---|---|---|---|---|
+| features | 768 embedding dims | 768 embedding dims | $\log_{10} N_u$, $H_u$ | 2048 embedding dims |
+| target reliability $R$ | 0.319 | 0.661 | 0.661 | 0.885 |
+| ceiling $\sqrt{R}$ | 0.565 | 0.813 | 0.813 | 0.941 |
+| held-out $\rho$ | $+0.295 \pm 0.092$ | $+0.244 \pm 0.122$ | $+0.176 \pm 0.129$ | $+0.764 \pm 0.045$ |
+| $\rho$ ÷ ceiling | $+0.52$ | $+0.30$ | $+0.22$ | $+0.81$ |
+| held-out $R^2$ | $+0.025$ | $-0.021$ | $-0.036$ | $+0.514$ |
+| 50-draw null | $-0.002 \pm 0.093$ | $+0.006 \pm 0.108$ | $-0.012 \pm 0.090$ | (one draw: $-0.201$) |
+| permutation $p$ | 0.020 | 0.020 | 0.039 | — |
+
+Three things follow, and the first is the one an auditor should act on. **The lookup does not port.**
+Inside GPT-2 the probe recovers 0.30 of the ordering its target allows, against 0.81 inside
+Pythia-1.4B, and its held-out $R^2$ is $-0.021$ — it ranks tokens slightly better than chance and
+predicts none of the variance in the width itself. A practitioner who wants GPT-2 widths has to measure
+them; the free lookup is a Pythia result, and pattern 36's finding that GPT-2 *has* a reproducible
+ordering does not make that ordering readable from the embedding.
+
+**The reliable target did not help, which localises where the shortfall is.** The plateau-filtered
+target is measured more than twice as reliably, yet the probe on it scores $0.051$ *lower*
+($\pm 0.140$ across the 50 splits, which both probes share; the filtered target wins in 16 of 50 splits,
+paired Wilcoxon $p = 0.023$). Attenuation from label noise was therefore not the binding constraint: the
+part of GPT-2's width that its embedding predicts is disproportionately the part the filter discards.
+The two targets themselves rank the tokens at $\rho = +0.750$, so this is a shift in emphasis inside a
+largely shared ordering, and with 123 tokens we can say the reliable target is no easier to predict —
+not why.
+
+**Two numbers you can count from a corpus get most of the way there.** A probe with only
+$\log_{10} N_u$ and successor entropy $H_u$ as features reaches $+0.176$ on the same target and splits
+(permutation $p = 0.039$); 768 embedding dimensions beat it by $0.067 \pm 0.164$, winning 34 of 50
+shared splits (paired Wilcoxon $p = 0.009$). The margin is real but small, and it comes almost entirely
+from successor entropy ($\rho = +0.191$ with the filtered widths, $p = 0.034$) since frequency is
+absent in GPT-2 ($-0.018$, $p = 0.84$) — the same frequency signal that carries $-0.52$ in both Pythias.
+Inside Pythia the embedding probe clears both corpus statistics by a wide margin (pattern 30: they
+explain 0.375 of the ranking's rank variance where the probe reaches $+0.76$), so the contrast between
+the models is in how much the embedding adds over free statistics, and in GPT-2 the answer is: a little.
+
+The two models' lookups also disagree with each other, which is what pattern 32 predicts and this
+measurement confirms from the embedding side: GPT-2's out-of-fold lookup ranks its own filtered widths
+at $+0.196$ ($p = 0.03$) and Pythia-1.4B's widths at $-0.174$ ($p = 0.05$), and the two models' lookups
+rank the 123 tokens at $-0.204$ ($p = 0.02$) with each other. Whatever weak signal GPT-2's embedding
+carries, it is not Pythia's signal.
+
+**What this settles for the report's recommendation.** The two-check recommendation above stands
+unchanged, and this adds a third statement to it: a model that passes both checks still may not support
+the *free* version of the screen. The porting order for a new model is therefore the edge-drift
+distribution, then split-half reliability on the plateau-shaped curves, then — and only if a lookup is
+wanted — a refit of the embedding probe against a properly estimated permutation null, benchmarked
+against a probe on $\log_{10} N_u$ and $H_u$, which costs nothing and is the bar GPT-2's embedding
+barely clears.
+
 ### Candidate hypotheses
 
 This section is interpretation, ranked by how well each fits the evidence above.
@@ -2264,8 +2375,7 @@ a count table.
 
 Pattern 32 then left the Pythia family, and cost the report its broadest claim. The same 123 token
 strings measured in GPT-2 small rank at $\rho = -0.22$ with Pythia-1.4B, where two Pythia sizes agree
-at $+0.88$; the free lookup transfers at $-0.20$; a probe refitted inside GPT-2 sits on its shuffled
-control; and even the frequency signal is gone. Before any of that, the measurement itself fails there —
+at $+0.88$; the free lookup transfers at $-0.20$; and even the frequency signal is gone. Before any of that, the measurement itself fails there —
 88.8% of GPT-2's block-0 curves are non-monotone, and its per-token width has a split-half reliability
 of 0.32 against Pythia's 0.89, at every site we tried. The ordering is a property of a token *as
 trained in a particular corpus*, and the screen is per-model.
@@ -2277,20 +2387,23 @@ with Pythia ($-0.185$ against a ceiling of 0.77). GPT-2 has its own reproducible
 strings. Pythia-160M is the opposite case — the least plateau-shaped configuration measured
 ($E = 0.183$), which is also where the trait is absent.
 
-**The single most informative next experiment is now to ask what GPT-2's own ordering is made of.**
-Until pattern 36 there was no reliable GPT-2 target to model: the probe refit inside GPT-2 landed on
-its shuffled control ($+0.295$ vs $+0.275$), but it was fitted against a target with a reliability of
-0.32, so the null was uninformative. The filtered widths give a target with reliability 0.661, and the
-experiment costs no forward passes: refit the same ridge probe on GPT-2's own embedding matrix against
-the plateau-filtered widths, with the same 80/43 splits and shuffled-target control, and report it
-against the new ceiling. If the probe now reads GPT-2's ordering out of its embeddings at a level
-comparable to Pythia's $+0.76$, then both models write a width trait into the static embedding and only
-its *content* is corpus-specific, which is a much sharper claim than "the screen is per-model" and
-tells an auditor exactly what to refit. If the probe stays at its control with a reliable target, the
-trait is embedding-readable in Pythia specifically, and the cross-corpus difference is about where the
-information sits rather than what it says. The mechanistic follow-up inside Pythia is unchanged and
-still cheap: write the final checkpoint's block-0 MLP output vector $m_u$ into the `step128` model,
-where the ordering does not yet exist, and see whether it appears — tying patterns 23 and 29 together.
+Patterns 37 and 38 then asked what GPT-2's own ordering is made of, and answered the question pattern 36
+opened. Refitted against the reliable target, GPT-2's embedding probe reaches $+0.244$ of a ceiling of
+0.813 — above a properly estimated chance level ($p = 0.02$ against 50 shuffled draws, where the
+earlier single-draw control had been the largest of 50) but well short of Pythia's 0.81 of ceiling, with
+a held-out $R^2$ of $-0.021$, and only $0.067$ ahead of a probe built from two corpus statistics. The
+free lookup is a Pythia result; a new model can carry a reproducible width ordering that its static
+embedding does not hold.
+
+**The single most informative next experiment is now inside Pythia, where the trait is readable.**
+Write the final checkpoint's block-0 MLP output vector $m_u$ into the `step128` model, where the
+ordering does not yet exist, and see whether it appears — tying patterns 23 and 29 together. It is the
+one remaining test that could turn a set of correlations between the embedding, the block-0 MLP and the
+measured width into a statement about which of them produces which. For GPT-2 the cheap follow-up is
+different: pattern 38 localised the shortfall to *which* widths the embedding predicts (the all-curve
+target beats the filtered one), so the next step there is to probe the two components separately — fit
+the same probe to a token's edge drift $E$ and to its filtered width, on the same tokens and splits, and
+see whether GPT-2's embedding is holding curve shape rather than crossing width.
 
 ---
 
@@ -2427,6 +2540,15 @@ is little plateau structure for a width to order. The practical consequence for 
 cheap checks should be run before trusting the screen on a new model: the edge-drift distribution to
 see whether its transitions have plateaus, and the split-half reliability of the per-token width,
 computed on the plateau-shaped curves, to see whether they can be measured.
+
+Even a model that passes both checks may not support the free version of the screen. Refitted against
+GPT-2's reliable ordering, its embedding probe recovers 0.30 of the ceiling that target allows, against
+0.81 inside Pythia-1.4B, with a held-out $R^2$ of $-0.021$ and a margin of only $+0.067$ over a probe
+made from two statistics an auditor can count from a corpus. It is above chance — but establishing that
+took 50 shuffled draws in place of the single draw this report had used as a control everywhere, since
+one draw of 123 permuted targets is worth about $\pm 0.2$ of apparent skill. So the vocabulary-wide
+lookup is a Pythia result: a new model can carry a reproducible width ordering that its static embedding
+does not hold, and the widths there have to be measured.
 
 **Limitations.** The main analysis is one model, one hook point (after block 0) and one checkpoint; the
 cross-model section adds three further sizes but only for the per-token measurement, the embedding

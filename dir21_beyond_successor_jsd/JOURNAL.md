@@ -1092,3 +1092,66 @@ target, so it never tested whether a different corpus also writes a width trait 
 upgraded one negative from noise-limited to measured, and both deliverables are curated to current-best
 with Figure 29 embedded and `check_render.py` passing. No STOP written: the direction has a cheap,
 well-specified next experiment and budget remains.
+
+---
+
+## 2026-08-12 — iteration 15: refitting GPT-2's embedding probe, and a control that was one coin flip
+
+**What I set out to do.** The named next step from iteration 14: refit the ridge embedding probe inside
+GPT-2 against the plateau-filtered widths (reliability 0.661 rather than 0.319), same 80/43 splits, read
+against the new ceiling. No unaddressed feedback in the folder, so this was ordinary plan work. Zero
+forward passes — `experiments/gpt2_embed_probe.py` reads the stored curves and loads GPT-2's embedding
+matrix on CPU, so it never touched the shared GPU.
+
+**The thing I did not plan for, and it was the more important half.** Before running anything I looked
+at the stored probe numbers across models and noticed the shuffled-target controls were incoherent:
++0.275 (GPT-2), +0.032 (410M), −0.201 (1.4B). A control that swings over half a Spearman unit between
+models is not measuring chance. The cause is in `xmodel_width.py` and `embed_probe.py`: the control
+permutes the targets ONCE and reuses that permutation across all 50 train/test splits, so averaging over
+splits reduces split noise but not the noise in the draw itself. With n = 123 tokens a single permuted
+assignment is worth about ±0.2 of apparent skill. I therefore built the null from 50 independent
+permutations, each scored over the same 50 splits, and report a permutation p-value.
+
+Reproducing the stored draw exactly (rng(0), +0.275) and locating it in the 50-draw distribution
+(null −0.002 ± 0.093, range −0.274 to +0.157) showed it was the LARGEST of the 50. The earlier reading —
+"GPT-2's probe sits on its shuffled control" — was an artifact of that one draw. Retracted in both
+deliverables. Nothing changes for Pythia, whose probes sit at +0.77, far outside any draw observed.
+
+**What the refit found — the question from iteration 14 is answered, in the negative.** Against the
+plateau-filtered target the probe reaches +0.244 ± 0.122 (p = 0.020), which is 0.30 of the 0.813 ceiling
+that target allows, against Pythia-1.4B's 0.81 of its own ceiling; held-out R² is −0.021, so it orders
+tokens weakly and predicts none of the width's variance. Both deliverables now say plainly: the free
+vocabulary-wide lookup is a Pythia result, and GPT-2 widths have to be measured.
+
+**Two extra measurements that make the negative informative rather than flat.**
+- The reliable target is *harder*, not easier: paired over the 50 shared splits the filtered target
+  scores 0.051 lower (ahead in 16/50, Wilcoxon p = 0.023). Label noise was not the binding constraint;
+  what GPT-2's embedding predicts sits disproportionately in the curves the plateau filter throws away.
+  Since edge drift and width rank tokens at +0.77 inside GPT-2, the natural follow-up is to probe the
+  two separately — that is now the named GPT-2 next step.
+- A probe with two features an auditor can count from a corpus (log₁₀ N_u, successor entropy H_u)
+  reaches +0.176 on the same target and splits; 768 embedding dimensions beat it by 0.067 ± 0.164
+  (34/50, p = 0.009). A real but small margin, and it comes from entropy (+0.191), not frequency
+  (−0.018 — the signal that carries −0.52 in both Pythias is simply absent here). Without this baseline
+  the +0.244 would have read as "the embedding knows something"; with it, the honest statement is "about
+  as much as two numbers from a word count, plus a little".
+
+**What I learned, beyond this direction.** A single-permutation control is not a null distribution, and
+the failure is silent: it looks like a control, it is cheap, and it lands wherever it lands. It only
+became visible because the same control was run in four models and disagreed with itself. The general
+rule: when a control is a random draw, either draw it many times or state that it is one sample. I did
+not retrofit multi-draw nulls onto the Pythia probes — their effect sizes are 8σ outside the null and
+re-running every probe in the report would spend the budget on numbers that cannot change — but both
+deliverables now label those controls as single draws so no reader is misled.
+
+**Assumptions logged.** (a) 50 permutations for the null; enough to place a p-value at the 0.02
+resolution reported and no finer claim is made from it. (b) The two corpus statistics are the ones
+already used in the checkpoint analysis, so no new corpus processing was introduced. (c) The
+out-of-fold GPT-2 lookup uses the primal 5-fold `oof` from `embed_probe.py` with the fixed λ = 100 it
+already used for Pythia, so the two models' lookups are built the same way. (d) The Pythia-1.4B row in
+Figure 30 is included for scale and keeps its single-draw null, which the caption states.
+
+**On track?** Yes. The named experiment ran, answered its question negatively, retracted one earlier
+claim on the strength of a better control, and both deliverables are curated to current-best with
+Figure 30 embedded and `check_render.py` passing (30 embeds, 30 captions, 0 problems). No STOP written:
+the remaining Pythia transplant-into-`step128` experiment is well specified and budget remains.

@@ -1,0 +1,15 @@
+targets: reliability all +0.319 -> plateau +0.661; the two targets rank tokens at rho +0.750
+[probe] probe_all_curves: test rho +0.295 +- 0.092, R2 +0.025; null -0.002 +- 0.093 (range -0.274..+0.157), permutation p 0.020
+[probe] probe_plateau_curves: test rho +0.244 +- 0.122, R2 -0.021; null +0.006 +- 0.108 (range -0.177..+0.231), permutation p 0.020
+[paired] plateau target minus all-curve target: -0.051 +- 0.140 over 50 shared splits, plateau higher in 32% (Wilcoxon p 0.023)
+[control] stored single-shuffle null +0.275 (reproduced +0.275) sits at the 100% point of the 50-draw null
+[baseline] log_count: rho with plateau widths -0.018 (p 0.844)
+[baseline] successor_entropy: rho with plateau widths +0.191 (p 0.034)
+[probe] probe_corpus_stats: test rho +0.176 +- 0.129, R2 -0.036; null -0.012 +- 0.090 (range -0.156..+0.223), permutation p 0.039
+[paired] embedding minus corpus statistics on the plateau target: +0.067 +- 0.164, embedding higher in 68% of 50 shared splits (Wilcoxon p 0.00939)
+[lookup] gpt2_lookup_vs_gpt2_plateau: rho +0.196 (p 0.0302)
+[lookup] gpt2_lookup_vs_1_4b_width: rho -0.174 (p 0.0543)
+[lookup] p14b_lookup_vs_gpt2_plateau: rho -0.145 (p 0.11)
+[lookup] p14b_lookup_vs_gpt2_all: rho -0.200 (p 0.0268)
+[lookup] rho_between_lookups: rho -0.204 (p 0.0235)
+wrote /workspace/marsv_agent_haoyang/dir21_beyond_successor_jsd/results/gpt2_probe.json

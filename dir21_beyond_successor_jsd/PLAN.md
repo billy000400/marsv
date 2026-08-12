@@ -46,7 +46,36 @@ References:
 * [Activation Plateaus: Where and How They Emerge](https://www.lesswrong.com/posts/WMfSbt7AAcJdHzysB/activation-plateaus-where-and-how-they-emerge)
 * [Deep Networks Always Grok and Here Is Why](https://arxiv.org/abs/2402.15555)
 
-## Current status (2026-08-12, iteration 14 — COMPLETE; edge-drift test separates the two negatives)
+## Current status (2026-08-12, iteration 15 — COMPLETE; the free lookup does not port to GPT-2)
+
+**Iteration 15 ran the experiment both deliverables named as next** (`experiments/gpt2_embed_probe.py`,
+`plot_gpt2_probe.py`; Figure 30; deliverables now carry 30 figures each and pass `check_render.py`).
+Zero forward passes: stored curves plus GPT-2's embedding matrix on CPU.
+
+* **The old control was one coin flip.** Every probe in this report was checked against a *single*
+  permuted target reused across the 50 splits. GPT-2's control value $+0.275$ reproduces exactly and is
+  the largest of 50 independent draws (null $-0.002 \pm 0.093$, range $-0.274$ to $+0.157$). So the
+  earlier "the probe sits on its shuffled control" reading is retracted: GPT-2's probe is above chance,
+  $+0.295$, permutation $p = 0.020$. Nothing changes for Pythia (probes at $+0.77$).
+* **But the lookup does not port.** Against the plateau-filtered target (reliability 0.661, ceiling
+  0.813) the probe reaches $+0.244$ — 0.30 of ceiling against Pythia-1.4B's 0.81 — with held-out
+  $R^2 = -0.021$. GPT-2 widths must be measured; the free vocabulary-wide table is a Pythia result.
+* **The reliable target is *harder*, not easier** ($-0.051$ paired over the 50 shared splits, filtered
+  ahead in 16/50, Wilcoxon $p = 0.023$), so attenuation was not the binding constraint: what GPT-2's
+  embedding predicts is concentrated in the curves the plateau filter discards.
+* **Two free corpus numbers get most of the way.** A probe on $\log_{10} N_u$ and $H_u$ reaches
+  $+0.176$ ($p = 0.039$); 768 embedding dims beat it by $0.067 \pm 0.164$ (34/50 splits, $p = 0.009$),
+  and the margin is successor entropy ($+0.191$), not frequency ($-0.018$, absent in GPT-2).
+* **The lookups disagree across models:** GPT-2's out-of-fold lookup ranks its own filtered widths at
+  $+0.196$ and Pythia-1.4B's at $-0.174$; the two lookups agree with each other at $-0.204$.
+
+**Next step (only if reopened):** two candidates, both cheap. (a) Inside Pythia, the one remaining
+causal test: write the final checkpoint's block-0 MLP output $m_u$ into the `step128` model, where the
+ordering does not yet exist, and see whether it appears. (b) Inside GPT-2, probe edge drift $E$ and the
+filtered width separately on the same tokens and splits, to find out which curve property its embedding
+actually holds — the iteration-15 result points at shape rather than crossing width.
+
+## Previous status (2026-08-12, iteration 14 — COMPLETE; edge-drift test separates the two negatives)
 
 **Iteration 14 ran the experiment both deliverables named as next** (`experiments/edgedrift.py` — run
 at the start of this iteration; `edgedrift_analysis.py`, `plot_edgedrift.py`; Figure 29; deliverables

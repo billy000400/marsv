@@ -951,3 +951,52 @@ little." No forward passes.
 (REPORT 38 display eqs / 1020 inline eqs / 29 embeds / 0 problems; RESULTS 1 display eq / 735 inline
 eqs / 29 embeds / 0 problems). Determinism check: re-running `edgedrift.py` for Pythia-160M reproduced
 its previously stored summary exactly (median `E` 0.1833, 0.868 of curves above 0.1).
+
+---
+
+## 2026-08-12 — iteration 15: the free lookup does not port to GPT-2; a control retracted
+
+**New experiment.** `experiments/gpt2_embed_probe.py` (+ `plot_gpt2_probe.py`, `results/gpt2_probe.json`,
+`results/gpt2_probe.log`, `plots/gpt2_probe.png`) refits the ridge embedding probe inside GPT-2 against
+the plateau-filtered widths, as both deliverables named as the next step. Zero forward passes: stored
+curves plus GPT-2's embedding matrix on CPU. **Figure 30** added to REPORT.md and RESULTS.md (both files
+now 30 embeds, 30 captions).
+
+**A control is retracted, and the claim it supported with it** (old → new). Old, in both deliverables:
+"a probe refitted inside GPT-2 sits on its shuffled-target control (+0.295 against +0.275)". The +0.275
+came from a SINGLE permuted target reused across all 50 splits. Re-run with 50 independent permutations,
+the null is centred at −0.002 (sd 0.093, range −0.274 to +0.157) and the stored +0.275 — which
+reproduces exactly — is the largest of the 50 draws. New: GPT-2's probe is above chance, +0.295 with
+permutation p = 0.020. The cross-model table row in both files drops its parenthetical control values
+(GPT-2 +0.295 / 410M +0.774 / 1.4B +0.764 now shown alone), and the Summary, Headline, pattern-32 prose
+and Conclusion sentences that said "sits on its shuffled control" are rewritten. The other single-draw
+controls (+0.032 at 410M, −0.201 at 1.4B) are unchanged in substance — those probes sit at +0.77 — and
+are now labelled as one draw in RESULTS.md's Metrics table.
+
+**New result, replacing the open question the previous iteration posed.** Against the plateau-filtered
+target (reliability 0.661, ceiling √R = 0.813) GPT-2's probe reaches +0.244 ± 0.122, i.e. 0.30 of its
+ceiling against Pythia-1.4B's 0.81, with held-out R² = −0.021 (permutation p = 0.020). Two supporting
+measurements: the more reliable target scores 0.051 LOWER than the all-curve one (paired over the 50
+shared splits, filtered ahead in 16/50, Wilcoxon p = 0.023), and a probe on two free corpus statistics
+(log₁₀ N_u, successor entropy H_u) reaches +0.176 (p = 0.039), which 768 embedding dimensions beat by
+only 0.067 ± 0.164 (34/50 splits, Wilcoxon p = 0.009). Cross-model: GPT-2's out-of-fold lookup ranks its
+own filtered widths at +0.196 and Pythia-1.4B's at −0.174; the two models' lookups agree at −0.204.
+
+**Where this landed in the deliverables.** REPORT.md gains a Results subsection "Does GPT-2's embedding
+hold GPT-2's own widths?" (patterns 37 and 38, one table, Figure 30) after the edge-drift section, a
+Methods paragraph defining the 50-permutation null and the two refits, and a new Conclusion paragraph.
+RESULTS.md gains the condensed version of the same section plus the Metrics note. The auditor
+recommendation grows from two checks to three: edge-drift distribution, split-half reliability on
+plateau-shaped curves, and — only if a free lookup is wanted — a probe against a 50-draw permutation
+null benchmarked on log₁₀ N_u and H_u.
+
+**Recommended next experiment replaced** (old → new): "refit the probe inside GPT-2 against the
+plateau-filtered widths" (done, above) → "**write the final checkpoint's block-0 MLP output m_u into the
+`step128` model** and see whether the ordering appears — the one remaining test of direction rather than
+correlation", with a cheap GPT-2 side experiment (probe edge drift E and filtered width separately, to
+find which curve property its embedding holds).
+
+**Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS
+(REPORT 38 display eqs / 1101 inline eqs / 30 embeds / 0 problems; RESULTS 1 display eq / 798 inline eqs
+/ 30 embeds / 0 problems). The stored single-draw control was reproduced bit-for-bit (+0.275) before
+being reinterpreted, which doubles as a determinism check on the probe code.
