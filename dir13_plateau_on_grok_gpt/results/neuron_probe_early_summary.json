@@ -1,0 +1,188 @@
+{
+  "steps": [
+    831,
+    2038,
+    5000,
+    12500,
+    30000
+  ],
+  "n_units": 3840,
+  "pipeline_check": {
+    "max_abs_diff_r2_1_step30000": 1.3433698597964394e-14,
+    "max_abs_diff_r2_full_step30000": 4.0190073491430667e-14
+  },
+  "group_sizes": {
+    "stable": 75,
+    "demoted": 141,
+    "promoted": 181,
+    "never_head": 3443
+  },
+  "medians": {
+    "1": {
+      "831": {
+        "stable": 0.9558,
+        "demoted": 0.917,
+        "promoted": 0.6104,
+        "never_head": 0.3571,
+        "all_units": 0.3874
+      },
+      "2038": {
+        "stable": 0.9825,
+        "demoted": 0.8321,
+        "promoted": 0.6364,
+        "never_head": 0.2528,
+        "all_units": 0.2836
+      },
+      "5000": {
+        "stable": 0.9824,
+        "demoted": 0.5987,
+        "promoted": 0.6729,
+        "never_head": 0.2147,
+        "all_units": 0.2427
+      },
+      "12500": {
+        "stable": 0.9759,
+        "demoted": 0.4073,
+        "promoted": 0.7261,
+        "never_head": 0.1481,
+        "all_units": 0.1685
+      },
+      "30000": {
+        "stable": 0.9731,
+        "demoted": 0.4094,
+        "promoted": 0.7245,
+        "never_head": 0.1398,
+        "all_units": 0.1544
+      }
+    },
+    "full": {
+      "831": {
+        "stable": 0.9691,
+        "demoted": 0.944,
+        "promoted": 0.7825,
+        "never_head": 0.6172,
+        "all_units": 0.6437
+      },
+      "2038": {
+        "stable": 0.9882,
+        "demoted": 0.9182,
+        "promoted": 0.8394,
+        "never_head": 0.5763,
+        "all_units": 0.6053
+      },
+      "5000": {
+        "stable": 0.991,
+        "demoted": 0.8339,
+        "promoted": 0.8826,
+        "never_head": 0.5738,
+        "all_units": 0.6019
+      },
+      "12500": {
+        "stable": 0.9895,
+        "demoted": 0.7834,
+        "promoted": 0.9035,
+        "never_head": 0.547,
+        "all_units": 0.5721
+      },
+      "30000": {
+        "stable": 0.9873,
+        "demoted": 0.7677,
+        "promoted": 0.9176,
+        "never_head": 0.5608,
+        "all_units": 0.5858
+      }
+    }
+  },
+  "median_change": {
+    "1": {
+      "stable": 0.0055,
+      "demoted": -0.2468,
+      "promoted": 0.053,
+      "never_head": -0.1748
+    },
+    "full": {
+      "stable": 0.007,
+      "demoted": -0.0431,
+      "promoted": 0.085,
+      "never_head": -0.0086
+    }
+  },
+  "within_band": {
+    "1": {
+      "831": {
+        "0-7:stable_vs_demoted": {
+          "n1": 75,
+          "n2": 141,
+          "median1": 0.9558,
+          "median2": 0.917,
+          "cles": 0.587,
+          "p": 0.03460366538636963
+        },
+        "8-31:promoted_vs_never_head": {
+          "n1": 68,
+          "n2": 337,
+          "median1": 0.8041,
+          "median2": 0.6442,
+          "cles": 0.631,
+          "p": 0.0006635372210724837
+        }
+      },
+      "30000": {
+        "0-7:stable_vs_promoted": {
+          "n1": 75,
+          "n2": 181,
+          "median1": 0.9731,
+          "median2": 0.7245,
+          "cles": 0.685,
+          "p": 3.152100282062454e-06
+        },
+        "8-31:demoted_vs_never_head": {
+          "n1": 66,
+          "n2": 346,
+          "median1": 0.9406,
+          "median2": 0.2264,
+          "cles": 0.789,
+          "p": 8.955782537236743e-14
+        }
+      }
+    },
+    "full": {
+      "831": {
+        "0-7:stable_vs_demoted": {
+          "n1": 75,
+          "n2": 141,
+          "median1": 0.9691,
+          "median2": 0.944,
+          "cles": 0.592,
+          "p": 0.025926953814347092
+        },
+        "8-31:promoted_vs_never_head": {
+          "n1": 68,
+          "n2": 337,
+          "median1": 0.8948,
+          "median2": 0.8265,
+          "cles": 0.643,
+          "p": 0.00019396237934594246
+        }
+      },
+      "30000": {
+        "0-7:stable_vs_promoted": {
+          "n1": 75,
+          "n2": 181,
+          "median1": 0.9873,
+          "median2": 0.9176,
+          "cles": 0.666,
+          "p": 2.959031389995667e-05
+        },
+        "8-31:demoted_vs_never_head": {
+          "n1": 66,
+          "n2": 346,
+          "median1": 0.9834,
+          "median2": 0.6572,
+          "cles": 0.751,
+          "p": 9.753731269925048e-11
+        }
+      }
+    }
+  }
+}

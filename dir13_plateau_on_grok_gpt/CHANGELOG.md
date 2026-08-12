@@ -1992,3 +1992,42 @@ listed it as the direction's real open problem since 2026-08-03.
   (REPORT 51 display / 1,114 inline equations / 42 figures; RESULTS 42 figures; 0 problems); embed count
   equals caption count (84 = 42 + 42).
 - **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.
+
+## 2026-08-12 — S24j: what the promoted head units compute (Figures 40–41, both deliverables)
+
+- **New experiment, two parts.** `experiments/neuron_head_describe.py` (no GPU; joins
+  `results/neuron_head_identity_raw.npz`, `neuron_bands_raw.npz` and `neuron_probe_raw.npz`) labels every
+  block-1..4 unit by its role at the two ends of training — promoted (in some pair's step-30,000 top 8,
+  in no pair's step-831 top 8), demoted (the reverse), stable (both), never-head (neither) — and compares
+  the character-window probe's held-out $R^2$ across those groups. `experiments/neuron_probe_early.py`
+  (~40 s per checkpoint) then refits the whole probe at all five checkpoints so describability becomes a
+  per-checkpoint quantity.
+- **Result 1 — the unconditional contrast is confounded, and conditioning reverses it.** Promoted (n=181)
+  vs demoted (n=141): median $R^2$ from the current character 0.72 vs 0.41 (effect size 0.58, p = 0.013),
+  full window 0.92 vs 0.77 (0.56, p = 0.079). But promoted units have best rank ≤ 7 at step 30,000 by
+  construction and demoted units ≥ 8, and rank already tracks describability (Figure 37c). Within best
+  rank 0–7: stable 0.97 vs promoted 0.72 (0.69, p = 3e-6) and 0.99 vs 0.92 (0.67, p = 3e-5). Within best
+  rank 8–31: demoted 0.94 vs never-head 0.23 (0.79, p = 9e-14) and 0.98 vs 0.66 (0.75, p = 1e-10).
+- **Result 2 — describability travels with head membership.** Refitting at every checkpoint: the median
+  unit's $R^2$ from the current character falls 0.39 → 0.28 → 0.24 → 0.17 → 0.15, yet promoted units rise
+  against that background (0.61 → 0.64 → 0.67 → 0.73 → 0.72; per-unit median change +0.05) while demoted
+  units fall faster than it (0.92 → 0.83 → 0.60 → 0.41 → 0.41; −0.25, most of it between steps 2,038 and
+  12,500) and stable units stay at 0.96–0.98. Forward visibility at step 831 is weak: future keepers vs
+  future losers inside the early head 0.96 vs 0.92 (0.59, p = 0.035); future promotions vs never-head one
+  band down 0.80 vs 0.64 (0.63, p = 7e-4).
+- **Where it is written.** REPORT.md: two Methods paragraphs added to the band-decomposition subsection
+  ("Whether the promoted units are describable", "Describability at the checkpoint where the unit held
+  the head"); Results paragraphs "In the finished network, the describable head units are the
+  early-selected ones" with **Figure 40** (`plots/neuron_head_describe.png`) and "Describability moves
+  with head membership, not with the units" with **Figure 41** (`plots/neuron_probe_early.png`); a fourth
+  "why this matters" consequence; extended caveats (Holm correction, probe-family limit, no causal
+  claim); one Summary sentence. RESULTS.md: matching self-contained section with methods inline, both
+  figures, three result bullets, Headline sentence and caveat/data lines.
+- **Figure numbering.** The three exploratory figures move 40 → 42, 41 → 43, 42 → 44 in both files; every
+  prose reference moved with them. Figure count 42 → 44 in each file.
+- **Nothing superseded.** No earlier number changed. The step-30,000 refit reproduces the published
+  per-unit probe $R^2$ to 3e-14, which is this pipeline's check.
+- **Verification.** `python3 experiments/check_render.py REPORT.md RESULTS.md` → **ALL CHECKS PASS**
+  (REPORT 51 display / 1,147 inline equations / 44 figures; RESULTS 44 figures; 0 problems); embed count
+  equals caption count (88 = 44 + 44).
+- **No `STOP`**: `human_feedback_7.txt` is still awaiting the independent content review.

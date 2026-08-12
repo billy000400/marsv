@@ -2063,6 +2063,81 @@ training step (x, log scale), one series per threshold with its own marker and l
   that is recognizable early, which matches the shared pool of 668 units the per-pair top-32 sets are
   drawn from.
 
+Ranks say *when* a unit joins the head, not what it computes. The fitted character-window probe answers
+that, so every unit is labelled by its role at the two ends of training — **promoted** (in some pair's
+top 8 at step 30,000, in no pair's top 8 at step 831), **demoted** (the reverse), **stable** (both) and
+**never-head** (neither) — and the groups are compared on the probe's held-out $R^2$, from the full
+8-character description and from the current character alone, with a two-sided Mann–Whitney test over
+distinct units. The effect size quoted is the common-language one, $U/(n_1 n_2)$: the chance that a unit
+from the first group scores above one from the second, 0.5 meaning no difference. Comparing promoted
+against demoted units on their own is confounded, because a promoted unit's best rank at step 30,000 is
+at most 7 and a demoted unit's is at least 8, and best rank already tracks describability (Figure 37c).
+So the comparison is repeated **within** a band of best rank, where both groups share a level of present
+importance.
+
+![six panels of cumulative distributions of held-out probe R-squared: promoted versus demoted units unconditionally, and within two bands of best importance rank, for the current character alone and for the full eight-character window](plots/neuron_head_describe.png)
+
+**Figure 40.** Once present importance is held fixed, the describable units are the ones that held the
+head early, not the ones training promoted. Reference character GPT, blocks 1–4, 3,840 units; probe
+$R^2$ measured on the step-30,000 model, unit roles read from the step-831 and step-30,000 top-8 sets of
+the same 150 pairs. Each panel is a cumulative distribution: x = held-out $R^2$ (0 = no better than the
+unit's mean, 1 = the unit's corpus response fully described), y = the fraction of that group's units at
+or below that value, so a curve further **right** is the more describable group. Top row (a1, b1, c1):
+current character alone; bottom row (a2, b2, c2): the full 8-character window with the interaction term.
+**(a)** promoted (solid) vs demoted (dashed), with all 3,840 units as a gray dotted reference.
+**(b)** among units of best rank 0–7: stable (solid) vs promoted (dash-dot). **(c)** among units of best
+rank 8–31: demoted (solid) vs never-head (dash-dot). Panel titles give the effect size and the
+Mann–Whitney $p$.
+
+- **Unconditionally, the promoted units look like the describable ones.** Median held-out $R^2$ 0.72
+  (promoted, n = 181) against 0.41 (demoted, n = 141) from the current character alone (effect size
+  0.58, p = 0.013), and 0.92 against 0.77 from the full window (0.56, p = 0.079); both groups sit far
+  above the all-unit medians of 0.15 and 0.59 (Figure 40a).
+- **Holding present rank fixed reverses it.** Within the finished head (best rank 0–7), the 75 units
+  that also held the head at step 831 beat the 181 promoted ones: 0.97 against 0.72 from the current
+  character (effect size 0.69, p = 3e-6) and 0.99 against 0.92 from the full window (0.67, p = 3e-5)
+  (Figure 40b). One band down (best rank 8–31), the 66 demoted units beat the 346 units of the same rank
+  that were never in either head: 0.94 against 0.23 (0.79, p = 9e-14) and 0.98 against 0.66 (0.75,
+  p = 1e-10) (Figure 40c). At the final checkpoint, then, early-head membership rather than present rank
+  is what describability tracks: the units this network leaned on after 831 steps are close to what a
+  single character predicts, and they stay so after being displaced.
+
+One model cannot say whether training keeps a fixed set of describable units and adds harder ones, or
+whether a unit is describable exactly while it holds the head. Refitting the same probe from scratch at
+each of the five checkpoints — same corpus, window, splits and $\lambda$ grid — gives every unit an
+$R^2$ trajectory across training and separates the two. Two contrasts also look *forward* from step 831,
+with bands taken from that checkpoint's own top-8 and top-32 sets: inside the early head, the units that
+keep it against those that lose it; one band below, the units that will be promoted against those that
+never hold it. The step-30,000 refit reproduces the published per-unit $R^2$ to 3e-14, which is the
+pipeline check.
+
+![two panels: cumulative distributions of held-out probe R-squared at step 831 for stable, demoted, promoted and never-head units, and median describability of each group across five checkpoints](plots/neuron_probe_early.png)
+
+**Figure 41.** Character describability travels with head membership: the promoted units gain it while
+the network as a whole loses it, and the demoted units lose it faster than the network. Same 3,840
+block-1..4 units and the same probe as Figure 40, refitted at each of the five checkpoints; same four
+role groups. **(a)** Cumulative distribution at step 831: x = held-out $R^2$ from the current character
+alone, y = the fraction of that group's units at or below it, so a curve further **right** is the more
+describable group; stable (solid), demoted (dashed), promoted (dash-dot), never-head (dotted).
+**(b)** Median held-out $R^2$ from the current character alone (y) against the training step of the
+checkpoint the probe was fitted on (x, log scale), one line per group with its own marker and line style,
+each labelled at its right-hand end; the gray line marked with crosses is all 3,840 units.
+
+- **The network as a whole gets less character-readable.** The median unit's $R^2$ from the current
+  character falls 0.39 → 0.28 → 0.24 → 0.17 → 0.15 across the five checkpoints (0.64 → 0.59 for the full
+  window at the ends). That is the background every group is read against.
+- **The promoted units gain describability, the demoted units lose it.** Median $R^2$ from the current
+  character: promoted 0.61 → 0.64 → 0.67 → 0.73 → 0.72 (per-unit median change +0.05), demoted
+  0.92 → 0.83 → 0.60 → 0.41 → 0.41 (−0.25), never-head 0.36 → 0.14 (−0.17), stable steady at 0.96–0.98
+  (Figure 41b). Most of the demoted fall happens between steps 2,038 and 12,500, the same span over
+  which their replacements take the head (top-8 overlap with the final head 2 → 6 of 8, Figure 38d). A
+  unit is character-readable while it holds the head, and readability moves in both directions with
+  membership rather than marking a fixed set of units.
+- **Little of this is visible in advance.** Inside the step-831 head the 75 units that would keep it are
+  barely separable from the 141 that would lose it (0.96 against 0.92, effect size 0.59, p = 0.035);
+  one band below (step-831 best rank 8–31) the 68 future promotions beat the 337 units that never hold
+  the head by more (0.80 against 0.64, effect size 0.63, p = 7e-4).
+
 **What this adds.** The concentrated picture suggested by the top-$k$ curve is an artifact of scoring
 nested prefixes: the same bend is available in several places at once, so straightening the top 32 units
 removes the most efficient copy of a capability and leaves others behind — an ablation argument built on
@@ -2071,21 +2146,37 @@ The ranking is worth trusting to about rank 2,048 and worth nothing below, which
 method where to stop. And because the head's membership is rewritten as training proceeds, unit identity
 found at one checkpoint transfers poorly to another in this run even though the number of units needed
 barely changes — bounded by Figure 39: half of the finished head is already inside the early top 128, so
-an early checkpoint gets the right neighbourhood of the ranking and the wrong order within it.
+an early checkpoint gets the right neighbourhood of the ranking and the wrong order within it. Figures 40
+and 41 add the consequence for describing such a head: at the final checkpoint the units a short
+character window explains well are the early-selected ones at every rank we can condition on, and the
+two-checkpoint view says why — readability follows whichever units currently hold the head, rising for
+the promoted ones and falling for the demoted ones while the network as a whole becomes less
+character-readable. A description harvested at one checkpoint describes that checkpoint's head, so a
+claim that some fraction of a mechanism is "interpretable" needs the checkpoint attached to it.
 
 **Caveats.** One run, one context, one interpolation site, 150 pairs (94 for the developmental panels),
 five checkpoints; the band edges reuse the existing $k$ grid and are not fitted. Band-alone effects are
 properties of this chord intervention. Figure 37c is an association at the final checkpoint, and the
 developmental panels describe how one training run moved — a second seed would be needed before treating
-the flat redundancy ratio or the turnover rate as general. Free checks: the nested-prefix column
+the flat redundancy ratio or the turnover rate as general. Figures 40 and 41 inherit that limit: they
+associate a unit's role with how well one probe family describes it, across the checkpoints of one run,
+and
+nothing in them shows that a unit is promoted *because* of what it computes. Of Figure 40's six tests,
+five survive a Holm correction across the six; the exception is the unconditional full-window contrast
+(p = 0.079), which does not separate promoted from demoted units at all. "Describable" means describable
+by this probe: a unit reading longer-range or non-character structure scores low, and the whole-network
+decline in Figure 41b is consistent with the network coming to compute things an 8-character window
+cannot express. Free checks: the nested-prefix column
 reproduces the published curve to within 1.5 points at every $k$ (27.9 / 47.3 / 65.6 / 82.5 / 85.3 /
 85.2% here against 30.0 / 50.9 / 68.4 / 83.6 / 86.8 / 86.7% there, the difference being per-pair versus
 median-of-medians $\rho$), both endpoints stay exact under every edit (worst deviation 1e-6), and both
 rank trajectories in Figure 39 hit their tautological endpoints exactly (median 3.5 at their own
 checkpoint). Data: `results/neuron_bands_summary.json`, `results/neuron_bands_time_summary.json`,
-`results/neuron_head_identity_summary.json`, `results/neuron_head_origin_summary.json`; code:
+`results/neuron_head_identity_summary.json`, `results/neuron_head_origin_summary.json`,
+`results/neuron_head_describe_summary.json`, `results/neuron_probe_early_summary.json`; code:
 `experiments/neuron_bands.py`, `experiments/neuron_bands_time.py`,
-`experiments/neuron_head_identity.py`, `experiments/neuron_head_origin.py`.
+`experiments/neuron_head_identity.py`, `experiments/neuron_head_origin.py`,
+`experiments/neuron_head_describe.py`, `experiments/neuron_probe_early.py`.
 
 ## Standalone exploratory evidence — 40 natural minimal pairs (character model, final checkpoint)
 
@@ -2104,32 +2195,32 @@ checkpoint). Data: `results/neuron_bands_summary.json`, `results/neuron_bands_ti
   for interpolation blocks 0, 2, 4, 6, 8, 10 — reaching the diagonal when one block remains.
 
 Because this set uses 127-character natural prefixes rather than one shared context, it is the widest
-test that the plateau shape is not an artifact of the short shared prompt; Figure 40 shows every
+test that the plateau shape is not an artifact of the short shared prompt; Figure 42 shows every
 frozen pair individually.
 
 ![exploratory 40-pair raw curves](plots/pair_curves_logits.png)
 
-**Figure 40.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
+**Figure 42.** *(Exploratory.)* Raw `d(t)` (y) vs interpolation position `t` (x) in final-logit space,
 one panel per frozen pair; panel titles give the pair ID, the two endpoint characters and the width
 `w`. Gray dashed = the straight-line reference `d = t`. Most curves hug `d ≈ 0`, cross rapidly near
 `t ≈ 0.5`, then hug `d ≈ 1`; two (#10, #19) track the straight line.
 
-Figure 41 shows the same pairs read at successively deeper recording points, which is the layerwise
+Figure 43 shows the same pairs read at successively deeper recording points, which is the layerwise
 signature Matthew predicts.
 
 ![exploratory layerwise emergence](plots/layerwise_emergence.png)
 
-**Figure 41.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
+**Figure 43.** *(Exploratory.)* Layerwise emergence for four fixed pairs (IDs 0–3): `d(t)` (y) vs
 interpolation position `t` (x). Thin lines are the recording blocks on the cividis scale (dark = early
 block, light = late); the thick black line is the final logits and the gray dashed line the
 straight-line reference. Curves start near-straight and sharpen into plateaus by the logits — the
 plateau is formed by the downstream stack, not present in the patched activation.
 
-Figure 42 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
+Figure 44 is the converse control: moving the patch later leaves fewer blocks to build the plateau.
 
 ![exploratory interpolation-block comparison](plots/interpolation_layer_comparison.png)
 
-**Figure 42.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
+**Figure 44.** *(Exploratory.)* Left: median final-logit `d(t)` (y) vs interpolation position `t` (x)
 per interpolation block, cividis scale (dark = block 0 → light = block 10) as labelled in the legend;
 the block-0 curve is sigmoid and later blocks approach the gray dashed straight line. Right: median
 width `w_10→90` (y, inter-quartile-range bars, solid line with circle markers) vs interpolation block
@@ -2254,4 +2345,9 @@ share. What training builds is a head whose membership it keeps rewriting — at
 eight units already remove 7.2% of its gap, and **none** of them is a unit the finished network ranks in
 that pair's top eight. Those eventual head units are promoted from just below the head: at step 831 they
 already sit at median rank **113.5** of 3,840 (random: 1,919.5), half of them inside that checkpoint's
-top 128, and they climb smoothly from there.
+top 128, and they climb smoothly from there. What those units compute is readable in step with that
+promotion: refitting the character-window probe at every checkpoint leaves the median unit *more*
+describable early than late (median $R^2$ from the current character **0.39** against **0.15**), yet the promoted
+units gain describability against that background (**0.61 → 0.72**) while the demoted ones fall with it
+(**0.92 → 0.41**). Character readability travels with head membership rather than marking a fixed set of
+units.

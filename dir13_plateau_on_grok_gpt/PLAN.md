@@ -603,6 +603,25 @@ labels the basins nor explains them"), RESULTS.md Question & verdict item 5, Fig
 files, and the hypothesis paragraph's "decodes to the same prediction" description. Every measurement
 is unchanged. `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (39 figures each, 0 problems).
 
+**S24j DONE 2026-08-12 — describability travels with head membership, not with the units.**
+`experiments/neuron_head_describe.py` (no GPU, reads `results/neuron_head_identity_raw.npz`,
+`neuron_bands_raw.npz`, `neuron_probe_raw.npz`) labels every unit promoted / demoted / stable /
+never-head from the step-831 and step-30,000 top-8 sets and compares probe $R^2$. Unconditionally the
+promoted units look like the describable ones (median $R^2$ from the current character 0.72 vs 0.41,
+CLES 0.58, p = 0.013), but that contrast is confounded — promoted units have best rank ≤ 7 by
+construction. Conditioning on best rank reverses it: inside the head, stable 0.97 vs promoted 0.72
+(CLES 0.69, p = 3e-6); one band down, demoted 0.94 vs never-head 0.23 (CLES 0.79, p = 9e-14).
+`experiments/neuron_probe_early.py` (~40 s per checkpoint on GPU, five checkpoints) then refits the
+whole probe at every checkpoint and settles the reading: the median unit is **more** describable early
+(all units 0.39 → 0.28 → 0.24 → 0.17 → 0.15), yet promoted units gain against that background
+(0.61 → 0.64 → 0.67 → 0.73 → 0.72, per-unit median +0.05) while demoted units fall faster than it
+(0.92 → 0.83 → 0.60 → 0.41 → 0.41, −0.25, most of it between steps 2,038 and 12,500) and stable units
+sit at the ceiling throughout (0.96–0.98). Forward visibility at step 831 is
+weak: future keepers vs future losers inside the early head 0.96 vs 0.92 (CLES 0.59, p = 0.035); future
+promotions vs never-head one band down 0.80 vs 0.64 (CLES 0.63, p = 7e-4). Pipeline check: the
+step-30,000 refit reproduces the published per-unit $R^2$ to 3e-14. Curated as **Figure 40** and
+**Figure 41** in both deliverables; exploratory figures renumbered 42–44.
+
 **S24i DONE 2026-08-12 — the final head units are promoted from just below the head, not recruited
 from the anonymous middle.** `experiments/neuron_head_origin.py` (14 s, one recording pass per pair per
 checkpoint, no ablations) reads the importance *rank* of each pair's step-30,000 top-8 units at every
@@ -1242,6 +1261,20 @@ before finishing, and re-write `STOP` only when clean again.
   `check_render.py` ran in full for the first time (node present): **ALL CHECKS PASS**.
 
 ## Next step
+
+**S24j DONE (2026-08-12) and curated — see "Current status". Both halves ran in one iteration: the
+final-checkpoint comparison (`neuron_head_describe.py`, no GPU) and the step-831 refit that interprets
+it (`neuron_probe_early.py`, 21 s). Figures 40 and 41 are embedded in REPORT.md and RESULTS.md with
+their methods, captions, Summary/Headline paragraphs and updated caveats.
+
+**The successor this names, and its cost.** The five-checkpoint curve is measured, so the coupling
+between head membership and describability is a trajectory, not a two-point contrast. What remains is
+(i) a **second seed**, still the honest generality check for every developmental claim in this block
+(~16 min of training plus ~70 s of assay per condition, and it would put an across-seed bar on the
+0.397-vs-0.476 depth gap as well); and (ii) whether the coupling is specific to the character-window
+probe family — a unit that stops being readable from 8 characters may have become readable from
+something else, and no probe in this direction tests that. Item (i) is what an external reader will ask
+for first; item (ii) needs a new probe family and is the larger piece of work.
 
 **S24h curation DONE and S24i DONE (2026-08-12, same iteration).** `plots/neuron_bands.png`
 (Figure 37), `plots/neuron_bands_time.png` (Figure 38) and the new `plots/neuron_head_origin.png`

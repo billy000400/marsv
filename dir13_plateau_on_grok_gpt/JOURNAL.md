@@ -2642,3 +2642,55 @@ than the ones they displaced — a Mann–Whitney over distinct units using `res
 `results/neuron_head_origin_raw.npz`, no GPU work.
 
 On track? yes — PLAN "Next step" items (i) and (ii) both done this iteration; blocker: none.
+
+## 2026-08-12 — S24j: are the promoted head units describable, and does it hold over training?
+
+**Feedback check first.** `human_feedback_7.txt` is still un-renamed; its manifest is `review_pending`
+with the single checklist item `done` and nothing `rejected`, so the wrapper's independent reviewer has
+not run and there is nothing to repair. That sends me to PLAN's "Next step", whose head item was the
+describability comparison the S24i result named.
+
+**Part 1, no GPU.** `neuron_head_describe.py` joins three existing arrays: per-pair top-8 sets at each
+checkpoint (`neuron_head_identity_raw.npz`), each unit's best rank at step 30,000 (`neuron_bands_raw.npz`)
+and each unit's probe $R^2$ (`neuron_probe_raw.npz`). Read straight, the answer looks like "training
+promotes the describable units": promoted 0.72 vs demoted 0.41 from the current character, p = 0.013.
+I nearly wrote that up. The confound is structural, not subtle — a promoted unit is *defined* by being in
+some pair's final top 8, so its best rank is ≤ 7, while a demoted unit's is ≥ 8, and Figure 37c already
+showed rank tracks describability. There is no exactly-matched stratum available (the two groups are
+disjoint in best rank by construction), so I conditioned the other way: compare units *within* a band by
+their early role. Within the finished head, the stable units beat the promoted ones (0.97 vs 0.72,
+p = 3e-6); one band below, the demoted units beat same-rank never-head units by a lot (0.94 vs 0.23,
+p = 9e-14). The direction reverses. Early-head membership, not present rank, is what describability
+tracked at the final checkpoint.
+
+**Why I did not stop there.** That result has two readings — training keeps a describable set and adds
+harder units, or a unit is describable exactly while it holds the head — and one checkpoint cannot tell
+them apart. The probe is 21 s per fit and every checkpoint is on disk, so the honest version was
+affordable: `neuron_probe_early.py` refits the whole probe at all five checkpoints. Two facts settle it.
+The network as a whole gets *less* character-readable as it trains (median unit 0.39 → 0.15), and against
+that background the promoted units rise (0.61 → 0.72) while the demoted units fall faster than the
+background (0.92 → 0.41, most of the fall between steps 2,038 and 12,500, the span in which their
+replacements take the head). So describability is not a property of particular units that training
+selects for; it travels with head membership in both directions. Forward visibility at step 831 is weak
+(0.96 vs 0.92 for future keepers vs future losers, p = 0.035), which is worth stating because it bounds
+what an early-checkpoint description could have predicted.
+
+**Framing (rules 9a/9b).** The single-checkpoint paragraph is written as the finding it is and then
+explicitly limited by the trajectory paragraph, rather than being left as the headline. The "why this
+matters" list gains a fourth consequence stated at the strength the evidence supports: a simple
+description of a head is checkpoint-specific in the same way the head's membership is, so an
+"interpretable fraction" claim needs a checkpoint attached. No causal language: nothing here shows a unit
+is promoted *because* of what it computes, and the caveat says so.
+
+**Checks.** Pipeline check built into the script: the step-30,000 refit reproduces the published per-unit
+probe $R^2$ to 3e-14 (assert). `check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS (REPORT 51
+display / 1,147 inline equations / 44 figures; RESULTS 44 figures; 0 problems), embeds = captions = 88.
+One bug caught by running: after extending the checkpoint list I reordered a loop over `contrasts` before
+that dict was defined; fixed and re-run in full rather than patched around.
+
+**Cost note.** The same code fitted two checkpoints in 21 s earlier in the iteration but took ~40 s per
+checkpoint on the five-checkpoint run (~3.5 min total). I did not chase the difference — the GPU is
+shared with three other agents — but the PLAN estimate is corrected to the measured figure.
+
+On track? yes — PLAN "Next step" item (i) from last iteration is done and the successor list is now a
+second seed and a probe family beyond the 8-character window; blocker: none.
