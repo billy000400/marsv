@@ -205,8 +205,9 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Done, and revised once for `human_feedback.txt` (all 48 checklist items; manifest state
-`review_pending`). `experiments/analysis.py` (CPU, no model loaded) validated the stored dir13 sweep,
+Done, and revised twice for `human_feedback.txt` (all 48 checklist items; manifest state
+`review_pending` after repairing the content review's four rejection points: report word budget, an
+unhedged between-anchor explanation, a wrong figure pointer, and an overstated low-divergence claim). `experiments/analysis.py` (CPU, no model loaded) validated the stored dir13 sweep,
 reproduced the letter-anchor class analysis over all 43 well-trained letters, computed corpus successor
 JSD with a split-half reliability check, and related JSD to width in fixed-width bins, pooled, and within
 fixed anchors. Answers now stated from the raw pairwise data first: (1) the 43 x 53 width heatmap shows a
@@ -216,8 +217,9 @@ spread; (2) no general monotonic JSD-width relationship — fixed-width bin mean
 JSD 0.1 to 1.0, and the wide 0.0-0.1 bin (n = 12, mean 0.581) is 10/12 punctuation-punctuation pairs,
 which average 0.531 at every JSD; within a fixed anchor the trend is negative but weak. The rank
 statistics (W = 0.424, pooled rho = -0.064, per-anchor median rho = -0.205) now live in `RESULTS.md`
-only. `REPORT.md` (1,600 words by wc; 3 figures, 1 table) and `RESULTS.md` are current-best;
-`python3 ../check_render.py REPORT.md RESULTS.md` passes.
+only. `REPORT.md` (1,592 words by `workflow.report_counts`, the wrapper's own counter; 3 figures, 1
+table) and `RESULTS.md` are current-best; `python3 ../check_render.py REPORT.md RESULTS.md` passes and
+`workflow.report_budget_failures` is empty.
 
 ## Next step
 

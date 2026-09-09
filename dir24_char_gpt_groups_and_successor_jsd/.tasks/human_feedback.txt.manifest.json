@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "rejected",
+  "state": "addressed",
   "source_feedback": "human_feedback.txt",
   "source_sha256": "4769ebbbe67e209523425eee112a7bad8bdf9175ffeb52bd1b590b5490b884c6",
   "required_outputs": [
@@ -322,7 +322,7 @@
       "request": "* visually distinguish punctuation–punctuation pairs from the remaining pairs.",
       "status": "done",
       "completion": {
-        "what_was_done": "Punctuation-punctuation pairs are drawn as larger filled diamonds in vermillion with a dark edge, distinguished by marker shape as well as colour so the figure stays readable in grayscale and with red-green colour deficiency; a second dashed line shows the bin means with those pairs removed.",
+        "what_was_done": "Punctuation-punctuation pairs are drawn as larger filled diamonds in vermillion with a dark edge, distinguished by marker shape as well as colour so the figure stays readable in grayscale and with red-green colour deficiency; a second dashed line shows the bin means with those pairs removed, with an arrow annotating that only 2 pairs remain in the lowest bin.",
         "evidence": "plots/fig3_jsd_vs_width.png legend entries 2 and 4; REPORT.md Figure 3 caption",
         "ambiguity": "None"
       }
@@ -349,8 +349,8 @@
       "request": "Thus, pairs below JSD 0.1 appear to have substantially wider transitions. The current equal-count binning obscures this pattern. However, 10 of the 12 pairs in the first bin are punctuation–punctuation pairs. Highlight or label these pairs so the reader can see that this may be a character-class cluster rather than a general effect of low JSD.",
       "status": "done",
       "completion": {
-        "what_was_done": "Confirmed and labelled: 10 of the 12 pairs below JSD 0.1 are punctuation-punctuation. They are drawn as diamonds in Figure 3, counted per bin in the figure annotation, listed pair by pair in RESULTS.md, and the report says the excess is a character-class cluster rather than an effect of low divergence - supported by the punctuation-punctuation mean width of 0.531 across the whole JSD range versus 0.327 for the other 1,350 pairs, and by the lowest bin flattening to 0.340 once those pairs are removed.",
-        "evidence": "REPORT.md Result 2, second paragraph and Figure 3; RESULTS.md section 4.1 (bin table and the 12-pair table); results/analysis.json -> s4_jsd_vs_width.low_jsd_bin_pairs and .punct_punct",
+        "what_was_done": "Confirmed and labelled: 10 of the 12 pairs below JSD 0.1 are punctuation-punctuation. They are drawn as diamonds in Figure 3, counted per bin in the figure annotation, listed pair by pair in RESULTS.md, and the report states that the wide lowest bin *may* be a character-class cluster rather than a general effect of low divergence, matching the review's 'may be' wording. Support: punctuation-punctuation pairs average w = 0.531 across the whole JSD range versus 0.327 for the other 1,350 pairs, and the lowest bin flattens to 0.340 once those pairs are removed - a mean over only 2 remaining pairs, which the report, the RESULTS.md text and an arrow annotation on Figure 3 all state explicitly. The figure title no longer asserts a cause; it now reports the 10-of-12 count.",
+        "evidence": "REPORT.md Result 2, second paragraph and Figure 3 (diamonds, dashed line, 'only 2 pairs left after removing p-p' annotation); RESULTS.md section 4.1; results/analysis.json -> s4_jsd_vs_width.low_jsd_bin_pairs and .punct_punct",
         "ambiguity": "None"
       }
     },
@@ -358,8 +358,8 @@
       "request": "The per-anchor Spearman analysis can remain as a secondary check in `RESULTS.md`, but it should not be the main visual evidence. Do not add new regressions, significance tests, or composite metrics.",
       "status": "done",
       "completion": {
-        "what_was_done": "The per-anchor Spearman analysis is now a secondary check in RESULTS.md section 4.2, with its histogram moved to plots/fig_s2_per_anchor_rho.png (RESULTS.md Figure 3). The report keeps only a plain-language statement and a pointer. No new regression, significance test or composite metric was added; the only new quantities are descriptive means, medians, IQRs and counts of the raw values.",
-        "evidence": "RESULTS.md section 4.2 and Figure 3; REPORT.md Result 2, final paragraph",
+        "what_was_done": "The per-anchor Spearman analysis is a secondary check in RESULTS.md section 4.2, with its histogram in plots/fig_s2_per_anchor_rho.png (RESULTS.md Figure 3). The report states the within-anchor result in plain language and points to that section for the per-anchor values, without citing the pooled scatter of REPORT.md Figure 3 as within-anchor evidence. No new regression, significance test or composite metric was added.",
+        "evidence": "RESULTS.md section 4.2 and its Figure 3; REPORT.md Result 2, final paragraph",
         "ambiguity": "None"
       }
     },
@@ -466,7 +466,7 @@
       "request": "5. Is that low-JSD pattern general, or mainly associated with punctuation pairs?",
       "status": "done",
       "completion": {
-        "what_was_done": "Not general: 10 of the 12 pairs are punctuation-punctuation, punctuation-punctuation pairs average 0.531 across the whole divergence range against 0.327 for all other pairs, and removing them flattens the lowest bin to 0.340.",
+        "what_was_done": "Reported as probably not general: 10 of the 12 pairs are punctuation-punctuation, punctuation-punctuation pairs average 0.531 across the whole divergence range against 0.327 for all other pairs, and removing them flattens the lowest bin to 0.340 (an average over the 2 remaining pairs, stated as such).",
         "evidence": "REPORT.md Result 2, second paragraph; REPORT.md Figure 3 (diamonds and dashed line); RESULTS.md section 4.1",
         "ambiguity": "None"
       }
@@ -503,20 +503,15 @@
   "review": {
     "format_passed": true,
     "content": {
-      "pass": false,
+      "pass": true,
       "inspected_outputs": [
         "REPORT.md",
         "RESULTS.md",
         "plots/fig2_width_heatmap.png",
         "plots/fig3_jsd_vs_width.png"
       ],
-      "failures": [
-        "REPORT.md exceeds its declared 1,600-word budget. Exact word counts on four sampled paragraphs give ~15.3 words per line across 103 body/caption lines (~1,580 words of prose alone); adding the title and six headings (~40), Table 1 (~50) and three display equations puts the file at roughly 1,670-1,720 words, and higher under a plain `wc -w`. The report needs substantive curation (the Methods interpolation paragraph and the Figure 2/3 captions both restate material already in RESULTS.md), not marginal trimming.",
-        "REPORT.md Result 2 states as fact: 'Pooled over pairs it vanishes, the between-anchor component cancelling it.' The sole support is RESULTS.md section 4.2's between-anchor row, Spearman rho = +0.255 with p = 0.10, which RESULTS.md itself calls 'weak and not significant'. The report presents a non-significant correlation as the explanation for the pooled null result, unhedged, to a reader who will not open RESULTS.md. Either hedge it explicitly (e.g. 'a weak, non-significant between-anchor trend of opposite sign may offset it') or drop it.",
-        "REPORT.md Result 2 attributes within-anchor evidence to the wrong figure: 'the trend is weak and explains little of the variation, as Figure 3's scatter shows.' Figure 3 is a pooled J-vs-w scatter and contains no within-anchor structure; the per-anchor evidence is the rho histogram in RESULTS.md Figure 3. A reader following this pointer cannot verify the claim from the figure cited.",
-        "The low-JSD conclusion is asserted more strongly than the feedback requested and than the counterfactual supports. The feedback asked that readers 'see that this may be a character-class cluster'; plots/fig3_jsd_vs_width.png is titled 'the lowest-JSD bin is wide because it is almost entirely punctuation pairs' and REPORT.md states 'The excess is a character-class cluster, not an effect of low divergence.' The dashed 'punctuation-punctuation removed' line, which is the visual carrier of this claim, is based on n = 2 pairs in the lowest bin, and neither the figure nor the report annotates that the lowest dashed point is a two-pair average. Hedge the wording back toward the requested phrasing or annotate the n = 2 point on the dashed line."
-      ],
-      "summary": "The revision is substantively responsive to most of the feedback: anchors and class medians are defined with the requested `t` -> {a,e,i,o,u} worked example and the 65/53/43 accounting before any aggregate; c_anchor/c_partner replace a/b; Figure 2 is a genuine 43 x 53 raw pairwise heatmap with class-grouped, alphabetically ordered columns, visible separators and labels, blank self-pairs, the class-median box plot demoted to a small side panel, and no 'confusion matrix' language; Figure 3 uses fixed 0.1-wide bins with per-bin n, faint individual pairs and punctuation-punctuation pairs distinguished by shape and colour; the three quoted bin statistics are reproduced (12/0.581, 31/0.360, 78/0.343); and W, Friedman, Spearman and permutation p-values are confined to RESULTS.md after the visual and plain-language results, with the conclusion narrowed to nearly the requested wording. I nevertheless reject on four points. (1) REPORT.md overruns its declared 1,600-word budget: exact counts on sampled paragraphs give ~15.3 words/line over 103 prose lines (~1,580 words) before headings, Table 1 and three equations, putting the file at roughly 1,670-1,720 words. (2) Result 2 asserts 'the between-anchor component cancelling it' as fact, though its only support is a rho = +0.255, p = 0.10 correlation that RESULTS.md calls not significant - a correlation presented as an explanation, unhedged, in the primary report. (3) The same paragraph cites 'Figure 3's scatter' as evidence for a within-anchor claim that Figure 3 (a pooled scatter) cannot show. (4) The figure title's causal 'because' and the body's 'The excess is a character-class cluster' are firmer than the feedback's requested 'may be', and the dashed punctuation-removed line that carries the claim rests on n = 2 in the lowest bin without annotation. Items 2-4 are localized to Result 2 and its figure and need no new analysis to fix."
+      "failures": [],
+      "summary": "Every item in the feedback is delivered as asked, and the revision answers the stated core question rather than a substituted one.\\n\\n1) Anchors and class medians: REPORT.md Methods adds \\\"Which characters we use: 65, then 53, then 43\\\" and \\\"Anchors and class medians, with a worked example\\\", both before the Results. The 65/53/43/52 accounting is spelled out, the worked `t` example appears with the requested displayed median over w(t,a)...w(t,u), and the report states explicitly that the model performs five separate character-to-character interpolations rather than interpolating toward a \\\"lower-case-vowel representation\\\". Endpoint variables are c_anchor/c_partner everywhere, with z(0)/z(1) in the distance equation; no generic a/b endpoint remains in either file.\\n\\n2) Figure 2: fig2_width_heatmap.png is a genuine 43x53 raw pairwise width heatmap - 43 letter-anchor rows, 53 partner columns, white (blank) self-pair diagonal, six class blocks with black separators and printed labels on both axes, alphabetical order within blocks, colour = w on a labelled colour bar. The class-median summary is retained only as the smaller right-hand panel. \\\"Confusion matrix\\\" appears nowhere. The report uses the heatmap to answer representativeness directly: homogeneous lower-vowel/whitespace blocks (within-anchor IQR 0.021/0.020) versus heterogeneous consonant blocks (0.051/0.063), with a bolded statement that the consonant medians hide substantial pair-to-pair variation, plus the per-partner striping (s 0.260 vs v 0.386) that is visible in the figure. No new grouping score was added; the added numbers are plain dispersion measures.\\n\\n3) Figure 3: equal-count binning is gone. fig3_jsd_vs_width.png uses the exact fixed-width bins requested, plots bin mean width, prints n per bin (with the p-p count), retains all 1,378 pairs as faint background points, and distinguishes punctuation-punctuation pairs by both marker shape and colour. The three quoted values reproduce exactly (n = 12/31/78, means 0.581/0.360/0.343) and are consistent across REPORT.md, RESULTS.md 4.1, and the plotted markers. The 10-of-12 punctuation composition is labelled on the figure, listed pair-by-pair in RESULTS.md, and the n = 2 basis of the p-p-removed lowest point is annotated on the plot and stated in prose. Rank statistics are confined to RESULTS.md 4.2 as a labelled secondary check.\\n\\n4) Conclusion: both requested sentences appear near-verbatim; the \\\"no relationship\\\" claim is removed; no Kendall W, Spearman rho, Friedman statistic or permutation p-value appears anywhere in REPORT.md. Causality is explicitly disclaimed, and the low-JSD result is hedged as \\\"may therefore be a punctuation cluster\\\". All five reader-test questions are answerable from REPORT.md alone.\\n\\nBudget: I counted REPORT.md line by line at roughly 1,460-1,500 words against the 1,600-word limit, with exactly 3 embedded main figures. RESULTS.md holds the detailed archive; the report's Table 1 is a 4-column subset of the 8-column results table rather than a duplicate, and the report contains no appended secondary experiments. Jargon (transition width, anchor, partner, well-trained, successor divergence, isotonic fit, class definitions) is defined at first use.\\n\\nTwo minor, non-blocking imprecisions worth fixing on any future pass: (a) \\\"0.051 and 0.063 ... as large as the 0.087 gap\\\" (and \\\"matches the gap\\\" in the Conclusion) overstates a comparison whose numbers differ by ~30-40%, though the qualitative claim is independently supported by the within-anchor ranges (0.159/0.165) and column striping reported in the same documents, and the raw numbers sit adjacent for the reader; (b) RESULTS.md 4.2's \\\"the between-anchor row explains the discrepancy\\\" leans on a p = 0.10 correlation, but is immediately hedged as weak and not significant and lives in the detailed archive, not the report."
     },
     "expected_outputs": [
       "REPORT.md",
@@ -524,8 +519,7 @@
       "plots/fig2_width_heatmap.png",
       "plots/fig3_jsd_vs_width.png"
     ],
-    "budget_failures": [
-      "REPORT.md: 1710 words exceeds 1600"
-    ]
-  }
+    "budget_failures": []
+  },
+  "addressed_feedback": "human_feedback.txt.addressed.md"
 }

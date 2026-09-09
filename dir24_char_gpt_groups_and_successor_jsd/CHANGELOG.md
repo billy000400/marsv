@@ -61,3 +61,28 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 **results/analysis.json**: added `s2_classes.raw_block_spread`, `s2_classes.partner_mean_w_over_anchors`,
 `s4_jsd_vs_width.fixed_width_bins`, `.low_jsd_bin_pairs` and `.punct_punct`. All previously reported
 numbers are unchanged.
+
+## 2026-09-09 — revision after the content review rejected the first feedback pass
+
+Four rejection points, all localized to `REPORT.md` and `plots/fig3_jsd_vs_width.png`; no new experiment,
+no new metric, and no change to any number.
+
+- **Word budget.** `REPORT.md` curated from 1,702 to 1,592 words (limit 1,600, counted by
+  `workflow.report_counts`; `wc -w` reads lower). Cuts were compression, not deletion of evidence: the
+  interpolation paragraph, the three figure captions, Table 1's caption and both Results narratives were
+  tightened, and the `\lVert…\rVert` / `\big(…\big)` markup was replaced by `\|…\|` / plain parentheses.
+  Every mandated sentence (the `t` worked example, the 65/53/43 accounting, the two Conclusion passages)
+  is unchanged.
+- **Unhedged mechanism.** Result 2 said "Pooled over pairs it vanishes, the between-anchor component
+  cancelling it", resting on a ρ = +0.255, p = 0.10 correlation that `RESULTS.md` calls non-significant.
+  Now: "Pooled over all pairs it disappears; a weak, non-significant trend of opposite sign between
+  anchors may offset it."
+- **Wrong figure pointer.** The within-anchor claim cited "Figure 3's scatter", which is pooled and
+  cannot show within-anchor structure. It now points to `RESULTS.md` section 4.2 and its Figure 3.
+- **Overstated low-JSD claim.** Figure 3's title changed from "the lowest-JSD bin is wide because it is
+  almost entirely punctuation pairs" to "10 of the 12 pairs in the lowest-JSD bin are
+  punctuation-punctuation pairs"; the body changed from "The excess is a character-class cluster, not an
+  effect of low divergence" to "The wide lowest bin may therefore be a punctuation cluster rather than a
+  general effect of low divergence"; and the two-pair basis of the dashed line's lowest point is now
+  annotated on the figure ("only 2 pairs left after removing p-p") and stated in `REPORT.md` Result 2 and
+  `RESULTS.md` section 4.1.

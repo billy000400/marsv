@@ -138,7 +138,9 @@ digit passes the 1,000-occurrence threshold. `REPORT.md` Figure 3 plots these bi
 
 The first three rows reproduce the values quoted in the review (n = 12 / 31 / 78, mean 0.581 / 0.360 /
 0.343). Once the punctuation–punctuation pairs are removed the last column is flat across the whole
-range (0.313–0.345), so the wide lowest bin is a punctuation cluster rather than a low-divergence effect.
+range (0.313–0.345); its lowest entry averages only 2 pairs, so the evidence that the wide lowest bin is
+a punctuation cluster rather than a low-divergence effect rests mainly on the other rows and on the
+punctuation–punctuation widths below.
 The 28 punctuation–punctuation pairs have mean `w` 0.531 (median 0.577) against 0.327 (median 0.319) for
 the other 1,350 pairs, and they occur at divergences from 0.002 to 0.83.
 

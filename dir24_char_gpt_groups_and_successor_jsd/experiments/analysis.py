@@ -496,6 +496,12 @@ def main():
     for c, r in zip(ctr, fixed):
         lab = f"n = {r['n']}" + (f"  ({r['n_punct_punct']} p-p)" if r["n_punct_punct"] else "")
         ax.text(c, 0.755, lab, ha="center", va="bottom", fontsize=6.8, rotation=90, color="0.25")
+        n_ex = r["n"] - r["n_punct_punct"]
+        if r["mean_w_excl_pp"] is not None and n_ex <= 5:
+            ax.annotate(f"only {n_ex} pairs left\nafter removing p-p",
+                        xy=(c, r["mean_w_excl_pp"]), xytext=(c + 0.10, r["mean_w_excl_pp"] - 0.12),
+                        fontsize=7, color=CVD[2], ha="left",
+                        arrowprops=dict(arrowstyle="->", color=CVD[2], lw=1.0))
     ax.set_xticks(np.round(np.arange(0, 1.001, 0.1), 1))
     ax.set_xlim(-0.02, 1.02)
     ax.set_ylim(0.10, 1.00)
@@ -503,7 +509,7 @@ def main():
                   "endpoints (bits), fixed-width bins of 0.1")
     ax.set_ylabel("transition width $w_{10\\to90}$")
     ax.set_title("Width against successor divergence, all 1,378 well-trained pairs\n"
-                 "the lowest-JSD bin is wide because it is almost entirely punctuation pairs",
+                 "10 of the 12 pairs in the lowest-JSD bin are punctuation-punctuation pairs",
                  fontsize=9.5)
     ax.legend(fontsize=7.4, loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=2,
               framealpha=.95)
