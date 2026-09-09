@@ -1,21 +1,43 @@
 {
   "version": 1,
-  "state": "triage",
+  "state": "ready",
   "source_feedback": "human_feedback.txt",
   "source_sha256": "4769ebbbe67e209523425eee112a7bad8bdf9175ffeb52bd1b590b5490b884c6",
-  "required_outputs": null,
-  "may_modify": null,
-  "must_remain_unchanged": null,
-  "report_policy": {
-    "core_research_question": null,
-    "primary_report": null,
-    "max_words": null,
-    "max_main_figures": null,
-    "detailed_results": null
-  },
-  "unresolved_ambiguities": [
-    "Classify output routing from the exact feedback before doing research."
+  "required_outputs": [
+    "REPORT.md",
+    "RESULTS.md",
+    "plots/fig2_width_heatmap.png",
+    "plots/fig3_jsd_vs_width.png"
   ],
+  "may_modify": [
+    "REPORT.md",
+    "RESULTS.md",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md",
+    "experiments/analysis.py",
+    "experiments/*.py",
+    "results/analysis.json",
+    "results/*.json",
+    "plots/*.png",
+    ".tasks/human_feedback.txt.manifest.json"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback.txt",
+    ".tasks/feedback-only",
+    "../dir13_plateau_on_grok_gpt/** (read-only source artifacts, incl. results/allpairs_summary.json)",
+    "../CLAUDE.md",
+    "../WRITING.md",
+    "../BUDGET.md"
+  ],
+  "report_policy": {
+    "core_research_question": "For the step-30,000 character-level Shakespeare GPT: (1) does transition width group by partner character class when the fixed endpoint is a letter, and (2) across character pairs, do endpoints with more different immediate-successor distributions have narrower transitions? The revision must show the raw pairwise structure before any median/rank summary, and must resolve what happens specifically at successor JSD below 0.1.",
+    "primary_report": "REPORT.md",
+    "max_words": 1600,
+    "max_main_figures": 3,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
   "checklist": [
     {
       "request": "Please revise `dir24_char_gpt_groups_and_successor_jsd` to make the raw structure visible before summarizing it with medians or rank statistics. The main problem with the current report is that it compresses the pairwise results too early and therefore misses an important pattern at very low successor JSD.",
@@ -449,5 +471,12 @@
         "ambiguity": ""
       }
     }
+  ],
+  "triage_notes": [
+    "Routing: the feedback names dir24 and refers to 'the current report', Figure 2, Figure 3 and the conclusion, all of which exist only in REPORT.md; it explicitly routes the per-anchor Spearman check to RESULTS.md. No new report filename is requested, so REPORT.md stays the primary report and RESULTS.md the detailed-results file.",
+    "'43 x 53 heatmap' vs '52 partners' is consistent, not ambiguous: the grid has all 53 well-trained characters as columns and the 43 letter anchors as rows, with the 43 self-pair cells left blank, so each anchor still has 52 partners.",
+    "'Replace or supplement Figure 2' is explicitly the author's choice; the feedback also permits keeping the class-median summary 'as a smaller accompanying panel'. Plan limit of 3 main figures is preserved by making Figure 2 a heatmap-dominant figure with the class-median summary as a smaller panel.",
+    "Feedback bans new grouping scores, regressions, significance tests and composite metrics; existing W / rho / Friedman / permutation p-values may be retained only after the visual and plain-language results.",
+    "The three bin numbers quoted in the feedback must be recomputed independently from this direction's artifacts and reported as measured, not copied."
   ]
 }

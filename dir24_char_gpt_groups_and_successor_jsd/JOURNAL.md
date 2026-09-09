@@ -34,3 +34,32 @@ within the plan's 1,600-word limit.
 **Next step.** None — success criterion met, STOP written.
 
 On track? yes — S1–S6 complete, 100% done, no blocker.
+
+## 2026-09-09 — triage of `human_feedback.txt`
+
+**Did.** Triage pass only, no research. Verified the feedback SHA-256 matches the manifest and that all
+48 checklist requests are byte-for-byte substrings of `human_feedback.txt` (including the literal
+`$$ ... \operatorname{median}{...} $$` block and the curly quotes). Filled the manifest routing fields:
+required outputs `REPORT.md`, `RESULTS.md`, `plots/fig2_width_heatmap.png`,
+`plots/fig3_jsd_vs_width.png`; `dir13` artifacts and `human_feedback.txt` must remain unchanged;
+report policy = same two core questions, primary report `REPORT.md`, 1,600 words, 3 main figures,
+detailed results in `RESULTS.md`. State set to `ready`.
+
+**Learned / decided (triage judgements, not research).** (1) "43 × 53 heatmap" and "52 partners" are
+consistent, not contradictory: 53 well-trained characters are columns, the 43 self-pair cells are blank,
+so each anchor keeps 52 partners. (2) "Replace or supplement Figure 2" is explicitly the author's
+choice and the class-median summary may stay "as a smaller accompanying panel", so the 3-figure plan
+limit is preserved by making Figure 2 a heatmap-dominant panel plus a smaller class-median panel.
+(3) The three bin numbers quoted in the feedback (n = 12/31/78, mean width 0.581/0.360/0.343) are to be
+recomputed independently from this direction's artifacts, as the feedback asks. (4) No new grouping
+score, regression, significance test or composite metric may be added; existing W / rho / Friedman /
+permutation results may only follow the visual and plain-language results. No ambiguity remained, so the
+task was not blocked.
+
+**Next step.** Work the ready checklist: rewrite Methods with the `t`-anchor worked example and the
+65 -> 53 -> 43 vocabulary accounting, rename endpoint variables to `c_anchor` / `c_partner`, build the
+raw pairwise width heatmap, rebuild Figure 3 with fixed-width JSD bins and punctuation–punctuation
+pairs marked, move the rank statistics behind the plain-language conclusions, and demote the per-anchor
+Spearman analysis to `RESULTS.md`.
+
+On track? yes — triage complete, checklist verified verbatim, state `ready`.
