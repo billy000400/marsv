@@ -80,11 +80,17 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Fresh direction; no experiment has been run.
+S0 done. dir13's checkpoint and corpus lived under `/tmp` and have been wiped, so the same model is
+being retrained here with dir13's exact recipe and seeds (`experiments/train_char_gpt.py`); the
+reproduction matches dir13's logged loss curve step for step. Matched examples counted
+(`results/feature_counts.json`) and ten readable examples of each feature saved
+(`results/feature_examples.txt`): both features clear the 60-pair requirement by a wide margin
+(speaker-label 23,010 train / 2,742 held-out matched pairs; word-continuation 152,467 / 16,683).
+S1-S3 scripts are written and smoke-tested on an intermediate checkpoint.
 
 ## Next step
 
-Count the available matched examples for the two candidate features and save ten human-readable examples of each before computing any direction.
+Run S1 on the finished checkpoint and keep or replace each direction on its behavioural check.
 
 ## Motivation and references
 

@@ -1,0 +1,50 @@
+[train] speaker_label: positives=46324 negatives=28589 matched pairs available=23010
+[train] word_continuation: positives=499130 negatives=167841 matched pairs available=152467
+
+=== speaker_label (train split) - 10 positive examples ===
+...one honest enough: would all the rest were so!\n\n[M]  -> next 'E'
+... thing but what I am,\nI would wish me only he.\n\n[C]  -> next 'O'
+...econd Senator:\nFarewell.\n\nAll:\nFarewell.\n\nVOLUMN[I]  -> next 'A'
+... with\nmy prayers; but I cannot go thither.\n\nVOLU[M]  -> next 'N'
+...r a Volsce,\nAnd he shall feel mine edge.\n\nMARCIU[S]  -> next ':'
+...ide\nThey have placed their men of trust?\n\nCOMINI[U]  -> next 'S'
+...fts, am bound to beg\nOf my lord general.\n\nCOMINI[U]  -> next 'S'
+...being so. You blame Marcius for\nbeing proud?\n\nBR[U]  -> next 'T'
+...t's in them. Is the senate possessed of this?\n\nV[O]  -> next 'L'
+...:\nGive way there, and go on!\n\nCORIOLANUS:\n\nVOLUM[N]  -> next 'I'
+=== speaker_label (train split) - 10 negative examples ===
+...ll resolved rather to die than to famish?\n\nAll:\n[R]  -> next 'e'
+...For corn at their own rates; whereof, they say,\n[T]  -> next 'h'
+...ll find\nThey've not prepared for us.\n\nAUFIDIUS:\n[O]  -> next ','
+... have you run\nFrom slaves that apes would beat! [P]  -> next 'l'
+...s it were sin to doubt--that love this painting\n[W]  -> next 'h'
+... to Rome\nThe best, with whom we may articulate,\n[F]  -> next 'o'
+...ll be sworn they are true.\nWhere is he wounded?\n[G]  -> next 'o'
+... of that worthy work perform'd\nBy Caius Marcius [C]  -> next 'o'
+... tongue to such a pace:--'Look, sir, my wounds!\n[I]  -> next ' '
+... your own true affections, and that your minds,\n[P]  -> next 'r'
+
+=== word_continuation (train split) - 10 positive examples ===
+...\n\nFirst Citizen:\nYou are all resolved rather to [d]  -> next 'i'
+... patricians good.\nWhat authority surfeits on wou[l]  -> next 'd'
+...ferance is a gain to them Let us revenge this wi[t]  -> next 'h'
+...l; and could be content to give him good\nreport [f]  -> next 'o'
+...is virtue.\n\nSecond Citizen:\nWhat he cannot help [i]  -> next 'n'
+...\nSecond Citizen:\nWorthy Menenius Agrippa; one th[a]  -> next 't'
+...l show 'em in deeds. They say poor\nsuitors have [s]  -> next 't'
+...in this dearth, you may as well\nStrike at the he[a]  -> next 'v'
+...rms, must help. Alack,\nYou are transported by ca[l]  -> next 'a'
+... to\nsupport usurers; repeal daily any wholesome [a]  -> next 'c'
+=== word_continuation (train split) - 10 negative examples ===
+...First Citizen:\nYou are all resolved rather to di[e]  -> next ' '
+... being proud.\n\nSecond Citizen:\nNay, but speak no[t]  -> next ' '
+...r\nsuitors have strong breaths: they shall know w[e]  -> next '\n'
+...If the wars eat us not up, they will; and\nthere'[s]  -> next ' '
+...parts\nThat envied his receipt; even so most fitl[y]  -> next '\n'
+...e court, the heart, to the seat o' the brain;\nAn[d]  -> next ','
+...ubs:\nRome and her rats are at the point of battl[e]  -> next ';'
+...s the matter,\nThat in these several places of th[e]  -> next ' '
+...that the gods sent not\nCorn for the rich men onl[y]  -> next ':'
+... any thing but what I am,\nI would wish me only h[e]  -> next '.'
+[heldout] speaker_label: positives=6801 negatives=3204 matched pairs available=2742
+[heldout] word_continuation: positives=53472 negatives=18468 matched pairs available=16683
