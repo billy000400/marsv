@@ -49,11 +49,11 @@ If either feature lacks enough examples or fails the behavioral check, replace i
 
 ## Stages
 
-- [ ] **S1 - Validate the feature directions.** For each direction, perturb held-out examples in both signs and check whether the relevant character probabilities move as expected. Make Figure 1 with two simple steering curves and a few example next-character distributions. Keep a direction only if the change is clear and has the correct meaning.
+- [x] **S1 - Validate the feature directions.** For each direction, perturb held-out examples in both signs and check whether the relevant character probabilities move as expected. Make Figure 1 with two simple steering curves and a few example next-character distributions. Keep a direction only if the change is clear and has the correct meaning.
 
-- [ ] **S2 - Compare single features with their mixture.** Use 30 new, ordinary-text activations as anchors. Sweep the same perturbation sizes along feature 1, feature 2, their equal mixture, and 10 random directions. Remove the overlap between the two feature directions before mixing them. Make Figure 2: output JSD versus perturbation size. Show the average curves and several individual anchors so that the reader can see whether the pattern is typical.
+- [x] **S2 - Compare single features with their mixture.** Use 30 new, ordinary-text activations as anchors. Sweep the same perturbation sizes along feature 1, feature 2, their equal mixture, and 10 random directions. Remove the overlap between the two feature directions before mixing them. Make Figure 2: output JSD versus perturbation size. Show the average curves and several individual anchors so that the reader can see whether the pattern is typical.
 
-- [ ] **S3 - Show the geometry and report it.** Sweep a two-dimensional grid spanning the two feature directions. Make Figure 3 with side-by-side heatmaps for the feature-feature plane and a random-random plane. Color each point by output JSD. Rescale the axes only so their single-direction boundaries line up; do not fit a shape or introduce a new score. Then write and reader-test `REPORT.md` using `Motivation`, `Setup`, `Results`, and `What this does and does not show`.
+- [x] **S3 - Show the geometry and report it.** Sweep a two-dimensional grid spanning the two feature directions. Make Figure 3 with side-by-side heatmaps for the feature-feature plane and a random-random plane. Color each point by output JSD. Rescale the axes only so their single-direction boundaries line up; do not fit a shape or introduce a new score. Then write and reader-test `REPORT.md` using `Motivation`, `Setup`, `Results`, and `What this does and does not show`.
 
 ## How to describe the result
 
@@ -80,17 +80,21 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-S0 done. dir13's checkpoint and corpus lived under `/tmp` and have been wiped, so the same model is
-being retrained here with dir13's exact recipe and seeds (`experiments/train_char_gpt.py`); the
-reproduction matches dir13's logged loss curve step for step. Matched examples counted
-(`results/feature_counts.json`) and ten readable examples of each feature saved
-(`results/feature_examples.txt`): both features clear the 60-pair requirement by a wide margin
-(speaker-label 23,010 train / 2,742 held-out matched pairs; word-continuation 152,467 / 16,683).
-S1-S3 scripts are written and smoke-tested on an intermediate checkpoint.
+**Complete.** S0-S3 all done on the finished checkpoint (30,000 steps, val acc 0.550). Both feature
+directions passed the S1 behavioural check with a wide margin, so neither was replaced by the
+line-ending fallback. S2 and S3 answer the two success-criterion questions, and `REPORT.md` is written
+to the plan's limits (900 words, 3 figures, sections Motivation / Setup / Results / What this does and
+does not show). Verdict per the plan's vocabulary: **no visible support**.
+
+- Q1 (do the directions change the model in the expected linguistic way?) **Yes** — S1, Figure 1.
+- Q2 (do the singles leave the low-change region before their equal mixture?) **No** — S2, Figure 2:
+  the mixture's mean curve crosses JSD 0.05 at alpha 0.39, between speaker label (0.38) and word
+  continuation (0.79); per anchor the comparison is near a coin flip. S3, Figure 3: the feature plane
+  looks like the random plane. Random directions changed the output most of all.
 
 ## Next step
 
-Run S1 on the finished checkpoint and keep or replace each direction on its behavioural check.
+None — the success criterion is met. Deliverables are final; STOP written.
 
 ## Motivation and references
 

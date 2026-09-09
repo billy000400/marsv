@@ -121,7 +121,7 @@ def main():
         for k, alpha in enumerate(e["alphas"]):
             d = e["dists"][str(alpha)]
             a1.bar(np.arange(len(order)) + (k - 1) * w, d[order], width=w,
-                   color=CVD[k if k < 2 else 3], hatch=["//", "", ".."][k],
+                   color=CVD[k], hatch=["//", "", ".."][k],
                    edgecolor="white", label=fr"$\alpha={alpha:+.0f}$")
         a1.set_xticks(np.arange(len(order)))
         a1.set_xticklabels([{" ": "sp", "\n": "\\n"}.get(itos[i], itos[i]) for i in order])

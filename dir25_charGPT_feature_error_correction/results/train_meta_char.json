@@ -1,0 +1,19 @@
+{
+  "corpus_sha256": "86c4e6aa9db7c042ec79f339dcb96d42b0075e16b8fc2e86bf0ca57e2dc565ed",
+  "vocab_size": 65,
+  "final_step": 30000,
+  "final_val_loss": 2.359383988380432,
+  "final_val_acc": 0.5501790364583333,
+  "cfg": {
+    "vocab_size": 65,
+    "block_size": 128,
+    "n_layer": 12,
+    "n_head": 12,
+    "n_embd": 240,
+    "dropout": 0.2
+  },
+  "model_seed": 1337,
+  "data_seed": 42,
+  "recipe": "dir13 train_grok.py --tok char (Adam lr 1e-3 cosine->1e-4, wd 0, bs 48x128)",
+  "torch": "2.8.0.dev20250319+cu128"
+}

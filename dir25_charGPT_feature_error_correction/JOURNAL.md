@@ -38,3 +38,50 @@ their target probability the expected way and above random.
 Next step: run S1 on the finished checkpoint; if both behavioural checks pass, run S2 and S3.
 
 On track? yes — S0 done, S1-S3 coded, waiting on the ~23-minute retrain.
+
+## 2026-09-09 — iteration 2 (S1-S3 complete, deliverables written)
+
+Retrain finished at step 30,000 (val loss 2.359, val acc 0.550) — matches dir13's recipe as intended.
+Ran S1, S2, S3 on the final checkpoint.
+
+**S1 — both directions kept.** Speaker label lifts P(uppercase or ':') from 0.0002 to 0.31 at alpha 1
+(random 0.004); word continuation lifts P(letter) from 0.25 to 0.78 (random 0.26). Both clear the
+behavioural check by a wide margin, so the line-ending fallback direction was not needed. Noted for the
+record: the effect is one-sided — negative alpha does not suppress the target mass — and at large alpha
+random directions also raise letter probability (0.60 at alpha 3), so only the small-alpha region
+separates the word-continuation direction from noise. Cosine between the two raw directions is -0.60;
+S2/S3 orthogonalize before mixing, as the plan requires.
+
+**S2 — prediction not supported.** Mean JSD curve crosses 0.05 bits at alpha 0.39 (mixture), 0.38
+(speaker label), 0.79 (word continuation): the mixture falls *between* the singles rather than after
+both. Per anchor it is near a coin flip (7/16 and 12/19). Unpredicted and worth stating: random
+directions are the most disruptive condition, crossing earliest (median alpha 0.82 vs 1.00 mixture).
+
+**S3 — planes look alike.** Feature plane 34% of grid below 0.05 bits vs random plane 32%; at the 45
+degree point mean JSD 0.12 vs 0.17. That mean difference is in the predicted direction, so before
+writing anything I patched `s3_geometry.py` to save per-anchor maps and re-ran (~8 min): the feature
+plane is the lower of the two in only 5 of 8 anchors, per-anchor values spanning 0.008-0.47. The
+anchor spread is an order of magnitude larger than the difference in means, so the mean is not a
+pattern — reported as no visible support, not as a weak positive. This is a direct measurement, not an
+added statistical test (plan puts p-values/CIs out of scope).
+
+**Selection effect recorded:** S3 drops 4 of 12 anchors where an axis never reaches 0.05 bits within
+the scan, leaving the rescaling undefined. Those are the anchors where feature directions are weakest,
+so the retained figure is biased *toward* the prediction. Stated in both deliverables.
+
+**Verdict** in the plan's vocabulary: **no visible support**. The phrase "consistent with
+feature-specific error correction" is deliberately not used.
+
+**Deliverables.** `REPORT.md` rewritten to the plan's limits — 900 words exactly (wc -w) and 3 figures,
+sections Motivation / Setup / Results / What this does and does not show, plus a Summary for CLAUDE.md
+rule 8. Getting from the first draft (1763 words) to 900 took several passes; the binding constraint
+was that captions, equations and image markdown consume ~300 of the 900. `RESULTS.md` carries the full
+evidence record (S0 counts, S1/S2/S3 tables, per-anchor numbers, the confound and the selection
+effect). `python3 ../check_render.py REPORT.md RESULTS.md` → ALL CHECKS PASS.
+
+**One minor plot fix:** in fig1's example panel the alpha=+2 bars used sky blue against the alpha=-2
+blue; switched to the reddish-purple hue so the three bar groups differ by hue and hatch (rule 13).
+
+No unaddressed feedback files exist, the plan's success criterion is met, so STOP is written.
+
+On track? yes — S1-S3 done, 100%, deliverables final, no blocker.

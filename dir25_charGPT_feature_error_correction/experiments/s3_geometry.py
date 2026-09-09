@@ -99,8 +99,12 @@ def main():
         print(f"anchor {a} done ({len(used)} kept)", flush=True)
 
     M = {k: np.mean(np.stack(v), 0) for k, v in maps.items()}
+    # per-anchor JSD at the 45-degree point of each plane, to show whether the mean map is typical
+    dj = np.argmin(np.abs(GRID - 0.70710678))
+    diag = {k: [float(m[dj, dj]) for m in maps[k]] for k in maps}
     json.dump({"ckpt_step": int(step), "block": BLOCK, "theta": THETA, "grid": GRID.tolist(),
                "anchor_indices": used, "scales": {k: np.array(v).tolist() for k, v in scales.items()},
+               "diag_point": float(GRID[dj]), "per_anchor_diag_jsd": diag,
                "mean_map": {k: v.tolist() for k, v in M.items()}},
               open(os.path.join(RES, "s3.json"), "w"), indent=2)
 
