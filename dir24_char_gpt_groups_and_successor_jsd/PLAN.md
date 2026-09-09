@@ -205,19 +205,26 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Done. `experiments/analysis.py` (CPU, no model loaded) validated the stored dir13 sweep, reproduced the
-letter-anchor class analysis over all 43 well-trained letters, computed corpus successor JSD with a
-split-half reliability check, and related JSD to width both pooled and within fixed anchors. Answers:
-(1) yes, class grouping is consistent across anchors (Kendall's W = 0.424, Friedman p = 3.8e-18; W = 0.267
-after removing the partner-frequency trend); (2) mixed — pooled rho = -0.064 (permutation p = 0.32), but
-within a fixed anchor median rho = -0.205 (36/43 negative, permutation p = 0.002; -0.320 with partner
-frequency partialled out). `REPORT.md` (1,621 words by wc, ~1,500 excluding table markup; 3 figures, 1
-table) and `RESULTS.md` are current-best; `python3 ../check_render.py REPORT.md RESULTS.md` passes.
+Done, and revised once for `human_feedback.txt` (all 48 checklist items; manifest state
+`review_pending`). `experiments/analysis.py` (CPU, no model loaded) validated the stored dir13 sweep,
+reproduced the letter-anchor class analysis over all 43 well-trained letters, computed corpus successor
+JSD with a split-half reliability check, and related JSD to width in fixed-width bins, pooled, and within
+fixed anchors. Answers now stated from the raw pairwise data first: (1) the 43 x 53 width heatmap shows a
+real but coarse class effect — the class median is representative for the small classes (within-anchor
+raw IQR 0.021, 0.020) but not for the two consonant classes (0.051, 0.063) against a 0.087 between-class
+spread; (2) no general monotonic JSD-width relationship — fixed-width bin means run 0.317-0.360 from
+JSD 0.1 to 1.0, and the wide 0.0-0.1 bin (n = 12, mean 0.581) is 10/12 punctuation-punctuation pairs,
+which average 0.531 at every JSD; within a fixed anchor the trend is negative but weak. The rank
+statistics (W = 0.424, pooled rho = -0.064, per-anchor median rho = -0.205) now live in `RESULTS.md`
+only. `REPORT.md` (1,600 words by wc; 3 figures, 1 table) and `RESULTS.md` are current-best;
+`python3 ../check_render.py REPORT.md RESULTS.md` passes.
 
 ## Next step
 
-None — success criterion met and `STOP` written. If reopened: the untested question is whether the class
-ordering and the within-anchor JSD trend hold at other blocks, contexts, or checkpoints.
+None from the plan — the success criterion is met. Awaiting the wrapper's independent content review of
+the feedback task; no `STOP` while `human_feedback.txt` is unaddressed. If reopened: the untested
+question is whether the class ordering and the within-anchor JSD trend hold at other blocks, contexts, or
+checkpoints.
 
 ## References
 

@@ -63,3 +63,44 @@ pairs marked, move the rank statistics behind the plain-language conclusions, an
 Spearman analysis to `RESULTS.md`.
 
 On track? yes — triage complete, checklist verified verbatim, state `ready`.
+
+## 2026-09-09 — worked the `human_feedback.txt` checklist (raw structure before summaries)
+
+**Did.** All 48 checklist items. (1) Methods rewritten: new subsections "Which characters we use: 65,
+then 53, then 43" and "Anchors and class medians, with a worked example" (the `t` -> a/e/i/o/u median,
+with the explicit statement that the model does not interpolate towards a class representation); every
+endpoint variable renamed to `c_anchor` / `c_partner`, and the output-distance equation switched from
+`z_a`/`z_b` to `z(0)`/`z(1)`. (2) New `plots/fig2_width_heatmap.png`: raw 43x53 width matrix (rows =
+letter anchors, columns = all 53 well-trained characters, cividis colour, white self-pairs, class blocks
+with black separators and labels, alphabetical within class), with the old class-median boxplot as the
+smaller right-hand panel; the four-anchor version moved to `plots/fig2b_class_widths.png` for RESULTS.md.
+(3) `plots/fig3_jsd_vs_width.png` rebuilt as a single panel with fixed 0.1-wide JSD bins, per-bin mean
+width, per-bin pair counts, all 1,378 pairs faint in the background, punctuation-punctuation pairs as
+vermillion diamonds, and a second dashed line for the bin means with those pairs removed. The per-anchor
+Spearman histogram moved to `plots/fig_s2_per_anchor_rho.png` (RESULTS.md only). (4) Conclusions narrowed
+to the requested wording; no W / rho / Friedman / permutation number remains in REPORT.md.
+
+**Learned.** The quoted bin numbers reproduce exactly from our own artefacts: n = 12 / 31 / 78 with mean
+widths 0.581 / 0.360 / 0.343, and 10 of the 12 lowest-JSD pairs are punctuation-punctuation. The decisive
+new number is that punctuation-punctuation pairs average w = 0.531 across the *whole* JSD range against
+0.327 for the other 1,350 pairs, and removing them flattens the lowest bin from 0.581 to 0.340 — so the
+low-JSD excess is a character-class cluster, not a divergence effect. On the heatmap side, the raw
+within-anchor IQR inside a class block is 0.021 (lower vowels) but 0.051 and 0.063 for the two consonant
+classes, against a between-class spread of only 0.087: the median is representative for the small classes
+and not for the large ones, and the residual variation is striped by partner character (`s` 0.260 vs `v`
+0.386 averaged over anchors).
+
+**Assumptions / decisions (loop mode, no human to ask).** (a) Used `\mathrm{median}` rather than the
+feedback's `\operatorname{median}`, because GitHub's KaTeX denylist rejects `\operatorname` and would
+render the equation as a red error (CLAUDE.md rule 8c); the displayed formula is otherwise identical.
+(b) Kept the width-definition figure as REPORT.md Figure 1 so the heatmap stays Figure 2 and the JSD plot
+stays Figure 3, matching the numbering the feedback uses. (c) To stay inside the 1,600-word report limit
+while adding the worked example, the vocabulary accounting and the heatmap discussion, the report's
+statistical passages were compressed to pointers into RESULTS.md; REPORT.md is now exactly 1,600 words by
+`wc -w`. Rejected alternative: dropping Figure 1 to buy ~55 words, which would have renumbered the two
+figures the feedback refers to.
+
+**Next step.** None from the plan; awaiting the wrapper's content review of the feedback task. Manifest
+state set to `review_pending`; no `STOP` written, since `human_feedback.txt` is still unaddressed.
+
+On track? yes — 48/48 checklist items done, `python3 ../check_render.py REPORT.md RESULTS.md` passes.

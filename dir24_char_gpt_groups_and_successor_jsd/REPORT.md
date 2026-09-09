@@ -2,165 +2,173 @@
 
 ## Summary
 
-Slide a trained model's internal state smoothly from one input to another and its output need not follow
-smoothly: it can sit still and then flip. How abruptly it flips says when a small change to an activation
-will change what the model does.
+With the prompt frozen, slide an internal activation vector from the state a model has for input X to
+the state for input Y. The output can sit still, then flip. How abruptly it flips says how much a
+nudge to an activation changes what the model does.
 
-We measure this on one small character-level GPT trained on Shakespeare, at a single prompt and a single
-interpolation point, and ask two questions. First: with one endpoint fixed to a letter, are the switch
-widths grouped by the kind of character at the other endpoint? Yes, consistently across all 43 eligible
-letters, though the effect is modest and partly tracks character frequency. Second: do endpoints followed
-by more different characters in the training text give narrower switches? Mixed — nothing when pairs are
-pooled, a weak but reliable trend in that direction once the letter endpoint is held fixed. All of it is
-one model, one checkpoint, and correlational.
+On one small character-level GPT trained on Shakespeare we ask two questions. **First:** with one
+endpoint fixed to a letter, is the switch width organised by what *kind* of character sits at the other
+endpoint (vowel, consonant, punctuation, whitespace)? **Second:** do endpoints followed by more different
+characters in the training text switch more narrowly?
+
+Both answers come from the raw pairwise measurements, before averaging.
 
 ## Methods
 
-**Data and model.** A 12-block, 12-head decoder-only GPT (width 240, context 128, dropout 0.2, about
-8.4M parameters) trained for next-character prediction on Tiny Shakespeare (1,115,394 characters, first
-90% used for training, 65-character vocabulary), at step 30,000. Widths come from a stored sweep in
-`../dir13_plateau_on_grok_gpt` (commit `01d2501`), validated in `RESULTS.md`.
+**Data and model.** A 12-block, 12-head decoder-only GPT (width 240, context 128, about 8.4M parameters)
+trained for next-character prediction on Tiny Shakespeare (1,115,394 characters, first 90% for
+training), at step 30,000. Widths come from a stored sweep in `../dir13_plateau_on_grok_gpt`
+(commit `01d2501`), re-validated in `RESULTS.md` section 1.
 
-**Interpolation and transition width.** Measurements start from the prompt `"The house was "` (with its
-trailing space) plus one more character. For characters `a` and `b` we run both 15-character inputs and
-take the residual stream at the final position after block 0. Blending the two vectors along a
-norm-preserving spherical path in 50 steps indexed by $t$ ($t=0$ gives the `a` state, $t=1$ the `b`
-state), we patch the blend into the final position only and read the final-token logits $z(t)$, then
-measure how far the output has moved:
+**Interpolation and transition width.** Every measurement compares two characters, $c_{\mathrm{anchor}}$
+and $c_{\mathrm{partner}}$. We run the prompt `"The house was "` (trailing space included) followed by one
+character, then the other, and take the residual stream at the final position after block 0. The two
+vectors are blended along a norm-preserving spherical path in 50 steps indexed by $t$ ($t=0$ = anchor,
+$t=1$ = partner) and patched back in; we read the logits $z(t)$ and ask how far the *output* has moved:
 
 ```math
-d(t)=\frac{\lVert z(t)-z_a\rVert_2}{\lVert z(t)-z_a\rVert_2+\lVert z(t)-z_b\rVert_2}.
+d(t)=\frac{\lVert z(t)-z(0)\rVert_2}{\lVert z(t)-z(0)\rVert_2+\lVert z(t)-z(1)\rVert_2}.
 ```
 
-$d=0$ means the output still matches endpoint `a`, $d=1$ that it matches `b`. The **transition width** is
-the span of $t$ over which $d$ climbs from 0.1 to 0.9, read off a monotone (isotonic) fit of the curve:
+$d=0$ means the output still matches the anchor, $d=1$ the partner. The **transition width** is the span
+of $t$ over which $d$ climbs from 0.1 to 0.9, read off a monotone (isotonic) fit:
 
 ```math
-w_{10\to90}=t(d=0.9)-t(d=0.1).
+w(c_{\mathrm{anchor}},c_{\mathrm{partner}})=t(d=0.9)-t(d=0.1).
 ```
 
-Small $w$ means an abrupt switch; an output tracking the state proportionally would trace a straight line
-and give $w=0.8$ (Figure 1).
+Small $w$ means an abrupt switch: an output tracking the state proportionally would give $w=0.8$,
+whereas the median here is 0.320 (Figure 1). $w$ is symmetric.
 
-**Well-trained characters and classes.** Rare characters have unusually wide transitions, so we keep the
-earlier direction's frozen threshold of 1,000 training-split occurrences: 53 characters and their 1,378
-pairs form the primary sample, the other 12 appearing only in a sensitivity check. Of the 53,
-43 are letters, each used in turn as a fixed **anchor** against its 52 partners. Partners fall into six
-classes fixed before analysis: lower-case vowels, lower-case consonants, upper-case vowels, upper-case
-consonants, punctuation and digits, and whitespace. These are surface character classes, not learned
-features.
+![interpolation curves](plots/fig1_width_definition.png)
 
-**Successor divergence.** Question 2 needs a property of a character defined by the corpus, not the
-model, so we use what follows it: counting character bigrams in the training split without smoothing
-gives $P(y \mid c)$, the distribution of the character immediately after `c`. We compare a pair's
-distributions with the base-2 Jensen–Shannon divergence, $m$ being their average:
+**Figure 1.** The transition width. x: interpolation position $t$, anchor at 0, partner at 1; y: output
+distance $d(t)$. Three pairs (solid, dashed, dash-dotted, labelled with their widths), the median over
+all 1,378 pairs (thick gray), and the straight line $w=0.8$ (dotted).
+
+**Which characters we use: 65, then 53, then 43.** The vocabulary has 65 characters. Rare characters have
+unusually wide transitions, so we keep the earlier direction's frozen threshold of 1,000 training-split
+occurrences; 53 pass and we call these *well-trained*. Those 53 give the 1,378 pairs used for question 2.
+Question 1 needs a letter endpoint: 43 of the 53 are letters, each serving in turn as a fixed **anchor**
+against the other 52 well-trained characters, its **partners**.
+
+**Anchors and class medians, with a worked example.** Partners are sorted into six classes fixed before
+any analysis: lower-case vowels, lower-case consonants, upper-case vowels, upper-case consonants,
+punctuation and digits, and whitespace — surface classes of the character, not learned features. A
+*class-level median* summarises several separate measurements. With `t` as the anchor, its value for the
+lower-case-vowel class is
 
 ```math
-J(a,b)=\tfrac{1}{2}D_{\mathrm{KL}}\big(P(\cdot \mid a)\,\Vert\,m\big)
-      +\tfrac{1}{2}D_{\mathrm{KL}}\big(P(\cdot \mid b)\,\Vert\,m\big).
+\mathrm{median}\lbrace w(\texttt{t},\texttt{a}),\, w(\texttt{t},\texttt{e}),\, w(\texttt{t},\texttt{i}),\, w(\texttt{t},\texttt{o}),\, w(\texttt{t},\texttt{u})\rbrace.
+```
+
+The model never interpolates from `t` towards a "lower-case-vowel representation". It performs five
+separate character-to-character interpolations — `t`→`a`, `t`→`e`, `t`→`i`, `t`→`o`, `t`→`u` — whose five
+widths we summarise with a median, one number per class. Because a median can hide its underlying
+values, Result 1 shows the individual measurements first.
+
+**Successor divergence.** Question 2 needs a character property from the corpus, not the model, so we use
+what follows it. Counting character bigrams in the training split without smoothing gives
+$P(y \mid c)$, the distribution of the character right after `c`. We compare two characters'
+distributions with the base-2 Jensen–Shannon divergence, $m$ their average:
+
+```math
+J(c_{\mathrm{anchor}},c_{\mathrm{partner}})=\tfrac{1}{2}D_{\mathrm{KL}}\big(P(\cdot \mid c_{\mathrm{anchor}})\,\Vert\,m\big)+\tfrac{1}{2}D_{\mathrm{KL}}\big(P(\cdot \mid c_{\mathrm{partner}})\,\Vert\,m\big).
 ```
 
 $J=0$ bits means the two characters are followed by the same mix of characters, $J=1$ bit that their
-successors never overlap. This is a divergence *between two endpoints*, not a property of one token.
-Estimated on each half of the training split, the pair values agree at Spearman $\rho = 0.95$, well above
-the 0.007-bit same-character noise floor.
-
-![Three interpolation curves with their transition widths](plots/fig1_width_definition.png)
-
-**Figure 1.** How the transition width is defined. x: interpolation position $t$ from endpoint `a` to
-`b`; y: relative output distance $d(t)$. Curves: three single pairs (solid, dashed, dash-dotted; labelled
-with their widths), the median over the 1,378 well-trained pairs (thick gray, median width 0.320), and
-the straight-line reference $w=0.8$ (dotted).
+successors never overlap. Estimated on each half of the training split, the pair values agree at Spearman
+rank correlation 0.95 (`RESULTS.md` section 3).
 
 ## Results
 
-### 1. Letter-to-character widths are grouped by character class
+### 1. Raw widths show class structure; the class median is only sometimes representative
 
-**Verdict: yes, consistently across letters — but the effect is modest and partly tracks how common the
-partner character is.** The grouping is not a quirk of one special character such as the comma;
-essentially every letter shows the same class ordering, so it is a general property of the model's
-character layout.
+Figure 2 shows every measurement behind question 1: one cell per pair, no averaging, columns grouped by
+class so each block can be inspected.
 
-For each of the 43 anchors we take the median width over its partners in each class (Figure 2). Averaged
-over anchors, lower-case vowels give the narrowest transitions (0.270) and upper-case consonants the
-widest (0.356), the rest in between (Table 1). Agreement across anchors, measured by Kendall's
-coefficient of concordance $W$ — 0 if anchors rank the classes independently, 1 if identically — is
-$W = 0.42$ (Friedman $\chi^2 = 91.2$, $p = 3.8\times10^{-18}$), and 38 of 43 anchors put lower-case
-vowels below upper-case consonants. The effect is small beside the spread between anchors, whose overall
-medians span 0.258–0.404, and one anchor's profile can invert the average ordering (Figure 2, left), so
-the claim needs all 43.
+![pairwise width heatmap](plots/fig2_width_heatmap.png)
 
-Class membership is also confounded with frequency: vowels are common, upper-case consonants rare. But
-repeating the concordance test after removing each anchor's partner-frequency trend still leaves a clear
-pattern ($W = 0.27$, $p = 4.3\times10^{-11}$), so frequency explains part of the grouping, not all.
+**Figure 2.** Left: raw transition width for every measured pair. x: the 53 well-trained partners,
+grouped into the six classes (black separators, names above), alphabetical within class; y: the 43
+letter anchors, grouped the same way; colour: $w$, dark blue = abrupt, yellow = gradual, white =
+self-pair. Right, same data: x: an anchor's median width over its partners in a class, y: the six
+classes; one point per anchor, boxes give quartiles.
 
-![Class medians for four anchors and across all 43 anchors](plots/fig2_class_widths.png)
+The lower-vowel and whitespace columns are dark for almost every anchor and the upper-consonant block is
+brightest, so the class ordering in the right-hand panel is visible in the raw cells:
+lower-case vowels are narrowest (0.270 averaged over anchors) and upper-case consonants widest (0.356),
+a gap of 0.087 (Table 1).
 
-**Figure 2.** Transition width by partner class, seen from letter anchors. Both panels: x: partner class,
-ordered by mean rank over anchors (narrowest left); y: median $w_{10\to90}$ over the anchor's partners in
-that class. Left: the most frequent letter of each letter class (`e`, `t`, `I`, `T`; own line
-style and marker each). Right: one point per anchor; boxes give median and quartiles.
+The heatmap also shows where that median stops being fair. The lower-vowel and whitespace
+blocks look flat and are: within one anchor their raw widths span an interquartile range of only 0.021
+and 0.020 on average. The large letter blocks are not flat — 0.051 and 0.063, as large as the whole
+0.087 gap between the extreme class averages. **For the two consonant
+classes the median hides substantial pair-to-pair variation and should not be read as describing a
+typical pair.** The variation runs down columns, which is why the blocks look striped: `s` averages 0.260
+over the 43 anchors, `v` 0.386.
 
-| partner class | mean median $w$ | mean rank | mean median $J$ (bits) |
+| partner class | members | mean class median $w$ | mean within-anchor IQR of raw $w$ |
 |---|---|---|---|
-| lower vowel | 0.270 | 1.79 | 0.60 |
-| whitespace | 0.286 | 2.37 | 0.69 |
-| upper vowel | 0.316 | 3.56 | 0.73 |
-| lower consonant | 0.320 | 3.84 | 0.49 |
-| punctuation and digits | 0.331 | 4.47 | 0.83 |
-| upper consonant | 0.356 | 4.98 | 0.61 |
+| lower vowel | 5 | 0.270 | 0.021 |
+| whitespace | 2 | 0.286 | 0.020 |
+| upper vowel | 5 | 0.316 | 0.043 |
+| lower consonant | 17 | 0.320 | 0.051 |
+| punctuation & digits | 8 | 0.331 | 0.050 |
+| upper consonant | 16 | 0.356 | 0.063 |
 
-**Table 1.** Each column averages a per-anchor median over the 43 letter anchors; rows are ordered by
-width and rank 1 is narrowest. Class sizes are 5, 2, 5, 17, 8 and 16 well-trained members in row order. The last column gives the successor
-divergence of Result 2; the two orderings disagree — lower consonants have the lowest divergence but
-middling widths, punctuation the highest but wide transitions.
+**Table 1.** Column 3 averages the per-anchor class median over the 43 anchors, narrowest first;
+column 4 averages the interquartile range of the *raw* widths in that block, so small column 4 means the
+median represents its cells.
 
-### 2. Successor divergence predicts width only within a fixed letter, and weakly
+The ordering is not driven by a few letters: 38 of 43 anchors put lower-case vowels below upper-case
+consonants. Agreement statistics and a frequency control are in `RESULTS.md`.
 
-**Verdict: mixed. Pooled over well-trained pairs there is no relationship; with the letter anchor held
-fixed, more different successor distributions go with slightly narrower transitions in 36 of 43 anchors.**
-Pooling mixes between- and within-anchor variation, so the fixed-anchor answer is the more informative.
-Because pairs share characters, each aggregate below is tested by permuting the 53 character labels,
-which leaves both pairwise matrices intact and breaks only their alignment.
+### 2. Successor divergence: flat except for a punctuation cluster at the bottom
 
-Pooled over the 1,378 pairs, Spearman $\rho = -0.06$ (permutation $p = 0.32$): no effect, and the ten
-binned medians in Figure 3 (left) stay between 0.307 and 0.341 across the full divergence range.
+Figure 3 plots all 1,378 pairs, averaged in fixed-width divergence bins of 0.1 so the few
+near-zero-divergence pairs are not absorbed into a larger group.
 
-Holding the anchor fixed changes the picture. Correlating $J$ with $w$ across each anchor's 52 partners
-gives a median $\rho$ of $-0.20$ (interquartile range $-0.40$ to $-0.08$), negative for 36 of 43 anchors
-and individually significant at 0.05 for 18. The sign is the anticipated direction: higher divergence,
-narrower transition. Under permutation the median $\rho$ stays within $[-0.12, +0.11]$ 95% of
-the time, so $-0.20$ is unlikely under the null ($p = 0.002$, 1,000 permutations). Partialling out the
-partner's log frequency strengthens it slightly (median $\rho = -0.32$, negative for 39 of 43), so this
-is not the frequency effect again.
+![width against successor divergence](plots/fig3_jsd_vs_width.png)
 
-The gap between the two answers is visible in the data: the between-anchor component runs the other way.
-Anchors with more divergent partners on average also have somewhat wider transitions on average
-($\rho = +0.25$, $p = 0.10$, n = 43) — weak, but enough to cancel a within-anchor slope of $-0.20$ once
-pairs are pooled. Table 1 shows the same tension, so successor divergence does not explain the class
-ordering of Result 1.
+**Figure 3.** x: successor divergence $J$ between the endpoints in bits, in fixed bins of 0.1; y:
+transition width $w$. Faint dots: pairs with at least one non-punctuation endpoint (n = 1,350). Diamonds:
+both endpoints punctuation (n = 28). Solid line with squares: bin mean width, all pairs; dashed line with
+triangles: the same with punctuation–punctuation pairs removed. Rotated text per bin: pair count, and how
+many are punctuation–punctuation ("p-p").
 
-![Pooled scatter and per-anchor correlations](plots/fig3_jsd_vs_width.png)
+From 0.1 upward the bin means barely move: each lies between 0.317 and 0.360, a range of 0.04 against a
+pair-to-pair spread near 0.2. The lowest bin is the exception — below $J=0.1$ there are 12 pairs with
+mean width 0.581, nearly double the rest. (Bins 1–3, n = 12 / 31 / 78, means 0.581 / 0.360 / 0.343,
+recomputed here, match the review's values.)
 
-**Figure 3.** Successor divergence against transition width. Left: x: $J(a,b)$ in bits; y:
-$w_{10\to90}$; one dot per well-trained pair, with ten equal-count bin medians on the diamond-marked
-line. Right: x: the Spearman $\rho$ between $J$ and $w$ within one anchor across its 52 partners; y:
-anchor count. Gray band: 95% range of the median $\rho$ under permutation; dashed line: observed
-median; dash-dotted line: pooled value.
+That bin is not a general low-divergence effect. Ten of its 12 pairs are punctuation-to-punctuation —
+every pair drawn from `! , . : ; ?` — as expected, since punctuation marks are followed by similar things
+and so sit at low $J$ by construction. Those pairs are wide *wherever* they fall on the x-axis: mean
+width 0.531 over all 28, against 0.327 for the other 1,350. The two non-punctuation pairs in the lowest
+bin, `g`–`t` and `h`–`m`, have ordinary widths of 0.302 and 0.379, and removing the
+punctuation–punctuation pairs flattens the lowest bin to 0.340 (dashed line). The excess is a
+character-class cluster, not an effect of low divergence.
+
+Holding the letter anchor fixed gives a second view, free of between-anchor differences. Done that way,
+36 of the 43 anchors show the expected direction — more different successors, slightly narrower
+transitions — but the trend is weak and explains little of the variation, as Figure 3's scatter shows.
+Pooled over pairs it vanishes, the between-anchor component cancelling it. Rank statistics are in
+`RESULTS.md`.
 
 ## Conclusion
 
-Character-class grouping of transition width is general across letters: the 43 anchors rank the six
-partner classes consistently ($W = 0.42$, $p = 3.8\times10^{-18}$, Figure 2), lower-case vowels narrowest
-and upper-case consonants widest. This is the stronger result, and it survives removing the
-partner-frequency trend, though weakened.
+**Character classes (question 1).** Figure 2 shows a genuine class tendency, consistent across anchors,
+but the class median is a fair summary only for the small, homogeneous classes: in the consonant blocks
+pair-to-pair variation within one anchor is as large as the gap between the extreme class averages
+(Table 1); the individual partner character carries as much structure as the class does.
 
-Successor divergence is weaker: pooled over pairs there is nothing ($\rho = -0.06$, $p = 0.32$), and only
-with the anchor held fixed does a consistent negative trend appear (median $\rho = -0.20$, 36 of 43
-anchors, permutation $p = 0.002$, Figure 3). It explains little of the variation in width.
+**Successor divergence (question 2).** Across most of the divergence range, transition width changes
+little. Pairs with divergence below 0.1 have substantially wider transitions, but this small group of 12
+is dominated by punctuation–punctuation pairs, which are wide at every divergence level. We therefore do
+not find a general monotonic relationship between successor divergence and transition width. Within a
+fixed letter anchor, larger successor divergence is weakly associated with narrower transitions, but the
+trend explains little of the variation.
 
-Nothing here is causal: we did not intervene on successor statistics or class membership, so neither can
-be said to *make* transitions sharper, and a shared cause such as how often and where a character appears
-fits equally well. Everything comes from one 8.4M-parameter model at one checkpoint, prompt,
-interpolation point (block 0) and patched position, so we cannot say how it varies with model, context or
-depth, nor when during training the pattern appears.
+**What this does not show.** Nothing here is causal: we did not intervene on successor statistics or
+class membership. All of it is one model at one checkpoint, prompt, block and position.

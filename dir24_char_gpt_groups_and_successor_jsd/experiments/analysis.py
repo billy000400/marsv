@@ -177,6 +177,23 @@ def main():
             "min": float(min(np.median([W[a, b] for b in kept if b != a]) for a in letters)),
             "max": float(max(np.median([W[a, b] for b in kept if b != a]) for a in letters))},
     }
+    # raw pair-to-pair spread inside each class block, for judging whether the class median is
+    # representative of the cells it summarises (descriptive spread of the raw widths, no new score)
+    blk = {}
+    for g in CLASSES:
+        iq, rg = [], []
+        for a in letters:
+            v = np.array([W[a, b] for b in partner_class[(a, g)]])
+            iq.append(np.percentile(v, 75) - np.percentile(v, 25))
+            rg.append(v.max() - v.min())
+        blk[g] = {"mean_within_anchor_iqr": float(np.mean(iq)),
+                  "mean_within_anchor_range": float(np.mean(rg)),
+                  "n_members": int(sum(class_of(chars[b]) == g for b in kept))}
+    out["s2_classes"]["raw_block_spread"] = blk
+    out["s2_classes"]["between_class_spread_of_mean_medians"] = float(M.mean(0).max() - M.mean(0).min())
+    out["s2_classes"]["partner_mean_w_over_anchors"] = {
+        disp(chars[b]): float(np.mean([W[a, b] for a in letters if a != b])) for b in kept}
+
     # four non-cherry-picked example anchors: most frequent eligible member of each letter class
     ex_anchors = []
     for g in ["lower vowel", "lower cons.", "upper vowel", "upper cons."]:
@@ -264,10 +281,33 @@ def main():
                   if p["w"] is not None and not (keep[p["i"]] and keep[p["j"]])]
     rho_rare = stats.spearmanr([J[a, b] for a, b in rare_pairs], [W[a, b] for a, b in rare_pairs])
 
-    # equal-count binned medians for the figure
+    # equal-count binned medians (superseded by the fixed-width bins below; kept for the record)
     o = np.argsort(j_pairs)
     bins = np.array_split(o, 10)
     binned = [[float(np.median(j_pairs[b])), float(np.median(w_kept[b])), int(b.size)] for b in bins]
+
+    # fixed-width JSD bins [0.0,0.1) ... [0.9,1.0]: mean width, count, and the same excluding
+    # punctuation-punctuation pairs (both endpoints in the punctuation-and-digits class)
+    is_pp = np.array([class_of(chars[a]) == "punct. & digits" and
+                      class_of(chars[b]) == "punct. & digits" for a, b in kp])
+    edges = np.round(np.arange(0, 1.0001, 0.1), 3)
+    bidx = np.clip(np.digitize(j_pairs, edges[1:-1]), 0, 9)
+    fixed = []
+    for k in range(10):
+        m = bidx == k
+        mn = m & ~is_pp
+        fixed.append({"lo": float(edges[k]), "hi": float(edges[k + 1]), "n": int(m.sum()),
+                      "mean_w": float(w_kept[m].mean()) if m.any() else None,
+                      "median_w": float(np.median(w_kept[m])) if m.any() else None,
+                      "n_punct_punct": int((m & is_pp).sum()),
+                      "n_excl_pp": int(mn.sum()),
+                      "mean_w_excl_pp": float(w_kept[mn].mean()) if mn.any() else None})
+    low = bidx == 0
+    low_pairs = [{"pair": [disp(chars[a]), disp(chars[b])], "J": float(J[a, b]), "w": float(W[a, b]),
+                  "both_punct": bool(class_of(chars[a]) == "punct. & digits" and
+                                     class_of(chars[b]) == "punct. & digits")}
+                 for (a, b), m in zip(kp, low) if m]
+    low_pairs.sort(key=lambda r: r["J"])
 
     out["s4_jsd_vs_width"] = {
         "pooled": {"n": len(kp), "spearman_rho": float(rho_pool.statistic),
@@ -276,6 +316,14 @@ def main():
                    "perm_null_q025_q975": [float(np.percentile(null, 2.5)),
                                            float(np.percentile(null, 97.5))]},
         "binned_medians_J_w_n": binned,
+        "fixed_width_bins": fixed,
+        "low_jsd_bin_pairs": low_pairs,
+        "punct_punct": {"n": int(is_pp.sum()), "mean_w": float(w_kept[is_pp].mean()),
+                        "median_w": float(np.median(w_kept[is_pp])),
+                        "mean_w_other": float(w_kept[~is_pp].mean()),
+                        "median_w_other": float(np.median(w_kept[~is_pp])),
+                        "members": [disp(chars[i]) for i in kept
+                                    if class_of(chars[i]) == "punct. & digits"]},
         "per_anchor": {"n_anchors": len(letters), "median_rho": float(np.median(pr)),
                        "iqr": [float(np.percentile(pr, 25)), float(np.percentile(pr, 75))],
                        "n_negative": int((pr < 0).sum()), "min_rho": float(pr.min()),
@@ -340,7 +388,67 @@ def main():
              ha="center", fontsize=7.5)
     save(fig, "fig1_width_definition.png")
 
-    # Fig 2 - character classes from letter anchors
+    # Fig 2 - raw 43 x 53 pairwise width matrix, with the class-median summary as a small panel
+    row_ord, row_sep, row_lab = [], [], []
+    for g in CLASSES:
+        grp = sorted([a for a in letters if class_of(chars[a]) == g], key=lambda i: chars[i].lower())
+        if grp:
+            row_lab.append((len(row_ord) + len(grp) / 2 - 0.5, g))
+            row_ord += grp
+            row_sep.append(len(row_ord) - 0.5)
+    col_ord, col_sep, col_lab = [], [], []
+    for g in CLASSES:
+        grp = sorted([b for b in kept if class_of(chars[b]) == g], key=lambda i: disp(chars[i]))
+        col_lab.append((len(col_ord) + len(grp) / 2 - 0.5, g))
+        col_ord += grp
+        col_sep.append(len(col_ord) - 0.5)
+    H = np.array([[W[a, b] if a != b else np.nan for b in col_ord] for a in row_ord])
+
+    fig = plt.figure(figsize=(13.4, 5.8))
+    gs = fig.add_gridspec(1, 2, width_ratios=[3.5, 1.0], wspace=0.30)
+    ax = fig.add_subplot(gs[0, 0])
+    cmap = plt.get_cmap("cividis").copy()
+    cmap.set_bad("white")
+    im = ax.imshow(H, cmap=cmap, aspect="auto", interpolation="nearest")
+    for x in col_sep[:-1]:
+        ax.axvline(x, color="k", lw=1.4)
+    for y in row_sep[:-1]:
+        ax.axhline(y, color="k", lw=1.0)
+    ax.set_xticks(range(len(col_ord)))
+    ax.set_xticklabels([disp(chars[b]) for b in col_ord], fontsize=6.5, rotation=90)
+    ax.set_yticks(range(len(row_ord)))
+    ax.set_yticklabels([chars[a] for a in row_ord], fontsize=6.5)
+    for x, g in col_lab:
+        ax.text(x, -1.6, g, ha="center", va="bottom",
+                fontsize=7.5 if g not in ("punct. & digits", "space / \\n") else 6.3)
+    for y, g in row_lab:
+        ax.text(-4.2, y, g, ha="center", va="center", fontsize=7.5, rotation=90)
+    ax.set_xlabel("partner character $c_{\\mathrm{partner}}$   (53 well-trained characters, "
+                  "grouped by class, alphabetical within class)", fontsize=8.5)
+    ax.set_ylabel("anchor character $c_{\\mathrm{anchor}}$   (43 letters)", fontsize=8.5, labelpad=34)
+    ax.set_title("Every measured pair: transition width $w(c_{\\mathrm{anchor}},c_{\\mathrm{partner}})$"
+                 "   (white = self-pair, not measured)", fontsize=9.5, pad=18)
+    cb = fig.colorbar(im, ax=ax, fraction=0.025, pad=0.015)
+    cb.set_label("$w_{10\\to90}$  (small = abrupt switch)", fontsize=8)
+
+    ax2 = fig.add_subplot(gs[0, 1])
+    ypos = np.arange(len(CLASSES))[::-1]
+    bp = ax2.boxplot([M[:, k] for k in range(len(CLASSES))], positions=ypos, vert=False, widths=.6,
+                     patch_artist=True, medianprops=dict(color="k", lw=1.6),
+                     flierprops=dict(marker=".", ms=3))
+    for k, box in enumerate(bp["boxes"]):
+        box.set(facecolor=CCOLOR[CLASSES[k]], alpha=.55, hatch=CHATCH[CLASSES[k]], edgecolor="0.2")
+    for k in range(len(CLASSES)):
+        ax2.plot(M[:, k], np.full(len(letters), ypos[k]) + rng.uniform(-.14, .14, len(letters)),
+                 ls="none", marker=CMARK[CLASSES[k]], ms=2.6, color="0.25", alpha=.65)
+    ax2.set_yticks(ypos)
+    ax2.set_yticklabels(CLASSES, fontsize=7.5)
+    ax2.set_xlabel("median $w$ over that anchor's\npartners in the class", fontsize=8)
+    ax2.set_title("Class median, one point per anchor\n(same class order as rows and columns)",
+                  fontsize=9)
+    save(fig, "fig2_width_heatmap.png")
+
+    # kept for RESULTS.md: the four-anchor view of the same class medians
     ordc = [CLASSES[k] for k in np.argsort(ranks.mean(0))]   # display order: narrowest first
     Mo = np.array([[med[(a, g)] for g in ordc] for a in letters])
     fig, axes = plt.subplots(1, 2, figsize=(11.6, 4.4))
@@ -350,7 +458,8 @@ def main():
         ax.plot(x + (k - 1.5) * 0.05, [med[(a, g)] for g in ordc], ls=["-", "--", "-.", ":"][k],
                 marker=["o", "s", "^", "D"][k], ms=6, color=CVD[k],
                 label=f"anchor '{chars[a]}' ({class_of(chars[a])})")
-    ax.set_xticks(x); ax.set_xticklabels(ordc, rotation=25, ha="right", fontsize=8)
+    ax.set_xticks(x)
+    ax.set_xticklabels(ordc, rotation=25, ha="right", fontsize=8)
     ax.set_ylabel("median $w_{10\\to90}$ over the anchor's partners in that class")
     ax.set_xlabel("character class of the partner (classes ordered by mean rank over all anchors)")
     ax.set_title("Four anchors: the most frequent letter of each letter class\n"
@@ -369,31 +478,46 @@ def main():
     ax.set_xlabel("character class of the partner (same order as the left panel)")
     ax.set_title(f"All {len(letters)} letter anchors (one point per anchor)\n"
                  f"Kendall's $W$ = {kw:.2f}, Friedman $p$ = {fried.pvalue:.1e}", fontsize=9.5)
-    save(fig, "fig2_class_widths.png")
+    save(fig, "fig2b_class_widths.png")
 
-    # Fig 3 - successor JSD vs width
-    fig, axes = plt.subplots(1, 2, figsize=(11.6, 4.4))
-    ax = axes[0]
-    ax.plot(j_pairs, w_kept, ls="none", marker="o", ms=2.2, alpha=.28, color=CVD[0],
-            label=f"one point = one pair (n = {len(kp)})")
-    bm = np.array(binned)
-    ax.plot(bm[:, 0], bm[:, 1], ls="-", marker="D", ms=6, lw=2, color=CVD[1],
-            label="median $w$ in 10 equal-count bins")
-    ax.set_xlabel("successor JSD $J(a,b)$ between the two endpoints (bits)")
-    ax.set_ylabel("$w_{10\\to90}$")
-    ax.set_title(f"Pooled over well-trained pairs: Spearman $\\rho$ = {rho_pool.statistic:.2f}\n"
-                 f"(character-relabel permutation $p$ = {p_perm:.4f}, {N_PERM} permutations)",
+    # Fig 3 - successor JSD vs width in fixed-width JSD bins
+    ctr = np.array([r["lo"] + 0.05 for r in fixed])
+    fig, ax = plt.subplots(figsize=(7.8, 5.0))
+    ax.plot(j_pairs[~is_pp], w_kept[~is_pp], ls="none", marker="o", ms=2.4, alpha=.22,
+            color=CVD[0],
+            label=f"one pair, at least one non-punctuation endpoint (n = {int((~is_pp).sum())})")
+    ax.plot(j_pairs[is_pp], w_kept[is_pp], ls="none", marker="D", ms=5.5, alpha=.95,
+            color=CVD[1], markeredgecolor="0.2", markeredgewidth=.4,
+            label=f"one pair, both endpoints punctuation (n = {int(is_pp.sum())})")
+    ax.plot(ctr, [r["mean_w"] for r in fixed], ls="-", marker="s", ms=7, lw=2, color="k",
+            zorder=5, label="bin mean width, all pairs")
+    ax.plot(ctr, [r["mean_w_excl_pp"] for r in fixed], ls="--", marker="^", ms=6, lw=1.8,
+            color=CVD[2], zorder=6, label="bin mean width, punctuation-punctuation pairs removed")
+    for c, r in zip(ctr, fixed):
+        lab = f"n = {r['n']}" + (f"  ({r['n_punct_punct']} p-p)" if r["n_punct_punct"] else "")
+        ax.text(c, 0.755, lab, ha="center", va="bottom", fontsize=6.8, rotation=90, color="0.25")
+    ax.set_xticks(np.round(np.arange(0, 1.001, 0.1), 1))
+    ax.set_xlim(-0.02, 1.02)
+    ax.set_ylim(0.10, 1.00)
+    ax.set_xlabel("successor JSD $J(c_{\\mathrm{anchor}},c_{\\mathrm{partner}})$ between the two "
+                  "endpoints (bits), fixed-width bins of 0.1")
+    ax.set_ylabel("transition width $w_{10\\to90}$")
+    ax.set_title("Width against successor divergence, all 1,378 well-trained pairs\n"
+                 "the lowest-JSD bin is wide because it is almost entirely punctuation pairs",
                  fontsize=9.5)
-    ax.legend(fontsize=7.5, loc="upper right")
-    ax = axes[1]
+    ax.legend(fontsize=7.4, loc="upper center", bbox_to_anchor=(0.5, -0.16), ncol=2,
+              framealpha=.95)
+    save(fig, "fig3_jsd_vs_width.png")
+
+    # supporting figure for RESULTS.md: the per-anchor Spearman check
+    fig, ax = plt.subplots(figsize=(6.0, 4.3))
     lo95, hi95 = np.percentile(null_pa, 2.5), np.percentile(null_pa, 97.5)
     ax.axvspan(lo95, hi95, color="0.75", alpha=.5, zorder=0,
                label="95% range of the median under\ncharacter-relabel permutation")
     ax.hist(pr, bins=np.linspace(-0.8, 0.6, 29), color=CVD[0], alpha=.65, hatch="//",
             edgecolor="0.2", zorder=2)
     ax.axvline(0, color="0.3", lw=1.2, ls=":")
-    ax.axvline(np.median(pr), color=CVD[1], lw=2, ls="--",
-               label=f"median = {np.median(pr):.2f}")
+    ax.axvline(np.median(pr), color=CVD[1], lw=2, ls="--", label=f"median = {np.median(pr):.2f}")
     ax.axvline(rho_pool.statistic, color=CVD[2], lw=2, ls="-.",
                label=f"pooled = {rho_pool.statistic:.2f}")
     ax.set_xlim(-0.8, 0.6)
@@ -402,7 +526,7 @@ def main():
     ax.set_title(f"Within a fixed letter anchor ({len(letters)} anchors)\n"
                  f"{int((pr < 0).sum())} of {len(letters)} anchors have $\\rho$ < 0", fontsize=9.5)
     ax.legend(fontsize=7, loc="upper left")
-    save(fig, "fig3_jsd_vs_width.png")
+    save(fig, "fig_s2_per_anchor_rho.png")
 
     # supporting figure for RESULTS.md: successor-JSD reliability
     fig, ax = plt.subplots(figsize=(5.4, 4.2))
