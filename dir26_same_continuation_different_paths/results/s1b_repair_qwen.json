@@ -1,0 +1,70 @@
+{
+  "model": "Qwen/Qwen2.5-3B",
+  "pair": {
+    "key": "p3_relation_repaired",
+    "label": "Different relation, same answer (repaired wording)",
+    "intended": "Paris",
+    "prompts": {
+      "A": {
+        "prompt": "The capital city of France is",
+        "n_tokens": 6,
+        "continuation": " Paris. The capital city of",
+        "top1_token": " Paris",
+        "top1_prob": 0.4294,
+        "top5": [
+          [
+            " Paris",
+            0.4294
+          ],
+          [
+            " __",
+            0.0846
+          ],
+          [
+            "____",
+            0.0513
+          ],
+          [
+            " ______",
+            0.0453
+          ],
+          [
+            " located",
+            0.0399
+          ]
+        ]
+      },
+      "B": {
+        "prompt": "The largest city in France is",
+        "n_tokens": 6,
+        "continuation": " Paris. The largest city in",
+        "top1_token": " Paris",
+        "top1_prob": 0.2641,
+        "top5": [
+          [
+            " Paris",
+            0.2641
+          ],
+          [
+            " __",
+            0.1602
+          ],
+          [
+            " ____",
+            0.0757
+          ],
+          [
+            "____",
+            0.0757
+          ],
+          [
+            "\n",
+            0.0668
+          ]
+        ]
+      }
+    },
+    "completion_pass": true,
+    "length_match": true
+  }
+}

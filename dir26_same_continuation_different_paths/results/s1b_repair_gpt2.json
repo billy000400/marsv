@@ -1,0 +1,70 @@
+{
+  "model": "gpt2-large",
+  "pair": {
+    "key": "p3_relation_repaired",
+    "label": "Different relation, same answer (repaired wording)",
+    "intended": "Paris",
+    "prompts": {
+      "A": {
+        "prompt": "The capital city of France is",
+        "n_tokens": 6,
+        "continuation": " home to the world's largest",
+        "top1_token": " home",
+        "top1_prob": 0.0754,
+        "top5": [
+          [
+            " home",
+            0.0754
+          ],
+          [
+            " the",
+            0.074
+          ],
+          [
+            " a",
+            0.0649
+          ],
+          [
+            " also",
+            0.0274
+          ],
+          [
+            " known",
+            0.0264
+          ]
+        ]
+      },
+      "B": {
+        "prompt": "The largest city in France is",
+        "n_tokens": 6,
+        "continuation": " the capital, Paris. It",
+        "top1_token": " the",
+        "top1_prob": 0.0952,
+        "top5": [
+          [
+            " the",
+            0.0952
+          ],
+          [
+            " Paris",
+            0.0901
+          ],
+          [
+            " also",
+            0.0722
+          ],
+          [
+            " not",
+            0.0405
+          ],
+          [
+            " a",
+            0.0328
+          ]
+        ]
+      }
+    },
+    "completion_pass": false,
+    "length_match": true
+  }
+}

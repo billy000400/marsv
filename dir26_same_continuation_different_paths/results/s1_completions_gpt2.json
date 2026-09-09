@@ -1,0 +1,273 @@
+{
+  "model": "gpt2-large",
+  "pairs": [
+    {
+      "key": "p1_copy_vs_recall",
+      "label": "Copy available vs factual recall",
+      "intended": "Paris",
+      "prompts": {
+        "A": {
+          "prompt": "The capital of France is Paris. The capital of France is",
+          "n_tokens": 12,
+          "continuation": " Paris.\n\nThe capital",
+          "top1_token": " Paris",
+          "top1_prob": 0.6544,
+          "top5": [
+            [
+              " Paris",
+              0.6544
+            ],
+            [
+              " the",
+              0.0246
+            ],
+            [
+              " France",
+              0.0204
+            ],
+            [
+              " not",
+              0.0195
+            ],
+            [
+              " New",
+              0.0156
+            ]
+          ]
+        },
+        "B": {
+          "prompt": "The capital of Spain is Madrid. The capital of France is",
+          "n_tokens": 12,
+          "continuation": " Paris. The capital of Germany",
+          "top1_token": " Paris",
+          "top1_prob": 0.937,
+          "top5": [
+            [
+              " Paris",
+              0.937
+            ],
+            [
+              " Lyon",
+              0.0136
+            ],
+            [
+              " B",
+              0.006
+            ],
+            [
+              " T",
+              0.0055
+            ],
+            [
+              " Mont",
+              0.0029
+            ]
+          ]
+        }
+      },
+      "completion_pass": true,
+      "length_match": true
+    },
+    {
+      "key": "p2_succ_vs_pred",
+      "label": "Successor vs predecessor",
+      "intended": "seven",
+      "prompts": {
+        "A": {
+          "prompt": "The number after six is",
+          "n_tokens": 5,
+          "continuation": " the number of times the player",
+          "top1_token": " the",
+          "top1_prob": 0.2765,
+          "top5": [
+            [
+              " the",
+              0.2765
+            ],
+            [
+              " a",
+              0.1119
+            ],
+            [
+              " not",
+              0.0336
+            ],
+            [
+              " an",
+              0.0252
+            ],
+            [
+              " for",
+              0.0239
+            ]
+          ]
+        },
+        "B": {
+          "prompt": "The number before eight is",
+          "n_tokens": 5,
+          "continuation": " the number of times the player",
+          "top1_token": " the",
+          "top1_prob": 0.269,
+          "top5": [
+            [
+              " the",
+              0.269
+            ],
+            [
+              " a",
+              0.1034
+            ],
+            [
+              " not",
+              0.0339
+            ],
+            [
+              " an",
+              0.0219
+            ],
+            [
+              " called",
+              0.0209
+            ]
+          ]
+        }
+      },
+      "completion_pass": false,
+      "length_match": true
+    },
+    {
+      "key": "p3_relation",
+      "label": "Different relation, same answer",
+      "intended": "Paris",
+      "prompts": {
+        "A": {
+          "prompt": "The capital of France is",
+          "n_tokens": 5,
+          "continuation": " the capital of France.\n",
+          "top1_token": " the",
+          "top1_prob": 0.097,
+          "top5": [
+            [
+              " the",
+              0.097
+            ],
+            [
+              " Paris",
+              0.0721
+            ],
+            [
+              " a",
+              0.0696
+            ],
+            [
+              " also",
+              0.0403
+            ],
+            [
+              " located",
+              0.0395
+            ]
+          ]
+        },
+        "B": {
+          "prompt": "The largest city in France is",
+          "n_tokens": 6,
+          "continuation": " the capital, Paris. It",
+          "top1_token": " the",
+          "top1_prob": 0.0952,
+          "top5": [
+            [
+              " the",
+              0.0952
+            ],
+            [
+              " Paris",
+              0.0901
+            ],
+            [
+              " also",
+              0.0722
+            ],
+            [
+              " not",
+              0.0405
+            ],
+            [
+              " a",
+              0.0328
+            ]
+          ]
+        }
+      },
+      "completion_pass": false,
+      "length_match": false
+    },
+    {
+      "key": "p4_entity",
+      "label": "Different entity, same relation and answer",
+      "intended": "Shakespeare",
+      "prompts": {
+        "A": {
+          "prompt": "The author of Hamlet is",
+          "n_tokens": 6,
+          "continuation": " a man of the world,",
+          "top1_token": " a",
+          "top1_prob": 0.1273,
+          "top5": [
+            [
+              " a",
+              0.1273
+            ],
+            [
+              " dead",
+              0.0956
+            ],
+            [
+              " not",
+              0.0592
+            ],
+            [
+              " the",
+              0.031
+            ],
+            [
+              " also",
+              0.0226
+            ]
+          ]
+        },
+        "B": {
+          "prompt": "The author of Macbeth is",
+          "n_tokens": 7,
+          "continuation": " a man of the world,",
+          "top1_token": " a",
+          "top1_prob": 0.1074,
+          "top5": [
+            [
+              " a",
+              0.1074
+            ],
+            [
+              " not",
+              0.0464
+            ],
+            [
+              " the",
+              0.0464
+            ],
+            [
+              " also",
+              0.0278
+            ],
+            [
+              " an",
+              0.0192
+            ]
+          ]
+        }
+      },
+      "completion_pass": false,
+      "length_match": false
+    }
+  ]
+}

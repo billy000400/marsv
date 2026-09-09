@@ -5,9 +5,14 @@ import os
 import numpy as np
 import torch
 
-from common import DEV, PAIRS, RESULTS, blocks, load
+from common import DEV, MODEL, MODEL_KEY, PAIRS, RESULTS, blocks, load
+from s1b_repair import REPAIR
 
 N_T = 50
+# Pairs that passed the S1 completion screen on this model (both sides give the intended
+# answer AND the two prompts tokenize to the same length).
+RUN = {"gpt2": ["p1_copy_vs_recall"],
+       "qwen": ["p1_copy_vs_recall", "p3_relation_repaired", "p4_entity"]}[MODEL_KEY]
 CHUNK = 25
 LAYER = 0
 
@@ -70,10 +75,10 @@ def main():
     tok, m = load()
     ts = np.linspace(0.0, 1.0, N_T)
     summary = []
-    for key, label, pa, pb, intended in PAIRS:
+    for key, label, pa, pb, intended in list(PAIRS) + [REPAIR]:
+        if key not in RUN:
+            continue
         ida, idb = tok(pa)["input_ids"], tok(pb)["input_ids"]
-        if key != "p1_copy_vs_recall":
-            continue  # only the pair that passed the S1 completion screen
         ha, lga = resid_post0(m, ida)
         hb, lgb = resid_post0(m, idb)
         vecs, cos = slerp_norm(ha, hb, ts)
@@ -91,11 +96,11 @@ def main():
             top_tokens_unique=sorted(set(top)),
             n_steps_top_is_intended=int(sum(t.strip() == intended for t in top)),
             per_pos_cos=[round(float(c), 4) for c in cos]))
-        np.savez(os.path.join(RESULTS, f"{key}_interp.npz"), t=ts, d=d,
+        np.savez(os.path.join(RESULTS, f"{key}_interp_{MODEL_KEY}.npz"), t=ts, d=d,
                  logits_A=lga.cpu().numpy(), logits_B=lgb.cpu().numpy())
         print(key, "d(t) =", np.round(d, 3))
-    with open(os.path.join(RESULTS, "s2_summary.json"), "w") as f:
-        json.dump(summary, f, indent=2)
+    with open(os.path.join(RESULTS, f"s2_summary_{MODEL_KEY}.json"), "w") as f:
+        json.dump({"model": MODEL, "pairs": summary}, f, indent=2)
     print(json.dumps(summary, indent=2)[:2000])
 
 

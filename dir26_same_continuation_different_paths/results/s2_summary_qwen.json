@@ -1,0 +1,83 @@
+{
+  "model": "Qwen/Qwen2.5-3B",
+  "pairs": [
+    {
+      "key": "p1_copy_vs_recall",
+      "label": "Copy available vs factual recall",
+      "prompt_a": "The capital of France is Paris. The capital of France is",
+      "prompt_b": "The capital of Spain is Madrid. The capital of France is",
+      "n_tokens": 12,
+      "endpoint_logit_l2": 543.1680908203125,
+      "recon_err_a": 15.587748527526855,
+      "recon_err_b": 12.909272193908691,
+      "top_a": " Paris",
+      "top_b": " Paris",
+      "top_tokens_unique": [
+        " Paris"
+      ],
+      "n_steps_top_is_intended": 50,
+      "per_pos_cos": [
+        1.0,
+        1.0,
+        1.0,
+        0.6701,
+        0.9864,
+        0.571,
+        0.9918,
+        0.9904,
+        0.9957,
+        0.9973,
+        0.9874,
+        0.9987
+      ]
+    },
+    {
+      "key": "p4_entity",
+      "label": "Different entity, same relation and answer",
+      "prompt_a": "The author of Hamlet is",
+      "prompt_b": "The author of Macbeth is",
+      "n_tokens": 6,
+      "endpoint_logit_l2": 321.4616394042969,
+      "recon_err_a": 12.837434768676758,
+      "recon_err_b": 12.884442329406738,
+      "top_a": " ______",
+      "top_b": " ______",
+      "top_tokens_unique": [
+        " ______"
+      ],
+      "n_steps_top_is_intended": 0,
+      "per_pos_cos": [
+        1.0,
+        1.0,
+        1.0,
+        0.3817,
+        0.3136,
+        0.9715
+      ]
+    },
+    {
+      "key": "p3_relation_repaired",
+      "label": "Different relation, same answer (repaired wording)",
+      "prompt_a": "The capital city of France is",
+      "prompt_b": "The largest city in France is",
+      "n_tokens": 6,
+      "endpoint_logit_l2": 377.4859619140625,
+      "recon_err_a": 10.259475708007812,
+      "recon_err_b": 11.762391090393066,
+      "top_a": " Paris",
+      "top_b": " Paris",
+      "top_tokens_unique": [
+        " Paris"
+      ],
+      "n_steps_top_is_intended": 50,
+      "per_pos_cos": [
+        1.0,
+        0.2042,
+        0.7728,
+        0.3161,
+        0.9777,
+        0.9862
+      ]
+    }
+  ]
+}

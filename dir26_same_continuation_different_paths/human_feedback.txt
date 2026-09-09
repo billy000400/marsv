@@ -1,0 +1,1 @@
+It looks like a lot of examples failed. Can you use a bigger model and try again? (Qwen?) Also for the failed ones, can you also add a column about what the model actuallly predicting?

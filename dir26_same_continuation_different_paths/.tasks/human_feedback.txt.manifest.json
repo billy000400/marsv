@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "state": "review_pending",
+  "source_feedback": "human_feedback.txt",
+  "source_sha256": "cba73a6e19d39fcd0b4f18a89e505ca48df473a6b89d423fe12c32cb5fa62dca",
+  "required_outputs": [
+    "REPORT.md",
+    "RESULTS.md",
+    "plots/*.png"
+  ],
+  "may_modify": [
+    "REPORT.md",
+    "RESULTS.md",
+    "PLAN.md",
+    "JOURNAL.md",
+    "CHANGELOG.md",
+    "experiments/*.py",
+    "plots/*",
+    "results/*",
+    ".tasks/*.manifest.json"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback.txt"
+  ],
+  "report_policy": {
+    "core_research_question": "Do the four hand-designed same-continuation prompt pairs produce a visible activation plateau in d(t)? (Re-run on a bigger model, Qwen, per feedback.)",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [
+    "Feedback names 'Qwen' without a size. Assumption (implementation detail, not a change of research question): use the largest Qwen2.5 base model that fits the ~7.2 GB GPU share, i.e. Qwen/Qwen2.5-3B in bfloat16 (3.1B params, 4x GPT-2 Large). Logged in JOURNAL.md.",
+    "Feedback asks to 'add a column about what the model actually predicting' for the failed examples. The existing table already had a greedy 6-token continuation column; assumption: the ask is for an explicit prediction column, so we add the model's actual top-1 next token and its probability alongside the continuation, for every row (which covers all failed ones).",
+    "No new report filename is named in the feedback; it asks to redo the existing experiment, so the existing REPORT.md and RESULTS.md are updated in place."
+  ],
+  "checklist": [
+    {
+      "request": "It looks like a lot of examples failed. Can you use a bigger model and try again? (Qwen?) Also for the failed ones, can you also add a column about what the model actuallly predicting?",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Reran the whole experiment on a bigger model, Qwen2.5-3B (Qwen/Qwen2.5-3B, 3.09B params, bfloat16), alongside the original GPT-2 Large, and added the requested prediction column (the model's actual top-1 next token with its probability) to BOTH screening tables, with top-5 in RESULTS.md. Outcome: on Qwen2.5-3B, 3 of 4 pairs pass the completion screen instead of 1 (pairs 3 and 4 now answer as intended; pair 3 via the one authorized wording repair). Pair 2 still fails on side A, and the new column shows why: top-1 is the blank-filler ' __' at p=0.19 with ' seven' fourth at 0.07 (formatting habit), whereas GPT-2 Large's failures are ignorance (top-1 ' the'/' a' at ~0.1). Ran the 50-step block-0 full-sequence interpolation for all three newly testable pairs; only pair 1 shows a plateau (on both models), pairs 3 and 4 give no clear plateau. REPORT.md was rewritten around that changed finding; RESULTS.md holds the detailed evidence. Both pass check_render.py.",
+        "evidence": "REPORT.md 'A bigger model rescues two of the three failed pairs' (Qwen2.5-3B screening table with the 'Top-1 next token (prob)' column, and the GPT-2 Large table with the same column); REPORT.md 'Only pair 1 shows a plateau, on either model' with Figure 1 (plots/qwen_dt_three_pairs.png) and Figure 2 (plots/p1_gpt2_vs_qwen_dt.png). RESULTS.md sections 'S1 completion screen on Qwen2.5-3B', 'S1 completion screen on GPT-2 Large' (both with top-1 and top-5 prediction columns), 'S2 endpoint sanity check', 'S2 relative logit distance d(t)', 'Verdicts'. Raw data: results/s1_completions_qwen.json, results/s1_completions_gpt2.json, results/s1b_repair_qwen.json, results/s1b_repair_gpt2.json, results/s2_summary_qwen.json, results/s2_summary_gpt2.json, results/*_interp_{qwen,gpt2}.npz. Code: experiments/common.py (DIR26_MODEL), s1_completions.py, s1b_repair.py, s2_interp.py, s2_plot.py.",
+        "ambiguity": "The feedback wrote 'Qwen?' without a size, so the choice of Qwen2.5-3B is an assumption: it is the largest Qwen2.5 base model that fits the ~7.2 GB GPU share (bfloat16). A larger Qwen (7B+) was not run for that reason. Also, the screening tables already carried a greedy-continuation column, so 'what the model actually predicting' was implemented as an explicit top-1 next token + probability column (top-5 in RESULTS.md), applied to every row so the failed and passing rows stay comparable."
+      }
+    }
+  ]
+}

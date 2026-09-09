@@ -59,15 +59,24 @@ Test all four prompt pairs for completion, then produce `d(t)` plots for the fir
 End each JOURNAL.md entry with: `On track? <yes/no> â <stage, % done, blocker if any>`.
 
 ## Current status
-DONE. All four prompt pairs were screened on GPT-2 Large with greedy decoding. Only pair 1
-(copy-available vs factual-recall) gives the intended answer from both prompts, and its two prompts
-are both 12 tokens. The one authorized wording repair was spent on pair 3 (`The capital city of
-France is`): it equalised lengths at 6 tokens but the A side still does not answer Paris, so pair 3
-remains ineligible. Pair 2 fails on both sides, pair 4 fails on both sides and is length-mismatched.
-The 50-step full-sequence block-0 interpolation was run for pair 1: `d(t)` covers 17% of the endpoint
-gap over the first 57% of the path, then 71% over the next 10% -> verdict **plateau visible**
-(`plots/p1_copy_vs_recall_dt.png`). Pairs 2-4: **not testable**. REPORT.md and RESULTS.md are
-written and pass `check_render.py`. `STOP` written.
+DONE, including the `human_feedback.txt` follow-up (bigger model + a "what the model actually
+predicts" column). The four pairs were screened on GPT-2 Large *and* on Qwen2.5-3B, and both
+screening tables now report the top-1 next token with its probability (top-5 in RESULTS.md).
+
+On Qwen2.5-3B three of four pairs become testable (GPT-2 Large: one). Pair 2 still fails, on the A
+side only: Qwen2.5-3B puts 0.19 on the blank-filler token ` __` with ` seven` fourth at 0.07. Pair 3
+needed the one authorized wording repair (`The capital city of France is`), which works on
+Qwen2.5-3B. Pair 4 passes the screen but predicts ` ______` as its immediate next token, so its
+endpoints are a fill-in-the-blank state (stated as a caveat in REPORT.md).
+
+Plateau verdicts from the 50-step full-sequence block-0 interpolation: pair 1 **plateau visible** on
+both models (65% of the endpoint gap inside the steepest fifth of the path on Qwen2.5-3B, 77% on
+GPT-2 Large); pair 3 repaired and pair 4 **no clear plateau** (44% and 37%); pair 2 **not testable**.
+More testable pairs did not give more plateaus. Figures: `plots/qwen_dt_three_pairs.png`,
+`plots/p1_gpt2_vs_qwen_dt.png`. REPORT.md and RESULTS.md pass `check_render.py`.
+
+Note: PLAN.md's "no model sweep" exclusion was overridden by the operator's explicit request for a
+bigger model; the second model is the requested Qwen2.5-3B only, not a sweep.
 
 ## Next step
-None. Direction complete.
+None. Direction complete; the feedback in `human_feedback.txt` is addressed and awaiting review.

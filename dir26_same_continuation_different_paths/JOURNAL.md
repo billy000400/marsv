@@ -43,3 +43,53 @@ one passing pair, REPORT.md carries the exact prompts, literal completions, the 
 interpretation). Wrote `STOP`.
 
 On track? yes — S1/S2/S3 all complete, 100% done, no blocker.
+
+## 2026-09-09 — iteration 2 (operator feedback: bigger model + prediction column)
+
+**Feedback.** `human_feedback.txt`: "It looks like a lot of examples failed. Can you use a bigger
+model and try again? (Qwen?) Also for the failed ones, can you also add a column about what the model
+actuallly predicting?"
+
+**Did.** Parameterised `experiments/common.py` with `DIR26_MODEL=gpt2|qwen`; added a top-1/top-5
+next-token record to `s1_completions.py` (reused by `s1b_repair.py`); made `s2_interp.py` run a
+per-model list of screened pairs and write model-suffixed outputs; replaced `s2_plot.py` with two
+figures. Reran the full pipeline on both models.
+
+**Learned.**
+- Qwen2.5-3B rescues two of the three pairs GPT-2 Large failed: pair 3 (after the one authorized
+  wording repair, which now works) and pair 4 both give the intended answer, so 3 of 4 pairs reach
+  interpolation instead of 1.
+- Pair 2 still fails, but for a *different reason*, which is exactly what the requested prediction
+  column exposes: Qwen2.5-3B reads `The number after six is` as a fill-in-the-blank quiz item and
+  puts 0.19 on ` __`, with ` seven` fourth at 0.07. GPT-2 Large's failures are ignorance (top-1
+  ` the` / ` a` at ~0.1). Same verdict, different cause.
+- Pair 4 passes the documented screen (intended answer inside the greedy continuation) but its
+  immediate next token is ` ______` on both sides, so its interpolation endpoints are a
+  fill-in-the-blank state. Reported as tested with that caveat rather than silently dropped or
+  silently accepted.
+- **The headline changed.** More testable pairs did NOT give more plateaus: pair 1 plateaus on both
+  models (steepest fifth of the path covers 65% of the endpoint gap on Qwen2.5-3B, 77% on GPT-2
+  Large), while pairs 3 and 4 are gentle S-curves (44%, 37%) → **no clear plateau**. Old story:
+  "the screen is the binding constraint, and the one survivor plateaus." New story: "scale fixes the
+  screen, and the plateau still shows up only in the copy-vs-recall pair." Rewrote REPORT.md around
+  that (rule 9b).
+
+**Assumptions logged (no human to ask).**
+- "Qwen?" has no size. Chose `Qwen/Qwen2.5-3B` — largest Qwen2.5 base model fitting the 0.225 GPU
+  fraction (~7.2 GB) in bfloat16, 4x GPT-2 Large. Rejected: Qwen2.5-7B (15 GB in fp16, over budget);
+  Qwen2.5-1.5B (fits comfortably but is a smaller step up). Instruct variants rejected: the prompts
+  are raw completions, so a base model is the like-for-like comparison.
+- bfloat16 is forced by the memory budget. Checked the cost: patched-vs-clean endpoint logits differ
+  by ~3% of the endpoint separation on Qwen2.5-3B vs ~2e-6 on float32 GPT-2 Large. `d(t)` uses the
+  patched endpoints, so the metric is internally consistent; the check is reported in RESULTS.md.
+- "add a column about what the model actually predicting" — the tables already had the greedy
+  6-token continuation, so read the ask as an explicit *prediction* column: top-1 next token with its
+  probability, added to BOTH screening tables (top-5 kept in RESULTS.md). Applied to every row, not
+  only failed ones, so the tables stay comparable.
+- PLAN.md lists "no model sweep" as out of scope. Operator feedback overrides; added exactly the one
+  requested model, no sweep.
+
+**Next step.** None. Feedback addressed, manifest set to `review_pending`. Did not write `STOP` —
+`human_feedback.txt` is still unaddressed until the wrapper's reviewer renames it (rule 11).
+
+On track? yes — feedback iteration complete, 100% done, no blocker.

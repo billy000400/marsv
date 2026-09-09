@@ -1,0 +1,35 @@
+{
+  "model": "gpt2-large",
+  "pairs": [
+    {
+      "key": "p1_copy_vs_recall",
+      "label": "Copy available vs factual recall",
+      "prompt_a": "The capital of France is Paris. The capital of France is",
+      "prompt_b": "The capital of Spain is Madrid. The capital of France is",
+      "n_tokens": 12,
+      "endpoint_logit_l2": 445.1588134765625,
+      "recon_err_a": 0.0008953470387496054,
+      "recon_err_b": 0.0011855883058160543,
+      "top_a": " Paris",
+      "top_b": " Paris",
+      "top_tokens_unique": [
+        " Paris"
+      ],
+      "n_steps_top_is_intended": 50,
+      "per_pos_cos": [
+        1.0,
+        1.0,
+        1.0,
+        0.651,
+        0.9971,
+        0.541,
+        0.9727,
+        0.9403,
+        0.991,
+        0.9608,
+        0.9905,
+        0.995
+      ]
+    }
+  ]
+}

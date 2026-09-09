@@ -1,0 +1,273 @@
+{
+  "model": "Qwen/Qwen2.5-3B",
+  "pairs": [
+    {
+      "key": "p1_copy_vs_recall",
+      "label": "Copy available vs factual recall",
+      "intended": "Paris",
+      "prompts": {
+        "A": {
+          "prompt": "The capital of France is Paris. The capital of France is",
+          "n_tokens": 12,
+          "continuation": " Paris. The capital of France",
+          "top1_token": " Paris",
+          "top1_prob": 0.621,
+          "top5": [
+            [
+              " Paris",
+              0.621
+            ],
+            [
+              " also",
+              0.0655
+            ],
+            [
+              " the",
+              0.045
+            ],
+            [
+              " located",
+              0.0329
+            ],
+            [
+              " a",
+              0.0212
+            ]
+          ]
+        },
+        "B": {
+          "prompt": "The capital of Spain is Madrid. The capital of France is",
+          "n_tokens": 12,
+          "continuation": " Paris. The capital of Germany",
+          "top1_token": " Paris",
+          "top1_prob": 0.9481,
+          "top5": [
+            [
+              " Paris",
+              0.9481
+            ],
+            [
+              " ____",
+              0.0082
+            ],
+            [
+              " __",
+              0.0064
+            ],
+            [
+              " ______",
+              0.0034
+            ],
+            [
+              "____",
+              0.003
+            ]
+          ]
+        }
+      },
+      "completion_pass": true,
+      "length_match": true
+    },
+    {
+      "key": "p2_succ_vs_pred",
+      "label": "Successor vs predecessor",
+      "intended": "seven",
+      "prompts": {
+        "A": {
+          "prompt": "The number after six is",
+          "n_tokens": 5,
+          "continuation": " ____\nA. 5",
+          "top1_token": " __",
+          "top1_prob": 0.1907,
+          "top5": [
+            [
+              " __",
+              0.1907
+            ],
+            [
+              " ____",
+              0.1311
+            ],
+            [
+              " ",
+              0.1157
+            ],
+            [
+              " seven",
+              0.0701
+            ],
+            [
+              " ______",
+              0.0619
+            ]
+          ]
+        },
+        "B": {
+          "prompt": "The number before eight is",
+          "n_tokens": 5,
+          "continuation": " seven. The number after eight",
+          "top1_token": " seven",
+          "top1_prob": 0.1835,
+          "top5": [
+            [
+              " seven",
+              0.1835
+            ],
+            [
+              " __",
+              0.1619
+            ],
+            [
+              " ____",
+              0.1113
+            ],
+            [
+              " ",
+              0.0982
+            ],
+            [
+              " ______",
+              0.0675
+            ]
+          ]
+        }
+      },
+      "completion_pass": false,
+      "length_match": true
+    },
+    {
+      "key": "p3_relation",
+      "label": "Different relation, same answer",
+      "intended": "Paris",
+      "prompts": {
+        "A": {
+          "prompt": "The capital of France is",
+          "n_tokens": 5,
+          "continuation": " Paris. The capital of the",
+          "top1_token": " Paris",
+          "top1_prob": 0.454,
+          "top5": [
+            [
+              " Paris",
+              0.454
+            ],
+            [
+              " __",
+              0.0614
+            ],
+            [
+              " ______",
+              0.0422
+            ],
+            [
+              "____",
+              0.0422
+            ],
+            [
+              " located",
+              0.0373
+            ]
+          ]
+        },
+        "B": {
+          "prompt": "The largest city in France is",
+          "n_tokens": 6,
+          "continuation": " Paris. The largest city in",
+          "top1_token": " Paris",
+          "top1_prob": 0.2641,
+          "top5": [
+            [
+              " Paris",
+              0.2641
+            ],
+            [
+              " __",
+              0.1602
+            ],
+            [
+              " ____",
+              0.0757
+            ],
+            [
+              "____",
+              0.0757
+            ],
+            [
+              "\n",
+              0.0668
+            ]
+          ]
+        }
+      },
+      "completion_pass": true,
+      "length_match": false
+    },
+    {
+      "key": "p4_entity",
+      "label": "Different entity, same relation and answer",
+      "intended": "Shakespeare",
+      "prompts": {
+        "A": {
+          "prompt": "The author of Hamlet is",
+          "n_tokens": 6,
+          "continuation": " ______.\nA. William Shakespeare",
+          "top1_token": " ______",
+          "top1_prob": 0.1838,
+          "top5": [
+            [
+              " ______",
+              0.1838
+            ],
+            [
+              " __",
+              0.1622
+            ],
+            [
+              " ____",
+              0.1115
+            ],
+            [
+              "\n",
+              0.0766
+            ],
+            [
+              "____",
+              0.0597
+            ]
+          ]
+        },
+        "B": {
+          "prompt": "The author of Macbeth is",
+          "n_tokens": 6,
+          "continuation": " ______.\nA. William Shakespeare",
+          "top1_token": " ______",
+          "top1_prob": 0.1413,
+          "top5": [
+            [
+              " ______",
+              0.1413
+            ],
+            [
+              " __",
+              0.0971
+            ],
+            [
+              " ____",
+              0.0857
+            ],
+            [
+              " William",
+              0.0857
+            ],
+            [
+              "\n",
+              0.0667
+            ]
+          ]
+        }
+      },
+      "completion_pass": true,
+      "length_match": true
+    }
+  ]
+}
