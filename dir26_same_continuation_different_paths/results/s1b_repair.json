@@ -1,0 +1,19 @@
+{
+  "key": "p3_relation_repaired",
+  "label": "Different relation, same answer (repaired wording)",
+  "intended": "Paris",
+  "prompts": {
+    "A": {
+      "prompt": "The capital city of France is",
+      "n_tokens": 6,
+      "continuation": " home to the world's largest"
+    },
+    "B": {
+      "prompt": "The largest city in France is",
+      "n_tokens": 6,
+      "continuation": " the capital, Paris. It"
+    }
+  },
+  "completion_pass": false,
+  "length_match": true
+}
