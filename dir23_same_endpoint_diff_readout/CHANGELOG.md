@@ -48,3 +48,7 @@ Both files went from template stubs to complete deliverables; no earlier numbers
 - Conclusion: "says the switch is driven by…" / "supports the former" changed to "consistent with"; added that a 0.011 spread cannot exclude close-lying readout-specific boundaries; "changes at one location" softened.
 - Summary: "once per readout" changed to "once per primary readout (the Type control never switches)".
 - No numbers or figures changed.
+
+## 2026-09-23 — REPORT.md wording (second content review)
+- Conclusion: "once per readout" → "once per primary readout (the Type control never switches)".
+- Results heading: "The four transition locations coincide, and the answers switch there too" → "… lie close together, and the answers switch in the same narrow region". No numbers changed.

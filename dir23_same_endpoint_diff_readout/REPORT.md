@@ -248,7 +248,7 @@ a linear change would give. Sliding the input embedding two thirds of the way ac
 Japan and Germany therefore does *not* produce a two-thirds-blended answer; the readout stays
 Japan-like, then flips over a window about a quarter of the path wide.
 
-### The four transition locations coincide, and the answers switch there too
+### The four transition locations lie close together, and the answers switch in the same narrow region
 
 The direct answer to the research question is the comparison of the four transition locations. A
 second question is whether the model's actual answer changes at that same place: $d(t)$ could pass
@@ -332,7 +332,7 @@ transitions**:
 > shared transition in the future-relevant country representation that is subsequently accessed by
 > different downstream readouts.
 
-The predicted answers switch in the same region: the top-1 token changes once per readout, between
+The predicted answers switch in the same region: the top-1 token changes once per primary readout (the Type control never switches), between
 $t$ = 0.432 and 0.461 (Figure 7, Table 2). The switch is not identical to $t_{50}$ — it is within
 0.012 of $t_{50}$ for Capital, Continent and Language and 0.018 later for Currency.
 
