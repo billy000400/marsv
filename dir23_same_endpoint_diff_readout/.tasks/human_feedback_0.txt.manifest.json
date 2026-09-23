@@ -1,21 +1,47 @@
 {
   "version": 1,
-  "state": "triage",
+  "state": "ready",
   "source_feedback": "human_feedback_0.txt",
   "source_sha256": "92be9bbc84a895d4829b2fc9dda47f2858461d0dd006c5584f8e42ff8063560b",
-  "required_outputs": null,
-  "may_modify": null,
-  "must_remain_unchanged": null,
-  "report_policy": {
-    "core_research_question": null,
-    "primary_report": null,
-    "max_words": null,
-    "max_main_figures": null,
-    "detailed_results": null
-  },
-  "unresolved_ambiguities": [
-    "Classify output routing from the exact feedback before doing research."
+  "required_outputs": [
+    "plots/transition_comparison.png",
+    "REPORT.md"
   ],
+  "may_modify": [
+    "plots/transition_comparison.png",
+    "REPORT.md",
+    "RESULTS.md",
+    "experiments/s2_interp.py",
+    "experiments/s3_plots.py",
+    "results/interp.csv",
+    "results/interp.npz",
+    "results/transitions.json",
+    "results/top1_tokens.csv",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback_0.txt",
+    "PLAN.md research question and success criterion",
+    "experiments/s1_endpoints.py",
+    "results/s1_endpoints.json",
+    "plots/immediate_prediction.png",
+    "plots/distance_capital.png",
+    "plots/distance_continent.png",
+    "plots/distance_currency.png",
+    "plots/distance_language.png",
+    "plots/distance_type.png",
+    "plots/distance_overlay.png"
+  ],
+  "report_policy": {
+    "core_research_question": "Do different downstream readouts (Capital, Continent, Currency, Language; Type as control) of the interpolated Japan->Germany country embedding in GPT-2 large share the same plateau boundary (transition location t50)?",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
   "checklist": [
     {
       "request": "For Figure 7, Add the top-token prediction along the interpolation to the plot below. For each interpolation point \\(t\\), show which token has the highest delayed-logit probability (e.g. Tokyo vs Berlin).\nThe delayed logits appear to remain Tokyo-like, transition rapidly near the midpoint, and then remain Berlin-like. Visualize the top-token prediction directly so we can see whether the predicted token switches at the same boundary as the delayed-logit transition. Do not assume that they coincide; show the actual switch location from the data.",
@@ -26,5 +52,6 @@
         "ambiguity": ""
       }
     }
-  ]
+  ],
+  "triage_notes": "'Figure 7' = REPORT.md Figure 7 = plots/transition_comparison.png (t50 markers + [t10,t90] bars for all five readouts). 'Delayed-logit' = the readout-position logits after each suffix (the logits d(t) is computed from). Since Figure 7 has one row per readout, the top-1 token at every one of the 101 t points is added for each of the five readouts (Tokyo vs Berlin is the Capital example), with the observed top-1 switch location marked from data alongside t50 so any mismatch is visible. Figure 7 is updated in place; main figure count stays 7."
 }
