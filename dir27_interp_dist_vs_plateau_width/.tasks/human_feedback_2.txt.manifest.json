@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "state": "ready",
+  "source_feedback": "human_feedback_2.txt",
+  "source_sha256": "31df9a5785cced0eaaa95503a29edfc49c07c90f862a635067b93475a7b07f59",
+  "required_outputs": [
+    "plots/fig3_representative_curves.png",
+    "results/tokens_W_final_ge_large.csv",
+    "REPORT.md",
+    "RESULTS.md"
+  ],
+  "may_modify": [
+    "REPORT.md",
+    "RESULTS.md",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md",
+    "experiments/s5_curves.py",
+    "plots/fig3_representative_curves.png",
+    "results/tokens_W_final_ge_large.csv",
+    ".tasks/human_feedback_2.txt.manifest.json"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback_2.txt",
+    "human_feedback.txt.addressed.md",
+    "results/sweep.csv",
+    "results/sweep",
+    "plots/fig1_distance_vs_width.png",
+    "plots/fig1_zoom_distance_vs_width.png",
+    "plots/fig2_final_width_distribution.png",
+    "plots/s1_sanity_curves.png"
+  ],
+  "report_policy": {
+    "core_research_question": "Does the layer-0 embedding L2 distance D between ' big' and token B predict the transition width W of GPT-2 Large's interpolation curve (blocks 18 and 35)?",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
+  "checklist": [
+    {
+      "request": "I don't like the examples you showed in Figure 3 left panel. The D is not representative. Can you find examples around 2.5 plus minus 0.05\nAlso can you find all the tokens tht have a w >= w of big -> large",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    }
+  ],
+  "routing_notes": "'Figure 3 left panel' = the representative-curves figure (plots/fig3_representative_curves.png), panel (a). It was numbered Figure 3 in the REPORT.md version the operator reviewed (commit bcd1624); after the zoom figure was inserted it became Figure 4. Its panel (a) shows five common words with D 1.35-1.67, far from the vocabulary median D 2.51, hence 'not representative'. Fix: replace panel (a) examples with tokens whose D lies in [2.45, 2.55] (2.5 +/- 0.05), still chosen to span low to high W_final so the panel keeps its purpose (same D, different widths); regenerate the PNG in place from the saved curves in results/sweep (no new model run). 'w of big -> large' = W_final of B = ' large' (0.466), the width shown for ' large' in that figure (final layer, block 35). Deliver the full list of tokens with W_final >= W_final(' large') as results/tokens_W_final_ge_large.csv (token_id, token, D, W_mid, W_final, flag), sorted by W_final; summarize count and composition in RESULTS.md and briefly in REPORT.md. Assumption: the final layer is meant because the figure reports W_final; a block-18 count may be given as one extra sentence in RESULTS.md only."
+}
