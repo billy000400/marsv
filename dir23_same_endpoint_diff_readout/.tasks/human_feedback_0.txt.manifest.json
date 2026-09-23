@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "state": "triage",
+  "source_feedback": "human_feedback_0.txt",
+  "source_sha256": "92be9bbc84a895d4829b2fc9dda47f2858461d0dd006c5584f8e42ff8063560b",
+  "required_outputs": null,
+  "may_modify": null,
+  "must_remain_unchanged": null,
+  "report_policy": {
+    "core_research_question": null,
+    "primary_report": null,
+    "max_words": null,
+    "max_main_figures": null,
+    "detailed_results": null
+  },
+  "unresolved_ambiguities": [
+    "Classify output routing from the exact feedback before doing research."
+  ],
+  "checklist": [
+    {
+      "request": "For Figure 7, Add the top-token prediction along the interpolation to the plot below. For each interpolation point \\(t\\), show which token has the highest delayed-logit probability (e.g. Tokyo vs Berlin).\nThe delayed logits appear to remain Tokyo-like, transition rapidly near the midpoint, and then remain Berlin-like. Visualize the top-token prediction directly so we can see whether the predicted token switches at the same boundary as the delayed-logit transition. Do not assume that they coincide; show the actual switch location from the data.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    }
+  ]
+}

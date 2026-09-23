@@ -1,0 +1,2 @@
+For Figure 7, Add the top-token prediction along the interpolation to the plot below. For each interpolation point \(t\), show which token has the highest delayed-logit probability (e.g. Tokyo vs Berlin).
+The delayed logits appear to remain Tokyo-like, transition rapidly near the midpoint, and then remain Berlin-like. Visualize the top-token prediction directly so we can see whether the predicted token switches at the same boundary as the delayed-logit transition. Do not assume that they coincide; show the actual switch location from the data.
