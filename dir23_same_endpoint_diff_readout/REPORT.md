@@ -18,7 +18,7 @@ questions consult. If they flip at different positions, each question has its ow
 $t_{50}$ lie between 0.443 and 0.454, a spread of **Δt₅₀ = 0.011** — about one interpolation step out
 of 101. Each curve is sharp (10–90% width ≈ 0.27, against 0.80 for a linear change), monotonic, and
 crosses each threshold exactly once. The most likely answer token (top-1) switches exactly once per
-readout, and Figure 7 plots where: ` Tokyo`→` Berlin` at t = 0.460, ` Asia`→` Europe` at 0.432,
+primary readout (the Type control never switches), and Figure 7 plots where: ` Tokyo`→` Berlin` at t = 0.460, ` Asia`→` Europe` at 0.432,
 ` yen`→` euro` at 0.461, ` Japanese`→` German` at 0.447. For three readouts the switch lies within
 0.012 of $t_{50}$; for Currency it comes 0.018 later.
 
@@ -292,9 +292,12 @@ normalized logit distance at the switch (0.5 would mean the switch sits exactly 
 For Capital and Language the answer switches within one grid step of $t_{50}$ (offsets +0.006 and
 −0.003). Continent switches slightly *before* its midpoint (−0.011), when $d$ is only 0.43. Currency
 switches *after* it (+0.018), when $d$ is already 0.61: at $t_{50}$ = 0.443 the model still answers
-` yen`, and ` euro` only takes over between $t$ = 0.46 and 0.47. The reason is visible in the answer
-probabilities: near the switch neither currency token is confident (` yen` 0.22 and ` euro` 0.20 at
-$t$ = 0.46; `results/top1_tokens.csv`), so the argmax can lag the overall logit movement. All four
+` yen`, and ` euro` only takes over between $t$ = 0.46 and 0.47. We also observe that
+near this switch neither currency token is confident (` yen` 0.22 and ` euro` 0.20 at $t$ = 0.46;
+`results/top1_tokens.csv`). When the two leading probabilities are this close, the top-1 token (the
+single highest-probability token, sometimes called the argmax) can change hands at a point that differs
+from the midpoint of the overall logit movement; this goes along with the Currency lag, but this
+experiment does not test whether it causes it. All four
 switches still fall between $t$ = 0.432 and 0.461 — a spread of 0.029, inside the 0.05 alignment
 threshold and well inside every $[t_{10}, t_{90}]$ interval. So the discrete answers switch in the
 same narrow region as the logit-distance transitions, but they do not sit exactly on $t_{50}$; the
@@ -302,10 +305,11 @@ offsets of up to 0.018 are real at this grid resolution.
 
 The practical significance is that these four questions probe genuinely different knowledge
 (a city, a landmass, a currency, a language; their answer tokens share nothing) and are asked through
-different suffixes, yet they do not each carry their own boundary. Whatever the country position
-holds is consulted by all four in the same way, so locating the switch for one property locates it
-for the others. That is what makes it reasonable to speak of a boundary belonging to the
-representation rather than to the question.
+different suffixes, yet they do not each carry their own boundary. For this pair,
+prompt and model, the four transition locations fall within 0.011 of each other (Figure 7, Table 1).
+That observation is consistent with a single change in what the country position holds, read by all
+four questions; it does not show how each readout uses that information, and it does not establish
+that the boundaries would stay together for other pairs, prompts or models.
 
 ### Reading the Type control
 
@@ -338,15 +342,15 @@ Three qualifications bound that statement.
 — the next-token distribution after the country token barely moves along the entire slide (Figure 1,
 endpoint JSD 0.0076 bits). It becomes visible only once a readout suffix is appended, and those
 delayed predictions are not the model's immediate outputs. This experiment does not show that GPT-2 is
-explicitly planning an answer before it sees the readout suffix; it shows that a representation
-sufficient to answer four different later questions is present at the country position, and that it
-changes at one location.
+explicitly planning an answer before it sees the readout suffix; it shows that information
+sufficient to answer four different later questions is present at the country position, and that all
+four answers change within the same narrow region of the slide.
 
 *On what alignment can and cannot distinguish.* Because all five readouts consume the same 101
-interpolated embeddings, their agreement says the switch is driven by a change at the country
-position rather than by anything suffix-specific. It does not identify the mechanism: the study
-separates "shared entity-state transition" from "readout-specific transition" and supports the former,
-without ruling out every process that could produce that pattern. The alignment is descriptive at the
+interpolated embeddings, their agreement is consistent with the switch being driven by a change at
+the country position that all suffixes read. It does not identify the mechanism, and a 0.011 spread
+cannot exclude separate readout-specific boundaries that happen to lie close together; the result is
+consistent with a shared entity-state transition but does not rule out the alternatives. The alignment is descriptive at the
 resolution of a 0.01 grid, and $\Delta t_{50}$ is a spread, not a significance test.
 
 *On scope.* This is one token pair, one prompt, one model, and one hook point (the input embedding

@@ -41,3 +41,10 @@ Both files went from template stubs to complete deliverables; no earlier numbers
   data index lists the new `results/top1_tokens.csv`.
 - **experiments/s3_plots.py** — transition-comparison block rewritten; writes `results/top1_tokens.csv`.
   No model re-run: top-1 ids and answer probabilities were already saved in `results/interp.npz`.
+
+## 2026-09-23 — REPORT.md wording revision (content review of human_feedback_0.txt)
+- Results, Currency paragraph: "the reason is visible…" changed to an observation (low yen/euro confidence near the switch goes with the lag; causation not tested); defined top-1/argmax.
+- Results, practical-significance paragraph: removed "consulted by all four in the same way" / "locating one locates the others"; now states alignment is only consistent with a shared change, for this pair, prompt and model.
+- Conclusion: "says the switch is driven by…" / "supports the former" changed to "consistent with"; added that a 0.011 spread cannot exclude close-lying readout-specific boundaries; "changes at one location" softened.
+- Summary: "once per readout" changed to "once per primary readout (the Type control never switches)".
+- No numbers or figures changed.

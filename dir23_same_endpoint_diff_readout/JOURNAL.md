@@ -72,3 +72,6 @@ biased late by up to one step and cannot be compared fairly with an interpolated
 **Gotcha.** `s3_plots.py` regenerates every plot, and matplotlib PNG bytes are not reproducible, so
 the seven must-remain-unchanged PNGs were restored from HEAD after running it (hashes verified equal
 to the manifest baseline).
+
+## 2026-09-23 — content-review rejection fixed (wording only)
+**Did.** Reworded four REPORT.md passages the reviewer flagged as causal or overclaimed (Currency-lag "reason", "same way" mechanism claim, Conclusion "driven by"/"supports the former", Summary "once per readout"), and softened one more Conclusion sentence of the same kind. No re-analysis. check_render passes; REPORT ≈3.7k words, 7 figures. Manifest → review_pending.
