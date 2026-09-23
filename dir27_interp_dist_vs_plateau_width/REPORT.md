@@ -15,10 +15,11 @@ those shapes would say little about how the model processes the tokens.
 
 **Answer.** We tested all 50,256 other tokens.
 - **Distance.** Input distance does not visibly predict switch width for 97% of tokens (Figure 1).
-  Five common words at nearly the same distance range from an almost vertical jump to a slow ramp
-  (Figure 4a).
-- **Where the widest switches are.** They occur mainly for size words such as ` huge`, ` giant` and
-  ` large`, and for rarely seen, oddly formed tokens.
+  Five words at the typical distance (D 2.49–2.54, around the vocabulary median 2.51) range from an
+  almost vertical jump to a slow ramp (Figure 4a).
+- **Where the widest switches are.** 52 tokens switch at least as slowly as ` big` → ` large` at
+  the final layer. They are mainly size words such as ` huge`, ` giant` and ` vast`, and rarely
+  seen, oddly formed tokens.
 - **Depth.** The final layer switches more sharply than the middle layer for 97.7% of tokens.
 - **Groups.** Final-layer widths form one broad peak with a long tail (Figure 3). The one tight
   group is 64 rarely seen tokens (byte-level characters and scraped fragments such as
@@ -119,14 +120,24 @@ fixed D stays much larger than any change across D.
   with D > 4.
 - At a fixed D, widths spread over most of the range.
 
-Figure 4a shows that spread with five common words. Their D lies between 1.35 and 1.67, yet W_final
-runs from 0.046 (` of`) to 0.466 (` large`).
+Figure 4a shows that spread at the typical distance. Among the 8,307 tokens with D in 2.45–2.55, we
+took the words closest to the minimum, 25th, 50th and 75th percentile, and maximum of W_final in that
+band. All five have D between 2.49 and 2.54, yet W_final runs from 0.049 (` domestically`) to 0.476
+(` nutshell`). Within this band the middle half of widths lies between 0.083 and 0.136.
 
 The widest switches are not the farthest tokens. The 100 widest final-layer tokens have median D 2.43,
 slightly below the vocabulary median of 2.51. They are mostly size words (` huge` has the smallest D of
 any token, 1.22, and W_final 0.56) and rarely seen, oddly formed tokens such as ` guiName` and
 `Downloadha` (RESULTS.md, S4). This is an observation from one prompt; we did not test why these
 tokens switch slowly.
+
+We also listed every token whose final-layer width is at least that of B = ` large` (W_final 0.466):
+52 other tokens, 0.1% of the vocabulary (full list in `results/tokens_W_final_ge_large.csv`). By our
+reading, 27 are size or amount words (` whopping`, ` HUGE`, ` giant`, ` tremendous`, ` huge`,
+` enormous`, ` vast`, ` substantial`, …), 21 are code-like or scraped strings (` guiName`,
+`Downloadha`, `SourceFile`, `TPPStreamerBot`, …), and 4 are other words (` nutshell`, ` manageable`,
+` solvent`, ` abound`). Their D spans 1.22–3.17, covering most of the vocabulary's range, so a wide
+switch does not require a particular distance (RESULTS.md, S4).
 
 ### Finding 2 — The final layer switches more sharply than the middle layer
 
@@ -167,10 +178,13 @@ To check that W reflects visibly different curve shapes, we plot some final-laye
 
 **Figure 4.** Final-layer progress y(t). x: interpolation position t (0 = ` big`, 1 = token B); y:
 y(t). Dotted lines mark 0.1 and 0.9; line style and marker identify each token, and the legend gives
-its W_final and D. (a) Five common words with similar D but very different widths. (b) Five tokens
+its W_final and D. (a) Five words with D in 2.45–2.55 (vocabulary median 2.51), chosen nearest the minimum, quartiles
+and maximum of W_final within that band. (b) Five tokens
 from the most common histogram bin (W_final 0.087–0.090).
 
-In panel (a), small W is a near-vertical jump (` of`, ` the`) and large W is a slow ramp (` large`).
+In panel (a), small W is a near-vertical jump (` domestically`, ` nickel`) and large W is a slow ramp
+with an intermediate shoulder (` nutshell`). Most tokens in the band look like the middle three
+curves.
 In panel (b), tokens with the same W have the same steep shape but switch at different points, from
 about t = 0.40 to 0.53. `MQ` briefly overshoots y = 1 and is one of the flagged curves.
 

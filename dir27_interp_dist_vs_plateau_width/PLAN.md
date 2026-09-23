@@ -238,6 +238,8 @@ Do not replace the basic experiment with a more complicated analysis.
 COMPLETE. All stages S1–S5 done; success criterion met. 50,256 tokens in `results/sweep.csv`;
 Figures in `plots/fig1_distance_vs_width.png`, `plots/fig2_final_width_distribution.png`,
 `plots/fig3_representative_curves.png`; REPORT.md and RESULTS.md written, render checks pass.
+Feedback 2 (2026-09-23): Figure 3(a) examples now at D≈2.5; tokens with W_final ≥ W(' large') listed in
+`results/tokens_W_final_ge_large.csv`.
 Answer: D does not visibly predict W in the bulk; final layer sharper than block 18; W_final is one
 broad peak with a tail, the only tight group being 64 rarely seen tokens at D≈5.17, W≈0.33.
 

@@ -104,17 +104,38 @@ The 40 widest tokens mix two kinds:
 
 The median D of the 100 widest tokens is 2.43, close to the vocabulary median of 2.51.
 
+**Tokens at least as wide as ` big` → ` large`.** B = ` large` has W_final 0.4659. 52 other tokens
+(53 including ` large`, 0.1% of the vocabulary) have W_final ≥ 0.4659; all are listed with D, W_mid,
+W_final and the irregular-curve flag in `results/tokens_W_final_ge_large.csv` (sorted by W_final,
+written by `experiments/s5_curves.py`). None of the 53 is flagged. Our hand grouping of the 52:
+- 27 size or amount words: ` whopping`, ` HUGE`, ` giant`, ` considerable`, ` tremendous`, ` huge`,
+  `hemoth`, `UGE`, ` oversized`, ` towering`, ` monumental`, ` substantial`, ` ample`, `uge`,
+  ` sizeable`, ` sizable`, ` enorm`, ` sprawling`, ` hefty`, `idespread`, ` spacious`, ` gigantic`,
+  ` vast`, ` enormous`, ` monstrous`, `stantial`, ` innumerable`;
+- 21 code-like, scraped or rare strings: `fty` (the widest, 0.650), ` guiName`, `Downloadha`, one
+  partial multi-byte character, `soType`, `SourceFile`, `MpServer`, ` externalToEVAOnly`,
+  ` guiActiveUnfocused`, `TPPStreamerBot`, ` TheNitromeFan`, `thora`, `ItemTracker`,
+  `rawdownloadcloneembedreportprint`, `auld`, ` Tradable`, `ゼウス`, `SpaceEngineers`, `idable`,
+  ` partName`, `uxe`;
+- 4 other words: ` abound`, ` nutshell`, ` manageable`, ` solvent`.
+
+Their D ranges from 1.22 (` huge`) to 3.17 (median 2.44). The size words sit at D ≈ 1.2–2.5 and the
+rare strings at D ≈ 2.3–3.2. At block 18, 27 other tokens have W_mid ≥ W_mid(` large`) = 0.5034.
+
 ## S5 — Representative curves
 
 ![Representative curves](plots/fig3_representative_curves.png)
 
 **Figure 5.** Final-layer y(t) curves. x: interpolation position t; y: y(t). Dotted lines mark 0.1 and
-0.9. (a) Five common words with nearly the same D (1.35–1.67) but W_final from 0.046 to 0.466. (b) Five
+0.9. (a) Five words with D in 2.45–2.55 (around the vocabulary median 2.51), chosen nearest the minimum,
+25th, 50th and 75th percentile, and maximum of W_final among the 8,307 tokens in that band: W_final
+0.049 (` domestically`), 0.083 (` nickel`), 0.106 (` bulletin`), 0.136 (` oxide`), 0.476 (` nutshell`). (b) Five
 tokens from the most common width bin (W_final 0.087–0.090). Each token has its own line style and
 marker.
 
-In panel (a), the measured widths match the curves: ` of` and ` the` jump almost vertically, and
-` large` rises gradually. In panel (b), all five tokens have the same steep shape, but they cross at
+In panel (a), the measured widths match the curves: ` domestically` and ` nickel` jump almost
+vertically, ` oxide` overshoots y = 1 briefly after its jump, and ` nutshell` rises gradually with a
+shoulder near y ≈ 0.8. Within the band, the middle half of W_final lies between 0.083 and 0.136. In panel (b), all five tokens have the same steep shape, but they cross at
 different t, from about 0.40 to 0.53. `MQ` overshoots to y ≈ 1.1 and is flagged.
 
 ## Headline

@@ -71,3 +71,12 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 - Zoom holds 50,164/50,256 tokens (excluded: 9 with D<1.6, 19 with 3.3<D<4, 64 at D≈5.17). The core shows no
   clear slope at either layer, consistent with Finding 1. Embedded in REPORT.md (Fig 2) and RESULTS.md (Fig 3);
   check_render passes. Manifest -> review_pending.
+
+## 2026-09-23 — feedback 2: Figure 3(a) examples at D≈2.5, tokens with W ≥ W(' large')
+- Interpreted "Figure 3 left panel" as fig3_representative_curves panel (a) (manifest routing notes); "w" as
+  W_final (the width the figure reports). Rejected alternative: block-18 width — given as one sentence in RESULTS.
+- Panel (a) selection rule: among D∈[2.45,2.55] (8,307 tokens), whole-word tokens (regex ` [a-z]{4,}`) nearest
+  the min/Q1/median/Q3/max of W_final in the band; picked unflagged ones by hand from the 4 nearest.
+- `s5_curves.py` now also writes results/tokens_W_final_ge_large.csv (`ge_large()`); 53 rows incl. ' large'.
+  Category grouping (27 size / 21 code-like / 4 other) is my hand reading, not an automatic classifier.
+- Verified sha256 of sweep.csv and fig1/fig1_zoom/fig2/s1 unchanged; check_render passes.

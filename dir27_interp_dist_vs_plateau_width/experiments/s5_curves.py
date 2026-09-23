@@ -22,8 +22,9 @@ def main():
     D = np.concatenate([s["D"] for s in sh])
     pos = {tok.decode([int(i)]): k for k, i in enumerate(ids)}
 
-    # (a) one common word per width regime; (b) five tokens from the modal histogram bin
-    regime = [" of", " the", " good", " great", " large"]
+    # (a) five words with D in [2.45, 2.55] (vocabulary median D = 2.51) nearest the min, 25th, 50th, 75th
+    # percentile and max of W_final within that band; (b) five tokens from the modal histogram bin
+    regime = [" domestically", " nickel", " bulletin", " oxide", " nutshell"]
     hist, edges = np.histogram(Wf, bins=200)
     b = hist.argmax()
     lo, hi = edges[b], edges[b + 1]
@@ -36,7 +37,7 @@ def main():
     print(f"modal bin [{lo:.4f},{hi:.4f}) n={hist[b]}; modal examples {modal}")
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.6), sharey=True)
-    for ax, words, title in ((axes[0], regime, "(a) tokens from different width regimes"),
+    for ax, words, title in ((axes[0], regime, "(a) same D (2.45-2.55), different widths"),
                              (axes[1], modal, "(b) five tokens from the most common width bin")):
         for j, w in enumerate(words):
             k = pos[w]
@@ -55,5 +56,17 @@ def main():
     plt.close(fig)
 
 
+def ge_large():
+    """All tokens whose final-layer width is at least that of B = ' large'."""
+    import pandas as pd
+    d = pd.read_csv(os.path.join(RESULTS, "sweep.csv"), keep_default_na=False)
+    w_large = d.loc[d.token == repr(" large"), "W_final"].item()
+    out = d[d.W_final >= w_large].sort_values("W_final", ascending=False)
+    out = out[["token_id", "token", "D", "W_mid", "W_final", "flag_nonmonotonic"]]
+    out.to_csv(os.path.join(RESULTS, "tokens_W_final_ge_large.csv"), index=False)
+    print(f"W_final(' large')={w_large}; {len(out)} tokens (incl. ' large') with W_final >= it")
+
+
 if __name__ == "__main__":
     main()
+    ge_large()

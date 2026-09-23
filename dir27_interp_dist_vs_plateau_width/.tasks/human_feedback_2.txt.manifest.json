@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "ready",
+  "state": "addressed",
   "source_feedback": "human_feedback_2.txt",
   "source_sha256": "31df9a5785cced0eaaa95503a29edfc49c07c90f862a635067b93475a7b07f59",
   "required_outputs": [
@@ -41,13 +41,54 @@
   "checklist": [
     {
       "request": "I don't like the examples you showed in Figure 3 left panel. The D is not representative. Can you find examples around 2.5 plus minus 0.05\nAlso can you find all the tokens tht have a w >= w of big -> large",
-      "status": "pending",
+      "status": "done",
       "completion": {
-        "what_was_done": "",
-        "evidence": "",
-        "ambiguity": ""
+        "what_was_done": "(1) Replaced the panel (a) examples of the representative-curves figure (Figure 3 in the reviewed version; now REPORT.md Figure 4, RESULTS.md Figure 5) with five words whose D lies in 2.5 +/- 0.05: ' domestically' (D 2.545, W_final 0.049), ' nickel' (2.493, 0.083), ' bulletin' (2.507, 0.106), ' oxide' (2.511, 0.136), ' nutshell' (2.508, 0.476), chosen nearest the min/25th/50th/75th percentile/max of W_final among the 8,307 tokens with D in [2.45, 2.55]; regenerated the PNG from saved curves (no model rerun) and updated captions and text. (2) Listed all tokens with W_final >= W_final(' large') = 0.4659: 53 tokens including ' large' (52 others; 27 size/amount words, 21 code-like or scraped strings, 4 other words; D 1.22-3.17), saved as a CSV and summarized.",
+        "evidence": "plots/fig3_representative_curves.png panel (a); REPORT.md Finding 1 (paragraph starting 'Figure 4a shows that spread at the typical distance' and paragraph 'We also listed every token...') and Figure 4 caption; RESULTS.md S4 paragraph 'Tokens at least as wide as big -> large' and S5 Figure 5 caption; results/tokens_W_final_ge_large.csv (53 rows); code experiments/s5_curves.py (regime list, ge_large()).",
+        "ambiguity": "None. Assumption recorded: 'w' is the final-layer width W_final (the width shown in the figure); the block-18 count (27 other tokens with W_mid >= W_mid(' large')) is given in RESULTS.md S4."
       }
     }
   ],
-  "routing_notes": "'Figure 3 left panel' = the representative-curves figure (plots/fig3_representative_curves.png), panel (a). It was numbered Figure 3 in the REPORT.md version the operator reviewed (commit bcd1624); after the zoom figure was inserted it became Figure 4. Its panel (a) shows five common words with D 1.35-1.67, far from the vocabulary median D 2.51, hence 'not representative'. Fix: replace panel (a) examples with tokens whose D lies in [2.45, 2.55] (2.5 +/- 0.05), still chosen to span low to high W_final so the panel keeps its purpose (same D, different widths); regenerate the PNG in place from the saved curves in results/sweep (no new model run). 'w of big -> large' = W_final of B = ' large' (0.466), the width shown for ' large' in that figure (final layer, block 35). Deliver the full list of tokens with W_final >= W_final(' large') as results/tokens_W_final_ge_large.csv (token_id, token, D, W_mid, W_final, flag), sorted by W_final; summarize count and composition in RESULTS.md and briefly in REPORT.md. Assumption: the final layer is meant because the figure reports W_final; a block-18 count may be given as one extra sentence in RESULTS.md only."
+  "routing_notes": "'Figure 3 left panel' = the representative-curves figure (plots/fig3_representative_curves.png), panel (a). It was numbered Figure 3 in the REPORT.md version the operator reviewed (commit bcd1624); after the zoom figure was inserted it became Figure 4. Its panel (a) shows five common words with D 1.35-1.67, far from the vocabulary median D 2.51, hence 'not representative'. Fix: replace panel (a) examples with tokens whose D lies in [2.45, 2.55] (2.5 +/- 0.05), still chosen to span low to high W_final so the panel keeps its purpose (same D, different widths); regenerate the PNG in place from the saved curves in results/sweep (no new model run). 'w of big -> large' = W_final of B = ' large' (0.466), the width shown for ' large' in that figure (final layer, block 35). Deliver the full list of tokens with W_final >= W_final(' large') as results/tokens_W_final_ge_large.csv (token_id, token, D, W_mid, W_final, flag), sorted by W_final; summarize count and composition in RESULTS.md and briefly in REPORT.md. Assumption: the final layer is meant because the figure reports W_final; a block-18 count may be given as one extra sentence in RESULTS.md only.",
+  "baseline_sha256": {
+    ".tasks/human_feedback_2.txt.manifest.json": "957746005e01b827594bde9b2c4aa2067bea76fce2706a315e5032fcf842e250",
+    "CHANGELOG.md": "5f48e4fb3d3d0ba75ca869b93b51079d485f03f600a3c202fbf415d782234efa",
+    "JOURNAL.md": "3c161eef9a81f65709e80697587c8969834877bfec438b3c0dd57a64106e6d7d",
+    "PLAN.md": "38ce4e637641c2eddbc0f5c4ecbe09fee4e015903f16474aa43d9820b7b5c817",
+    "REPORT.md": "b8fa752f92b29d442e08edea22d0fb75e8d2e75e594d771b32f9eb565fda2c6a",
+    "RESULTS.md": "d5d7a1b5eedbe2a49c8419122f2286b247b13a250349583c787c06911788e5e6",
+    "experiments/s5_curves.py": "ed124c19795afcb3dbcf02b1766449e23e5a45dbe52d1599a9f8b92b45fe53a9",
+    "human_feedback.txt.addressed.md": "487570a0d1941444502f038b7932a3f019b52e83aabcd4c4ac48444b0ded3031",
+    "human_feedback_2.txt": "31df9a5785cced0eaaa95503a29edfc49c07c90f862a635067b93475a7b07f59",
+    "plots/fig1_distance_vs_width.png": "4bc9969f0c94d0c1c5d44045b49986ad3cd2b35c0f6d15d2d75b54504eb70084",
+    "plots/fig1_zoom_distance_vs_width.png": "66a453db31adfa40f04ea61a875a13acf4d8205ebdded784c455e92748dfc37c",
+    "plots/fig2_final_width_distribution.png": "a1efb5123c556ed877591395d779fc1cca9b168ffe552290386d863b0c91c178",
+    "plots/fig3_representative_curves.png": "7dbe817ecf6f2a592fba0c1e7b2f02b5884b88a1fd713007a205cc6164a89013",
+    "plots/s1_sanity_curves.png": "72bbcff257c8104a28765a795d45732b8ac525de0f6ad42d7cb518dd0293edee",
+    "results/sweep": null,
+    "results/sweep.csv": "9be246a68ec36e33548cce6299c3116e900c1f30fa7e8b60e93ba99059698b5b",
+    "results/tokens_W_final_ge_large.csv": null
+  },
+  "review": {
+    "format_passed": true,
+    "content": {
+      "pass": true,
+      "inspected_outputs": [
+        "plots/fig3_representative_curves.png",
+        "results/tokens_W_final_ge_large.csv",
+        "REPORT.md",
+        "RESULTS.md"
+      ],
+      "failures": [],
+      "summary": "Both requests are done. (1) The representative-curves figure (Figure 3 in the reviewed version, now REPORT Figure 4 / RESULTS Figure 5), panel (a), now shows five words with D between 2.49 and 2.545 (domestically, nickel, bulletin, oxide, nutshell), chosen to span the final-layer width range from 0.049 to 0.476. The captions and text match the plot, and the renumbering is explained. (2) results/tokens_W_final_ge_large.csv lists 53 tokens (' large' plus 52 others) sorted by final-layer width. The grouping of the 52 into 27 size/amount words, 21 code-like strings and 4 other words matches the CSV. REPORT.md gives a short summary and RESULTS.md the detail. Reading 'w' as the final-layer width is stated, with the block-18 count in one sentence. REPORT.md is about 2,000 words with 4 figures, within budget, and does not duplicate the detailed results. Wording stays descriptive, with no causal claims. Minor issues (not blocking): the token 'idespread' (D 2.4616, width 0.4811) is inside the band and slightly wider than ' nutshell'. REPORT.md's 'words' explains why it was not picked, but RESULTS.md says 'among the 8,307 tokens in that band' without saying the examples were limited to words. REPORT.md gives the examples' D as '2.49–2.54', while ' domestically' is 2.545 in the task record."
+    },
+    "expected_outputs": [
+      "plots/fig3_representative_curves.png",
+      "results/tokens_W_final_ge_large.csv",
+      "REPORT.md",
+      "RESULTS.md"
+    ],
+    "budget_failures": []
+  },
+  "addressed_feedback": "human_feedback_2.txt.addressed.md"
 }
