@@ -1,0 +1,1 @@
+Can you add a zoom in version of Figure 1, showing [1.6, 3.3] in x range and the corresponding y range

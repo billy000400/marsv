@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "state": "ready",
+  "source_feedback": "human_feedback.txt",
+  "source_sha256": "487570a0d1941444502f038b7932a3f019b52e83aabcd4c4ac48444b0ded3031",
+  "required_outputs": [
+    "plots/fig1_zoom_distance_vs_width.png",
+    "REPORT.md"
+  ],
+  "may_modify": [
+    "REPORT.md",
+    "RESULTS.md",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md",
+    "experiments/s3_plots.py",
+    "plots/fig1_zoom_distance_vs_width.png",
+    ".tasks/human_feedback.txt.manifest.json"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback.txt",
+    "results/sweep.csv",
+    "plots/fig1_distance_vs_width.png",
+    "plots/fig2_final_width_distribution.png",
+    "plots/fig3_representative_curves.png",
+    "plots/s1_sanity_curves.png"
+  ],
+  "report_policy": {
+    "core_research_question": "Does the layer-0 embedding L2 distance D between ' big' and token B predict the transition width W of GPT-2 Large's interpolation curve (blocks 18 and 35)?",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
+  "checklist": [
+    {
+      "request": "Can you add a zoom in version of Figure 1, showing [1.6, 3.3] in x range and the corresponding y range",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    }
+  ],
+  "routing_notes": "'Figure 1' = REPORT.md Figure 1 (plots/fig1_distance_vs_width.png, D vs W scatter, panels block 18 and block 35); the requested x range [1.6, 3.3] is in units of D, which confirms this (RESULTS.md's Figure 1 is the S1 sanity-curve grid, whose x-axis is t in [0,1], so it cannot be meant). The zoom is a new, additional figure (original Figure 1 stays unchanged), same two panels, x limited to D in [1.6, 3.3] and y limited to the min-max of W over tokens with D in that range, per panel. It is embedded right after Figure 1 in REPORT.md (and in RESULTS.md next to its D-vs-W figure); later figures are renumbered to keep sequential numbering."
+}

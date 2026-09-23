@@ -57,3 +57,10 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
   is at 0.33 (the D>4 cluster; 43 of 65 in the tallest bin).
 - Median-by-D table kept as a descriptive summary, not a test (PLAN forbids correlation stats).
 - check_render passes. Success criterion met → STOP.
+
+## 2026-09-23 — feedback triage: human_feedback.txt
+- Request: zoomed version of Figure 1 with x in [1.6, 3.3] and the matching y range.
+- Routing: "Figure 1" = REPORT.md Figure 1 (D vs W scatter); x range is in D units, so RESULTS.md's
+  Figure 1 (sanity curves, x = t) is ruled out. New output plots/fig1_zoom_distance_vs_width.png, added
+  after Figure 1 in REPORT.md and RESULTS.md; original Figure 1 kept. "Corresponding y range" = min–max
+  of W among tokens with D in [1.6, 3.3], per panel. Manifest set to ready.
