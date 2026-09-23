@@ -109,3 +109,16 @@ restrict it to the two capitals, which would hide any third token that wins near
 
 **Next step.** Implement the Figure 2 overlay, mark the observed top-1 switch location(s) against the `d(t)`
 transition, and update the captions.
+
+## 2026-09-23 — Figure 2 top-1 overlay (human_feedback_0.txt)
+
+**Did.** Added a top-1 token strip above `d(t)` in `plots/delayed_distance.png`. The strip uses
+`top1_delayed` from `results/delayed.json`. I checked that this field equals the decoded argmax of
+`results/logits_delayed.npy` over the full vocabulary at all 101 points. Only ` Tokyo` and ` Berlin`
+ever win, with one switch between t = 0.48 and t = 0.49. `d(t)` first reaches 0.5 at t = 0.48
+(d = 0.52), so the switch lags the logit midpoint by one grid step. The delayed top-1 probability
+bottoms out at 0.495 at t = 0.49. Updated the Figure 2 caption and prose in REPORT.md and RESULTS.md.
+
+**Gotcha.** Re-running `plot_delayed.py` rewrites Figures 1 and 3 with different bytes (the image
+content is the same; the PNG bytes are not deterministic). Those files must stay unchanged, so I
+restored them from HEAD after each run. Their hashes match the baseline.

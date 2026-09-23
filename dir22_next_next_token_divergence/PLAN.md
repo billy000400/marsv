@@ -170,7 +170,9 @@ midpoint `t₅₀ = 0.48`, and the delayed top-1 flips ` Tokyo`→` Berlin` at `
 REPORT.md are curated to this verdict; the three named figures are saved and embedded;
 `check_render.py` passes on both; `STOP` written.
 
+2026-09-23: human_feedback_0.txt addressed (pending review). Figure 2 now shows the delayed top-1
+token at every `t`; the switch falls between t = 0.48 and 0.49, one grid step after `t₅₀ = 0.48`.
+
 ## Next step
 
-None — the plan is complete and `STOP` exists. If a human drops feedback later, delete `STOP`,
-address it, and re-write `STOP` only when clean again.
+Await the content review of human_feedback_0.txt. The wrapper writes `STOP` once it is approved.

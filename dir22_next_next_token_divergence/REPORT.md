@@ -194,13 +194,28 @@ comfortably inside the pre-registered `w < 0.5` criterion and 2.9 times narrower
 reference's 0.80. The curve is monotone at every one of the 101 steps, and its midpoint sits at
 `t₅₀ = 0.48`, near the centre of the path.
 
-![Relative logit distance at the delayed readout versus interpolation position](plots/delayed_distance.png)
+Figure 2 also asks whether the model's actual delayed prediction changes at the same place as the
+logits. Its top panel shows, at each of the 101 positions, the delayed top-1 token: the token with
+the highest delayed probability over the full 50,257-token vocabulary. Only two tokens ever win:
+` Tokyo` at `t = 0.00–0.48` and ` Berlin` at `t = 0.49–1.00`. So the top-1 token switches exactly
+once, between the adjacent grid points `t = 0.48` and `t = 0.49`. That is one grid step (0.01) after
+`d(t)` first reaches 0.5: at `t = 0.48` the logits are already 52% of the way to the ` Germany`
+endpoint (`d = 0.52`) but ` Tokyo` still wins, and at `t = 0.49` (`d = 0.58`) ` Berlin` wins. The
+switch therefore falls inside the shaded transition interval (0.34–0.62), just past its midpoint,
+and not at `d = 0.5` exactly. The 0.01 grid spacing limits how precisely either location is known.
 
-**Figure 2.** The delayed logits sit still, switch quickly, then sit still again — the plateau shape.
-x: interpolation position `t` (0 = ` Japan`, 1 = ` Germany`); y: relative logit distance `d(t)`, 0 at
-the ` Japan` endpoint and 1 at the ` Germany` endpoint. Solid with triangles = delayed readout after
-` is`; dotted gray = linear reference `d = t`. Thin horizontal lines mark the 0.1 and 0.9 levels that
-define `w`; the shaded band spans the transition interval, of width 0.28.
+![Delayed top-1 token and relative logit distance at the delayed readout versus interpolation position](plots/delayed_distance.png)
+
+**Figure 2.** The delayed logits sit still, switch quickly, then sit still again, and the delayed
+top-1 token switches once, just after the logit midpoint. Top panel: the delayed top-1 token (argmax
+over the full vocabulary) at each of the 101 values of `t`; circles on the upper row = ` Tokyo`,
+squares on the lower row = ` Berlin`. Bottom panel: x = interpolation position `t` (0 = ` Japan`,
+1 = ` Germany`); y = relative logit distance `d(t)`, 0 at the ` Japan` endpoint and 1 at the
+` Germany` endpoint. Solid with triangles = delayed readout after ` is`; dotted gray = linear
+reference `d = t`; open diamond = the first `t` with `d ≥ 0.5` (`t₅₀ = 0.48`). Thin horizontal lines
+mark the 0.1 and 0.9 levels that define `w`; the shaded band spans the transition interval, of width
+0.28. The dash-dotted vertical line in both panels sits between `t = 0.48` (last ` Tokyo`) and
+`t = 0.49` (first ` Berlin`), where the top-1 token is observed to switch.
 
 The transition is not an artifact of the scale-free normalisation: the endpoint logit gap being
 normalised is $\lVert z_A - z_B \rVert_2 = 462.5$, a large change in the delayed output, consistent

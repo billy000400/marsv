@@ -66,3 +66,16 @@ normalized-distance curve.
 
 **Checks.** `python3 experiments/check_render.py REPORT.md RESULTS.md` passes (5 display equations,
 18 inline, 3 embedded figures with visible captions in REPORT.md; 3 embedded figures in RESULTS.md).
+
+## 2026-09-23 — Figure 2 gains the delayed top-1 token (human_feedback_0.txt)
+
+**Changed.** `plots/delayed_distance.png` (Figure 2 in REPORT.md and RESULTS.md) now has a top panel
+showing the delayed top-1 token (full-vocabulary argmax) at all 101 values of `t`. The bottom panel
+marks the first `t` with `d ≥ 0.5` and a vertical line at the observed top-1 switch. The Figure 2
+caption and the paragraph before it were rewritten in both files to report the switch location from
+the data: last ` Tokyo` at `t = 0.48` (`d = 0.52`), first ` Berlin` at `t = 0.49` (`d = 0.58`), one
+0.01 grid step after `t₅₀ = 0.48` and inside the transition interval 0.34–0.62. No numbers were
+superseded; no new model run was needed. `experiments/plot_delayed.py` changed only in its Fig 2 block.
+
+**Checks.** `python3 ../check_render.py REPORT.md RESULTS.md` passes. The other two figures and all
+raw results match their baseline hashes.

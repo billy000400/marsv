@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "ready",
+  "state": "addressed",
   "source_feedback": "human_feedback_0.txt",
   "source_sha256": "7b3bc6e27091169b33a2ffde8869d60442e5e9cfe6965959f13985b9a417ad0f",
   "required_outputs": [
@@ -35,13 +35,47 @@
   "checklist": [
     {
       "request": "For Figure 2, Add the top-token prediction along the interpolation to the plot below. For each interpolation point \\(t\\), show which token has the highest delayed-logit probability (e.g. Tokyo vs Berlin).\nThe delayed logits appear to remain Tokyo-like, transition rapidly near the midpoint, and then remain Berlin-like. Visualize the top-token prediction directly so we can see whether the predicted token switches at the same boundary as the delayed-logit transition. Do not assume that they coincide; show the actual switch location from the data.",
-      "status": "pending",
+      "status": "done",
       "completion": {
-        "what_was_done": "",
-        "evidence": "",
-        "ambiguity": ""
+        "what_was_done": "Regenerated Figure 2 (plots/delayed_distance.png) via experiments/plot_delayed.py with a new top panel showing, at each of the 101 interpolation points t, the delayed top-1 token (argmax of the stored delayed logits over the full 50,257-token vocabulary; only ' Tokyo' and ' Berlin' ever win). A dash-dotted vertical line through both panels marks the observed switch location read from the data, and an open diamond marks the first t with d(t) >= 0.5. Result: last ' Tokyo' at t = 0.48 (d = 0.52), first ' Berlin' at t = 0.49 (d = 0.58), so the switch is one 0.01 grid step after the logit midpoint t50 = 0.48 and inside the transition interval 0.34-0.62. It does not coincide exactly with d = 0.5. Updated the Figure 2 caption and the preceding prose in REPORT.md and RESULTS.md.",
+        "evidence": "plots/delayed_distance.png (Figure 2, top panel + switch line); REPORT.md, Results section 'The delayed prediction is flat, switches sharply, and is flat again' (paragraph before Figure 2 and Figure 2 caption); RESULTS.md Figure 2 paragraph and caption; data source results/delayed.json field top1_delayed, verified equal to the argmax of results/logits_delayed.npy.",
+        "ambiguity": "None"
       }
     }
   ],
-  "triage_notes": "'Figure 2' is unambiguous: in both REPORT.md and RESULTS.md it is plots/delayed_distance.png (relative delayed-logit distance d(t) vs interpolation position t). Routing: regenerate that same file via experiments/plot_delayed.py, adding the delayed top-1 token (argmax over the full vocabulary of the stored delayed logits, not restricted to Tokyo/Berlin) at every t, and mark the observed top-1 switch location(s) from data next to the d(t) transition (e.g. t50). Update the Figure 2 caption/prose in REPORT.md and RESULTS.md. No new model run is needed: results/logits_delayed.npy is (101, 50257), full-vocabulary delayed logits at every t."
+  "triage_notes": "'Figure 2' is unambiguous: in both REPORT.md and RESULTS.md it is plots/delayed_distance.png (relative delayed-logit distance d(t) vs interpolation position t). Routing: regenerate that same file via experiments/plot_delayed.py, adding the delayed top-1 token (argmax over the full vocabulary of the stored delayed logits, not restricted to Tokyo/Berlin) at every t, and mark the observed top-1 switch location(s) from data next to the d(t) transition (e.g. t50). Update the Figure 2 caption/prose in REPORT.md and RESULTS.md. No new model run is needed: results/logits_delayed.npy is (101, 50257), full-vocabulary delayed logits at every t.",
+  "baseline_sha256": {
+    "CHANGELOG.md": "2df3f51738ceb38e23fc12c06d8034d6007cfc793999ec5c45a1a90301685449",
+    "JOURNAL.md": "c1e4c06702c005e825a08202dbf00af7de0810a87b66e92dd12ee8cfc31452a5",
+    "PLAN.md": "3469ae1ec0cc2242da10fff274ee2188d5739cfc2ec050dfe11095ff6e71bee0",
+    "REPORT.md": "800e2ad669860bfcd91f39dbb300ba3f4acddaa1e9637a6f9149358b39524055",
+    "RESULTS.md": "d4dd17cbe2efe4cb033d155e615ba221d348b715157562d1419827ae722c0383",
+    "experiments/plot_delayed.py": "388644d3ef299d76a084151aac7c467bcb18f736a9cdd83b1ebb3270c434de30",
+    "experiments/run_delayed.py": "a5c44a91f1579ec7c78e0b168ff23c078bb15c5ee2930ed47fb4cdb99eed5f24",
+    "human_feedback_0.txt": "7b3bc6e27091169b33a2ffde8869d60442e5e9cfe6965959f13985b9a417ad0f",
+    "plots/delayed_distance.png": "9a97c7a3dd2967a7f145c85f6eabf02df28ac1574bb4495d837a8fc0f1facc1f",
+    "plots/delayed_tokens.png": "574f3d3c2d46e04c4db3bed463c999ad0231b5a411a40c0beada5cd1309007cd",
+    "plots/immediate_prediction.png": "223cc4066c77dff1f387f2162fb30a9eec31ecf99a980540944752b18dd04c83",
+    "results/delayed.json": "5f63af59b0a11119f17f4c96ba6a352859c2cf1d53cb1e826567568f2eb37ea6",
+    "results/logits_delayed.npy": "234ad6755a652095437f691f01d2870ef5e145155d2e9cdaba56d221d219553b",
+    "results/logits_immediate.npy": "a13a9619c4c31cd9818203ade7c4e0399a8ae4b4b7caf5f7206aab7c14caa5ff"
+  },
+  "review": {
+    "format_passed": true,
+    "content": {
+      "pass": true,
+      "inspected_outputs": [
+        "plots/delayed_distance.png",
+        "REPORT.md"
+      ],
+      "failures": [],
+      "summary": "Pass. The feedback asked for four things, and all four are done in both outputs:\n\n1. **Top-token panel added to Figure 2.** `plots/delayed_distance.png` has a new top panel showing the delayed top-1 token at each interpolation point t. It is the highest-probability token over the full vocabulary, not just a choice between the two cities.\n2. **Visible Tokyo/Berlin switch.** The panel shows ' Tokyo' up to t = 0.48 and ' Berlin' from t = 0.49.\n3. **Switch location read from the data.** A dash-dotted line through both panels marks the observed switch.\n4. **Coincidence not assumed.** The figure's annotation and the `REPORT.md` text both say the switch comes one grid step after the logit-distance midpoint (t50 = 0.48, where d first reaches 0.5). They also say it falls inside the transition interval (0.34–0.62) but not exactly at d = 0.5, and that the 0.01 grid spacing limits how precisely either point is known.\n\nThe figure matches the new caption and prose. The numbers are consistent: d = 0.52 at t = 0.48 and d = 0.58 at t = 0.49.\n\n`REPORT.md` still answers the core research question and stays within budget (about 2.7k words against a 5,000 limit; 3 figures against 8). It does not duplicate the detailed results file, add unrequested experiments, or bolt on analysis round by round. Jargon (SLERP, Jensen–Shannon divergence, relative logit distance, transition width, plateau) is defined. The limitations section explicitly avoids mechanistic or causal claims.\n\nMinor points that don't justify rejection:\n- Figure 3's caption puts the flip line at \"t = 0.49\", while Figure 2 puts it between 0.48 and 0.49.\n- \"Conclusion 1 of three pre-registered outcomes\" never spells out conclusion 2.\n- \"Already committed to Tokyo at t = 0.30\" is mildly strong wording."
+    },
+    "expected_outputs": [
+      "plots/delayed_distance.png",
+      "REPORT.md"
+    ],
+    "budget_failures": []
+  },
+  "addressed_feedback": "human_feedback_0.txt.addressed.md"
 }

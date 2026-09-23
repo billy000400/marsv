@@ -63,15 +63,24 @@ switch would be unremarkable.
 0–1. The curve stays within 0.931–0.944 and ` is` is the top-1 token at every `t`.
 
 The plateau claim is about the shape of the delayed response, so we plot its relative logit distance
-against the linear reference.
+against the linear reference. To check whether the model's delayed prediction switches where the
+logits do, the top panel shows the delayed top-1 token (argmax over the full 50,257-token vocabulary
+of `results/logits_delayed.npy`) at every `t`. Only ` Tokyo` (`t = 0.00–0.48`) and ` Berlin`
+(`t = 0.49–1.00`) ever win, so there is exactly one switch, between `t = 0.48` (`d = 0.52`) and
+`t = 0.49` (`d = 0.58`). `d(t)` first reaches 0.5 at `t₅₀ = 0.48`, so the token switch lags the logit
+midpoint by one 0.01 grid step and lies inside the transition interval 0.34–0.62.
 
-![Relative logit distance at the delayed readout versus interpolation position](plots/delayed_distance.png)
+![Delayed top-1 token and relative logit distance at the delayed readout versus interpolation position](plots/delayed_distance.png)
 
-**Figure 2.** The delayed logits are flat, switch sharply, then flat again. x: interpolation
-position `t`; y: relative logit distance `d(t)` (0 at the ` Japan` endpoint, 1 at the ` Germany`
-endpoint). Solid with triangles = delayed readout after ` is`; dotted gray = linear reference
-`d = t`. Thin horizontal lines mark the 0.1 and 0.9 levels; the shaded band is the transition
-interval of width `w = 0.28`.
+**Figure 2.** The delayed logits are flat, switch sharply, then flat again; the delayed top-1 token
+switches once, just after the logit midpoint. Top panel: delayed top-1 token at each of the 101
+values of `t` (circles, upper row = ` Tokyo`; squares, lower row = ` Berlin`). Bottom panel: x:
+interpolation position `t`; y: relative logit distance `d(t)` (0 at the ` Japan` endpoint, 1 at the
+` Germany` endpoint). Solid with triangles = delayed readout after ` is`; dotted gray = linear
+reference `d = t`; open diamond = first `t` with `d ≥ 0.5` (`t₅₀ = 0.48`). Thin horizontal lines mark
+the 0.1 and 0.9 levels; the shaded band is the transition interval of width `w = 0.28`. The
+dash-dotted vertical line in both panels marks the observed top-1 switch, between `t = 0.48` and
+`t = 0.49`.
 
 Finally, whether that geometric switch is also a behavioural one: which city the model actually
 predicts.
