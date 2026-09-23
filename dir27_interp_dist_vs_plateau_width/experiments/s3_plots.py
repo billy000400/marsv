@@ -41,10 +41,10 @@ def main():
     # Figure 1: D vs W at block 18 and block 35
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.8), sharex=True, sharey=True)
     for ax, W, name in ((axes[0], Wm, "(a) block 18 (middle)"), (axes[1], Wf, "(b) block 35 (final)")):
-        ax.scatter(D[~flag], W[~flag], s=2, alpha=0.15, color=CVD[0], marker="o", lw=0,
-                   label="clean curve")
-        ax.scatter(D[flag], W[flag], s=6, alpha=0.5, color=CVD[1], marker="x", lw=0.6,
+        ax.scatter(D[flag], W[flag], s=4, alpha=0.25, color=CVD[1], marker="x", lw=0.4,
                    label="flagged (non-monotonic)")
+        ax.scatter(D[~flag], W[~flag], s=2, alpha=0.08, color=CVD[0], marker="o", lw=0,
+                   label="clean curve")
         ax.set_title(name)
         ax.set_xlabel("layer-0 L2 distance D from ' big'")
     axes[0].set_ylabel("transition width W = t$_{0.9}$ − t$_{0.1}$")

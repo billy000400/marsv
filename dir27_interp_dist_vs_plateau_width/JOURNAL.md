@@ -32,3 +32,28 @@ sharper than block 18 in every case. A few final-layer curves overshoot y>1 (` P
 Next: aggregate the shards → CSV; make Fig 1a/1b, 2a/2b, and representative curves; write REPORT.md.
 
 On track? yes — S1 done, S2 running (~25% of plan), no blocker.
+
+## 2026-09-23 — iter 2: waiting on S2, plotting scripts ready
+
+- `kill -0` / `sleep` loops in backgrounded Bash exit immediately in this sandbox, so a watcher
+  wrongly reported the sweep as dead. I relaunched it, saw the original PID was still alive, and
+  killed the duplicate (PID 55952) about 5 s later, before it wrote any shard. Shards are
+  deterministic, so no data was affected. Use Monitor on the log instead.
+- Partial-data observation (8,192 tokens): the D≈5.16 cluster is ~45 byte-level tokens (control
+  chars, invalid-UTF-8 fragments) that barely occur in training; all have W_final≈0.33.
+- New `experiments/s5_curves.py` (Figure 3). s3_plots.py now draws unflagged points on top of
+  flagged ones so they are visible.
+
+## 2026-09-23 — iter 2 (cont.): S2–S5 done, direction complete
+
+- Sweep finished: 50,256 tokens, 5.5% flagged (2,686 at the final layer, 163 at block 18).
+- D vs W (Fig 1): the bulk (D 2–3, 97% of tokens) shows no visible slope at either layer. ` huge` is
+  the nearest token (D=1.22) yet one of the widest (W_final 0.56). The widest tail = size words plus
+  known under-trained tokens (` guiName`, `Downloadha`).
+- Correction: the D>4 cluster (64 tokens) is not only byte tokens. It also includes known
+  under-trained scraped strings (` RandomRedditor`, `StreamerBot`, ` externalToEVA`). The reports
+  say "rarely seen tokens".
+- W_final: one peak around 0.09–0.10 with a long tail; the sorted curve has no shelves. The only spike
+  is at 0.33 (the D>4 cluster; 43 of 65 in the tallest bin).
+- Median-by-D table kept as a descriptive summary, not a test (PLAN forbids correlation stats).
+- check_render passes. Success criterion met → STOP.

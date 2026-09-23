@@ -1,6 +1,6 @@
 # PLAN — Token distance vs. transition width
 
-> Working folder: `TODO`.
+> Working folder: `dir27_interp_dist_vs_plateau_width`.
 > Read `../BUDGET.md` and `../CLAUDE.md` every iteration. Keep the experiment minimal.
 
 ## Question
@@ -108,13 +108,13 @@ If a trajectory is strongly non-monotonic or crosses a threshold multiple times,
 
 ## Stages
 
-- [ ] **S1 — Verify the measurement**
+- [x] **S1 — Verify the measurement**
   - Run ` big` → a small set of ~20 diverse tokens.
   - Plot `y(t)` at the middle and final layers.
   - Confirm that the 0.1 → 0.9 width visually matches the curves.
   - Confirm endpoint normalization gives approximately `y(0)=0`, `y(1)=1`.
 
-- [ ] **S2 — Vocabulary sweep**
+- [x] **S2 — Vocabulary sweep**
   - Run ` big` → every other usable GPT-2 token.
   - Save one row per token containing:
     - token ID
@@ -124,7 +124,7 @@ If a trajectory is strongly non-monotonic or crosses a threshold multiple times,
     - final-layer width `W_final`
     - simple flag for non-monotonic / unusual trajectories
 
-- [ ] **S3 — Distance vs. transition width**
+- [x] **S3 — Distance vs. transition width**
   Produce two primary scatter plots:
 
   **Figure 1a**
@@ -144,7 +144,7 @@ If a trajectory is strongly non-monotonic or crosses a threshold multiple times,
 
   Do not add Pearson/Spearman correlations, hypothesis tests, regression models, etc. in this first pass.
 
-- [ ] **S4 — Look for grouped final-layer behavior**
+- [x] **S4 — Look for grouped final-layer behavior**
   Make two simple views of `W_final`:
 
   **Figure 2a — Histogram**
@@ -165,7 +165,7 @@ If a trajectory is strongly non-monotonic or crosses a threshold multiple times,
   - show their decoded token strings;
   - do not run k-means or another clustering algorithm.
 
-- [ ] **S5 — Representative curves**
+- [x] **S5 — Representative curves**
   Pick a small number of tokens from visually different width regimes, and several tokens from any apparent same-width group.
 
   Plot their final-layer `y(t)` curves together.
@@ -235,8 +235,12 @@ Do not replace the basic experiment with a more complicated analysis.
 
 ## Current status
 
-Fresh direction.
+COMPLETE. All stages S1–S5 done; success criterion met. 50,256 tokens in `results/sweep.csv`;
+Figures in `plots/fig1_distance_vs_width.png`, `plots/fig2_final_width_distribution.png`,
+`plots/fig3_representative_curves.png`; REPORT.md and RESULTS.md written, render checks pass.
+Answer: D does not visibly predict W in the bulk; final layer sharper than block 18; W_final is one
+broad peak with a tail, the only tight group being 64 rarely seen tokens at D≈5.17, W≈0.33.
 
 ## Next step
 
-Implement the 20-token sanity check and verify the definition of `W = t_0.9 - t_0.1` on the actual interpolation curves before launching the vocabulary-wide sweep.
+None — direction finished (STOP written).

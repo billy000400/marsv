@@ -3,3 +3,26 @@ Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF
 Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  90%|█████████ | 393/436 [00:00<00:00, 3916.77it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 4014.24it/s]
 shard 0: 2048 tokens in 62.0s
 shard 2048: 2048 tokens in 62.5s
+shard 4096: 2048 tokens in 62.7s
+shard 6144: 2048 tokens in 62.8s
+shard 8192: 2048 tokens in 62.8s
+shard 10240: 2048 tokens in 62.8s
+shard 12288: 2048 tokens in 62.8s
+shard 14336: 2048 tokens in 62.8s
+shard 16384: 2048 tokens in 62.8s
+shard 18432: 2048 tokens in 62.8s
+shard 20480: 2048 tokens in 62.8s
+shard 22528: 2048 tokens in 62.9s
+shard 24576: 2048 tokens in 62.8s
+shard 26624: 2048 tokens in 62.8s
+shard 28672: 2048 tokens in 62.8s
+shard 30720: 2048 tokens in 62.8s
+shard 32768: 2048 tokens in 62.8s
+shard 34816: 2048 tokens in 62.8s
+shard 36864: 2048 tokens in 62.8s
+shard 38912: 2048 tokens in 62.8s
+shard 40960: 2048 tokens in 62.8s
+shard 43008: 2048 tokens in 62.8s
+shard 45056: 2048 tokens in 62.8s
+shard 47104: 2048 tokens in 62.8s
+shard 49152: 1104 tokens in 33.9s
