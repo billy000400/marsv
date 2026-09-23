@@ -339,4 +339,6 @@ results/{s1_endpoints.json, interp.csv, interp.npz, transitions.json}.
 
 ## Next step
 
-None — success criterion met. Direction finalized and STOP written.
+Feedback `human_feedback_0.txt` (2026-09-23): Figure 7 now also shows the top-1 token at every t and the
+observed top-1 switch (t_switch 0.460 / 0.432 / 0.461 / 0.447 vs t50 0.454 / 0.444 / 0.443 / 0.450).
+Awaiting independent content review; no further research planned.

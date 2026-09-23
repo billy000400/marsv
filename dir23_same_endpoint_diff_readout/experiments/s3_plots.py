@@ -85,28 +85,88 @@ fig.tight_layout()
 fig.savefig(os.path.join(PLOTS, "immediate_prediction.png"), dpi=160)
 plt.close(fig)
 
-# --- transition comparison -------------------------------------------------------
-fig, ax = plt.subplots(figsize=(6.2, 3.6))
+# --- transition comparison + top-1 token along the sweep ----------------------------
+from transformers import AutoTokenizer  # noqa: E402
+
+from common import crossings  # noqa: E402
+
+tok = AutoTokenizer.from_pretrained("gpt2-large")
 order = PRIMARY + ["Type"]
-for i, name in enumerate(order):
-    st = T[name]
-    y = len(order) - 1 - i
-    c = COL[name]
-    ax.hlines(y, st["t10"], st["t90"], color=c, lw=3.5, alpha=0.55)
-    ax.plot([st["t10"], st["t90"]], [y, y], marker="|", ms=12, ls="none", color=c)
-    ax.plot([st["t50"]], [y], marker=MARK[name], ms=9, color=c, mec="black", mew=0.7, zorder=5)
-    ax.text(st["t90"] + 0.015, y, f"$t_{{50}}$={st['t50']:.3f},  $w$={st['w']:.3f}",
-            va="center", fontsize=9, color=c)
-ax.set_yticks(range(len(order)))
-ax.set_yticklabels(order[::-1])
-ax.set_xlim(0, 1)
-ax.set_xlabel("interpolation position $t$  (0 = Japan, 1 = Germany)")
+sw = {}      # observed top-1 switch per readout: grid interval and linearly interpolated crossing
+for name, _, ans_a, ans_b in READOUTS:
+    t1 = D[f"top1_{name}"]
+    idx = np.where(t1[:-1] != t1[1:])[0]
+    # top-1 is always the Japan or Germany answer, so the switch is where p_A - p_B crosses 0
+    cross = crossings(alphas, D[f"p_A_{name}"] - D[f"p_B_{name}"], 0.0) if len(idx) else []
+    sw[name] = {"grid": [(float(alphas[i]), float(alphas[i + 1])) for i in idx],
+                "t_switch": cross[0] if cross else None}
+
+with open(os.path.join(RESULTS, "top1_tokens.csv"), "w") as f:
+    f.write("t," + ",".join(f"top1_{n},p_top1_{n}" for n in NAMES) + "\n")
+    for i, t in enumerate(alphas):
+        cells = []
+        for n in NAMES:
+            cells.append(repr(tok.decode([int(D[f"top1_{n}"][i])])))
+            cells.append(f"{max(D[f'p_A_{n}'][i], D[f'p_B_{n}'][i]):.4f}")
+        f.write(f"{t:.2f}," + ",".join(cells) + "\n")
+
+fig, axes = plt.subplots(1, 2, figsize=(11.0, 5.8), gridspec_kw={"width_ratios": [1.0, 1.0]})
+for ax, (x0, x1), zoom in zip(axes, ((0.0, 1.0), (0.40, 0.50)), (False, True)):
+    for i, name in enumerate(order):
+        st = T[name]
+        y = len(order) - 1 - i
+        c = COL[name]
+        yb, ys = y + 0.18, y - 0.18          # bar row (d(t) transition) and top-1 strip row
+        ax.hlines(yb, st["t10"], st["t90"], color=c, lw=3.5, alpha=0.55)
+        ax.plot([st["t10"], st["t90"]], [yb, yb], marker="|", ms=10, ls="none", color=c)
+        ax.plot([st["t50"]], [yb], marker=MARK[name], ms=9, color=c, mec="black", mew=0.7, zorder=5)
+        # top-1 strip: open squares = Japan-side token, filled squares = Germany-side token
+        t1 = D[f"top1_{name}"]
+        japan = t1 == t1[0]
+        ms = 7 if zoom else 3.2
+        ax.plot(alphas[japan], np.full(japan.sum(), ys), ls="none", marker="s", ms=ms,
+                mfc="white", mec="#444444", mew=0.8)
+        if (~japan).any():
+            ax.plot(alphas[~japan], np.full((~japan).sum(), ys), ls="none", marker="s", ms=ms,
+                    mfc="#222222", mec="#222222", mew=0.8)
+        tok_a = tok.decode([int(t1[0])]).strip()
+        tok_b = tok.decode([int(t1[-1])]).strip()
+        s = sw[name]
+        if s["t_switch"] is not None:
+            ax.plot([s["t_switch"]] * 2, [ys - 0.12, yb + 0.12], color="black", lw=1.2, ls="--", zorder=6)
+        if zoom:
+            if s["t_switch"] is None:
+                label = f"$t_{{50}}$={st['t50']:.3f}\ntop-1 switch: none"
+            else:
+                lo, hi = s["grid"][0]
+                label = (f"$t_{{50}}$={st['t50']:.3f}\ntop-1 switch={s['t_switch']:.3f}\n"
+                         f"(last '{tok_a}' $t$={lo:.2f},\n first '{tok_b}' $t$={hi:.2f})")
+            ax.text(1.03, y, label, va="center", fontsize=8, transform=ax.get_yaxis_transform())
+        elif s["t_switch"] is None:
+            ax.text(0.5, ys - 0.22, f"top-1 = '{tok_a}' at every $t$ (no switch)", ha="center",
+                    va="center", fontsize=8)
+        else:
+            ax.text(0.02, ys - 0.22, f"top-1 '{tok_a}'", ha="left", va="center", fontsize=8)
+            ax.text(0.98, ys - 0.22, f"top-1 '{tok_b}'", ha="right", va="center", fontsize=8)
+    ax.set_yticks(range(len(order)))
+    ax.set_yticklabels(order[::-1] if not zoom else [])
+    ax.set_ylim(-0.7, len(order) - 0.45)
+    ax.set_xlim(x0 - (0.003 if zoom else 0), x1 + (0.003 if zoom else 0))
+    ax.set_xlabel("interpolation position $t$  (0 = Japan, 1 = Germany)")
+    if zoom:
+        ax.set_xticks(np.arange(0.40, 0.501, 0.01), minor=True)
+        ax.grid(axis="x", which="both", alpha=0.3, lw=0.5)
+    else:
+        ax.grid(axis="x", alpha=0.25, lw=0.5)
 dt = T["delta_t50_primary"]
-ax.set_title(f"Transition location per readout: marker = $t_{{50}}$, bar = $[t_{{10}},t_{{90}}]$\n"
-             f"$\\Delta t_{{50}}$ across the four primary readouts = {dt:.3f}", fontsize=10)
-ax.grid(axis="x", alpha=0.25, lw=0.5)
+axes[0].set_title(f"(a) full sweep;  $\\Delta t_{{50}}$ (four primary) = {dt:.3f}", fontsize=10)
+axes[1].set_title("(b) zoom on $0.40 \\leq t \\leq 0.50$ (grid step 0.01)", fontsize=10)
 fig.tight_layout()
+fig.subplots_adjust(right=0.82, wspace=0.08)
 fig.savefig(os.path.join(PLOTS, "transition_comparison.png"), dpi=160)
 plt.close(fig)
+for n in order:
+    print(f"{n:10s} t50={T[n]['t50']:.4f} switch={sw[n]['t_switch']} grid={sw[n]['grid']} "
+          f"d_at_switch={np.interp(sw[n]['t_switch'], alphas, D[f'd_{n}']) if sw[n]['t_switch'] else None}")
 
 print("saved:", sorted(os.listdir(PLOTS)))

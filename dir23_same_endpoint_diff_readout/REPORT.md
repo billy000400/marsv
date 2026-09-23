@@ -17,9 +17,10 @@ questions consult. If they flip at different positions, each question has its ow
 **Headline result.** All four readouts switch at nearly the same place. Their midpoints
 $t_{50}$ lie between 0.443 and 0.454, a spread of **Δt₅₀ = 0.011** — about one interpolation step out
 of 101. Each curve is sharp (10–90% width ≈ 0.27, against 0.80 for a linear change), monotonic, and
-crosses each threshold exactly once. The top-1 answers flip inside a three-step window:
-` Tokyo`→` Berlin` at t = 0.46, ` Asia`→` Europe` at 0.44, ` yen`→` euro` at 0.47,
-` Japanese`→` German` at 0.45.
+crosses each threshold exactly once. The most likely answer token (top-1) switches exactly once per
+readout, and Figure 7 plots where: ` Tokyo`→` Berlin` at t = 0.460, ` Asia`→` Europe` at 0.432,
+` yen`→` euro` at 0.461, ` Japanese`→` German` at 0.447. For three readouts the switch lies within
+0.012 of $t_{50}$; for Currency it comes 0.018 later.
 
 **Verdict: aligned transitions.** Capital, continent, currency, and language become Germany-like at
 approximately the same interpolation location. This is consistent with a shared transition in a
@@ -139,6 +140,25 @@ Following the pre-registered plan, $\Delta t_{50} \le 0.05$ counts as descriptiv
 resolution of this experiment* (the grid step is 0.01). This is a descriptive threshold, not a
 statistical significance test.
 
+**Top-1 switch location $t_{\text{switch}}$** — $d(t)$ summarises the whole logit vector, so it does
+not directly say *which answer the model would give*. To check whether the predicted answer changes at
+the same place as $d(t)$, we also record, at every one of the 101 positions, the top-1 token: the
+token with the highest probability under the readout-position logits $z_r(t)$ (the "delayed logits",
+meaning the prediction made after the readout suffix, not directly after the country token). In
+every primary readout the top-1 token is always either the Japan-side answer $a_A$ or the
+Germany-side answer $a_B$, so it switches exactly where the two answer probabilities cross. The
+switch location is the zero crossing of
+
+```math
+g_r(t) \;=\; p_r(a_A \mid t) \;-\; p_r(a_B \mid t)
+```
+
+found by linear interpolation between the last sampled position whose top-1 is $a_A$ and the first
+whose top-1 is $a_B$ (the same interpolation used for $t_{50}$). The switch is observed only on the
+0.01 grid, so the two bracketing grid points are reported alongside it. Comparing
+$t_{\text{switch}}$ with $t_{50}$ (Figure 7) shows whether the discrete answer and the logit-distance
+curve change at the same place.
+
 ### Baseline / reference
 
 There is no competing method to beat here; the reference is the **linear change** $d(t) = t$, drawn on
@@ -228,26 +248,57 @@ a linear change would give. Sliding the input embedding two thirds of the way ac
 Japan and Germany therefore does *not* produce a two-thirds-blended answer; the readout stays
 Japan-like, then flips over a window about a quarter of the path wide.
 
-### The four transition locations coincide
+### The four transition locations coincide, and the answers switch there too
 
-The direct answer to the research question is the comparison of those four locations. Figure 7 places
-each readout's $t_{50}$ as a marker with its $[t_{10}, t_{90}]$ interval as a bar, which is the
-clearest way to see whether the switching points separate.
+The direct answer to the research question is the comparison of the four transition locations. A
+second question is whether the model's actual answer changes at that same place: $d(t)$ could pass
+0.5 while the top-1 token is still the Japan answer. Figure 7 answers both. For each readout, the
+upper row shows $t_{50}$ as a marker with its $[t_{10}, t_{90}]$ interval as a bar; the lower row
+shows the top-1 token at each of the 101 positions, and a dashed line marks the observed top-1 switch
+$t_{\text{switch}}$. Panel (b) zooms into $0.40 \le t \le 0.50$ so that the individual grid points
+and the gap between $t_{50}$ and the switch are visible.
 
-![Transition locations and 10-90% intervals for the five readouts](plots/transition_comparison.png)
+![Transition locations, 10-90% intervals and top-1 tokens for the five readouts](plots/transition_comparison.png)
 
-**Figure 7.** Transition location per readout. x: interpolation position $t$ (0 = Japan, 1 = Germany);
-y: the five readouts, with the Type control at the bottom in gray. Marker = $t_{50}$; bar =
-$[t_{10}, t_{90}]$; each row is annotated with its $t_{50}$ and width. The four primary markers span
-only $\Delta t_{50}$ = 0.011 and every interval overlaps almost completely.
+**Figure 7.** Transition location and top-1 answer per readout. x: interpolation position $t$
+(0 = Japan, 1 = Germany); panel (a) shows the full sweep, panel (b) zooms into 0.40–0.50 (grid step
+0.01). y: the five readouts, with the Type control at the bottom in gray. Upper row of each readout:
+marker = $t_{50}$, bar = $[t_{10}, t_{90}]$ of $d(t)$. Lower row: one square per sampled $t$; open
+square = top-1 token is the Japan-side answer (e.g. ` Tokyo`), filled square = top-1 token is the
+Germany-side answer (e.g. ` Berlin`). Dashed vertical line = $t_{\text{switch}}$. Right-hand labels
+give $t_{50}$, $t_{\text{switch}}$ and the last/first grid points on either side of the switch.
 
 Across Capital, Continent, Currency, and Language, $\Delta t_{50} = 0.454 - 0.443 = 0.011$ — about one
 grid step, and roughly a twenty-fifth of the transition width itself. This is far inside the
-pre-registered alignment threshold of 0.05. The same coincidence appears in the discrete answers,
-which is the reading that needs no metric at all: the top-1 prediction flips ` Asia`→` Europe` at
-t = 0.44, ` Japanese`→` German` at 0.45, ` Tokyo`→` Berlin` at 0.46, and ` yen`→` euro` at 0.47. Each
-readout produces exactly two distinct top-1 tokens over the whole slide — the Japan answer, then the
-Germany answer, with no third token appearing in between.
+pre-registered alignment threshold of 0.05.
+
+The top-1 answers tell the same story at the level of the discrete prediction, with small offsets
+that we measured instead of assuming away. Each primary readout produces exactly two distinct top-1
+tokens over the whole slide — the Japan answer, then the Germany answer, with no third token in
+between — and it switches once (Figure 7, lower rows). Table 2 compares the switch with $t_{50}$.
+Values come from `results/transitions.json` and `results/top1_tokens.csv`.
+
+| Readout   | Top-1 switch            | Last Japan-answer $t$ | First Germany-answer $t$ | $t_{\text{switch}}$ | $t_{50}$ | $t_{\text{switch}} - t_{50}$ | $d(t_{\text{switch}})$ |
+| --------- | ----------------------- | ----: | ----: | ----: | ----: | -----: | ----: |
+| Capital   | ` Tokyo` → ` Berlin`    | 0.45 | 0.46 | 0.460 | 0.454 | +0.006 | 0.54 |
+| Continent | ` Asia` → ` Europe`     | 0.43 | 0.44 | 0.432 | 0.444 | −0.011 | 0.43 |
+| Currency  | ` yen` → ` euro`        | 0.46 | 0.47 | 0.461 | 0.443 | +0.018 | 0.61 |
+| Language  | ` Japanese` → ` German` | 0.44 | 0.45 | 0.447 | 0.450 | −0.003 | 0.48 |
+| Type      | none (` country` at every $t$) | — | — | — | 0.438 | — | — |
+
+**Table 2.** Observed top-1 switch versus the $d(t)$ midpoint. $d(t_{\text{switch}})$ is the
+normalized logit distance at the switch (0.5 would mean the switch sits exactly at $t_{50}$).
+
+For Capital and Language the answer switches within one grid step of $t_{50}$ (offsets +0.006 and
+−0.003). Continent switches slightly *before* its midpoint (−0.011), when $d$ is only 0.43. Currency
+switches *after* it (+0.018), when $d$ is already 0.61: at $t_{50}$ = 0.443 the model still answers
+` yen`, and ` euro` only takes over between $t$ = 0.46 and 0.47. The reason is visible in the answer
+probabilities: near the switch neither currency token is confident (` yen` 0.22 and ` euro` 0.20 at
+$t$ = 0.46; `results/top1_tokens.csv`), so the argmax can lag the overall logit movement. All four
+switches still fall between $t$ = 0.432 and 0.461 — a spread of 0.029, inside the 0.05 alignment
+threshold and well inside every $[t_{10}, t_{90}]$ interval. So the discrete answers switch in the
+same narrow region as the logit-distance transitions, but they do not sit exactly on $t_{50}$; the
+offsets of up to 0.018 are real at this grid resolution.
 
 The practical significance is that these four questions probe genuinely different knowledge
 (a city, a landmass, a currency, a language; their answer tokens share nothing) and are asked through
@@ -276,6 +327,10 @@ transitions**:
 > interpolation location ($\Delta t_{50}$ = 0.011, Figure 7 and Table 1). This is consistent with a
 > shared transition in the future-relevant country representation that is subsequently accessed by
 > different downstream readouts.
+
+The predicted answers switch in the same region: the top-1 token changes once per readout, between
+$t$ = 0.432 and 0.461 (Figure 7, Table 2). The switch is not identical to $t_{50}$ — it is within
+0.012 of $t_{50}$ for Capital, Continent and Language and 0.018 later for Currency.
 
 Three qualifications bound that statement.
 

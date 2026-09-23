@@ -65,16 +65,23 @@ Across the four primary readouts: $\Delta t_{50} = 0.454 - 0.443 = 0.011$, insid
 descriptive-alignment threshold of 0.05 (a descriptive comparison at a 0.01 grid resolution, not a
 significance test). Mean primary $t_{50}$ = 0.4475, mean primary width = 0.268.
 
-The discrete answers agree with the curve summary, and are the same observation without any metric:
-each primary readout emits exactly two distinct top-1 tokens across all 101 positions, flipping once.
+The discrete answers switch in the same region. Each primary readout emits exactly two distinct top-1
+tokens across all 101 positions and switches once. The switch location $t_{\text{switch}}$ is the
+linearly interpolated zero crossing of $p(a_A) - p(a_B)$ between the last grid point with the Japan
+answer on top and the first with the Germany answer on top (REPORT.md Methods).
 
-| Readout | Top-1 flip | $t$ of flip | Distinct top-1 tokens over the sweep |
-| ------- | ---------- | ----------: | -----------------------------------: |
-| Capital   | ` Tokyo` → ` Berlin`    | 0.46 | 2 |
-| Continent | ` Asia` → ` Europe`     | 0.44 | 2 |
-| Currency  | ` yen` → ` euro`        | 0.47 | 2 |
-| Language  | ` Japanese` → ` German` | 0.45 | 2 |
-| Type      | none                    | —    | 1 (` country` throughout) |
+| Readout | Top-1 switch | Last Japan-answer $t$ | First Germany-answer $t$ | $t_{\text{switch}}$ | $t_{\text{switch}} - t_{50}$ | $d(t_{\text{switch}})$ | Distinct top-1 tokens |
+| ------- | ------------ | ----: | ----: | ----: | -----: | ----: | ----: |
+| Capital   | ` Tokyo` → ` Berlin`    | 0.45 | 0.46 | 0.460 | +0.006 | 0.54 | 2 |
+| Continent | ` Asia` → ` Europe`     | 0.43 | 0.44 | 0.432 | −0.011 | 0.43 | 2 |
+| Currency  | ` yen` → ` euro`        | 0.46 | 0.47 | 0.461 | +0.018 | 0.61 | 2 |
+| Language  | ` Japanese` → ` German` | 0.44 | 0.45 | 0.447 | −0.003 | 0.48 | 2 |
+| Type      | none                    | —    | —    | —     | —      | —    | 1 (` country` throughout) |
+
+The switches span 0.432–0.461 (spread 0.029). Currency's answer lags its $d(t)$ midpoint because
+neither currency token is confident near the switch (` yen` 0.22, ` euro` 0.20 at $t$ = 0.46). The
+per-$t$ top-1 tokens and their probabilities are in `results/top1_tokens.csv`; they are plotted in
+REPORT.md Figure 7.
 
 ## Immediate position across the sweep
 
@@ -110,11 +117,11 @@ and the two comparison figures:
 | `plots/distance_type.png`       | Type control $d(t)$ (` country` both sides) |
 | `plots/distance_overlay.png`    | All five curves overlaid (Figure R1) |
 | `plots/immediate_prediction.png`| $p(\text{newline})$ at the country position across $t$ |
-| `plots/transition_comparison.png` | $t_{50}$ markers with $[t_{10}, t_{90}]$ intervals |
+| `plots/transition_comparison.png` | $t_{50}$ markers with $[t_{10}, t_{90}]$ intervals, plus the top-1 token at every $t$ and the observed top-1 switch (REPORT.md Figure 7) |
 
 ## Data and code
 
-Everything above is reproducible from four scripts and four saved artefacts; the sweep takes about a
+Everything above is reproducible from four scripts and five saved artefacts; the sweep takes about a
 minute on one GPU. Re-running `s1_endpoints.py`, `s2_interp.py` and `s3_plots.py` in that order
 regenerates every number and figure in this file.
 
@@ -123,11 +130,12 @@ regenerates every number and figure in this file.
 | `results/s1_endpoints.json` | Tokenization checks, endpoint top-5 predictions, endpoint JSDs |
 | `results/interp.csv`        | Per-$t$: $p(\text{newline})$, all five $d(t)$, and both answer-token probabilities per readout |
 | `results/interp.npz`        | Same arrays plus per-$t$ top-1 token ids and the immediate $d(t)$ |
+| `results/top1_tokens.csv`   | Per-$t$ top-1 token and its probability for each readout (written by `s3_plots.py`) |
 | `results/transitions.json`  | Per-readout $t_{10}/t_{50}/t_{90}/w$, crossing counts, monotonicity, top-1 flip positions, $\Delta t_{50}$ |
 | `experiments/common.py`     | Prompt, readouts, slerp, JSD, distance and threshold-crossing helpers |
 | `experiments/s1_endpoints.py` | S1 endpoint reproduction |
 | `experiments/s2_interp.py`  | S2 interpolation sweep (full logits used in memory; derived curves saved) |
-| `experiments/s3_plots.py`   | S3/S4 figures |
+| `experiments/s3_plots.py`   | S3/S4 figures, top-1 switch locations and `top1_tokens.csv` |
 
 ## Headline
 

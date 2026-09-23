@@ -49,3 +49,26 @@ iteration if the direction is reopened.
 **Next step.** None — success criterion met; STOP written.
 
 On track? yes — S5, 100% done, no blocker.
+
+## 2026-09-23 — human_feedback_0.txt: top-1 token added to Figure 7
+
+**Did.** Used the per-t top-1 ids and answer probabilities already stored in `results/interp.npz`
+(no model re-run). Rewrote the Figure 7 block of `s3_plots.py`: two panels (full sweep + 0.40–0.50
+zoom), a strip of 101 open/filled squares per readout for the top-1 token, dashed line at the observed
+switch. Wrote `results/top1_tokens.csv`. Updated REPORT.md (Methods metric, Figure 7 text, Table 2,
+Summary, Conclusion) and RESULTS.md.
+
+**Learned.** Top-1 is always a_A or a_B in each primary readout, switching once. t_switch
+(interpolated zero crossing of p_A − p_B) = 0.460 / 0.432 / 0.461 / 0.447 for Capital / Continent /
+Currency / Language against t50 0.454 / 0.444 / 0.443 / 0.450. They do not coincide exactly: Currency's
+answer switches 0.018 after t50 (d = 0.61 at the switch; yen 0.22 vs euro 0.20 at t = 0.46, so the
+argmax is fragile); Continent switches 0.011 before t50. Switch spread 0.029, still < 0.05.
+
+**Decisions.** "Switch location" = linear-interpolated crossing of p_A − p_B, which matches how t50 is
+interpolated; the bracketing grid points are shown too, since the switch is observed only on the grid.
+Rejected: reporting only the first grid point with the new token (earlier practice), because it is
+biased late by up to one step and cannot be compared fairly with an interpolated t50.
+
+**Gotcha.** `s3_plots.py` regenerates every plot, and matplotlib PNG bytes are not reproducible, so
+the seven must-remain-unchanged PNGs were restored from HEAD after running it (hashes verified equal
+to the manifest baseline).
