@@ -64,3 +64,10 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
   Figure 1 (sanity curves, x = t) is ruled out. New output plots/fig1_zoom_distance_vs_width.png, added
   after Figure 1 in REPORT.md and RESULTS.md; original Figure 1 kept. "Corresponding y range" = min–max
   of W among tokens with D in [1.6, 3.3], per panel. Manifest set to ready.
+
+## 2026-09-23 — feedback work: zoomed Figure 1
+- Added `zoom()` to s3_plots.py (`python s3_plots.py zoom`), reading sweep.csv to avoid regenerating the
+  frozen outputs; verified sha256 of sweep.csv and fig1–fig3 unchanged.
+- Zoom holds 50,164/50,256 tokens (excluded: 9 with D<1.6, 19 with 3.3<D<4, 64 at D≈5.17). The core shows no
+  clear slope at either layer, consistent with Finding 1. Embedded in REPORT.md (Fig 2) and RESULTS.md (Fig 3);
+  check_render passes. Manifest -> review_pending.

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "ready",
+  "state": "addressed",
   "source_feedback": "human_feedback.txt",
   "source_sha256": "487570a0d1941444502f038b7932a3f019b52e83aabcd4c4ac48444b0ded3031",
   "required_outputs": [
@@ -36,13 +36,47 @@
   "checklist": [
     {
       "request": "Can you add a zoom in version of Figure 1, showing [1.6, 3.3] in x range and the corresponding y range",
-      "status": "pending",
+      "status": "done",
       "completion": {
-        "what_was_done": "",
-        "evidence": "",
-        "ambiguity": ""
+        "what_was_done": "Made a zoomed version of REPORT.md Figure 1 (same two panels: block 18 and block 35, same markers). The x-axis is limited to D in [1.6, 3.3]. The y-axis in each panel is limited to the smallest-to-largest W among the 50,164 tokens in that D range (block 18: 0.065–0.627; block 35: 0.021–0.650), with 2% padding. Plotted by the new zoom mode in experiments/s3_plots.py, which reads results/sweep.csv. The figure is embedded in REPORT.md as Figure 2, directly after Figure 1 in Finding 1, with a motivating sentence and a caption naming both axes; later figures were renumbered. It is also added to RESULTS.md as Figure 3.",
+        "evidence": "plots/fig1_zoom_distance_vs_width.png; REPORT.md, Results > Finding 1, Figure 2; RESULTS.md, S3 section, Figure 3; experiments/s3_plots.py zoom()",
+        "ambiguity": "None"
       }
     }
   ],
-  "routing_notes": "'Figure 1' = REPORT.md Figure 1 (plots/fig1_distance_vs_width.png, D vs W scatter, panels block 18 and block 35); the requested x range [1.6, 3.3] is in units of D, which confirms this (RESULTS.md's Figure 1 is the S1 sanity-curve grid, whose x-axis is t in [0,1], so it cannot be meant). The zoom is a new, additional figure (original Figure 1 stays unchanged), same two panels, x limited to D in [1.6, 3.3] and y limited to the min-max of W over tokens with D in that range, per panel. It is embedded right after Figure 1 in REPORT.md (and in RESULTS.md next to its D-vs-W figure); later figures are renumbered to keep sequential numbering."
+  "routing_notes": "'Figure 1' = REPORT.md Figure 1 (plots/fig1_distance_vs_width.png, D vs W scatter, panels block 18 and block 35); the requested x range [1.6, 3.3] is in units of D, which confirms this (RESULTS.md's Figure 1 is the S1 sanity-curve grid, whose x-axis is t in [0,1], so it cannot be meant). The zoom is a new, additional figure (original Figure 1 stays unchanged), same two panels, x limited to D in [1.6, 3.3] and y limited to the min-max of W over tokens with D in that range, per panel. It is embedded right after Figure 1 in REPORT.md (and in RESULTS.md next to its D-vs-W figure); later figures are renumbered to keep sequential numbering.",
+  "baseline_sha256": {
+    ".tasks/human_feedback.txt.manifest.json": "b647c21e1c8c786c766dd47e874c4dd8714c1632e64a756066b9d8a29242182a",
+    "CHANGELOG.md": "eefdda4a98d89ac83a88c8551804c8aa13e19658fc7e4f9c1448614e6c122bae",
+    "JOURNAL.md": "f3266786f418f6a5328a91542fee8150f9d6f62602f7c772ec09518b74c0bbc4",
+    "PLAN.md": "38ce4e637641c2eddbc0f5c4ecbe09fee4e015903f16474aa43d9820b7b5c817",
+    "REPORT.md": "12cbd1260990194eb21e5fadc6b4acc2c1fc747064f42c96ec093d900a4953a9",
+    "RESULTS.md": "9eb3c5e223a37ff963215a23b95a47cadc9271ad186cdcebb502197f59c2056b",
+    "experiments/s3_plots.py": "0706b9086c358a88fcccbafd30de2d96d3520cf0ef67c90662e8dd08221f0798",
+    "human_feedback.txt": "487570a0d1941444502f038b7932a3f019b52e83aabcd4c4ac48444b0ded3031",
+    "plots/fig1_distance_vs_width.png": "4bc9969f0c94d0c1c5d44045b49986ad3cd2b35c0f6d15d2d75b54504eb70084",
+    "plots/fig1_zoom_distance_vs_width.png": null,
+    "plots/fig2_final_width_distribution.png": "a1efb5123c556ed877591395d779fc1cca9b168ffe552290386d863b0c91c178",
+    "plots/fig3_representative_curves.png": "7dbe817ecf6f2a592fba0c1e7b2f02b5884b88a1fd713007a205cc6164a89013",
+    "plots/s1_sanity_curves.png": "72bbcff257c8104a28765a795d45732b8ac525de0f6ad42d7cb518dd0293edee",
+    "results/sweep.csv": "9be246a68ec36e33548cce6299c3116e900c1f30fa7e8b60e93ba99059698b5b"
+  },
+  "review": {
+    "format_passed": true,
+    "content": {
+      "pass": true,
+      "inspected_outputs": [
+        "plots/fig1_zoom_distance_vs_width.png",
+        "REPORT.md"
+      ],
+      "failures": [],
+      "summary": "The request was to add a zoomed-in version of Figure 1 covering x in [1.6, 3.3] with the matching y range. The work does this without changing what was asked. The new figure keeps both panels of the original D-vs-W scatter (block 18 and block 35) with the same markers. The x-axis is limited to D from 1.6 to 3.3. Each panel's y-axis runs from the smallest to the largest W among tokens in that D range, which is the natural reading of 'the corresponding y range'. The y limits in the image match the ones stated in the caption (block 18: 0.065–0.627, block 35: 0.021–0.650), with a small padding. Both axes are labelled. The original Figure 1 is unchanged, and the zoom is added right after it as Figure 2. It has a short sentence explaining why it is there, a caption naming both axes and the limits, and it says which tokens the zoom leaves out (9 with D < 1.6, 19 with D between 3.3 and 4, and the 64-token group at D ≈ 5.17). Later figures are renumbered consistently. The new text makes only descriptive claims ('no clear slope', 'spread at fixed D much larger than change across D'), and the median values in the report back these up. It makes no causal or mechanistic claims. The report is still short, well under the 5,000-word limit, with 4 of the allowed 8 main figures, and it stays focused on the core question. Nothing was added beyond the requested figure. Minor note: the flagged points are hard to tell apart as crosses at this marker size, but the legend explains the markers."
+    },
+    "expected_outputs": [
+      "plots/fig1_zoom_distance_vs_width.png",
+      "REPORT.md"
+    ],
+    "budget_failures": []
+  },
+  "addressed_feedback": "human_feedback.txt.addressed.md"
 }

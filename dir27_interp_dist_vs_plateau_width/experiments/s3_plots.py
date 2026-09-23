@@ -78,5 +78,38 @@ def main():
               f"lowest-D examples {ex}")
 
 
+def zoom(lo=1.6, hi=3.3):
+    """Zoomed Figure 1: D in [lo, hi], y limited per panel to the min-max W of tokens in that D range.
+    Reads results/sweep.csv so the sweep CSV and the other figures are not rewritten."""
+    with open(os.path.join(RESULTS, "sweep.csv")) as f:
+        rows = list(csv.DictReader(f))
+    D = np.array([float(r["D"]) for r in rows])
+    Wm = np.array([float(r["W_mid"]) for r in rows])
+    Wf = np.array([float(r["W_final"]) for r in rows])
+    flag = np.array([r["flag_nonmonotonic"] == "1" for r in rows])
+    sel = (D >= lo) & (D <= hi)
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
+    for ax, W, name in ((axes[0], Wm, "(a) block 18 (middle)"), (axes[1], Wf, "(b) block 35 (final)")):
+        ax.scatter(D[sel & flag], W[sel & flag], s=4, alpha=0.25, color=CVD[1], marker="x", lw=0.4,
+                   label="flagged (non-monotonic)")
+        ax.scatter(D[sel & ~flag], W[sel & ~flag], s=2, alpha=0.08, color=CVD[0], marker="o", lw=0,
+                   label="clean curve")
+        ymin, ymax = W[sel].min(), W[sel].max()
+        pad = 0.02 * (ymax - ymin)
+        ax.set_xlim(lo, hi)
+        ax.set_ylim(ymin - pad, ymax + pad)
+        ax.set_title(name)
+        ax.set_xlabel("layer-0 L2 distance D from ' big'")
+        print(f"{name}: n={sel.sum()}, W range [{ymin:.4f}, {ymax:.4f}]")
+    axes[0].set_ylabel("transition width W = t$_{0.9}$ − t$_{0.1}$")
+    leg = axes[0].legend(loc="upper right", markerscale=4)
+    for lh in leg.legend_handles:
+        lh.set_alpha(1)
+    fig.tight_layout()
+    fig.savefig(os.path.join(PLOTS, "fig1_zoom_distance_vs_width.png"), dpi=130)
+    plt.close(fig)
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    zoom() if sys.argv[1:] == ["zoom"] else main()

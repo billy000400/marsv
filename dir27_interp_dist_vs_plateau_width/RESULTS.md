@@ -54,6 +54,14 @@ visible slope. Two groups sit apart from that cloud:
 **Figure 2.** Each point is one token B. x: layer-0 L2 distance D from ` big`; y: transition width W.
 (a) block 18, (b) block 35. Round dots = unflagged curves; crosses = flagged curves.
 
+To show the dense core at a readable scale, Figure 3 zooms in on D in 1.6–3.3 (50,164 of 50,256 tokens).
+
+![D vs W, zoom](plots/fig1_zoom_distance_vs_width.png)
+
+**Figure 3.** Zoom of Figure 2. x: D, limited to 1.6–3.3; y: W, limited in each panel to the min–max W
+among tokens in that D range (block 18: 0.065–0.627; block 35: 0.021–0.650). (a) block 18, (b) block 35.
+Round dots = unflagged curves; crosses = flagged curves. The core shows no clear slope at either layer.
+
 The table below gives the median width within each D range. It only summarizes the cloud; it is not a
 statistical test:
 
@@ -73,7 +81,7 @@ by the 64 rarely seen tokens with D > 4 (43 of the 65 tokens in the tallest bin;
 
 ![W_final distribution](plots/fig2_final_width_distribution.png)
 
-**Figure 3.** (a) Histogram of W_final (200 bins); x: W_final, y: number of tokens. (b) The same values
+**Figure 4.** (a) Histogram of W_final (200 bins); x: W_final, y: number of tokens. (b) The same values
 sorted; x: token rank, y: W_final.
 
 To see which tokens fall at each width, the table below lists, for each W_final band, the tokens with
@@ -100,7 +108,7 @@ The median D of the 100 widest tokens is 2.43, close to the vocabulary median of
 
 ![Representative curves](plots/fig3_representative_curves.png)
 
-**Figure 4.** Final-layer y(t) curves. x: interpolation position t; y: y(t). Dotted lines mark 0.1 and
+**Figure 5.** Final-layer y(t) curves. x: interpolation position t; y: y(t). Dotted lines mark 0.1 and
 0.9. (a) Five common words with nearly the same D (1.35–1.67) but W_final from 0.046 to 0.466. (b) Five
 tokens from the most common width bin (W_final 0.087–0.090). Each token has its own line style and
 marker.

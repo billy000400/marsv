@@ -12,3 +12,10 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
   counts, variable percentiles, median width per D range, W_final band examples, and 4 figures.
 - REPORT.md: replaced the template with the full report. It answers the three PLAN questions
   (distance, depth, grouping) using Figures 1–3. No earlier numbers were superseded.
+
+## 2026-09-23 — human_feedback.txt: zoomed Figure 1
+- Added plots/fig1_zoom_distance_vs_width.png (new `zoom` mode in experiments/s3_plots.py; reads
+  results/sweep.csv, so the CSV and the existing figures are byte-identical). x: D in [1.6, 3.3]; y: per-panel
+  min–max W of tokens in that range (block 18: 0.065–0.627; block 35: 0.021–0.650); 50,164 tokens.
+- REPORT.md: new Figure 2 after Figure 1 in Finding 1; old Figures 2, 3 renumbered to 3, 4.
+- RESULTS.md: new Figure 3 after the D-vs-W figure; old Figures 3, 4 renumbered to 4, 5.

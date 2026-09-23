@@ -16,11 +16,11 @@ those shapes would say little about how the model processes the tokens.
 **Answer.** We tested all 50,256 other tokens.
 - **Distance.** Input distance does not visibly predict switch width for 97% of tokens (Figure 1).
   Five common words at nearly the same distance range from an almost vertical jump to a slow ramp
-  (Figure 3a).
+  (Figure 4a).
 - **Where the widest switches are.** They occur mainly for size words such as ` huge`, ` giant` and
   ` large`, and for rarely seen, oddly formed tokens.
 - **Depth.** The final layer switches more sharply than the middle layer for 97.7% of tokens.
-- **Groups.** Final-layer widths form one broad peak with a long tail (Figure 2). The one tight
+- **Groups.** Final-layer widths form one broad peak with a long tail (Figure 3). The one tight
   group is 64 rarely seen tokens (byte-level characters and scraped fragments such as
   ` RandomRedditor`) that share almost the same embedding and the same width.
 
@@ -97,14 +97,29 @@ would show a slope. We plot every token as one point:
 (a) block 18 (W_mid); (b) block 35 (W_final). Round dots = unflagged curves; crosses = flagged curves.
 The isolated dot at D ≈ 5.17 is 64 rarely seen tokens drawn on top of each other.
 
+The full-range plot is dominated by empty space, so the bulk is hard to read. To check for a slope
+inside the bulk, Figure 2 zooms in on D between 1.6 and 3.3. This range holds 50,164 of the 50,256
+tokens (99.8%); it leaves out only 9 tokens with D < 1.6, 19 tokens with D between 3.3 and 4, and the
+64-token group at D ≈ 5.17.
+
+![Zoom of width vs distance for D in 1.6 to 3.3](plots/fig1_zoom_distance_vs_width.png)
+
+**Figure 2.** Zoom of Figure 1. x: layer-0 L2 distance D from ` big`, limited to 1.6–3.3; y: transition
+width W, limited in each panel to the smallest-to-largest W among tokens in that D range (block 18:
+0.065–0.627; block 35: 0.021–0.650). (a) block 18 (W_mid); (b) block 35 (W_final). Round dots = unflagged
+curves; crosses = flagged curves.
+
+At this scale the dense core still shows no clear slope at either layer; the spread of W at a
+fixed D stays much larger than any change across D.
+
 **What is visible.**
 - 97% of tokens have D between 2.0 and 3.0 and form one round cloud at both layers, with no visible
-  slope. Median W_final is 0.109 for D in 2.0–2.5 and 0.114 for D in 2.5–3.0 (RESULTS.md, S3 table).
+  slope (Figure 2 zooms in on it). Median W_final is 0.109 for D in 2.0–2.5 and 0.114 for D in 2.5–3.0 (RESULTS.md, S3 table).
 - At the sparse edges the median width is higher: 0.164 for D in 3.0–4.0 and 0.331 for the 64 tokens
   with D > 4.
 - At a fixed D, widths spread over most of the range.
 
-Figure 3a shows that spread with five common words. Their D lies between 1.35 and 1.67, yet W_final
+Figure 4a shows that spread with five common words. Their D lies between 1.35 and 1.67, yet W_final
 runs from 0.046 (` of`) to 0.466 (` large`).
 
 The widest switches are not the farthest tokens. The 100 widest final-layer tokens have median D 2.43,
@@ -129,7 +144,7 @@ widths would show flat steps. We plot both:
 
 ![Histogram and sorted view of final-layer widths](plots/fig2_final_width_distribution.png)
 
-**Figure 2.** (a) Histogram of W_final over all 50,256 tokens (200 bins); x: W_final, y: number of
+**Figure 3.** (a) Histogram of W_final over all 50,256 tokens (200 bins); x: W_final, y: number of
 tokens. (b) The same widths sorted; x: token rank, y: W_final.
 
 **What is visible.**
@@ -150,7 +165,7 @@ To check that W reflects visibly different curve shapes, we plot some final-laye
 
 ![Representative final-layer curves](plots/fig3_representative_curves.png)
 
-**Figure 3.** Final-layer progress y(t). x: interpolation position t (0 = ` big`, 1 = token B); y:
+**Figure 4.** Final-layer progress y(t). x: interpolation position t (0 = ` big`, 1 = token B); y:
 y(t). Dotted lines mark 0.1 and 0.9; line style and marker identify each token, and the legend gives
 its W_final and D. (a) Five common words with similar D but very different widths. (b) Five tokens
 from the most common histogram bin (W_final 0.087–0.090).
@@ -163,11 +178,11 @@ about t = 0.40 to 0.53. `MQ` briefly overshoots y = 1 and is one of the flagged 
 
 For "The house was big" in GPT-2 Large, how far B's embedding is from ` big` does not visibly decide
 how sharply the downstream representation switches between them.
-- **Evidence.** The bulk of the vocabulary shows no slope in Figure 1, and Figure 3a shows words at the
+- **Evidence.** The bulk of the vocabulary shows no slope in Figure 1, and Figure 4a shows words at the
   same distance with very different widths.
 - **Depth.** The final layer switches more sharply than block 18 for almost every token (Finding 2).
 - **Groups.** Final-layer widths show one broad peak and no separate groups, apart from 64 rarely seen
-  tokens with near-identical embeddings (Figure 2).
+  tokens with near-identical embeddings (Figure 3).
 - **Widest switches.** These come mainly from size words and from rarely seen tokens. That is a
   descriptive pattern; we did not test what causes it.
 
