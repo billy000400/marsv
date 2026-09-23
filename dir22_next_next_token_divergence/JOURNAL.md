@@ -93,3 +93,19 @@ Re-curated RESULTS.md and REPORT.md; `check_render.py` passes on both.
 
 **Next step.** None — the plan is complete (S1–S4 done, verdict rendered, three named figures embedded
 in both deliverables, render checks pass, no unaddressed feedback), so I wrote `STOP` per rule 11.
+
+## 2026-09-23 — triage of human_feedback_0.txt (no research)
+
+**Did.** Triage only. Set the manifest to `ready`. "Figure 2" means the same figure in both
+deliverables: `plots/delayed_distance.png` (delayed `d(t)` vs `t`). Declared outputs: regenerate that
+PNG through `experiments/plot_delayed.py` and update the Figure 2 caption and prose in REPORT.md and
+RESULTS.md. Raw results, the run script and the other two figures must stay unchanged.
+`results/logits_delayed.npy` is (101, 50257), so the top-1 token over the full vocabulary can be read
+at every `t` without a new model run.
+
+**Assumption logged.** "Top-token" means the argmax over the full vocabulary, not a two-way choice
+between ` Tokyo` and ` Berlin`. The feedback's "e.g." marks those two as examples. *Rejected alternative:*
+restrict it to the two capitals, which would hide any third token that wins near the boundary.
+
+**Next step.** Implement the Figure 2 overlay, mark the observed top-1 switch location(s) against the `d(t)`
+transition, and update the captions.

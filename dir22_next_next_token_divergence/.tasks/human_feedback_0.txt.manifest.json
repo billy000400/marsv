@@ -1,21 +1,37 @@
 {
   "version": 1,
-  "state": "triage",
+  "state": "ready",
   "source_feedback": "human_feedback_0.txt",
   "source_sha256": "7b3bc6e27091169b33a2ffde8869d60442e5e9cfe6965959f13985b9a417ad0f",
-  "required_outputs": null,
-  "may_modify": null,
-  "must_remain_unchanged": null,
-  "report_policy": {
-    "core_research_question": null,
-    "primary_report": null,
-    "max_words": null,
-    "max_main_figures": null,
-    "detailed_results": null
-  },
-  "unresolved_ambiguities": [
-    "Classify output routing from the exact feedback before doing research."
+  "required_outputs": [
+    "plots/delayed_distance.png"
   ],
+  "may_modify": [
+    "plots/delayed_distance.png",
+    "experiments/plot_delayed.py",
+    "REPORT.md",
+    "RESULTS.md",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback_0.txt",
+    "experiments/run_delayed.py",
+    "results/delayed.json",
+    "results/logits_delayed.npy",
+    "results/logits_immediate.npy",
+    "plots/immediate_prediction.png",
+    "plots/delayed_tokens.png"
+  ],
+  "report_policy": {
+    "core_research_question": "Does an activation plateau hold information the model has not used yet? (GPT-2 Large, 'The capital of France is Paris. The capital of' with the country-token embedding interpolated from ' Japan' to ' Germany': does the immediate prediction stay fixed while the delayed, one-token-later prediction ' Tokyo'/' Berlin' changes, and in what shape?)",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
   "checklist": [
     {
       "request": "For Figure 2, Add the top-token prediction along the interpolation to the plot below. For each interpolation point \\(t\\), show which token has the highest delayed-logit probability (e.g. Tokyo vs Berlin).\nThe delayed logits appear to remain Tokyo-like, transition rapidly near the midpoint, and then remain Berlin-like. Visualize the top-token prediction directly so we can see whether the predicted token switches at the same boundary as the delayed-logit transition. Do not assume that they coincide; show the actual switch location from the data.",
@@ -26,5 +42,6 @@
         "ambiguity": ""
       }
     }
-  ]
+  ],
+  "triage_notes": "'Figure 2' is unambiguous: in both REPORT.md and RESULTS.md it is plots/delayed_distance.png (relative delayed-logit distance d(t) vs interpolation position t). Routing: regenerate that same file via experiments/plot_delayed.py, adding the delayed top-1 token (argmax over the full vocabulary of the stored delayed logits, not restricted to Tokyo/Berlin) at every t, and mark the observed top-1 switch location(s) from data next to the d(t) transition (e.g. t50). Update the Figure 2 caption/prose in REPORT.md and RESULTS.md. No new model run is needed: results/logits_delayed.npy is (101, 50257), full-vocabulary delayed logits at every t."
 }
