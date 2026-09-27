@@ -245,4 +245,6 @@ broad peak with a tail, the only tight group being 64 rarely seen tokens at D≈
 
 ## Next step
 
-None — direction finished (STOP written).
+Feedback 3 (2026-09-27, generalize to GPT2-XL / Pythia 1.4B / Llama-3.1-8B / Qwen3-8B-Base) is BLOCKED
+in triage: output file not named, and the 8B models exceed the 7.2 GB GPU budget. Waiting for the operator's answer
+(see `.tasks/human_feedback_3.txt.manifest.json` unresolved_ambiguities).

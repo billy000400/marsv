@@ -80,3 +80,11 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 - `s5_curves.py` now also writes results/tokens_W_final_ge_large.csv (`ge_large()`); 53 rows incl. ' large'.
   Category grouping (27 size / 21 code-like / 4 other) is my hand reading, not an automatic classifier.
 - Verified sha256 of sweep.csv and fig1/fig1_zoom/fig2/s1 unchanged; check_render passes.
+
+## 2026-09-27 — feedback 3 triage: blocked
+- Request: reproduce Figures 1-3 + RESULTS S4 table (0.30-0.50 row) for GPT2-XL, Pythia 1.4B, Llama-3.1-8B,
+  Qwen3-8B-Base, one section per model plus a summary section.
+- Blocked, no research done. (1) Destination file not named: REPORT.md would reach 16 figures (limit 8); a new
+  file would be a filename I invented. (2) 8B models need ~16 GB bf16 vs 7.2 GB per-agent GPU cap; quantization
+  changes the model; vocab 128k/152k makes full sweeps long; neither model cached, Llama gated.
+- Non-blocking interpretations recorded in manifest routing_notes (middle + final block readouts, 0.30-0.50 row).

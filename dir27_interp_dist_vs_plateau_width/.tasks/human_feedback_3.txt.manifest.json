@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "state": "blocked",
+  "source_feedback": "human_feedback_3.txt",
+  "source_sha256": "2187ad0d7f91b604bc823fb390626a94630e32d727acf50ffcc552ca88a85ac2",
+  "required_outputs": null,
+  "may_modify": [
+    ".tasks/human_feedback_3.txt.manifest.json",
+    "JOURNAL.md",
+    "PLAN.md"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback_3.txt",
+    "human_feedback.txt.addressed.md",
+    "human_feedback_2.txt.addressed.md",
+    "REPORT.md",
+    "RESULTS.md",
+    "results/sweep.csv",
+    "results/sweep",
+    "plots/fig1_distance_vs_width.png",
+    "plots/fig1_zoom_distance_vs_width.png",
+    "plots/fig2_final_width_distribution.png",
+    "plots/fig3_representative_curves.png",
+    "plots/s1_sanity_curves.png"
+  ],
+  "report_policy": {
+    "core_research_question": "Does the GPT-2 Large finding (layer-0 embedding L2 distance D between ' big' and token B does not visibly predict interpolation transition width W; final layer sharper than middle layer; W_final one broad peak with tail) generalize to GPT2-XL, Pythia 1.4B, Llama-3.1-8B and Qwen3-8B-Base?",
+    "primary_report": null,
+    "max_words": 5000,
+    "max_main_figures": null,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [
+    "OUTPUT DESTINATION NOT NAMED (blocking). The feedback asks for 'one section for each of the models' plus 'a final section' but does not say which file. Options: (a) append five sections to the existing REPORT.md - this would add 4 models x 3 figures = 12 figures to the 4 already there (16 total), over the 8-main-figure report limit, and change the report's GPT-2-Large-only question; (b) a new follow-up report file (e.g. REPORT_generalization.md) that REPORT.md does not replace. Project rules forbid picking REPORT.md or inventing a filename when the destination is unclear. Please name the file (and, if REPORT.md, confirm the figure limit may be exceeded).",
+    "GPU BUDGET vs 8B MODELS (blocking, affects scientific fidelity). This agent may use ~7.2 GB of GPU memory. Llama-3.1-8B and Qwen3-8B-Base need ~16 GB in bf16, so they cannot run unmodified. Options: (a) raise the per-agent GPU budget for this task (~18 GB); (b) 8-bit/4-bit quantized weights (changes the model being studied); (c) CPU/GPU layer offload (much slower). Separately, their vocabularies are ~128k and ~152k tokens (vs 50k for GPT-2); a full sweep x 101 interpolation steps is roughly 13-15M forward steps per model and may not fit in the remaining ~4 h - a random token subsample (e.g. 20k tokens) is an alternative. Neither model is in the local HF cache; Llama-3.1-8B is gated and needs an accepted-license HF token. Please choose.",
+    "PYTHIA VARIANT (minor; default proposed). Only EleutherAI/pythia-1.4b-deduped is cached. Default if unanswered: use the standard EleutherAI/pythia-1.4b as literally named, downloading it."
+  ],
+  "checklist": [
+    {
+      "request": "Can you check if the study can be generalized to GPT2-XL, Pythia 1.4B, Llama-3.1-8B，Qwen3-8B-Base",
+      "status": "blocked",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": "Blocked: output file not named; 8B models exceed the 7.2 GB GPU budget (see unresolved_ambiguities)."
+      }
+    },
+    {
+      "request": "I want you to have one section for each of the models. In each section, reproducing study that made figure 1-3 and S4 tabele. In each section, show the new plots for each model and the part of the table that corresponding to W 0.3",
+      "status": "blocked",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": "Blocked: output file not named; 8B models exceed the 7.2 GB GPU budget (see unresolved_ambiguities)."
+      }
+    },
+    {
+      "request": "Then, in a final section, use several sentences to summarize if the trend can be generalized to those models.",
+      "status": "blocked",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": "Blocked: output file not named; 8B models exceed the 7.2 GB GPU budget (see unresolved_ambiguities)."
+      }
+    }
+  ],
+  "routing_notes": "Interpretations that are NOT blocking (recorded for the next pass): 'figure 1-3' = REPORT.md Figures 1-3 = plots/fig1_distance_vs_width.png (D vs W scatter, middle and final block), plots/fig1_zoom_distance_vs_width.png (zoom D 1.6-3.3), plots/fig2_final_width_distribution.png (W_final histogram + sorted view). 'S4 tabele' = the W_final band table in RESULTS.md section S4 (band, token count, lowest-D examples). 'the part of the table that corresponding to W 0.3' = the '0.30-0.50' W_final band row (the only band containing 0.3), per model. Per-model adaptation: same prompt 'The house was big' with A = that model's ' big' token, B = every other vocabulary id, 101 steps, readouts at the middle block (n_layers/2, analogous to GPT-2 Large block 18 of 36) and the final block (pre final norm), same W and flag definitions. Existing GPT-2 Large results stay unchanged."
+}
