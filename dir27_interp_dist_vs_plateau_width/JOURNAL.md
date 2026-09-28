@@ -181,3 +181,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 12 (feedback 3 still review_pending)
 - No rejection notes and no new feedback files. The source hash is unchanged (2187ad0d…). check_render.py stopped again at the GitHub markdown-API step with HTTP 403 (rate limit), so this run gives no pass/fail result. Deliverables are unchanged, and STOP was not written because the review is still pending (rule 11).
+
+## 2026-09-28 — re-entry check 13 (feedback 3 still review_pending)
+- No rejection notes, no new feedback files, source hash unchanged (2187ad0d…). check_render.py again hit HTTP 403 (GitHub API rate limit) at the markdown-API step, so it produced no pass/fail result. The local check passes: 12 embeds and 12 `**Figure` captions. Deliverables unchanged. STOP not written because review is pending (rule 11).
