@@ -154,3 +154,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 3 (feedback 3 still review_pending)
 - No rejection notes, no new feedback files, source hash unchanged. Deliverables and manifest untouched; STOP not written (review pending).
+
+## 2026-09-28 — re-entry check 4 (feedback 3 still review_pending)
+- No rejection notes, no new feedback files, source hash unchanged. check_render.py could not finish: GitHub markdown API returned HTTP 403 (rate limit exceeded). That is an external limit, not a content error; earlier runs passed and the deliverables have not changed since. Deliverables and manifest left as they were; STOP not written (review pending).
