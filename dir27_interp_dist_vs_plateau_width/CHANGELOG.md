@@ -29,3 +29,12 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - New `results/tokens_W_final_ge_large.csv`: 53 tokens (incl. ` large`) with W_final ≥ 0.4659. Summarized in
   RESULTS.md S4 (27 size words / 21 code-like strings / 4 other; block-18 count 27) and one paragraph in
   REPORT.md Finding 1.
+
+## 2026-09-28 — feedback 3: generalization to four models (new files)
+- NEW `REPORT_generalization.md` (12 figures, ~3.7k words): one section each for GPT2-XL, Pythia 1.4B,
+  Llama-3.1-8B, Qwen3-8B-Base reproducing REPORT.md Figures 1–3 and the RESULTS.md S4 0.30–0.50 row,
+  plus a final "does the trend generalize?" section. NEW `RESULTS_generalization.md` (G0–G5: setup, checks,
+  full band and D-quintile tables, widest tokens, comparison).
+- Result: distance-does-not-predict-width and single-broad-peak shape hold in all four; final block sharper
+  in GPT2-XL (95.3%), Pythia (95.8%), Llama (88.8%) but not Qwen3-8B-Base (56.2%, medians 0.233 vs 0.230).
+- REPORT.md, RESULTS.md and all GPT-2 Large results/plots unchanged.

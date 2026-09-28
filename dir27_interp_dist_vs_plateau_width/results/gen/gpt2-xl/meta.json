@@ -1,0 +1,18 @@
+{
+ "model": "gpt2-xl",
+ "n_blocks": 48,
+ "mid_block": 24,
+ "final_block": 47,
+ "vocab": 50257,
+ "prompt_ids": [
+  464,
+  2156,
+  373,
+  1263
+ ],
+ "token_a": " big",
+ "cache_check_max_rel_diff": [
+  2.6277880351699423e-06,
+  7.27338965589297e-06
+ ]
+}

@@ -1,0 +1,14 @@
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<08:24,  1.74s/it]Loading weights:  15%|█▌        | 44/292 [00:01<00:08, 30.33it/s]Loading weights:  19%|█▉        | 56/292 [00:02<00:07, 33.43it/s]Loading weights:  23%|██▎       | 68/292 [00:02<00:05, 39.24it/s]Loading weights:  26%|██▌       | 76/292 [00:02<00:05, 39.82it/s]Loading weights:  31%|███       | 90/292 [00:02<00:04, 49.62it/s]Loading weights:  34%|███▎      | 98/292 [00:02<00:04, 44.07it/s]Loading weights:  37%|███▋      | 108/292 [00:03<00:04, 43.15it/s]Loading weights:  41%|████      | 120/292 [00:03<00:03, 50.78it/s]Loading weights:  44%|████▍     | 128/292 [00:03<00:03, 52.52it/s]Loading weights:  46%|████▌     | 135/292 [00:03<00:03, 40.45it/s]Loading weights:  49%|████▉     | 144/292 [00:04<00:03, 43.05it/s]Loading weights:  53%|█████▎    | 156/292 [00:04<00:03, 44.21it/s]Loading weights:  58%|█████▊    | 170/292 [00:04<00:02, 58.85it/s]Loading weights:  61%|██████    | 178/292 [00:04<00:02, 54.37it/s]Loading weights:  64%|██████▍   | 188/292 [00:04<00:01, 54.60it/s]Loading weights:  67%|██████▋   | 195/292 [00:05<00:02, 44.04it/s]Loading weights:  70%|██████▉   | 204/292 [00:05<00:02, 39.06it/s]Loading weights:  75%|███████▍  | 218/292 [00:05<00:01, 42.14it/s]Loading weights:  81%|████████  | 236/292 [00:05<00:00, 57.29it/s]Loading weights:  83%|████████▎ | 243/292 [00:06<00:01, 47.13it/s]Loading weights:  87%|████████▋ | 254/292 [00:06<00:00, 50.27it/s]Loading weights:  91%|█████████ | 266/292 [00:06<00:00, 43.32it/s]Loading weights:  95%|█████████▌| 278/292 [00:06<00:00, 49.85it/s]Loading weights:  97%|█████████▋| 284/292 [00:06<00:00, 49.08it/s]Loading weights: 100%|██████████| 292/292 [00:06<00:00, 42.66it/s]
+{'model': 'pythia-1.4b', 'n_blocks': 24, 'mid_block': 12, 'final_block': 23, 'vocab': 50277, 'prompt_ids': [510, 2419, 369, 1943], 'token_a': ' big', 'cache_check_max_rel_diff': [1.7016365063682315e-06, 2.7311489247949794e-05]}
+shard 4096: 4096 tokens, gpu 133.4s total 134.1s
+shard 8192: 4096 tokens, gpu 133.9s total 134.6s
+shard 12288: 4096 tokens, gpu 133.9s total 134.6s
+shard 16384: 4096 tokens, gpu 133.8s total 134.5s
+shard 20480: 4096 tokens, gpu 133.8s total 134.5s
+shard 24576: 4096 tokens, gpu 133.8s total 134.5s
+shard 28672: 4096 tokens, gpu 133.8s total 134.6s
+shard 32768: 4096 tokens, gpu 133.8s total 134.6s
+shard 36864: 4096 tokens, gpu 133.8s total 134.5s
+shard 40960: 4096 tokens, gpu 133.8s total 134.5s
+shard 45056: 4096 tokens, gpu 133.8s total 134.6s
+shard 49152: 1124 tokens, gpu 36.7s total 36.9s

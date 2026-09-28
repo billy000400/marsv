@@ -245,6 +245,18 @@ broad peak with a tail, the only tight group being 64 rarely seen tokens at D≈
 
 ## Next step
 
-Feedback 3 (2026-09-27, generalize to GPT2-XL / Pythia 1.4B / Llama-3.1-8B / Qwen3-8B-Base) is BLOCKED
+[2026-09-28: DONE — all four sweeps complete; REPORT_generalization.md + RESULTS_generalization.md written, render checks pass; manifest review_pending.] Feedback 3 (2026-09-27, generalize to GPT2-XL / Pythia 1.4B / Llama-3.1-8B / Qwen3-8B-Base) was BLOCKED
 in triage: output file not named, and the 8B models exceed the 7.2 GB GPU budget. Waiting for the operator's answer
 (see `.tasks/human_feedback_3.txt.manifest.json` unresolved_ambiguities).
+
+For human_feedback_3 only:
+
+Write the four model sections and final synthesis to REPORT_generalization.md.
+Write detailed supporting results to RESULTS_generalization.md.
+Keep the existing GPT-2 Large reports and results unchanged.
+
+The follow-up report may contain up to 12 main figures.
+
+These are explicit task-specific routing decisions. Update the existing
+human_feedback_3 manifest to reflect them, preserving its verbatim checklist.
+The missing-filename issue is resolved.

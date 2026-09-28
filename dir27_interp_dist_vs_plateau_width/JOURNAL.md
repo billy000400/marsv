@@ -88,3 +88,30 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
   file would be a filename I invented. (2) 8B models need ~16 GB bf16 vs 7.2 GB per-agent GPU cap; quantization
   changes the model; vocab 128k/152k makes full sweeps long; neither model cached, Llama gated.
 - Non-blocking interpretations recorded in manifest routing_notes (middle + final block readouts, 0.30-0.50 row).
+
+## 2026-09-28 — feedback 3: unblocked by operator routing, sweeps started
+- Operator (PLAN.md): write sections to REPORT_generalization.md, details to RESULTS_generalization.md, up to
+  12 main figures; GPT-2 Large files unchanged. Manifest set in_progress.
+- GPU (now 14.4 GB/agent): 8B models run in native bf16 without quantization. Only the last position is run
+  (prefix keys/values computed once; `FrozenPrefix` cache layer). Blocks beyond 22 (Llama) / 24 (Qwen3) are
+  kept in pinned CPU memory and copied to GPU per forward. Check: cached path vs full-prompt path, max
+  relative difference of block outputs stored in results/gen/<model>/meta.json (Pythia: 2.7e-5).
+- Assumptions: Llama-3.1-8B weights from ungated mirror unsloth/Meta-Llama-3.1-8B (official repo gated, no
+  HF token). Pythia = EleutherAI/pythia-1.4b. Tokenizer defaults (Llama prepends <|begin_of_text|>). B = every
+  tokenizer id except ' big' (len(tokenizer); padding rows of the embedding matrix skipped). Middle block =
+  n_blocks//2 (0-indexed), final = last block before final norm. Zoom = 5th-95th percentile of D per model
+  (GPT-2 Large's 1.6-3.3 does not transfer; D scales differ). Small models fp32 (as GPT-2 Large), 8B bf16.
+- Infra: shared volume hit its disk quota for multi-GB files (xet + plain downloads failed); 8B weights are
+  staged in /tmp one model at a time (results/gen/queue.sh).
+- Pythia first look: W_final peak ~0.33, much wider than GPT-2 Large (~0.10).
+
+## 2026-09-28 — feedback 3: all four sweeps done, deliverables written
+- Full-vocabulary sweeps: GPT2-XL 50,256 (80 s/4096 tok), Pythia 50,276 (134 s), Qwen3 151,668 (66 s),
+  Llama 128,255 (61 s). Cache check fp32 <3e-5 rel; bf16 median |dW_final| 0.003 (Qwen3) / 0.002 (Llama).
+- Bug fixed on the way: first 8B attempt fed a float32 prefix into bf16 weights (crash). Then Qwen3 bf16
+  residual stream gave 3-10% path-dependent differences (norm ~1500 at final block); switched to bf16
+  autocast with float32 residual (halves it) and added a 32-token |dW| check to every sweep.
+- Findings: distance + shape generalize to all four; depth to 3/4 (Qwen3 exception); ' large' widest in Llama,
+  3rd Pythia, 84th GPT2-XL, 281st Qwen3. Tight rare-token groups in GPT2-XL (57), Pythia (237), Llama (475).
+- Zoom range = 5th-95th percentile of D per model (documented). Report order follows the feedback's model order.
+- Manifest -> review_pending.

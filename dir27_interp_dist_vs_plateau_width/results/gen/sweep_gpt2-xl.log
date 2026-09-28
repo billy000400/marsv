@@ -1,0 +1,15 @@
+Loading weights:   0%|          | 0/580 [00:00<?, ?it/s]Loading weights:  15%|█▌        | 88/580 [00:00<00:00, 813.56it/s]Loading weights:  29%|██▉       | 170/580 [00:00<00:00, 643.07it/s]Loading weights:  41%|████      | 237/580 [00:00<00:00, 589.93it/s]Loading weights:  51%|█████     | 297/580 [00:00<00:00, 586.64it/s]Loading weights:  62%|██████▏   | 357/580 [00:00<00:00, 576.61it/s]Loading weights:  73%|███████▎  | 421/580 [00:00<00:00, 592.22it/s]Loading weights:  84%|████████▎ | 485/580 [00:00<00:00, 601.31it/s]Loading weights:  94%|█████████▍| 546/580 [00:00<00:00, 582.69it/s]Loading weights: 100%|██████████| 580/580 [00:00<00:00, 609.00it/s]
+{'model': 'gpt2-xl', 'n_blocks': 48, 'mid_block': 24, 'final_block': 47, 'vocab': 50257, 'prompt_ids': [464, 2156, 373, 1263], 'token_a': ' big', 'cache_check_max_rel_diff': [2.6277880351699423e-06, 7.27338965589297e-06]}
+shard 0: 4096 tokens, gpu 79.8s total 80.5s
+shard 4096: 4096 tokens, gpu 80.2s total 81.0s
+shard 8192: 4096 tokens, gpu 80.2s total 80.9s
+shard 12288: 4096 tokens, gpu 80.2s total 80.9s
+shard 16384: 4096 tokens, gpu 80.2s total 80.9s
+shard 20480: 4096 tokens, gpu 80.2s total 80.9s
+shard 24576: 4096 tokens, gpu 80.2s total 80.9s
+shard 28672: 4096 tokens, gpu 80.2s total 81.0s
+shard 32768: 4096 tokens, gpu 80.2s total 81.0s
+shard 36864: 4096 tokens, gpu 80.3s total 81.0s
+shard 40960: 4096 tokens, gpu 80.2s total 80.9s
+shard 45056: 4096 tokens, gpu 80.3s total 81.0s
+shard 49152: 1104 tokens, gpu 21.6s total 21.8s

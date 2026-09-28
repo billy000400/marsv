@@ -1,0 +1,26 @@
+{
+ "model": "qwen3-8b-base",
+ "n_blocks": 36,
+ "mid_block": 18,
+ "final_block": 35,
+ "vocab": 151669,
+ "prompt_ids": [
+  785,
+  3753,
+  572,
+  2409
+ ],
+ "token_a": " big",
+ "cache_check_max_rel_diff": [
+  0.022678816691040993,
+  0.060249213129282
+ ],
+ "cache_check_abs_dW_median": [
+  0.0008782304823398701,
+  0.003218125067651345
+ ],
+ "cache_check_abs_dW_max": [
+  0.003052932024002142,
+  0.10543535009026528
+ ]
+}

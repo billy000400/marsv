@@ -1,0 +1,55 @@
+Fetching 8 files:   0%|          | 0/8 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 8 files: 100%|██████████| 8/8 [00:59<00:00,  7.49s/it]Fetching 8 files: 100%|██████████| 8/8 [00:59<00:00,  7.49s/it]
+openai-community/gpt2-xl /workspacen/hf_home/hub/models--openai-community--gpt2-xl/snapshots/15ea56dee5df4983c59b2538573817e1667135e2 60s
+Fetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]Fetching 12 files:  67%|██████▋   | 8/12 [00:37<00:18,  4.68s/it]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 2032, in _download_to_tmp_and_move
+    http_get(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 464, in http_get
+    temp_file.write(chunk)
+OSError: [Errno 122] Disk quota exceeded
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/tmp/dl.py", line 5, in <module>
+    p=snapshot_download(r, allow_patterns=["*.safetensors","*.json","tokenizer*","*.txt","*.model"], ignore_patterns=["*onnx*","*flax*","*tf_*","*64-*"])
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_http.py", line 266, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/_snapshot_download.py", line 532, in snapshot_download
+    hf_thread_map(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/tqdm.py", line 441, in hf_thread_map
+    results[future_to_index[future]] = future.result()
+                                       ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/_snapshot_download.py", line 512, in _inner_hf_hub_download
+    hf_hub_download(  # type: ignore
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_http.py", line 266, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 1047, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 1285, in _hf_hub_download_to_cache_dir
+    _download_to_tmp_and_move(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 2006, in _download_to_tmp_and_move
+    with tmp_path.open("wb") as f:
+OSError: [Errno 122] Disk quota exceeded
