@@ -334,3 +334,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — feedback 3 rejection repair
 - Addressed the 3 reviewer failures by narrowing text in REPORT_generalization.md (no new analysis). Manifest → review_pending. check_render.py could not run: GitHub API rate limit (HTTP 403); edits add no math, tables or figures; local inline-math hazard grep clean; 3,903 words.
+
+## 2026-09-28 — feedback 3 second rejection repair
+- Fixed Summary/Conclusion disagreement on the 0.30–0.50 band (Llama is tail: 11% of tokens, P90 0.308) and the GPT2-XL flag-rate definition mismatch. check_render.py passes; 3,935 words. Manifest → review_pending.

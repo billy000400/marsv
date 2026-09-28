@@ -44,3 +44,7 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - Pythia band: "ordinary tokens" → case/spacing variants of "big" plus unrelated pieces.
 - Conclusion: removed the causal claim that peak position explains the example column; now says the column mainly reflects each model's lowest-D tokens and the cause was not tested.
 - Methods precision paragraph + Qwen3 section: Qwen3's 0.003 median depth gap and 56.2% sharper share stated as near bfloat16 rounding noise. No numbers changed.
+
+## 2026-09-28 — REPORT_generalization.md: second rejection repair (feedback 3)
+- Summary 'Shape' bullet: replaced "0.30–0.50 band is the tail in the GPT-2 models but typical in the others" with per-model token shares (Pythia 66% typical, Qwen3 23% upper side, Llama 11% tail, GPT2-XL ~2% tail); Conclusion sentence aligned to the same numbers.
+- GPT2-XL section: flag rate now final-block (11.5% vs GPT-2 Large 5.3%) instead of any-block 11.6% vs 5.5%, matching the Conclusion table.

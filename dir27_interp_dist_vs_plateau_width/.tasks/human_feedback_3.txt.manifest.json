@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "rejected",
+  "state": "addressed",
   "source_feedback": "human_feedback_3.txt",
   "source_sha256": "2187ad0d7f91b604bc823fb390626a94630e32d727acf50ffcc552ca88a85ac2",
   "required_outputs": [
@@ -56,7 +56,7 @@
       "request": "I want you to have one section for each of the models. In each section, reproducing study that made figure 1-3 and S4 tabele. In each section, show the new plots for each model and the part of the table that corresponding to W 0.3",
       "status": "done",
       "completion": {
-        "what_was_done": "One Results subsection per model. Each reproduces REPORT.md Figure 1 (D vs W scatter, middle and final block), Figure 2 (zoom on the dense core; range = that model's 5th-95th D percentile because D scales differ) and Figure 3 (W_final histogram + sorted view), and shows the 0.30-0.50 W_final row of the RESULTS.md S4 table (token count + 7 lowest-D examples). Full S4-style tables for every band are in RESULTS_generalization.md. Rejection fix 2026-09-28: each band-row description now states only what the lowest-D example column shows (the examples are the band members closest to ' big'), not what the whole band contains; Pythia examples described as case/spacing variants of 'big'.",
+        "what_was_done": "One Results subsection per model. Each reproduces REPORT.md Figure 1 (D vs W scatter, middle and final block), Figure 2 (zoom on the dense core; range = that model's 5th-95th D percentile because D scales differ) and Figure 3 (W_final histogram + sorted view), and shows the 0.30-0.50 W_final row of the RESULTS.md S4 table (token count + 7 lowest-D examples). Full S4-style tables for every band are in RESULTS_generalization.md. Rejection fix 2026-09-28: each band-row description now states only what the lowest-D example column shows (the examples are the band members closest to ' big'), not what the whole band contains; Pythia examples described as case/spacing variants of 'big'. GPT2-XL section now compares final-block flag rates consistently with the Conclusion table (11.5% vs GPT-2 Large 5.3%).",
         "evidence": "REPORT_generalization.md: GPT2-XL = Figures 1-3 + 0.30-0.50 table; Pythia 1.4B = Figures 4-6 + table; Llama-3.1-8B = Figures 7-9 + table; Qwen3-8B-Base = Figures 10-12 + table. plots/gen/<model>_fig{1,2,3}_*.png. Full band tables: RESULTS_generalization.md G1-G4.",
         "ambiguity": "None"
       }
@@ -65,7 +65,7 @@
       "request": "Then, in a final section, use several sentences to summarize if the trend can be generalized to those models.",
       "status": "done",
       "completion": {
-        "what_was_done": "Final section summarizes, with a comparison table, which GPT-2 Large findings generalize: distance does not visibly predict width (all four), final block sharper (GPT2-XL, Pythia, Llama; not Qwen3-8B-Base), one broad peak with tail (all four; peak position model-specific), size words among widest (3 of 4, partly Qwen3). Rejection fix 2026-09-28: removed the unsupported causal sentence linking peak position to the example column (now stated as reflecting each model's low-D tokens, cause not tested); Methods precision paragraph and the Qwen3 section now state that Qwen3's 0.003 median depth gap and 56.2% sharper share are near the bfloat16 rounding error, so only the qualitative 'not clearly sharper' conclusion is claimed.",
+        "what_was_done": "Final section summarizes, with a comparison table, which GPT-2 Large findings generalize: distance does not visibly predict width (all four), final block sharper (GPT2-XL, Pythia, Llama; not Qwen3-8B-Base), one broad peak with tail (all four; peak position model-specific), size words among widest (3 of 4, partly Qwen3). Rejection fix 2026-09-28: removed the unsupported causal sentence linking peak position to the example column (now stated as reflecting each model's low-D tokens, cause not tested); Methods precision paragraph and the Qwen3 section now state that Qwen3's 0.003 median depth gap and 56.2% sharper share are near the bfloat16 rounding error, so only the qualitative 'not clearly sharper' conclusion is claimed. Second rejection fix 2026-09-28: Summary 'Shape' bullet and Conclusion now give per-model shares of tokens in 0.30-0.50 (Pythia 66% typical; Qwen3 23% upper side of peak; Llama 11%, above its 90th percentile 0.308, tail; GPT2-XL ~2% tail), so Summary and Conclusion agree.",
         "evidence": "REPORT_generalization.md section 'Conclusion — does the trend generalize?' (comparison table + paragraphs); RESULTS_generalization.md G5. Precision caveat: REPORT_generalization.md Methods 'Checking the computation' and Qwen3-8B-Base section after Figure 11.",
         "ambiguity": "None"
       }
@@ -98,23 +98,21 @@
     "results/sweep.csv": "9be246a68ec36e33548cce6299c3116e900c1f30fa7e8b60e93ba99059698b5b"
   },
   "review": {
-    "format_passed": false,
+    "format_passed": true,
     "content": {
-      "pass": false,
+      "pass": true,
       "inspected_outputs": [
         "REPORT_generalization.md",
         "RESULTS_generalization.md"
       ],
-      "failures": [
-        "Claim contradicted by the report's own data (REPORT_generalization.md, Summary, 'Shape' bullet): 'So the 0.30–0.50 band is the tail in the GPT-2 models but typical in the others.' 'The others' includes Llama-3.1-8B. For Llama, RESULTS_generalization.md G3 gives a W_final 90th percentile of 0.308 and a peak at 0.19–0.20. Only 14,583 of 128,255 tokens (about 11%) fall in 0.30–0.50. So for Llama that band sits above the 90th percentile, which makes it the tail, not typical. The Conclusion says this more carefully ('in the tail for the GPT-2 models and typical for Pythia'), so the Summary and Conclusion now disagree. The Summary sentence should be corrected: typical for Pythia, and upper side or tail for Llama. Qwen3 needs its own description too (23% of tokens, 90th percentile 0.374).",
-        "Minor inconsistency a new reader could stumble on (REPORT_generalization.md, GPT2-XL section): '11.6% of curves are flagged, almost all at the final block (5.5% in GPT-2 Large)'. This compares an any-block flag rate with a GPT-2 Large figure, while the Conclusion table reports final-block flag rates (11.5% vs 5.3%). Use one definition consistently."
-      ],
-      "summary": "All three failures from the previous review are fixed. The GPT2-XL band text now says only what its lowest-D examples show. The causal link between peak position and the example column has been removed and replaced with an explicit statement that the cause was not tested. The precision paragraph and the Qwen3 section now say plainly that Qwen3's depth gap and its 56.2% share are near the bfloat16 rounding error. The structure still does what was asked: one section per model, Figure 1–3 analogues, the 0.30–0.50 S4 row, and a final synthesis. It stays within budget (12 figures, under 5,000 words), and RESULTS is a curated archive rather than a duplicate of the report. It still fails on one factual overclaim. The Summary says the 0.30–0.50 band is 'typical' in Llama, Pythia and Qwen3, but the Llama data (90th percentile 0.308, about 11% of tokens in the band) show it is the tail for Llama. This also contradicts the Conclusion's more careful wording. There is also a smaller inconsistency in how flag rates are compared between models."
+      "failures": [],
+      "summary": "This pass fixes both failures from the previous review. First, the Summary's 'Shape' bullet now gives a share for each model of tokens with final-block width between 0.30 and 0.50: Pythia 66% (typical), Qwen3 23% (upper side of the peak), Llama 11% (the tail) and GPT2-XL about 2% (the tail). These match RESULTS G1–G4, where Llama's 90th percentile is 0.308 and Qwen3's is 0.374, and they now agree with the Conclusion. Second, the GPT2-XL section now compares final-block flag rates (11.5% against 5.3% for GPT-2 Large), the same measure the Conclusion table uses.\n\nEvery request is covered. The report has one section per model: GPT2-XL, Pythia 1.4B, Llama-3.1-8B and Qwen3-8B-Base. Each section has new versions of the REPORT.md Figure 1–3 plots (distance-vs-width scatter, zoom, and width distribution). Each also shows the 0.30–0.50 row of the S4 table, which is the band that contains W = 0.3. A final Conclusion section says whether each finding generalizes and backs this with a comparison table.\n\nThe claims are descriptive and stay within the evidence. Causal wording has been removed, and the report says the cause was not tested. Qwen3's depth result is correctly described as within bfloat16 rounding error. The exceptions are stated: Pythia's slight tilt, Qwen3's ramp of low-distance tokens, and Llama's spike from its group of special and byte-level tokens. Technical terms are explained for a new reader, including D, W, flag, bfloat16, residual stream and D quintiles. A few minor terms are not defined, such as 'rotary position encoding' and 'quantized', but they are not needed to follow the argument.\n\nThe report stays within budget: 12 figures, well under 5,000 words, and no secondary experiments. RESULTS_generalization.md is a curated archive (full band tables, quintile tables, widest tokens and setup checks); it does not repeat the report's prose."
     },
     "expected_outputs": [
       "REPORT_generalization.md",
       "RESULTS_generalization.md"
     ],
     "budget_failures": []
-  }
+  },
+  "addressed_feedback": "human_feedback_3.txt.addressed.md"
 }

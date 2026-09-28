@@ -25,8 +25,8 @@ table in `RESULTS.md` section S4, over the model's whole vocabulary.
   blocks, and only 56.2% of tokens are sharper at the final block.
 - **Shape (holds in all four).** Final-block widths form one broad peak with a tail in every model
   (Figures 3, 6, 9, 12). The peak's position is model-specific (W_final ≈ 0.06 in GPT2-XL, 0.19–0.20 in
-  Llama and Qwen3, 0.33 in Pythia). So the 0.30–0.50 band is the tail in the GPT-2 models but typical
-  in the others.
+  Llama and Qwen3, 0.33 in Pythia). So the 0.30–0.50 band holds 66% of tokens in Pythia (typical),
+  23% in Qwen3 (upper side of the peak), and 11% in Llama and about 2% in GPT2-XL (the tail).
 - **Widest switches.** Size words are again among the widest: ` large` ranks 1st in Llama, 3rd in
   Pythia and 84th in GPT2-XL. In Qwen3 it ranks 281st, and the very widest tokens are Thai pieces.
 
@@ -153,8 +153,8 @@ D ≈ 3.97 with almost the same width (W_final ≈ 0.18). Figure 2 zooms into th
 min–max W in that range (block 24: 0.075–0.573; block 47: 0.013–0.729). Markers as in Figure 1.
 
 The zoom shows a flat band at both blocks. The final block is lower than the middle block: median W_final
-is 0.089 against median W_mid 0.174, and 95.3% of tokens switch more sharply at the final block. 11.6% of
-curves are flagged, almost all at the final block (5.5% in GPT-2 Large). To see whether the final-block
+is 0.089 against median W_mid 0.174, and 95.3% of tokens switch more sharply at the final block. 11.5% of
+final-block curves are flagged (5.3% in GPT-2 Large). To see whether the final-block
 widths form groups, Figure 3 shows their distribution:
 
 ![GPT2-XL W_final distribution](plots/gen/gpt2-xl_fig3_final_width_distribution.png)
@@ -355,7 +355,8 @@ block also has the most irregular curves (21.2% flagged).
 3, 6, 9 and 12). In GPT2-XL, Pythia and Llama, the only tight group is again made of rarely seen tokens
 (byte-level, whitespace or special tokens) that share almost the same embedding and width. The position
 of the peak does not generalize: it ranges from W_final ≈ 0.06 (GPT2-XL) to 0.33 (Pythia). So a given
-width, such as 0.3, is in the tail for the GPT-2 models and typical for Pythia. The example column of the
+width, such as 0.3, is typical for Pythia (66% of tokens in 0.30–0.50), on the upper side of the peak
+for Qwen3 (23%), and in the tail for Llama (11%; its 90th percentile is 0.308) and the GPT-2 models. The example column of the
 0.30–0.50 row also differs between models (size words in GPT2-XL, variants of "big" in Pythia,
 multilingual pieces in Llama and Qwen3), but because it lists only the lowest-D tokens it mainly reflects
 which tokens sit closest to ` big` in each model's embedding space. We did not test what causes these
