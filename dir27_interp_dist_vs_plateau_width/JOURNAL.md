@@ -247,3 +247,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 34 (feedback 3 still review_pending)
 - No rejection notes, no new feedback, source hash unchanged. GitHub markdown API still returns HTTP 403 (rate limit), so the display-math placement check could not run. Ran check_render.py's local checks with the API call stubbed out: KaTeX compile (4 display eqs), blocked macros, plot embeds (12), table prose and contrast budget all pass for REPORT_generalization.md and RESULTS_generalization.md. Deliverables unchanged; no STOP (review pending).
+
+## 2026-09-28 — re-entry check 35 (feedback 3 still review_pending)
+- No rejection notes, no new feedback, source hash unchanged. check_render.py again stopped at the GitHub markdown API (HTTP 403 rate limit); deliverables unchanged since the last passing local checks. No STOP (review pending).
