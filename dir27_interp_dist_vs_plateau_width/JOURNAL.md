@@ -283,3 +283,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 46 (feedback 3 still review_pending)
 - No rejection notes, no new feedback, source hash unchanged. check_render.py's local checks raised no problems, but its GitHub API stage failed again with HTTP 403 (rate limit), so that stage did not run. Deliverables unchanged. No STOP written because the review is still pending.
+
+## 2026-09-28 — re-entry check 47 (feedback 3 still review_pending)
+- No rejection notes, no new feedback, source hash unchanged. check_render.py's GitHub API stage failed again with HTTP 403 (rate limit), so that stage did not run this time. Deliverables unchanged. No STOP written because the review is still pending.
