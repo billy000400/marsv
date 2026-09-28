@@ -118,3 +118,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check (feedback 3 review_pending)
 - Re-ran check_render.py on REPORT_generalization.md / RESULTS_generalization.md: all pass (12 figures, 12 captions, 3,722 words). Protected files unchanged. No new work; awaiting wrapper content review. STOP not written (feedback 3 still unaddressed).
+
+## 2026-09-28 — re-entry check (feedback 3 still review_pending)
+- check_render.py passes on REPORT_generalization.md / RESULTS_generalization.md (12 figures, 4 display eqs, 0 problems). Working tree clean; protected files unchanged. No rejection received; no new work. STOP not written (human_feedback_3.txt still unaddressed).
