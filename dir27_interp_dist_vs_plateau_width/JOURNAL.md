@@ -160,3 +160,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 5 (feedback 3 still review_pending)
 - No rejection notes, no new feedback files, source hash unchanged. check_render.py again stopped at the GitHub markdown API step with HTTP 403 (unauthenticated rate limit 60/60 used; resets at epoch 1790566900). External limit, not a content error; deliverables unchanged since the last passing run. Nothing edited; STOP not written (review pending, per rule 11).
+
+## 2026-09-28 — re-entry check 6 (feedback 3 still review_pending)
+- No rejection notes, no new feedback files, source hash unchanged (2187ad0d…). check_render.py again hit HTTP 403 (GitHub unauthenticated markdown-API rate limit) at the API step; external limit, not a content error. Deliverables unchanged since the last passing run. Nothing edited; STOP not written (review pending, rule 11).
