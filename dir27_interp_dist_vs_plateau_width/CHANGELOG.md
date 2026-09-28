@@ -38,3 +38,9 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - Result: distance-does-not-predict-width and single-broad-peak shape hold in all four; final block sharper
   in GPT2-XL (95.3%), Pythia (95.8%), Llama (88.8%) but not Qwen3-8B-Base (56.2%, medians 0.233 vs 0.230).
 - REPORT.md, RESULTS.md and all GPT-2 Large results/plots unchanged.
+
+## 2026-09-28 — REPORT_generalization.md: fix content-review rejection (feedback 3)
+- GPT2-XL 0.30–0.50 band: "made of size and amount words" → "lowest-D examples are size and amount words", with a note that lowest-D examples do not describe the whole band.
+- Pythia band: "ordinary tokens" → case/spacing variants of "big" plus unrelated pieces.
+- Conclusion: removed the causal claim that peak position explains the example column; now says the column mainly reflects each model's lowest-D tokens and the cause was not tested.
+- Methods precision paragraph + Qwen3 section: Qwen3's 0.003 median depth gap and 56.2% sharper share stated as near bfloat16 rounding noise. No numbers changed.

@@ -122,7 +122,11 @@ pass, which changes speed but not results. We keep the residual stream (the hidd
 each block reads and adds its output to) in float32, which roughly halved the rounding error in a test
 on Qwen3. On 32 random tokens we compared W from the reused-prefix run with W from a full run. The
 median |ΔW| at the final block was 0.002 for Llama and 0.003 for Qwen3 (largest 0.008 and 0.105).
-Differences this small do not change any conclusion below.
+For most comparisons below these errors are far smaller than the effects. The exception is Qwen3's
+depth comparison: its median gap between the two blocks (0.003) and many per-token gaps are about as
+large as the median rounding error, so the exact share of tokens that are sharper at the final block
+(56.2%) is near the noise level. The qualitative Qwen3 result (the final block is not clearly sharper)
+does not depend on that exact share.
 
 ## Results
 
@@ -159,9 +163,11 @@ widths form groups, Figure 3 shows their distribution:
 values sorted; x: token rank, y: W_final.
 
 There is one broad peak near W_final 0.06–0.07 and a long tail toward 0.7. The sorted curve rises smoothly
-with no flat shelves, so there are no separate width groups. The 0.30–0.50 band of the S4 table is again
-made of size and amount words, much as in GPT-2 Large (787 tokens there: ` large`, ` bigger`,
-` biggest`, ` massive`, ` small`, ` gigantic`, ` enormous`):
+with no flat shelves, so there are no separate width groups. In the 0.30–0.50 band of the S4 table, the
+lowest-D examples are again size and amount words, much as in GPT-2 Large (787 tokens there: ` large`,
+` bigger`, ` biggest`, ` massive`, ` small`, ` gigantic`, ` enormous`). These examples are chosen by
+lowest D, so they are the band members whose embeddings are closest to ` big`; they do not describe the
+other 1,000-odd tokens in the band:
 
 | W_final band | tokens | lowest-D examples |
 |---|---|---|
@@ -204,8 +210,8 @@ same values sorted; x: token rank, y: W_final.
 
 Again there is one broad peak with a tail and no shelves. But the peak sits at W_final ≈ 0.33, about three
 times wider than in GPT-2 Large: Pythia's switches are typically gradual rather than abrupt. As a result
-the 0.30–0.50 band holds two thirds of the vocabulary, and its lowest-D examples are ordinary tokens,
-not size words:
+the 0.30–0.50 band holds two thirds of the vocabulary. Its lowest-D examples are mostly case and spacing
+variants of "big" itself (` Big`, ` BIG`, `big`, `Big`) plus a few unrelated pieces:
 
 | W_final band | tokens | lowest-D examples |
 |---|---|---|
@@ -296,7 +302,9 @@ min–max W in that range (block 18: 0.111–0.648; block 35: 0.037–0.722). Ma
 
 In the core the depth finding does **not** hold. The final block's cloud is no lower than the middle
 block's, only more spread out: median W_final 0.230 against W_mid 0.233, and only 56.2% of tokens switch
-more sharply at the final block (97.7% in GPT-2 Large). The final block is also much less regular: 21.2%
+more sharply at the final block (97.7% in GPT-2 Large). Both the 0.003 median gap and this share are
+close to the bfloat16 rounding error measured in Methods, so they mean "no clear difference" rather than
+a small real advantage. The final block is also much less regular: 21.2%
 of final-block curves are flagged. Figure 12 shows the distribution:
 
 ![Qwen3 W_final distribution](plots/gen/qwen3-8b-base_fig3_final_width_distribution.png)
@@ -347,8 +355,11 @@ block also has the most irregular curves (21.2% flagged).
 3, 6, 9 and 12). In GPT2-XL, Pythia and Llama, the only tight group is again made of rarely seen tokens
 (byte-level, whitespace or special tokens) that share almost the same embedding and width. The position
 of the peak does not generalize: it ranges from W_final ≈ 0.06 (GPT2-XL) to 0.33 (Pythia). So a given
-width, such as 0.3, is in the tail for the GPT-2 models and typical for Pythia. That is why the
-0.30–0.50 row holds size words in GPT2-XL but ordinary tokens in Pythia, Llama and Qwen3.
+width, such as 0.3, is in the tail for the GPT-2 models and typical for Pythia. The example column of the
+0.30–0.50 row also differs between models (size words in GPT2-XL, variants of "big" in Pythia,
+multilingual pieces in Llama and Qwen3), but because it lists only the lowest-D tokens it mainly reflects
+which tokens sit closest to ` big` in each model's embedding space. We did not test what causes these
+differences.
 
 **Size words are among the widest switches: holds in three of four, partly in Qwen3.** ` large` is the
 widest token of all in Llama, 3rd in Pythia and 84th in GPT2-XL. In Qwen3 it is 281st of 151,668, while

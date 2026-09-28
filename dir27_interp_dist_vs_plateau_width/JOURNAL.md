@@ -331,3 +331,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 62 (feedback 3 still review_pending)
 - No rejection notes, no new feedback, source hash unchanged; deliverables untouched. check_render.py again hit GitHub API rate limit (HTTP 403); files unchanged since earlier passing runs. STOP not written (review pending).
+
+## 2026-09-28 — feedback 3 rejection repair
+- Addressed the 3 reviewer failures by narrowing text in REPORT_generalization.md (no new analysis). Manifest → review_pending. check_render.py could not run: GitHub API rate limit (HTTP 403); edits add no math, tables or figures; local inline-math hazard grep clean; 3,903 words.
