@@ -124,3 +124,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check (feedback 3 still review_pending)
 - No rejection or new feedback found. check_render.py passes (REPORT_generalization.md: 12 figures, 4 display eqs, 0 problems). Protected files untouched; no new work. STOP not written (human_feedback_3.txt awaits wrapper review/rename).
+
+## 2026-09-28 — re-entry check (feedback 3 still review_pending)
+- No rejection notes or new feedback files. Source hash matches manifest. check_render.py passes (REPORT_generalization.md: 12 figures, 4 display eqs, 0 problems; RESULTS_generalization.md 0 problems). No new work; STOP not written (human_feedback_3.txt awaits wrapper review/rename).
