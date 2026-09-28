@@ -145,3 +145,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check (feedback 3 still review_pending)
 - No rejection notes and no new feedback. The source hash matches and check_render.py passes for both generalization files. No changes were made. STOP was not written because the review is still pending.
+
+## 2026-09-28 — re-entry check (feedback 3 still review_pending)
+- No rejection notes and no new feedback; the source hash matches. check_render.py could not finish because the GitHub markdown API returned HTTP 403 (rate limit). The offline checks pass: no inline-math backslash hazards, no `\operatorname`, and every embedded figure has a caption. No deliverables were changed and STOP was not written, because the review is still pending.
