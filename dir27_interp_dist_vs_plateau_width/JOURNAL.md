@@ -223,3 +223,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 26 (feedback 3 still review_pending)
 - There are no rejection notes and no new feedback files, and the source hash is unchanged (2187ad0d…). The local KaTeX checks ran, but check_render.py again hit HTTP 403 (rate limit) at the GitHub API step. Deliverables are unchanged. STOP was not written because the review is still pending (rule 11).
+
+## 2026-09-28 — re-entry check 27 (feedback 3 still review_pending)
+- There are no rejection notes and no new feedback files, and the source hash is unchanged (2187ad0d…). check_render.py again stopped at the GitHub API step with HTTP 403 (rate limit). Deliverables are unchanged, and no STOP was written because the review is still pending (rule 11).
