@@ -151,3 +151,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 2 (feedback 3 still review_pending)
 - No rejection notes and no new feedback; the source hash matches. The unauthenticated GitHub API was still rate-limited (HTTP 403), so the full `check_render.py` logic was run with only its GitHub call routed through the authenticated `gh api markdown`; the shared script was not edited. Result: REPORT_generalization.md has 4 display equations, all rendered as js-display-math, 0 `<pre lang="math">`, 12 figures each with a caption, 0 problems. RESULTS_generalization.md also has 0 problems. No deliverables were changed. STOP was not written because the review is still pending.
+
+## 2026-09-28 — re-entry check 3 (feedback 3 still review_pending)
+- No rejection notes, no new feedback files, source hash unchanged. Deliverables and manifest untouched; STOP not written (review pending).
