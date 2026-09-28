@@ -250,3 +250,6 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — re-entry check 35 (feedback 3 still review_pending)
 - No rejection notes, no new feedback, source hash unchanged. check_render.py again stopped at the GitHub markdown API (HTTP 403 rate limit); deliverables unchanged since the last passing local checks. No STOP (review pending).
+
+## 2026-09-28 — re-entry check 36 (feedback 3 still review_pending)
+- No rejection notes, no new feedback, source hash unchanged. check_render.py again stopped at the GitHub markdown API (HTTP 403 rate limit); deliverables unchanged. No STOP (review pending).
