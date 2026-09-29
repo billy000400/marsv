@@ -32,7 +32,7 @@ def main():
     groups += [(f"exactly {n} contexts", [r for r in rows if r["n_ctx"] == str(n)]) for n in (3, 2)]
     for k, c in enumerate(CTX, 1):
         groups.append((f"only Section {k} (\"{PROMPTS[c]}\")",
-                       [r for r in rows if r["n_ctx"] == "1" and float(r[f"W_{c}"]) > 0.3]))
+                       [r for r in rows if r["n_ctx"] == "1" and r[f"W_{c}"] == r["max_W"]]))
     with open(os.path.join(OUT, "cross.md"), "w") as f:
         for name, g in groups:
             g = sorted(g, key=lambda r: -float(r["max_W"]))

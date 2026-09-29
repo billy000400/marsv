@@ -67,3 +67,23 @@ On track? yes — Stage 0 done; sweeps running (~25% done), no blocker.
 ## 2026-09-29 — iteration 9 (21:50)
 
 - s2 at 9/25 shards, ~193 s/shard (GPU shared with dir29). Projection: s2 ~22:45, s3 ~00:05, s4 ~01:25 at shared speed — may exceed the ~183 min budget unless dir29 frees the GPU. No parallel sweep started (GPU is at 100%, would not add throughput). Waiting in-iteration on results/queue.done; if budget runs short, finalize REPORT.md with whichever contexts have completed and mark the rest as not run.
+
+## 2026-09-29 — iteration 10 (22:30)
+
+- dir29 sweep finished ~22:25; our shards now ~93 s. s2 complete at 22:28 (961 tokens W_final > 0.3, median 0.135).
+- s2 qualitative: size/magnitude words + comparatives dominate; code/scraped identifiers at the top; the 56-token
+  D≈5.16 glitch block moved from median W 0.322 (s1) to 0.292 → all drop below 0.3 (threshold-edge shift, noted as such).
+  " small" (in the s2 prefix) 0.342 → 0.211. Section 2 prose drafted in REPORT.md. Waiting for s3/s4 (~23:10 / ~23:50).
+
+## 2026-09-29 — iteration 10, continued (23:30)
+
+- s3 done 22:49 (1,307 > 0.3), s4 done 23:15 (736). Ran analyze.py + report_lists.py.
+- Cross-context: 229 in all four; unique s1 120, s2 405, s3 690, s4 143. Unique tokens are mostly near threshold
+  (median own W 0.32–0.34). Top-50 of each context: 24–36 are in the all-four set. Themed unique items noted as
+  observations only (s1 shape words, s3 "dream big" verbs, s4 negative adjectives).
+- Fixed rounding bug in unique assignment (see CHANGELOG).
+- Word budget: main body ~2,810 words; appendices hold the complete token lists that PLAN's success criterion
+  explicitly requires inside REPORT.md (treated as a declared technical appendix; placed in collapsible blocks).
+- Success criterion items 1–5 met; check_render passes on REPORT.md and RESULTS.md; no feedback files → STOP.
+
+On track? yes — all sections complete, 100%, no blocker.

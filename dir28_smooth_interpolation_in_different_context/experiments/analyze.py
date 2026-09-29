@@ -99,7 +99,7 @@ def main():
         w.writerows(rows)
     summary["cross"] = {f"in_{n}_contexts": sum(r["n_ctx"] == n for r in rows) for n in (1, 2, 3, 4)}
     summary["cross"]["unique_per_context"] = {
-        c: sum(1 for r in rows if r["n_ctx"] == 1 and r[f"W_{c}"] > THR) for c in CTX}
+        c: sum(1 for r in rows if r["n_ctx"] == 1 and r[f"W_{c}"] == r["max_W"]) for c in CTX}
     json.dump(summary, open(os.path.join(RES, "summary.json"), "w"), indent=1)
     print(summary["cross"])
 

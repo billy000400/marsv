@@ -189,12 +189,10 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Stage 0 done. s1 complete (692 tokens W_final > 0.3). s2 running (8/25 shards at 21:45; queue.sh; shards ~193 s while GPU shared with dir29,
-~95 s alone; s2 expected ~22:45, s3 ~23:30, s4 ~00:15 on 2026-09-29/30). REPORT.md drafted: research question, Methods,
-Section 1 qualitative note done; histograms, Sections 2-4, cross-context, Summary, Conclusion marked PENDING.
+DONE (2026-09-29 23:30). All four sweeps complete (W > 0.3: s1 692, s2 961, s3 1,307, s4 736; 229 shared by all four).
+REPORT.md has all four sections with histograms and complete sorted lists (Appendix A), cross-context comparison
+(Table 1, Appendix B), Summary and Conclusion; RESULTS.md written; check_render passes. Success criterion met.
 
 ## Next step
 
-When results/queue.done exists: python experiments/analyze.py && python experiments/report_lists.py; inspect s2-s4 lists;
-fill the PENDING parts of REPORT.md (embed 4 histograms, paste fragments into Appendix A/B), write RESULTS.md,
-run ../check_render.py. If still running, do nothing expensive (do not start parallel sweeps: GPU throughput is shared).
+None. Direction complete; STOP written.

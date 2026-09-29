@@ -1,0 +1,29 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  12%|█▏        | 54/436 [00:00<00:00, 501.03it/s]Loading weights:  26%|██▌       | 113/436 [00:00<00:00, 508.77it/s]Loading weights:  41%|████      | 179/436 [00:00<00:00, 550.55it/s]Loading weights:  54%|█████▍    | 235/436 [00:00<00:00, 474.06it/s]Loading weights:  68%|██████▊   | 298/436 [00:00<00:00, 491.46it/s]Loading weights:  81%|████████  | 353/436 [00:00<00:00, 489.77it/s]Loading weights:  92%|█████████▏| 403/436 [00:00<00:00, 483.29it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 524.23it/s]
+s4 'The elephant was big' [464, 20950, 373, 1263]
+shard 0: 2048 tokens in 63.9s
+shard 2048: 2048 tokens in 63.8s
+shard 4096: 2048 tokens in 63.9s
+shard 6144: 2048 tokens in 63.9s
+shard 8192: 2048 tokens in 63.9s
+shard 10240: 2048 tokens in 63.9s
+shard 12288: 2048 tokens in 63.9s
+shard 14336: 2048 tokens in 63.9s
+shard 16384: 2048 tokens in 63.9s
+shard 18432: 2048 tokens in 63.9s
+shard 20480: 2048 tokens in 63.9s
+shard 22528: 2048 tokens in 63.9s
+shard 24576: 2048 tokens in 63.9s
+shard 26624: 2048 tokens in 63.9s
+shard 28672: 2048 tokens in 63.9s
+shard 30720: 2048 tokens in 63.9s
+shard 32768: 2048 tokens in 63.9s
+shard 34816: 2048 tokens in 63.9s
+shard 36864: 2048 tokens in 63.9s
+shard 38912: 2048 tokens in 63.9s
+shard 40960: 2048 tokens in 63.9s
+shard 43008: 2048 tokens in 63.9s
+shard 45056: 2048 tokens in 63.9s
+shard 47104: 2048 tokens in 63.9s
+shard 49152: 1104 tokens in 34.5s
