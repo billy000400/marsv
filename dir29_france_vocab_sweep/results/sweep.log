@@ -1,0 +1,6 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 9452.78it/s]
+'The capital of France' [464, 3139, 286, 4881]
+shard 0: 2048 tokens in 136.5s
+shard 2048: 2048 tokens in 136.1s
