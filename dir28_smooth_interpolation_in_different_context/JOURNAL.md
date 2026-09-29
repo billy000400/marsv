@@ -63,3 +63,7 @@ On track? yes — Stage 0 done; sweeps running (~25% done), no blocker.
 ## 2026-09-29 — iteration 8: waiting on s2–s4 (21:50)
 
 - queue.sh alive; s2 at 9/25 shards. Waiting in-iteration (background until-loop on results/queue.done); will run analyze.py + report_lists.py and fill REPORT.md when it lands (expected ~00:30).
+
+## 2026-09-29 — iteration 9 (21:50)
+
+- s2 at 9/25 shards, ~193 s/shard (GPU shared with dir29). Projection: s2 ~22:45, s3 ~00:05, s4 ~01:25 at shared speed — may exceed the ~183 min budget unless dir29 frees the GPU. No parallel sweep started (GPU is at 100%, would not add throughput). Waiting in-iteration on results/queue.done; if budget runs short, finalize REPORT.md with whichever contexts have completed and mark the rest as not run.
