@@ -32,3 +32,13 @@ On track? yes — Stage 0 done; sweeps running (~25% done), no blocker.
   (~700 tokens × 4). I read that as the explicit PLAN override WRITING.md rule 11 allows for this content, and put the lists
   in collapsed `<details>` text fences in a declared appendix; the argued body stays well under 5,000 words.
   Rejected: moving the lists to RESULTS.md only (would violate success criterion 3).
+
+## 2026-09-29 — iteration 3: drafting while s2–s4 run
+
+- s2 at 7/25 shards at 21:42; shard time ~193 s because dir29's sweep shares the GPU (93 s alone). Running s3/s4 in
+  parallel would not raise total throughput, so the serial queue is kept. Expected finish ~00:15.
+- Drafted REPORT.md: research question, Methods (prompt token IDs verified from shards/tokenizer), Section 1
+  qualitative note. Section 1 reading: top-40 dominated by size/magnitude words; small-size and place/object
+  adjectives fill much of the rest; code identifiers throughout; 64 glitch tokens at W≈0.32, D≈5.16.
+- Methods states the actual interpolation site (layer-0 embedding, as dir27 code does) rather than PLAN's
+  "block-0 resid_post" wording (see iteration-1 assumption).
