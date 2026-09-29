@@ -1,0 +1,5 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  16%|█▌        | 69/436 [00:00<00:00, 681.05it/s]Loading weights:  35%|███▍      | 151/436 [00:00<00:00, 726.37it/s]Loading weights:  51%|█████▏    | 224/436 [00:00<00:00, 722.48it/s]Loading weights:  68%|██████▊   | 297/436 [00:00<00:00, 657.55it/s]Loading weights:  84%|████████▍ | 366/436 [00:00<00:00, 644.41it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 683.03it/s]
+s1 'My house is big' [3666, 2156, 318, 1263]
+shard 0: 2048 tokens in 63.3s
