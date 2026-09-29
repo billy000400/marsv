@@ -10,3 +10,4 @@ shard 8192: 2048 tokens in 193.7s
 shard 10240: 2048 tokens in 193.4s
 shard 12288: 2048 tokens in 193.1s
 shard 14336: 2048 tokens in 193.6s
+shard 16384: 2048 tokens in 193.2s
