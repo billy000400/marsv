@@ -3,3 +3,27 @@ Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF
 Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights:  16%|█▌        | 69/436 [00:00<00:00, 681.05it/s]Loading weights:  35%|███▍      | 151/436 [00:00<00:00, 726.37it/s]Loading weights:  51%|█████▏    | 224/436 [00:00<00:00, 722.48it/s]Loading weights:  68%|██████▊   | 297/436 [00:00<00:00, 657.55it/s]Loading weights:  84%|████████▍ | 366/436 [00:00<00:00, 644.41it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 683.03it/s]
 s1 'My house is big' [3666, 2156, 318, 1263]
 shard 0: 2048 tokens in 63.3s
+shard 2048: 2048 tokens in 63.7s
+shard 4096: 2048 tokens in 63.8s
+shard 6144: 2048 tokens in 63.9s
+shard 8192: 2048 tokens in 63.9s
+shard 10240: 2048 tokens in 63.9s
+shard 12288: 2048 tokens in 64.0s
+shard 14336: 2048 tokens in 63.9s
+shard 16384: 2048 tokens in 63.9s
+shard 18432: 2048 tokens in 63.9s
+shard 20480: 2048 tokens in 63.9s
+shard 22528: 2048 tokens in 63.9s
+shard 24576: 2048 tokens in 64.0s
+shard 26624: 2048 tokens in 63.9s
+shard 28672: 2048 tokens in 63.9s
+shard 30720: 2048 tokens in 63.9s
+shard 32768: 2048 tokens in 63.9s
+shard 34816: 2048 tokens in 63.9s
+shard 36864: 2048 tokens in 63.9s
+shard 38912: 2048 tokens in 63.9s
+shard 40960: 2048 tokens in 63.9s
+shard 43008: 2048 tokens in 63.9s
+shard 45056: 2048 tokens in 63.9s
+shard 47104: 2048 tokens in 63.9s
+shard 49152: 1104 tokens in 34.5s

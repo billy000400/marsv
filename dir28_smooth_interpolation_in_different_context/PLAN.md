@@ -189,8 +189,9 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Stage 0 done: dir27 control reproduced (max |dW_final| 7e-7 on 256 tokens). Interpolation site follows dir27's code
-(layer 0 = input embedding), see JOURNAL 2026-09-29. Four full sweeps running via experiments/queue.sh.
+Stage 0 done. s1 sweep complete (692 tokens with W_final > 0.3; top of list = size adjectives, 64 glitch tokens at D~5.16
+sit at W~0.32). s2-s4 running via experiments/queue.sh (started s2 21:21, ~26 min each). experiments/report_lists.py
+writes the complete lists as collapsible fragments for REPORT.md's appendix.
 
 ## Next step
 

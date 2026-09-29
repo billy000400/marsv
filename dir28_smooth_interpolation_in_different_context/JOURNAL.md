@@ -22,3 +22,13 @@ and a final line `On track? <yes/no> — <stage, % done, blocker>`.
   context's w>0.3 list. Will report them as a group rather than interpret.
 
 On track? yes — Stage 0 done; sweeps running (~25% done), no blocker.
+
+## 2026-09-29 — iteration 2: s1 complete, waiting on s2–s4
+
+- s1 ("My house is big"): 50,256 tokens, median W_final 0.106, 692 tokens > 0.3 (7 flagged non-monotonic), 64 with D > 4.
+  Top of the list: size/magnitude adjectives (HUGE, tremendous, whopping, huge, giant, colossal, vast…), mixed with
+  glitch/code-identifier tokens (guiName, externalToEVAOnly, PsyNetMessage…). 64 near-zero-norm glitch tokens sit at W≈0.32.
+- **Decision (report length):** PLAN's success criterion requires the *complete* w>0.3 list per prompt in REPORT.md
+  (~700 tokens × 4). I read that as the explicit PLAN override WRITING.md rule 11 allows for this content, and put the lists
+  in collapsed `<details>` text fences in a declared appendix; the argued body stays well under 5,000 words.
+  Rejected: moving the lists to RESULTS.md only (would violate success criterion 3).
