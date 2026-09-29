@@ -50,43 +50,43 @@ Finish the full vocabulary sweep, save the transition-width histogram and sorted
 
 ## Stage 0 â Verify Direction 27 compatibility
 
-- [ ] Locate the exact Direction 27 GPT-2 Large vocabulary-sweep implementation.
-- [ ] Confirm model, tokenizer, hook point, interpolation path, alpha grid, `d(t)`, transition-width calculation, threshold, and usable-token filtering.
-- [ ] Run a small sanity check with ` France` and a handful of partner tokens before launching the full vocabulary sweep.
-- [ ] If any setup differs from Direction 27, fix it before proceeding rather than silently changing the method.
+- [x] Locate the exact Direction 27 GPT-2 Large vocabulary-sweep implementation.
+- [x] Confirm model, tokenizer, hook point, interpolation path, alpha grid, `d(t)`, transition-width calculation, threshold, and usable-token filtering.
+- [x] Run a small sanity check with ` France` and a handful of partner tokens before launching the full vocabulary sweep.
+- [x] If any setup differs from Direction 27, fix it before proceeding rather than silently changing the method.
 
 ## Section 1 â Full `France â vocabulary` sweep
 
 For every usable GPT-2 vocabulary token `B`:
 
-- [ ] Construct endpoint A: `The capital of France`.
-- [ ] Construct endpoint B: `The capital of` + token `B`.
-- [ ] Interpolate the final-token representation ` France â B` using the Direction 27 procedure.
-- [ ] Compute `d(t)` and transition width `w`.
-- [ ] Save one result row per partner token.
+- [x] Construct endpoint A: `The capital of France`.
+- [x] Construct endpoint B: `The capital of` + token `B`.
+- [x] Interpolate the final-token representation ` France â B` using the Direction 27 procedure.
+- [x] Compute `d(t)` and transition width `w`.
+- [x] Save one result row per partner token.
 
 Required outputs:
 
-- [ ] Plot a histogram of transition widths over the complete valid vocabulary sweep.
-- [ ] Use the same histogram conventions / binning style as Direction 27 where possible.
-- [ ] Mark `w = 0.3` on the plot so the non-plateau candidate region is visually clear.
-- [ ] Report the number and fraction of valid tokens with `w <= 0.3` and `w > 0.3` as simple descriptive counts only.
+- [x] Plot a histogram of transition widths over the complete valid vocabulary sweep.
+- [x] Use the same histogram conventions / binning style as Direction 27 where possible.
+- [x] Mark `w = 0.3` on the plot so the non-plateau candidate region is visually clear.
+- [x] Report the number and fraction of valid tokens with `w <= 0.3` and `w > 0.3` as simple descriptive counts only.
 
 ## Section 2 â Inspect the non-plateau tokens
 
 Primary object of interest: all partner tokens with `w <= 0.3`.
 
-- [ ] Save the complete set sorted from smallest to largest transition width.
-- [ ] Display at least the lowest-width tokens in a readable table containing token ID, decoded token, and transition width.
-- [ ] Inspect decoded tokens directly for obvious regularities.
-- [ ] Ask simple qualitative questions such as:
+- [x] Save the complete set sorted from smallest to largest transition width.
+- [x] Display at least the lowest-width tokens in a readable table containing token ID, decoded token, and transition width.
+- [x] Inspect decoded tokens directly for obvious regularities.
+- [x] Ask simple qualitative questions such as:
   - Are other country or place names enriched among the smoothest transitions?
   - Are there demonyms, languages, nationalities, cities, or geographic terms?
   - Are there semantically related words that are not geographic entities?
   - Are many tokens merely orthographically / tokenization-similar to ` France`?
   - Are punctuation, whitespace, fragments, capitalization variants, or other token-form effects common?
   - Are the low-width tokens heterogeneous with no obvious semantic relationship?
-- [ ] Do not force tokens into categories when the pattern is unclear.
+- [x] Do not force tokens into categories when the pattern is unclear.
 
 The main deliverable for this section is a human-readable description of what the smoothest `France â token` transitions actually look like.
 
@@ -94,10 +94,10 @@ The main deliverable for this section is a human-readable description of what th
 
 Choose a small number of examples after seeing the sweep.
 
-- [ ] Plot `d(t)` for several of the lowest-width / clearest non-plateau examples.
-- [ ] Include a few ordinary `w > 0.3` examples as controls.
-- [ ] Prefer examples that illustrate genuinely different observations rather than many near-duplicates.
-- [ ] Annotate each plot with the partner token and transition width.
+- [x] Plot `d(t)` for several of the lowest-width / clearest non-plateau examples.
+- [x] Include a few ordinary `w > 0.3` examples as controls.
+- [x] Prefer examples that illustrate genuinely different observations rather than many near-duplicates.
+- [x] Annotate each plot with the partner token and transition width.
 
 This section is for visual confirmation only; do not introduce another plateau metric.
 
@@ -148,8 +148,12 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Stage 0 done (iteration 1, 2026-09-29): dir27 code imported unchanged via `experiments/sweep.py`; control reproduces dir27 shard 0 to 7e-7. Full sweep running (`results/sweep.log`). Found that this PLAN's threshold labels are inverted relative to dir27 (dir27: small W = abrupt jump = plateau-like; W > 0.3 = smoother). Handling: report both sides of 0.3, literal `w <= 0.3` list ascending plus the `w > 0.3` list, and let d(t) curves show which side is smooth.
+Done (iteration 2, 2026-09-29). Full sweep analysed; REPORT.md and RESULTS.md written and pass `check_render.py`.
+All five success-criterion items are covered: Figure 1 histogram; complete W ≤ 0.3 list in `results/france_W_le_0.3.csv`
+(40 narrowest in REPORT Table 1); inspection of both ends; d(t) curves (Figure 2); conclusion. The PLAN's threshold labels
+are swapped: Figure 2 shows that small W is the plateau shape and the smooth transitions are the W > 0.3 side (mostly place
+names). REPORT Methods notes this.
 
 ## Next step
 
-When sweep finishes: `python experiments/analyze.py`, inspect both ends, pick tokens for `experiments/curves.py`, write RESULTS.md and REPORT.md, run `../check_render.py`.
+None. STOP created. Reopen only if operator feedback arrives.

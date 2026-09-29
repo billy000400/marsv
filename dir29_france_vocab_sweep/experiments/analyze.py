@@ -66,12 +66,12 @@ def main():
     print(summary)
 
     bins = np.linspace(0, np.ceil(Wf.max() * 10) / 10, 101)
-    ymax = np.histogram(Wf, bins)[0].max() * 1.5
+    ymax = np.histogram(Wf, bins)[0].max() * 12
     fig, ax = plt.subplots(figsize=(6.4, 3.8))
     ax.hist(Wf, bins=bins, color=d27.CVD[0], edgecolor="none")
     ax.axvline(THR, color="0.2", ls="--", lw=1)
-    ax.text(THR - 0.01, ymax / 3, f"{len(le):,} tokens\nW ≤ 0.3", fontsize=8, ha="right")
-    ax.text(THR + 0.01, ymax / 3, f"{len(gt):,} tokens\nW > 0.3", fontsize=8)
+    ax.text(THR - 0.01, ymax / 2.2, f"{len(le):,} tokens\nW ≤ 0.3", fontsize=8, ha="right")
+    ax.text(THR + 0.01, ymax / 2.2, f"{len(gt):,} tokens\nW > 0.3", fontsize=8)
     ax.set_yscale("log")
     ax.set_ylim(0.8, ymax)
     ax.set_xlim(bins[0], bins[-1])

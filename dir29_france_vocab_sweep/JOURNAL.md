@@ -25,3 +25,22 @@ and a final line `On track? <yes/no> — <stage, % done, blocker>`.
 - Full sweep launched in background (`results/sweep.log`), GPU shared with dir28 (~26 min alone).
 
 On track? yes — Stage 0 done, Section 1 sweep running (~15%); blocker: threshold-label inversion in PLAN (handled by reporting both sides).
+
+## 2026-09-29 — iteration 2: sweep analysed, deliverables written
+
+- Sweep finished (25 shards, 50,256 tokens). `analyze.py`: 47,073 W ≤ 0.3, 3,183 W > 0.3, median W 0.188, 537 flagged.
+  Moved the histogram count labels above the bars (they overlapped).
+- Narrowest end: short capitalized word starts (82/100 are space+Capital fragment vs 21% vocab), no places.
+  `France` (no space) W = 0.072.
+- Widest end: 53/100 places by manual reading (`experiments/categories.py`), many France-linked (Brittany, Normandy,
+  Lyon, Gaul, Monaco, Algeria...), 17 scraped/glitch tokens (as in dir27), 30 other.
+- `curves.py` on (a) ' Ent',' More',' the','France',' French' and (b) ' Brittany',' Spain',' Paris',' Germany',
+  ' SolidGoldMagikarp'. Figure confirms small W = jump (plateau), large W = gradual.
+- **Assumption:** the "complete list" of W ≤ 0.3 (47,073 rows) cannot fit in REPORT.md's 5,000-word limit. So the complete
+  sorted list lives in `results/france_W_le_0.3.csv`, the report links it, and the report shows the 40 narrowest.
+  Rejected alternative: printing a partial list and calling it complete.
+- Did not compute a vocabulary base rate for place names, because that needs labeling the whole vocabulary (automated
+  labeling is out of scope). The report names this as a limit.
+- REPORT/RESULTS pass `check_render.py`. All five success-criterion items are covered, so I am creating STOP.
+
+On track? yes — all sections done; no blocker.

@@ -1,0 +1,101 @@
+rank,token_id,token,W_final,manual_label
+1,48773,' Brittany',0.6547,place
+2,42090,' TheNitromeFan',0.6492,scraped
+3,46043,' Marino',0.6398,place
+4,31656,' Rica',0.6336,place
+5,36935,' dstg',0.6296,scraped
+6,16707,' Rico',0.6207,place
+7,48158,' Lucia',0.6178,place
+8,43231,' Normandy',0.6139,place
+9,37226,'SourceFile',0.6122,scraped
+10,35193,' Lyon',0.6073,place
+11,49002,' Guerrero',0.6052,other
+12,43540,' Gaul',0.6034,place
+13,31630,' Monaco',0.5938,place
+14,13945,'��',0.5903,scraped
+15,50158,' Cannes',0.5855,place
+16,46600,' Adinida',0.5842,scraped
+17,36498,' Algeria',0.5839,place
+18,26832,' Alger',0.5832,place
+19,41274,' pandemonium',0.5818,other
+20,43728,' Lyons',0.5775,place
+21,6336,' Palestin',0.5758,place
+22,39737,'quished',0.5752,other
+23,40012,'uyomi',0.5672,other
+24,30399,' Leone',0.5671,place
+25,31829,'eden',0.5645,other
+26,31864,' Luxembourg',0.5612,place
+27,47766,' Lydia',0.5607,other
+28,32437,' Smartstocks',0.5604,scraped
+29,28890,' Aviv',0.5598,place
+30,15664,' Belgium',0.5596,place
+31,35773,' Valencia',0.5594,place
+32,37579,'TPPStreamerBot',0.5572,scraped
+33,49657,' Senegal',0.5571,place
+34,32734,'aughtered',0.5564,other
+35,41297,' TAMADRA',0.5537,scraped
+36,49301,' Sicily',0.5532,place
+37,33859,' Catalonia',0.5527,place
+38,49997,'ahime',0.5484,other
+39,23339,'bia',0.5465,other
+40,41538,'Magikarp',0.5460,scraped
+41,15142,' Barcelona',0.5450,place
+42,10695,'hire',0.5438,other
+43,46882,' Sahara',0.5437,place
+44,24256,'bourg',0.5388,place
+45,47995,' Albion',0.5367,place
+46,25266,' Tunis',0.5353,place
+47,43177,'EStreamFrame',0.5348,scraped
+48,36174,' RandomRedditorWithNo',0.5338,scraped
+49,43317,'naires',0.5314,other
+50,19101,' Portugal',0.5314,place
+51,31765,'MpServer',0.5298,scraped
+52,35579,' Mechdragon',0.5289,scraped
+53,43453,' SolidGoldMagikarp',0.5269,scraped
+54,21175,'gow',0.5242,other
+55,14708,' Madrid',0.5227,place
+56,39367,' Minerva',0.5220,other
+57,40368,'rador',0.5215,other
+58,46654,'ukong',0.5211,other
+59,47403,' Gibraltar',0.5208,place
+60,8602,' Spain',0.5208,place
+61,42916,' Helena',0.5206,other
+62,44309,'agascar',0.5206,place
+63,45662,'raltar',0.5198,place
+64,29480,'ottage',0.5197,other
+65,44568,' Cameroon',0.5193,place
+66,33972,' Tunisia',0.5191,place
+67,43778,'ugal',0.5184,place
+68,48025,' Calais',0.5182,place
+69,37285,' Petra',0.5162,place
+70,46312,' Alps',0.5162,place
+71,46362,' Ajax',0.5152,other
+72,45408,' Barkley',0.5139,other
+73,45545,' サーティワン',0.5135,scraped
+74,14679,' Switzerland',0.5128,place
+75,45844,'Mania',0.5127,other
+76,16070,' Holland',0.5119,place
+77,43652,'quila',0.5114,other
+78,44692,' Aires',0.5109,place
+79,22013,'uba',0.5104,other
+80,41388,' Lafayette',0.5098,other
+81,18472,' guiActive',0.5082,scraped
+82,37631,'FactoryReloaded',0.5079,scraped
+83,41941,' Sabha',0.5073,other
+84,50026,' Ulster',0.5064,place
+85,11225,' Heaven',0.5063,other
+86,38330,' Hastings',0.5062,place
+87,46123,' Somerset',0.5048,place
+88,41898,' Lisbon',0.5044,place
+89,29638,' Morocco',0.5042,place
+90,6342,' Paris',0.5031,place
+91,49755,' Mania',0.5028,other
+92,29702,' Venice',0.5024,place
+93,42799,' Janeiro',0.5023,place
+94,24771,' Juda',0.5012,other
+95,45294,' Cornwall',0.5011,place
+96,45726,' Bahamas',0.5011,place
+97,40208,' Spa',0.5010,other
+98,41515,' Siberia',0.4979,place
+99,32795,' Hercules',0.4975,other
+100,41145,'ibia',0.4969,other
