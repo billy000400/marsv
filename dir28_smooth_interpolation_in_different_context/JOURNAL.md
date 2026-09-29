@@ -59,3 +59,7 @@ On track? yes — Stage 0 done; sweeps running (~25% done), no blocker.
 ## 2026-09-29 — iteration 7: waiting on s2–s4 (21:48)
 
 - queue.sh alive; s2 at 9/25 shards (~193 s/shard, GPU shared). analyze.py needs all four contexts, so no report edits possible yet. Waiting in-iteration for s2 to finish.
+
+## 2026-09-29 — iteration 8: waiting on s2–s4 (21:50)
+
+- queue.sh alive; s2 at 9/25 shards. Waiting in-iteration (background until-loop on results/queue.done); will run analyze.py + report_lists.py and fill REPORT.md when it lands (expected ~00:30).
