@@ -112,3 +112,8 @@ On track? yes — all sections complete, 100%, no blocker.
 
 - Success criterion already satisfied; no human_feedback/REVIEW files or active manifest.
 - check_render.py passes on REPORT.md and RESULTS.md (0 problems). STOP was absent again (only .tasks/STOP.over-budget.* present), so re-wrote STOP. No experiments run; deliverables unchanged.
+
+## 2026-09-29 — iteration 16 (finalize only)
+
+- Success criterion already satisfied; no human_feedback/REVIEW files or active manifest.
+- check_render.py passes on REPORT.md and RESULTS.md (0 problems). STOP was absent again, so re-wrote STOP. No experiments run; deliverables unchanged.
