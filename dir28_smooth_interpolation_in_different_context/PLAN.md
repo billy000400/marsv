@@ -189,7 +189,7 @@ End each `JOURNAL.md` entry with:
 
 ## Current status
 
-Stage 0 done. s1 complete (692 tokens W_final > 0.3). s2 running (queue.sh; shards ~193 s while GPU shared with dir29,
+Stage 0 done. s1 complete (692 tokens W_final > 0.3). s2 running (8/25 shards at 21:45; queue.sh; shards ~193 s while GPU shared with dir29,
 ~95 s alone; s2 expected ~22:45, s3 ~23:30, s4 ~00:15 on 2026-09-29/30). REPORT.md drafted: research question, Methods,
 Section 1 qualitative note done; histograms, Sections 2-4, cross-context, Summary, Conclusion marked PENDING.
 

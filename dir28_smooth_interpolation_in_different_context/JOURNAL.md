@@ -42,3 +42,8 @@ On track? yes — Stage 0 done; sweeps running (~25% done), no blocker.
   adjectives fill much of the rest; code identifiers throughout; 64 glitch tokens at W≈0.32, D≈5.16.
 - Methods states the actual interpolation site (layer-0 embedding, as dir27 code does) rather than PLAN's
   "block-0 resid_post" wording (see iteration-1 assumption).
+
+## 2026-09-29 — iteration 4: waiting on s2–s4 (21:45)
+
+- s2 at 8/25 shards; queue.sh alive; GPU 100% (shared with dir29). No queue.done yet, so no analysis this iteration.
+- Draft REPORT.md passes ../check_render.py (3 display eqs, 0 problems). No other changes.
