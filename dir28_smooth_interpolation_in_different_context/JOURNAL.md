@@ -55,3 +55,7 @@ On track? yes — Stage 0 done; sweeps running (~25% done), no blocker.
 ## 2026-09-29 — iteration 6: waiting on s2–s4 (21:47)
 
 - queue.sh alive; s2 at 8/25 shards (~193 s/shard, GPU shared with dir29). No queue.done. Waiting in-iteration for s2 to finish (~22:45) instead of spawning no-op iterations; no report edits yet.
+
+## 2026-09-29 — iteration 7: waiting on s2–s4 (21:48)
+
+- queue.sh alive; s2 at 9/25 shards (~193 s/shard, GPU shared). analyze.py needs all four contexts, so no report edits possible yet. Waiting in-iteration for s2 to finish.
