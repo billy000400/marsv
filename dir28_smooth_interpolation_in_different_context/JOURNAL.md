@@ -47,3 +47,7 @@ On track? yes — Stage 0 done; sweeps running (~25% done), no blocker.
 
 - s2 at 8/25 shards; queue.sh alive; GPU 100% (shared with dir29). No queue.done yet, so no analysis this iteration.
 - Draft REPORT.md passes ../check_render.py (3 display eqs, 0 problems). No other changes.
+
+## 2026-09-29 — iteration 5: waiting on s2–s4 (21:46)
+
+- queue.sh alive; s2 still mid-sweep; no results/queue.done. No analysis or report edits this iteration (next step unchanged).
