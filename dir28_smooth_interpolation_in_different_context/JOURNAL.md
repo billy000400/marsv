@@ -911,3 +911,7 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 209 (finalize)
 
 - Success criterion still met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments run, no deliverables changed. check_render passed (exit 0). Rewrote plain STOP.
+
+## 2026-09-30 — iteration 210 (finalize)
+
+- Success criterion still met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments run, no deliverables changed. check_render passed (exit 0). Plain STOP was absent (only wrapper STOP.over-budget.* files); rewrote plain STOP.
