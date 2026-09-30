@@ -859,3 +859,7 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 196 (finalize)
 
 - Success criterion still met; no unaddressed feedback. No experiments and no deliverable changes. Ran check_render and rewrote STOP. The wrapper keeps re-launching this finished direction. A wrapper-side fix is needed.
+
+## 2026-09-30 — iteration 197 (finalize)
+
+- Success criterion still met. No unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments and no deliverable changes. check_render passes (exit 0). Rewrote STOP. More than 190 STOP.over-budget.* files have piled up in the direction root. The wrapper keeps re-launching this finished direction and needs a fix on its side.
