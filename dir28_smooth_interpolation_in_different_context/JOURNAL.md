@@ -218,3 +218,7 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 36 (finalize)
 
 - No STOP file was present (only STOP.over-budget.* files). The success criterion was already met and the only feedback file is .addressed.md, so I ran no experiments. check_render passes on REPORT.md and RESULTS.md (exit 0). Re-wrote STOP.
+
+## 2026-09-30 — iteration 37 (finalize)
+
+- STOP was missing again (only STOP.over-budget.* files present). The success criterion was already met and the only feedback file is .addressed.md, so I ran no experiments. check_render passes on REPORT.md and RESULTS.md (exit 0). Re-wrote STOP.
