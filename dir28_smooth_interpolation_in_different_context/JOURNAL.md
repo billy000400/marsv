@@ -214,3 +214,7 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 35 (finalize)
 
 - human_feedback_0 is approved (.addressed.md) and no unaddressed feedback is left. The success criterion was already met, so I ran no new experiments. check_render passes on REPORT.md and RESULTS.md. Wrote STOP.
+
+## 2026-09-30 — iteration 36 (finalize)
+
+- No STOP file was present (only STOP.over-budget.* files). The success criterion was already met and the only feedback file is .addressed.md, so I ran no experiments. check_render passes on REPORT.md and RESULTS.md (exit 0). Re-wrote STOP.
