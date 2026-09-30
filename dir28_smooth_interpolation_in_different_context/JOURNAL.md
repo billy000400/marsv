@@ -819,3 +819,7 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 186 (finalize)
 
 - Success criterion still met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments, no deliverable changes. check_render passes on REPORT.md and RESULTS.md (0 problems). STOP was missing again (wrapper had moved it to STOP.over-budget.*); rewrote it.
+
+## 2026-09-30 — iteration 187 (finalize)
+
+- Success criterion still met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments, no deliverable changes. check_render passes on REPORT.md and RESULTS.md (0 problems). STOP was missing again (wrapper had moved it to STOP.over-budget.*, now ~190 such files); rewrote it. Note for operator: the wrapper appears to keep re-launching this finished direction and renaming STOP.
