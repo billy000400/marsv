@@ -839,3 +839,15 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 191 (finalize)
 
 - Success criterion still met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments, no deliverable changes. check_render passes (0 problems). STOP was missing again; rewrote it.
+
+## 2026-09-30 — iteration 192 (finalize)
+
+- Success criterion still met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments, no deliverable changes. check_render passes (0 problems). STOP was missing again; rewrote it.
+
+## 2026-09-30 — iteration 193 (finalize)
+
+- Success criterion still met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments, no deliverable changes. check_render passes (0 problems). STOP was missing again (wrapper keeps moving it to .tasks/STOP.over-budget.*); rewrote it.
+
+## 2026-09-30 — iteration 194 (finalize)
+
+- Success criterion still met; only feedback file is human_feedback_0.txt.addressed.md. No experiments, no deliverable changes. check_render passes (0 problems). STOP had again been moved to .tasks/STOP.over-budget.* by the wrapper; rewrote it. Operator note: the loop keeps re-launching this finished direction (~190 finalize-only iterations), so a wrapper-side fix is needed to stop spending budget.
