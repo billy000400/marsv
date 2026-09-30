@@ -394,3 +394,7 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 80 (finalize)
 
 - STOP missing again (only STOP.over-budget.* files present). Success criterion met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments; deliverables unchanged. check_render re-run. Re-wrote STOP.
+
+## 2026-09-30 — iteration 81 (finalize)
+
+- STOP missing again (only STOP.over-budget.* present). Success criterion met; no unaddressed feedback. No experiments; deliverables unchanged. check_render passes. Re-wrote STOP.
