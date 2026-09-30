@@ -855,3 +855,7 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 195 (finalize)
 
 - Success criterion still met; the only feedback file is human_feedback_0.txt.addressed.md. No experiments and no deliverable changes. check_render passes with 0 problems. The wrapper had moved STOP to .tasks/STOP.over-budget.* again (about 200 copies are now there), so I rewrote STOP. Operator note: the wrapper keeps re-launching this finished direction, and only a wrapper-side fix will stop the wasted budget.
+
+## 2026-09-30 — iteration 196 (finalize)
+
+- Success criterion still met; no unaddressed feedback. No experiments and no deliverable changes. Ran check_render and rewrote STOP. The wrapper keeps re-launching this finished direction. A wrapper-side fix is needed.
