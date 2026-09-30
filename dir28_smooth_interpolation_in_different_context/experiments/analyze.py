@@ -20,6 +20,7 @@ CTX = ["s1", "s2", "s3", "s4"]
 THR = 0.3
 BACKSTEP = 0.05
 RES, PLOTS = os.path.join(ROOT, "results"), os.path.join(ROOT, "plots")
+D27_CSV = os.path.join(ROOT, "..", "dir27_interp_dist_vs_plateau_width", "results", "sweep.csv")
 os.makedirs(PLOTS, exist_ok=True)
 plt.rcParams["axes.prop_cycle"] = plt.cycler(color=d27.CVD)
 
@@ -63,24 +64,32 @@ def main():
                           W_max=float(Wf.max()))
         print(c, summary[c])
 
-    # identical bins and axes for all four histograms
-    allW = np.concatenate([np.array(list(data[c].values())) for c in CTX])
+    # control = Direction 27's "The house was big" (stored W_final, 4 decimals); histogram only
+    with open(D27_CSV) as f:
+        Wc = np.array([float(r["W_final"]) for r in csv.DictReader(f)])
+    assert len(Wc) == 50256
+    hist_W = {"control": Wc, **{c: np.array(list(data[c].values())) for c in CTX}}
+    n_gt = {"control": int((Wc > THR).sum()), **{c: summary[c]["n_gt"] for c in CTX}}
+    titles = {"control": "Direction 27 control", **{c: f"Section {k}" for k, c in enumerate(CTX, 1)}}
+    fnames = {"control": "section0_control", **{c: f"section{k}" for k, c in enumerate(CTX, 1)}}
+
+    # identical bins and axes for all five histograms
+    allW = np.concatenate(list(hist_W.values()))
     bins = np.linspace(0, np.ceil(allW.max() * 10) / 10, 101)
-    ymax = max(np.histogram(list(data[c].values()), bins)[0].max() for c in CTX) * 1.5
-    for k, c in enumerate(CTX, 1):
-        W = np.array(list(data[c].values()))
+    ymax = max(np.histogram(W, bins)[0].max() for W in hist_W.values()) * 1.5
+    for c, W in hist_W.items():
         fig, ax = plt.subplots(figsize=(6.4, 3.8))
         ax.hist(W, bins=bins, color=d27.CVD[0], edgecolor="none")
         ax.axvline(THR, color="0.2", ls="--", lw=1)
-        ax.text(THR + 0.01, ymax / 3, f"W = 0.3\n{summary[c]['n_gt']} tokens above", fontsize=8)
+        ax.text(THR + 0.01, ymax / 3, f"W = 0.3\n{n_gt[c]} tokens above", fontsize=8)
         ax.set_yscale("log")
         ax.set_ylim(0.8, ymax)
         ax.set_xlim(bins[0], bins[-1])
         ax.set_xlabel("final transition width W (block 35)")
         ax.set_ylabel("number of tokens (log scale)")
-        ax.set_title(f"Section {k}: \"{PROMPTS[c]}\" ({len(W):,} tokens)")
+        ax.set_title(f"{titles[c]}: \"{PROMPTS[c]}\" ({len(W):,} tokens)")
         fig.tight_layout()
-        fig.savefig(os.path.join(PLOTS, f"section{k}_width_histogram.png"), dpi=130)
+        fig.savefig(os.path.join(PLOTS, f"{fnames[c]}_width_histogram.png"), dpi=130)
         plt.close(fig)
 
     # cross-context comparison of the W > 0.3 sets

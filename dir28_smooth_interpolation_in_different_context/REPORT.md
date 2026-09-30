@@ -9,7 +9,8 @@ transition width W of the final-layer output. In every context most tokens give 
 tokens pass in all four, and they include most of the widest size and magnitude words and a stable set of
 code-like strings. The contexts differ mainly in the size of the tail ("He dreamed big" has the most) and
 in near-threshold tokens. The core pattern is shared across contexts, and the differences are mostly in
-tokens close to the cut-off.
+tokens close to the cut-off. Direction 27's original sentence, "The house was big", plotted from its
+stored widths on the same axes, has the same shape and 816 tokens above 0.3 (Figure 5).
 
 ## Research question
 
@@ -107,7 +108,7 @@ To show where the 692 wide-transition tokens sit relative to the rest of the voc
 
 ![Histogram of transition widths for "My house is big"](plots/section1_width_histogram.png)
 
-**Figure 1.** Final transition width W for all 50,256 substitutions of " big" in "My house is big". x: W (0 = abrupt jump, larger = slower change), 100 equal bins; y: number of tokens, log scale. The dashed vertical line is the fixed threshold W = 0.3. All four figures use the same bins and axes.
+**Figure 1.** Final transition width W for all 50,256 substitutions of " big" in "My house is big". x: W (0 = abrupt jump, larger = slower change), 100 equal bins; y: number of tokens, log scale. The dashed vertical line is the fixed threshold W = 0.3. Figures 1–5 use the same bins and axes.
 
 ## Section 2 — "The opposite of small is big"
 
@@ -134,7 +135,7 @@ To show where the 961 wide-transition tokens sit relative to the rest of the voc
 
 ![Histogram of transition widths for "The opposite of small is big"](plots/section2_width_histogram.png)
 
-**Figure 2.** Final transition width W for all 50,256 substitutions of " big" in "The opposite of small is big". x: W (0 = abrupt jump, larger = slower change), 100 equal bins; y: number of tokens, log scale. The dashed vertical line is the fixed threshold W = 0.3. All four figures use the same bins and axes.
+**Figure 2.** Final transition width W for all 50,256 substitutions of " big" in "The opposite of small is big". x: W (0 = abrupt jump, larger = slower change), 100 equal bins; y: number of tokens, log scale. The dashed vertical line is the fixed threshold W = 0.3. Figures 1–5 use the same bins and axes.
 
 
 ## Section 3 — "He dreamed big"
@@ -160,7 +161,7 @@ To show where the 1,307 wide-transition tokens sit relative to the rest of the v
 
 ![Histogram of transition widths for "He dreamed big"](plots/section3_width_histogram.png)
 
-**Figure 3.** Final transition width W for all 50,256 substitutions of " big" in "He dreamed big". x: W (0 = abrupt jump, larger = slower change), 100 equal bins; y: number of tokens, log scale. The dashed vertical line is the fixed threshold W = 0.3. All four figures use the same bins and axes.
+**Figure 3.** Final transition width W for all 50,256 substitutions of " big" in "He dreamed big". x: W (0 = abrupt jump, larger = slower change), 100 equal bins; y: number of tokens, log scale. The dashed vertical line is the fixed threshold W = 0.3. Figures 1–5 use the same bins and axes.
 
 
 ## Section 4 — "The elephant was big"
@@ -186,7 +187,7 @@ To show where the 736 wide-transition tokens sit relative to the rest of the voc
 
 ![Histogram of transition widths for "The elephant was big"](plots/section4_width_histogram.png)
 
-**Figure 4.** Final transition width W for all 50,256 substitutions of " big" in "The elephant was big". x: W (0 = abrupt jump, larger = slower change), 100 equal bins; y: number of tokens, log scale. The dashed vertical line is the fixed threshold W = 0.3. All four figures use the same bins and axes.
+**Figure 4.** Final transition width W for all 50,256 substitutions of " big" in "The elephant was big". x: W (0 = abrupt jump, larger = slower change), 100 equal bins; y: number of tokens, log scale. The dashed vertical line is the fixed threshold W = 0.3. Figures 1–5 use the same bins and axes.
 
 ## Cross-context comparison
 
@@ -216,6 +217,24 @@ tokens in each context, 34 (Section 1), 35 (Section 2), 24 (Section 3) and 36 (S
 shared group. The shape of the width distribution is also the same in all four contexts: a single peak
 near W ≈ 0.1 and a thin tail to the right (Figures 1–4).
 
+To check whether the four new prompts differ from the sentence Direction 27 originally studied, Figure 5
+shows that sentence, "The house was big", on the same bins, log y-axis and axis limits as Figures 1–4.
+It uses the widths Direction 27 already stored (`results/sweep.csv`, column `W_final`, rounded to four
+decimals); nothing was rerun. This is the same model, anchor, interpolation, readout and width code, and
+this code reproduced Direction 27's stored widths (Methods). In this control context 816 of 50,256 tokens
+have W > 0.3, the median width is 0.112, and the widest token reaches 0.65. Its histogram has the same
+single peak near W ≈ 0.1 and the same thin right tail as the four new contexts. Its tail size falls
+inside their range (692 to 1,307) and is closest to the two other sentences that call a physical object
+big, "My house is big" (692, Figure 1) and "The elephant was big" (736, Figure 4). So the fifth context
+shows the same distribution shape; we did not compare its token list with the four new lists.
+
+![Histogram of transition widths for "The house was big"](plots/section0_control_width_histogram.png)
+
+**Figure 5.** Final transition width W for all 50,256 substitutions of " big" in Direction 27's control
+prompt "The house was big", from Direction 27's stored `W_final` values. x: W (0 = abrupt jump, larger =
+slower change), the same 100 equal bins from 0 to 0.7 as Figures 1–4; y: number of tokens, log scale, same
+limits as Figures 1–4. The dashed vertical line is the fixed threshold W = 0.3.
+
 **What changes.** Three differences are visible.
 
 1. *The size of the tail changes.* The count above 0.3 ranges from 692 ("My house is big") to 1,307
@@ -243,7 +262,7 @@ the widest transitions come from the same two groups: words for size and magnitu
 code identifiers and scraped strings (Table 1, "What is shared"). What the prefix changes is how many
 tokens cross the fixed threshold W = 0.3 (692 to 1,307) and which near-threshold tokens are included.
 "He dreamed big" gives the heaviest tail and the most unique tokens; the two physical-object contexts
-give nearly identical results (Figures 1–4). A few themed groups that appear only in one context (shape
+give nearly identical results (Figures 1–4). Direction 27's original sentence, "The house was big", has the same histogram shape and 816 tokens above the threshold, inside the range of the four new contexts (Figure 5). A few themed groups that appear only in one context (shape
 words, "dream big" verbs, negative adjectives) are small and near the threshold. This study shows only
 that these lists differ between contexts; it does not show why.
 

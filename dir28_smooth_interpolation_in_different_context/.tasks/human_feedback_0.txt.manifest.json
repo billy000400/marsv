@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "ready",
+  "state": "addressed",
   "source_feedback": "human_feedback_0.txt",
   "source_sha256": "a1cae3361cd78fa1af5a4b7e70b77044ec1a1f6c1961ff7710e49fed9e17d4e8",
   "required_outputs": [
@@ -38,13 +38,50 @@
   "checklist": [
     {
       "request": "include dir27’s “The house was big” histogram in the dir28 report, replotted with the same bin edges, log y-axis, and axis limits as the four existing histograms. That gives a direct comparison across all five contexts using the existing data; no experiments need rerunning.",
-      "status": "pending",
+      "status": "done",
       "completion": {
-        "what_was_done": "",
-        "evidence": "",
-        "ambiguity": ""
+        "what_was_done": "Replotted Direction 27's stored W_final for all 50,256 substitutions in 'The house was big' (../dir27_interp_dist_vs_plateau_width/results/sweep.csv, no rerun) with experiments/analyze.py, using the same 100 bin edges (0 to 0.7), log y-axis, x-limits and y-limits as the four existing histograms. The shared bins and limits are now computed over all five contexts, which leaves them unchanged, and the four existing PNGs are byte-identical. Embedded the plot in the dir28 REPORT.md as Figure 5 with a caption and a comparison paragraph (816 tokens above 0.3, median 0.112, same shape, tail size inside the four-context range). Added one sentence to each of Summary and Conclusion.",
+        "evidence": "plots/section0_control_width_histogram.png; REPORT.md, section 'Cross-context comparison', paragraph beginning 'To check whether the four new prompts differ' and Figure 5; REPORT.md Summary and Conclusion (Figure 5 sentences); RESULTS.md per-context table control row and Figure 5; experiments/analyze.py (hist_W / bins / ymax block).",
+        "ambiguity": "None"
       }
     }
   ],
-  "triage_notes": "Primary report = dir28 REPORT.md (the 'dir28 report'). Data = existing dir27 results/sweep.csv W_final column (same model gpt2-large, same anchor ' big', same width code; dir28 sweep.py imports dir27 common.py and calls it the 'control' context). No experiments rerun. 'Same bin edges, log y-axis, axis limits' = the shared bins/xlim/ylim computed in experiments/analyze.py; if dir27 widths exceed the existing range, the shared limits will be recomputed over all five contexts and the four existing histograms regenerated so all five stay identical (documented assumption). Apply the same usable-token filter as the four existing histograms. max_words set to 52000 because PLAN.md success criterion item 3 explicitly requires complete sorted token lists in REPORT.md (current report 48,891 words by workflow.py's counter mostly appendices); 5 embeds <= 8."
+  "triage_notes": "Primary report = dir28 REPORT.md (the 'dir28 report'). Data = existing dir27 results/sweep.csv W_final column (same model gpt2-large, same anchor ' big', same width code; dir28 sweep.py imports dir27 common.py and calls it the 'control' context). No experiments rerun. 'Same bin edges, log y-axis, axis limits' = the shared bins/xlim/ylim computed in experiments/analyze.py; if dir27 widths exceed the existing range, the shared limits will be recomputed over all five contexts and the four existing histograms regenerated so all five stay identical (documented assumption). Apply the same usable-token filter as the four existing histograms. max_words set to 52000 because PLAN.md success criterion item 3 explicitly requires complete sorted token lists in REPORT.md (current report 48,891 words by workflow.py's counter mostly appendices); 5 embeds <= 8.",
+  "baseline_sha256": {
+    "../dir27_interp_dist_vs_plateau_width/REPORT.md": "f7f83825bd9191575b0c4b08bb81ac7a4086b611cfeea1d2f4e9c8c49691502a",
+    "../dir27_interp_dist_vs_plateau_width/results/sweep.csv": "9be246a68ec36e33548cce6299c3116e900c1f30fa7e8b60e93ba99059698b5b",
+    "CHANGELOG.md": "b49537eab46c3b2a8173248cedb6ba17f7fc32eba55d600e590f3ab3845f4f3c",
+    "JOURNAL.md": "649a3ff6394eb09ef1208ad7c9982b076bc92c1730907031daf04b05e72020f7",
+    "PLAN.md": "8655e6c768175e5e3689d5f97be50257aed29631dcf06ca4efecf96c748456cc",
+    "REPORT.md": "ce06cec211cefd67e173b0c85daae37d63a6cf4a859baee0ee4f958b988d81ef",
+    "RESULTS.md": "263a39df807b57c64fa2c7221adedfe86c208c7634a206a5cf35e194879dca01",
+    "experiments/analyze.py": "cf5edede35d35e662e1c7e2e398fd803ab87f3f3c3c90c7841999e9f97e50284",
+    "plots/section0_control_width_histogram.png": null,
+    "plots/section1_width_histogram.png": "4edf0a194c24e9c23a2e96d2e990ed372ad1c2775b9f0304dc27d3fd0fd953fc",
+    "plots/section2_width_histogram.png": "5825b21608c2b66f6886280c5a90da80a7c8984b4eeb3811c20f3dd2d8efb562",
+    "plots/section3_width_histogram.png": "83f800520e09d76d940b4f630defaecd471975788a85ee2f6f9dc535b3e36ac3",
+    "plots/section4_width_histogram.png": "4424471905abed306808fd4e4119553bbf45d33a5af84b9ec5e7da9a914ab797",
+    "results/s1_tokens.csv": "0294043295f71587c390806960bd66c87ebc6b454bede392f16b24f03e48b0ae",
+    "results/s2_tokens.csv": "cabddcd7c97156d4b8cafe8edd11d80751034270f299619e0554419c5d8668cf",
+    "results/s3_tokens.csv": "e5287582695e8e4210e71edaa8f03172d65e332d7bd363ee4c8923e2ab6109c4",
+    "results/s4_tokens.csv": "fbd436010777b0fe747e28ecb38c234fa39533761176c9fdaf787bfb647d35f5"
+  },
+  "review": {
+    "format_passed": true,
+    "content": {
+      "pass": true,
+      "inspected_outputs": [
+        "REPORT.md",
+        "plots/section0_control_width_histogram.png"
+      ],
+      "failures": [],
+      "summary": "The work does what the feedback asked, so this passes. The report now includes Direction 27's \"The house was big\" histogram as Figure 5, placed in the Cross-context comparison section. It is replotted from the widths Direction 27 had already saved (sweep.csv, W_final column), and nothing was rerun. The caption and text say it uses the same 100 bins from 0 to 0.7, a log y-axis and the same axis limits as Figures 1–4.\n\nWhat I checked:\n- **The new plot:** it renders cleanly, with W from 0 to 0.7, a log count axis, a dashed line at 0.3 and the note \"816 tokens above\", which matches the text.\n- **Matching axes:** only the new plot was bundled, so I could not compare it against Figures 1–4 myself. The shared-axes claim rests on the report's own statement and the manifest's note that the four existing plots are byte-identical to before.\n- **The comparison paragraph:** it describes rather than explains. It reports 816 tokens above 0.3, a median of 0.112, the same single-peak shape, and a tail size inside the 692–1,307 range of the other four prompts. It says the new prompt's count is closest to \"My house is big\" (692) and \"The elephant was big\" (736), and I confirmed that against the numbers. It openly says its token list was not compared with the other four lists, and it makes no causal claims.\n- **Summary and Conclusion:** each got one added sentence rather than a new section, so the additions are small and fit the existing text.\n- **Length:** the report has 5 figures, within the limit of 8. It is about 49k words, mostly the complete token lists in the appendices. That is under the 52,000-word limit set in the task manifest, which cites the plan's requirement to include those lists.\n- **Readability:** terms such as W, D, glitch tokens and flagged curves are defined in Methods."
+    },
+    "expected_outputs": [
+      "REPORT.md",
+      "plots/section0_control_width_histogram.png"
+    ],
+    "budget_failures": []
+  },
+  "addressed_feedback": "human_feedback_0.txt.addressed.md"
 }

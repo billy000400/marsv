@@ -20,6 +20,7 @@ One row per context, computed over all 50,256 substitutions. "Flagged" = non-mon
 | s2 | The opposite of small is big | 961 | 0.135 | 0.244 | 0.592 | 4,074 | 21 |
 | s3 | He dreamed big | 1,307 | 0.145 | 0.263 | 0.672 | 2,016 | 8 |
 | s4 | The elephant was big | 736 | 0.110 | 0.225 | 0.627 | 2,303 | 5 |
+| control (Direction 27) | The house was big | 816 | 0.112 | 0.232 | 0.650 | 2,788 | 12 |
 
 ![Width histogram, s1](plots/section1_width_histogram.png)
 
@@ -36,6 +37,13 @@ One row per context, computed over all 50,256 substitutions. "Flagged" = non-mon
 ![Width histogram, s4](plots/section4_width_histogram.png)
 
 **Figure 4.** Same for "The elephant was big".
+
+The control row and Figure 5 use Direction 27's stored `results/sweep.csv` (`W_final` and `flag_nonmonotonic`,
+four decimals); no sweep was rerun. Figure 5 uses the same bins and axis limits as Figures 1–4.
+
+![Width histogram, control](plots/section0_control_width_histogram.png)
+
+**Figure 5.** Same for Direction 27's control prompt "The house was big".
 
 ## Cross-context set comparison
 
