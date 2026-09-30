@@ -26,3 +26,7 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - REPORT.md: Figure 5 plus a short paragraph in "Cross-context comparison"; one sentence each in Summary and Conclusion; captions of Figures 1–4 now say "Figures 1–5 use the same bins and axes". Existing numbers are unchanged.
 - RESULTS.md: control row in the per-context table (816 above 0.3, median 0.112) and Figure 5.
 - experiments/analyze.py: loads the dir27 control for the histograms only; token CSVs and cross-context outputs are unchanged (hashes verified).
+
+## 2026-09-30 — iteration 281
+
+- No change to REPORT.md or RESULTS.md. Added an explicit report-word override (50,000) to PLAN.md. The complete token lists that criterion 3 requires in REPORT.md exceed the 5,000-word default, and the wrapper's budget gate kept removing STOP because of that.

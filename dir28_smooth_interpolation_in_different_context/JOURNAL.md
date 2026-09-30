@@ -1195,3 +1195,9 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 280 (finalize)
 
 - Success criterion still met; only feedback file is human_feedback_0.txt.addressed.md. No experiments or deliverable changes. check_render: ALL CHECKS PASS. STOP was missing; re-created it.
+
+## 2026-09-30 — iteration 281 (finalize; budget gate)
+
+- Diagnosed the repeated STOP loss: run.sh moves STOP to .tasks/STOP.over-budget.* because `workflow.py check-budgets` failed (REPORT.md 49,220 words > 5,000 default). Main text is ~3,000 words; the rest is the complete W > 0.3 lists that success criterion 3 requires inside REPORT.md.
+- Assumption: the human-written success criterion takes precedence over the default limit. WRITING.md rule 11 allows a PLAN.md override, so I added `Maximum report words: 50000` to PLAN.md with the reason. Rejected: moving the lists into another file, which would change the requested output location. Also rejected: truncating the lists, which would break criterion 3. REPORT.md itself is unchanged. Operator should revert the PLAN override if they prefer the lists moved out.
+- check-budgets now passes; check_render ALL CHECKS PASS. Re-created STOP.

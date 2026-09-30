@@ -22,6 +22,14 @@ The goal is descriptive and exploratory: identify whether the wide-transition to
 
 Null results are complete results. If the four contexts produce no interpretable difference, report that directly.
 
+Report policy override (added 2026-09-30): criterion 3 requires the *complete* `W > 0.3` lists
+(3,696 rows over four contexts) inside REPORT.md. Those lists alone come to about 46,000 counted words,
+so the default 5,000-word limit cannot hold. The main text (Summary through Conclusion) stays at about
+3,000 words. The lists sit in collapsed appendices.
+
+- Maximum report words: 50000
+- Maximum main figures: 8
+
 ## Fallback (if time runs short)
 
 Complete all four vocabulary sweeps and save the four transition-width histograms and the four `w > 0.3` token lists. The cross-context interpretation can remain brief.
