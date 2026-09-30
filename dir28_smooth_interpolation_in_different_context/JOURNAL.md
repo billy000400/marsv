@@ -246,3 +246,7 @@ On track? yes — all sections complete, 100%, no blocker.
 ## 2026-09-30 — iteration 43 (finalize)
 
 - STOP missing again (renamed to STOP.over-budget.* by wrapper). Success criterion already met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments run; deliverables unchanged. check_render passes on REPORT.md and RESULTS.md (exit 0). Re-wrote STOP.
+
+## 2026-09-30 — iteration 44 (finalize)
+
+- STOP missing again (wrapper renamed it to STOP.over-budget.*). Success criterion already met; no unaddressed feedback (only human_feedback_0.txt.addressed.md). No experiments run; deliverables unchanged. check_render passes on REPORT.md and RESULTS.md (exit 0). Re-wrote STOP.
