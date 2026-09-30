@@ -210,3 +210,7 @@ On track? yes — all sections complete, 100%, no blocker.
 - Added control histogram from dir27 sweep.csv W_final. Control max W 0.6498 < 0.6718, and its max bin count 3653 < 3726, so the shared bins and limits don't change. The four existing PNGs and s*_tokens.csv are byte-identical after rerunning analyze.py (sha256 checked against the manifest baseline).
 - Control counts come from 4-dp stored values (816 > 0.3; no ties at exactly 0.3000). The control is not added to the Table 1 set comparison, since the feedback asked only for the histogram.
 - Report: Figure 5 in Cross-context comparison. check_render passes. Manifest → review_pending.
+
+## 2026-09-30 — iteration 35 (finalize)
+
+- human_feedback_0 is approved (.addressed.md) and no unaddressed feedback is left. The success criterion was already met, so I ran no new experiments. check_render passes on REPORT.md and RESULTS.md. Wrote STOP.
