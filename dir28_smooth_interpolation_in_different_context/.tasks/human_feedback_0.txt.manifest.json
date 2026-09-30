@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "state": "ready",
+  "source_feedback": "human_feedback_0.txt",
+  "source_sha256": "a1cae3361cd78fa1af5a4b7e70b77044ec1a1f6c1961ff7710e49fed9e17d4e8",
+  "required_outputs": [
+    "REPORT.md",
+    "plots/section0_control_width_histogram.png"
+  ],
+  "may_modify": [
+    "REPORT.md",
+    "RESULTS.md",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md",
+    "experiments/analyze.py",
+    "plots/section1_width_histogram.png",
+    "plots/section2_width_histogram.png",
+    "plots/section3_width_histogram.png",
+    "plots/section4_width_histogram.png"
+  ],
+  "must_remain_unchanged": [
+    "../dir27_interp_dist_vs_plateau_width/results/sweep.csv",
+    "../dir27_interp_dist_vs_plateau_width/REPORT.md",
+    "results/s1_tokens.csv",
+    "results/s2_tokens.csv",
+    "results/s3_tokens.csv",
+    "results/s4_tokens.csv"
+  ],
+  "report_policy": {
+    "core_research_question": "Does the distribution of final transition widths (and the set of tokens with W > 0.3) for ' big' -> token interpolation in GPT-2 Large change with the prompt context? The feedback adds dir27's 'The house was big' as a fifth context shown on identical histogram axes.",
+    "primary_report": "REPORT.md",
+    "max_words": 52000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
+  "checklist": [
+    {
+      "request": "include dir27’s “The house was big” histogram in the dir28 report, replotted with the same bin edges, log y-axis, and axis limits as the four existing histograms. That gives a direct comparison across all five contexts using the existing data; no experiments need rerunning.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    }
+  ],
+  "triage_notes": "Primary report = dir28 REPORT.md (the 'dir28 report'). Data = existing dir27 results/sweep.csv W_final column (same model gpt2-large, same anchor ' big', same width code; dir28 sweep.py imports dir27 common.py and calls it the 'control' context). No experiments rerun. 'Same bin edges, log y-axis, axis limits' = the shared bins/xlim/ylim computed in experiments/analyze.py; if dir27 widths exceed the existing range, the shared limits will be recomputed over all five contexts and the four existing histograms regenerated so all five stay identical (documented assumption). Apply the same usable-token filter as the four existing histograms. max_words set to 52000 because PLAN.md success criterion item 3 explicitly requires complete sorted token lists in REPORT.md (current report 48,891 words by workflow.py's counter mostly appendices); 5 embeds <= 8."
+}

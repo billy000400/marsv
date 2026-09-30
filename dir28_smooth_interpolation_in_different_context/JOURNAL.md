@@ -197,3 +197,10 @@ On track? yes — all sections complete, 100%, no blocker.
 
 - Success criterion already met; no human_feedback/REVIEW files, no active manifest.
 - check_render.py: REPORT.md and RESULTS.md pass (0 problems). The wrapper renamed STOP to STOP.over-budget.* again (22 copies now), so STOP was written again. No experiments run; deliverables unchanged. Operator note: the wrapper keeps relaunching this direction even though STOP exists.
+
+## 2026-09-30 — iteration 33 (triage human_feedback_0.txt)
+
+- New feedback: add dir27 "The house was big" histogram to REPORT.md on the same bins / log y / axis limits as the four existing ones. Triage only; manifest set to `ready`.
+- Assumptions: data = dir27 results/sweep.csv `W_final` (same model, anchor, width code; dir28 sweep.py already names it the `control` context). If its widths fall outside the current shared range, recompute the shared bins over all five contexts and regenerate all five plots. Rejected alternative: rerunning the control sweep (the feedback explicitly says no reruns).
+- max_words set to 52000 in the manifest because PLAN.md requires complete token lists in REPORT.md.
+- STOP stays absent until the feedback is addressed.

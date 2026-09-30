@@ -1,0 +1,1 @@
+include dir27’s “The house was big” histogram in the dir28 report, replotted with the same bin edges, log y-axis, and axis limits as the four existing histograms. That gives a direct comparison across all five contexts using the existing data; no experiments need rerunning.
