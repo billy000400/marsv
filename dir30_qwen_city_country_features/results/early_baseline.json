@@ -1,0 +1,60 @@
+[
+ {
+  "prefix": "The capital of Japan",
+  "country": "Japan",
+  "city": "Tokyo",
+  "tokens": [
+   "The",
+   " capital",
+   " of",
+   " Japan"
+  ],
+  "country_span": [
+   3
+  ],
+  "country_position": 3,
+  "country_token": " Japan",
+  "prefix_top1": " is",
+  "prefix_top1_prob": 0.6925448179244995,
+  "bridge_token": " is",
+  "bridge_prob": 0.6925448179244995,
+  "bridge_rank": 1,
+  "city_token_ids": [
+   26194
+  ],
+  "after_bridge_top1": " Tokyo",
+  "city_prob_after_bridge": 0.40225979685783386,
+  "continuation_after_bridge": " Tokyo. The capital of the United States",
+  "max_abs_diff_prefix_vs_full": 9.5367431640625e-06,
+  "max_abs_mlp_input": 46.6700439453125
+ },
+ {
+  "prefix": "The capital of Germany",
+  "country": "Germany",
+  "city": "Berlin",
+  "tokens": [
+   "The",
+   " capital",
+   " of",
+   " Germany"
+  ],
+  "country_span": [
+   3
+  ],
+  "country_position": 3,
+  "country_token": " Germany",
+  "prefix_top1": " is",
+  "prefix_top1_prob": 0.7512708902359009,
+  "bridge_token": " is",
+  "bridge_prob": 0.7512708902359009,
+  "bridge_rank": 1,
+  "city_token_ids": [
+   19846
+  ],
+  "after_bridge_top1": " Berlin",
+  "city_prob_after_bridge": 0.47704407572746277,
+  "continuation_after_bridge": " Berlin. The capital of France is Paris",
+  "max_abs_diff_prefix_vs_full": 9.5367431640625e-06,
+  "max_abs_mlp_input": 50.87031555175781
+ }
+]

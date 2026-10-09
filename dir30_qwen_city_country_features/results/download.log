@@ -1,0 +1,45 @@
+Fetching 10 files:   0%|          | 0/10 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 10 files:  10%|█         | 1/10 [00:00<00:02,  3.83it/s]Fetching 10 files:  60%|██████    | 6/10 [00:00<00:00, 16.87it/s]Fetching 10 files:  90%|█████████ | 9/10 [00:01<00:00,  4.90it/s]Fetching 10 files: 100%|██████████| 10/10 [00:04<00:00,  2.10it/s]
+/workspacen/hf_home/hub/models--Qwen--Qwen3-0.6B/snapshots/c1899de289a04d12100db370d81485cdf75e47ca
+Fetching 31 files:   0%|          | 0/31 [00:00<?, ?it/s]Fetching 31 files:   3%|▎         | 1/31 [00:00<00:09,  3.05it/s]Fetching 31 files:  10%|▉         | 3/31 [00:05<00:56,  2.01s/it]Fetching 31 files:  16%|█▌        | 5/31 [00:05<00:26,  1.01s/it]Fetching 31 files:  16%|█▌        | 5/31 [00:13<01:08,  2.65s/it]
+Traceback (most recent call last):
+  File "/workspacen/marsv_agent_haoyang/dir30_qwen_city_country_features/experiments/download.py", line 5, in <module>
+    print(snapshot_download("mwhanna/qwen3-0.6b-transcoders-lowl0",
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_http.py", line 276, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/_snapshot_download.py", line 541, in snapshot_download
+    hf_thread_map(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/tqdm.py", line 441, in hf_thread_map
+    results[future_to_index[future]] = future.result()
+                                       ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/concurrent/futures/_base.py", line 449, in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.11/concurrent/futures/_base.py", line 401, in __get_result
+    raise self._exception
+  File "/usr/lib/python3.11/concurrent/futures/thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/_snapshot_download.py", line 521, in _inner_hf_hub_download
+    hf_hub_download(  # type: ignore
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_validators.py", line 89, in _inner_fn
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/utils/_http.py", line 276, in _inner
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 1047, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 1285, in _hf_hub_download_to_cache_dir
+    _download_to_tmp_and_move(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 2016, in _download_to_tmp_and_move
+    xet_get(
+  File "/usr/local/lib/python3.11/dist-packages/huggingface_hub/file_download.py", line 589, in xet_get
+    with session.new_file_download_group(
+RuntimeError: Task error: File reconstruction error: IO Error: Disk quota exceeded (os error 122)

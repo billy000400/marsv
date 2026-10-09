@@ -1,0 +1,3640 @@
+{
+ "Tokyo": [
+  {
+   "group": "Tokyo",
+   "layer": 21,
+   "feature": 136683,
+   "rank_in_layer": 1,
+   "score": 1.0,
+   "positive_rate": 1.0,
+   "background_rate": 0.0,
+   "n_active_facts": 6,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 1.0,
+   "mean_act_Tokyo": 32.82649579313066,
+   "rate_Japan": 0.9791666666666666,
+   "mean_act_Japan": 31.88283185164134,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     44.204
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     46.395
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     77.72
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     30.451
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     32.739
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     73.485
+    ],
+    [
+     "Tokyo",
+     "The headquarters of TEAC Corporation are in the city of",
+     1.125
+    ],
+    [
+     "Tokyo",
+     "The headquarters of TEAC Corporation is in the city of",
+     0.643
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     26.683
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     56.854
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     50.384
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     50.23
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     51.981
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     16.141
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     16.146
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     46.504
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     23.114
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     30.274
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     40.523
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     43.082
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     46.828
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     33.037
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     45.701
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     26.375
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     45.141
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     61.33
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     27.819
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     30.533
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     29.019
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     21.524
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     42.972
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     26.931
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     19.954
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     48.517
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     31.236
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     42.845
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     12.92
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     10.585
+    ],
+    [
+     "Japan",
+     "Miso Soup is from the country of",
+     10.214
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     15.352
+    ],
+    [
+     "Japan",
+     "Miso Soup originates from the country of",
+     7.237
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     66.329
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     71.418
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     59.592
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     50.863
+    ],
+    [
+     "Japan-context",
+     "People in Japan speak",
+     8.483
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     38.56
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     29.286
+    ]
+   ],
+   "early_value_own_country": 14.04098892211914,
+   "early_value_Japan": 14.04098892211914,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Tokyo",
+   "layer": 23,
+   "feature": 147945,
+   "rank_in_layer": 1,
+   "score": 0.9543003293003293,
+   "positive_rate": 1.0,
+   "background_rate": 0.045699670699670694,
+   "n_active_facts": 6,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 1.0,
+   "mean_act_Tokyo": 60.1154199441274,
+   "rate_Japan": 1.0,
+   "mean_act_Japan": 52.54188895225525,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.04819277108433735,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     73.37
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     74.857
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     120.48
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     53.31
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     59.328
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     117.8
+    ],
+    [
+     "Tokyo",
+     "The headquarters of TEAC Corporation are in the city of",
+     5.289
+    ],
+    [
+     "Tokyo",
+     "The headquarters of TEAC Corporation is in the city of",
+     4.156
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     39.097
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     101.38
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     90.282
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     90.985
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     96.183
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     37.37
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     38.046
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     83.623
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     48.634
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     47.313
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     73.593
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     77.828
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     86.643
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     51.82
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     70.498
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     53.321
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     74.063
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     85.749
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     44.016
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     50.178
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     52.304
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     28.406
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     67.275
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     45.915
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     30.042
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     70.606
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     44.021
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     71.31
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     48.676
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     31.192
+    ],
+    [
+     "Japan",
+     "Sushi originates from the country of",
+     18.824
+    ],
+    [
+     "Japan",
+     "Miso Soup is from the country of",
+     30.607
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     41.519
+    ],
+    [
+     "Japan",
+     "Miso Soup originates from the country of",
+     28.211
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     96.666
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     105.071
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     78.296
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     75.392
+    ],
+    [
+     "Japan-context",
+     "People in Japan speak",
+     12.517
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     56.474
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     44.451
+    ]
+   ],
+   "early_value_own_country": 44.580360412597656,
+   "early_value_Japan": 44.580360412597656,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Tokyo",
+   "layer": 27,
+   "feature": 70045,
+   "rank_in_layer": 1,
+   "score": 0.8888888888888888,
+   "positive_rate": 0.8888888888888888,
+   "background_rate": 0.0,
+   "n_active_facts": 6,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 0.8888888888888888,
+   "mean_act_Tokyo": 37.89749558766683,
+   "rate_Japan": 0.9166666666666666,
+   "mean_act_Japan": 37.308627128601074,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     76.695
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     77.375
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     69.477
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     60.327
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     53.151
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     64.046
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     1.893
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     55.668
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     51.823
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     51.242
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     60.381
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     19.08
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     17.179
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     48.234
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     37.273
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     29.629
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     50.001
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     49.202
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     60.619
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     35.612
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     43.757
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     53.91
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     57.424
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     38.459
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     31.958
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     34.154
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     47.242
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     32.475
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     59.736
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     52.958
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     25.878
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     45.656
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     23.821
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     41.141
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     25.049
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     12.275
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     11.908
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     84.452
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     86.1
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     96.166
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     94.141
+    ],
+    [
+     "Japan-context",
+     "People in Japan speak",
+     31.233
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     57.276
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     61.027
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Tokyo",
+   "layer": 24,
+   "feature": 80507,
+   "rank_in_layer": 1,
+   "score": 0.8888888888888888,
+   "positive_rate": 0.8888888888888888,
+   "background_rate": 0.0,
+   "n_active_facts": 6,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 0.8888888888888888,
+   "mean_act_Tokyo": 20.321810139550102,
+   "rate_Japan": 1.0,
+   "mean_act_Japan": 16.896402219931286,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     20.986
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     24.789
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     47.577
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     19.185
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     23.195
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     43.127
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     10.789
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     34.4
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     33.43
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     33.599
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     36.23
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     8.802
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     9.107
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     29.898
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     14.571
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     15.167
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     26.593
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     27.658
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     30.226
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     16.1
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     39.169
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     15.785
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     30.958
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     30.84
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     14.45
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     13.455
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     14.276
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     3.489
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     22.409
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     13.031
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     5.588
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     28.402
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     11.902
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     22.991
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     21.4
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     8.956
+    ],
+    [
+     "Japan",
+     "Sushi originates from the country of",
+     2.842
+    ],
+    [
+     "Japan",
+     "Miso Soup is from the country of",
+     4.271
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     15.054
+    ],
+    [
+     "Japan",
+     "Miso Soup originates from the country of",
+     3.857
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     29.69
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     30.5
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     24.961
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     21.099
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     14.883
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     8.985
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Tokyo",
+   "layer": 25,
+   "feature": 28687,
+   "rank_in_layer": 1,
+   "score": 0.8795648795648795,
+   "positive_rate": 0.8888888888888888,
+   "background_rate": 0.009324009324009324,
+   "n_active_facts": 6,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 0.8888888888888888,
+   "mean_act_Tokyo": 20.15041592386034,
+   "rate_Japan": 0.6458333333333334,
+   "mean_act_Japan": 6.995814169446628,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.024096385542168676,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     29.097
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     36.348
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     56.132
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     27.499
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     33.245
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     47.812
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     2.956
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     33.994
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     30.355
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     29.568
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     33.491
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     10.712
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     9.536
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     27.695
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     14.412
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     14.56
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     22.414
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     22.634
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     26.34
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     4.142
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     31.771
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     2.411
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     23.193
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     5.294
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     2.468
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     4.113
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     18.718
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     16.335
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     4.286
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     10.359
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     20.397
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     8.204
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     13.938
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     12.005
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     15.907
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     13.44
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     18.486
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     6.471
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  }
+ ],
+ "Japan": [
+  {
+   "group": "Japan",
+   "layer": 23,
+   "feature": 147945,
+   "rank_in_layer": 1,
+   "score": 1.0,
+   "positive_rate": 1.0,
+   "background_rate": 0.0,
+   "n_active_facts": 16,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 1.0,
+   "mean_act_Tokyo": 60.1154199441274,
+   "rate_Japan": 1.0,
+   "mean_act_Japan": 52.54188895225525,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.04819277108433735,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     73.37
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     74.857
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     120.48
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     53.31
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     59.328
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     117.8
+    ],
+    [
+     "Tokyo",
+     "The headquarters of TEAC Corporation are in the city of",
+     5.289
+    ],
+    [
+     "Tokyo",
+     "The headquarters of TEAC Corporation is in the city of",
+     4.156
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     39.097
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     101.38
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     90.282
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     90.985
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     96.183
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     37.37
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     38.046
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     83.623
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     48.634
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     47.313
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     73.593
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     77.828
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     86.643
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     51.82
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     70.498
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     53.321
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     74.063
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     85.749
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     44.016
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     50.178
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     52.304
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     28.406
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     67.275
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     45.915
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     30.042
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     70.606
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     44.021
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     71.31
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     48.676
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     31.192
+    ],
+    [
+     "Japan",
+     "Sushi originates from the country of",
+     18.824
+    ],
+    [
+     "Japan",
+     "Miso Soup is from the country of",
+     30.607
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     41.519
+    ],
+    [
+     "Japan",
+     "Miso Soup originates from the country of",
+     28.211
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     96.666
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     105.071
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     78.296
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     75.392
+    ],
+    [
+     "Japan-context",
+     "People in Japan speak",
+     12.517
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     56.474
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     44.451
+    ]
+   ],
+   "early_value_own_country": 44.580360412597656,
+   "early_value_Japan": 44.580360412597656,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Japan",
+   "layer": 24,
+   "feature": 80507,
+   "rank_in_layer": 1,
+   "score": 1.0,
+   "positive_rate": 1.0,
+   "background_rate": 0.0,
+   "n_active_facts": 16,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 0.8888888888888888,
+   "mean_act_Tokyo": 20.321810139550102,
+   "rate_Japan": 1.0,
+   "mean_act_Japan": 16.896402219931286,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     20.986
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     24.789
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     47.577
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     19.185
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     23.195
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     43.127
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     10.789
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     34.4
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     33.43
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     33.599
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     36.23
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     8.802
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     9.107
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     29.898
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     14.571
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     15.167
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     26.593
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     27.658
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     30.226
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     16.1
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     39.169
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     15.785
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     30.958
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     30.84
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     14.45
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     13.455
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     14.276
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     3.489
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     22.409
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     13.031
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     5.588
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     28.402
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     11.902
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     22.991
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     21.4
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     8.956
+    ],
+    [
+     "Japan",
+     "Sushi originates from the country of",
+     2.842
+    ],
+    [
+     "Japan",
+     "Miso Soup is from the country of",
+     4.271
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     15.054
+    ],
+    [
+     "Japan",
+     "Miso Soup originates from the country of",
+     3.857
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     29.69
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     30.5
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     24.961
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     21.099
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     14.883
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     8.985
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Japan",
+   "layer": 21,
+   "feature": 136683,
+   "rank_in_layer": 1,
+   "score": 0.9791666666666666,
+   "positive_rate": 0.9791666666666666,
+   "background_rate": 0.0,
+   "n_active_facts": 16,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 1.0,
+   "mean_act_Tokyo": 32.82649579313066,
+   "rate_Japan": 0.9791666666666666,
+   "mean_act_Japan": 31.88283185164134,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     44.204
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     46.395
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     77.72
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     30.451
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     32.739
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     73.485
+    ],
+    [
+     "Tokyo",
+     "The headquarters of TEAC Corporation are in the city of",
+     1.125
+    ],
+    [
+     "Tokyo",
+     "The headquarters of TEAC Corporation is in the city of",
+     0.643
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     26.683
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     56.854
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     50.384
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     50.23
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     51.981
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     16.141
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     16.146
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     46.504
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     23.114
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     30.274
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     40.523
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     43.082
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     46.828
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     33.037
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     45.701
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     26.375
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     45.141
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     61.33
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     27.819
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     30.533
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     29.019
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     21.524
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     42.972
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     26.931
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     19.954
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     48.517
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     31.236
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     42.845
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     12.92
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     10.585
+    ],
+    [
+     "Japan",
+     "Miso Soup is from the country of",
+     10.214
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     15.352
+    ],
+    [
+     "Japan",
+     "Miso Soup originates from the country of",
+     7.237
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     66.329
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     71.418
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     59.592
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     50.863
+    ],
+    [
+     "Japan-context",
+     "People in Japan speak",
+     8.483
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     38.56
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     29.286
+    ]
+   ],
+   "early_value_own_country": 14.04098892211914,
+   "early_value_Japan": 14.04098892211914,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Japan",
+   "layer": 22,
+   "feature": 74086,
+   "rank_in_layer": 1,
+   "score": 0.9270833333333334,
+   "positive_rate": 0.9270833333333334,
+   "background_rate": 0.0,
+   "n_active_facts": 16,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 0.6805555555555555,
+   "mean_act_Tokyo": 15.125546243455673,
+   "rate_Japan": 0.9270833333333334,
+   "mean_act_Japan": 28.895767132441204,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     6.581
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     7.484
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     49.186
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     50.663
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     32.508
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     23.678
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     24.854
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     27.275
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     9.675
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     6.972
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     29.246
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     15.969
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     17.294
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     21.354
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     23.432
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     29.231
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     28.235
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     30.649
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     48.279
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     72.41
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     15.704
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     26.358
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     26.479
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     16.784
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     41.245
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     24.708
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     23.865
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     41.661
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     26.205
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     37.104
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     1.554
+    ],
+    [
+     "Japan",
+     "Miso Soup is from the country of",
+     3.257
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     35.794
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     43.391
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     30.428
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     21.893
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     6.052
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     10.725
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Japan",
+   "layer": 27,
+   "feature": 70045,
+   "rank_in_layer": 1,
+   "score": 0.9166666666666666,
+   "positive_rate": 0.9166666666666666,
+   "background_rate": 0.0,
+   "n_active_facts": 15,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 0.8888888888888888,
+   "mean_act_Tokyo": 37.89749558766683,
+   "rate_Japan": 0.9166666666666666,
+   "mean_act_Japan": 37.308627128601074,
+   "rate_Berlin": 0.0,
+   "mean_act_Berlin": 0.0,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Tokyo",
+     "The capital city of Japan is",
+     76.695
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is",
+     77.375
+    ],
+    [
+     "Tokyo",
+     "The capital of Japan is the city of",
+     69.477
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is",
+     60.327
+    ],
+    [
+     "Tokyo",
+     "The biggest city in Japan is",
+     53.151
+    ],
+    [
+     "Tokyo",
+     "The largest city in Japan is the city of",
+     64.046
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of TEAC Corporation? It is in the city of",
+     1.893
+    ],
+    [
+     "Tokyo",
+     "Nippon Cultural Broadcasting is headquartered in the city of",
+     55.668
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting are in the city of",
+     51.823
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Nippon Cultural Broadcasting is in the city of",
+     51.242
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Nippon Cultural Broadcasting? It is in the city of",
+     60.381
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation are in the city of",
+     19.08
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Taito Corporation is in the city of",
+     17.179
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Taito Corporation? It is in the city of",
+     48.234
+    ],
+    [
+     "Tokyo",
+     "Seiyu Group is headquartered in the city of",
+     37.273
+    ],
+    [
+     "Tokyo",
+     "Mitsubishi Corporation is headquartered in the city of",
+     29.629
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation are in the city of",
+     50.001
+    ],
+    [
+     "Tokyo",
+     "The headquarters of Mitsubishi Corporation is in the city of",
+     49.202
+    ],
+    [
+     "Tokyo",
+     "Where are the headquarters of Mitsubishi Corporation? It is in the city of",
+     60.619
+    ],
+    [
+     "Japan",
+     "Kyoto University is in the country of",
+     35.612
+    ],
+    [
+     "Japan",
+     "What country is Kyoto University in? It is in",
+     43.757
+    ],
+    [
+     "Japan",
+     "Yokohama International School is in the country of",
+     53.91
+    ],
+    [
+     "Japan",
+     "Kyōto Prefecture is in the country of",
+     57.424
+    ],
+    [
+     "Japan",
+     "Nagoya University is in the country of",
+     38.459
+    ],
+    [
+     "Japan",
+     "Minamishitara District, Aichi is in the country of",
+     31.958
+    ],
+    [
+     "Japan",
+     "Nishi-Matsuura District is in the country of",
+     34.154
+    ],
+    [
+     "Japan",
+     "Kitakami Station is in the country of",
+     47.242
+    ],
+    [
+     "Japan",
+     "Hitachinaka is in the country of",
+     32.475
+    ],
+    [
+     "Japan",
+     "Tsubaki Grand Shrine is in the country of",
+     59.736
+    ],
+    [
+     "Japan",
+     "Tsuno District, Yamaguchi is in the country of",
+     52.958
+    ],
+    [
+     "Japan",
+     "Iruma Air Base is in the country of",
+     25.878
+    ],
+    [
+     "Japan",
+     "Fukuno, Toyama is in the country of",
+     45.656
+    ],
+    [
+     "Japan",
+     "Ikuno-ku is in the country of",
+     23.821
+    ],
+    [
+     "Japan",
+     "Hida Mountains is in the country of",
+     41.141
+    ],
+    [
+     "Japan",
+     "Sushi originates from",
+     25.049
+    ],
+    [
+     "Japan",
+     "Sushi is from the country of",
+     12.275
+    ],
+    [
+     "Japan",
+     "What is the country of origin for Miso Soup? It originates from",
+     11.908
+    ],
+    [
+     "Japan-context",
+     "The official currency of Japan is the",
+     84.452
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is the",
+     86.1
+    ],
+    [
+     "Japan-context",
+     "What is the official currency of Japan? It is called the",
+     96.166
+    ],
+    [
+     "Japan-context",
+     "Japan's official currency is called the",
+     94.141
+    ],
+    [
+     "Japan-context",
+     "People in Japan speak",
+     31.233
+    ],
+    [
+     "Japan-context",
+     "In Japan, the primary language is",
+     57.276
+    ],
+    [
+     "Japan-context",
+     "Japan, where most people speak",
+     61.027
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  }
+ ],
+ "Berlin": [
+  {
+   "group": "Berlin",
+   "layer": 27,
+   "feature": 86525,
+   "rank_in_layer": 1,
+   "score": 1.0,
+   "positive_rate": 1.0,
+   "background_rate": 0.0,
+   "n_active_facts": 2,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 85.99391587575278,
+   "rate_Germany": 0.8,
+   "mean_act_Germany": 14.106548833847047,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     101.66
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     88.273
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     96.971
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     86.328
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     85.804
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     83.993
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     90.662
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     89.158
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     80.88
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     79.218
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     91.418
+    ],
+    [
+     "Germany",
+     "Hohenlohe-Langenburg is in the country of",
+     55.59
+    ],
+    [
+     "Germany",
+     "Thuringian Highland is in the country of",
+     5.751
+    ],
+    [
+     "Germany",
+     "Hohenwestedt is in the country of",
+     0.117
+    ],
+    [
+     "Germany",
+     "Annweiler am Trifels is in the country of",
+     1.936
+    ],
+    [
+     "Germany",
+     "Windischeschenbach is in the country of",
+     28.285
+    ],
+    [
+     "Germany",
+     "Lauterecken-Wolfstein is in the country of",
+     6.963
+    ],
+    [
+     "Germany",
+     "Naumburg (Saale) is in the country of",
+     30.986
+    ],
+    [
+     "Germany",
+     "Mannheim City Airport is in the country of",
+     11.436
+    ],
+    [
+     "Germany-context",
+     "People in Germany speak",
+     14.52
+    ],
+    [
+     "Germany-context",
+     "In Germany, the primary language is",
+     31.181
+    ],
+    [
+     "Germany-context",
+     "Germany, where most people speak",
+     31.331
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Berlin",
+   "layer": 24,
+   "feature": 25510,
+   "rank_in_layer": 1,
+   "score": 1.0,
+   "positive_rate": 1.0,
+   "background_rate": 0.0,
+   "n_active_facts": 2,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 33.06623522440593,
+   "rate_Germany": 0.1,
+   "mean_act_Germany": 0.037231969833374026,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     20.641
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     2.081
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     31.866
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     24.475
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     23.506
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     26.148
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     47.315
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     32.54
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     35.535
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     34.768
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     32.394
+    ],
+    [
+     "Germany",
+     "Hohenlohe-Langenburg is in the country of",
+     0.372
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Berlin",
+   "layer": 25,
+   "feature": 40466,
+   "rank_in_layer": 1,
+   "score": 1.0,
+   "positive_rate": 1.0,
+   "background_rate": 0.0,
+   "n_active_facts": 2,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 31.47935930887858,
+   "rate_Germany": 0.7,
+   "mean_act_Germany": 8.510582399368285,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     31.187
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     20.938
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     40.861
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     37.605
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     15.587
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     19.666
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     37.535
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     37.404
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     38.378
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     36.759
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     42.243
+    ],
+    [
+     "Germany",
+     "Hohenlohe-Langenburg is in the country of",
+     28.827
+    ],
+    [
+     "Germany",
+     "Thuringian Highland is in the country of",
+     10.197
+    ],
+    [
+     "Germany",
+     "Hohenwestedt is in the country of",
+     4.337
+    ],
+    [
+     "Germany",
+     "Annweiler am Trifels is in the country of",
+     7.339
+    ],
+    [
+     "Germany",
+     "Windischeschenbach is in the country of",
+     17.127
+    ],
+    [
+     "Germany",
+     "Lauterecken-Wolfstein is in the country of",
+     3.754
+    ],
+    [
+     "Germany",
+     "Naumburg (Saale) is in the country of",
+     13.525
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Berlin",
+   "layer": 23,
+   "feature": 92900,
+   "rank_in_layer": 1,
+   "score": 1.0,
+   "positive_rate": 1.0,
+   "background_rate": 0.0,
+   "n_active_facts": 2,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 27.47981150945028,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     23.343
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     18.536
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     40.361
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     21.542
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     15.834
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     19.653
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     38.103
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     26.696
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     32.47
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     31.567
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     30.985
+    ],
+    [
+     "Germany-context",
+     "In Germany, the primary language is",
+     0.69
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Berlin",
+   "layer": 26,
+   "feature": 58020,
+   "rank_in_layer": 1,
+   "score": 1.0,
+   "positive_rate": 1.0,
+   "background_rate": 0.0,
+   "n_active_facts": 2,
+   "heldout_last_token_rate": 1.0,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 20.0526172320048,
+   "rate_Germany": 0.0,
+   "mean_act_Germany": 0.0,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     15.109
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     14.821
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     35.476
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     6.969
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     12.404
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     18.142
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     32.632
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     15.099
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     22.761
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     21.039
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     17.284
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  }
+ ],
+ "Germany": [
+  {
+   "group": "Germany",
+   "layer": 23,
+   "feature": 144162,
+   "rank_in_layer": 1,
+   "score": 0.9,
+   "positive_rate": 0.9,
+   "background_rate": 0.0,
+   "n_active_facts": 9,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 29.106933434804283,
+   "rate_Germany": 0.9,
+   "mean_act_Germany": 10.079026317596435,
+   "background_rate_unweighted": 0.07228915662650602,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     27.394
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     22.445
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     37.955
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     33.075
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     14.507
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     19.411
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     33.15
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     34.771
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     36.282
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     34.97
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     37.407
+    ],
+    [
+     "Germany",
+     "Hohenlohe-Langenburg is in the country of",
+     33.045
+    ],
+    [
+     "Germany",
+     "Thuringian Highland is in the country of",
+     9.021
+    ],
+    [
+     "Germany",
+     "Hohenwestedt is in the country of",
+     6.781
+    ],
+    [
+     "Germany",
+     "Annweiler am Trifels is in the country of",
+     9.557
+    ],
+    [
+     "Germany",
+     "Waldshut-Tiengen is in the country of",
+     1.0
+    ],
+    [
+     "Germany",
+     "Windischeschenbach is in the country of",
+     15.947
+    ],
+    [
+     "Germany",
+     "Lauterecken-Wolfstein is in the country of",
+     6.461
+    ],
+    [
+     "Germany",
+     "Naumburg (Saale) is in the country of",
+     17.467
+    ],
+    [
+     "Germany",
+     "Mannheim City Airport is in the country of",
+     1.512
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Germany",
+   "layer": 22,
+   "feature": 74666,
+   "rank_in_layer": 1,
+   "score": 0.8333333333333334,
+   "positive_rate": 1.0,
+   "background_rate": 0.16666666666666663,
+   "n_active_facts": 10,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 85.99148273468018,
+   "rate_Germany": 1.0,
+   "mean_act_Germany": 45.75733604431152,
+   "background_rate_unweighted": 0.060240963855421686,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     86.056
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     76.111
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     118.33
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     90.009
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     66.872
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     71.494
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     108.184
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     85.067
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     91.133
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     87.917
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     95.083
+    ],
+    [
+     "Germany",
+     "Hohenlohe-Langenburg is in the country of",
+     89.273
+    ],
+    [
+     "Germany",
+     "Thuringian Highland is in the country of",
+     47.39
+    ],
+    [
+     "Germany",
+     "Reiherstieg Schiffswerfte & Maschinenfabrik is in the country of",
+     21.758
+    ],
+    [
+     "Germany",
+     "Hohenwestedt is in the country of",
+     39.452
+    ],
+    [
+     "Germany",
+     "Annweiler am Trifels is in the country of",
+     43.665
+    ],
+    [
+     "Germany",
+     "Waldshut-Tiengen is in the country of",
+     22.849
+    ],
+    [
+     "Germany",
+     "Windischeschenbach is in the country of",
+     59.675
+    ],
+    [
+     "Germany",
+     "Lauterecken-Wolfstein is in the country of",
+     41.601
+    ],
+    [
+     "Germany",
+     "Naumburg (Saale) is in the country of",
+     62.154
+    ],
+    [
+     "Germany",
+     "Mannheim City Airport is in the country of",
+     29.756
+    ],
+    [
+     "Germany-context",
+     "People in Germany speak",
+     17.888
+    ],
+    [
+     "Germany-context",
+     "In Germany, the primary language is",
+     45.924
+    ],
+    [
+     "Germany-context",
+     "Germany, where most people speak",
+     42.896
+    ]
+   ],
+   "early_value_own_country": 46.622127532958984,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 46.622127532958984
+  },
+  {
+   "group": "Germany",
+   "layer": 24,
+   "feature": 39495,
+   "rank_in_layer": 1,
+   "score": 0.8333333333333334,
+   "positive_rate": 1.0,
+   "background_rate": 0.16666666666666663,
+   "n_active_facts": 10,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 35.73993730545044,
+   "rate_Germany": 1.0,
+   "mean_act_Germany": 23.819343423843385,
+   "background_rate_unweighted": 0.07228915662650602,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     30.916
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     29.538
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     47.839
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     43.965
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     23.041
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     26.271
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     46.926
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     37.757
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     38.11
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     37.259
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     44.475
+    ],
+    [
+     "Germany",
+     "Hohenlohe-Langenburg is in the country of",
+     49.363
+    ],
+    [
+     "Germany",
+     "Thuringian Highland is in the country of",
+     26.291
+    ],
+    [
+     "Germany",
+     "Reiherstieg Schiffswerfte & Maschinenfabrik is in the country of",
+     5.545
+    ],
+    [
+     "Germany",
+     "Hohenwestedt is in the country of",
+     22.124
+    ],
+    [
+     "Germany",
+     "Annweiler am Trifels is in the country of",
+     21.658
+    ],
+    [
+     "Germany",
+     "Waldshut-Tiengen is in the country of",
+     11.472
+    ],
+    [
+     "Germany",
+     "Windischeschenbach is in the country of",
+     34.366
+    ],
+    [
+     "Germany",
+     "Lauterecken-Wolfstein is in the country of",
+     18.88
+    ],
+    [
+     "Germany",
+     "Naumburg (Saale) is in the country of",
+     36.614
+    ],
+    [
+     "Germany",
+     "Mannheim City Airport is in the country of",
+     11.88
+    ],
+    [
+     "Germany-context",
+     "In Germany, the primary language is",
+     12.731
+    ],
+    [
+     "Germany-context",
+     "Germany, where most people speak",
+     2.041
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Germany",
+   "layer": 27,
+   "feature": 86525,
+   "rank_in_layer": 1,
+   "score": 0.8,
+   "positive_rate": 0.8,
+   "background_rate": 0.0,
+   "n_active_facts": 8,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 1.0,
+   "mean_act_Berlin": 85.99391587575278,
+   "rate_Germany": 0.8,
+   "mean_act_Germany": 14.106548833847047,
+   "background_rate_unweighted": 0.0,
+   "active_prompts": [
+    [
+     "Berlin",
+     "The capital city of Germany is",
+     101.66
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is",
+     88.273
+    ],
+    [
+     "Berlin",
+     "The capital of Germany is the city of",
+     96.971
+    ],
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     86.328
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is",
+     85.804
+    ],
+    [
+     "Berlin",
+     "The biggest city in Germany is",
+     83.993
+    ],
+    [
+     "Berlin",
+     "The largest city in Germany is the city of",
+     90.662
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     89.158
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) are in the city of",
+     80.88
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     79.218
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     91.418
+    ],
+    [
+     "Germany",
+     "Hohenlohe-Langenburg is in the country of",
+     55.59
+    ],
+    [
+     "Germany",
+     "Thuringian Highland is in the country of",
+     5.751
+    ],
+    [
+     "Germany",
+     "Hohenwestedt is in the country of",
+     0.117
+    ],
+    [
+     "Germany",
+     "Annweiler am Trifels is in the country of",
+     1.936
+    ],
+    [
+     "Germany",
+     "Windischeschenbach is in the country of",
+     28.285
+    ],
+    [
+     "Germany",
+     "Lauterecken-Wolfstein is in the country of",
+     6.963
+    ],
+    [
+     "Germany",
+     "Naumburg (Saale) is in the country of",
+     30.986
+    ],
+    [
+     "Germany",
+     "Mannheim City Airport is in the country of",
+     11.436
+    ],
+    [
+     "Germany-context",
+     "People in Germany speak",
+     14.52
+    ],
+    [
+     "Germany-context",
+     "In Germany, the primary language is",
+     31.181
+    ],
+    [
+     "Germany-context",
+     "Germany, where most people speak",
+     31.331
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  },
+  {
+   "group": "Germany",
+   "layer": 22,
+   "feature": 47602,
+   "rank_in_layer": 2,
+   "score": 0.8,
+   "positive_rate": 0.8,
+   "background_rate": 0.0,
+   "n_active_facts": 8,
+   "heldout_last_token_rate": NaN,
+   "rate_Tokyo": 0.0,
+   "mean_act_Tokyo": 0.0,
+   "rate_Japan": 0.0,
+   "mean_act_Japan": 0.0,
+   "rate_Berlin": 0.375,
+   "mean_act_Berlin": 0.396030992269516,
+   "rate_Germany": 0.8,
+   "mean_act_Germany": 9.387844228744507,
+   "background_rate_unweighted": 0.1686746987951807,
+   "active_prompts": [
+    [
+     "Berlin",
+     "What is the capital of Germany? It is the city of",
+     0.872
+    ],
+    [
+     "Berlin",
+     "Deutsche Reichsbahn (GDR) is headquartered in the city of",
+     0.134
+    ],
+    [
+     "Berlin",
+     "The headquarters of Deutsche Reichsbahn (GDR) is in the city of",
+     0.611
+    ],
+    [
+     "Berlin",
+     "Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of",
+     2.423
+    ],
+    [
+     "Germany",
+     "Hohenlohe-Langenburg is in the country of",
+     31.057
+    ],
+    [
+     "Germany",
+     "Thuringian Highland is in the country of",
+     12.734
+    ],
+    [
+     "Germany",
+     "Reiherstieg Schiffswerfte & Maschinenfabrik is in the country of",
+     3.073
+    ],
+    [
+     "Germany",
+     "Hohenwestedt is in the country of",
+     12.007
+    ],
+    [
+     "Germany",
+     "Annweiler am Trifels is in the country of",
+     8.709
+    ],
+    [
+     "Germany",
+     "Waldshut-Tiengen is in the country of",
+     7.634
+    ],
+    [
+     "Germany",
+     "Windischeschenbach is in the country of",
+     2.35
+    ],
+    [
+     "Germany",
+     "Naumburg (Saale) is in the country of",
+     16.314
+    ]
+   ],
+   "early_value_own_country": 0.0,
+   "early_value_Japan": 0.0,
+   "early_value_Germany": 0.0
+  }
+ ]
+}

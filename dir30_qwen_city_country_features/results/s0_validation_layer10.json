@@ -1,0 +1,24 @@
+{
+ "layer": 10,
+ "n_prompts": 8,
+ "n_tokens": 69,
+ "d_in": 1024,
+ "d_out": 1024,
+ "W_enc_shape": [
+  163840,
+  1024
+ ],
+ "W_dec_shape": [
+  163840,
+  1024
+ ],
+ "finite": true,
+ "mlp_input_is_post_attention_norm": true,
+ "recon_shape_matches": true,
+ "mean_active_features": 8052.3916015625,
+ "mean_active_features_excl_first_token": 17.311473846435547,
+ "rel_l2_error_mean": 274.2536926269531,
+ "rel_l2_error_excl_first_token": 0.6283901929855347,
+ "rel_l2_error_first_token": 2360.646484375,
+ "rel_l2_error_last_token": 0.6883319020271301
+}

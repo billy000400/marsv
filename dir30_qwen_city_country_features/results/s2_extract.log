@@ -1,0 +1,91 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:  19%|█▉        | 59/311 [00:00<00:00, 589.88it/s]Loading weights: 100%|██████████| 311/311 [00:00<00:00, 2060.77it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[
+ {
+  "prefix": "The capital of Japan",
+  "country": "Japan",
+  "city": "Tokyo",
+  "tokens": [
+   "The",
+   " capital",
+   " of",
+   " Japan"
+  ],
+  "country_span": [
+   3
+  ],
+  "country_position": 3,
+  "country_token": " Japan",
+  "prefix_top1": " is",
+  "prefix_top1_prob": 0.6925448179244995,
+  "bridge_token": " is",
+  "bridge_prob": 0.6925448179244995,
+  "bridge_rank": 1,
+  "city_token_ids": [
+   26194
+  ],
+  "after_bridge_top1": " Tokyo",
+  "city_prob_after_bridge": 0.40225979685783386,
+  "continuation_after_bridge": " Tokyo. The capital of the United States",
+  "max_abs_diff_prefix_vs_full": 9.5367431640625e-06,
+  "max_abs_mlp_input": 46.6700439453125
+ },
+ {
+  "prefix": "The capital of Germany",
+  "country": "Germany",
+  "city": "Berlin",
+  "tokens": [
+   "The",
+   " capital",
+   " of",
+   " Germany"
+  ],
+  "country_span": [
+   3
+  ],
+  "country_position": 3,
+  "country_token": " Germany",
+  "prefix_top1": " is",
+  "prefix_top1_prob": 0.7512708902359009,
+  "bridge_token": " is",
+  "bridge_prob": 0.7512708902359009,
+  "bridge_rank": 1,
+  "city_token_ids": [
+   19846
+  ],
+  "after_bridge_top1": " Berlin",
+  "city_prob_after_bridge": 0.47704407572746277,
+  "continuation_after_bridge": " Berlin. The capital of France is Paris",
+  "max_abs_diff_prefix_vs_full": 9.5367431640625e-06,
+  "max_abs_mlp_input": 50.87031555175781
+ }
+]
+{'layer': 0, 'n_rows': 156, 'mean_active_features': 18.897436141967773, 'rel_l2_error': 0.24657881259918213, 'finite': True}
+{'layer': 1, 'n_rows': 156, 'mean_active_features': 17.46794891357422, 'rel_l2_error': 0.35677334666252136, 'finite': True}
+{'layer': 2, 'n_rows': 156, 'mean_active_features': 16.698719024658203, 'rel_l2_error': 0.4743955731391907, 'finite': True}
+{'layer': 3, 'n_rows': 156, 'mean_active_features': 8.551281929016113, 'rel_l2_error': 0.5026843547821045, 'finite': True}
+{'layer': 4, 'n_rows': 156, 'mean_active_features': 10.378205299377441, 'rel_l2_error': 0.5190832018852234, 'finite': True}
+{'layer': 5, 'n_rows': 156, 'mean_active_features': 12.019230842590332, 'rel_l2_error': 0.60759437084198, 'finite': True}
+{'layer': 6, 'n_rows': 156, 'mean_active_features': 10.70512866973877, 'rel_l2_error': 0.6436982750892639, 'finite': True}
+{'layer': 7, 'n_rows': 156, 'mean_active_features': 12.60897445678711, 'rel_l2_error': 0.6179686188697815, 'finite': True}
+{'layer': 8, 'n_rows': 156, 'mean_active_features': 13.423076629638672, 'rel_l2_error': 0.7063677310943604, 'finite': True}
+{'layer': 9, 'n_rows': 156, 'mean_active_features': 13.339743614196777, 'rel_l2_error': 0.6767257452011108, 'finite': True}
+{'layer': 10, 'n_rows': 156, 'mean_active_features': 12.551281929016113, 'rel_l2_error': 0.6702588200569153, 'finite': True}
+{'layer': 11, 'n_rows': 156, 'mean_active_features': 11.692307472229004, 'rel_l2_error': 0.7326423525810242, 'finite': True}
+{'layer': 12, 'n_rows': 156, 'mean_active_features': 13.85897445678711, 'rel_l2_error': 0.7531394362449646, 'finite': True}
+{'layer': 13, 'n_rows': 156, 'mean_active_features': 10.89102554321289, 'rel_l2_error': 0.7673999667167664, 'finite': True}
+{'layer': 14, 'n_rows': 156, 'mean_active_features': 12.807692527770996, 'rel_l2_error': 0.7381306290626526, 'finite': True}
+{'layer': 15, 'n_rows': 156, 'mean_active_features': 11.576923370361328, 'rel_l2_error': 0.7308465838432312, 'finite': True}
+{'layer': 16, 'n_rows': 156, 'mean_active_features': 10.34615421295166, 'rel_l2_error': 0.6439507603645325, 'finite': True}
+{'layer': 17, 'n_rows': 156, 'mean_active_features': 9.333333015441895, 'rel_l2_error': 0.548568606376648, 'finite': True}
+{'layer': 18, 'n_rows': 156, 'mean_active_features': 8.884615898132324, 'rel_l2_error': 0.6407895684242249, 'finite': True}
+{'layer': 19, 'n_rows': 156, 'mean_active_features': 9.583333015441895, 'rel_l2_error': 0.5100387930870056, 'finite': True}
+{'layer': 20, 'n_rows': 156, 'mean_active_features': 10.852563858032227, 'rel_l2_error': 0.556970477104187, 'finite': True}
+{'layer': 21, 'n_rows': 156, 'mean_active_features': 8.282051086425781, 'rel_l2_error': 0.538348376750946, 'finite': True}
+{'layer': 22, 'n_rows': 156, 'mean_active_features': 10.5, 'rel_l2_error': 0.3969230651855469, 'finite': True}
+{'layer': 23, 'n_rows': 156, 'mean_active_features': 10.692307472229004, 'rel_l2_error': 0.48205509781837463, 'finite': True}
+{'layer': 24, 'n_rows': 156, 'mean_active_features': 10.160256385803223, 'rel_l2_error': 0.4186868965625763, 'finite': True}
+{'layer': 25, 'n_rows': 156, 'mean_active_features': 10.884615898132324, 'rel_l2_error': 0.4841479957103729, 'finite': True}
+{'layer': 26, 'n_rows': 156, 'mean_active_features': 9.73717975616455, 'rel_l2_error': 0.5159725546836853, 'finite': True}
+{'layer': 27, 'n_rows': 156, 'mean_active_features': 4.679487228393555, 'rel_l2_error': 0.2774578928947449, 'finite': True}

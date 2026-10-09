@@ -1,0 +1,675 @@
+{
+ "support": {
+  "Tokyo": {
+   "discovery_facts": 6,
+   "supported_facts": 6,
+   "discovery_prompts": 18,
+   "supported_prompts": 18,
+   "cells": {
+    "country_largest_city | The largest city in {} is": {
+     "weight": 0.0556,
+     "background_rows": 11
+    },
+    "country_largest_city | The biggest city in {} is": {
+     "weight": 0.0556,
+     "background_rows": 13
+    },
+    "country_largest_city | The largest city in {} is the city of": {
+     "weight": 0.0556,
+     "background_rows": 14
+    },
+    "company_hq | The headquarters of {} are in the city of": {
+     "weight": 0.1944,
+     "background_rows": 6
+    },
+    "company_hq | The headquarters of {} is in the city of": {
+     "weight": 0.1944,
+     "background_rows": 6
+    },
+    "company_hq | Where are the headquarters of {}? It is in the city of": {
+     "weight": 0.1944,
+     "background_rows": 6
+    },
+    "company_hq | {} is headquartered in the city of": {
+     "weight": 0.25,
+     "background_rows": 6
+    }
+   },
+   "sufficient": true
+  },
+  "Japan": {
+   "discovery_facts": 16,
+   "supported_facts": 16,
+   "discovery_prompts": 21,
+   "supported_prompts": 20,
+   "cells": {
+    "landmark_in_country | {} is in the country of": {
+     "weight": 0.8438,
+     "background_rows": 6
+    },
+    "landmark_in_country | What country is {} in? It is in": {
+     "weight": 0.0312,
+     "background_rows": 1
+    },
+    "food_from_country | {} originates from": {
+     "weight": 0.0208,
+     "background_rows": 2
+    },
+    "food_from_country | {} is from the country of": {
+     "weight": 0.0521,
+     "background_rows": 6
+    },
+    "food_from_country | {} originates from the country of": {
+     "weight": 0.0521,
+     "background_rows": 6
+    }
+   },
+   "sufficient": true
+  },
+  "Berlin": {
+   "discovery_facts": 2,
+   "supported_facts": 2,
+   "discovery_prompts": 7,
+   "supported_prompts": 7,
+   "cells": {
+    "country_largest_city | The largest city in {} is": {
+     "weight": 0.1667,
+     "background_rows": 11
+    },
+    "country_largest_city | The biggest city in {} is": {
+     "weight": 0.1667,
+     "background_rows": 13
+    },
+    "country_largest_city | The largest city in {} is the city of": {
+     "weight": 0.1667,
+     "background_rows": 14
+    },
+    "company_hq | {} is headquartered in the city of": {
+     "weight": 0.125,
+     "background_rows": 6
+    },
+    "company_hq | The headquarters of {} are in the city of": {
+     "weight": 0.125,
+     "background_rows": 6
+    },
+    "company_hq | The headquarters of {} is in the city of": {
+     "weight": 0.125,
+     "background_rows": 6
+    },
+    "company_hq | Where are the headquarters of {}? It is in the city of": {
+     "weight": 0.125,
+     "background_rows": 6
+    }
+   },
+   "sufficient": true
+  },
+  "Germany": {
+   "discovery_facts": 10,
+   "supported_facts": 10,
+   "discovery_prompts": 10,
+   "supported_prompts": 10,
+   "cells": {
+    "landmark_in_country | {} is in the country of": {
+     "weight": 1.0,
+     "background_rows": 6
+    }
+   },
+   "sufficient": true
+  }
+ },
+ "set_sizes": {
+  "top10": {
+   "Tokyo": 211,
+   "Japan": 257,
+   "Berlin": 85,
+   "Germany": 204
+  },
+  "top20": {
+   "Tokyo": 276,
+   "Japan": 403,
+   "Berlin": 85,
+   "Germany": 271
+  },
+  "top50": {
+   "Tokyo": 293,
+   "Japan": 518,
+   "Berlin": 85,
+   "Germany": 275
+  }
+ },
+ "qualifying": {
+  "Tokyo": 293,
+  "Japan": 521,
+  "Berlin": 85,
+  "Germany": 275
+ },
+ "pooled_overlap": [
+  {
+   "cutoff": 10,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Japan",
+   "n_a": 211,
+   "n_b": 257,
+   "shared": 39,
+   "unique_a": 172,
+   "unique_b": 218,
+   "shared_over_a": 0.1848341232227488,
+   "shared_over_b": 0.1517509727626459,
+   "jaccard": 0.09090909090909091,
+   "note": ""
+  },
+  {
+   "cutoff": 10,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Berlin",
+   "n_a": 211,
+   "n_b": 85,
+   "shared": 14,
+   "unique_a": 197,
+   "unique_b": 71,
+   "shared_over_a": 0.06635071090047394,
+   "shared_over_b": 0.16470588235294117,
+   "jaccard": 0.04964539007092199,
+   "note": ""
+  },
+  {
+   "cutoff": 10,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Germany",
+   "n_a": 211,
+   "n_b": 204,
+   "shared": 16,
+   "unique_a": 195,
+   "unique_b": 188,
+   "shared_over_a": 0.07582938388625593,
+   "shared_over_b": 0.0784313725490196,
+   "jaccard": 0.040100250626566414,
+   "note": ""
+  },
+  {
+   "cutoff": 10,
+   "scope": "all_layers_pooled",
+   "group_a": "Japan",
+   "group_b": "Berlin",
+   "n_a": 257,
+   "n_b": 85,
+   "shared": 7,
+   "unique_a": 250,
+   "unique_b": 78,
+   "shared_over_a": 0.027237354085603113,
+   "shared_over_b": 0.08235294117647059,
+   "jaccard": 0.020895522388059702,
+   "note": ""
+  },
+  {
+   "cutoff": 10,
+   "scope": "all_layers_pooled",
+   "group_a": "Japan",
+   "group_b": "Germany",
+   "n_a": 257,
+   "n_b": 204,
+   "shared": 42,
+   "unique_a": 215,
+   "unique_b": 162,
+   "shared_over_a": 0.16342412451361868,
+   "shared_over_b": 0.20588235294117646,
+   "jaccard": 0.10023866348448687,
+   "note": ""
+  },
+  {
+   "cutoff": 10,
+   "scope": "all_layers_pooled",
+   "group_a": "Berlin",
+   "group_b": "Germany",
+   "n_a": 85,
+   "n_b": 204,
+   "shared": 13,
+   "unique_a": 72,
+   "unique_b": 191,
+   "shared_over_a": 0.15294117647058825,
+   "shared_over_b": 0.06372549019607843,
+   "jaccard": 0.04710144927536232,
+   "note": ""
+  },
+  {
+   "cutoff": 20,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Japan",
+   "n_a": 276,
+   "n_b": 403,
+   "shared": 58,
+   "unique_a": 218,
+   "unique_b": 345,
+   "shared_over_a": 0.21014492753623187,
+   "shared_over_b": 0.14392059553349876,
+   "jaccard": 0.09339774557165861,
+   "note": ""
+  },
+  {
+   "cutoff": 20,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Berlin",
+   "n_a": 276,
+   "n_b": 85,
+   "shared": 23,
+   "unique_a": 253,
+   "unique_b": 62,
+   "shared_over_a": 0.08333333333333333,
+   "shared_over_b": 0.27058823529411763,
+   "jaccard": 0.06804733727810651,
+   "note": ""
+  },
+  {
+   "cutoff": 20,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Germany",
+   "n_a": 276,
+   "n_b": 271,
+   "shared": 27,
+   "unique_a": 249,
+   "unique_b": 244,
+   "shared_over_a": 0.09782608695652174,
+   "shared_over_b": 0.0996309963099631,
+   "jaccard": 0.051923076923076926,
+   "note": ""
+  },
+  {
+   "cutoff": 20,
+   "scope": "all_layers_pooled",
+   "group_a": "Japan",
+   "group_b": "Berlin",
+   "n_a": 403,
+   "n_b": 85,
+   "shared": 11,
+   "unique_a": 392,
+   "unique_b": 74,
+   "shared_over_a": 0.02729528535980149,
+   "shared_over_b": 0.12941176470588237,
+   "jaccard": 0.023060796645702306,
+   "note": ""
+  },
+  {
+   "cutoff": 20,
+   "scope": "all_layers_pooled",
+   "group_a": "Japan",
+   "group_b": "Germany",
+   "n_a": 403,
+   "n_b": 271,
+   "shared": 83,
+   "unique_a": 320,
+   "unique_b": 188,
+   "shared_over_a": 0.20595533498759305,
+   "shared_over_b": 0.3062730627306273,
+   "jaccard": 0.1404399323181049,
+   "note": ""
+  },
+  {
+   "cutoff": 20,
+   "scope": "all_layers_pooled",
+   "group_a": "Berlin",
+   "group_b": "Germany",
+   "n_a": 85,
+   "n_b": 271,
+   "shared": 14,
+   "unique_a": 71,
+   "unique_b": 257,
+   "shared_over_a": 0.16470588235294117,
+   "shared_over_b": 0.05166051660516605,
+   "jaccard": 0.04093567251461988,
+   "note": ""
+  },
+  {
+   "cutoff": 50,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Japan",
+   "n_a": 293,
+   "n_b": 518,
+   "shared": 66,
+   "unique_a": 227,
+   "unique_b": 452,
+   "shared_over_a": 0.22525597269624573,
+   "shared_over_b": 0.1274131274131274,
+   "jaccard": 0.08859060402684564,
+   "note": ""
+  },
+  {
+   "cutoff": 50,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Berlin",
+   "n_a": 293,
+   "n_b": 85,
+   "shared": 24,
+   "unique_a": 269,
+   "unique_b": 61,
+   "shared_over_a": 0.08191126279863481,
+   "shared_over_b": 0.2823529411764706,
+   "jaccard": 0.06779661016949153,
+   "note": ""
+  },
+  {
+   "cutoff": 50,
+   "scope": "all_layers_pooled",
+   "group_a": "Tokyo",
+   "group_b": "Germany",
+   "n_a": 293,
+   "n_b": 275,
+   "shared": 27,
+   "unique_a": 266,
+   "unique_b": 248,
+   "shared_over_a": 0.09215017064846416,
+   "shared_over_b": 0.09818181818181818,
+   "jaccard": 0.04990757855822551,
+   "note": ""
+  },
+  {
+   "cutoff": 50,
+   "scope": "all_layers_pooled",
+   "group_a": "Japan",
+   "group_b": "Berlin",
+   "n_a": 518,
+   "n_b": 85,
+   "shared": 11,
+   "unique_a": 507,
+   "unique_b": 74,
+   "shared_over_a": 0.021235521235521235,
+   "shared_over_b": 0.12941176470588237,
+   "jaccard": 0.018581081081081082,
+   "note": ""
+  },
+  {
+   "cutoff": 50,
+   "scope": "all_layers_pooled",
+   "group_a": "Japan",
+   "group_b": "Germany",
+   "n_a": 518,
+   "n_b": 275,
+   "shared": 102,
+   "unique_a": 416,
+   "unique_b": 173,
+   "shared_over_a": 0.1969111969111969,
+   "shared_over_b": 0.3709090909090909,
+   "jaccard": 0.1476121562952243,
+   "note": ""
+  },
+  {
+   "cutoff": 50,
+   "scope": "all_layers_pooled",
+   "group_a": "Berlin",
+   "group_b": "Germany",
+   "n_a": 85,
+   "n_b": 275,
+   "shared": 14,
+   "unique_a": 71,
+   "unique_b": 261,
+   "shared_over_a": 0.16470588235294117,
+   "shared_over_b": 0.05090909090909091,
+   "jaccard": 0.04046242774566474,
+   "note": ""
+  }
+ ],
+ "early_summary": [
+  {
+   "country_position": "Japan",
+   "feature_set": "Tokyo",
+   "set_size": 276,
+   "active": 7,
+   "active_shared": 3,
+   "active_unique": 4,
+   "layers_active": [
+    10,
+    11,
+    12,
+    15,
+    20,
+    21,
+    23
+   ],
+   "max_abs_diff_prefix_vs_full": 1.811981201171875e-05
+  },
+  {
+   "country_position": "Japan",
+   "feature_set": "Japan",
+   "set_size": 403,
+   "active": 5,
+   "active_shared": 3,
+   "active_unique": 2,
+   "layers_active": [
+    10,
+    12,
+    20,
+    21,
+    23
+   ],
+   "max_abs_diff_prefix_vs_full": 1.811981201171875e-05
+  },
+  {
+   "country_position": "Japan",
+   "feature_set": "Berlin",
+   "set_size": 85,
+   "active": 5,
+   "active_shared": 0,
+   "active_unique": 5,
+   "layers_active": [
+    9,
+    10,
+    11,
+    17
+   ],
+   "max_abs_diff_prefix_vs_full": 7.152557373046875e-06
+  },
+  {
+   "country_position": "Japan",
+   "feature_set": "Germany",
+   "set_size": 271,
+   "active": 3,
+   "active_shared": 0,
+   "active_unique": 3,
+   "layers_active": [
+    8,
+    12,
+    13
+   ],
+   "max_abs_diff_prefix_vs_full": 3.337860107421875e-06
+  },
+  {
+   "country_position": "Germany",
+   "feature_set": "Tokyo",
+   "set_size": 276,
+   "active": 3,
+   "active_shared": 0,
+   "active_unique": 3,
+   "layers_active": [
+    11,
+    12,
+    15
+   ],
+   "max_abs_diff_prefix_vs_full": 2.384185791015625e-06
+  },
+  {
+   "country_position": "Germany",
+   "feature_set": "Japan",
+   "set_size": 403,
+   "active": 3,
+   "active_shared": 0,
+   "active_unique": 3,
+   "layers_active": [
+    10,
+    12
+   ],
+   "max_abs_diff_prefix_vs_full": 6.198883056640625e-06
+  },
+  {
+   "country_position": "Germany",
+   "feature_set": "Berlin",
+   "set_size": 85,
+   "active": 7,
+   "active_shared": 1,
+   "active_unique": 6,
+   "layers_active": [
+    9,
+    10,
+    11,
+    17,
+    22,
+    25,
+    27
+   ],
+   "max_abs_diff_prefix_vs_full": 1.52587890625e-05
+  },
+  {
+   "country_position": "Germany",
+   "feature_set": "Germany",
+   "set_size": 271,
+   "active": 4,
+   "active_shared": 1,
+   "active_unique": 3,
+   "layers_active": [
+    8,
+    12,
+    13,
+    22
+   ],
+   "max_abs_diff_prefix_vs_full": 1.1444091796875e-05
+  }
+ ],
+ "total_active_features_at_country_position": {
+  "Japan|prefix": 192,
+  "Japan|full": 192,
+  "Germany|prefix": 189,
+  "Germany|full": 189
+ },
+ "heldout_last_token_mean_rate": {
+  "Tokyo": 0.14130434782608692,
+  "Japan": null,
+  "Berlin": 0.6088235294117647,
+  "Germany": null
+ },
+ "median_score": {
+  "Tokyo": 0.17592592592592593,
+  "Japan": 0.125,
+  "Berlin": 0.1875,
+  "Germany": 0.2
+ },
+ "overlap_by_score_0.5": [
+  {
+   "threshold": 0.5,
+   "set_a": "Tokyo",
+   "set_b": "Japan",
+   "n_strong": 20,
+   "strong_also_in_b": 16,
+   "n_weak": 256,
+   "weak_also_in_b": 42
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Tokyo",
+   "set_b": "Berlin",
+   "n_strong": 20,
+   "strong_also_in_b": 1,
+   "n_weak": 256,
+   "weak_also_in_b": 22
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Tokyo",
+   "set_b": "Germany",
+   "n_strong": 20,
+   "strong_also_in_b": 0,
+   "n_weak": 256,
+   "weak_also_in_b": 27
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Japan",
+   "set_b": "Tokyo",
+   "n_strong": 19,
+   "strong_also_in_b": 12,
+   "n_weak": 384,
+   "weak_also_in_b": 46
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Japan",
+   "set_b": "Berlin",
+   "n_strong": 19,
+   "strong_also_in_b": 0,
+   "n_weak": 384,
+   "weak_also_in_b": 11
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Japan",
+   "set_b": "Germany",
+   "n_strong": 19,
+   "strong_also_in_b": 3,
+   "n_weak": 384,
+   "weak_also_in_b": 80
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Berlin",
+   "set_b": "Tokyo",
+   "n_strong": 25,
+   "strong_also_in_b": 1,
+   "n_weak": 60,
+   "weak_also_in_b": 22
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Berlin",
+   "set_b": "Japan",
+   "n_strong": 25,
+   "strong_also_in_b": 0,
+   "n_weak": 60,
+   "weak_also_in_b": 11
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Berlin",
+   "set_b": "Germany",
+   "n_strong": 25,
+   "strong_also_in_b": 11,
+   "n_weak": 60,
+   "weak_also_in_b": 3
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Germany",
+   "set_b": "Tokyo",
+   "n_strong": 14,
+   "strong_also_in_b": 2,
+   "n_weak": 257,
+   "weak_also_in_b": 25
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Germany",
+   "set_b": "Japan",
+   "n_strong": 14,
+   "strong_also_in_b": 4,
+   "n_weak": 257,
+   "weak_also_in_b": 79
+  },
+  {
+   "threshold": 0.5,
+   "set_a": "Germany",
+   "set_b": "Berlin",
+   "n_strong": 14,
+   "strong_also_in_b": 7,
+   "n_weak": 257,
+   "weak_also_in_b": 7
+  }
+ ],
+ "strong_heldout_last_token_rate": {
+  "Tokyo": 0.7666666666666666,
+  "Berlin": 0.88
+ }
+}

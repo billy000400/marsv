@@ -1,0 +1,102 @@
+{
+ "alphas": [
+  0.0,
+  0.5,
+  1.0
+ ],
+ "rule": "S5: small suppression check at the country token of \"The capital of <country> is\".\nPredeclared rule: candidates = features in the city set but not the country set that are active at the country\ntoken (set-exclusive candidates); pick the single layer (0..26) with the highest total discovery score; use up to\nfive candidates there. The same rule applied to shared candidates is run as a labelled extra.\nWrites results/suppression.csv, results/suppression_config.json and plots/suppression.png.",
+ "runs": [
+  {
+   "country": "Japan",
+   "city": "Tokyo",
+   "kind": "set-exclusive (predeclared)",
+   "layer": 12,
+   "features": [
+    99286
+   ],
+   "edited_position": 3,
+   "natural_activations": [
+    4.517864227294922
+   ],
+   "perturbation_l2_at_alpha1": 4.514751434326172,
+   "control_features": [
+    92850
+   ],
+   "control_natural_activations": [
+    4.0452141761779785
+   ],
+   "control_perturbation_l2_at_alpha1": 4.0450758934021,
+   "control_pool_size": 5,
+   "mlp_output_l2": null
+  },
+  {
+   "country": "Japan",
+   "city": "Tokyo",
+   "kind": "shared (extra)",
+   "layer": 21,
+   "features": [
+    136683
+   ],
+   "edited_position": 3,
+   "natural_activations": [
+    14.040992736816406
+   ],
+   "perturbation_l2_at_alpha1": 14.040363311767578,
+   "control_features": [
+    93303
+   ],
+   "control_natural_activations": [
+    15.248247146606445
+   ],
+   "control_perturbation_l2_at_alpha1": 15.247697830200195,
+   "control_pool_size": 8,
+   "mlp_output_l2": null
+  },
+  {
+   "country": "Germany",
+   "city": "Berlin",
+   "kind": "set-exclusive (predeclared)",
+   "layer": 25,
+   "features": [
+    28710
+   ],
+   "edited_position": 3,
+   "natural_activations": [
+    10.952371597290039
+   ],
+   "perturbation_l2_at_alpha1": 10.951824188232422,
+   "control_features": [
+    21506
+   ],
+   "control_natural_activations": [
+    0.7501649856567383
+   ],
+   "control_perturbation_l2_at_alpha1": 0.7501678466796875,
+   "control_pool_size": 3,
+   "mlp_output_l2": null
+  },
+  {
+   "country": "Germany",
+   "city": "Berlin",
+   "kind": "shared (extra)",
+   "layer": 22,
+   "features": [
+    74666
+   ],
+   "edited_position": 3,
+   "natural_activations": [
+    46.622127532958984
+   ],
+   "perturbation_l2_at_alpha1": 46.62287902832031,
+   "control_features": [
+    114871
+   ],
+   "control_natural_activations": [
+    55.71607208251953
+   ],
+   "control_perturbation_l2_at_alpha1": 55.74079895019531,
+   "control_pool_size": 4,
+   "mlp_output_l2": null
+  }
+ ]
+}
