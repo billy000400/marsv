@@ -1,0 +1,191 @@
+{
+ "token_ids": {
+  "Japan": 6323,
+  "Germany": 9856,
+  "Tokyo": 26194,
+  "Berlin": 19846,
+  "is": 374
+ },
+ "endpoints": [
+  {
+   "template": "tune",
+   "prompt": "The capital city of Japan is",
+   "country": "Japan",
+   "country_position": 4,
+   "tokens": [
+    "The",
+    " capital",
+    " city",
+    " of",
+    " Japan",
+    " is"
+   ],
+   "p_is_after_country": 0.40870580077171326,
+   "top1_after_country": " is",
+   "p_tokyo": 0.18348456919193268,
+   "p_berlin": 1.33803214339423e-05,
+   "margin_tokyo_minus_berlin": 9.526101112365723,
+   "top1_after_bridge": " Tokyo",
+   "completion": " Tokyo. The capital city of China is"
+  },
+  {
+   "template": "tune",
+   "prompt": "The capital city of Germany is",
+   "country": "Germany",
+   "country_position": 4,
+   "tokens": [
+    "The",
+    " capital",
+    " city",
+    " of",
+    " Germany",
+    " is"
+   ],
+   "p_is_after_country": 0.6005579829216003,
+   "top1_after_country": " is",
+   "p_tokyo": 2.6233399694319814e-05,
+   "p_berlin": 0.252483069896698,
+   "margin_tokyo_minus_berlin": -9.172065734863281,
+   "top1_after_bridge": " Berlin",
+   "completion": " Berlin. The capital city of France is"
+  },
+  {
+   "template": "original",
+   "prompt": "The capital of Japan is",
+   "country": "Japan",
+   "country_position": 3,
+   "tokens": [
+    "The",
+    " capital",
+    " of",
+    " Japan",
+    " is"
+   ],
+   "p_is_after_country": 0.69254469871521,
+   "top1_after_country": " is",
+   "p_tokyo": 0.40225979685783386,
+   "p_berlin": 1.5793018974363804e-05,
+   "margin_tokyo_minus_berlin": 10.145285606384277,
+   "top1_after_bridge": " Tokyo",
+   "completion": " Tokyo. The capital of the United States"
+  },
+  {
+   "template": "original",
+   "prompt": "The capital of Germany is",
+   "country": "Germany",
+   "country_position": 3,
+   "tokens": [
+    "The",
+    " capital",
+    " of",
+    " Germany",
+    " is"
+   ],
+   "p_is_after_country": 0.7512703537940979,
+   "top1_after_country": " is",
+   "p_tokyo": 1.7250482414965518e-05,
+   "p_berlin": 0.47704407572746277,
+   "margin_tokyo_minus_berlin": -10.227523803710938,
+   "top1_after_bridge": " Berlin",
+   "completion": " Berlin. The capital of France is Paris"
+  },
+  {
+   "template": "city_of",
+   "prompt": "The capital of Japan is the city of",
+   "country": "Japan",
+   "country_position": 3,
+   "tokens": [
+    "The",
+    " capital",
+    " of",
+    " Japan",
+    " is",
+    " the",
+    " city",
+    " of"
+   ],
+   "p_is_after_country": 0.6925449371337891,
+   "top1_after_country": " is",
+   "p_tokyo": 0.35594692826271057,
+   "p_berlin": 3.3445380722696427e-06,
+   "margin_tokyo_minus_berlin": 11.57520866394043,
+   "top1_after_bridge": " Tokyo",
+   "completion": " Tokyo. The capital of the United States"
+  },
+  {
+   "template": "city_of",
+   "prompt": "The capital of Germany is the city of",
+   "country": "Germany",
+   "country_position": 3,
+   "tokens": [
+    "The",
+    " capital",
+    " of",
+    " Germany",
+    " is",
+    " the",
+    " city",
+    " of"
+   ],
+   "p_is_after_country": 0.7512708306312561,
+   "top1_after_country": " is",
+   "p_tokyo": 6.851410034869332e-06,
+   "p_berlin": 0.4161718487739563,
+   "margin_tokyo_minus_berlin": -11.014398574829102,
+   "top1_after_bridge": " Berlin",
+   "completion": " Berlin. The capital of the United States"
+  }
+ ],
+ "mismatch": {
+  "cos_layer0_output_endpoints": 0.6647672057151794,
+  "is_position_layer0_rel_diff": 0.11626867949962616,
+  "t0_max_abs_logit_diff_vs_native_japan": 3.814697265625e-05,
+  "t1_max_abs_logit_diff_vs_native_germany": 0.1324176788330078,
+  "t1_jsd_bits_vs_native_germany": 3.6162073229206726e-05,
+  "t1_p_berlin_path_vs_native": [
+   0.47759780287742615,
+   0.4770440459251404
+  ],
+  "t1_country_resid_max_rel_diff": 1.1772102652685135e-06
+ },
+ "slerp_angle_rad": 0.8436141610145569,
+ "layer0_norms": [
+  10.713584899902344,
+  10.930585861206055
+ ],
+ "answer_margin_t_zero": 0.5307533536106348,
+ "p_tokyo_t_half_of_start": 0.4754424096550793,
+ "p_is_min_max": [
+  0.6925484538078308,
+  0.7576212882995605
+ ],
+ "next_token_jsd_bits_endpoints": 0.03336838260293007,
+ "after_bridge_jsd_bits_endpoints": 0.6732138991355896,
+ "probe_n_train": 32,
+ "probe_families": {
+  "currency": [
+   "The official currency of {}",
+   "The money used in {}",
+   "Prices in {}",
+   "The central bank of {}"
+  ],
+  "language": [
+   "People in {}",
+   "The language used in {}",
+   "Most people living in {}",
+   "Schools in {}"
+  ],
+  "identity": [
+   "I was born in {}",
+   "My friend is from {}",
+   "She moved to {}",
+   "We are talking about {}"
+  ],
+  "general": [
+   "The population of {}",
+   "The flag of {}",
+   "The weather in {}",
+   "The history of {}"
+  ]
+ }
+}

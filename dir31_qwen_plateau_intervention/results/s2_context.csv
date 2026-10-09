@@ -1,0 +1,51 @@
+prompt,relation,country,direction,arm,country_token,country_position,country_is_first_token,answer,p_answer,top1,readout_layer26,completion,edit_l2
+The official currency of Japan is the,country_currency,Japan,to_Berlin,none, Japan,4,False, yen,0.8510834574699402, yen,0.9430221915245056," yen, and the official currency of the",
+The official currency of Japan is the,country_currency,Japan,to_Berlin,edit, Japan,4,False, yen,0.006000154186040163, German,-0.8871282339096069," German mark, which is the same as",59.52
+The official currency of Japan is the,country_currency,Japan,to_Berlin,control1, Japan,4,False, yen,0.7000861167907715, yen,0.6505822539329529," yen, and the official currency of the",59.52
+The official currency of Japan is the,country_currency,Japan,to_Berlin,control2, Japan,4,False, yen,0.8952009677886963, yen,1.0733346939086914," yen, and the official currency of the",59.52
+The official currency of Japan is the,country_currency,Japan,to_Berlin,control3, Japan,4,False, yen,0.7371220588684082, yen,0.5838997960090637," yen, and the official currency of China",59.52
+Japan's official currency is the,country_currency,Japan,to_Berlin,none,Japan,0,True, yen,0.8909014463424683, yen,1.2995936870574951," yen, and the official currency is the",
+Japan's official currency is the,country_currency,Japan,to_Berlin,edit,Japan,0,True, yen,0.8842460513114929, yen,1.163783311843872," yen, and the official currency is the",57.14
+Japan's official currency is the,country_currency,Japan,to_Berlin,control1,Japan,0,True, yen,0.8868562579154968, yen,1.308324933052063," yen, and the official currency is the",57.14
+Japan's official currency is the,country_currency,Japan,to_Berlin,control2,Japan,0,True, yen,0.9020230770111084, yen,1.2770013809204102," yen, and the official currency is the",57.14
+Japan's official currency is the,country_currency,Japan,to_Berlin,control3,Japan,0,True, yen,0.900754451751709, yen,1.2743831872940063," yen, and the official currency is the",57.14
+What is the official currency of Japan? It is called the,country_currency,Japan,to_Berlin,none, Japan,6,False, yen,0.3825865387916565, yen,0.8181946277618408, yen. What is the official currency of,
+What is the official currency of Japan? It is called the,country_currency,Japan,to_Berlin,edit, Japan,6,False, yen,0.0028507292736321688, German,-0.8373491764068604, German mark. What is the official currency,60.30
+What is the official currency of Japan? It is called the,country_currency,Japan,to_Berlin,control1, Japan,6,False, yen,0.28084397315979004, yen,0.5020083785057068, yen. What is the official currency of,60.30
+What is the official currency of Japan? It is called the,country_currency,Japan,to_Berlin,control2, Japan,6,False, yen,0.38385525345802307, yen,0.8680369257926941, yen. What is the official currency of,60.30
+What is the official currency of Japan? It is called the,country_currency,Japan,to_Berlin,control3, Japan,6,False, yen,0.20295044779777527, yen,0.46746301651000977, yen. What is the official currency of,60.30
+Japan's official currency is called the,country_currency,Japan,to_Berlin,none,Japan,0,True, yen,0.33960017561912537, yen,1.2995936870574951, yen. The yen is a currency used,
+Japan's official currency is called the,country_currency,Japan,to_Berlin,edit,Japan,0,True, yen,0.3427376449108124, yen,1.163783311843872, yen. The yen is a currency used,57.14
+Japan's official currency is called the,country_currency,Japan,to_Berlin,control1,Japan,0,True, yen,0.32629936933517456, yen,1.308324933052063, yen. The yen is a currency used,57.14
+Japan's official currency is called the,country_currency,Japan,to_Berlin,control2,Japan,0,True, yen,0.3554496765136719, yen,1.2770013809204102, yen. The yen is a currency used,57.14
+Japan's official currency is called the,country_currency,Japan,to_Berlin,control3,Japan,0,True, yen,0.3542511761188507, yen,1.2743831872940063, yen. The yen is a currency used,57.14
+People in Germany speak,country_language,Germany,to_Tokyo,none, Germany,2,False, German,0.5773579478263855, German,-0.8059833645820618," German, but they also speak other languages",
+People in Germany speak,country_language,Germany,to_Tokyo,edit, Germany,2,False, German,0.0932062417268753, Japanese,0.3771587014198303," Japanese as a second language, and Japanese",44.86
+People in Germany speak,country_language,Germany,to_Tokyo,control1, Germany,2,False, German,0.3668496906757355, German,-0.491426557302475," German, but some people in other countries",44.86
+People in Germany speak,country_language,Germany,to_Tokyo,control2, Germany,2,False, German,0.6990746259689331, German,-0.8149934411048889," German, but they also speak other languages",44.86
+People in Germany speak,country_language,Germany,to_Tokyo,control3, Germany,2,False, German,0.6213646531105042, German,-0.6383180022239685," German, and German is a language spoken",44.86
+"In Germany, the primary language is",country_language,Germany,to_Tokyo,none, Germany,1,False, German,0.8644933700561523, German,-1.0315715074539185," German, and the primary language is also",
+"In Germany, the primary language is",country_language,Germany,to_Tokyo,edit, Germany,1,False, German,0.17776526510715485, Japanese,0.18412013351917267," Japanese, and the primary language of the",45.09
+"In Germany, the primary language is",country_language,Germany,to_Tokyo,control1, Germany,1,False, German,0.5467166304588318, German,-0.7158815264701843," German, and the primary language is also",45.09
+"In Germany, the primary language is",country_language,Germany,to_Tokyo,control2, Germany,1,False, German,0.9091305136680603, German,-1.0601717233657837," German, and the primary language is also",45.09
+"In Germany, the primary language is",country_language,Germany,to_Tokyo,control3, Germany,1,False, German,0.8633242249488831, German,-0.9783371686935425," German, and the primary language is also",45.09
+"Germany, where most people speak",country_language,Germany,to_Tokyo,none,Germany,0,True, German,0.6232426762580872, German,1.2614885568618774," German, and the country is known for",
+"Germany, where most people speak",country_language,Germany,to_Tokyo,edit,Germany,0,True, German,0.6383212804794312, German,1.3363054990768433," German, and the country is known for",37.15
+"Germany, where most people speak",country_language,Germany,to_Tokyo,control1,Germany,0,True, German,0.6399630904197693, German,1.2497236728668213," German, and the country is known for",37.15
+"Germany, where most people speak",country_language,Germany,to_Tokyo,control2,Germany,0,True, German,0.6271673440933228, German,1.2450135946273804," German, and the country is known for",37.15
+"Germany, where most people speak",country_language,Germany,to_Tokyo,control3,Germany,0,True, German,0.6326539516448975, German,1.2377370595932007," German, and the country is known for",37.15
+People in Japan speak,country_language,Japan,to_Berlin,none, Japan,2,False, Japanese,0.3603721559047699, Japanese,0.9869433641433716," Japanese, but they are not necessarily the",
+People in Japan speak,country_language,Japan,to_Berlin,edit, Japan,2,False, Japanese,0.002426524879410863, German,-0.47035762667655945," German, but they are not German.",57.91
+People in Japan speak,country_language,Japan,to_Berlin,control1, Japan,2,False, Japanese,0.09273397922515869, a,0.7552763819694519," a language called Japanese, which is a",57.91
+People in Japan speak,country_language,Japan,to_Berlin,control2, Japan,2,False, Japanese,0.4410143494606018, Japanese,1.0208758115768433," Japanese, but they are not necessarily the",57.91
+People in Japan speak,country_language,Japan,to_Berlin,control3, Japan,2,False, Japanese,0.3680826723575592, Japanese,0.8282439112663269," Japanese, but they are not necessarily the",57.91
+"In Japan, the primary language is",country_language,Japan,to_Berlin,none, Japan,1,False, Japanese,0.7218413352966309, Japanese,1.0542861223220825," Japanese, and the primary language of the",
+"In Japan, the primary language is",country_language,Japan,to_Berlin,edit, Japan,1,False, Japanese,0.00050837587332353, German,-0.7264363169670105," German, and the primary language of the",58.67
+"In Japan, the primary language is",country_language,Japan,to_Berlin,control1, Japan,1,False, Japanese,0.04914059117436409, English,0.593476414680481," English, and the primary language of the",58.67
+"In Japan, the primary language is",country_language,Japan,to_Berlin,control2, Japan,1,False, Japanese,0.7505806088447571, Japanese,1.1082446575164795," Japanese, and the primary language of the",58.67
+"In Japan, the primary language is",country_language,Japan,to_Berlin,control3, Japan,1,False, Japanese,0.44844165444374084, Japanese,0.836458683013916," Japanese, and the primary language of the",58.67
+"Japan, where most people speak",country_language,Japan,to_Berlin,none,Japan,0,True, Japanese,0.4408876895904541, Japanese,1.2995936870574951," Japanese, is a country that has been",
+"Japan, where most people speak",country_language,Japan,to_Berlin,edit,Japan,0,True, Japanese,0.45183637738227844, Japanese,1.163783311843872," Japanese, is a country that has a",57.14
+"Japan, where most people speak",country_language,Japan,to_Berlin,control1,Japan,0,True, Japanese,0.459076851606369, Japanese,1.308324933052063," Japanese, is a country that has been",57.14
+"Japan, where most people speak",country_language,Japan,to_Berlin,control2,Japan,0,True, Japanese,0.4444785416126251, Japanese,1.2770013809204102," Japanese, is a country that has been",57.14
+"Japan, where most people speak",country_language,Japan,to_Berlin,control3,Japan,0,True, Japanese,0.4480319619178772, Japanese,1.2743831872940063," Japanese, is a country that has been",57.14
