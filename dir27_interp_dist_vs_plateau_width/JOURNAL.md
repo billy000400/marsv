@@ -337,3 +337,55 @@ On track? yes — S1 done, S2 running (~25% of plan), no blocker.
 
 ## 2026-09-28 — feedback 3 second rejection repair
 - Fixed Summary/Conclusion disagreement on the 0.30–0.50 band (Llama is tail: 11% of tokens, P90 0.308) and the GPT2-XL flag-rate definition mismatch. check_render.py passes; 3,935 words. Manifest → review_pending.
+
+## 2026-10-13 — block-0 resid_post rerun: S1 audit/patch, S2 validation, S3 launched
+- **Preserved.** Previous PLAN recovered from git (7ad492e) to `archive/embedding_run/PLAN.md`; old REPORT.md and
+  RESULTS.md copied there. Embedding-run data (`results/sweep*`, `results/gen`, `plots/*.png`, `plots/gen`) untouched.
+  No STOP file was present, so nothing to reopen.
+- **Audit (local code vs REPORT.md).** No discrepancy found for GPT-2 Large: `common.Runner` feeds `inputs_embeds`
+  for the whole prompt (no cache), float32, 8 tokens x 101 t per forward, readouts = forward hooks on `h[18]`, `h[35]`.
+  The four other models (`gen_common.Runner`) run only the last position against a frozen prefix key/value cache;
+  8B models are bf16 weights with a float32 residual stream (autocast).
+- **Patch.** One env option `DIR27_SITE` in `common.py` (default `embed` = old behaviour, so dir28/dir29 imports are
+  unchanged; `block0_resid_post` redirects outputs to `results/block0_resid_post/`, `plots/block0_resid_post/`).
+  Both Runners got a forward hook on block 0 (`GPT2Model.h[0]`, `GPTNeoXModel.layers[0]`, `LlamaModel.layers[0]`,
+  `Qwen3Model.layers[0]` output = resid_post) that records the last position and, when `inject` is set, replaces
+  only that position; other tuple outputs are passed through. Patched runs feed endpoint A's own tokens.
+  r_A, r_B come from unpatched runs; D = ||r_B - r_A||_2.
+- **Assumptions (logged, not asked).**
+  1. Prefix cache for the four `gen` models is kept: prefix positions never depend on B or t, and the last-position
+     keys/values of every block >= 1 are recomputed for each t. Rejected: full-prompt runs (5x cost, same numbers up
+     to rounding; the sweep's built-in cached-vs-full check quantifies the difference).
+  2. Zoom figure for GPT-2 Large: the old D window 1.6-3.3 was an embedding-distance range, so the block-0 run uses
+     the 5th-95th percentile of D, the rule already used for the other four models. Rejected: reusing 1.6-3.3
+     (meaningless at D ~ 15-80) or hand-picking a new window.
+  3. Representative-curve panel (a): same rule as before restated in relative terms (D within 2% of the median,
+     lowercase words nearest min/quartiles/max of W_final in the band), since the old five words were chosen at
+     embedding D 2.45-2.55.
+  4. Fixed a duplicate-decoding bug in `s5_curves.py` modal fill (a token string shared by two ids was plotted with
+     the wrong id). Only affects the fill path, which the embedding run did not hit.
+  5. 8B weights are no longer in the shared HF cache; re-staged in /tmp one at a time as before.
+- **S2 (float32 models, full-prompt runs).** `results/block0_resid_post/validate/*.json`. Block-1 input at the last
+  position equals r(t) exactly (max abs diff 0); prefix positions equal the unpatched A run to <1e-5 abs; raw
+  readouts at t=0 / t=1 vs independent unpatched A / B runs: max relative L2 1.5e-6 (GPT-2 Large, 20 tokens),
+  1.3e-6 (GPT2-XL, 32 tokens), 2.0e-5 (Pythia, 32 tokens). bf16 models are validated in the queue before their sweep.
+- **S3.** GPT-2 Large sweep running (same batch 8, ~69 s/shard); queue then validates+sweeps GPT2-XL, Pythia,
+  Qwen3-8B-Base, Llama-3.1-8B (`results/block0_resid_post/gen/queue.sh`).
+
+On track? yes — S1, S2 (3/5 models) done; S3 ~10%, no blocker.
+
+## 2026-10-13 — block-0 resid_post rerun: S3 complete (5/5 models), S4 deliverables written
+- All five sweeps finished with unchanged batch settings (GPT-2 Large 8, GPT2-XL/Pythia 64, Qwen3/Llama 128 tokens
+  x 101 t). No OOM. Queue: `results/block0_resid_post/gen/queue.sh`. A waiter process of mine matched the queue's
+  `pgrep` pattern and would have blocked it; killed before the GPT-2 Large sweep ended, no effect on results.
+- S2 for the bf16 models: injected vector exact; raw readouts at t=0/t=1 vs unpatched A/B differ by up to 2.4%
+  (Qwen3) and 3.4% (Llama) relative L2; cached-vs-full |dW| median <= 0.0035, max 0.030. Same order as the
+  embedding run's batch-shape differences; accepted as the bf16 noise floor and stated in REPORT.md Methods/Limitations.
+  Source not isolated further (assumption: rounding).
+- Outcome: differs from the embedding run at the middle block in the GPT-2 models (median W_mid rises with D),
+  weak rise in Pythia/Llama/Qwen3; final block no shared direction. Reported as observed; no tuning.
+- New helper scripts: `b0_validate.py`, `b0_summary.py`, `b0_results_md.py`. REPORT_generalization.md left as the
+  embedding-run record because the PLAN names only REPORT.md / RESULTS.md for the update.
+- `check_render.py REPORT.md RESULTS.md` passes (REPORT 8 figures, ~3.1k words).
+
+On track? yes — S1–S4 done, 100%; no blocker.

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from transformers import AutoTokenizer
 
-from common import CVD
+from common import CVD, XLABEL
 from gen_common import GEN, GPLOTS, MODELS, NAMES
 
 BACKSTEP = 0.05
@@ -25,7 +25,7 @@ def scatter(ax, D, W, flag, sel):
                label="flagged (non-monotonic)")
     ax.scatter(D[sel & ~flag], W[sel & ~flag], s=2, alpha=0.08, color=CVD[0], marker="o", lw=0,
                label="clean curve")
-    ax.set_xlabel("layer-0 L2 distance D from ' big'")
+    ax.set_xlabel(XLABEL)
 
 
 def legend(ax):

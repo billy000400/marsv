@@ -1,0 +1,41 @@
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:  10%|▉         | 38/399 [00:00<00:00, 365.69it/s]Loading weights:  19%|█▉        | 75/399 [00:00<00:01, 311.84it/s]Loading weights:  27%|██▋       | 107/399 [00:00<00:01, 289.22it/s]Loading weights:  34%|███▍      | 137/399 [00:00<00:00, 279.39it/s]Loading weights:  42%|████▏     | 166/399 [00:00<00:00, 282.14it/s]Loading weights:  49%|████▉     | 195/399 [00:00<00:00, 268.60it/s]Loading weights:  56%|█████▋    | 225/399 [00:00<00:00, 270.16it/s]Loading weights:  63%|██████▎   | 253/399 [00:00<00:00, 272.32it/s]Loading weights: 100%|██████████| 399/399 [00:00<00:00, 413.71it/s]
+Some parameters are on the meta device because they were offloaded to the cpu.
+{'model': 'qwen3-8b-base', 'intervention_site': 'block0_resid_post', 'distance_space': 'block0_resid_post', 'tok_per_batch': 128, 'hook_module': 'Qwen3Model.layers[0] output', 'n_blocks': 36, 'mid_block': 18, 'final_block': 35, 'vocab': 151669, 'prompt_ids': [785, 3753, 572, 2409], 'token_a': ' big', 'cache_check_max_rel_diff': [0.023622501641511917, 0.02763463743031025], 'cache_check_abs_dW_median': [0.0007918638642877285, 0.003467856347560805], 'cache_check_abs_dW_max': [0.003760903179645614, 0.023533697724342384]}
+shard 0: 4096 tokens, gpu 73.7s total 74.3s
+shard 4096: 4096 tokens, gpu 73.9s total 74.6s
+shard 8192: 4096 tokens, gpu 74.0s total 74.7s
+shard 12288: 4096 tokens, gpu 74.1s total 74.8s
+shard 16384: 4096 tokens, gpu 74.1s total 74.7s
+shard 20480: 4096 tokens, gpu 73.7s total 74.4s
+shard 24576: 4096 tokens, gpu 73.7s total 74.3s
+shard 28672: 4096 tokens, gpu 73.7s total 74.3s
+shard 32768: 4096 tokens, gpu 73.7s total 74.3s
+shard 36864: 4096 tokens, gpu 73.7s total 74.3s
+shard 40960: 4096 tokens, gpu 73.7s total 74.3s
+shard 45056: 4096 tokens, gpu 73.7s total 74.4s
+shard 49152: 4096 tokens, gpu 73.6s total 74.3s
+shard 53248: 4096 tokens, gpu 73.7s total 74.4s
+shard 57344: 4096 tokens, gpu 73.7s total 74.5s
+shard 61440: 4096 tokens, gpu 73.7s total 74.4s
+shard 65536: 4096 tokens, gpu 73.8s total 74.5s
+shard 69632: 4096 tokens, gpu 73.8s total 74.5s
+shard 73728: 4096 tokens, gpu 73.7s total 74.4s
+shard 77824: 4096 tokens, gpu 73.7s total 74.4s
+shard 81920: 4096 tokens, gpu 73.7s total 74.5s
+shard 86016: 4096 tokens, gpu 73.7s total 74.4s
+shard 90112: 4096 tokens, gpu 73.7s total 74.3s
+shard 94208: 4096 tokens, gpu 73.7s total 74.3s
+shard 98304: 4096 tokens, gpu 73.7s total 74.3s
+shard 102400: 4096 tokens, gpu 73.7s total 74.4s
+shard 106496: 4096 tokens, gpu 73.8s total 74.4s
+shard 110592: 4096 tokens, gpu 73.7s total 74.4s
+shard 114688: 4096 tokens, gpu 73.7s total 74.5s
+shard 118784: 4096 tokens, gpu 73.8s total 74.5s
+shard 122880: 4096 tokens, gpu 73.7s total 74.4s
+shard 126976: 4096 tokens, gpu 73.7s total 74.4s
+shard 131072: 4096 tokens, gpu 73.7s total 74.3s
+shard 135168: 4096 tokens, gpu 73.7s total 74.4s
+shard 139264: 4096 tokens, gpu 73.7s total 74.4s
+shard 143360: 4096 tokens, gpu 73.7s total 74.4s
+shard 147456: 4096 tokens, gpu 73.8s total 74.5s
+shard 151552: 116 tokens, gpu 2.1s total 2.1s

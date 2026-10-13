@@ -1,0 +1,13 @@
+{
+ "model": "gpt2-large",
+ "intervention_site": "block0_resid_post",
+ "distance_space": "block0_resid_post",
+ "hook_module": "GPT2Model.h[0] output",
+ "tok_per_batch": 8,
+ "prompt_ids": [
+  464,
+  2156,
+  373,
+  1263
+ ]
+}

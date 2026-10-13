@@ -1,0 +1,30 @@
+{
+ "model": "gpt2-xl",
+ "intervention_site": "block0_resid_post",
+ "distance_space": "block0_resid_post",
+ "tok_per_batch": 64,
+ "hook_module": "GPT2Model.h[0] output",
+ "n_blocks": 48,
+ "mid_block": 24,
+ "final_block": 47,
+ "vocab": 50257,
+ "prompt_ids": [
+  464,
+  2156,
+  373,
+  1263
+ ],
+ "token_a": " big",
+ "cache_check_max_rel_diff": [
+  3.3977073599089636e-06,
+  6.172901976242429e-06
+ ],
+ "cache_check_abs_dW_median": [
+  6.586313247569642e-08,
+  1.4908611775665825e-07
+ ],
+ "cache_check_abs_dW_max": [
+  3.132224082880164e-07,
+  1.151859760295526e-06
+ ]
+}

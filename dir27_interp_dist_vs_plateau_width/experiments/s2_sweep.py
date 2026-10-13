@@ -2,6 +2,7 @@
 
 Resumable: writes results/sweep/shard_XXXXX.npz per chunk of token ids.
 """
+import json
 import os
 import sys
 import time
@@ -9,7 +10,7 @@ import time
 import numpy as np
 import torch
 
-from common import RESULTS, TS, Runner, load, width, y_curve
+from common import RESULTS, SITE, TS, Runner, load, width, y_curve
 
 TOK_PER_BATCH = 8          # 8 tokens x 101 t-points = 808 sequences per forward
 SHARD = 2048
@@ -26,7 +27,12 @@ def main():
     if limit:
         ids_all = ids_all[:limit]
     t = torch.tensor(TS, device=dev, dtype=torch.float32).view(1, -1, 1)
-    ea = r.wte[r.id_a]
+    block0 = SITE == "block0_resid_post"
+    # endpoint vectors: token embeddings (original runs) or unpatched block-0 outputs at the last position
+    ea = r.resid0(torch.tensor([r.id_a], device=dev))[0] if block0 else r.wte[r.id_a]
+    json.dump(dict(model="gpt2-large", intervention_site=SITE, distance_space=SITE,
+                   hook_module="GPT2Model.h[0] output" if block0 else "wte row (inputs_embeds)",
+                   tok_per_batch=TOK_PER_BATCH, prompt_ids=r.ids), open(os.path.join(OUT, "meta.json"), "w"), indent=1)
     for s0 in range(0, len(ids_all), SHARD):
         path = os.path.join(OUT, f"shard_{s0:05d}.npz")
         if os.path.exists(path) and not limit:
@@ -36,9 +42,9 @@ def main():
         ym_all, yf_all, D = [], [], []
         for b0 in range(0, len(ids), TOK_PER_BATCH):
             ib = torch.tensor(ids[b0:b0 + TOK_PER_BATCH], device=dev)
-            eb = r.wte[ib]                                        # (k, d)
+            eb = r.resid0(ib) if block0 else r.wte[ib]            # (k, d)
             h = (1 - t) * ea.view(1, 1, -1) + t * eb.unsqueeze(1)  # (k, 101, d)
-            mid, fin = r.run(h.reshape(-1, h.shape[-1]))
+            mid, fin = (r.run_patched if block0 else r.run)(h.reshape(-1, h.shape[-1]))
             k = len(ib)
             ym_all.append(y_curve(mid.view(k, len(TS), -1)).cpu().numpy())
             yf_all.append(y_curve(fin.view(k, len(TS), -1)).cpu().numpy())

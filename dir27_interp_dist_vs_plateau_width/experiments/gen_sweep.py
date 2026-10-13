@@ -10,7 +10,7 @@ import time
 import numpy as np
 import torch
 
-from common import TS, width, y_curve
+from common import SITE, TS, width, y_curve
 from gen_common import GEN, Runner, load
 
 SHARD = 4096
@@ -25,20 +25,26 @@ def main():
     r = Runner(tok, m)
     V = len(tok)
     t = torch.tensor(TS, device="cuda", dtype=torch.float32).view(1, -1, 1)
-    ea = r.rows([r.id_a])[0]
+    block0 = SITE == "block0_resid_post"
+    # endpoint vectors: token embeddings (original runs) or unpatched block-0 outputs at the last position
+    endpoint = (lambda ids: r.resid0(r.rows(ids))) if block0 else r.rows
+    run = r.run_patched if block0 else r.run
+    run_full = (lambda x: r.run_patched(x, full=True)) if block0 else r.run_full
+    ea = endpoint([r.id_a])[0]
 
     # check: cached last-position path vs full-prompt path on 32 random tokens x 101 steps.
     # For bf16 models the two paths differ by rounding; |dW| measures the resulting precision of W.
     chk = np.random.default_rng(0).choice(V, 32, replace=False)
-    eb = r.rows(chk)
+    eb = endpoint(chk)
     h = ((1 - t) * ea + t * eb.unsqueeze(1)).reshape(-1, ea.shape[0])
-    a = [x.clone() for x in r.run(h)]
-    b = r.run_full(h)
+    a = [x.clone() for x in run(h)]
+    b = run_full(h)
     rel = [float(((x - y).norm(dim=-1) / y.norm(dim=-1)).max()) for x, y in zip(a, b)]
     dW = [np.abs([width(TS, u)[2] - width(TS, v)[2] for u, v in
                   zip(y_curve(x.view(32, len(TS), -1)).cpu().numpy(), y_curve(y.view(32, len(TS), -1)).cpu().numpy())])
           for x, y in zip(a, b)]
-    meta = dict(model=key, n_blocks=r.n_blocks, mid_block=r.mid, final_block=r.final, vocab=V,
+    meta = dict(model=key, intervention_site=SITE, distance_space=SITE, tok_per_batch=per,
+                hook_module=r.site_module if block0 else "embedding row (inputs_embeds)", n_blocks=r.n_blocks, mid_block=r.mid, final_block=r.final, vocab=V,
                 prompt_ids=r.ids, token_a=tok.decode([r.id_a]), cache_check_max_rel_diff=rel,
                 cache_check_abs_dW_median=[float(np.median(d)) for d in dW],
                 cache_check_abs_dW_max=[float(d.max()) for d in dW])
@@ -54,9 +60,9 @@ def main():
         tic = time.time()
         ym_all, yf_all, D = [], [], []
         for b0 in range(0, len(ids), per):
-            eb = r.rows(ids[b0:b0 + per])
+            eb = endpoint(ids[b0:b0 + per])
             h = (1 - t) * ea.view(1, 1, -1) + t * eb.unsqueeze(1)
-            mid, fin = r.run(h.reshape(-1, h.shape[-1]))
+            mid, fin = run(h.reshape(-1, h.shape[-1]))
             k = len(eb)
             ym_all.append(y_curve(mid.view(k, len(TS), -1)).cpu().numpy())
             yf_all.append(y_curve(fin.view(k, len(TS), -1)).cpu().numpy())

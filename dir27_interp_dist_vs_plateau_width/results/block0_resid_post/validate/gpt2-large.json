@@ -1,0 +1,55 @@
+{
+ "model": "gpt2-large",
+ "intervention_site": "block0_resid_post",
+ "hook_module": "GPT2Model.h[0] output",
+ "n_tokens": 20,
+ "token_ids": [
+  1402,
+  1588,
+  3236,
+  7009,
+  2266,
+  1468,
+  6565,
+  262,
+  290,
+  3290,
+  2952,
+  2702,
+  8735,
+  13,
+  11,
+  278,
+  6342,
+  38251,
+  3228,
+  5749
+ ],
+ "resid0_dtype": "torch.float32",
+ "injected_vs_r_t_max_abs": 0.0,
+ "prefix_vs_unpatched_A_max_abs": 4.76837158203125e-06,
+ "readout_t0_vs_unpatched_A_max_rel_l2": [
+  6.139093784440774e-07,
+  5.181639153306605e-07
+ ],
+ "readout_t1_vs_unpatched_B_max_rel_l2": [
+  1.102721284951258e-06,
+  1.540816128908773e-06
+ ],
+ "readout_t0_vs_unpatched_A_max_abs": [
+  1.9073486328125e-05,
+  3.0517578125e-05
+ ],
+ "readout_t1_vs_unpatched_B_max_abs": [
+  2.6702880859375e-05,
+  0.000274658203125
+ ],
+ "readout_norm_A": [
+  120.41432189941406,
+  365.326904296875
+ ],
+ "D_min_max": [
+  15.086161613464355,
+  34.6516227722168
+ ]
+}

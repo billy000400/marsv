@@ -1,0 +1,67 @@
+{
+ "model": "pythia-1.4b",
+ "intervention_site": "block0_resid_post",
+ "hook_module": "GPTNeoXModel.layers[0] output",
+ "n_tokens": 32,
+ "token_ids": [
+  47001,
+  32005,
+  13941,
+  3780,
+  830,
+  31779,
+  28143,
+  13556,
+  48789,
+  42562,
+  30488,
+  2058,
+  38454,
+  19813,
+  27324,
+  15468,
+  45872,
+  137,
+  43102,
+  41010,
+  1688,
+  33723,
+  36683,
+  40870,
+  32637,
+  25311,
+  8807,
+  8831,
+  36665,
+  42740,
+  27866,
+  25683
+ ],
+ "resid0_dtype": "torch.float32",
+ "injected_vs_r_t_max_abs": 0.0,
+ "prefix_vs_unpatched_A_max_abs": 5.7220458984375e-06,
+ "readout_t0_vs_unpatched_A_max_rel_l2": [
+  8.250306109403027e-07,
+  1.0036346793640405e-05
+ ],
+ "readout_t1_vs_unpatched_B_max_rel_l2": [
+  1.82610767751612e-06,
+  1.9550667275325395e-05
+ ],
+ "readout_t0_vs_unpatched_A_max_abs": [
+  4.798173904418945e-06,
+  0.000102996826171875
+ ],
+ "readout_t1_vs_unpatched_B_max_abs": [
+  3.4332275390625e-05,
+  0.001220703125
+ ],
+ "readout_norm_A": [
+  69.43769836425781,
+  118.06378936767578
+ ],
+ "D_min_max": [
+  23.711502075195312,
+  39.49881362915039
+ ]
+}

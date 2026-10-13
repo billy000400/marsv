@@ -1,0 +1,15 @@
+Loading weights:   0%|          | 0/292 [00:00<?, ?it/s]Loading weights:   0%|          | 1/292 [00:01<05:53,  1.22s/it]Loading weights:  17%|█▋        | 50/292 [00:01<00:04, 50.47it/s]Loading weights:  25%|██▍       | 72/292 [00:01<00:03, 63.12it/s]Loading weights:  30%|███       | 89/292 [00:01<00:03, 62.27it/s]Loading weights:  37%|███▋      | 108/292 [00:02<00:03, 54.77it/s]Loading weights:  47%|████▋     | 138/292 [00:02<00:01, 83.10it/s]Loading weights:  53%|█████▎    | 154/292 [00:02<00:01, 72.06it/s]Loading weights:  62%|██████▏   | 180/292 [00:02<00:01, 79.94it/s]Loading weights:  66%|██████▌   | 192/292 [00:03<00:01, 70.77it/s]Loading weights:  72%|███████▏  | 210/292 [00:03<00:00, 85.84it/s]Loading weights:  77%|███████▋  | 224/292 [00:03<00:00, 93.82it/s]Loading weights:  81%|████████  | 237/292 [00:03<00:00, 68.94it/s]Loading weights:  87%|████████▋ | 254/292 [00:04<00:00, 64.83it/s]Loading weights:  95%|█████████▍| 276/292 [00:04<00:00, 78.48it/s]Loading weights:  99%|█████████▉| 290/292 [00:04<00:00, 86.94it/s]Loading weights: 100%|██████████| 292/292 [00:04<00:00, 67.23it/s]
+{'model': 'pythia-1.4b', 'intervention_site': 'block0_resid_post', 'distance_space': 'block0_resid_post', 'tok_per_batch': 64, 'hook_module': 'GPTNeoXModel.layers[0] output', 'n_blocks': 24, 'mid_block': 12, 'final_block': 23, 'vocab': 50277, 'prompt_ids': [510, 2419, 369, 1943], 'token_a': ' big', 'cache_check_max_rel_diff': [2.3719223918305943e-06, 3.424918759264983e-05], 'cache_check_abs_dW_median': [2.4754554028838527e-07, 3.0985474586686657e-06], 'cache_check_abs_dW_max': [6.079673767755978e-07, 8.243918418804341e-06]}
+shard 0: 4096 tokens, gpu 138.3s total 138.9s
+shard 4096: 4096 tokens, gpu 138.4s total 139.0s
+shard 8192: 4096 tokens, gpu 138.4s total 139.1s
+shard 12288: 4096 tokens, gpu 138.5s total 139.2s
+shard 16384: 4096 tokens, gpu 138.5s total 139.2s
+shard 20480: 4096 tokens, gpu 138.4s total 139.1s
+shard 24576: 4096 tokens, gpu 138.6s total 139.2s
+shard 28672: 4096 tokens, gpu 138.6s total 139.2s
+shard 32768: 4096 tokens, gpu 138.5s total 139.1s
+shard 36864: 4096 tokens, gpu 138.4s total 139.1s
+shard 40960: 4096 tokens, gpu 138.4s total 139.1s
+shard 45056: 4096 tokens, gpu 138.5s total 139.2s
+shard 49152: 1124 tokens, gpu 38.0s total 38.2s

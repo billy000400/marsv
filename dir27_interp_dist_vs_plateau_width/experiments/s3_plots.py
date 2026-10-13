@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from transformers import AutoTokenizer
 
-from common import CVD, MODEL, PLOTS, RESULTS
+from common import CVD, MODEL, PLOTS, RESULTS, SITE, XLABEL
 
 BACKSTEP = 0.05
 
@@ -46,7 +46,7 @@ def main():
         ax.scatter(D[~flag], W[~flag], s=2, alpha=0.08, color=CVD[0], marker="o", lw=0,
                    label="clean curve")
         ax.set_title(name)
-        ax.set_xlabel("layer-0 L2 distance D from ' big'")
+        ax.set_xlabel(XLABEL)
     axes[0].set_ylabel("transition width W = t$_{0.9}$ − t$_{0.1}$")
     leg = axes[0].legend(loc="upper right", markerscale=4)
     for lh in leg.legend_handles:
@@ -87,6 +87,8 @@ def zoom(lo=1.6, hi=3.3):
     Wm = np.array([float(r["W_mid"]) for r in rows])
     Wf = np.array([float(r["W_final"]) for r in rows])
     flag = np.array([r["flag_nonmonotonic"] == "1" for r in rows])
+    if SITE != "embed":  # 1.6-3.3 is an embedding-distance range; here use the same 5th-95th percentile rule as gen_plots.py
+        lo, hi = np.percentile(D, [5, 95])
     sel = (D >= lo) & (D <= hi)
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.8))
     for ax, W, name in ((axes[0], Wm, "(a) block 18 (middle)"), (axes[1], Wf, "(b) block 35 (final)")):
@@ -99,8 +101,8 @@ def zoom(lo=1.6, hi=3.3):
         ax.set_xlim(lo, hi)
         ax.set_ylim(ymin - pad, ymax + pad)
         ax.set_title(name)
-        ax.set_xlabel("layer-0 L2 distance D from ' big'")
-        print(f"{name}: n={sel.sum()}, W range [{ymin:.4f}, {ymax:.4f}]")
+        ax.set_xlabel(XLABEL)
+        print(f"{name}: D [{lo:.3f}, {hi:.3f}] n={sel.sum()}, W range [{ymin:.4f}, {ymax:.4f}]")
     axes[0].set_ylabel("transition width W = t$_{0.9}$ − t$_{0.1}$")
     leg = axes[0].legend(loc="upper right", markerscale=4)
     for lh in leg.legend_handles:

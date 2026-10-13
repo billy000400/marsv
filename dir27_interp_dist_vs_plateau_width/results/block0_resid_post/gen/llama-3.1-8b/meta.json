@@ -1,0 +1,31 @@
+{
+ "model": "llama-3.1-8b",
+ "intervention_site": "block0_resid_post",
+ "distance_space": "block0_resid_post",
+ "tok_per_batch": 128,
+ "hook_module": "LlamaModel.layers[0] output",
+ "n_blocks": 32,
+ "mid_block": 16,
+ "final_block": 31,
+ "vocab": 128256,
+ "prompt_ids": [
+  128000,
+  791,
+  3838,
+  574,
+  2466
+ ],
+ "token_a": " big",
+ "cache_check_max_rel_diff": [
+  0.0200294628739357,
+  0.06250445544719696
+ ],
+ "cache_check_abs_dW_median": [
+  0.0007810163497924683,
+  0.001253792103379947
+ ],
+ "cache_check_abs_dW_max": [
+  0.0026436486840247797,
+  0.02975975424051286
+ ]
+}

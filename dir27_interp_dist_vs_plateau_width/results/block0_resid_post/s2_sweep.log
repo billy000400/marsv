@@ -1,0 +1,27 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/436 [00:00<?, ?it/s]Loading weights: 100%|██████████| 436/436 [00:00<00:00, 5650.50it/s]
+shard 0: 2048 tokens in 74.0s
+shard 2048: 2048 tokens in 68.9s
+shard 4096: 2048 tokens in 69.1s
+shard 6144: 2048 tokens in 69.0s
+shard 8192: 2048 tokens in 69.1s
+shard 10240: 2048 tokens in 69.1s
+shard 12288: 2048 tokens in 68.9s
+shard 14336: 2048 tokens in 68.9s
+shard 16384: 2048 tokens in 68.9s
+shard 18432: 2048 tokens in 68.9s
+shard 20480: 2048 tokens in 69.0s
+shard 22528: 2048 tokens in 68.9s
+shard 24576: 2048 tokens in 68.9s
+shard 26624: 2048 tokens in 68.9s
+shard 28672: 2048 tokens in 68.8s
+shard 30720: 2048 tokens in 68.8s
+shard 32768: 2048 tokens in 68.9s
+shard 34816: 2048 tokens in 68.9s
+shard 36864: 2048 tokens in 68.9s
+shard 38912: 2048 tokens in 68.9s
+shard 40960: 2048 tokens in 69.2s
+shard 43008: 2048 tokens in 69.1s
+shard 45056: 2048 tokens in 69.1s
+shard 47104: 2048 tokens in 69.0s
+shard 49152: 1104 tokens in 37.2s

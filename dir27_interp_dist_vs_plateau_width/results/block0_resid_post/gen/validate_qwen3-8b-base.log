@@ -1,0 +1,69 @@
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:  10%|▉         | 38/399 [00:00<00:00, 362.41it/s]Loading weights:  19%|█▉        | 75/399 [00:00<00:00, 326.84it/s]Loading weights:  27%|██▋       | 108/399 [00:00<00:00, 301.42it/s]Loading weights:  35%|███▍      | 139/399 [00:00<00:01, 246.78it/s]Loading weights:  43%|████▎     | 170/399 [00:00<00:00, 259.44it/s]Loading weights:  49%|████▉     | 197/399 [00:00<00:00, 231.12it/s]Loading weights:  57%|█████▋    | 226/399 [00:00<00:00, 241.03it/s]Loading weights:  65%|██████▍   | 258/399 [00:00<00:00, 254.76it/s]Loading weights: 100%|██████████| 399/399 [00:01<00:00, 388.41it/s]
+Some parameters are on the meta device because they were offloaded to the cpu.
+{
+ "model": "qwen3-8b-base",
+ "intervention_site": "block0_resid_post",
+ "hook_module": "Qwen3Model.layers[0] output",
+ "n_tokens": 32,
+ "token_ids": [
+  141810,
+  96588,
+  42061,
+  11409,
+  2506,
+  95886,
+  84914,
+  40910,
+  147215,
+  128398,
+  91996,
+  6213,
+  116007,
+  59777,
+  82443,
+  46679,
+  138418,
+  415,
+  130036,
+  123731,
+  5093,
+  101745,
+  110664,
+  123329,
+  98482,
+  76375,
+  26578,
+  26641,
+  110630,
+  128986,
+  84069,
+  77508
+ ],
+ "resid0_dtype": "torch.float32",
+ "injected_vs_r_t_max_abs": 0.0,
+ "prefix_vs_unpatched_A_max_abs": 0.109375,
+ "readout_t0_vs_unpatched_A_max_rel_l2": [
+  0.009834328666329384,
+  0.009891211055219173
+ ],
+ "readout_t1_vs_unpatched_B_max_rel_l2": [
+  0.0244208462536335,
+  0.01869090646505356
+ ],
+ "readout_t0_vs_unpatched_A_max_abs": [
+  0.119140625,
+  3.68621826171875
+ ],
+ "readout_t1_vs_unpatched_B_max_abs": [
+  0.3408203125,
+  8.7808837890625
+ ],
+ "readout_norm_A": [
+  89.28971099853516,
+  1494.463623046875
+ ],
+ "D_min_max": [
+  15.857650756835938,
+  40.746734619140625
+ ]
+}

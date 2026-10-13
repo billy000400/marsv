@@ -7,8 +7,16 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-RESULTS = os.path.join(ROOT, "results")
-PLOTS = os.path.join(ROOT, "plots")
+# Intervention site. "embed" (default, original runs): interpolate the last-position input embedding.
+# "block0_resid_post": interpolate the last-position output of transformer block 0 (TransformerLens
+# blocks.0.hook_resid_post); D is measured in that same space. Outputs go to their own subfolders.
+SITE = os.environ.get("DIR27_SITE", "embed")
+assert SITE in ("embed", "block0_resid_post"), SITE
+_SUB = () if SITE == "embed" else (SITE,)
+RESULTS = os.path.join(ROOT, "results", *_SUB)
+PLOTS = os.path.join(ROOT, "plots", *_SUB)
+XLABEL = ("layer-0 L2 distance D from ' big'" if SITE == "embed"
+          else "Block-0 resid_post L2 distance from ' big'")
 os.makedirs(RESULTS, exist_ok=True)
 os.makedirs(PLOTS, exist_ok=True)
 
@@ -52,6 +60,18 @@ class Runner:
         self.cap = {}
         m.transformer.h[MID_BLOCK].register_forward_hook(self._hook("mid"))
         m.transformer.h[FINAL_BLOCK].register_forward_hook(self._hook("final"))
+        self.inject = None
+        m.transformer.h[0].register_forward_hook(self._site_hook)
+
+    def _site_hook(self, mod, inp, out):
+        """Block-0 output (resid_post): record the last position; if self.inject is set, replace it."""
+        h = out[0] if isinstance(out, tuple) else out
+        self.cap["resid0"] = h[:, -1, :].float().clone()
+        if self.inject is None:
+            return None
+        h = h.clone()
+        h[:, -1, :] = self.inject.to(h.dtype)
+        return (h,) + tuple(out[1:]) if isinstance(out, tuple) else h
 
     def _hook(self, name):
         def f(mod, inp, out):
@@ -65,6 +85,21 @@ class Runner:
         emb = torch.cat([self.prefix.unsqueeze(0).expand(n, -1, -1), last_emb.unsqueeze(1)], dim=1)
         self.m.transformer(inputs_embeds=emb, use_cache=False)
         return self.cap["mid"], self.cap["final"]
+
+    @torch.no_grad()
+    def resid0(self, ids_b):
+        """Unpatched runs of the prompt with last token ids_b (N,) -> block-0 output at the last position."""
+        self.run(self.wte[ids_b])
+        return self.cap["resid0"]
+
+    @torch.no_grad()
+    def run_patched(self, r):
+        """Run endpoint A (N copies) with the last-position block-0 output replaced by r (N, d)."""
+        self.inject = r
+        try:
+            return self.run(self.wte[self.id_a].expand(r.shape[0], -1))
+        finally:
+            self.inject = None
 
 
 def y_curve(h):

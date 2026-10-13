@@ -12,10 +12,10 @@ import torch
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 from transformers.cache_utils import DynamicCache, DynamicLayer
 
-from common import PROMPT, ROOT, TS  # noqa: F401  (TS re-exported)
+from common import PLOTS, PROMPT, RESULTS, TS  # noqa: F401  (TS re-exported)
 
-GEN = os.path.join(ROOT, "results", "gen")
-GPLOTS = os.path.join(ROOT, "plots", "gen")
+GEN = os.path.join(RESULTS, "gen")
+GPLOTS = os.path.join(PLOTS, "gen")
 os.makedirs(GEN, exist_ok=True)
 os.makedirs(GPLOTS, exist_ok=True)
 
@@ -102,6 +102,9 @@ class Runner:
         self.cap = {}
         blocks[self.mid].register_forward_hook(self._hook("mid"))
         blocks[self.final].register_forward_hook(self._hook("final"))
+        self.inject = None
+        self.site_module = f"{type(self.base).__name__}.{'h' if hasattr(self.base, 'h') else 'layers'}[0] output"
+        blocks[0].register_forward_hook(self._site_hook)
         pre = self.rows(self.ids[:-1]).unsqueeze(0)
         with torch.no_grad():
             c = self.fwd(inputs_embeds=pre, use_cache=True).past_key_values
@@ -117,6 +120,17 @@ class Runner:
 
     def rows(self, ids):
         return self.emb[torch.as_tensor(ids, device=self.emb.device)].to("cuda", torch.float32)
+
+    def _site_hook(self, mod, inp, out):
+        """Block-0 output (resid_post): record the last position; if self.inject is set, replace it."""
+        h = out[0] if isinstance(out, tuple) else out
+        self.cap["resid0"] = h[:, -1, :].float().clone()
+        self.cap["resid0_dtype"] = str(h.dtype)
+        if self.inject is None:
+            return None
+        h = h.clone()
+        h[:, -1, :] = self.inject.to(h.dtype)
+        return (h,) + tuple(out[1:]) if isinstance(out, tuple) else h
 
     def _hook(self, name):
         def f(mod, inp, out):
@@ -140,3 +154,20 @@ class Runner:
         x = torch.cat([pre, last_emb.unsqueeze(1)], dim=1)
         self.fwd(inputs_embeds=x, use_cache=False)
         return self.cap["mid"], self.cap["final"]
+
+    @torch.no_grad()
+    def resid0(self, last_emb, full=False):
+        """Unpatched run(s) with last-position embedding(s) last_emb -> block-0 output at the last position."""
+        (self.run_full if full else self.run)(last_emb)
+        return self.cap["resid0"]
+
+    @torch.no_grad()
+    def run_patched(self, r, full=False):
+        """Run endpoint A (N copies) with the last-position block-0 output replaced by r (N, d).
+        The prefix cache holds only prefix keys/values, which do not depend on r; nothing downstream
+        of the patch is reused between runs."""
+        self.inject = r
+        try:
+            return (self.run_full if full else self.run)(self.rows([self.id_a]).expand(r.shape[0], -1))
+        finally:
+            self.inject = None

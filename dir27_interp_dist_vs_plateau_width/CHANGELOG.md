@@ -48,3 +48,23 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 ## 2026-09-28 — REPORT_generalization.md: second rejection repair (feedback 3)
 - Summary 'Shape' bullet: replaced "0.30–0.50 band is the tail in the GPT-2 models but typical in the others" with per-model token shares (Pythia 66% typical, Qwen3 23% upper side, Llama 11% tail, GPT2-XL ~2% tail); Conclusion sentence aligned to the same numbers.
 - GPT2-XL section: flag rate now final-block (11.5% vs GPT-2 Large 5.3%) instead of any-block 11.6% vs 5.5%, matching the Conclusion table.
+
+## 2026-10-13 — Block-0 resid_post rerun replaces the embedding run in REPORT.md / RESULTS.md
+- REPORT.md and RESULTS.md rewritten for the rerun (interpolation and distance at the last-position output of
+  transformer block 0, five models). Previous versions preserved unchanged in `archive/embedding_run/`
+  (REPORT.md, RESULTS.md, PLAN.md). REPORT_generalization.md / RESULTS_generalization.md are untouched and still
+  describe the embedding run. New data in `results/block0_resid_post/`, plots in `plots/block0_resid_post/`;
+  embedding-run data and plots not overwritten.
+- Story change (old -> new, forced by Table 1/2 of the new REPORT.md): "distance does not visibly predict width at
+  either block" -> "middle-block width rises with block-0 distance in GPT-2 Large and GPT2-XL, weakly in the other
+  three; final block shows no shared direction".
+- GPT-2 Large numbers, embedding -> block 0: median W_mid by D fifth 0.184/0.196/0.199/0.196/0.199 ->
+  0.196/0.201/0.211/0.228/0.276; median W_final by fifth 0.104/0.112/0.106/0.107/0.130 ->
+  0.110/0.119/0.123/0.127/0.128; median W_mid 0.195 -> 0.216; median W_final 0.112 -> 0.121; final narrower
+  97.7% -> 98.4%; flagged 2,788 (5.5%) -> 1,043 (2.1%); W_final(' large') 0.466 -> 0.533; tokens at least as wide
+  as ' large' 52 -> 28 others; histogram peak 0.087-0.090 -> 0.111-0.114; the 64-token spike at W_final 0.33 is gone.
+- Other models, W_mid nearest -> farthest fifth (block 0): GPT2-XL 0.170 -> 0.225, Pythia 0.550 -> 0.579,
+  Llama 0.339 -> 0.375, Qwen3 0.312 -> 0.335. W_final: 0.070 -> 0.075, 0.466 -> 0.427, 0.230 -> 0.266, 0.290 -> 0.312.
+- Figure changes: REPORT.md now has 8 figures (GPT-2 Large Figures 1-4 regenerated; one distance-vs-width figure
+  per other model). GPT-2 Large zoom window is the 5th-95th percentile of D (was the fixed 1.6-3.3 embedding range);
+  representative-curve words reselected by the same rule in the new distance space.

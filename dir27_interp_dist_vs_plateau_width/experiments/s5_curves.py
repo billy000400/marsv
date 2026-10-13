@@ -1,6 +1,7 @@
 """S5: representative final-layer y(t) curves from different W_final regimes and from the modal group."""
 import glob
 import os
+import re
 
 import matplotlib
 matplotlib.use("Agg")
@@ -8,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from transformers import AutoTokenizer
 
-from common import CVD, MODEL, PLOTS, RESULTS, TS
+from common import CVD, MODEL, PLOTS, RESULTS, SITE, TS
 
 STYLES = [("-", "o"), ("--", "s"), (":", "^"), ("-.", "D"), ("-", "v")]
 
@@ -25,6 +26,17 @@ def main():
     # (a) five words with D in [2.45, 2.55] (vocabulary median D = 2.51) nearest the min, 25th, 50th, 75th
     # percentile and max of W_final within that band; (b) five tokens from the modal histogram bin
     regime = [" domestically", " nickel", " bulletin", " oxide", " nutshell"]
+    band = "2.45-2.55"
+    if SITE != "embed":
+        # same rule in the new distance space: D within 2% of the vocabulary median; among lowercase words
+        # there, those nearest the min, 25th, 50th, 75th percentile and max of W_final of the whole band
+        med = np.median(D)
+        inb = np.where(np.abs(D - med) <= 0.02 * med)[0]
+        words = [k for k in inb if re.fullmatch(r" [a-z]{4,}", tok.decode([int(ids[k])]))]
+        targets = np.percentile(Wf[inb], [0, 25, 50, 75, 100])
+        regime = [tok.decode([int(ids[min(words, key=lambda k: abs(Wf[k] - x))])]) for x in targets]
+        band = f"{0.98 * med:.1f}-{1.02 * med:.1f}"
+        print(f"band D {band} (median {med:.2f}): n={len(inb)}, {len(words)} words; W_final percentiles {targets}")
     hist, edges = np.histogram(Wf, bins=200)
     b = hist.argmax()
     lo, hi = edges[b], edges[b + 1]
@@ -33,11 +45,13 @@ def main():
     if len(modal) < 5:
         cand = np.where((Wf >= lo) & (Wf < hi))[0]
         cand = cand[np.argsort(-D[cand])]  # deterministic fill
-        modal += [tok.decode([int(ids[k])]) for k in cand if tok.decode([int(ids[k])]) not in modal][:5 - len(modal)]
+        # pos[...] == k: skip tokens whose decoded string is shared with another token (pos keeps only one)
+        modal += [tok.decode([int(ids[k])]) for k in cand if tok.decode([int(ids[k])]) not in modal
+                  and pos[tok.decode([int(ids[k])])] == k][:5 - len(modal)]
     print(f"modal bin [{lo:.4f},{hi:.4f}) n={hist[b]}; modal examples {modal}")
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.6), sharey=True)
-    for ax, words, title in ((axes[0], regime, "(a) same D (2.45-2.55), different widths"),
+    for ax, words, title in ((axes[0], regime, f"(a) same D ({band}), different widths"),
                              (axes[1], modal, "(b) five tokens from the most common width bin")):
         for j, w in enumerate(words):
             k = pos[w]

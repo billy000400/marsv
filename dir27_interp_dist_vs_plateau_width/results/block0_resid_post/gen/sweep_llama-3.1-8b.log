@@ -1,0 +1,36 @@
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:  10%|▉         | 28/291 [00:00<00:00, 277.69it/s]Loading weights:  19%|█▉        | 56/291 [00:00<00:01, 229.62it/s]Loading weights:  27%|██▋       | 80/291 [00:00<00:01, 207.01it/s]Loading weights:  35%|███▌      | 103/291 [00:00<00:00, 206.08it/s]Loading weights:  43%|████▎     | 124/291 [00:00<00:00, 194.44it/s]Loading weights:  50%|█████     | 146/291 [00:00<00:00, 201.62it/s]Loading weights:  57%|█████▋    | 167/291 [00:00<00:00, 197.00it/s]Loading weights:  65%|██████▍   | 189/291 [00:00<00:00, 201.93it/s]Loading weights: 100%|██████████| 291/291 [00:00<00:00, 299.32it/s]
+Some parameters are on the meta device because they were offloaded to the cpu.
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+{'model': 'llama-3.1-8b', 'intervention_site': 'block0_resid_post', 'distance_space': 'block0_resid_post', 'tok_per_batch': 128, 'hook_module': 'LlamaModel.layers[0] output', 'n_blocks': 32, 'mid_block': 16, 'final_block': 31, 'vocab': 128256, 'prompt_ids': [128000, 791, 3838, 574, 2466], 'token_a': ' big', 'cache_check_max_rel_diff': [0.0200294628739357, 0.06250445544719696], 'cache_check_abs_dW_median': [0.0007810163497924683, 0.001253792103379947], 'cache_check_abs_dW_max': [0.0026436486840247797, 0.02975975424051286]}
+shard 0: 4096 tokens, gpu 67.3s total 68.0s
+shard 4096: 4096 tokens, gpu 67.7s total 68.4s
+shard 8192: 4096 tokens, gpu 68.0s total 68.7s
+shard 12288: 4096 tokens, gpu 68.2s total 68.9s
+shard 16384: 4096 tokens, gpu 68.1s total 69.9s
+shard 20480: 4096 tokens, gpu 69.2s total 70.9s
+shard 24576: 4096 tokens, gpu 69.3s total 71.3s
+shard 28672: 4096 tokens, gpu 69.3s total 71.2s
+shard 32768: 4096 tokens, gpu 69.6s total 71.1s
+shard 36864: 4096 tokens, gpu 69.5s total 71.6s
+shard 40960: 4096 tokens, gpu 69.3s total 71.0s
+shard 45056: 4096 tokens, gpu 69.5s total 70.2s
+shard 49152: 4096 tokens, gpu 68.1s total 69.0s
+shard 53248: 4096 tokens, gpu 68.2s total 69.0s
+shard 57344: 4096 tokens, gpu 68.1s total 68.9s
+shard 61440: 4096 tokens, gpu 68.0s total 68.7s
+shard 65536: 4096 tokens, gpu 68.1s total 68.8s
+shard 69632: 4096 tokens, gpu 68.2s total 68.9s
+shard 73728: 4096 tokens, gpu 68.3s total 69.0s
+shard 77824: 4096 tokens, gpu 68.3s total 69.0s
+shard 81920: 4096 tokens, gpu 68.6s total 69.2s
+shard 86016: 4096 tokens, gpu 68.2s total 68.9s
+shard 90112: 4096 tokens, gpu 68.2s total 69.0s
+shard 94208: 4096 tokens, gpu 68.3s total 68.9s
+shard 98304: 4096 tokens, gpu 68.2s total 68.8s
+shard 102400: 4096 tokens, gpu 68.3s total 69.0s
+shard 106496: 4096 tokens, gpu 68.1s total 68.8s
+shard 110592: 4096 tokens, gpu 68.3s total 69.1s
+shard 114688: 4096 tokens, gpu 68.3s total 69.0s
+shard 118784: 4096 tokens, gpu 68.2s total 69.0s
+shard 122880: 4096 tokens, gpu 68.2s total 68.9s
+shard 126976: 1279 tokens, gpu 21.3s total 21.5s

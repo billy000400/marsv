@@ -1,0 +1,30 @@
+{
+ "model": "qwen3-8b-base",
+ "intervention_site": "block0_resid_post",
+ "distance_space": "block0_resid_post",
+ "tok_per_batch": 128,
+ "hook_module": "Qwen3Model.layers[0] output",
+ "n_blocks": 36,
+ "mid_block": 18,
+ "final_block": 35,
+ "vocab": 151669,
+ "prompt_ids": [
+  785,
+  3753,
+  572,
+  2409
+ ],
+ "token_a": " big",
+ "cache_check_max_rel_diff": [
+  0.023622501641511917,
+  0.02763463743031025
+ ],
+ "cache_check_abs_dW_median": [
+  0.0007918638642877285,
+  0.003467856347560805
+ ],
+ "cache_check_abs_dW_max": [
+  0.003760903179645614,
+  0.023533697724342384
+ ]
+}
