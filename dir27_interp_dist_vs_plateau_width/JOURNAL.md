@@ -515,3 +515,17 @@ On track? blocked on one operator answer: which files are "the ECC results" — 
 - Output paths are my choice (the feedback names none); PNG and PDF both, as the feedback allows.
 
 On track? yes — next pass writes the script and figure.
+
+## 2026-10-13 — human_feedback_6.txt: summary figure script written and run
+- `experiments/summary_distance_vs_width.py` -> `plots/block0_resid_post/summary_distance_vs_width.{png,pdf}`.
+- Monotonic tokens / Pearson r / Spearman rho (D vs W_final): GPT-2 Large 49,213 / +0.127 / +0.148;
+  GPT-2 XL 45,953 / +0.054 / +0.054; Pythia 1.4B 50,155 / -0.138 / -0.149; Llama 3.1-8B 122,425 / +0.149 / +0.149;
+  Qwen3-8B 132,609 / +0.062 / +0.088.
+- Choices (all single config lines): Llama x window 1-2.5 as in the feedback-4 figure (23 monotonic tokens beyond it,
+  still in the correlations; rejected: full range, which squeezes the cloud into a sliver); summary axis drawn
+  0.06 past +-1 so the reference lines are visible; "0" annotation placed under the last model row because three
+  annotations in one row overlapped; alpha 0.08, point area 5.
+- Empty-model path tested on a temporary copy with all GPT-2 Large flags set to 1: run completes.
+- Manifest: all 80 items done, state `review_pending`.
+
+On track? yes — waiting for the wrapper's checks and content review.

@@ -86,3 +86,7 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
   `plots/block0_resid_post/path_control/`; linear and embedding results not overwritten.
 - Story change: the Conclusion's "little at the final block" is now qualified as specific to the straight path and
   dir27's normalization (final-block rise 0.02 -> 0.05 under Matthew's path, 0.10-0.14 under the relative normalization).
+
+## 2026-10-13 — Feedback 6: summary figure of distance vs final-block width (no report change)
+- New `experiments/summary_distance_vs_width.py` and `plots/block0_resid_post/summary_distance_vs_width.png` / `.pdf`.
+- REPORT*.md and RESULTS*.md unchanged; no result file changed; no number superseded.

@@ -153,14 +153,11 @@ REPORT.md keeps 8 figures, so the path-control figures are in RESULTS.md R6 and 
 
 ## Next step
 
-`human_feedback_6.txt` is **ready** (triaged 2026-10-13). It replaces the withdrawn `human_feedback_5.txt` and names
-the data source: the block-0 CSVs (`results/block0_resid_post/sweep.csv` and `results/block0_resid_post/gen/<model>.csv`).
-Next pass: write `experiments/summary_distance_vs_width.py` and run it to produce
-`plots/block0_resid_post/summary_distance_vs_width.png` and `.pdf` (2x3 layout: five final-block scatter panels of
-W_final against D with Pearson r in the title, one Spearman summary panel). No model runs; no report change.
-Term mapping and the one format assumption (the CSV flag covers both the middle and final block) are in
-`.tasks/human_feedback_6.txt.manifest.json` (`routing_notes`). No STOP while this feedback is open.
-The success criterion and addendum are otherwise met.
+`human_feedback_6.txt` is **review_pending** (2026-10-13). `experiments/summary_distance_vs_width.py` reads the five
+block-0 CSVs and writes `plots/block0_resid_post/summary_distance_vs_width.png` and `.pdf` (2x3 layout: five
+final-block scatter panels of W_final against D with Pearson r in the title, one Spearman summary panel).
+No model run; no report or result file changed. If the content review rejects it, repair the named items only.
+The success criterion and addendum are otherwise met; nothing else is open.
 
 ## Method references
 
