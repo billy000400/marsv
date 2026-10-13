@@ -580,3 +580,27 @@ the property that would have to change (off-centre transitions) for the two to s
 first (rule 11).
 
 On track? yes — S1–S3 complete, S4 delivered, feedback #7 fully addressed, no blocker.
+
+## 2026-10-13 — feedback #8: triage only (frame-variation report)
+
+**What I did.** Triage of `human_feedback_8.md`; no research. Manifest set to `ready`.
+
+**Routing.** New report `REPORT_frame_variation.md` (the feedback asks for "a separate report" and
+names no file). `REPORT.md` and `PLAN.md` are declared unchanged. Required plots:
+`plots/frame_range_jsd_hist.png`, `plots/frame_range_w_hist.png`, `plots/frame_jsd_w_errorbars.png`.
+
+**Assumptions logged** (loop mode). (i) "Range" = per-pair max − min over the three sentence frames.
+(ii) Corpus JSD is one context-free number per pair, so it has no frame range; the JSD that can vary
+across frames is the per-frame model-output JSD, and the JSD-range histogram uses that. The report
+must state this openly. (iii) The error-bar scatter is the JSD-vs-width plot with min-to-max bars;
+shown for corpus JSD (vertical bars only) and model-output JSD (bars on both axes). (iv) "This result"
+= trained 1.4B association, both the 1,000-pair and 60-pair sets. Rejected alternative: blocking on
+"which JSD" — the data admits only one frame-dependent JSD, and showing both scatter versions drops
+neither reading.
+
+**Next step.** Check whether per-frame model-output JSD is stored in `results/`; if not, recompute it
+with the existing pipeline. Then write `experiments/frame_variation.py`, the three plots, the report.
+Known wrapper issue: `REPORT.md` (10,676 words, 11 figures) exceeds the default budget and may not be
+touched under this feedback.
+
+On track? yes — triage complete, task ready.

@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "state": "ready",
+  "source_feedback": "human_feedback_8.md",
+  "source_sha256": "306dba8876f08daefb71bf7819ad3acaa1d51ebea4f1f7de2631d120ff35351d",
+  "required_outputs": [
+    "REPORT_frame_variation.md",
+    "plots/frame_range_jsd_hist.png",
+    "plots/frame_range_w_hist.png",
+    "plots/frame_jsd_w_errorbars.png"
+  ],
+  "may_modify": [
+    "REPORT_frame_variation.md",
+    "plots/frame_range_jsd_hist.png",
+    "plots/frame_range_w_hist.png",
+    "plots/frame_jsd_w_errorbars.png",
+    "experiments/frame_variation.py",
+    "results/frame_variation.json",
+    "RESULTS.md",
+    "CHANGELOG.md",
+    "JOURNAL.md"
+  ],
+  "must_remain_unchanged": [
+    "REPORT.md",
+    "PLAN.md"
+  ],
+  "report_policy": {
+    "core_research_question": "How much do the per-pair measurements behind the JSD-versus-transition-width result vary across the three fixed sentence frames, and is that variation large enough to weaken trust in the result?",
+    "primary_report": "REPORT_frame_variation.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
+  "checklist": [
+    {
+      "request": "is there significant variation across 'frames'? i guess that weighs on how much we can trust this result. Can you write a separate report to show how much variation are across the three frames? like a histogram of the range of JSd and a histogram of the range of w, and a new JSD plot but now each scattered point has error bars representing the range. Include those plots in the new report. Do not touch the old report",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    }
+  ],
+  "triage_notes": [
+    "Destination: the feedback asks for 'a separate report' and names no file. A new file REPORT_frame_variation.md is created; REPORT.md ('the old report') is declared unchanged.",
+    "'range' is read literally: per token pair, maximum minus minimum of the quantity over the three sentence frames.",
+    "'range of JSd': the corpus next-token JSD is one context-free number per pair and cannot vary across frames; the only JSD measured per frame is the model-output JSD (REPORT.md Methods). The JSD-range histogram therefore uses the per-frame model-output JSD, and the new report must say this plainly, including that corpus JSD has zero frame range by construction.",
+    "'a new JSD plot ... error bars representing the range': the JSD-versus-width scatter redrawn with each pair's min-to-max range over frames as error bars (vertical for w; horizontal only where the x quantity is the per-frame model-output JSD). Both the corpus-JSD and model-output-JSD versions are shown so neither reading is dropped.",
+    "'this result' = the trained 1.4B JSD-versus-width association; both pair sets in REPORT.md (1,000-pair and controlled 60-pair) are covered.",
+    "If per-frame model-output JSD is not already stored in results/, it is recomputed with the existing pipeline (same model, hook, frames); no other experiment is rerun.",
+    "Note for the wrapper: the existing REPORT.md is 10,676 words / 11 figures, over the default budget, and cannot be shortened here because the feedback forbids touching it."
+  ]
+}
