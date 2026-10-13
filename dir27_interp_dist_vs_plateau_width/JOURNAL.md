@@ -396,3 +396,10 @@ On track? yes — S1–S4 done, 100%; no blocker.
 - Wrote STOP.
 
 On track? yes — 100%; complete.
+
+## 2026-10-13 — finalization (re-entry)
+- No unaddressed feedback (three feedback files all `.addressed.md`). PLAN success criterion met; no experiment run, deliverables unchanged.
+- `check_render.py REPORT*.md RESULTS.md` passes (REPORT.md 8 figures; REPORT_generalization.md 12 figures; RESULTS.md 16 figures).
+- `STOP` was absent on entry (only `STOP.over-budget.*` files present); re-wrote `STOP`.
+
+On track? yes — 100%; complete.
