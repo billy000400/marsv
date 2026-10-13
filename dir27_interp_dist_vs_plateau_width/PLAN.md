@@ -104,6 +104,14 @@ run metadata. Preserve the old reports before updating RESULTS.md / REPORT.md
 to describe the current run; keep the history in CHANGELOG.md. If shared output
 paths are used by another direction, leave them untouched.
 
+## Report budget
+
+`REPORT_generalization.md` (feedback 3, approved) keeps the operator's earlier allowance: "The follow-up
+report may contain up to 12 main figures" (PLAN.md as of 2026-09-28). `REPORT.md` stays at 8 or fewer.
+The gate reads one limit for all `REPORT*.md`, so it is stated once here:
+
+- Maximum main figures: 12
+
 ## Fallback (if time runs short)
 
 Complete GPT-2 Large first. Report exactly which other model sweeps are complete

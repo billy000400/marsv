@@ -403,3 +403,17 @@ On track? yes — 100%; complete.
 - `STOP` was absent on entry (only `STOP.over-budget.*` files present); re-wrote `STOP`.
 
 On track? yes — 100%; complete.
+
+## 2026-10-13 — finalization (re-entry): why STOP kept disappearing
+- No unaddressed feedback; success criterion met; no experiment run; REPORT*.md / RESULTS*.md unchanged.
+- Cause of the repeated re-entries: `run.sh` moves `STOP` to `.tasks/STOP.over-budget.*` when
+  `workflow.py check-budgets` fails. It failed on `REPORT_generalization.md` (12 figure embeds vs default 8).
+  The operator's 2026-09-28 PLAN.md allowed "up to 12 main figures" for that report (also in the feedback-3
+  manifest, `max_main_figures: 12`), but the 2026-10-13 PLAN.md rewrite dropped the line, so the gate fell back to 8.
+- Fix: restored the allowance in PLAN.md as a gate-readable line (`Maximum main figures: 12`, new "Report budget"
+  section). Assumption: the earlier operator allowance still holds for the approved follow-up report. Rejected
+  alternative: cutting 4 figures from an approved, reviewed report with no feedback asking for it.
+  Side effect: the gate limit is per-direction, so it now also permits 12 in REPORT.md; REPORT.md stays at 8.
+- `check-budgets` now passes; `check_render.py REPORT*.md RESULTS.md` passes. Re-wrote `STOP`.
+
+On track? yes — 100%; complete.
