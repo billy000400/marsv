@@ -529,3 +529,23 @@ On track? yes — next pass writes the script and figure.
 - Manifest: all 80 items done, state `review_pending`.
 
 On track? yes — waiting for the wrapper's checks and content review.
+
+## 2026-10-13 — human_feedback_6.txt: repair after content rejection
+- Reviewer's seven failures, each repaired in `experiments/summary_distance_vs_width.py` and the regenerated figure:
+  1. Summary x-axis is now exactly [-1, 1]; the +-1 lines are drawn thick with `clip_on=False`.
+  2. Llama panel draws its full x range (all 122,528 points); an inset enlarges D 1-2.5. Inset box covers 0 points.
+  3. Stale "26 far tokens" comment removed (26 = all far Llama tokens, 23 = the monotonic ones).
+  4. Points coloured by local density (log count per grid cell, cividis, dense drawn last); alpha 0.5, area 3.
+  5. Monotonic test is now final-block only, rebuilt from shard `stats` columns 9-11 (tolerance 0.05).
+  6. Definition written out in full in the script and printed under the figure.
+  7. Value labels sit beside each marker, away from the x = 0 line.
+- Assumption logged: "final layer + monotonic" = final-block curve monotonic. The named CSVs hold only the combined
+  flag, so the shard statistics beside each CSV (same block-0 result set, read only) supply the test. Rejected:
+  keeping the CSV flag as default (stricter than asked; still available as `MONOTONIC_RULE = "csv_flag"`).
+  Rejected for Llama: cropped x range (hides counted points), log x-axis (one panel on a different scale).
+- Monotonic tokens / Pearson r / Spearman rho: GPT-2 Large 49,244 / +0.127 / +0.148; GPT-2 XL 45,954 / +0.054 / +0.054;
+  Pythia 1.4B 50,155 / -0.138 / -0.149; Llama 3.1-8B 122,528 / +0.149 / +0.149; Qwen3-8B 132,653 / +0.061 / +0.088.
+  Final-only vs combined flag: +31 / +1 / 0 / +103 / +44 tokens; no coefficient changes at two decimals.
+- Checks: two runs give a byte-identical PNG; empty-model path and `csv_flag` rule run on a temporary copy.
+
+On track? yes — manifest `review_pending`, waiting for the wrapper's review.

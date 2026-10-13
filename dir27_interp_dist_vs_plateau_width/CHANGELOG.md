@@ -90,3 +90,12 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 ## 2026-10-13 — Feedback 6: summary figure of distance vs final-block width (no report change)
 - New `experiments/summary_distance_vs_width.py` and `plots/block0_resid_post/summary_distance_vs_width.png` / `.pdf`.
 - REPORT*.md and RESULTS*.md unchanged; no result file changed; no number superseded.
+
+## 2026-10-13 — Feedback 6 repair: summary figure regenerated (no report change)
+- `experiments/summary_distance_vs_width.py` and `plots/block0_resid_post/summary_distance_vs_width.png` / `.pdf` rewritten
+  after the content review: exact [-1, 1] summary axis, full-range Llama panel with an inset, density-coloured points,
+  final-block-only monotonic test stated under the figure.
+- Figure counts changed with the filter (combined flag -> final-block test): GPT-2 Large 49,213 -> 49,244; GPT-2 XL
+  45,953 -> 45,954; Pythia 50,155 -> 50,155; Llama 122,425 -> 122,528; Qwen3-8B 132,609 -> 132,653. Displayed r and rho
+  are unchanged at two decimals.
+- REPORT*.md and RESULTS*.md unchanged; no result file changed.

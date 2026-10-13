@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "rejected",
+  "state": "review_pending",
   "source_feedback": "human_feedback_6.txt",
   "source_sha256": "212fccfd7fec68587733ff55ba42588b27fa987bad68d9c6e4532a7a0622c26f",
   "required_outputs": [
@@ -44,7 +44,9 @@
     "max_main_figures": 8,
     "detailed_results": "RESULTS.md"
   },
-  "unresolved_ambiguities": [],
+  "unresolved_ambiguities": [
+    "Non-blocking, resolved by a documented assumption: 'final layer' + 'monotonic curves' is read as 'the final-block curve is monotonic'. The named CSVs hold only a combined middle-or-final flag, so the final-block test is rebuilt from the shard statistics stored beside each CSV in the same block-0 result set. One config line (MONOTONIC_RULE = \"csv_flag\") gives the CSV-column version; the two differ by at most 103 tokens per model and by nothing at two decimals."
+  ],
   "checklist": [
     {
       "request": "Please write a reproducible Python script that reads the existing results and generates one summary figure as output.\nGoal\nCreate a 2×3 figure layout summarizing the relationship between interpolation distance and transition width across models.\nPanels 1–5: scatter plots\nMake scatter plots for these five models:",
@@ -59,7 +61,7 @@
       "request": "1. GPT-2 Large",
       "status": "done",
       "completion": {
-        "what_was_done": "Panel 1 (top-left) is GPT-2 Large: 49,213 monotonic tokens, Pearson r = 0.13.",
+        "what_was_done": "Panel 1 (top-left) is GPT-2 Large: 49,244 monotonic tokens, Pearson r = 0.13.",
         "evidence": "plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure), top-left panel; MODELS list in experiments/summary_distance_vs_width.py",
         "ambiguity": "None"
       }
@@ -68,7 +70,7 @@
       "request": "2. GPT-2 XL",
       "status": "done",
       "completion": {
-        "what_was_done": "Panel 2 (top-middle) is GPT-2 XL: 45,953 monotonic tokens, Pearson r = 0.05.",
+        "what_was_done": "Panel 2 (top-middle) is GPT-2 XL: 45,954 monotonic tokens, Pearson r = 0.05.",
         "evidence": "plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure), top-middle panel; MODELS list in experiments/summary_distance_vs_width.py",
         "ambiguity": "None"
       }
@@ -86,7 +88,7 @@
       "request": "4. Llama 3.1-8B",
       "status": "done",
       "completion": {
-        "what_was_done": "Panel 4 (bottom-left) is Llama 3.1-8B: 122,425 monotonic tokens, Pearson r = 0.15.",
+        "what_was_done": "Panel 4 (bottom-left) is Llama 3.1-8B: 122,528 monotonic tokens, Pearson r = 0.15.",
         "evidence": "plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure), bottom-left panel; MODELS list in experiments/summary_distance_vs_width.py",
         "ambiguity": "None"
       }
@@ -95,7 +97,7 @@
       "request": "5. Qwen3-8B\nFor each of these five panels:",
       "status": "done",
       "completion": {
-        "what_was_done": "Panel 5 (bottom-middle) is Qwen3-8B (file qwen3-8b-base.csv): 132,609 monotonic tokens, Pearson r = 0.06. The settings below apply to all five panels.",
+        "what_was_done": "Panel 5 (bottom-middle) is Qwen3-8B (file qwen3-8b-base.csv): 132,653 monotonic tokens, Pearson r = 0.06. The settings below apply to all five panels.",
         "evidence": "plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure), bottom-middle panel; MODELS list in experiments/summary_distance_vs_width.py",
         "ambiguity": "None"
       }
@@ -104,8 +106,8 @@
       "request": "- Only use final-layer results.",
       "status": "done",
       "completion": {
-        "what_was_done": "Every panel plots the column W_final, the width read out at the last transformer block. The middle-block column W_mid is not read.",
-        "evidence": "experiments/summary_distance_vs_width.py: COL_WIDTH = \"W_final\" in the assumptions block; y-axis label 'Transition width W (final block)' in plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
+        "what_was_done": "Every panel plots the column W_final, the width read out at the last transformer block, and the monotonic filter tests the final-block curve only. The middle-block column W_mid is not read.",
+        "evidence": "experiments/summary_distance_vs_width.py: COL_WIDTH = \"W_final\", MONOTONIC_RULE = \"final_block\" in the assumptions block; y-axis label 'Transition width W (final block)' in plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
         "ambiguity": "None"
       }
     },
@@ -113,9 +115,9 @@
       "request": "- Only keep monotonic curves.",
       "status": "done",
       "completion": {
-        "what_was_done": "Only rows with flag_nonmonotonic == 0 are kept (plus a finite-value check).",
-        "evidence": "experiments/summary_distance_vs_width.py: select_monotonic(); per-model counts printed at run time and shown as 'n = ...' in each panel of plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
-        "ambiguity": "'Monotonic' is the CSV column flag_nonmonotonic == 0. That flag covers the middle-block and the final-block curve together; the named CSVs hold no final-block-only flag. Documented in the script's assumptions block."
+        "what_was_done": "A token is kept when its final-block readout curve crosses the 0.1 level once, crosses the 0.9 level once, and never drops by more than 0.05 between neighbouring interpolation positions (plus a finite-value check). The rule is printed in one line under the figure.",
+        "evidence": "experiments/summary_distance_vs_width.py: load_final_block_monotonic(), select_monotonic(), BACKSTEP_TOL; 'n = ...' in each panel and the footnote line of plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
+        "ambiguity": "The request does not say which files hold a final-block monotonic test, and the five named CSVs do not: their column flag_nonmonotonic also fails a token whose middle-block curve is non-monotonic. I read 'final layer + monotonic' as 'the final-block curve is monotonic' and rebuilt that test from the per-curve statistics the same block-0 sweep saved beside each CSV (results/block0_resid_post/sweep/shard_*.npz and gen/<model>/shard_*.npz; read only). D and W_final still come from the CSVs. The two rules differ by 31 / 1 / 0 / 103 / 44 tokens (GPT-2 Large / XL / Pythia / Llama / Qwen) and no coefficient moves at two decimals. MONOTONIC_RULE = \"csv_flag\" switches to the CSV column and needs no shard file."
       }
     },
     {
@@ -149,7 +151,7 @@
       "request": "- Use a shared y-axis range across all five scatter plots so the transition widths are directly comparable.",
       "status": "done",
       "completion": {
-        "what_was_done": "All five scatter panels use one y range (about -0.03 to 0.90), computed to cover every plotted point.",
+        "what_was_done": "All five scatter panels (and the Llama inset) use one y range (about -0.02 to 0.90), computed to cover every plotted point.",
         "evidence": "experiments/summary_distance_vs_width.py: SHARE_Y, Y_LIM, common_y_limits(); identical y ticks on panels 1-5 of plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
         "ambiguity": "None"
       }
@@ -158,17 +160,17 @@
       "request": "- Let each model keep its own x-axis range (do not force a shared x-axis range if the distance scales differ across models).",
       "status": "done",
       "completion": {
-        "what_was_done": "Each panel has its own x range. Four panels use their full data range. The Llama panel uses 1-2.5, the window of the existing Llama figure, because 23 far monotonic tokens would squeeze the cloud into a sliver; the panel prints that 23 points lie beyond the range and that they are counted in r.",
-        "evidence": "experiments/summary_distance_vs_width.py: X_LIMS (set X_LIMS = {} to draw every point); x axes of panels 1-5 in plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
-        "ambiguity": "None for the request. The Llama window is my readability choice, set by one config line; correlations use all monotonic tokens either way."
+        "what_was_done": "Each panel has its own x range, set to that model's full data range, so every monotonic curve is drawn and the plotted points are exactly the points counted in r and rho. In the Llama panel 23 far tokens (D up to 9.1) make the bulk (D 1.4-2.2) a narrow strip, so an inset repeats the bulk enlarged (D from 1 to 2.5). The inset box covers no data point (checked numerically).",
+        "evidence": "experiments/summary_distance_vs_width.py: plot_scatter(), X_ZOOM_INSETS (set to {} for no inset); x axes of panels 1-5 and the Llama inset in plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
+        "ambiguity": "None"
       }
     },
     {
       "request": "- Use a scatter plot style that is easy to read:",
       "status": "done",
       "completion": {
-        "what_was_done": "Scatter style set by the three items below.",
-        "evidence": "experiments/summary_distance_vs_width.py: 'Scatter style' config block; plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
+        "what_was_done": "Scatter style set by the three items below, plus density colouring: each point is coloured by the number of points in its neighbourhood (log scale, cividis map) and crowded points are drawn last, so the inside of each cloud shows where the points concentrate.",
+        "evidence": "experiments/summary_distance_vs_width.py: 'Scatter style' config block, density_order_and_colors(), draw_points(); plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
         "ambiguity": "None"
       }
     },
@@ -176,8 +178,8 @@
       "request": "  - small-to-medium point size",
       "status": "done",
       "completion": {
-        "what_was_done": "Point area is 5 points^2.",
-        "evidence": "experiments/summary_distance_vs_width.py: MARKER_SIZE = 5",
+        "what_was_done": "Point area is 3 points^2.",
+        "evidence": "experiments/summary_distance_vs_width.py: MARKER_SIZE = 3",
         "ambiguity": "None"
       }
     },
@@ -185,16 +187,16 @@
       "request": "  - some transparency (alpha) to reduce overplotting",
       "status": "done",
       "completion": {
-        "what_was_done": "Alpha is 0.08. With 46k-133k points per panel the core of each cloud still saturates; sparse regions stay visible.",
-        "evidence": "experiments/summary_distance_vs_width.py: ALPHA = 0.08; plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
-        "ambiguity": "None"
+        "what_was_done": "Alpha is 0.5. Transparency alone could not show density at 46k-133k points per panel (the cloud cores were solid), so density is carried by the point colour described above; a colour bar under the figure explains the scale.",
+        "evidence": "experiments/summary_distance_vs_width.py: ALPHA = 0.5, COLOR_BY_DENSITY, DENSITY_BINS, DENSITY_CMAP; panels 1-5 and colour bar of plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
+        "ambiguity": "None. COLOR_BY_DENSITY = False returns to one flat colour per model."
       }
     },
     {
       "request": "  - no unnecessary clutter",
       "status": "done",
       "completion": {
-        "what_was_done": "No legend, no fit line, no top/right spines, light grid; the only in-panel text is the sample count.",
+        "what_was_done": "No legend, no fit line, no top/right spines, light grid. In-panel text is the sample count; the Llama panel also has the inset. One colour bar serves all five panels.",
         "evidence": "experiments/summary_distance_vs_width.py: style_axes(), plot_scatter(); plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
         "ambiguity": "None"
       }
@@ -204,7 +206,7 @@
       "status": "done",
       "completion": {
         "what_was_done": "Pearson r computed per model with scipy.stats.pearsonr.",
-        "evidence": "experiments/summary_distance_vs_width.py: correlations(); values printed at run time: +0.1268, +0.0535, -0.1378, +0.1491, +0.0615",
+        "evidence": "experiments/summary_distance_vs_width.py: correlations(); values printed at run time: +0.1267, +0.0535, -0.1378, +0.1489, +0.0614",
         "ambiguity": "None"
       }
     },
@@ -221,9 +223,9 @@
       "request": "  - transition width\n    using only the monotonic curves for that model.",
       "status": "done",
       "completion": {
-        "what_was_done": "Second variable is W_final; the inputs are the output of select_monotonic() for that model, including points beyond a zoomed x range.",
+        "what_was_done": "Second variable is W_final; the inputs are the output of select_monotonic() for that model. Every one of those points is also drawn in the panel.",
         "evidence": "experiments/summary_distance_vs_width.py: main() passes select_monotonic() output to correlations()",
-        "ambiguity": "'Monotonic' is the CSV column flag_nonmonotonic == 0. That flag covers the middle-block and the final-block curve together; the named CSVs hold no final-block-only flag. Documented in the script's assumptions block."
+        "ambiguity": "The request does not say which files hold a final-block monotonic test, and the five named CSVs do not: their column flag_nonmonotonic also fails a token whose middle-block curve is non-monotonic. I read 'final layer + monotonic' as 'the final-block curve is monotonic' and rebuilt that test from the per-curve statistics the same block-0 sweep saved beside each CSV (results/block0_resid_post/sweep/shard_*.npz and gen/<model>/shard_*.npz; read only). D and W_final still come from the CSVs. The two rules differ by 31 / 1 / 0 / 103 / 44 tokens (GPT-2 Large / XL / Pythia / Llama / Qwen) and no coefficient moves at two decimals. MONOTONIC_RULE = \"csv_flag\" switches to the CSV column and needs no shard file."
       }
     },
     {
@@ -295,7 +297,7 @@
       "completion": {
         "what_was_done": "Spearman uses the same select_monotonic() subset as the scatter panels.",
         "evidence": "experiments/summary_distance_vs_width.py: main()",
-        "ambiguity": "'Monotonic' is the CSV column flag_nonmonotonic == 0. That flag covers the middle-block and the final-block curve together; the named CSVs hold no final-block-only flag. Documented in the script's assumptions block."
+        "ambiguity": "The request does not say which files hold a final-block monotonic test, and the five named CSVs do not: their column flag_nonmonotonic also fails a token whose middle-block curve is non-monotonic. I read 'final layer + monotonic' as 'the final-block curve is monotonic' and rebuilt that test from the per-curve statistics the same block-0 sweep saved beside each CSV (results/block0_resid_post/sweep/shard_*.npz and gen/<model>/shard_*.npz; read only). D and W_final still come from the CSVs. The two rules differ by 31 / 1 / 0 / 103 / 44 tokens (GPT-2 Large / XL / Pythia / Llama / Qwen) and no coefficient moves at two decimals. MONOTONIC_RULE = \"csv_flag\" switches to the CSV column and needs no shard file."
       }
     },
     {
@@ -311,17 +313,17 @@
       "request": "- Set the x-axis range to [-1, 1]",
       "status": "done",
       "completion": {
-        "what_was_done": "Ticks and data range run from -1 to 1. The drawn axis extends 0.06 beyond each end so the lines at -1 and +1 are not hidden by the frame.",
-        "evidence": "experiments/summary_distance_vs_width.py: SUMMARY_X_LIM, SUMMARY_X_MARGIN (set to 0 for an exact [-1, 1] frame); plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure) bottom-right panel",
-        "ambiguity": "None; the 0.06 margin is a visibility choice with a one-line switch."
+        "what_was_done": "The summary x-axis runs exactly from -1 to 1 (ax.set_xlim(-1, 1)). The reference lines at -1 and +1 lie on the panel edges; they are drawn thick and unclipped so both are fully visible.",
+        "evidence": "experiments/summary_distance_vs_width.py: SUMMARY_X_LIM, plot_summary() set_xlim and axvline(clip_on=False); bottom-right panel of plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
+        "ambiguity": "None"
       }
     },
     {
       "request": "- Plot one point per model",
       "status": "done",
       "completion": {
-        "what_was_done": "One marker per model, with the same colour and marker shape as that model's scatter panel and its value printed above.",
-        "evidence": "plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure), bottom-right panel; experiments/summary_distance_vs_width.py: plot_summary()",
+        "what_was_done": "One marker per model, each with its own marker shape and colour, with its value printed beside it on the side away from the x = 0 line so no label touches that line or another marker.",
+        "evidence": "plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure), bottom-right panel; experiments/summary_distance_vs_width.py: plot_summary(), VALUE_OFFSET_PT",
         "ambiguity": "None"
       }
     },
@@ -437,7 +439,7 @@
       "request": "   - Organize the code into clear sections and helper functions.",
       "status": "done",
       "completion": {
-        "what_was_done": "Sections: imports, configuration, loading, filtering, correlations, plotting helpers, main, CLI. Helpers: load_csv, select_monotonic, correlations, style_axes, plot_scatter, common_y_limits, plot_summary.",
+        "what_was_done": "Sections: imports, configuration, loading, filtering, correlations, plotting helpers, main, CLI. Helpers: load_csv, load_final_block_monotonic, select_monotonic, correlations, style_axes, density_order_and_colors, draw_points, plot_scatter, common_y_limits, plot_summary.",
         "evidence": "experiments/summary_distance_vs_width.py",
         "ambiguity": "None"
       }
@@ -500,8 +502,8 @@
       "request": "     - subplot spacing",
       "status": "done",
       "completion": {
-        "what_was_done": "WSPACE, HSPACE.",
-        "evidence": "experiments/summary_distance_vs_width.py: WSPACE, HSPACE",
+        "what_was_done": "WSPACE, HSPACE; CBAR_BOX and FOOTNOTE_Y place the colour bar and the filter note.",
+        "evidence": "experiments/summary_distance_vs_width.py: WSPACE, HSPACE, CBAR_BOX, FOOTNOTE_Y",
         "ambiguity": "None"
       }
     },
@@ -527,8 +529,8 @@
       "request": "     - filtering logic",
       "status": "done",
       "completion": {
-        "what_was_done": "Comment 'EDIT filtering logic here' on select_monotonic(); the flag column and value are config constants.",
-        "evidence": "experiments/summary_distance_vs_width.py: select_monotonic(), COL_FLAG, MONOTONIC_FLAG_VALUE",
+        "what_was_done": "Comment 'EDIT filtering logic here' on select_monotonic(); the rule switch, column names, statistics columns and tolerance are config constants.",
+        "evidence": "experiments/summary_distance_vs_width.py: select_monotonic(), MONOTONIC_RULE, COL_FLAG, STAT_NCROSS10/STAT_NCROSS90/STAT_BACKSTEP, BACKSTEP_TOL",
         "ambiguity": "None"
       }
     },
@@ -563,8 +565,8 @@
       "request": "     - colors / marker styles",
       "status": "done",
       "completion": {
-        "what_was_done": "Comment 'EDIT HERE for colours / markers' on COLORS and MARKERS.",
-        "evidence": "experiments/summary_distance_vs_width.py: COLORS, MARKERS",
+        "what_was_done": "Comment 'EDIT HERE for colours / markers' on COLORS and MARKERS; DENSITY_CMAP and COLOR_BY_DENSITY sit below it.",
+        "evidence": "experiments/summary_distance_vs_width.py: COLORS, MARKERS, DENSITY_CMAP, COLOR_BY_DENSITY",
         "ambiguity": "None"
       }
     },
@@ -608,9 +610,9 @@
       "request": "     - “monotonic curve”",
       "status": "done",
       "completion": {
-        "what_was_done": "Defined as flag_nonmonotonic == 0, with the rule that sets the flag.",
-        "evidence": "experiments/summary_distance_vs_width.py: assumptions block",
-        "ambiguity": "'Monotonic' is the CSV column flag_nonmonotonic == 0. That flag covers the middle-block and the final-block curve together; the named CSVs hold no final-block-only flag. Documented in the script's assumptions block."
+        "what_was_done": "Defined in full inside the script: the final-block curve crosses 0.1 once, crosses 0.9 once, and never drops by more than BACKSTEP_TOL = 0.05 between neighbouring positions. No other file is needed to read the definition.",
+        "evidence": "experiments/summary_distance_vs_width.py: assumptions block; the same rule is printed under the figure in plots/block0_resid_post/summary_distance_vs_width.png (.pdf is the same figure)",
+        "ambiguity": "The request does not say which files hold a final-block monotonic test, and the five named CSVs do not: their column flag_nonmonotonic also fails a token whose middle-block curve is non-monotonic. I read 'final layer + monotonic' as 'the final-block curve is monotonic' and rebuilt that test from the per-curve statistics the same block-0 sweep saved beside each CSV (results/block0_resid_post/sweep/shard_*.npz and gen/<model>/shard_*.npz; read only). D and W_final still come from the CSVs. The two rules differ by 31 / 1 / 0 / 103 / 44 tokens (GPT-2 Large / XL / Pythia / Llama / Qwen) and no coefficient moves at two decimals. MONOTONIC_RULE = \"csv_flag\" switches to the CSV column and needs no shard file."
       }
     },
     {
@@ -635,16 +637,16 @@
       "request": "   - If the existing result format requires assumptions, isolate those assumptions in one place in the code and document them clearly.",
       "status": "done",
       "completion": {
-        "what_was_done": "The one format assumption (a single flag covering both blocks) is stated in that same block, next to the column-name constants; no other part of the code refers to column names.",
+        "what_was_done": "Two format assumptions are stated in that one block, next to the constants they use: (1) the CSV flag mixes the middle and final block, so the final-block test is rebuilt from the shard statistics beside each CSV; (2) MONOTONIC_RULE = \"csv_flag\" uses the CSV column instead. No other part of the code names a column or a statistics index.",
         "evidence": "experiments/summary_distance_vs_width.py: 'Data-format assumptions (the ONLY place they live)' block",
-        "ambiguity": "None"
+        "ambiguity": "The request does not say which files hold a final-block monotonic test, and the five named CSVs do not: their column flag_nonmonotonic also fails a token whose middle-block curve is non-monotonic. I read 'final layer + monotonic' as 'the final-block curve is monotonic' and rebuilt that test from the per-curve statistics the same block-0 sweep saved beside each CSV (results/block0_resid_post/sweep/shard_*.npz and gen/<model>/shard_*.npz; read only). D and W_final still come from the CSVs. The two rules differ by 31 / 1 / 0 / 103 / 44 tokens (GPT-2 Large / XL / Pythia / Llama / Qwen) and no coefficient moves at two decimals. MONOTONIC_RULE = \"csv_flag\" switches to the CSV column and needs no shard file."
       }
     },
     {
       "request": "   - If a model has no qualifying monotonic samples after filtering, handle that gracefully.\nExpected output\nThe script should produce:",
       "status": "done",
       "completion": {
-        "what_was_done": "A model with no qualifying rows keeps its panel with the title '<name> (no monotonic curves)' and a note, gets NaN correlations, and shows a text note in place of a point in the summary panel. Tested by running the script on a copy of the GPT-2 Large CSV with every flag set to 1 (output written to a temporary directory); the run completed.",
+        "what_was_done": "A model with no qualifying rows keeps its panel with the title '<name> (no monotonic curves)' and a note, gets NaN correlations, and shows a text note in place of a point in the summary panel. Tested on a temporary copy of the CSVs with every GPT-2 Large flag set to 1 and MONOTONIC_RULE = \"csv_flag\": the run completed. Missing shard files stop the run with a message naming the csv_flag switch.",
         "evidence": "experiments/summary_distance_vs_width.py: correlations() guard, plot_scatter() empty branch, plot_summary() NaN branch, common_y_limits()",
         "ambiguity": "None"
       }
@@ -653,7 +655,7 @@
       "request": "- a single publication-quality figure file (e.g. .png and/or .pdf)",
       "status": "done",
       "completion": {
-        "what_was_done": "One figure, saved as a 300-dpi PNG and a PDF (scatter points rasterized inside the PDF to keep it at 0.5 MB).",
+        "what_was_done": "One figure, saved as a 300-dpi PNG and a PDF (scatter points rasterized inside the PDF, 1.3 MB).",
         "evidence": "plots/block0_resid_post/summary_distance_vs_width.png; plots/block0_resid_post/summary_distance_vs_width.pdf",
         "ambiguity": "None"
       }
@@ -707,7 +709,7 @@
       "request": "- data loading functions",
       "status": "done",
       "completion": {
-        "what_was_done": "Section 3, load_csv().",
+        "what_was_done": "Section 3, load_csv() and load_final_block_monotonic().",
         "evidence": "experiments/summary_distance_vs_width.py: section 3 DATA LOADING",
         "ambiguity": "None"
       }
@@ -734,7 +736,7 @@
       "request": "- plotting helper functions",
       "status": "done",
       "completion": {
-        "what_was_done": "Section 6, style_axes(), plot_scatter(), common_y_limits(), plot_summary().",
+        "what_was_done": "Section 6, style_axes(), density_order_and_colors(), draw_points(), plot_scatter(), common_y_limits(), plot_summary().",
         "evidence": "experiments/summary_distance_vs_width.py: section 6 PLOTTING HELPERS",
         "ambiguity": "None"
       }
@@ -761,9 +763,9 @@
       "request": "Data source\nUse only data that already exists in this direction; do not run any new model sweeps.\nRead the current block-0 result set: results/block0_resid_post/sweep.csv (GPT-2 Large)\nand results/block0_resid_post/gen/<model>.csv (the other four models).\nDo not use the older input-embedding result set (results/sweep.csv, results/gen/).",
       "status": "done",
       "completion": {
-        "what_was_done": "The script reads only results/block0_resid_post/sweep.csv and results/block0_resid_post/gen/{gpt2-xl,pythia-1.4b,llama-3.1-8b,qwen3-8b-base}.csv. No model was run and no result file was written. results/sweep.csv and results/gen/ are not read.",
-        "evidence": "experiments/summary_distance_vs_width.py: DEFAULT_RESULTS_DIR, MODELS",
-        "ambiguity": "None"
+        "what_was_done": "D, W_final and the token ids are read only from results/block0_resid_post/sweep.csv and results/block0_resid_post/gen/{gpt2-xl,pythia-1.4b,llama-3.1-8b,qwen3-8b-base}.csv. The final-block monotonic test additionally reads the 'stats' array of the shard files that the same block-0 sweep saved beside each CSV. No model was run and no result file was written. results/sweep.csv and results/gen/ are not read.",
+        "evidence": "experiments/summary_distance_vs_width.py: DEFAULT_RESULTS_DIR, MODELS, load_csv(), load_final_block_monotonic()",
+        "ambiguity": "The request does not say which files hold a final-block monotonic test, and the five named CSVs do not: their column flag_nonmonotonic also fails a token whose middle-block curve is non-monotonic. I read 'final layer + monotonic' as 'the final-block curve is monotonic' and rebuilt that test from the per-curve statistics the same block-0 sweep saved beside each CSV (results/block0_resid_post/sweep/shard_*.npz and gen/<model>/shard_*.npz; read only). D and W_final still come from the CSVs. The two rules differ by 31 / 1 / 0 / 103 / 44 tokens (GPT-2 Large / XL / Pythia / Llama / Qwen) and no coefficient moves at two decimals. MONOTONIC_RULE = \"csv_flag\" switches to the CSV column and needs no shard file."
       }
     }
   ],
@@ -774,7 +776,8 @@
     "Format assumption to document in the script's single assumptions block: the CSVs store one flag per token, set when EITHER the middle-block or the final-block curve crosses the 0.1 or 0.9 level more than once or steps backwards beyond the tolerance (experiments/s3_plots.py load_sweep). The CSVs named as the data source hold no final-block-only flag, so 'monotonic' is this combined flag. This is the same 'clean curve' subset used by every existing dir27 figure.",
     "The feedback names no output path. Ordinary implementation choice: script experiments/summary_distance_vs_width.py; figure plots/block0_resid_post/summary_distance_vs_width.png plus the same figure as .pdf (the feedback allows '.png and/or .pdf').",
     "No report is requested. REPORT*.md and RESULTS*.md stay unchanged; the Pearson and Spearman coefficients are requested content of the figure.",
-    "Project plotting rules apply (CLAUDE.md rule 13): colour-vision-deficiency palette, no red/green contrast, marker shape varies with colour."
+    "Project plotting rules apply (CLAUDE.md rule 13): colour-vision-deficiency palette, no red/green contrast, marker shape varies with colour.",
+    "Repair pass after content rejection (2026-10-13): exact [-1, 1] summary axis; Llama panel draws its full range with an enlarged inset; points coloured by local density; monotonic test is final-block only, defined in full in the script and printed under the figure; value labels moved off the x = 0 line; the stale '26 far tokens' comment is gone (26 was all far Llama tokens, 23 the monotonic ones)."
   ],
   "baseline_sha256": {
     ".tasks/human_feedback_6.txt.manifest.json": "c2e1758c833b10e06d0a05037238fcf150fc1cc915edb2db52331b98f17d59aa",

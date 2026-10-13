@@ -153,10 +153,12 @@ REPORT.md keeps 8 figures, so the path-control figures are in RESULTS.md R6 and 
 
 ## Next step
 
-`human_feedback_6.txt` is **review_pending** (2026-10-13). `experiments/summary_distance_vs_width.py` reads the five
-block-0 CSVs and writes `plots/block0_resid_post/summary_distance_vs_width.png` and `.pdf` (2x3 layout: five
-final-block scatter panels of W_final against D with Pearson r in the title, one Spearman summary panel).
-No model run; no report or result file changed. If the content review rejects it, repair the named items only.
+`human_feedback_6.txt` is **review_pending** again (2026-10-13) after one rejection was repaired.
+`experiments/summary_distance_vs_width.py` reads the five block-0 CSVs (plus the shard statistics beside them for the
+final-block monotonic test) and writes `plots/block0_resid_post/summary_distance_vs_width.png` and `.pdf` (2x3 layout:
+five density-coloured scatter panels of W_final against D with Pearson r in the title, one Spearman summary panel on
+an exact [-1, 1] axis). No model run; no report or result file changed. If the content review rejects it, repair the
+named items only.
 The success criterion and addendum are otherwise met; nothing else is open.
 
 ## Method references
