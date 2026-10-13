@@ -484,3 +484,13 @@ On track? yes — addendum done; feedback 5 pending triage.
 - No script, figure, report or result file was touched. No STOP written (rule 11).
 
 On track? blocked on one operator answer: which files are "the ECC results".
+
+## 2026-10-13 — re-check of blocked human_feedback_5.txt (no research)
+- Result: still `blocked`; nothing changed. `human_feedback_5.txt` has the same SHA-256 as in the manifest
+  (94fc591f…), no new operator file has appeared in the direction, and a repeated whole-word search for "ECC" over
+  the project's .md/.py/.txt/.json/.sh files finds it only in the feedback itself and in my own triage notes
+  (one unrelated hit inside a cached web-text corpus in dir3).
+- No script, figure, report, result file or manifest field was touched. No STOP written (rule 11).
+
+On track? blocked on one operator answer: which files are "the ECC results" — the input-embedding set
+(`results/sweep.csv` + `results/gen/*.csv`), the block-0 set (`results/block0_resid_post/...`), or another path.
