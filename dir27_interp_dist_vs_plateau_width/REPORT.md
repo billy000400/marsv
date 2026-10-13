@@ -35,6 +35,11 @@ transformer block 0. Everything else is the same. The embedding-run report is ke
   code-like strings, at distances both below and above the median (Finding 2).
 - **Groups.** Final-block widths in GPT-2 Large form one broad peak with a long tail and no separate
   groups (Figure 3).
+- **Does the straight-line path matter?** In a pilot on 256 random GPT-2 Large pairs we also injected
+  the curved path used in Matthew's experiments. The middle-block rise with distance is present under
+  both paths, and single-pair widths change little (median +0.009 middle, +0.016 final). The
+  final-block rise is 0.02 under the straight line and 0.05 under the curved path, and 0.10–0.14 when
+  his normalization is used instead of ours (Finding 5, Table 3).
 
 ## Methods
 
@@ -108,6 +113,44 @@ r(t) exactly in every model. At t = 0 and t = 1 the raw readout vectors of the p
 separate, unpatched runs of A and B: the largest relative difference was 2 in 100,000 for the three
 float32 models and up to 3.4% of the vector's length for the two 16-bit models, where it reflects 16-bit rounding (RESULTS.md,
 R1).
+
+**Path control (GPT-2 Large pilot).** The straight line is one of many paths between r_A and r_B, and
+Matthew's experiments use a curved one. To ask whether Finding 1 depends on that choice, we ran both
+paths on the same pairs. The curved path is the function `slerp_rescale` from `scripts/utils.py` of
+`MShinkle/activation_plateau_mechanisms` (commit `4222c3e`). It turns the vector's direction at a
+steady angular rate and sets its length to the straight-line mix of the two endpoint lengths. With
+unit directions u_A, u_B and lengths n_A, n_B:
+
+```math
+\theta = \arccos\lvert u_A \cdot u_B \rvert, \qquad
+r_M(t) = \big((1-t)\,n_A + t\,n_B\big)\,\frac{\sin((1-t)\theta)\,u_A + \sin(t\theta)\,u_B}{\sin\theta}
+```
+
+The absolute value is in the published code and is kept; it changes the path only when the cosine
+between r_A and r_B is negative, which no pilot pair has (range 0.13–0.80). Our port matches a verbatim
+copy of the reference to 8 in 10 million. The pairs are 256 token IDs drawn at random (seed 0) from the
+sweep's vocabulary and fixed before the curved path was run. Hook, grid, readouts, W and the flag are
+unchanged, and the same endpoint checks as above pass for both paths (RESULTS.md, R6).
+
+Because the curved path is longer than the straight one, we report two distances. D is the distance
+between the endpoints, as above, and is the same for both paths. The path length adds up the steps of
+the path that is actually injected, on a fine grid of 2,000 steps:
+
+```math
+L_{path} = \sum_i \lVert r(t_{i+1}) - r(t_i) \rVert_2
+```
+
+Matthew's work also normalizes the readout differently, dividing by the sum of the distances to both
+ends. So that a change of path is not confused with a change of normalization, the main comparison
+uses our y(t) for both paths, and a separate comparison recomputes widths from the same forward passes
+with his measure, where x(t) is the readout:
+
+```math
+y_{rel}(t) = \frac{\lVert x(t) - x(0) \rVert_2}{\lVert x(t) - x(0) \rVert_2 + \lVert x(t) - x(1) \rVert_2}
+```
+
+The two measures agree when the readout moves in a straight line and differ when its route bends.
+Table 3 uses both.
 
 **Baselines.** There are none; the questions are descriptive and are answered from plots and medians.
 The earlier embedding run is the reference we compare against. No statistical tests were run.
@@ -274,6 +317,54 @@ down by 0.04 in Pythia, and up by 0.02–0.04 in Llama and Qwen3, where the with
 The final block is narrower than the middle block for most tokens in four models; Qwen3 remains the
 exception at 59.8%: its two medians (0.307 final, 0.325 middle) differ by only 0.018.
 
+### Finding 5 — A curved interpolation path keeps the middle-block trend; the final-block trend depends on path and normalization
+
+Finding 1 used a straight-line path. Here we ask whether it survives the curved path of Matthew's
+experiments, on 256 random GPT-2 Large pairs run under both paths (Methods, "Path control"). The curved
+path is 3.7% to 15.6% longer than the endpoint distance (median 7.5%). Table 3 groups the pairs into
+fifths by endpoint distance D and gives the median width per fifth.
+
+| normalization, block | path | nearest fifth | 2nd | 3rd | 4th | farthest fifth |
+|---|---|---|---|---|---|---|
+| ours (y), middle | straight | 0.197 | 0.198 | 0.207 | 0.233 | 0.259 |
+| ours (y), middle | curved | 0.189 | 0.203 | 0.217 | 0.255 | 0.282 |
+| ours (y), final | straight | 0.114 | 0.105 | 0.117 | 0.143 | 0.136 |
+| ours (y), final | curved | 0.113 | 0.116 | 0.133 | 0.164 | 0.163 |
+| relative (y_rel), middle | straight | 0.356 | 0.381 | 0.445 | 0.468 | 0.507 |
+| relative (y_rel), middle | curved | 0.329 | 0.346 | 0.391 | 0.411 | 0.431 |
+| relative (y_rel), final | straight | 0.280 | 0.276 | 0.345 | 0.368 | 0.421 |
+| relative (y_rel), final | curved | 0.264 | 0.268 | 0.317 | 0.344 | 0.367 |
+
+**Table 3.** GPT-2 Large pilot, median W by fifth of endpoint distance D. Rows with our normalization
+use the 245 pairs unflagged under both paths (48–50 per fifth); 11 pairs flagged under the straight
+path, 5 of them also under the curved path, are left out. Rows with the relative normalization use all
+256 pairs (51–52 per fifth); none is flagged.
+
+**Middle block.** With our normalization the median width rises with distance under both paths: 0.197
+to 0.259 for the straight path and 0.189 to 0.282 for the curved one. The straight-path row matches
+the full-vocabulary medians of Table 1. Grouping the curved-path widths by L_path gives the same
+medians to within 0.003, because L_path stays within 4–16% of D. So the middle-block
+reading of Finding 1 does not depend on the path, and endpoint distance and path length are
+interchangeable here.
+
+**Single pairs.** The path changes the width of one pair only slightly. Among the 245 unflagged pairs
+the curved path gives the wider curve in 180 at the middle block and 218 at the final block, with
+median differences of +0.009 and +0.016; the difference exceeds 0.05 in 3 and 10 pairs. Sharp
+switches stay sharp and gradual ones stay gradual: for ` pres` the final-block width is 0.042 and
+0.048 under the two paths, and for ` hefty` 0.533 and 0.553 (paired scatter and overlaid curves:
+RESULTS.md, R6, Figures 19 and 20).
+
+**Final block.** Here the reading is less stable. The rise from the nearest to the farthest fifth is
+0.02 with the straight path, as in Finding 1, and 0.05 with the curved path. With the relative
+normalization, computed from the same forward passes, it is 0.14 for the straight path and 0.10 for
+the curved one, and the middle block also rises more (0.15 and 0.10). The relative normalization gives
+much larger widths overall (straight-path medians 0.436 middle and 0.341 final, against 0.210 and
+0.120). The choice of normalization therefore moves the final-block trend more than the choice of
+path. We did not test why the two normalizations differ.
+
+This is a pilot: one model, about 50 pairs per fifth, and no statistical test. The other four models
+were not run with the curved path.
+
 ## Conclusion
 
 For "The house was big", measuring both the interpolation and the distance at the output of block 0
@@ -289,6 +380,10 @@ end.
   range from a near-vertical jump to a slow ramp (Figure 4a), and the slowest switches come from size
   words and rare strings at many distances (Finding 2).
 - **Groups.** GPT-2 Large final-block widths form one broad peak (Figure 3).
+- **Path.** In a 256-pair GPT-2 Large pilot, the middle-block trend holds under both the straight and
+  the curved path. The final-block trend is small under the straight path with our normalization and
+  larger under the curved path or the relative normalization (Finding 5, Table 3), so "little at the
+  final block" is specific to our path and normalization.
 
 For the plateau experiments, this suggests that block-0 distance carries some information about switch
 width partway through the network in the GPT-2 models, and little at the final block.
@@ -296,7 +391,7 @@ width partway through the network in the GPT-2 models, and little at the final b
 **Limitations.**
 - One prompt and one anchor token. All relationships here are associations across tokens; no
   experiment tested a cause.
-- The interpolation is a straight line and y is normalized to the two endpoints, as in the embedding
-  run. Other interpolation paths or readouts were out of scope.
+- The main sweeps use a straight-line path and normalize y to the two endpoints. The curved path and
+  the relative normalization were tried only in the GPT-2 Large pilot of Finding 5 (256 pairs).
 - W uses only the first crossing of each level, so it describes flagged curves less well.
 - In the two 16-bit models, rounding limits W to about 0.03 in the worst checked case (typically 0.001–0.003) (RESULTS.md, R1).

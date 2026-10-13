@@ -389,11 +389,187 @@ These are examples only and do not describe the whole band.
 
 The 12 widest tokens (W_final in brackets): `ซู` (0.87), `�` (0.86), ` valueType` (0.85), ` backpage` (0.85), ` nightlife` (0.85), ` kneeling` (0.84), ` ToolStrip` (0.84), `发展机遇` (0.84), `ชั่วโมง` (0.84), `นะครับ` (0.83), `햍` (0.83), `שׂ` (0.83).
 
+## R6 — Interpolation-path control (GPT-2 Large pilot)
+
+**Question.** The main run slides the block-0 vector along a straight line. Matthew's experiments use a
+curved path. Does the relationship between distance and transition width in GPT-2 Large depend on which
+path is injected? This is a pilot on 256 token pairs in one model. It changes the path only; the hook,
+readouts, width rule and flag are those of the main run.
+
+**The two paths.** Both start at r_A and end at r_B, the same unpatched block-0 vectors as in the main run.
+The linear path is the main run's r(t) = (1 − t)·r_A + t·r_B. Matthew's path is the function
+`slerp_rescale` from `scripts/utils.py` of `MShinkle/activation_plateau_mechanisms` (repository commit
+`4222c3e`; last change to the file `9e844be`, 2025-10-03). It turns the direction of the vector at a steady
+angular rate from the direction of r_A to that of r_B, and sets the vector's length to the straight-line
+mix of the two lengths. With unit directions u_A, u_B and lengths n_A, n_B:
+
+```math
+\theta = \arccos\lvert u_A \cdot u_B \rvert, \qquad
+r_M(t) = \big((1-t)\,n_A + t\,n_B\big)\,\frac{\sin((1-t)\theta)\,u_A + \sin(t\theta)\,u_B}{\sin\theta}
+```
+
+The absolute value inside the arccos is in the published code and is kept. It matters only when the
+cosine between r_A and r_B is negative; in that case the path would not keep the stated length. No pair in
+this pilot has a negative cosine (range 0.13–0.80), so for these pairs the function equals ordinary
+spherical interpolation with length rescaling. Our batched port (`experiments/path_control.py`) was
+compared with a verbatim copy of the reference (`experiments/matthew_reference_utils.py`) on 64 random
+vector pairs with cosines from −0.95 to 0.95 and on 26 real endpoint pairs: the largest relative difference
+is 8 in 10 million. No epsilon or other numerical repair was added, and no value was non-finite.
+
+**Pairs.** 256 partner token IDs were drawn without replacement with seed 0 from the sweep's vocabulary
+(every ID except ` big`), before any run of the new path
+(`results/block0_resid_post/path_control/pairs.json`). Six pairs already shown in REPORT.md (` pres`,
+` hefty`, ` large`, ` huge`, ` whopping`, ` money`) were added for illustration only; they are in no
+summary number below. Both paths were run on the same pairs. The saved full-vocabulary sweep keeps only
+normalized curves, so the linear path was rerun on this subset to store the distances needed for the second
+normalization. The rerun reproduces the saved sweep: D is identical and W differs by less than 1 in a
+million.
+
+**Checks.** For both paths and all 262 pairs: the vector entering block 1 at the last position equals the
+injected path exactly; earlier positions differ from the unpatched ` big` run by at most 1.3e-5 (float32
+noise from the batch size); the injected endpoints match r_A and r_B to 5 in 100 million; and the raw
+readout vectors at t = 0 and t = 1 match separate unpatched runs of A and B to 2 in a million
+(`validation.json`, `pilot_checks.json`).
+
+**Two distances.** D_endpoint is the L2 distance between r_A and r_B, the D of the main run; it is the
+same for both paths. L_path is the length of the path that is actually injected, summed over a fine grid
+of 2,000 steps (doubling the grid from 1,000 steps changes it by 1 in 10 million):
+
+```math
+L_{path} = \sum_i \lVert r(t_{i+1}) - r(t_i) \rVert_2
+```
+
+For the linear path L_path equals D_endpoint. Matthew's path is longer by 3.7% to 15.6% (median 7.5%) over
+the 256 pairs. Its length at each t equals the straight-line mix of the endpoint lengths to 2 in 10
+million; the linear path's length dips to as little as 75% of that mix.
+
+**Two normalizations.** The primary comparison uses the main run's progress y(t) for both paths
+(distance moved from the t = 0 readout, divided by the distance between the t = 0 and t = 1 readouts).
+The secondary comparison recomputes, from the same forward passes, the measure used in Matthew's work,
+which divides by the sum of the distances to both ends, with x(t) the readout:
+
+```math
+y_{rel}(t) = \frac{\lVert x(t) - x(0) \rVert_2}{\lVert x(t) - x(0) \rVert_2 + \lVert x(t) - x(1) \rVert_2}
+```
+
+The two agree when the readout moves along a straight line and differ when its route bends. W and the
+flag are computed from either curve by the same rule. No denominator was zero, so all 256 pairs are valid
+under both paths and both normalizations.
+
+**Counts and exclusions.** With the main normalization, 11 of 256 pairs are flagged under the linear path
+and 5 under Matthew's path (the same 5 are among the 11). Paired numbers use the 245 pairs unflagged under
+both. With the relative normalization no pair is flagged, and all 256 are used. All rows, with flags, are
+in `pilot_widths.csv`.
+
+### Distance versus width under each path
+
+To see whether the trend with distance survives the change of path, we group the pairs into fifths by
+D_endpoint and take the median width per fifth for each path.
+
+| normalization, block | path | nearest fifth | 2nd | 3rd | 4th | farthest fifth |
+|---|---|---|---|---|---|---|
+| main, middle (block 18) | linear | 0.197 | 0.198 | 0.207 | 0.233 | 0.259 |
+| main, middle | Matthew's | 0.189 | 0.203 | 0.217 | 0.255 | 0.282 |
+| main, final (block 35) | linear | 0.114 | 0.105 | 0.117 | 0.143 | 0.136 |
+| main, final | Matthew's | 0.113 | 0.116 | 0.133 | 0.164 | 0.163 |
+| relative, middle | linear | 0.356 | 0.381 | 0.445 | 0.468 | 0.507 |
+| relative, middle | Matthew's | 0.329 | 0.346 | 0.391 | 0.411 | 0.431 |
+| relative, final | linear | 0.280 | 0.276 | 0.345 | 0.368 | 0.421 |
+| relative, final | Matthew's | 0.264 | 0.268 | 0.317 | 0.344 | 0.367 |
+
+**Table 1.** GPT-2 Large pilot. Median W by fifth of D_endpoint (edges 28.8, 31.9, 35.3, 38.9). Main
+normalization: 245 pairs unflagged under both paths, 48–50 per fifth. Relative normalization: 256 pairs,
+51–52 per fifth.
+
+At the middle block with the main normalization, both paths rise with distance: 0.197 to 0.259 for the
+linear path and 0.189 to 0.282 for Matthew's. The linear row agrees with the full-vocabulary medians of R3
+(0.196 to 0.276). At the final block the linear path rises by 0.02, as in R3, and Matthew's path by 0.05.
+Grouping Matthew's widths by L_path gives almost the same medians as grouping by D_endpoint (middle
+0.190, 0.202, 0.217, 0.255, 0.282; final 0.114, 0.113, 0.133, 0.164, 0.163), because L_path stays
+within 4–16% of D_endpoint. Figure 18 shows the individual pairs.
+
+![Width against endpoint distance and against path length, both paths](plots/block0_resid_post/path_control/pc1_distance_vs_width.png)
+
+**Figure 18.** GPT-2 Large pilot, main normalization, 245 pairs unflagged under both paths. Rows: middle
+block (top), final block (bottom). Left column x: D_endpoint; right column x: L_path. y: transition width W.
+Open circles: linear path; filled triangles: Matthew's path. In the left column the two markers of a pair
+share the same x.
+
+### Paired comparison of the two paths
+
+To see how much the path changes the width of a single pair, we plot one path's width against the other's.
+
+![Width under Matthew's path against width under the linear path](plots/block0_resid_post/path_control/pc2_paired_width.png)
+
+**Figure 19.** GPT-2 Large pilot, main normalization, 256 random pairs. x: W under the linear path; y: W
+under Matthew's path. (a) middle block, (b) final block. Dots: unflagged under both paths (245); crosses:
+flagged under at least one (11). Dashed line: equal widths.
+
+The pairs lie close to the line of equal widths, slightly above it. Among the 245 unflagged pairs,
+Matthew's path gives the wider curve in 180 at the middle block (median difference +0.009) and in 218 at
+the final block (median difference +0.016). The difference exceeds 0.05 in 3 pairs at the middle block and
+10 at the final block; the largest is +0.115. The ordering of pairs by width is largely kept.
+
+### Matched curves
+
+To show what the two paths do to single curves, Figure 20 overlays them for the six illustrative pairs.
+It also draws the progress of Matthew's injected path itself, computed like y but on the injected vector:
+‖r_M(t) − r_A‖ / ‖r_B − r_A‖. A curved input path can by itself bend a progress curve, so this line shows
+how much bending comes from the input.
+
+![Progress curves under both paths for six illustrative pairs](plots/block0_resid_post/path_control/pc3_matched_curves.png)
+
+**Figure 20.** GPT-2 Large, six illustrative pairs (not part of the random sample). x: interpolation
+position t; y: progress with the main normalization. Top row: middle block; bottom row: final block. Solid:
+linear path; dashed: Matthew's path; dotted: progress of Matthew's injected path. Thin horizontal lines mark
+0.1 and 0.9. Titles give W as linear / Matthew's; the top panels give D_endpoint and the cosine between r_A
+and r_B.
+
+The injected-path progress stays near the diagonal: over the 256 random pairs it departs from t by at most
+0.043 (median of the per-pair maximum 0.015). The readout curves keep their shape under both paths. Sharp
+jumps stay sharp (` pres`: W_final 0.042 and 0.048; ` money`: 0.113 and 0.119) and gradual curves stay
+gradual (` hefty`: 0.533 and 0.553; ` huge`: 0.590 and 0.606; ` whopping`: 0.684 and 0.660). Under
+Matthew's path the switch of ` pres`, ` hefty` and ` whopping` happens at a later t.
+
+### Offline normalization comparison
+
+This comparison changes the normalization and uses no new forward passes. It is kept separate from the
+path comparison above.
+
+![Paired widths under the relative normalization](plots/block0_resid_post/path_control/pc4_paired_width_relative_normalization.png)
+
+**Figure 21.** GPT-2 Large pilot, relative normalization, 256 random pairs (none flagged). x: W under the
+linear path; y: W under Matthew's path. (a) middle block, (b) final block. Dashed line: equal widths.
+
+The relative normalization gives much larger widths than the main one for the same forward passes: the
+median W under the linear path is 0.436 at the middle block and 0.341 at the final block, against 0.210
+and 0.120. Under it, Matthew's path gives the narrower curve in all 256 pairs at the middle block (median
+difference −0.047) and in 205 of 256 at the final block (median −0.022), the opposite direction from the
+main normalization. Figure 22 and Table 1 show that width rises with distance under both paths and at
+both blocks: by 0.10–0.15 from the nearest to the farthest fifth.
+
+![Width against distance under the relative normalization](plots/block0_resid_post/path_control/pc5_distance_vs_width_relative_normalization.png)
+
+**Figure 22.** As Figure 18, with W computed from the relative normalization; 256 pairs.
+
+### What the pilot shows
+
+- The middle-block reading of the main run does not depend on the path: width rises with distance under
+  both (Table 1, Figure 18), and endpoint distance and path length give the same grouping.
+- Single-pair widths change little with the path under the main normalization (Figure 19).
+- The final-block reading is less stable. The rise from nearest to farthest fifth is 0.02 with the linear
+  path and main normalization, 0.05 with Matthew's path, and 0.10–0.14 with the relative normalization
+  under either path (Table 1). The choice of normalization moves this number more than the choice of path.
+- Coverage: one model, 256 random pairs, about 50 per fifth, no statistical test. The other four models
+  and the full vocabulary were not run with Matthew's path.
+
 ## Headline
 
 With interpolation and distance both at the output of block 0, the middle-block width rises with
 distance in GPT-2 Large and GPT2-XL by an amount comparable to the spread among tokens at one distance.
 Pythia 1.4B, Llama-3.1-8B and Qwen3-8B-Base show a smaller rise. Final-block width shows no shared
 direction across models. At any one distance, widths still range from very sharp to very gradual, and
-the widest GPT-2 Large switches again belong to size words and rare strings. These are associations
-across tokens for one prompt; no cause was tested.
+the widest GPT-2 Large switches again belong to size words and rare strings. In a 256-pair GPT-2 Large
+pilot, replacing the straight-line path with Matthew's curved path leaves the middle-block trend in place
+and changes single-pair widths little; the final-block trend is larger under his path and larger again
+under his normalization (R6). These are associations across tokens for one prompt; no cause was tested.

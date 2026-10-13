@@ -439,3 +439,33 @@ On track? yes — triage done; one replot step remains.
   must-remain-unchanged files match their baseline hashes. Manifest set to `review_pending`.
 
 On track? yes — feedback 4 complete, awaiting content review.
+
+## 2026-10-13 — PLAN_addendum.md: paired interpolation-path control (GPT-2 Large), P1-P4
+- Audit: the saved block-0 sweep stores only normalized y curves (float16), so y_relative cannot be computed from
+  it. Reran the linear path on the subset; rerun vs saved sweep: D identical, W differs < 1e-6. Current y
+  normalization (`common.y_curve`) divides by the patched run's own t=0 / t=1 readouts, which match unpatched A/B to
+  2e-6, i.e. it is the fixed-endpoint definition in the addendum; no discrepancy.
+- Reference: MShinkle/activation_plateau_mechanisms HEAD 4222c3e (utils.py last changed 9e844be). Verbatim copy in
+  `experiments/matthew_reference_utils.py`; batched port in `experiments/path_control.py` keeps acos(|dot|), adds no
+  epsilon. Port vs reference max rel diff 8e-7 (random vectors, cosines -0.95..0.95) and 2e-7 (real endpoints).
+- Pairs frozen in `pairs.json` before the run: 256 IDs, rng seed 0, from all IDs except ' big'. Illustrative
+  (separate, not pooled): ' pres', ' hefty', ' large', ' huge', ' whopping', ' money'.
+- Assumptions: (1) raw readout vectors not saved (about 0.5 GB); saved per-point distances to both curve endpoints
+  and the endpoint separation instead, which the addendum allows. (2) L_path computed in float64 on 1000- and
+  2000-step grids. (3) Prefix check tolerance 1e-3 abs instead of exact: 1.3e-5 observed, batch-size float noise
+  (b0_validate.py saw 4.8e-6). (4) REPORT.md is capped at 8 figures and already has 8, so the path-control figures
+  went to RESULTS.md R6 and REPORT.md got a table (Finding 5). Rejected: cutting an approved figure from REPORT.md.
+- Results (n=245 unflagged under both; fifths by D_endpoint): W_mid linear 0.197->0.259, Matthew 0.189->0.282;
+  W_final linear 0.114->0.136, Matthew 0.113->0.163. Relative normalization (n=256): mid 0.356->0.507 / 0.329->0.431,
+  final 0.280->0.421 / 0.264->0.367. L_path/D for Matthew's path 1.037-1.156. Cosines 0.13-0.80, none negative.
+- check_render.py passes for REPORT*.md and RESULTS.md.
+
+On track? yes — addendum P1-P4 100% done; plan complete, no blocker.
+
+## 2026-10-13 — end-of-iteration note
+- `human_feedback_5.txt` appeared at 18:03 while the addendum work was running. It has no `.tasks` manifest yet, so
+  it was not started; triage belongs to the next iteration. No STOP file was left in place (rule 11).
+- Triage hint for that pass: the request reads "ECC results", a name no file in this direction uses; check whether
+  it can be resolved before setting the manifest to ready.
+
+On track? yes — addendum done; feedback 5 pending triage.

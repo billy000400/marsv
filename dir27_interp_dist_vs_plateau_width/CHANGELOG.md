@@ -76,3 +76,13 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - REPORT.md Figures 7-8 and RESULTS.md Figures 12 and 15: captions now give the x range and the tokens not drawn
   (Llama 26 of 128,255; Qwen3 20 of 151,668). REPORT.md sentence "A few far outliers squeeze Llama's cloud into a
   narrow band" -> "Llama's cloud is a compact blob with at most a slight upward lean at the middle block".
+
+## 2026-10-13 — Path control added (PLAN_addendum.md)
+- REPORT.md: new Summary bullet, Methods paragraph "Path control (GPT-2 Large pilot)" (Matthew's path, L_path,
+  y_rel equations), new Finding 5 with Table 3, one Conclusion bullet; Limitations bullet on the straight-line path
+  rewritten to say the curved path and relative normalization were tried only in the pilot. Figure count unchanged (8).
+- RESULTS.md: new section R6 (Table 1, Figures 18-22) and one sentence added to the Headline.
+- No earlier number changed. New data `results/block0_resid_post/path_control/`, plots
+  `plots/block0_resid_post/path_control/`; linear and embedding results not overwritten.
+- Story change: the Conclusion's "little at the final block" is now qualified as specific to the straight path and
+  dir27's normalization (final-block rise 0.02 -> 0.05 under Matthew's path, 0.10-0.14 under the relative normalization).

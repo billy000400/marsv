@@ -73,6 +73,8 @@ anchor-token display). Do not call it token-embedding distance.
 
 Keep the current downstream residual readouts, progress-curve normalization,
 first-crossing width calculation, non-monotonicity flags, and plotting filters.
+(Amended by PLAN_addendum.md: do not change the main experiment's default; the opt-in paired
+path control, its path-length diagnostic and its offline normalization comparison are allowed.)
 In particular, do not switch to SLERP, logits, relative-to-both-endpoints
 normalization, or an isotonic fit as part of this rerun.
 
@@ -94,6 +96,15 @@ normalization, or an isotonic fit as part of this rerun.
   final-width distributions, representative curves, and existing token rankings
   from the new results. Update methods and captions with the explicit hook and
   distance definition. Do not copy the old conclusions into the new report.
+
+Path-control stages (PLAN_addendum.md):
+
+- [x] **P1 — Audit and freeze.** Reference pinned (repo commit 4222c3e), verbatim copy kept, 256 seed-0
+  pair IDs + 6 illustrative pairs saved before the new path was run, opt-in path added.
+- [x] **P2 — Validate.** Port vs reference, hook, endpoints, raw readouts, path-length convergence.
+- [x] **P3 — Paired pilot.** GPT-2 Large, both paths on the frozen pairs; linear subset rerun (saved sweep
+  holds only normalized curves) and checked against the saved sweep.
+- [x] **P4 — Report.** REPORT.md Finding 5 / Table 3; RESULTS.md R6 with Figures 18-22.
 
 ## Output handling
 
@@ -131,17 +142,20 @@ End each JOURNAL.md entry with:
 
 ## Current status
 
-Complete. All five models (GPT-2 Large, GPT2-XL, Pythia 1.4B, Llama-3.1-8B, Qwen3-8B-Base) were rerun with
-the interpolation and the distance at the last-position output of transformer block 0. S2 validation passed
-(exact injection; float32 models match unpatched endpoints to ~1e-5; bf16 models to 1-3%, their rounding
-floor). Plots and rankings are in `plots/block0_resid_post/` and `results/block0_resid_post/`; REPORT.md and
-RESULTS.md describe the new run; the embedding-run versions are in `archive/embedding_run/`.
-Observed outcome: middle-block width rises with block-0 distance in the two GPT-2 models and only weakly in
-the other three; final-block width shows no shared direction.
+Complete, including the PLAN_addendum.md path control. All five models were rerun with the interpolation and
+the distance at the last-position output of transformer block 0 (S1-S4). The GPT-2 Large paired path control
+(P1-P4) ran 256 random pairs + 6 illustrative pairs under the linear path and Matthew's `slerp_rescale` path;
+data in `results/block0_resid_post/path_control/`, plots in `plots/block0_resid_post/path_control/`.
+Observed outcome: the middle-block rise of width with distance holds under both paths; single-pair widths
+change little; the final-block rise is 0.02 (linear) vs 0.05 (Matthew's path) with dir27's normalization and
+0.10-0.14 with the relative normalization. No pair had a negative endpoint cosine.
+REPORT.md keeps 8 figures, so the path-control figures are in RESULTS.md R6 and REPORT.md carries Table 3.
 
 ## Next step
 
-None. Success criterion met.
+Triage `human_feedback_5.txt` (arrived 2026-10-13 18:03, during the addendum iteration; no manifest yet, not
+started). STOP was therefore not written. Otherwise the success criterion and addendum are met. Not expanded to other models, the full vocabulary, or France/dir29;
+propose that only if the operator asks.
 
 ## Method references
 
