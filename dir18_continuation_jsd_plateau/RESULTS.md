@@ -309,3 +309,36 @@ a pair differ by exactly 0.0. A scan of where the patch is applied shows the med
 **Auditability.** Every raw 50-point $d(t)$ curve is committed — `results/curves_*.npy` plus a
 plain-text `results/curves_*.csv.gz` export — so every width, flatness and validity number above can
 be recomputed without a GPU.
+
+## Variation across the three sentence frames (full account in REPORT_frame_variation.md)
+
+Every pair is measured in three sentence frames and the numbers above use the median. The per-frame
+values (`experiments/frame_variation.py`, no GPU; `results/frame_variation.json`) show how much the
+frame matters. "Range" is a pair's largest minus smallest frame value; "spread between pairs" is the
+interquartile range of the per-pair medians. Corpus JSD $J$ is computed from text counts, so it has no
+frame range.
+
+| Quantity, pair set | Median range | Largest range | Spread between pairs | Median range ÷ spread |
+|---|---|---|---|---|
+| $w$, 1,000 pairs | 0.061 | 0.232 | 0.129 | 0.47 |
+| $w$, 60 pairs | 0.071 | 0.165 | 0.169 | 0.42 |
+| Model-output JSD (bits), 1,000 pairs | 0.087 | 0.582 | 0.328 | 0.27 |
+| Model-output JSD (bits), 60 pairs | 0.091 | 0.458 | 0.384 | 0.24 |
+
+A single pair's width therefore moves with the frame by a bit under half the typical between-pair
+difference, and 9.4% of the 1,000 pairs have a $w$ range above the between-pair spread. The
+association across pairs does not depend on the frame: $\rho(J, w)$ from one frame alone is $-0.499$,
+$-0.417$, $-0.483$ (1,000 pairs) and $-0.486$, $-0.411$, $-0.504$ (60 pairs), and using each pair's
+smallest or largest frame value gives $-0.457$ / $-0.507$ and $-0.467$ / $-0.500$. All lie inside the
+intervals reported in Sections 1 and 2.
+
+Further per-frame numbers. Rank agreement between two frames: 0.787–0.841 for $w$ and 0.868–0.921 for
+model-output JSD (1,000 pairs); 0.779–0.891 and 0.865–0.958 (60 pairs). Median $w$ per frame: 0.567,
+0.542, 0.557 (1,000 pairs). $\rho(J, \text{model-output JSD})$ per frame: 0.742, 0.715, 0.701
+(1,000 pairs); 0.754, 0.756, 0.718 (60 pairs). $\rho(\text{model-output JSD}, w)$ within one frame:
+$-0.513$, $-0.449$, $-0.444$ (1,000 pairs); $-0.494$, $-0.450$, $-0.474$ (60 pairs). The range of $w$
+is unrelated to $J$ ($\rho = -0.066$, 1,000 pairs), while the range of model-output JSD is smaller for
+high-$J$ pairs ($\rho = -0.420$). The three frames are similar short clauses ending in `was`, so these
+numbers do not bound the variation across arbitrary contexts. Plots: `plots/frame_range_w_hist.png`,
+`plots/frame_range_jsd_hist.png`, `plots/frame_jsd_w_errorbars.png` (embedded in
+`REPORT_frame_variation.md`).

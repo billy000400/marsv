@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "ready",
+  "state": "addressed",
   "source_feedback": "human_feedback_8.md",
   "source_sha256": "306dba8876f08daefb71bf7819ad3acaa1d51ebea4f1f7de2631d120ff35351d",
   "required_outputs": [
@@ -35,11 +35,11 @@
   "checklist": [
     {
       "request": "is there significant variation across 'frames'? i guess that weighs on how much we can trust this result. Can you write a separate report to show how much variation are across the three frames? like a histogram of the range of JSd and a histogram of the range of w, and a new JSD plot but now each scattered point has error bars representing the range. Include those plots in the new report. Do not touch the old report",
-      "status": "pending",
+      "status": "done",
       "completion": {
-        "what_was_done": "",
-        "evidence": "",
-        "ambiguity": ""
+        "what_was_done": "Wrote a separate report, REPORT_frame_variation.md, on how much the per-pair measurements vary across the three sentence frames (trained 1.4B, 1,000-pair and controlled 60-pair sets), using the per-frame values already stored; no model rerun. Produced a histogram of the per-pair range (max minus min over frames) of JSD, a histogram of the range of w, and the JSD-versus-w scatter with min-to-max error bars on every point, and embedded all three in the new report. Answered the 'significant variation / trust' question by comparing the ranges with the spread between pairs and by recomputing the JSD-w rank correlation from each single frame and from each pair's min and max frame value. REPORT.md was not touched (sha256 unchanged).",
+        "evidence": "REPORT_frame_variation.md: Figure 1 (plots/frame_range_w_hist.png, range of w), Figure 2 (plots/frame_range_jsd_hist.png, range of JSD), Figure 3 (plots/frame_jsd_w_errorbars.png, scatter with range error bars), Table 1 (range statistics), Table 2 (correlation per frame choice), Table 3 (frame-to-frame agreement), Conclusion section. Code experiments/frame_variation.py; numbers results/frame_variation.json; RESULTS.md section 'Variation across the three sentence frames'.",
+        "ambiguity": "None blocking. 'Range of JSd' is shown for the model-output JSD because corpus JSD is one frame-free number per pair (zero range by construction); the report states this in Methods and Results section 2, and Figure 3 shows the scatter against both JSDs. 'Significant' was answered by size relative to between-pair spread, without a new significance test."
       }
     }
   ],
@@ -51,5 +51,40 @@
     "'this result' = the trained 1.4B JSD-versus-width association; both pair sets in REPORT.md (1,000-pair and controlled 60-pair) are covered.",
     "If per-frame model-output JSD is not already stored in results/, it is recomputed with the existing pipeline (same model, hook, frames); no other experiment is rerun.",
     "Note for the wrapper: the existing REPORT.md is 10,676 words / 11 figures, over the default budget, and cannot be shortened here because the feedback forbids touching it."
-  ]
+  ],
+  "baseline_sha256": {
+    "CHANGELOG.md": "005e13dd0bcdfedd38e992dc5846206cdc83147fbbe701541d74748438abd08f",
+    "JOURNAL.md": "f1ae8531ba3e67241d48e987545a0f3cb99a924c9ad7df68c59bb90c2c928dcd",
+    "PLAN.md": "615776a4fb2fe336e0bfe47f29b768dfde75f727635e68968a5428561a7b59a6",
+    "REPORT.md": "4e47dcc280225ce97abdc326be25c1ce12e7515a11bc53875c58b76c5f7ab100",
+    "REPORT_frame_variation.md": null,
+    "RESULTS.md": "fb4f8f6b3848e2bece811dde84ac3a996078f294c25af58de3bcd397827add6f",
+    "experiments/frame_variation.py": null,
+    "plots/frame_jsd_w_errorbars.png": null,
+    "plots/frame_range_jsd_hist.png": null,
+    "plots/frame_range_w_hist.png": null,
+    "results/frame_variation.json": null
+  },
+  "review": {
+    "format_passed": true,
+    "content": {
+      "pass": true,
+      "inspected_outputs": [
+        "REPORT_frame_variation.md",
+        "plots/frame_range_jsd_hist.png",
+        "plots/frame_range_w_hist.png",
+        "plots/frame_jsd_w_errorbars.png"
+      ],
+      "failures": [],
+      "summary": "Pass. Every element of the feedback is delivered in a separate report, with no rejectable defect found.\n\n**Coverage of the request**\n- **Separate report:** `REPORT_frame_variation.md` is a new file framed around the user's question (how much frame variation, and does it weaken trust in the result).\n- **Histogram of the range of w:** Figure 1, `plots/frame_range_w_hist.png`, per-pair max minus min for both pair sets, with median range and between-pair spread marked.\n- **Histogram of the range of JSD:** Figure 2, `plots/frame_range_jsd_hist.png`. It uses the model-output JSD, because the corpus JSD is one frame-free number per pair and has zero range by construction. The report states this plainly in Methods and in Results section 2, so I read it as the only feasible reading rather than a reinterpretation.\n- **JSD plot with range error bars:** Figure 3, `plots/frame_jsd_w_errorbars.png`, shows min-to-max bars on every point, against both corpus JSD (vertical bars only) and model-output JSD (bars in both directions).\n- **Plots included in the report:** all three are embedded with captions that define axes and markers.\n- **\"Is there significant variation / can we trust this\":** answered directly. The median range of w is about 0.06–0.07, roughly 45% of the between-pair spread. The corpus-JSD-versus-width rank correlation recomputed per frame is −0.41 to −0.50, all inside the main report's intervals.\n- **\"Do not touch the old report\":** not verifiable from the bundle, since `REPORT.md` is not included. The manifest declares it unchanged and nothing in the outputs suggests otherwise.\n\n**Quality checks**\n- **Budget:** about 2,300 words and 3 figures, against limits of 5,000 and 8. It is curated, not an archive dump.\n- **Extra analysis:** Tables 2 and 3 (correlation per frame choice, frame-to-frame agreement) were not requested but serve the trust question and do not displace anything requested.\n- **Numbers:** summary, tables, figure legends and panel titles agree with one another (e.g. 0.061/0.129, 0.087/0.328, −0.486, −0.525).\n- **Claim strength:** conclusions are limited to the three similar frames tested. The two speculative explanations are labelled as untested, and the association is explicitly called a correlation.\n- **Readability:** the key terms (token, sentence frame, residual state, w, JSD, range, IQR, Spearman) are defined for a newcomer.\n\n**Minor, non-blocking observations**\n- The top-right panel of Figure 3 (1,000 pairs with bars in both directions) is heavily overplotted; the 60-pair panel below it carries the readable version.\n- The model-output-JSD-versus-w correlations in the Figure 3 panel titles (−0.457, −0.501) are not discussed in the text.\n- Kullback-Leibler divergence and softmax are named but not explained.\n- \"±0.03 to ±0.06\" for a single pair's width is a loose paraphrase of the range distribution (median range 0.061, maximum 0.232)."
+    },
+    "expected_outputs": [
+      "REPORT_frame_variation.md",
+      "plots/frame_range_jsd_hist.png",
+      "plots/frame_range_w_hist.png",
+      "plots/frame_jsd_w_errorbars.png"
+    ],
+    "budget_failures": []
+  },
+  "addressed_feedback": "human_feedback_8.md.addressed.md"
 }

@@ -467,3 +467,23 @@ and a measured curve (`E = 0.070`) — against the straight line; (c) `E` vs `w`
 placement range drawn as a gray segment; (d) transition-midpoint histograms. Panels (b)–(d) are new.
 `check_render.py` passes on both files (REPORT.md: 13 display equations, 11 embeds; RESULTS.md: 9
 embeds; 0 problems).
+
+## 2026-10-13 — operator feedback #8: separate report on variation across the three sentence frames
+
+**New deliverable** `REPORT_frame_variation.md` (2.8k words, 3 figures, 3 tables). `REPORT.md` and
+`PLAN.md` untouched (sha256 unchanged). No model run: `experiments/frame_variation.py` reads the
+per-frame `w_ctx` and `out_jsd` already stored in `results/assay_large_step143000.json` and
+`results/assay_step143000_t256.json`; output `results/frame_variation.json`.
+
+**New numbers** (range = per-pair max − min over the three frames). Median range of `w`: 0.061
+(1,000 pairs) / 0.071 (60 pairs), i.e. 0.47 / 0.42 of the between-pair IQR. Median range of
+model-output JSD: 0.087 / 0.091 bits, 0.27 / 0.24 of the between-pair IQR. `rho(J, w)` per single
+frame: −0.499, −0.417, −0.483 (1,000) and −0.486, −0.411, −0.504 (60); with per-pair min / max frame
+value: −0.457 / −0.507 and −0.467 / −0.500. Frame-to-frame rank agreement of `w`: 0.78–0.89. No
+previously reported number changed.
+
+**New plots.** `plots/frame_range_jsd_hist.png`, `plots/frame_range_w_hist.png`,
+`plots/frame_jsd_w_errorbars.png`.
+
+**RESULTS.md.** One section appended, "Variation across the three sentence frames", with the summary
+table and the secondary per-frame numbers. `check_render.py` passes on both files.

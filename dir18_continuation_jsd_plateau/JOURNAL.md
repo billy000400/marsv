@@ -604,3 +604,27 @@ Known wrapper issue: `REPORT.md` (10,676 words, 11 figures) exceeds the default 
 touched under this feedback.
 
 On track? yes — triage complete, task ready.
+
+## 2026-10-13 — feedback #8: frame-variation report written
+
+**What I did.** Per-frame `w` and model-output JSD were already stored for both trained-1.4B pair sets
+(all 3,000 + 180 curves valid), so nothing was recomputed on the GPU. Wrote
+`experiments/frame_variation.py` -> `results/frame_variation.json` and the three requested plots, then
+`REPORT_frame_variation.md`; appended one section to RESULTS.md. Sanity check: the script reproduces
+the published rho (−0.4857, −0.5247) from the frame medians.
+
+**Finding.** Frame range of `w` is moderate (median 0.061 / 0.071, just under half the between-pair
+IQR); model-output JSD range is about a quarter of its between-pair IQR. The J-vs-w correlation is
+−0.41 to −0.51 in every single frame and under per-pair min/max — inside the published CIs.
+
+**Assumptions / choices.** (i) JSD-range histogram uses model-output JSD because corpus JSD has zero
+frame range by construction; stated in the report. (ii) "Significant variation" answered by size
+relative to between-pair IQR and by recomputing rho per frame; no new significance test added
+(WRITING.md rule 5). Rejected: variance-decomposition / ICC — more formalism than the question needs.
+(iii) Added per-frame rho and frame-to-frame rank agreement although not literally requested, because
+the ranges alone cannot say whether the result is affected.
+
+**Caveat recorded in report.** Three similar frames (all end in `was`); a range over three values
+understates wider-context variation.
+
+On track? yes — feedback #8 complete, manifest set to review_pending.
