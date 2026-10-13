@@ -1,4 +1,4 @@
-Please write a reproducible Python script that reads the ECC results and generates one summary figure as output.
+Please write a reproducible Python script that reads the existing results and generates one summary figure as output.
 Goal
 Create a 2×3 figure layout summarizing the relationship between interpolation distance and transition width across models.
 Panels 1–5: scatter plots
@@ -48,7 +48,7 @@ Important implementation requirements
 Please make the script:
 1. Reproducible
    - It should run from the command line.
-   - It should read the ECC results from disk.
+   - It should read the existing results from disk.
    - It should save the final figure to disk.
 2. Readable and easy to fine-tune
    - Organize the code into clear sections and helper functions.
@@ -73,7 +73,7 @@ Please make the script:
      - “monotonic curve”
      - “transition width”
      - “interpolation distance”
-   - If the ECC result format requires assumptions, isolate those assumptions in one place in the code and document them clearly.
+   - If the existing result format requires assumptions, isolate those assumptions in one place in the code and document them clearly.
    - If a model has no qualifying monotonic samples after filtering, handle that gracefully.
 Expected output
 The script should produce:
@@ -93,3 +93,9 @@ Please structure the script roughly like this:
 - CLI entry point
 Extra request
 Please include brief comments in the script explaining where I should edit things if I want to fine-tune the plotting style later.
+
+Data source
+Use only data that already exists in this direction; do not run any new model sweeps.
+Read the current block-0 result set: results/block0_resid_post/sweep.csv (GPT-2 Large)
+and results/block0_resid_post/gen/<model>.csv (the other four models).
+Do not use the older input-embedding result set (results/sweep.csv, results/gen/).

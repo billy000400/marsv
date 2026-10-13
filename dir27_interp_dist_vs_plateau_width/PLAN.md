@@ -153,11 +153,13 @@ REPORT.md keeps 8 figures, so the path-control figures are in RESULTS.md R6 and 
 
 ## Next step
 
-`human_feedback_5.txt` is **blocked** at triage (2026-10-13): it asks for a script that reads "the ECC results", a
-name no file in the project uses. Operator answer needed: the input-embedding result set (`results/sweep.csv` +
-`results/gen/*.csv`), the block-0 set (`results/block0_resid_post/...`), or another path. Mapping of the other terms
-and proposed output paths are in `.tasks/human_feedback_5.txt.manifest.json` (`routing_notes`). Once answered, set the
-manifest to ready and write the script and figure; no report change is requested. No STOP while this feedback is open.
+`human_feedback_6.txt` is **ready** (triaged 2026-10-13). It replaces the withdrawn `human_feedback_5.txt` and names
+the data source: the block-0 CSVs (`results/block0_resid_post/sweep.csv` and `results/block0_resid_post/gen/<model>.csv`).
+Next pass: write `experiments/summary_distance_vs_width.py` and run it to produce
+`plots/block0_resid_post/summary_distance_vs_width.png` and `.pdf` (2x3 layout: five final-block scatter panels of
+W_final against D with Pearson r in the title, one Spearman summary panel). No model runs; no report change.
+Term mapping and the one format assumption (the CSV flag covers both the middle and final block) are in
+`.tasks/human_feedback_6.txt.manifest.json` (`routing_notes`). No STOP while this feedback is open.
 The success criterion and addendum are otherwise met.
 
 ## Method references

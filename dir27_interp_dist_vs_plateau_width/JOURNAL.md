@@ -503,3 +503,15 @@ On track? blocked on one operator answer: which files are "the ECC results" — 
 
 On track? blocked on one operator answer: which files are "the ECC results" — the input-embedding set
 (`results/sweep.csv` + `results/gen/*.csv`), the block-0 set (`results/block0_resid_post/...`), or another path.
+
+## 2026-10-13 — triage of human_feedback_6.txt (no research)
+- `human_feedback_5.txt` was withdrawn by the operator; `human_feedback_6.txt` repeats the request and adds a
+  "Data source" paragraph naming the block-0 CSVs. The earlier "ECC results" ambiguity is gone.
+- Manifest set to `ready` (`workflow.py validate` OK). Required outputs: `experiments/summary_distance_vs_width.py`,
+  `plots/block0_resid_post/summary_distance_vs_width.png` and `.pdf`. Reports and result files declared unchanged.
+- Assumption logged: "monotonic curve" = `flag_nonmonotonic == 0`. That flag is set when either the middle-block or
+  the final-block curve is non-monotonic; the CSVs named as the source carry no final-block-only flag.
+  Rejected alternative: recompute a final-block-only flag from the raw curve shards — the feedback says to read the CSVs.
+- Output paths are my choice (the feedback names none); PNG and PDF both, as the feedback allows.
+
+On track? yes — next pass writes the script and figure.

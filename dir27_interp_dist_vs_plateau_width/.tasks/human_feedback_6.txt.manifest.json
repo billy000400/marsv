@@ -1,28 +1,53 @@
 {
   "version": 1,
-  "state": "blocked",
-  "source_feedback": "human_feedback_5.txt",
-  "source_sha256": "94fc591f1566cdee222a456183e08449c7081a1d7ba2e7c9986b755b162dd548",
-  "required_outputs": null,
-  "may_modify": null,
+  "state": "ready",
+  "source_feedback": "human_feedback_6.txt",
+  "source_sha256": "212fccfd7fec68587733ff55ba42588b27fa987bad68d9c6e4532a7a0622c26f",
+  "required_outputs": [
+    "experiments/summary_distance_vs_width.py",
+    "plots/block0_resid_post/summary_distance_vs_width.png",
+    "plots/block0_resid_post/summary_distance_vs_width.pdf"
+  ],
+  "may_modify": [
+    ".tasks/human_feedback_6.txt.manifest.json",
+    "experiments/summary_distance_vs_width.py",
+    "plots/block0_resid_post/summary_distance_vs_width.png",
+    "plots/block0_resid_post/summary_distance_vs_width.pdf",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md"
+  ],
   "must_remain_unchanged": [
-    "human_feedback_5.txt"
+    "human_feedback_6.txt",
+    "REPORT.md",
+    "REPORT_generalization.md",
+    "RESULTS.md",
+    "RESULTS_generalization.md",
+    "results/block0_resid_post/sweep.csv",
+    "results/block0_resid_post/gen/gpt2-xl.csv",
+    "results/block0_resid_post/gen/pythia-1.4b.csv",
+    "results/block0_resid_post/gen/llama-3.1-8b.csv",
+    "results/block0_resid_post/gen/qwen3-8b-base.csv",
+    "results/sweep.csv",
+    "results",
+    "archive",
+    "plots/gen",
+    "human_feedback.txt.addressed.md",
+    "human_feedback_2.txt.addressed.md",
+    "human_feedback_3.txt.addressed.md",
+    "human_feedback_4.txt.addressed.md"
   ],
   "report_policy": {
-    "core_research_question": null,
-    "primary_report": null,
-    "max_words": null,
-    "max_main_figures": null,
-    "detailed_results": null
+    "core_research_question": "Unchanged: when the ' big' -> token B interpolation and the endpoint distance are both taken at the last-position residual stream after transformer block 0, does transition width W vary with block-0 distance D? This task adds one summary figure and its script; it requests no report text.",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
   },
-  "unresolved_ambiguities": [
-    "The feedback says the script must read 'the ECC results' from disk. 'ECC' is not defined in the feedback and is not used by any file, report, plan, script or result in this direction or anywhere else in the project (word search of all .md/.py/.txt/.json/.sh files). The data source therefore cannot be identified from the request.",
-    "This direction holds two complete result sets for exactly the five named models, and they are different experiments: (a) the input-embedding run, results/sweep.csv (GPT-2 Large) + results/gen/<model>.csv, where interpolation and distance D are at the token embedding; (b) the block-0 run, results/block0_resid_post/sweep.csv + results/block0_resid_post/gen/<model>.csv, where both are at the last-position residual stream after transformer block 0. The Pearson and Spearman values in the requested figure depend on which set is read, so choosing one is a scientific choice, not an implementation detail. 'ECC' could also mean a result set outside this direction.",
-    "Operator decision needed: which files are 'the ECC results' - (a), (b), or another path? Once that is answered the rest of the request maps onto existing columns without further ambiguity (see routing_notes)."
-  ],
+  "unresolved_ambiguities": [],
   "checklist": [
     {
-      "request": "Please write a reproducible Python script that reads the ECC results and generates one summary figure as output.\nGoal\nCreate a 2×3 figure layout summarizing the relationship between interpolation distance and transition width across models.\nPanels 1–5: scatter plots\nMake scatter plots for these five models:",
+      "request": "Please write a reproducible Python script that reads the existing results and generates one summary figure as output.\nGoal\nCreate a 2×3 figure layout summarizing the relationship between interpolation distance and transition width across models.\nPanels 1–5: scatter plots\nMake scatter plots for these five models:",
       "status": "pending",
       "completion": {
         "what_was_done": "",
@@ -382,7 +407,7 @@
       }
     },
     {
-      "request": "   - It should read the ECC results from disk.",
+      "request": "   - It should read the existing results from disk.",
       "status": "pending",
       "completion": {
         "what_was_done": "",
@@ -607,7 +632,7 @@
       }
     },
     {
-      "request": "   - If the ECC result format requires assumptions, isolate those assumptions in one place in the code and document them clearly.",
+      "request": "   - If the existing result format requires assumptions, isolate those assumptions in one place in the code and document them clearly.",
       "status": "pending",
       "completion": {
         "what_was_done": "",
@@ -731,12 +756,24 @@
         "evidence": "",
         "ambiguity": ""
       }
+    },
+    {
+      "request": "Data source\nUse only data that already exists in this direction; do not run any new model sweeps.\nRead the current block-0 result set: results/block0_resid_post/sweep.csv (GPT-2 Large)\nand results/block0_resid_post/gen/<model>.csv (the other four models).\nDo not use the older input-embedding result set (results/sweep.csv, results/gen/).",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
     }
   ],
   "routing_notes": [
-    "Triage only; no script, figure or analysis was produced.",
-    "Provisional mapping, valid for either candidate result set (same CSV schema: token_id, token, D, W_mid, W_final, t10/t90, flag_nonmonotonic): 'interpolation distance' = column D (L2 distance between the ' big' endpoint and token B at the intervention site); 'transition width' at the 'final layer' = column W_final (t90 - t10 of the normalized readout at the last transformer block); 'monotonic curve' = flag_nonmonotonic == 0. Models: gpt2-large, gpt2-xl, pythia-1.4b, llama-3.1-8b, qwen3-8b-base.",
-    "No report is requested: the deliverable is one Python script and one figure file. The feedback names neither path. Proposed (not yet declared) paths once unblocked: experiments/ecc_summary_figure.py and plots/ecc_summary_figure.png (+ .pdf). REPORT*.md and RESULTS*.md would stay unchanged.",
-    "The requested Pearson and Spearman coefficients are the content of the requested figure, so they are in scope when the task becomes ready."
+    "Triage only; no script, figure or analysis was produced in this pass.",
+    "Data source is stated in the feedback: results/block0_resid_post/sweep.csv (GPT-2 Large) and results/block0_resid_post/gen/{gpt2-xl,pythia-1.4b,llama-3.1-8b,qwen3-8b-base}.csv. All five files exist with columns token_id, token, D, W_mid, W_final, flag_nonmonotonic. The input-embedding set (results/sweep.csv, results/gen/) is not read. No model is run.",
+    "Term mapping onto existing columns: 'interpolation distance' = D (L2 distance between the ' big' endpoint and token B at the last-position output of block 0); 'transition width' at the 'final layer' = W_final (t_0.9 - t_0.1 of the normalized readout at the last transformer block); 'monotonic curve' = flag_nonmonotonic == 0.",
+    "Format assumption to document in the script's single assumptions block: the CSVs store one flag per token, set when EITHER the middle-block or the final-block curve crosses the 0.1 or 0.9 level more than once or steps backwards beyond the tolerance (experiments/s3_plots.py load_sweep). The CSVs named as the data source hold no final-block-only flag, so 'monotonic' is this combined flag. This is the same 'clean curve' subset used by every existing dir27 figure.",
+    "The feedback names no output path. Ordinary implementation choice: script experiments/summary_distance_vs_width.py; figure plots/block0_resid_post/summary_distance_vs_width.png plus the same figure as .pdf (the feedback allows '.png and/or .pdf').",
+    "No report is requested. REPORT*.md and RESULTS*.md stay unchanged; the Pearson and Spearman coefficients are requested content of the figure.",
+    "Project plotting rules apply (CLAUDE.md rule 13): colour-vision-deficiency palette, no red/green contrast, marker shape varies with colour."
   ]
 }
