@@ -1,5 +1,6 @@
 """Feedback 3: per-model Figures 1-3 analogues, sweep CSV, W_final band table and summary numbers.
 Usage: gen_plots.py MODEL_KEY  ->  results/gen/<key>.csv, results/gen/<key>_summary.json, plots/gen/<key>_fig{1,2,3}.png
+       gen_plots.py MODEL_KEY fig1  ->  only plots/gen/<key>_fig1_distance_vs_width.png (nothing else is rewritten)
 """
 import csv
 import glob
@@ -13,10 +14,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from transformers import AutoTokenizer
 
-from common import CVD, XLABEL
+from common import CVD, SITE, XLABEL
 from gen_common import GEN, GPLOTS, MODELS, NAMES
 
 BACKSTEP = 0.05
+# Feedback 4: fixed x range of Figure 1 for the block-0 run (tokens outside it are not drawn)
+FIG1_XLIM = {("block0_resid_post", "llama-3.1-8b"): (1, 2.5), ("block0_resid_post", "qwen3-8b-base"): (10, 55)}
 BANDS = ((0, 0.05), (0.05, 0.1), (0.1, 0.15), (0.15, 0.2), (0.2, 0.3), (0.3, 0.5), (0.5, 1.01))
 
 
@@ -34,8 +37,16 @@ def legend(ax):
         lh.set_alpha(1)
 
 
-def main(key):
-    tok = AutoTokenizer.from_pretrained(MODELS[key][0])
+def write_csv(key, tok, ids, D, Wm, Wf, flag):
+    with open(os.path.join(GEN, f"{key}.csv"), "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["token_id", "token", "D", "W_mid", "W_final", "flag_nonmonotonic"])
+        for i in range(len(ids)):
+            w.writerow([ids[i], repr(tok.decode([int(ids[i])])), f"{D[i]:.4f}", f"{Wm[i]:.4f}",
+                        f"{Wf[i]:.4f}", int(flag[i])])
+
+
+def main(key, fig1_only=False):
     meta = json.load(open(os.path.join(GEN, key, "meta.json")))
     sh = [np.load(p) for p in sorted(glob.glob(os.path.join(GEN, key, "shard_*.npz")))]
     ids = np.concatenate([s["ids"] for s in sh])
@@ -44,12 +55,9 @@ def main(key):
     flag = ((st[:, [3, 4, 9, 10]] > 1).any(1)) | (st[:, [5, 11]] > BACKSTEP).any(1)
     Wm, Wf = st[:, 2], st[:, 8]
     name, bm, bf = NAMES[key], meta["mid_block"], meta["final_block"]
-    with open(os.path.join(GEN, f"{key}.csv"), "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["token_id", "token", "D", "W_mid", "W_final", "flag_nonmonotonic"])
-        for i in range(len(ids)):
-            w.writerow([ids[i], repr(tok.decode([int(ids[i])])), f"{D[i]:.4f}", f"{Wm[i]:.4f}",
-                        f"{Wf[i]:.4f}", int(flag[i])])
+    if not fig1_only:
+        tok = AutoTokenizer.from_pretrained(MODELS[key][0])
+        write_csv(key, tok, ids, D, Wm, Wf, flag)
 
     titles = (f"(a) block {bm} (middle)", f"(b) block {bf} (final)")
     # Figure 1 analogue: D vs W, both readout blocks
@@ -58,10 +66,17 @@ def main(key):
         scatter(ax, D, W, flag, np.ones_like(flag))
         ax.set_title(f"{name} {t}")
     axes[0].set_ylabel("transition width W = t$_{0.9}$ − t$_{0.1}$")
+    if (SITE, key) in FIG1_XLIM:
+        lo, hi = FIG1_XLIM[SITE, key]
+        axes[0].set_xlim(lo, hi)
+        print(f"fig1 x range {lo}-{hi}: {int((D < lo).sum())} tokens below, {int((D > hi).sum())} above, "
+              f"{len(D)} total; D min {D.min():.2f} max {D.max():.2f}")
     legend(axes[0])
     fig.tight_layout()
     fig.savefig(os.path.join(GPLOTS, f"{key}_fig1_distance_vs_width.png"), dpi=110)
     plt.close(fig)
+    if fig1_only:
+        return
 
     # Figure 2 analogue: zoom on the 5th-95th percentile of D, y range = min-max W in that range
     lo, hi = np.percentile(D, [5, 95])
@@ -126,4 +141,4 @@ def main(key):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], fig1_only=sys.argv[2:] == ["fig1"])

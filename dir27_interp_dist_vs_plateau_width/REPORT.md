@@ -233,16 +233,18 @@ down.
 ![Scatter of width vs block-0 distance, Llama-3.1-8B](plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png)
 
 **Figure 7.** Llama-3.1-8B. Same axes and markers as Figure 5. (a) block 16 (middle); (b) block 31
-(final). Nine in ten tokens have D between 1.56 and 1.90, so the cloud is narrow; a few tokens reach
-D ≈ 16.5.
+(final). The x-axis is limited to D from 1 to 2.5. Nine in ten tokens have D between 1.56 and 1.90.
+Of 128,255 tokens, 26 fall outside the plotted range and are not drawn (3 below 1; 23 above 2.5, the
+farthest at D ≈ 16.5).
 
 ![Scatter of width vs block-0 distance, Qwen3-8B-Base](plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png)
 
 **Figure 8.** Qwen3-8B-Base. Same axes and markers as Figure 5. (a) block 18 (middle); (b) block 35
-(final).
+(final). The x-axis is limited to D from 10 to 55. Of 151,668 tokens, 20 fall outside the plotted range
+and are not drawn (4 below 10; 16 above 55, the farthest at D ≈ 103).
 
-A few far outliers squeeze Llama's cloud into a narrow band, and Qwen3's cloud shows no obvious tilt
-by eye. Table 2 shows small rises at both blocks in both models.
+Llama's cloud is a compact blob with at most a slight upward lean at the middle block, and Qwen3's
+cloud shows no obvious tilt by eye. Table 2 shows small rises at both blocks in both models.
 
 
 | Model | Site | W_mid: nearest → farthest fifth | W_final: nearest → farthest fifth | Final narrower |

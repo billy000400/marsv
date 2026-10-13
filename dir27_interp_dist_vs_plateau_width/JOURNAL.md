@@ -430,3 +430,12 @@ On track? yes — 100%; complete.
   and the count of tokens outside it, run check_render.py.
 
 On track? yes — triage done; one replot step remains.
+
+## 2026-10-13 — feedback 4 done (replot only)
+- Added `FIG1_XLIM` and a `fig1`-only mode to `experiments/gen_plots.py`; ran it with `DIR27_SITE=block0_resid_post`
+  for llama-3.1-8b and qwen3-8b-base. Tokens outside the range: Llama 3 below 1 / 23 above 2.5; Qwen3 4 below 10 /
+  16 above 55. The y range is unchanged (still set by all tokens).
+- Captions updated in REPORT.md (Figures 7, 8) and RESULTS.md (Figures 12, 15). check_render.py passes; all
+  must-remain-unchanged files match their baseline hashes. Manifest set to `review_pending`.
+
+On track? yes — feedback 4 complete, awaiting content review.

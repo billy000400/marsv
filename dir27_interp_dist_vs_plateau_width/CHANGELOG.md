@@ -68,3 +68,11 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - Figure changes: REPORT.md now has 8 figures (GPT-2 Large Figures 1-4 regenerated; one distance-vs-width figure
   per other model). GPT-2 Large zoom window is the 5th-95th percentile of D (was the fixed 1.6-3.3 embedding range);
   representative-curve words reselected by the same rule in the new distance space.
+
+## 2026-10-13 — Feedback 4: x range of the Llama and Qwen3 block-0 scatter plots
+- `plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png`: x-axis full range (0.83-16.53) -> 1-2.5.
+  `plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png`: x-axis full range (7.41-103.03) -> 10-55.
+  Replotted from the existing shards; no data or measured number changed.
+- REPORT.md Figures 7-8 and RESULTS.md Figures 12 and 15: captions now give the x range and the tokens not drawn
+  (Llama 26 of 128,255; Qwen3 20 of 151,668). REPORT.md sentence "A few far outliers squeeze Llama's cloud into a
+  narrow band" -> "Llama's cloud is a compact blob with at most a slight upward lean at the middle block".

@@ -309,14 +309,15 @@ The 12 widest tokens (W_final in brackets): ` giant` (0.78), ` large` (0.77), ` 
 
 ### Llama-3.1-8B
 
-To check for a slope in Llama-3.1-8B, Figure 12 plots every token and Figure 13 zooms in on the 5th–95th
-percentile of D (1.56–1.90).
+To check for a slope in Llama-3.1-8B, Figure 12 plots the tokens with D between 1 and 2.5 and Figure 13
+zooms in on the 5th–95th percentile of D (1.56–1.90).
 
 ![Llama-3.1-8B width vs block-0 distance](plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png)
 
 **Figure 12.** Llama-3.1-8B. Each point is one token B. x: block-0 resid_post L2 distance D from ` big`;
 y: transition width W. (a) block 16 (middle); (b) block 31 (final). Round dots = unflagged curves;
-crosses = flagged curves.
+crosses = flagged curves. The x-axis is limited to D from 1 to 2.5; 26 of 128,255 tokens fall outside it
+and are not drawn (3 below 1; 23 above 2.5, the farthest at D ≈ 16.5).
 
 ![Llama-3.1-8B zoom](plots/block0_resid_post/gen/llama-3.1-8b_fig2_zoom_distance_vs_width.png)
 
@@ -349,14 +350,15 @@ The 12 widest tokens (W_final in brackets): ` oversized` (0.74), ` large` (0.70)
 
 ### Qwen3-8B-Base
 
-To check for a slope in Qwen3-8B-Base, Figure 15 plots every token and Figure 16 zooms in on the 5th–95th
-percentile of D (16.41–32.30).
+To check for a slope in Qwen3-8B-Base, Figure 15 plots the tokens with D between 10 and 55 and Figure 16
+zooms in on the 5th–95th percentile of D (16.41–32.30).
 
 ![Qwen3-8B-Base width vs block-0 distance](plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png)
 
 **Figure 15.** Qwen3-8B-Base. Each point is one token B. x: block-0 resid_post L2 distance D from ` big`;
 y: transition width W. (a) block 18 (middle); (b) block 35 (final). Round dots = unflagged curves;
-crosses = flagged curves.
+crosses = flagged curves. The x-axis is limited to D from 10 to 55; 20 of 151,668 tokens fall outside it
+and are not drawn (4 below 10; 16 above 55, the farthest at D ≈ 103).
 
 ![Qwen3-8B-Base zoom](plots/block0_resid_post/gen/qwen3-8b-base_fig2_zoom_distance_vs_width.png)
 

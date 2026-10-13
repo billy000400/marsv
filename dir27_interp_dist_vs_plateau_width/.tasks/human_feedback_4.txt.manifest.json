@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "ready",
+  "state": "addressed",
   "source_feedback": "human_feedback_4.txt",
   "source_sha256": "0f8f881fb3f1146d688f7ffd5c0fbe62ff27c7abbc2b8d0dacf570b98644203c",
   "required_outputs": [
@@ -50,11 +50,11 @@
   "checklist": [
     {
       "request": "Adjust the llama plot x range to 1-2.5 and Qwen3 plot range to 10-55",
-      "status": "pending",
+      "status": "done",
       "completion": {
-        "what_was_done": "",
-        "evidence": "",
-        "ambiguity": ""
+        "what_was_done": "Replotted the block-0 run's full width-vs-distance scatter (fig1) for Llama-3.1-8B with the x-axis limited to 1-2.5 and for Qwen3-8B-Base with the x-axis limited to 10-55, from the existing sweep shards (no model rerun; no results file rewritten). experiments/gen_plots.py gained a FIG1_XLIM table and a 'fig1' argument that redraws only this figure. Captions in REPORT.md and RESULTS.md now state the x range and the number of tokens outside it (Llama 26 of 128,255: 3 below, 23 above; Qwen3 20 of 151,668: 4 below, 16 above). The REPORT.md sentence saying outliers squeeze Llama's cloud was replaced, since it no longer describes the figure. No measured number changed.",
+        "evidence": "plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png (REPORT.md Figure 7, RESULTS.md Figure 12); plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png (REPORT.md Figure 8, RESULTS.md Figure 15); experiments/gen_plots.py FIG1_XLIM.",
+        "ambiguity": "None"
       }
     }
   ],
@@ -63,5 +63,55 @@
     "'Qwen3 plot range to 10-55' is read as the x range (D), parallel to the Llama clause; W lies in [0,1] so it cannot be a y range.",
     "The zoom figures (fig2, RESULTS.md only) already restrict x to the 5th-95th percentile and are left unchanged.",
     "No rerun: replot from existing results/block0_resid_post/gen/*.csv. REPORT.md and RESULTS.md change only in the two captions/adjacent sentences, to state the new x range and how many tokens fall outside it."
-  ]
+  ],
+  "baseline_sha256": {
+    ".tasks/human_feedback_4.txt.manifest.json": "0e30d3acb8d3645b3a7699727fb6e3c2c82a83698b39add6d7ae4d1566f5cdc4",
+    "CHANGELOG.md": "21b5d56985bfa5d19d8efd4e9bc48c61d3d385a87fe6c1ed79863c926490bc94",
+    "JOURNAL.md": "7d6bf56c0d3a561699fad0d7b39a00af550f2581515ebc4a9b92822d68a5bae2",
+    "PLAN.md": "a50cdde3b81032e6efe77b558884e52cb381f08d9eec9717e888beda59ba7d67",
+    "REPORT.md": "722a7f64e65bb8925deb03dd21fc8833750f8bb87b73bfde7abf3a7a16dc3649",
+    "REPORT_generalization.md": "e00492020e6477878cb5a688126840bd0fef56e6816d88981a9b164b14ae20e2",
+    "RESULTS.md": "bfc727779ed1b8601da887564f87e599524568e6575457b5dc014808e04941e2",
+    "RESULTS_generalization.md": "36909bd5e89b59cd9f587aec714e76e28988f8d3bc78d7be156f46a3079f82ec",
+    "archive": null,
+    "experiments/gen_plots.py": "1b210cc0affa73d07ec8c59d8dbd05ed556c571d36b4c8cf94ff41dc447a9bb4",
+    "human_feedback.txt.addressed.md": "487570a0d1941444502f038b7932a3f019b52e83aabcd4c4ac48444b0ded3031",
+    "human_feedback_2.txt.addressed.md": "31df9a5785cced0eaaa95503a29edfc49c07c90f862a635067b93475a7b07f59",
+    "human_feedback_3.txt.addressed.md": "2187ad0d7f91b604bc823fb390626a94630e32d727acf50ffcc552ca88a85ac2",
+    "human_feedback_4.txt": "0f8f881fb3f1146d688f7ffd5c0fbe62ff27c7abbc2b8d0dacf570b98644203c",
+    "plots/block0_resid_post/fig1_distance_vs_width.png": "2e675ee572fc7d3767ddfd5a88f6ac12cd86339937124b70e985937c5875a2a2",
+    "plots/block0_resid_post/fig1_zoom_distance_vs_width.png": "c973066462d3f95262972c764ba1ef85f74940b44b80d0df8066a88b5f7f27aa",
+    "plots/block0_resid_post/fig2_final_width_distribution.png": "78fa4dcf9e940eb0f5257316cff0fc1afd0d2bc8a9f0215073baf962cc9ee498",
+    "plots/block0_resid_post/fig3_representative_curves.png": "31046aabdad43b007ec3213d3d7e2938ad784dc7e907bcf60c36fe3f1404e7e4",
+    "plots/block0_resid_post/gen/gpt2-xl_fig1_distance_vs_width.png": "b987e6de3aa37087cb79cbc637fa8b978f8341ca446b8547c4118ec6e9bf39fa",
+    "plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png": "642a72b444a8192785883a1b8e1fa2bc4a1df5f9e0b86183f2c351411c6df081",
+    "plots/block0_resid_post/gen/llama-3.1-8b_fig2_zoom_distance_vs_width.png": "e86b53bcdeaac9ef21347afe2e43c7d34203d4e684f50b692f157677d99cb198",
+    "plots/block0_resid_post/gen/llama-3.1-8b_fig3_final_width_distribution.png": "af58450f3efbb8d86ed0f4f8a2ae1e75526eb60767de66ee4c2f7dae8bfd75b4",
+    "plots/block0_resid_post/gen/pythia-1.4b_fig1_distance_vs_width.png": "4fe7bc66eaf25945cb4581641c35b5ff8954e540b1088a644eb80a8d12e719cd",
+    "plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png": "f96aa7b762e602c4851d4cbf3dc174deec93ce5a5cb4854ef3107ac50a2407c6",
+    "plots/block0_resid_post/gen/qwen3-8b-base_fig2_zoom_distance_vs_width.png": "5ab1f3809c8de1bd24424b77b4dfdc27352a025fc8311599a9f35ea158c45351",
+    "plots/block0_resid_post/gen/qwen3-8b-base_fig3_final_width_distribution.png": "00a404c0375348ac3d21b9aad031d91a1562cee4e62313ba297e5e9d0a867f9f",
+    "plots/gen": null,
+    "results": null
+  },
+  "review": {
+    "format_passed": true,
+    "content": {
+      "pass": true,
+      "inspected_outputs": [
+        "plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png",
+        "plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png",
+        "REPORT.md"
+      ],
+      "failures": [],
+      "summary": "Both requested axis changes are made as asked. The Llama-3.1-8B figure has both panels' x-axis running exactly 1.0 to 2.5, and the Qwen3-8B-Base figure has both panels running exactly 10 to 55. Both images render cleanly with labelled axes, panel titles and a legend.\n\nReading \"Qwen3 plot range\" as the x range is the only sensible one: it parallels the Llama clause, and W lies in [0, 1]. Applying it to the block-0 scatter is also sound, since those are the only Llama and Qwen3 figures in REPORT.md.\n\nREPORT.md is consistent with the new figures:\n- **Captions:** Figures 7 and 8 state the new x limits and how many tokens are no longer drawn (Llama 26 of 128,255; Qwen3 20 of 151,668, with below/above splits and the farthest value).\n- **Adjacent sentence:** \"compact blob with at most a slight upward lean\" for Llama and \"no obvious tilt by eye\" for Qwen3 match what the images show and are hedged; it defers to Table 2 for the numbers.\n- **Scope:** the research question is unchanged and no new analysis or experiment was added.\n- **Budget:** the report has 8 main figures against a limit of 8 and is roughly 3,000 words against a limit of 5,000; detailed values stay in RESULTS.md.\n- **Claims:** relationships are described as associations, with explicit statements that no cause was tested and no statistical tests were run. Key terms (residual stream, D, y(t), W, flag) are defined before use.\n\nTwo things I could not check from the bundle:\n- The out-of-range token counts in the captions cannot be recomputed without the underlying CSVs; they are plausible given the sparse points at the plot edges.\n- The RESULTS.md captions (Figures 12 and 15) that the checklist says were also updated were not bundled, so I did not review them.\n\nOne minor point, not grounds for rejection: the plot legends say \"clean curve\" where the report says \"unflagged\". The meaning is clear from context."
+    },
+    "expected_outputs": [
+      "plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png",
+      "plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png",
+      "REPORT.md"
+    ],
+    "budget_failures": []
+  },
+  "addressed_feedback": "human_feedback_4.txt.addressed.md"
 }
