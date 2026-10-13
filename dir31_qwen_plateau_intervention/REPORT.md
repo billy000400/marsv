@@ -38,6 +38,9 @@ also changes country identity, so answer and country moved together in every tes
 disentangled", with one positive by-product: a small group of layer-16 features whose edit, at twice natural
 strength, changes the capital, currency and language answers and flattens the late-layer plateau.
 
+**Addendum.** A follow-up search for a purely additive edit that promotes Berlin while leaving Japan intact
+found none: its best shift is under 0.4 of the 1 logit required (Addendum).
+
 ## Methods
 
 ### Data & Model
@@ -313,6 +316,70 @@ readout at layer 26. Panel 2b: L2 norm of the vector added at layer 16; each con
 edit by construction, so those lines coincide. Panels 3a and 3b: probability of ` Tokyo` and of ` Berlin`
 after the bridge.
 
+## Addendum: can an additive edit promote Berlin while preserving Japan?
+
+**Question.** This addendum answers a follow-up request from the project's operator, who also fixed the
+freezing rule. The edit of Results 2–4 changed the country and is not reused. Can an edit that
+only *adds* a fixed vector at the country token raise the later ` Berlin` answer while Japan-related
+information stays intact?
+
+**Candidates.** An earlier study in this project (`dir30`) listed features active at the last token
+of prompts with a given answer more often than on matched other prompts. Its *Berlin set*
+comes from seven prompts about two facts, none a capital prompt. Our *candidates* are the 69 Berlin-set
+features in layers 1–26 absent from its *Germany set*. This exclusion is only a candidate filter, not proof
+of semantic independence: 18 candidates are active on some of that study's Germany prompts.
+
+**Additive edit.** The *reference amplitude* `A_i` of candidate `i` is the median of its positive
+activations at the last token of those seven prompts. For a set `C` of candidates in one layer we add to the
+true MLP output `y` at the ` Japan` token:
+
+```math
+y_{\text{new}} = y + \beta \sum_{i \in C} A_i\, v_i
+```
+
+`v_i` is the decoder direction and `β` is 0, 0.5, 1 or 2. Nothing is subtracted or replaced, later blocks
+are recomputed, and `β = 0` changes nothing.
+
+**Tolerances.** The *answer effect* is the rise of logit(` Berlin`) minus logit(` Tokyo`), the fall of `m`.
+Japan counts as preserved if three fixed tolerances hold. (1) The layer-26 country readout moves by at most
+a tenth of its unedited Japan-to-Germany gap. (2) On four Japanese currency and language prompts (the
+*control prompts*), with the same vector added at ` Japan`, the correct answer stays on top and loses at most 0.05
+probability. (3) After the country word, ` is` stays on top and loses at most 0.05.
+
+**Screen and freeze.** On the tuning prompt `The capital city of Japan is` we tested 256 *settings*: every
+candidate alone at each nonzero `β`, and per layer and `β` the three and the five tolerance-passing
+candidates with the most positive effects combined. The request says to freeze "the smallest qualifying
+edit" from tuning results without defining "qualifying". By the operator's resolution, since no setting
+reached +1 logit there, we froze the tolerance-passing setting with the largest answer
+effect. This rule was fixed after the tuning screen and before any reserved-prompt run; it selects the
+largest passing edit, not the smallest.
+
+**Result on the tuning prompt.** Answer effects range from −0.29 to +0.31 logits, far from +1 (Figure 4).
+The most positive, three layer-17 candidates at `β = 2`, passes every tolerance: the readout
+moves by 1.8% of the gap, the worst control prompt loses 0.008 and ` is` loses 0.014. In all, 250 settings pass.
+The six failures range from −0.29 to +0.21; the most positive lowers one currency answer by 0.061 and
+` is` by 0.066.
+
+![Answer effect of every additive setting by layer and strength](plots/additive/figA2_screen_answer_effect.png)
+
+**Figure 4.** All 256 settings on the tuning prompt, one panel per strength `β`. x: edited
+layer; y: answer effect in logits. Circles: single candidates. Squares and triangles: groups of three and
+five. A cross marks a failed tolerance. Dashed line: the +1 threshold.
+
+**Result on the reserved prompts.** The frozen edit was run once on both reserved prompts, beside three
+*random controls* (same amplitudes, layer and length, on random decoder directions). The request's three
+criteria: (a) At least +1 logit toward Berlin: not met. The answer moves by
++0.38 on `The capital of Japan is` and +0.29 with the bridge ` is the city of`. (b) Larger than every random
+control: met, weakly. The three reach at most +0.20 and share directions from a pool of 64.
+(c) Tolerances still hold: not met. P(` is`) after the country word falls by 0.095; the readout (1.2% of the
+gap) and the control prompts (0.008) hold. ` Tokyo` stays on top, and the *greedy continuation* (the text
+from always taking the likeliest next token) is unchanged. The pilot does not pass, so the plateau test,
+which requires a pass, was not run (`RESULTS.md` Sections 5.7 and 5.8).
+
+**Conclusion.** No selective additive intervention found in this bounded candidate search. The bounds are
+69 candidates, one tuning prompt, strengths up to 2 and single-layer groups. The result does not show that
+answer and country are inseparable, nor does it validate the candidates as Berlin or city features.
+
 ## Conclusion
 
 **Answer to the question.** This study does not show whether the plateau follows country identity or the
@@ -344,5 +411,7 @@ the mean).
 language answers stay correct. The scan found none among the top-ranked transcoder features at the country
 token.
 
+**Addendum.** The additive follow-up did not supply the missing edit either (at most 0.38 logits; Addendum).
+
 Full tables for every layer, all prompts, the feature list and the ` is`-token states are in `RESULTS.md`;
-raw curves and the rerun command are in `results/` and `experiments/run_all.sh`.
+raw curves and the rerun commands are in `results/` and `experiments/` (`run_all.sh`, `run_additive.sh`).

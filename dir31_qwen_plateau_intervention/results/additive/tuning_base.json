@@ -1,0 +1,84 @@
+{
+ "prompt": "The capital city of Japan is",
+ "tokens": [
+  "The",
+  " capital",
+  " city",
+  " of",
+  " Japan",
+  " is"
+ ],
+ "country_position": 4,
+ "token_ids": {
+  "Tokyo": 26194,
+  "Berlin": 19846,
+  "is": 374,
+  "Japan": 6323,
+  "Germany": 9856
+ },
+ "unedited": {
+  "berlin_minus_tokyo": -9.526101112365723,
+  "logp_berlin": -11.221725463867188,
+  "p_tokyo": 0.18348456919193268,
+  "p_berlin": 1.33803214339423e-05,
+  "top1": " Tokyo",
+  "p_is": 0.40870580077171326,
+  "top1_after_country_id": 374,
+  "top1_after_country": " is",
+  "readout26": 1.0616528987884521
+ },
+ "readout_gap_japan_minus_germany": 2.266371965408325,
+ "readout_tolerance": 0.22663719654083253,
+ "prob_tolerance": 0.05,
+ "min_answer_effect": 1.0,
+ "sanity": {
+  "beta0_max_abs_logit_diff": 0.0,
+  "hook_removed_max_abs_logit_diff": 0.0,
+  "site_max_abs_error": 1.9198283553123474e-05,
+  "upstream_max_abs_change": 0.0,
+  "bridge_upstream_max_abs_change": 0.0
+ },
+ "controls": [
+  {
+   "prompt": "The official currency of Japan is the",
+   "relation": "country_currency",
+   "japan_position": 4,
+   "answer": " yen",
+   "p_answer_unedited": 0.8510834574699402,
+   "top1_unedited": " yen",
+   "readout26_unedited": 0.9430221915245056
+  },
+  {
+   "prompt": "What is the official currency of Japan? It is called the",
+   "relation": "country_currency",
+   "japan_position": 6,
+   "answer": " yen",
+   "p_answer_unedited": 0.3825865387916565,
+   "top1_unedited": " yen",
+   "readout26_unedited": 0.8181946277618408
+  },
+  {
+   "prompt": "People in Japan speak",
+   "relation": "country_language",
+   "japan_position": 2,
+   "answer": " Japanese",
+   "p_answer_unedited": 0.3603721559047699,
+   "top1_unedited": " Japanese",
+   "readout26_unedited": 0.9869433641433716
+  },
+  {
+   "prompt": "In Japan, the primary language is",
+   "relation": "country_language",
+   "japan_position": 1,
+   "answer": " Japanese",
+   "p_answer_unedited": 0.7218413352966309,
+   "top1_unedited": " Japanese",
+   "readout26_unedited": 1.0542861223220825
+  }
+ ],
+ "excluded_first_token_controls": [
+  "Japan's official currency is the",
+  "Japan's official currency is called the",
+  "Japan, where most people speak"
+ ]
+}

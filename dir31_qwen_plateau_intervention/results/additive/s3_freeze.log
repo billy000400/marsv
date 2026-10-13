@@ -1,0 +1,63 @@
+{
+ "rule": "pass all three checks and answer effect >= +1 on the tuning prompt; smallest = fewest features, then smaller beta, then larger answer effect",
+ "declared": "JOURNAL.md, entry of 2026-10-11 written before the screen",
+ "n_settings": 256,
+ "n_pass_all": 250,
+ "n_effect_at_least_1": 0,
+ "n_qualifying": 0,
+ "outcome": "none_qualified"
+}
+frozen_edit.json already exists and matches
+{
+ "gate": "frozen_for_reserved_pilot",
+ "selection_rule": "largest answer effect on the tuning prompt among settings that pass all three preservation checks",
+ "selection_basis": "operator's resolution of \"qualifying\" (2026-10-11): no setting met the pre-registered bar, so the largest preservation-passing setting is frozen; set after the tuning screen and before any reserved-prompt run; this is the largest passing edit, not the smallest",
+ "preregistered_gate": {
+  "rule": "pass all three checks and answer effect >= +1 on the tuning prompt; smallest = fewest features, then smaller beta, then larger answer effect",
+  "n_qualifying": 0,
+  "met": false
+ },
+ "site": "country token, MLP output",
+ "layer": 17,
+ "features": [
+  15678,
+  70371,
+  150354
+ ],
+ "kind": "top3",
+ "amplitudes": [
+  11.89360237121582,
+  2.1551220417022705,
+  1.6581344604492188
+ ],
+ "beta": 2.0,
+ "vector_l2": 25.123804092407227,
+ "native_mlp_out_l2_tune_site": 30.041261672973633,
+ "native_mlp_out_l2_reserved_site_dir31": 29.920513153076172,
+ "formula": "y_new = y_native + beta * sum_i(amplitude_i * W_dec[i]); no b_dec, no encoder term, nothing subtracted",
+ "tuning_result": {
+  "kind": "top3",
+  "layer": 17,
+  "features": "15678+70371+150354",
+  "n_features": 3,
+  "beta": 2.0,
+  "answer_effect": 0.3135366439819336,
+  "d_logp_berlin": 0.23512840270996094,
+  "p_tokyo": 0.16964754462242126,
+  "p_berlin": 1.692705882305745e-05,
+  "top1": " Tokyo",
+  "d_readout26": -0.040985822677612305,
+  "d_readout26_frac_of_gap": -0.018084331832188022,
+  "pass_readout": true,
+  "controls_top1_kept": 4,
+  "control_max_fall": 0.008239328861236572,
+  "pass_controls": true,
+  "p_is": 0.3947175443172455,
+  "is_fall": 0.013988256454467773,
+  "top1_after_country": " is",
+  "pass_is": true,
+  "pass_all": true,
+  "edit_l2": 25.123804092407227
+ },
+ "selected_from": "tuning prompt only (screen_single.csv, screen_group.csv)"
+}

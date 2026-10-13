@@ -1,0 +1,8 @@
+dir30_row,fact_id,relation,prompt,extraction_token_index,extraction_token,dir30_completion
+12,country_largest_city|Germany|Berlin,country_largest_city,The largest city in Germany is,5, is," Berlin, and the largest city in the United States is New York. The largest"
+13,country_largest_city|Germany|Berlin,country_largest_city,The biggest city in Germany is,5, is," Berlin. Is that true? Also, is the largest city in the world the"
+15,country_largest_city|Germany|Berlin,country_largest_city,The largest city in Germany is the city of,8, of," Berlin. Is this statement correct? Also, is the largest city in Germany the"
+124,company_hq|Deutsche Reichsbahn (GDR)|Berlin,company_hq,Deutsche Reichsbahn (GDR) is headquartered in the city of,14, of," Berlin, and the city of Berlin is the capital of Germany. The city of"
+125,company_hq|Deutsche Reichsbahn (GDR)|Berlin,company_hq,The headquarters of Deutsche Reichsbahn (GDR) are in the city of,15, of," Berlin, Germany. The company is a major railway company in the world, and"
+126,company_hq|Deutsche Reichsbahn (GDR)|Berlin,company_hq,The headquarters of Deutsche Reichsbahn (GDR) is in the city of,15, of," Berlin, Germany. The company is a major railway company in the world. The"
+127,company_hq|Deutsche Reichsbahn (GDR)|Berlin,company_hq,Where are the headquarters of Deutsche Reichsbahn (GDR)? It is in the city of,18, of," Berlin, but the answer is not in Berlin. The answer is in the city"

@@ -1,0 +1,9 @@
+{
+ "rule": "pass all three checks and answer effect >= +1 on the tuning prompt; smallest = fewest features, then smaller beta, then larger answer effect",
+ "declared": "JOURNAL.md, entry of 2026-10-11 written before the screen",
+ "n_settings": 256,
+ "n_pass_all": 250,
+ "n_effect_at_least_1": 0,
+ "n_qualifying": 0,
+ "outcome": "none_qualified"
+}

@@ -1,0 +1,58 @@
+{
+ "frozen_edit_sha256": "846998fb5ce78474ca1be32b64acb949fe868e5e6b2a1f1841d3fd0b6612bff0",
+ "layer": 17,
+ "features": [
+  15678,
+  70371,
+  150354
+ ],
+ "beta": 2.0,
+ "vector_l2": 25.123804092407227,
+ "thresholds": {
+  "min_answer_effect": 1.0,
+  "readout_frac_of_gap": 0.1,
+  "prob_fall": 0.05
+ },
+ "per_prompt": {
+  "original": {
+   "prompt": "The capital of Japan is",
+   "answer_effect": 0.3811931610107422,
+   "control_answer_effects": [
+    0.20104408264160156,
+    0.1602306365966797,
+    -0.08484745025634766
+   ],
+   "criterion1_at_least_plus1_toward_berlin": false,
+   "criterion2_larger_than_every_random_control": true,
+   "criterion3_all_preservation_checks_pass": false,
+   "pass_readout": true,
+   "pass_controls": true,
+   "pass_is": false,
+   "native_mlp_out_l2_site": 29.920513153076172
+  },
+  "city_of": {
+   "prompt": "The capital of Japan is the city of",
+   "answer_effect": 0.2931785583496094,
+   "control_answer_effects": [
+    0.19680118560791016,
+    0.1461944580078125,
+    -0.021697998046875
+   ],
+   "criterion1_at_least_plus1_toward_berlin": false,
+   "criterion2_larger_than_every_random_control": true,
+   "criterion3_all_preservation_checks_pass": false,
+   "pass_readout": true,
+   "pass_controls": true,
+   "pass_is": false,
+   "native_mlp_out_l2_site": 29.92051124572754
+  }
+ },
+ "criteria_met_on_both_prompts": {
+  "criterion1_at_least_plus1_toward_berlin": false,
+  "criterion2_larger_than_every_random_control": true,
+  "criterion3_all_preservation_checks_pass": false
+ },
+ "pilot_passes": false,
+ "plateau_test": "not run: the pilot did not pass",
+ "conclusion": "No selective additive intervention found in this bounded candidate search."
+}

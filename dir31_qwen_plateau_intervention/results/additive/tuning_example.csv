@@ -1,0 +1,3 @@
+arm,prompt,layer,features,beta,edit_l2,berlin_minus_tokyo,answer_effect,p_tokyo,p_berlin,top1,readout26,d_readout26,d_readout26_frac_of_gap,p_is,top1_after_country,greedy_completion
+unedited,The capital city of Japan is,,,0.0,0.0,-9.526101112365723,0.0,0.18348456919193268,1.33803214339423e-05, Tokyo,1.0616528987884521,0.0,0.0,0.40870580077171326, is, Tokyo. The capital city of China is
+largest answer effect in the screen,The capital city of Japan is,17,15678+70371+150354,2.0,25.123804092407227,-9.212564468383789,0.3135366439819336,0.16964754462242126,1.692705882305745e-05, Tokyo,1.0206670761108398,-0.040985822677612305,-0.018084331832188022,0.3947175443172455, is, Tokyo. The capital city of China is

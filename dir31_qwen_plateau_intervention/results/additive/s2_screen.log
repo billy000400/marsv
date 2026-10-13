@@ -1,0 +1,179 @@
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/311 [00:00<?, ?it/s]Loading weights:   0%|          | 1/311 [00:01<06:38,  1.28s/it]Loading weights:  30%|██▉       | 93/311 [00:01<00:02, 92.57it/s]Loading weights:  47%|████▋     | 146/311 [00:01<00:01, 133.36it/s]Loading weights:  60%|██████    | 188/311 [00:01<00:00, 143.73it/s]Loading weights:  71%|███████   | 221/311 [00:01<00:00, 157.03it/s]Loading weights:  80%|████████  | 249/311 [00:02<00:00, 164.24it/s]Loading weights:  88%|████████▊ | 274/311 [00:02<00:00, 168.68it/s]Loading weights:  96%|█████████▌| 298/311 [00:02<00:00, 170.52it/s]Loading weights: 100%|██████████| 311/311 [00:02<00:00, 127.28it/s]
+{
+ "prompt": "The capital city of Japan is",
+ "tokens": [
+  "The",
+  " capital",
+  " city",
+  " of",
+  " Japan",
+  " is"
+ ],
+ "country_position": 4,
+ "token_ids": {
+  "Tokyo": 26194,
+  "Berlin": 19846,
+  "is": 374,
+  "Japan": 6323,
+  "Germany": 9856
+ },
+ "unedited": {
+  "berlin_minus_tokyo": -9.526101112365723,
+  "logp_berlin": -11.221725463867188,
+  "p_tokyo": 0.18348456919193268,
+  "p_berlin": 1.33803214339423e-05,
+  "top1": " Tokyo",
+  "p_is": 0.40870580077171326,
+  "top1_after_country_id": 374,
+  "top1_after_country": " is",
+  "readout26": 1.0616528987884521
+ },
+ "readout_gap_japan_minus_germany": 2.266371965408325,
+ "readout_tolerance": 0.22663719654083253,
+ "prob_tolerance": 0.05,
+ "min_answer_effect": 1.0,
+ "sanity": {
+  "beta0_max_abs_logit_diff": 0.0,
+  "hook_removed_max_abs_logit_diff": 0.0,
+  "site_max_abs_error": 1.9198283553123474e-05,
+  "upstream_max_abs_change": 0.0,
+  "bridge_upstream_max_abs_change": 0.0
+ },
+ "controls": [
+  {
+   "prompt": "The official currency of Japan is the",
+   "relation": "country_currency",
+   "japan_position": 4,
+   "answer": " yen",
+   "p_answer_unedited": 0.8510834574699402,
+   "top1_unedited": " yen",
+   "readout26_unedited": 0.9430221915245056
+  },
+  {
+   "prompt": "What is the official currency of Japan? It is called the",
+   "relation": "country_currency",
+   "japan_position": 6,
+   "answer": " yen",
+   "p_answer_unedited": 0.3825865387916565,
+   "top1_unedited": " yen",
+   "readout26_unedited": 0.8181946277618408
+  },
+  {
+   "prompt": "People in Japan speak",
+   "relation": "country_language",
+   "japan_position": 2,
+   "answer": " Japanese",
+   "p_answer_unedited": 0.3603721559047699,
+   "top1_unedited": " Japanese",
+   "readout26_unedited": 0.9869433641433716
+  },
+  {
+   "prompt": "In Japan, the primary language is",
+   "relation": "country_language",
+   "japan_position": 1,
+   "answer": " Japanese",
+   "p_answer_unedited": 0.7218413352966309,
+   "top1_unedited": " Japanese",
+   "readout26_unedited": 1.0542861223220825
+  }
+ ],
+ "excluded_first_token_controls": [
+  "Japan's official currency is the",
+  "Japan's official currency is called the",
+  "Japan, where most people speak"
+ ]
+}
+
+276 single rows, 49 group rows
+
+== top 15 by answer effect (any preservation outcome)
+  L17   top3 b=2.0 n=3 effect=+0.314 dReadout=-0.0410 (-1.8% of gap) ctlFall=+0.0082 top1kept=4/4 isFall=+0.0140 nextTok=' is' pass R/C/I=111 l2=25.12 feats=15678+70371+150354
+  L10   top3 b=2.0 n=3 effect=+0.305 dReadout=-0.0293 (-1.3% of gap) ctlFall=+0.0233 top1kept=4/4 isFall=+0.0081 nextTok=' is' pass R/C/I=111 l2=4.43 feats=137591+5895+1418
+  L17 single b=2.0 n=1 effect=+0.278 dReadout=-0.0308 (-1.4% of gap) ctlFall=+0.0109 top1kept=4/4 isFall=-0.0025 nextTok=' is' pass R/C/I=111 l2=23.79 feats=15678
+  L10   top3 b=1.0 n=3 effect=+0.231 dReadout=-0.0018 (-0.1% of gap) ctlFall=+0.0330 top1kept=4/4 isFall=+0.0342 nextTok=' is' pass R/C/I=111 l2=5.65 feats=137591+48590+5895
+  L10   top5 b=1.0 n=5 effect=+0.226 dReadout=-0.0079 (-0.3% of gap) ctlFall=+0.0350 top1kept=4/4 isFall=+0.0357 nextTok=' is' pass R/C/I=111 l2=5.81 feats=137591+48590+5895+1418+62097
+  L 9   top3 b=2.0 n=3 effect=+0.217 dReadout=+0.0081 (+0.4% of gap) ctlFall=+0.0421 top1kept=4/4 isFall=-0.0119 nextTok=' is' pass R/C/I=111 l2=4.77 feats=32744+21866+125396
+  L10 single b=2.0 n=1 effect=+0.217 dReadout=-0.0042 (-0.2% of gap) ctlFall=+0.0207 top1kept=4/4 isFall=+0.0125 nextTok=' is' pass R/C/I=111 l2=2.92 feats=137591
+  L10 single b=2.0 n=1 effect=+0.208 dReadout=+0.0191 (+0.8% of gap) ctlFall=+0.0612 top1kept=4/4 isFall=+0.0662 nextTok=' is' pass R/C/I=100 l2=9.36 feats=48590
+  L12 single b=2.0 n=1 effect=+0.192 dReadout=+0.0162 (+0.7% of gap) ctlFall=+0.0395 top1kept=4/4 isFall=+0.0112 nextTok=' is' pass R/C/I=111 l2=7.12 feats=1483
+  L20 single b=2.0 n=1 effect=+0.171 dReadout=-0.1013 (-4.5% of gap) ctlFall=+0.0509 top1kept=4/4 isFall=+0.0221 nextTok=' is' pass R/C/I=101 l2=57.22 feats=146850
+  L17   top3 b=1.0 n=3 effect=+0.165 dReadout=-0.0148 (-0.7% of gap) ctlFall=+0.0042 top1kept=4/4 isFall=-0.0037 nextTok=' is' pass R/C/I=111 l2=12.56 feats=15678+70371+150354
+  L17 single b=1.0 n=1 effect=+0.143 dReadout=-0.0116 (-0.5% of gap) ctlFall=+0.0093 top1kept=4/4 isFall=-0.0113 nextTok=' is' pass R/C/I=111 l2=11.89 feats=15678
+  L 9 single b=2.0 n=1 effect=+0.126 dReadout=+0.0075 (+0.3% of gap) ctlFall=+0.0108 top1kept=4/4 isFall=-0.0072 nextTok=' is' pass R/C/I=111 l2=1.64 feats=32744
+  L10   top3 b=0.5 n=3 effect=+0.111 dReadout=-0.0011 (-0.0% of gap) ctlFall=+0.0134 top1kept=4/4 isFall=+0.0141 nextTok=' is' pass R/C/I=111 l2=2.83 feats=137591+48590+5895
+  L10   top5 b=0.5 n=5 effect=+0.108 dReadout=-0.0043 (-0.2% of gap) ctlFall=+0.0145 top1kept=4/4 isFall=+0.0150 nextTok=' is' pass R/C/I=111 l2=2.91 feats=137591+48590+5895+1418+62097
+
+== top 15 by answer effect among rows passing all three checks
+  L17   top3 b=2.0 n=3 effect=+0.314 dReadout=-0.0410 (-1.8% of gap) ctlFall=+0.0082 top1kept=4/4 isFall=+0.0140 nextTok=' is' pass R/C/I=111 l2=25.12 feats=15678+70371+150354
+  L10   top3 b=2.0 n=3 effect=+0.305 dReadout=-0.0293 (-1.3% of gap) ctlFall=+0.0233 top1kept=4/4 isFall=+0.0081 nextTok=' is' pass R/C/I=111 l2=4.43 feats=137591+5895+1418
+  L17 single b=2.0 n=1 effect=+0.278 dReadout=-0.0308 (-1.4% of gap) ctlFall=+0.0109 top1kept=4/4 isFall=-0.0025 nextTok=' is' pass R/C/I=111 l2=23.79 feats=15678
+  L10   top3 b=1.0 n=3 effect=+0.231 dReadout=-0.0018 (-0.1% of gap) ctlFall=+0.0330 top1kept=4/4 isFall=+0.0342 nextTok=' is' pass R/C/I=111 l2=5.65 feats=137591+48590+5895
+  L10   top5 b=1.0 n=5 effect=+0.226 dReadout=-0.0079 (-0.3% of gap) ctlFall=+0.0350 top1kept=4/4 isFall=+0.0357 nextTok=' is' pass R/C/I=111 l2=5.81 feats=137591+48590+5895+1418+62097
+  L 9   top3 b=2.0 n=3 effect=+0.217 dReadout=+0.0081 (+0.4% of gap) ctlFall=+0.0421 top1kept=4/4 isFall=-0.0119 nextTok=' is' pass R/C/I=111 l2=4.77 feats=32744+21866+125396
+  L10 single b=2.0 n=1 effect=+0.217 dReadout=-0.0042 (-0.2% of gap) ctlFall=+0.0207 top1kept=4/4 isFall=+0.0125 nextTok=' is' pass R/C/I=111 l2=2.92 feats=137591
+  L12 single b=2.0 n=1 effect=+0.192 dReadout=+0.0162 (+0.7% of gap) ctlFall=+0.0395 top1kept=4/4 isFall=+0.0112 nextTok=' is' pass R/C/I=111 l2=7.12 feats=1483
+  L17   top3 b=1.0 n=3 effect=+0.165 dReadout=-0.0148 (-0.7% of gap) ctlFall=+0.0042 top1kept=4/4 isFall=-0.0037 nextTok=' is' pass R/C/I=111 l2=12.56 feats=15678+70371+150354
+  L17 single b=1.0 n=1 effect=+0.143 dReadout=-0.0116 (-0.5% of gap) ctlFall=+0.0093 top1kept=4/4 isFall=-0.0113 nextTok=' is' pass R/C/I=111 l2=11.89 feats=15678
+  L 9 single b=2.0 n=1 effect=+0.126 dReadout=+0.0075 (+0.3% of gap) ctlFall=+0.0108 top1kept=4/4 isFall=-0.0072 nextTok=' is' pass R/C/I=111 l2=1.64 feats=32744
+  L10   top3 b=0.5 n=3 effect=+0.111 dReadout=-0.0011 (-0.0% of gap) ctlFall=+0.0134 top1kept=4/4 isFall=+0.0141 nextTok=' is' pass R/C/I=111 l2=2.83 feats=137591+48590+5895
+  L10   top5 b=0.5 n=5 effect=+0.108 dReadout=-0.0043 (-0.2% of gap) ctlFall=+0.0145 top1kept=4/4 isFall=+0.0150 nextTok=' is' pass R/C/I=111 l2=2.91 feats=137591+48590+5895+1418+62097
+  L10 single b=1.0 n=1 effect=+0.106 dReadout=-0.0022 (-0.1% of gap) ctlFall=+0.0095 top1kept=4/4 isFall=+0.0056 nextTok=' is' pass R/C/I=111 l2=1.46 feats=137591
+  L10 single b=1.0 n=1 effect=+0.093 dReadout=+0.0094 (+0.4% of gap) ctlFall=+0.0222 top1kept=4/4 isFall=+0.0277 nextTok=' is' pass R/C/I=111 l2=4.68 feats=48590
+
+== matched random controls for the best settings (tuning prompt, descriptive)
+      edit L17   top3 b=2.0 n=3 effect=+0.314 dReadout=-0.0410 (-1.8% of gap) ctlFall=+0.0082 top1kept=4/4 isFall=+0.0140 nextTok=' is' pass R/C/I=111 l2=25.12 feats=15678+70371+150354
+  control1 L17   top3 b=2.0 n=3 effect=+0.052 dReadout=+0.1396 (+6.2% of gap) ctlFall=+0.0598 top1kept=4/4 isFall=-0.0289 nextTok=' is' pass R/C/I=101 l2=25.12 feats=15678+70371+150354
+  control2 L17   top3 b=2.0 n=3 effect=+0.223 dReadout=+0.0313 (+1.4% of gap) ctlFall=-0.0015 top1kept=4/4 isFall=-0.0027 nextTok=' is' pass R/C/I=111 l2=25.12 feats=15678+70371+150354
+  control3 L17   top3 b=2.0 n=3 effect=-0.126 dReadout=-0.0098 (-0.4% of gap) ctlFall=+0.0123 top1kept=4/4 isFall=+0.0234 nextTok=' is' pass R/C/I=111 l2=25.12 feats=15678+70371+150354
+
+== all group rows
+  L 9   top3 b=0.5 n=3 effect=+0.030 dReadout=+0.0041 (+0.2% of gap) ctlFall=+0.0090 top1kept=4/4 isFall=-0.0045 nextTok=' is' pass R/C/I=111 l2=1.19 feats=32744+125396+21866
+  L 9   top3 b=1.0 n=3 effect=+0.076 dReadout=+0.0069 (+0.3% of gap) ctlFall=+0.0193 top1kept=4/4 isFall=-0.0079 nextTok=' is' pass R/C/I=111 l2=2.39 feats=32744+125396+21866
+  L 9   top3 b=2.0 n=3 effect=+0.217 dReadout=+0.0081 (+0.4% of gap) ctlFall=+0.0421 top1kept=4/4 isFall=-0.0119 nextTok=' is' pass R/C/I=111 l2=4.77 feats=32744+21866+125396
+  L10   top3 b=0.5 n=3 effect=+0.111 dReadout=-0.0011 (-0.0% of gap) ctlFall=+0.0134 top1kept=4/4 isFall=+0.0141 nextTok=' is' pass R/C/I=111 l2=2.83 feats=137591+48590+5895
+  L10   top5 b=0.5 n=5 effect=+0.108 dReadout=-0.0043 (-0.2% of gap) ctlFall=+0.0145 top1kept=4/4 isFall=+0.0150 nextTok=' is' pass R/C/I=111 l2=2.91 feats=137591+48590+5895+1418+62097
+  L10   top3 b=1.0 n=3 effect=+0.231 dReadout=-0.0018 (-0.1% of gap) ctlFall=+0.0330 top1kept=4/4 isFall=+0.0342 nextTok=' is' pass R/C/I=111 l2=5.65 feats=137591+48590+5895
+  L10   top5 b=1.0 n=5 effect=+0.226 dReadout=-0.0079 (-0.3% of gap) ctlFall=+0.0350 top1kept=4/4 isFall=+0.0357 nextTok=' is' pass R/C/I=111 l2=5.81 feats=137591+48590+5895+1418+62097
+  L10   top3 b=2.0 n=3 effect=+0.305 dReadout=-0.0293 (-1.3% of gap) ctlFall=+0.0233 top1kept=4/4 isFall=+0.0081 nextTok=' is' pass R/C/I=111 l2=4.43 feats=137591+5895+1418
+  L12   top3 b=0.5 n=3 effect=-0.009 dReadout=+0.0087 (+0.4% of gap) ctlFall=+0.0078 top1kept=4/4 isFall=-0.0008 nextTok=' is' pass R/C/I=111 l2=2.22 feats=1483+55450+29330
+  L12   top3 b=1.0 n=3 effect=-0.003 dReadout=+0.0169 (+0.7% of gap) ctlFall=+0.0168 top1kept=4/4 isFall=+0.0013 nextTok=' is' pass R/C/I=111 l2=4.44 feats=1483+55450+29330
+  L12   top3 b=2.0 n=3 effect=+0.048 dReadout=+0.0314 (+1.4% of gap) ctlFall=+0.0370 top1kept=4/4 isFall=+0.0120 nextTok=' is' pass R/C/I=111 l2=8.88 feats=1483+55450+29330
+  L13   top3 b=0.5 n=3 effect=-0.068 dReadout=-0.0001 (-0.0% of gap) ctlFall=+0.0022 top1kept=4/4 isFall=+0.0018 nextTok=' is' pass R/C/I=111 l2=1.51 feats=114033+19368+27421
+  L13   top3 b=1.0 n=3 effect=-0.134 dReadout=+0.0003 (+0.0% of gap) ctlFall=+0.0045 top1kept=4/4 isFall=+0.0035 nextTok=' is' pass R/C/I=111 l2=3.02 feats=114033+19368+27421
+  L13   top3 b=2.0 n=3 effect=-0.250 dReadout=+0.0031 (+0.1% of gap) ctlFall=+0.0091 top1kept=4/4 isFall=+0.0062 nextTok=' is' pass R/C/I=111 l2=6.03 feats=114033+19368+27421
+  L17   top3 b=0.5 n=3 effect=+0.084 dReadout=-0.0058 (-0.3% of gap) ctlFall=+0.0031 top1kept=4/4 isFall=-0.0041 nextTok=' is' pass R/C/I=111 l2=6.28 feats=15678+70371+150354
+  L17   top3 b=1.0 n=3 effect=+0.165 dReadout=-0.0148 (-0.7% of gap) ctlFall=+0.0042 top1kept=4/4 isFall=-0.0037 nextTok=' is' pass R/C/I=111 l2=12.56 feats=15678+70371+150354
+  L17   top3 b=2.0 n=3 effect=+0.314 dReadout=-0.0410 (-1.8% of gap) ctlFall=+0.0082 top1kept=4/4 isFall=+0.0140 nextTok=' is' pass R/C/I=111 l2=25.12 feats=15678+70371+150354
+  L20   top3 b=0.5 n=3 effect=+0.029 dReadout=-0.0221 (-1.0% of gap) ctlFall=+0.0085 top1kept=4/4 isFall=-0.0084 nextTok=' is' pass R/C/I=111 l2=11.53 feats=146850+33005+62864
+  L20   top5 b=0.5 n=5 effect=-0.061 dReadout=+0.0363 (+1.6% of gap) ctlFall=+0.0123 top1kept=4/4 isFall=-0.0119 nextTok=' is' pass R/C/I=111 l2=18.34 feats=146850+33005+62864+51506+163792
+  L20   top3 b=1.0 n=3 effect=+0.068 dReadout=-0.0475 (-2.1% of gap) ctlFall=+0.0167 top1kept=4/4 isFall=-0.0136 nextTok=' is' pass R/C/I=111 l2=23.06 feats=146850+33005+62864
+  L20   top5 b=1.0 n=5 effect=-0.103 dReadout=+0.0555 (+2.5% of gap) ctlFall=+0.0264 top1kept=4/4 isFall=-0.0194 nextTok=' is' pass R/C/I=111 l2=36.68 feats=146850+33005+62864+51506+163792
+  L20   top3 b=2.0 n=3 effect=-0.016 dReadout=+0.0132 (+0.6% of gap) ctlFall=-0.0005 top1kept=4/4 isFall=-0.0145 nextTok=' is' pass R/C/I=111 l2=20.70 feats=33005+62864+51506
+  L21   top3 b=0.5 n=3 effect=+0.003 dReadout=+0.0020 (+0.1% of gap) ctlFall=-0.0017 top1kept=4/4 isFall=+0.0039 nextTok=' is' pass R/C/I=111 l2=6.82 feats=82598+123565+36202
+  L21   top5 b=0.5 n=5 effect=-0.002 dReadout=+0.0109 (+0.5% of gap) ctlFall=-0.0015 top1kept=4/4 isFall=+0.0001 nextTok=' is' pass R/C/I=111 l2=8.02 feats=82598+123565+36202+75179+88236
+  L21   top3 b=1.0 n=3 effect=+0.005 dReadout=+0.0039 (+0.2% of gap) ctlFall=-0.0034 top1kept=4/4 isFall=+0.0083 nextTok=' is' pass R/C/I=111 l2=13.64 feats=82598+123565+36202
+  L21   top5 b=1.0 n=5 effect=-0.004 dReadout=+0.0210 (+0.9% of gap) ctlFall=-0.0031 top1kept=4/4 isFall=-0.0000 nextTok=' is' pass R/C/I=111 l2=16.04 feats=82598+123565+36202+75179+88236
+  L21   top3 b=2.0 n=3 effect=+0.007 dReadout=+0.0070 (+0.3% of gap) ctlFall=-0.0065 top1kept=4/4 isFall=+0.0181 nextTok=' is' pass R/C/I=111 l2=27.28 feats=82598+123565+36202
+  L21   top5 b=2.0 n=5 effect=-0.014 dReadout=+0.0389 (+1.7% of gap) ctlFall=-0.0062 top1kept=4/4 isFall=-0.0008 nextTok=' is' pass R/C/I=111 l2=32.08 feats=82598+123565+36202+88236+75179
+  L22   top3 b=0.5 n=3 effect=+0.008 dReadout=-0.0094 (-0.4% of gap) ctlFall=+0.0006 top1kept=4/4 isFall=-0.0026 nextTok=' is' pass R/C/I=111 l2=5.38 feats=64313+9237+138210
+  L22   top3 b=1.0 n=3 effect=+0.016 dReadout=-0.0193 (-0.9% of gap) ctlFall=+0.0012 top1kept=4/4 isFall=-0.0053 nextTok=' is' pass R/C/I=111 l2=10.75 feats=64313+9237+138210
+  L22   top3 b=2.0 n=3 effect=+0.032 dReadout=-0.0405 (-1.8% of gap) ctlFall=+0.0026 top1kept=4/4 isFall=-0.0110 nextTok=' is' pass R/C/I=111 l2=21.51 feats=64313+9237+138210
+  L23   top3 b=0.5 n=3 effect=+0.009 dReadout=-0.0017 (-0.1% of gap) ctlFall=+0.0004 top1kept=4/4 isFall=+0.0012 nextTok=' is' pass R/C/I=111 l2=1.97 feats=142507+117077+67123
+  L23   top3 b=1.0 n=3 effect=+0.018 dReadout=-0.0035 (-0.2% of gap) ctlFall=+0.0007 top1kept=4/4 isFall=+0.0023 nextTok=' is' pass R/C/I=111 l2=3.94 feats=142507+117077+67123
+  L23   top3 b=2.0 n=3 effect=+0.036 dReadout=-0.0070 (-0.3% of gap) ctlFall=+0.0014 top1kept=4/4 isFall=+0.0047 nextTok=' is' pass R/C/I=111 l2=7.89 feats=142507+117077+67123
+  L24   top3 b=0.5 n=3 effect=+0.019 dReadout=+0.0004 (+0.0% of gap) ctlFall=+0.0026 top1kept=4/4 isFall=-0.0006 nextTok=' is' pass R/C/I=111 l2=5.06 feats=38736+82854+4417
+  L24   top5 b=0.5 n=5 effect=+0.014 dReadout=-0.0045 (-0.2% of gap) ctlFall=+0.0029 top1kept=4/4 isFall=+0.0015 nextTok=' is' pass R/C/I=111 l2=11.36 feats=38736+82854+4417+56177+142467
+  L24   top3 b=1.0 n=3 effect=+0.038 dReadout=+0.0007 (+0.0% of gap) ctlFall=+0.0052 top1kept=4/4 isFall=-0.0014 nextTok=' is' pass R/C/I=111 l2=10.12 feats=38736+82854+4417
+  L24   top5 b=1.0 n=5 effect=+0.027 dReadout=-0.0092 (-0.4% of gap) ctlFall=+0.0063 top1kept=4/4 isFall=+0.0029 nextTok=' is' pass R/C/I=111 l2=22.71 feats=38736+82854+4417+56177+142467
+  L24   top3 b=2.0 n=3 effect=+0.077 dReadout=+0.0014 (+0.1% of gap) ctlFall=+0.0108 top1kept=4/4 isFall=-0.0031 nextTok=' is' pass R/C/I=111 l2=20.24 feats=38736+82854+4417
+  L24   top5 b=2.0 n=5 effect=+0.052 dReadout=-0.0193 (-0.9% of gap) ctlFall=+0.0143 top1kept=4/4 isFall=+0.0055 nextTok=' is' pass R/C/I=111 l2=45.43 feats=38736+82854+4417+56177+142467
+  L25   top3 b=0.5 n=3 effect=+0.014 dReadout=+0.0275 (+1.2% of gap) ctlFall=+0.0054 top1kept=4/4 isFall=+0.0208 nextTok=' is' pass R/C/I=111 l2=22.90 feats=98860+95592+104247
+  L25   top5 b=0.5 n=5 effect=+0.012 dReadout=+0.0280 (+1.2% of gap) ctlFall=+0.0050 top1kept=4/4 isFall=+0.0203 nextTok=' is' pass R/C/I=111 l2=23.50 feats=98860+95592+104247+146554+26186
+  L25   top3 b=1.0 n=3 effect=+0.032 dReadout=+0.0544 (+2.4% of gap) ctlFall=+0.0097 top1kept=4/4 isFall=+0.0425 nextTok=' is' pass R/C/I=111 l2=45.80 feats=98860+95592+104247
+  L25   top5 b=1.0 n=5 effect=+0.028 dReadout=+0.0552 (+2.4% of gap) ctlFall=+0.0090 top1kept=4/4 isFall=+0.0415 nextTok=' is' pass R/C/I=111 l2=47.01 feats=98860+95592+104247+146554+26186
+  L25   top3 b=2.0 n=3 effect=+0.029 dReadout=+0.0105 (+0.5% of gap) ctlFall=+0.0076 top1kept=4/4 isFall=+0.0040 nextTok=' is' pass R/C/I=111 l2=16.79 feats=95592+104247+146554
+  L25   top5 b=2.0 n=5 effect=+0.013 dReadout=-0.0229 (-1.0% of gap) ctlFall=+0.0231 top1kept=4/4 isFall=-0.0120 nextTok=' is' pass R/C/I=111 l2=40.52 feats=95592+104247+146554+26186+162614
+  L26   top3 b=0.5 n=3 effect=-0.003 dReadout=+0.0025 (+0.1% of gap) ctlFall=+0.0001 top1kept=4/4 isFall=-0.0011 nextTok=' is' pass R/C/I=111 l2=5.42 feats=117516+19883+41862
+  L26   top3 b=1.0 n=3 effect=-0.006 dReadout=+0.0050 (+0.2% of gap) ctlFall=+0.0001 top1kept=4/4 isFall=-0.0021 nextTok=' is' pass R/C/I=111 l2=10.84 feats=117516+19883+41862
+  L26   top3 b=2.0 n=3 effect=-0.012 dReadout=+0.0100 (+0.4% of gap) ctlFall=+0.0002 top1kept=4/4 isFall=-0.0040 nextTok=' is' pass R/C/I=111 l2=21.67 feats=117516+19883+41862

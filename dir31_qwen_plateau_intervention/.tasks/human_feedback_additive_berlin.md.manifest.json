@@ -1,0 +1,574 @@
+{
+  "version": 1,
+  "state": "addressed",
+  "source_feedback": "human_feedback_additive_berlin.md",
+  "source_sha256": "6235022b75942f91e806222851bcee8557556118942f347e344e4127f949581b",
+  "required_outputs": [
+    "REPORT.md",
+    "RESULTS.md",
+    "plots/additive/figA1_candidates.png",
+    "plots/additive/figA2_screen_answer_effect.png",
+    "plots/additive/figA3_screen_preservation.png",
+    "plots/additive/figA5_reserved_pilot.png"
+  ],
+  "may_modify": [
+    "PLAN.md",
+    "JOURNAL.md",
+    "CHANGELOG.md",
+    "RESULTS.md",
+    "REPORT.md",
+    "experiments/additive_*.py (new files only)",
+    "experiments/run_additive.sh (new file)",
+    "results/additive/ (new directory)",
+    "plots/additive/ (new directory)",
+    ".tasks/human_feedback_additive_berlin.md.manifest.json"
+  ],
+  "must_remain_unchanged": [
+    "experiments/common.py",
+    "experiments/run_all.sh",
+    "experiments/s1_plateau.py",
+    "experiments/s2_scan.py",
+    "experiments/s2_select.py",
+    "experiments/s2_slices.py",
+    "experiments/s3_path.py",
+    "experiments/s4_plots.py",
+    "plots/fig1_baseline_plateau.png",
+    "plots/fig2_intervention.png",
+    "plots/fig3_path_comparison.png",
+    "results/frozen_edit.json",
+    "results/frozen_features.csv",
+    "results/probe.npz",
+    "results/run_config.json",
+    "results/s1_endpoints.json",
+    "results/s1_layers.csv",
+    "results/s1_path.npz",
+    "results/s1_plateau.log",
+    "results/s2_context.csv",
+    "results/s2_frozen_eval.csv",
+    "results/s2_ranking.csv",
+    "results/s2_scan.csv",
+    "results/s2_scan.log",
+    "results/s2_slices.csv",
+    "results/s2_slices.log",
+    "results/s3_path.log",
+    "results/s3_path.npz",
+    "results/s3_summary.csv",
+    "results/slices/layer_0.pt",
+    "results/slices/layer_1.pt",
+    "results/slices/layer_10.pt",
+    "results/slices/layer_11.pt",
+    "results/slices/layer_12.pt",
+    "results/slices/layer_13.pt",
+    "results/slices/layer_14.pt",
+    "results/slices/layer_15.pt",
+    "results/slices/layer_16.pt",
+    "results/slices/layer_17.pt",
+    "results/slices/layer_18.pt",
+    "results/slices/layer_19.pt",
+    "results/slices/layer_2.pt",
+    "results/slices/layer_20.pt",
+    "results/slices/layer_21.pt",
+    "results/slices/layer_22.pt",
+    "results/slices/layer_23.pt",
+    "results/slices/layer_24.pt",
+    "results/slices/layer_25.pt",
+    "results/slices/layer_26.pt",
+    "results/slices/layer_27.pt",
+    "results/slices/layer_3.pt",
+    "results/slices/layer_4.pt",
+    "results/slices/layer_5.pt",
+    "results/slices/layer_6.pt",
+    "results/slices/layer_7.pt",
+    "results/slices/layer_8.pt",
+    "results/slices/layer_9.pt"
+  ],
+  "report_policy": {
+    "core_research_question": "REPORT.md keeps its existing question (does the plateau at the country token follow country identity or the later capital answer?). The new, clearly separated addendum section answers the feedback question: can an additive intervention at the country token promote the later Berlin answer while preserving Japan-related information?",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
+  "checklist": [
+    {
+      "request": "# Human concern — dir31 addendum: promote Berlin while preserving Japan",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Title of the request. The addendum it names was carried out as PLAN stage S4 and written up as a separate section in each deliverable.",
+        "evidence": "REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\"; RESULTS.md Section 5; PLAN.md stage S4.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "## Question",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the question answered under the next item.",
+        "evidence": "REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraphs \"Question\" and \"Conclusion\"; RESULTS.md Section 5, paragraphs \"Question\" and \"Outcome\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Can an additive intervention at the country token promote the later\nBerlin answer while preserving Japan-related information?",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Answered: within this bounded search, no such edit was found. 69 candidates were screened alone and in within-layer top-3 / top-5 groups at beta 0.5, 1 and 2 on the tuning prompt (256 settings). The largest rise of logit(Berlin) - logit(Tokyo) is +0.314 against the +1.0 required; 250 of 256 settings preserve Japan-related information by the three tolerances. The preservation-passing setting with that largest effect was frozen and run once on both reserved prompts with three matched random controls: +0.381 and +0.293 logits (random controls at most +0.201), with the \" is\" tolerance failing there (fall 0.095). The pilot does not pass.",
+        "evidence": "REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraphs \"Result on the tuning prompt\", \"Result on the reserved prompts\" and \"Conclusion\", Figure 4; RESULTS.md Section 5 (\"Outcome\"), Sections 5.5 and 5.7, Figures 4, 6 and 7; results/additive/tuning_summary.json and pilot_verdict.json.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "The previous donor replacement changed country identity. Do not reuse\nits successful edit as if it were a validated Berlin-specific direction.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "The layer-16 donor-replacement edit is not used anywhere in the addendum. A new class (AdditiveEdit) adds a fixed vector built only from the dir30 candidates; no additive_* script reads dir31's results/frozen_edit.json or uses common.Edit. Both write-ups state that the old edit changed country identity and is not a validated Berlin-specific direction, and neither calls the new frozen vector a validated Berlin direction.",
+        "evidence": "experiments/additive_common.py (class AdditiveEdit); REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Question\"; RESULTS.md Section 5, paragraph \"Question\", and Section 5.6.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "## Setup",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the four setup items that follow; each is answered under its own item.",
+        "evidence": "See the next four items; RESULTS.md Sections 5.1 and 5.3.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- Reuse dir31's model, transcoders, hooks, country readout, and prompts.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Reused unchanged: dir31's experiments/common.py (model and transcoder loader pinned to dir30's revisions, the forward-hook code, the capital templates), the frozen country readout results/probe.npz, dir30's currency and language prompts, and dir31's stored random decoder rows. The new code only adds an edit class with the same hook interface.",
+        "evidence": "experiments/additive_common.py (imports common; class Bench loads results/probe.npz and dir30's samples.jsonl); RESULTS.md Sections 5.1 and 5.3.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- Read ../CLAUDE.md and ../BUDGET.md. Do not reinstall the ML environment.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "../CLAUDE.md, ../BUDGET.md and ../WRITING.md were read before any work. Nothing was installed or upgraded; the existing /usr/bin/python3 environment was used with dir30's loader settings (VRAM fraction 0.45, 4 threads).",
+        "evidence": "JOURNAL.md entries of 2026-10-11; experiments/additive_common.py (Bench calls common.setup, i.e. dir30's setup_torch).",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- Preserve existing results. Save this experiment under results/additive/\n  and plots/additive/, and add a clearly separated report section.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "All 57 files that existed under experiments/, results/ and plots/ are byte-identical to the manifest baseline (re-hashed at the end). New outputs are under results/additive/ and plots/additive/; new code is experiments/additive_*.py and experiments/run_additive.sh. One clearly separated section was added to REPORT.md and a separate Section 5 to RESULTS.md; RESULTS.md Sections 1-4 and the existing REPORT.md findings are unchanged.",
+        "evidence": "results/additive/; plots/additive/ (figA1, figA2, figA3, figA5); REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\"; RESULTS.md Section 5; baseline_sha256 in this manifest.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- Tune on \"The capital city of Japan is\". Reserve the original capital\n  prompt and the remaining correct paraphrase for evaluation.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "All selection used only \"The capital city of Japan is\". \"The capital of Japan is\" and \"The capital of Japan is the city of\" were reserved: they were first run after the edit had been frozen from tuning results, once, and nothing was retuned afterwards.",
+        "evidence": "experiments/additive_s2_screen.py (uses the \"tune\" template only), additive_s3_freeze.py (reads only the screen CSVs), additive_s5_reserved_eval.py; results/additive/frozen_edit.json and pilot_verdict.json (frozen_edit_sha256); RESULTS.md Sections 5.3, 5.6 and 5.7; JOURNAL.md entries of 2026-10-11.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "## 1. Define candidates and a strictly additive edit",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the five items that follow (candidates, amplitudes, the edit formula, strengths).",
+        "evidence": "See the next five items; RESULTS.md Sections 5.1 and 5.2.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Start with dir30's Berlin candidates outside its Germany candidate set,\nat layers 1–26. Set exclusion is only a candidate filter, not proof of\nsemantic independence.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Candidates = dir30's Berlin set (85 features, identical at its three cutoffs) minus dir30's broadest Germany set (top50, 275 features), restricted to layers 1-26: 69 features, in layers 3-26 (69 with the top20 Germany set, 70 with top10). Both write-ups state that the exclusion is only a candidate filter and not proof of semantic independence, with numbers: 18 of the 69 are active on some dir30 Germany prompts, 5 on all ten, and only 14 have a dir30 score of at least 0.5.",
+        "evidence": "results/additive/candidate_counts.json and candidates.csv; RESULTS.md Section 5.2 (\"Counts\", \"What the filter does and does not remove\", per-layer table, Figure 5) and Section 5.11; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Candidates\".",
+        "ambiguity": "The request does not say which dir30 cutoff defines the Germany set. The broadest (top50) was used and the counts under top10 and top20 are reported; logged in JOURNAL.md before the screen as an ordinary implementation detail."
+      }
+    },
+    {
+      "request": "For each feature, obtain a reference amplitude from its median positive\nactivation on dir30's Berlin-answer discovery prompts at that layer.\nDo not obtain amplitudes from the Germany token of a capital prompt.\nRecord sample support and extraction position.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "For each candidate the layer's native MLP input was encoded with dir30's encoder at the last prompt token of dir30's 7 Berlin-answer discovery prompts (2 facts); the amplitude is the median of the activations above zero. Recomputed activations match dir30's stored ones to 5e-5. No amplitude comes from any capital prompt. Recorded per feature: positive prompts out of 7, facts out of 2, token index and text of each positive prompt, smallest and largest positive value, and the extraction position.",
+        "evidence": "experiments/additive_s1_candidates.py; results/additive/candidates.csv (columns amplitude, n_positive_prompts, n_positive_facts, positive_prompt_tokens, extraction_position) and discovery_prompts.csv; RESULTS.md Section 5.2 (\"Sample support and extraction position\", table of the seven prompts, \"Amplitudes\") and Section 5.11; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Additive edit\".",
+        "ambiguity": "None. The median is pooled over the 7 prompts."
+      }
+    },
+    {
+      "request": "At the Japan token, apply:",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the formula under the next item. The edit is applied at the \" Japan\" token: position 4 of the tuning prompt, position 3 of the reserved prompts, and the \" Japan\" token of each control prompt for the control-prompt tolerance.",
+        "evidence": "See the next item; RESULTS.md Sections 5.1, 5.4 and 5.7.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "    y_new = y_native + beta * sum_i(reference_amplitude_i * decoder_i)",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Implemented as written: the fixed vector beta * sum_i(amplitude_i * W_dec[i]) is added to the output of the layer's native MLP at the \" Japan\" token, with no decoder bias and no encoder term. Checked for every candidate: the edited block's output moves by exactly that vector (largest error 1.9e-5), and neither earlier layers nor the bridge token up to that layer move.",
+        "evidence": "experiments/additive_common.py (AdditiveEdit, edit_vector); results/additive/tuning_base.json (field sanity); RESULTS.md Section 5.1 (equation) and Section 5.4; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Additive edit\" (equation).",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Test beta = 0, 0.5, 1, 2. Do not subtract current activations, remove Japan\nfeatures, or replace the native MLP. Recompute downstream states normally.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "beta = 0, 0.5, 1 and 2 were tested for every candidate; beta = 0 reproduces the unedited logits exactly, and groups are defined for beta above 0. No larger strength was used anywhere, including the frozen edit (beta 2). The vector does not depend on current activations, nothing is subtracted, no Japan feature is removed, the native MLP always runs, and every forward pass recomputes all later blocks without a KV cache.",
+        "evidence": "results/additive/screen_single.csv (276 rows = 69 candidates x 4 strengths) and tuning_base.json (beta0_max_abs_logit_diff 0.0); RESULTS.md Sections 5.1, 5.4 and 5.5.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "## 2. Screen for answer effects AND country preservation",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the seven items that follow. Every setting in the screen carries both its answer effect and all three preservation results.",
+        "evidence": "results/additive/screen_single.csv and screen_group.csv; RESULTS.md Section 5.5; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraphs \"Tolerances\", \"Screen and freeze\" and \"Result on the tuning prompt\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Test features individually first. Rank by the actual increase in\nlogit(Berlin) - logit(Tokyo), measured after the fixed bridge \" is\".",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Each of the 69 candidates was tested alone at every strength and ranked, within each strength, by the measured change of logit(Berlin) - logit(Tokyo) at the last bridge token of the tuning prompt (column rank_at_beta). The same three lead at all strengths (15678 at layer 17, then 137591 and 48590 at layer 10); the most positive single-feature effect is +0.278 and the most negative is -0.286.",
+        "evidence": "results/additive/screen_single.csv (answer_effect, rank_at_beta); RESULTS.md Section 5.5 (\"What was tested\", top-ten table, \"Moves away from Berlin\"), Section 5.11 (all candidates) and Figure 4.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Use these fixed pilot tolerances:",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the three tolerances under the next three items. All three were computed for every setting during the screen and again for every arm of the reserved-prompt pilot, with the request's numbers unchanged.",
+        "evidence": "RESULTS.md Section 5.1 (\"Preservation checks\"), Section 5.5 (pass-count table) and Section 5.7; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Tolerances\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- Country readout at layer 26 changes by at most 10% of the unedited\n  Japan–Germany readout gap for the matched capital template.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Computed for every setting: the absolute change of dir31's frozen layer-26 readout at the \" Japan\" token of the capital prefix, compared with 10% of the unedited Japan-minus-Germany gap of the same template. Tuning template: gap 2.266, tolerance 0.227; all 256 settings pass, largest change 0.192 (8.5% of the gap). Reserved template: gap 2.261, tolerance 0.226; the frozen edit changes the readout by -0.026 (1.2%) and passes.",
+        "evidence": "results/additive/tuning_base.json (readout_gap_japan_minus_germany, readout_tolerance); screen_single.csv, screen_group.csv and reserved_eval.csv (d_readout26, d_readout26_frac_of_gap, pass_readout); RESULTS.md Section 5.3, Section 5.5 (pass-count table), Section 5.7 and Figure 6, left panel.",
+        "ambiguity": "None. \"Changes by at most\" was applied in both directions."
+      }
+    },
+    {
+      "request": "- On each valid mid-sentence Japanese language/currency control, the\n  original correct top-1 is preserved and its answer probability falls\n  by no more than 0.05 absolute.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Four dir30 prompts are valid (Japanese, answered correctly unedited, country word not first). The same vector is added at the \" Japan\" token of each; the tolerance requires the unedited correct top-1 to stay top-1 and its probability to fall by at most 0.05. Screen: 253 of 256 settings pass; the top-1 is kept in all 1,024 control-prompt runs; the largest fall is 0.061, on \"What is the official currency of Japan? It is called the\". Pilot: the frozen edit passes (largest fall 0.008).",
+        "evidence": "results/additive/screen_controls.csv and reserved_controls.csv (one row per control prompt); screen_single.csv and screen_group.csv (controls_top1_kept, control_max_fall, pass_controls); RESULTS.md Section 5.3 (control-prompt table), Section 5.5 (pass-count table; failure table, which names the control prompt with the largest fall), Section 5.7 (control-prompt table) and Figure 6, middle panel.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- \" is\" remains top-1 at the capital-prefix country token, with its\n  probability falling by no more than 0.05 absolute.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Checked at the \" Japan\" token of the capital prefix: \" is\" must stay the top next token and P(\" is\") may fall by at most 0.05. Screen (tuning prefix, 0.409 unedited): 252 of 256 settings pass; the largest fall is 0.110, the one case in which the next token becomes a comma. Pilot (reserved prefix, 0.693 unedited): the frozen edit keeps \" is\" on top but lowers its probability to 0.598, a fall of 0.095, so this tolerance fails there.",
+        "evidence": "results/additive/screen_single.csv, screen_group.csv and reserved_eval.csv (p_is, is_fall, top1_after_country, pass_is); RESULTS.md Section 5.5 (pass-count and failure tables), Section 5.7 (per-arm and verdict tables) and Figure 6, right panel.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Exclude first-token controls already known to invalidate the readout.\nApply preservation checks during selection, not only after choosing\nthe strongest answer-changing edit.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "The three Japanese prompts that begin with the country word are listed and excluded. Preservation is applied during selection: all three tolerances are computed for every single-feature setting, only candidates that pass all three at a given strength can enter a group at that strength, and the frozen edit is chosen among settings that pass all three.",
+        "evidence": "results/additive/tuning_base.json (excluded_first_token_controls); experiments/additive_s2_screen.py and additive_s3_freeze.py; RESULTS.md Sections 5.1, 5.3, 5.5 and 5.6.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Combine the top 3 and top 5 preservation-passing features within a layer,\nwhere available. Recheck every condition: individual preservation does\nnot guarantee group preservation. No broader search in this pass.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "For each layer and each beta above 0, the top 3 and the top 5 of the candidates that pass all three tolerances at that beta (ranked by measured answer effect) were combined where that many exist: 49 groups in 12 layers (36 top-3, 13 top-5). Every tolerance was rerun on each group; all 49 pass and the best reaches +0.314. No other combination and no cross-layer group was tried.",
+        "evidence": "results/additive/screen_group.csv; RESULTS.md Section 5.5 (\"Groups\" table) and Figure 4; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", Figure 4.",
+        "ambiguity": "The request does not say whether a group member must itself have a positive effect. The literal wording was followed (top preservation-passing features of any sign); the 15 groups whose members are all positive are flagged (column all_members_positive, asterisks in the RESULTS.md table). The outcome is the same under either reading."
+      }
+    },
+    {
+      "request": "## 3. Freeze and evaluate",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading. Both steps under it were carried out: an edit was frozen from tuning results only and evaluated once on the two reserved prompts (see the next six items).",
+        "evidence": "results/additive/frozen_edit.json, reserved_eval.csv and pilot_verdict.json; RESULTS.md Sections 5.6 and 5.7; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraphs \"Screen and freeze\" and \"Result on the reserved prompts\".",
+        "ambiguity": "See the next item for the operator's resolution of \"qualifying\"; no ambiguity remains."
+      }
+    },
+    {
+      "request": "Freeze the smallest qualifying edit using tuning results only.\nEvaluate reserved prompts against baseline and three same-site,\nfeature-count/norm-matched random controls.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Frozen from tuning results only (additive_s3_freeze.py reads only the screen CSVs and runs no model). The rule written before the screen selected nothing; under the operator's resolution the preservation-passing setting with the largest tuning answer effect was frozen: layer 17, candidates 15678 + 70371 + 150354, beta 2, vector L2 25.12 (+0.314 on tuning). frozen_edit.json was written before the first reserved-prompt run and its hash is recorded in pilot_verdict.json. The frozen edit was then run once on \"The capital of Japan is\" and \"The capital of Japan is the city of\" against the unedited model and three same-site random controls with the same feature count and coefficients, rescaled to the same L2 norm. The random controls take their directions from dir31's stored pool of 64 random decoder rows for layer 17, and two rows are shared between them (152238 in random controls 1 and 2, 74060 in random controls 2 and 3); both deliverables say so. Nothing was changed afterwards.",
+        "evidence": "results/additive/preregistered_gate.json, frozen_edit.json, reserved_eval.csv, reserved_controls.csv and pilot_verdict.json; experiments/additive_s3_freeze.py and additive_s5_reserved_eval.py; RESULTS.md Section 5.1 (\"Frozen edit\", \"Matched random control\"), Section 5.6 and Section 5.7 (\"Where the random directions come from\", per-arm table, Figure 7); REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraphs \"Screen and freeze\" and \"Result on the reserved prompts\".",
+        "ambiguity": "Resolved by the operator (see operator_rulings). The request does not define \"qualifying\". The rule written in JOURNAL.md before the screen (all three tolerances AND answer effect >= +1.0 on the tuning prompt, then smallest) selected nothing, so the operator's resolution applied: freeze the preservation-passing setting with the largest tuning answer effect. That rule was fixed after the tuning screen and before any reserved-prompt run; it is the largest passing edit, not the smallest. No ambiguity remains."
+      }
+    },
+    {
+      "request": "A useful pilot result requires:",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the three criteria. Each was judged separately on each reserved prompt: criterion 1 not met, criterion 2 met, criterion 3 not met. The pilot does not pass.",
+        "evidence": "results/additive/pilot_verdict.json; RESULTS.md Section 5.1 (\"Pilot criteria\") and Section 5.7 (verdict table); REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- At least +1 logit toward Berlin on each reserved prompt.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Not met on either prompt: the frozen edit changes logit(Berlin) - logit(Tokyo) by +0.381 on \"The capital of Japan is\" and by +0.293 on \"The capital of Japan is the city of\".",
+        "evidence": "results/additive/reserved_eval.csv and pilot_verdict.json; RESULTS.md Section 5.7 (per-arm table, verdict table, Figure 7); REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- A larger answer effect than every matched random control.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Met on both prompts: +0.381 against +0.201, +0.160 and -0.085, and +0.293 against +0.197, +0.146 and -0.022. The margins over the best random control are 0.18 and 0.10 logits. Both deliverables report this as weak evidence: three seeds, directions taken from a pool of 64 decoder rows, and two rows shared between the random controls.",
+        "evidence": "results/additive/reserved_eval.csv and pilot_verdict.json; RESULTS.md Section 5.7 (per-arm table, verdict table, Figure 7); REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Result on the reserved prompts\". Pool and shared rows: RESULTS.md Section 5.1 (\"Matched random control\"), Section 5.7 (\"Where the random directions come from\", \"Reading the result\") and Section 5.10.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "- All preservation checks still pass.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Not met. On the reserved prefix the frozen edit passes the readout tolerance (change -0.026, 1.2% of the gap) and the control-prompt tolerance (largest fall 0.008, top-1 kept on all four prompts), but fails the \" is\" tolerance: P(\" is\") goes from 0.693 to 0.598, a fall of 0.095 against 0.05, with \" is\" still top-1.",
+        "evidence": "results/additive/reserved_eval.csv, reserved_controls.csv and pilot_verdict.json; RESULTS.md Section 5.7 (per-arm table, verdict table, control-prompt table); REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Show probabilities, readout changes, and greedy completions.\nBerlin need not become top-1. Do not retune on reserved results.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Shown for every arm on both reserved prompts: P(Tokyo), P(Berlin), top token, readout change, P(\" is\") and an 8-token greedy completion. Under the frozen edit Tokyo stays top-1 and both completions are unchanged (\" Tokyo. The capital of the United States\"). Berlin does not become top-1, which no criterion requires. The reserved prompts were run once and nothing was retuned on their results.",
+        "evidence": "results/additive/reserved_eval.csv; RESULTS.md Section 5.7 (per-arm table, \"Reading the result\"); REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "## 4. Conditional plateau test",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading. The condition for this test (the pilot passes) was not met, so the test was not run (see the next seven items).",
+        "evidence": "results/additive/pilot_verdict.json (pilot_passes: false; plateau_test: \"not run: the pilot did not pass\"); RESULTS.md Section 5.8; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", last sentence of \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Only after the pilot passes, apply the SAME fixed additive vector at\nevery point of dir31's original 41-point Japan–Germany path.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Not run: the pilot did not pass (criteria 1 and 3), so the fixed additive vector was not applied along the 41-point path.",
+        "evidence": "results/additive/pilot_verdict.json (pilot_passes: false; plateau_test: \"not run: the pilot did not pass\"); RESULTS.md Section 5.8; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", last sentence of \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Check country readout against the unedited path, including both endpoints.\nIf country preservation fails along the path, label the plateau result\nconfounded.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Not run for the same reason. There is no path result under an additive edit, so no plateau result is labelled confounded or unconfounded. The rule that would have been applied (the same 10% readout tolerance at all 41 points, both endpoints included) is recorded in JOURNAL.md.",
+        "evidence": "results/additive/pilot_verdict.json (pilot_passes: false; plateau_test: \"not run: the pilot did not pass\"); RESULTS.md Section 5.8; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", last sentence of \"Result on the reserved prompts\". Planned rule: JOURNAL.md, entry of 2026-10-11 written before the screen.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Plot:",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the three plots under the next three items. None was made, because the conditional test was not run.",
+        "evidence": "results/additive/pilot_verdict.json (pilot_passes: false; plateau_test: \"not run: the pilot did not pass\"); RESULTS.md Section 5.8; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", last sentence of \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "1. Hidden-state d(t), using EACH condition's OWN edited endpoints.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Not produced: the conditional plateau test was not run, so there is no d(t) curve under an additive edit.",
+        "evidence": "results/additive/pilot_verdict.json (pilot_passes: false; plateau_test: \"not run: the pilot did not pass\"); RESULTS.md Section 5.8; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", last sentence of \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "2. Adjacent-step L2 changes divided by that condition's mean step.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Not produced: the conditional plateau test was not run, so there are no adjacent-step curves under an additive edit.",
+        "evidence": "results/additive/pilot_verdict.json (pilot_passes: false; plateau_test: \"not run: the pilot did not pass\"); RESULTS.md Section 5.8; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", last sentence of \"Result on the reserved prompts\".",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "3. Country readout and Tokyo/Berlin probabilities.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Not produced along the path: the conditional plateau test was not run. Readout and Tokyo/Berlin probabilities at the path's Japan endpoint prompt (\"The capital of Japan is\") are reported for every arm of the pilot.",
+        "evidence": "results/additive/pilot_verdict.json (pilot_passes: false; plateau_test: \"not run: the pilot did not pass\"); RESULTS.md Section 5.8; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", last sentence of \"Result on the reserved prompts\". Endpoint-prompt values: RESULTS.md Section 5.7 (per-arm table).",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Also retain fixed-baseline-reference curves, raw step sizes, and endpoint\nseparation. Near-collapsed endpoints make normalized curves unreliable.\nRead native states downstream of the edit, not directly edited outputs.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Not applicable: no path curves exist under an additive edit. The quantities that would have been kept (d(t) with own endpoints and with fixed unedited endpoints, raw and normalised step sizes, endpoint separation, states read in layers after the edited one) are recorded in JOURNAL.md.",
+        "evidence": "results/additive/pilot_verdict.json (pilot_passes: false; plateau_test: \"not run: the pilot did not pass\"); RESULTS.md Section 5.8; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", last sentence of \"Result on the reserved prompts\". Planned quantities: JOURNAL.md, entry of 2026-10-11 written before the screen.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "## Completion / stop rule",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Heading for the two items that follow.",
+        "evidence": "See the next two items; REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Conclusion\"; RESULTS.md Section 5 (\"Outcome\") and Section 5.10.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Report the best answer effect and its country cost, including failures.\nIf no setting passes, conclude:\n\"No selective additive intervention found in this bounded candidate search.\"",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Reported in both deliverables. Tuning prompt: best answer effect +0.314 logits (layer 17, top-3 group 15678 + 70371 + 150354, beta 2), also the best preservation-passing setting; country cost: readout change -0.041 (1.8% of the gap), largest control-prompt fall 0.008, fall of P(\" is\") 0.014. Reserved prompts, same frozen edit: +0.381 and +0.293, with readout change -0.026 (1.2%), control-prompt fall 0.008 and a failing P(\" is\") fall of 0.095. Failures are included: the six failing tuning settings (the most positive reaches +0.208 with a fall of 0.061 on a named currency control prompt and a P(\" is\") fall of 0.066), the moves away from Berlin (down to -0.286), and the two unmet pilot criteria. No setting passes, and both deliverables contain the exact sentence \"No selective additive intervention found in this bounded candidate search.\"",
+        "evidence": "REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraphs \"Result on the tuning prompt\", \"Result on the reserved prompts\" and \"Conclusion\" (and the Addendum pointers in Summary and Conclusion); RESULTS.md Headline, Section 5 (\"Outcome\"), Section 5.5 (top-ten table, \"Moves away from Berlin\", failure table) and Section 5.7; results/additive/tuning_summary.json and pilot_verdict.json.",
+        "ambiguity": "None"
+      }
+    },
+    {
+      "request": "Do not conclude that disentanglement is impossible, enlarge strengths,\nor relabel country features as city features. Update JOURNAL/RESULTS/REPORT\nand finish according to the existing agent workflow.",
+      "status": "done",
+      "completion": {
+        "what_was_done": "Neither deliverable says disentanglement is impossible; both state the bounds of the search and that the question is open outside them. No strength above 2 was used. The candidates and the frozen vector are not called Berlin or city features, and no country feature is relabelled. JOURNAL.md, RESULTS.md, REPORT.md, CHANGELOG.md and PLAN.md were updated, the format checks were run, and the manifest is set to review_pending; the feedback file is not renamed and no STOP is written, as the workflow requires.",
+        "evidence": "REPORT.md section \"Addendum: can an additive edit promote Berlin while preserving Japan?\", paragraph \"Conclusion\"; RESULTS.md Section 5 (\"Outcome\"), Section 5.1 (\"Candidate\"), Section 5.6 and Section 5.10; JOURNAL.md and CHANGELOG.md entries of 2026-10-11; PLAN.md stage S4.",
+        "ambiguity": "None"
+      }
+    }
+  ],
+  "triage_notes": [
+    "Routing: the requested \"clearly separated report section\" goes in REPORT.md; the detailed evidence goes in a separated section of RESULTS.md; raw outputs under results/additive/ and plots/additive/ exactly as requested.",
+    "Every file that existed under experiments/, results/ and plots/ before this task is declared unchanged (\"Preserve existing results\"). New code goes in new experiments/additive_* files.",
+    "Figures embedded for the addendum should be appended to required_outputs before review so the reviewer inspects them.",
+    "Ordinary implementation details to log in JOURNAL.md before running (not material ambiguities): which dir30 cutoff defines the Germany candidate set; how top-3/top-5 groups are formed per beta; the tie-break for \"smallest qualifying edit\".",
+    "Completion (2026-10-11): figures embedded for the addendum are listed in required_outputs (REPORT.md embeds figA2; RESULTS.md embeds figA2, figA1, figA3 and figA5)."
+  ],
+  "baseline_sha256": {
+    ".tasks/human_feedback_additive_berlin.md.manifest.json": "be856a6a7c95f18224c38402953541d228426f318798379547407a3fa532a994",
+    "CHANGELOG.md": "3a39617ce6c1161048fcc818a6deb4aa508a230514e9b735a92a28e03ac2d623",
+    "JOURNAL.md": "8a20ff151ebc20b679dbeafd68127f17761322d014f689db3d6b7f562502ba19",
+    "PLAN.md": "3eff4fe00305d913677b2d2709072c31a3c2a9d4d951eaec76d79d5aa9da6533",
+    "REPORT.md": "195b66be6907bd2f9626704b31efff16e08780444649a14790168e71510fea5e",
+    "RESULTS.md": "5654fd0c7969fa6cf5079878ab010a00f31bfb947993be9731268f2deb7f279b",
+    "experiments/additive_*.py (new files only)": null,
+    "experiments/common.py": "d75d104747473a5623768ea582ff6843b1d36e5599451665cb5b486f33e6e6d1",
+    "experiments/run_additive.sh (new file)": null,
+    "experiments/run_all.sh": "46236f0c7a8ee3cd53ce6533f7a0271eba4395e308990005221b5ec21b393995",
+    "experiments/s1_plateau.py": "f2979bdf76c5fb5ed30afb3e7a479e3ab691f76127b02f28e4910a49e7172391",
+    "experiments/s2_scan.py": "bc3eea318cf306fb8d9124e072f09264373c43dec674542e476fa157a588e71e",
+    "experiments/s2_select.py": "0f4d18dc6685bb7bdcee4ecac5a3d020197408e00c89509e0107cc22f7166cb5",
+    "experiments/s2_slices.py": "97cdd4a328347af57d69a267474ae04850077ec7cf04368a93b762222312fdad",
+    "experiments/s3_path.py": "10946cf3d6705b70a23e9dcbd4a3ef46e5bfcefe4dc67354ec2cc7a0f942c501",
+    "experiments/s4_plots.py": "867f34268f13c22aebb807da0b7c8add63ee0b1345cc6408bb8687961ee9ad68",
+    "plots/additive/ (new directory)": null,
+    "plots/fig1_baseline_plateau.png": "c50dc3c31b3138686e7a89a2aa0619a116ac2fe6f089abb9faa1d5e50da8e45c",
+    "plots/fig2_intervention.png": "7db7f5279791cff938c29e8a15dd2d57a7a92c58582f2f8b1922c63dc407db23",
+    "plots/fig3_path_comparison.png": "6b673b7f1a35d40e5a8f5f854c6dd4a7e2cca870dda49b4534c85cd9e7bbeb42",
+    "results/additive/ (new directory)": null,
+    "results/frozen_edit.json": "5c74be524d695687444ef7f2c1b25a9774def34bf2f87680c454bbc01953d04d",
+    "results/frozen_features.csv": "6533311a60d90d42cbbe4fc3b471867aaf75bbea0d810e120d747e235285a698",
+    "results/probe.npz": "2f3bff01faa2aae60d5bf822b21cb5a9ce31bffc0a525a7b7a1594fb886af0c3",
+    "results/run_config.json": "f0a03eb53b996d20ddc10c74516428918b3ee9b8ade99298e512c30509e429d8",
+    "results/s1_endpoints.json": "7afe5c7216508153953970bcd8c5a85f27c5626f9f2266563f8d87d0d8c5a37d",
+    "results/s1_layers.csv": "1a170fee98b972fc97541ef029ec1ca49888ad9c22dacb1d37f6d28e7d3ce3c4",
+    "results/s1_path.npz": "3bc2ae00f29d1630aa4ceb83cfc983fd96d4ee9333863909638cd826325a6658",
+    "results/s1_plateau.log": "27c57e411d00053052b35bd23e1ddd3b109fe67e869719d8a51c96b82938d3e5",
+    "results/s2_context.csv": "15a8adcb197ab9b70cae5fedebb04155431af1162a39de2ee4d433c039dc3904",
+    "results/s2_frozen_eval.csv": "5b9e49783f70711cc4a844f030d143dd74e6a6b7774a7237f15dd525900f9f81",
+    "results/s2_ranking.csv": "e28c99add5fde4e9d24b57f4952814c3bf02d1b86df7bebdc4bad90c22e605f2",
+    "results/s2_scan.csv": "a8948f68a074f982b85e2f5a18f473074f87b49400269a51be4bf4f5d46a32fc",
+    "results/s2_scan.log": "4302e322c5848336cbd6211288ffdb453f1cfc68057a2166683d71aa2e1ffe9e",
+    "results/s2_slices.csv": "2702ad1e6b6e87d092ddca77d21b12351eca2b841e19f98ea5fa2c0684776327",
+    "results/s2_slices.log": "f9b76243ac42c9c77b39584975660abae78d5b79d530d138af606fb7a0d98eac",
+    "results/s3_path.log": "f0139b9af9925d9c10b6c9a8d03973b23186d032a8ffbc97e086dfb9132fc2fa",
+    "results/s3_path.npz": "0caf0efc991db62d59b05503fee2f7c2f5d41487b2868c599fa694c556825bda",
+    "results/s3_summary.csv": "d8848631d4353050cc40dd2f436080a8fb2e1332de3f2a5571a37841472f08fa",
+    "results/slices/layer_0.pt": "b28053f9661c7a81bbd3944979ab15981b7381a95c1050c2f9cd277ed3a23921",
+    "results/slices/layer_1.pt": "5c000777802e955322c34808fb9d0df873b0eae4cb85504102519bf419f5ddb6",
+    "results/slices/layer_10.pt": "ae5749cc925a8541115cba21071163c94100d924fee397a94835c449992b883d",
+    "results/slices/layer_11.pt": "9038b162bcb718094e32277437b50c679f15ad2caf84179adb53b544a7e59d3f",
+    "results/slices/layer_12.pt": "95d879d23fa857ab0415b85de1feb8e705bb6064181b77c791c03b0a133f448d",
+    "results/slices/layer_13.pt": "64c6296ecf4677cc317ee7e2727ba277512b65aa0a0595bda1e5ca6f529eed7b",
+    "results/slices/layer_14.pt": "e4104f9324b283be253db607b0409d4994ae35b4eca1c517137de81f3752f2bf",
+    "results/slices/layer_15.pt": "c69a362b3fa49e84be23aff6be2f93a04881d99528e9846866f57c6763fcdf64",
+    "results/slices/layer_16.pt": "d75d0185981e29b8eb8f409f0531c1f926386e966ceed27f645148752ed355b1",
+    "results/slices/layer_17.pt": "183c5d577c7d26e1047a63c4805e810e81d376c4d0f99576e45bc421b92a559c",
+    "results/slices/layer_18.pt": "0685a22bf5facefb3b0981baefaae2bea6d138d8b483c18a53a5e2f30e2847ff",
+    "results/slices/layer_19.pt": "f434777839035e5061964b85ca450787b920fcfe00f31211076a812fb5a3d4fe",
+    "results/slices/layer_2.pt": "8aab7ffeacd05a35cc6e69003b60eb7c54aa643137b569e91fe998b257241a12",
+    "results/slices/layer_20.pt": "4ce200a6b50611a1b60fe26eed733afd65db618203b9d9688277a99fea8c6630",
+    "results/slices/layer_21.pt": "f82ae4808b93fb5b6f2fe6bba956c9357d4f5a5ff349e28f78804470295dac38",
+    "results/slices/layer_22.pt": "0464a8d63cc5c1454af14f3b7362a9560a7d26252c5d9feb5e30f07259789c6a",
+    "results/slices/layer_23.pt": "65793c6d4067988df0faea037066099e3155a4b787a4aa8dc1883f145dece734",
+    "results/slices/layer_24.pt": "d349be97778b0bd3c90ba5c00ee81b75bc1b6f601c99ceba4e130cc5410424d8",
+    "results/slices/layer_25.pt": "9ae1e69b9c0920bc4daaaed244b941a1271dcf484a0d87100176f9030d41fbc2",
+    "results/slices/layer_26.pt": "60acc9de5127d974a6dcc67f8d943f3aea5ea1803554cfebf5b8338b5ae2c8d2",
+    "results/slices/layer_27.pt": "c3816fad3cc0274262d62c632b6e5ca1051f0ece1f77d3ecea9869b880e1b63e",
+    "results/slices/layer_3.pt": "3478725ffb77dd52907281ed394fa708bbb6573a391da1d93dd43a5fc818c21a",
+    "results/slices/layer_4.pt": "31a7cc0a58d6af19d40697f3a4dff591615aec30a7153fe80e8f442de55a4daa",
+    "results/slices/layer_5.pt": "f00391d6735a5b6e25e3d1246e2381fa4866c0c7cc219792eb041f1804a28bd9",
+    "results/slices/layer_6.pt": "0f36ed3fa577281ed69e338bc4a04f7c463f52f7066875450be32a25341030ab",
+    "results/slices/layer_7.pt": "12cb2a47b4092fa290c0c4bf1da31e38f811a1e233a89a99bcbca37f6fab2243",
+    "results/slices/layer_8.pt": "a4c3cb320f3e5af061d21f5aeef089c50770d2e3ded0983c44ef3c87680102a2",
+    "results/slices/layer_9.pt": "1800feeb2ba4ecd29ca401de7610f5dc7148a63be94f54b0e22c2312a55b1971"
+  },
+  "review": {
+    "format_passed": true,
+    "content": {
+      "pass": true,
+      "inspected_outputs": [
+        "REPORT.md",
+        "RESULTS.md",
+        "plots/additive/figA1_candidates.png",
+        "plots/additive/figA2_screen_answer_effect.png",
+        "plots/additive/figA3_screen_preservation.png",
+        "plots/additive/figA5_reserved_pilot.png"
+      ],
+      "failures": [],
+      "summary": "Every item of the request is carried out or correctly not triggered: 69 candidates, the strictly additive edit at beta 0/0.5/1/2, the 256-setting screen with all three tolerances applied during selection, the freeze under the operator's ruling, one reserved-prompt run against baseline and three matched random controls, the conditional plateau test not run because the pilot failed, and the exact stop-rule sentence in both files with no forbidden conclusion. Every number I cross-checked agrees between REPORT.md and RESULTS.md, within RESULTS.md (candidate, support, pass, failure and group counts recomputed from the Section 5.11 table), and with the four figures. The four failures of the previous round are fixed: 'control prompts' and 'random controls' are now distinct, including in figA5; the 64-row pool and the two shared rows are disclosed in both files; the request and operator are introduced; and the cross-reference cites Sections 5.7 and 5.8. All four figures separate series by marker shape, hatching or axis labels, so none depends on red versus green or on colour alone; for the budget I relied on the supplied count of 4,992 words and 4 figures, which my rough line-by-line count is consistent with but cannot confirm to the 8-word margin. Non-blocking polish: REPORT.md uses 'The pilot' and 'the plateau test' once each without introducing them (RESULTS.md Sections 5.1 and 5.8 do), and the RESULTS.md Headline says 'more than every control' where 'random control' is meant."
+    },
+    "expected_outputs": [
+      "REPORT.md",
+      "RESULTS.md",
+      "plots/additive/figA1_candidates.png",
+      "plots/additive/figA2_screen_answer_effect.png",
+      "plots/additive/figA3_screen_preservation.png",
+      "plots/additive/figA5_reserved_pilot.png"
+    ],
+    "budget_failures": []
+  },
+  "operator_rulings": [
+    {
+      "date": "2026-10-11",
+      "ruling": "\"Qualifying\" is resolved as follows: no setting reached +1 on the tuning prompt, so the frozen edit is the preservation-passing setting with the largest tuning answer effect (layer 17, candidates 15678 + 70371 + 150354, beta 2). It is run once on both reserved prompts against baseline and three matched random controls and reported as a pilot. The operator knows this is the largest passing edit, not the smallest.",
+      "source": "given to the orchestrator session by the operator; relayed to the worker by the orchestrator",
+      "timing": "after the tuning screen and the round-1 review, before any reserved-prompt forward pass"
+    }
+  ],
+  "addressed_feedback": "human_feedback_additive_berlin.md.addressed.md"
+}
