@@ -1,0 +1,742 @@
+{
+  "version": 1,
+  "state": "blocked",
+  "source_feedback": "human_feedback_5.txt",
+  "source_sha256": "94fc591f1566cdee222a456183e08449c7081a1d7ba2e7c9986b755b162dd548",
+  "required_outputs": null,
+  "may_modify": null,
+  "must_remain_unchanged": [
+    "human_feedback_5.txt"
+  ],
+  "report_policy": {
+    "core_research_question": null,
+    "primary_report": null,
+    "max_words": null,
+    "max_main_figures": null,
+    "detailed_results": null
+  },
+  "unresolved_ambiguities": [
+    "The feedback says the script must read 'the ECC results' from disk. 'ECC' is not defined in the feedback and is not used by any file, report, plan, script or result in this direction or anywhere else in the project (word search of all .md/.py/.txt/.json/.sh files). The data source therefore cannot be identified from the request.",
+    "This direction holds two complete result sets for exactly the five named models, and they are different experiments: (a) the input-embedding run, results/sweep.csv (GPT-2 Large) + results/gen/<model>.csv, where interpolation and distance D are at the token embedding; (b) the block-0 run, results/block0_resid_post/sweep.csv + results/block0_resid_post/gen/<model>.csv, where both are at the last-position residual stream after transformer block 0. The Pearson and Spearman values in the requested figure depend on which set is read, so choosing one is a scientific choice, not an implementation detail. 'ECC' could also mean a result set outside this direction.",
+    "Operator decision needed: which files are 'the ECC results' - (a), (b), or another path? Once that is answered the rest of the request maps onto existing columns without further ambiguity (see routing_notes)."
+  ],
+  "checklist": [
+    {
+      "request": "Please write a reproducible Python script that reads the ECC results and generates one summary figure as output.\nGoal\nCreate a 2×3 figure layout summarizing the relationship between interpolation distance and transition width across models.\nPanels 1–5: scatter plots\nMake scatter plots for these five models:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "1. GPT-2 Large",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "2. GPT-2 XL",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "3. Pythia 1.4B",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "4. Llama 3.1-8B",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "5. Qwen3-8B\nFor each of these five panels:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Only use final-layer results.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Only keep monotonic curves.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Plot:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - x-axis: interpolation distance",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - y-axis: transition width",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Use a shared y-axis range across all five scatter plots so the transition widths are directly comparable.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Let each model keep its own x-axis range (do not force a shared x-axis range if the distance scales differ across models).",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Use a scatter plot style that is easy to read:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - small-to-medium point size",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - some transparency (alpha) to reduce overplotting",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - no unnecessary clutter",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Compute the Pearson correlation coefficient between:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - interpolation distance",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - transition width\n    using only the monotonic curves for that model.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Show that Pearson correlation clearly in each subplot title, for example:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - GPT-2 XL (Pearson r = 0.03)\nPanel 6: summary correlation panel\nUse the sixth panel (bottom-right) as a compact summary plot.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- y-axis: model name",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- x-axis: Spearman correlation coefficient",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Compute one Spearman coefficient per model, again using:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - interpolation distance",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - transition width",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - only monotonic curves",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - final layer only",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Set the x-axis range to [-1, 1]",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Plot one point per model",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Draw vertical reference lines at:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - x = -1",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - x = 1",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Annotate these lines so the plot makes clear what they mean, e.g.:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - -1 = perfect negative monotonic relationship",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - 1 = perfect positive monotonic relationship",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- Also draw a vertical line at x = 0 if helpful, since that improves readability.\nImportant implementation requirements\nPlease make the script:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "1. Reproducible",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - It should run from the command line.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - It should read the ECC results from disk.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - It should save the final figure to disk.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "2. Readable and easy to fine-tune",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - Organize the code into clear sections and helper functions.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - Put all plotting style knobs near the top of the file as configuration variables, such as:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - figure size",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - font sizes",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - marker size",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - alpha",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - line widths",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - subplot spacing",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - output DPI",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - Add comments explaining where to quickly modify:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - filtering logic",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - panel titles",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - axis labels",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - y-axis sharing",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - colors / marker styles",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - summary-panel annotations",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "3. Robust",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - The script should clearly define what counts as:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - “final layer”",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - “monotonic curve”",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - “transition width”",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "     - “interpolation distance”",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - If the ECC result format requires assumptions, isolate those assumptions in one place in the code and document them clearly.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "   - If a model has no qualifying monotonic samples after filtering, handle that gracefully.\nExpected output\nThe script should produce:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- a single publication-quality figure file (e.g. .png and/or .pdf)",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- a 2×3 layout:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - first 5 panels = scatter plots",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "  - final panel = Spearman summary across models\nSuggested code structure\nPlease structure the script roughly like this:",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- imports",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- user-editable configuration",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- data loading functions",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- filtering / metric extraction functions",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- correlation computation functions",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- plotting helper functions",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- main function",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    },
+    {
+      "request": "- CLI entry point\nExtra request\nPlease include brief comments in the script explaining where I should edit things if I want to fine-tune the plotting style later.",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    }
+  ],
+  "routing_notes": [
+    "Triage only; no script, figure or analysis was produced.",
+    "Provisional mapping, valid for either candidate result set (same CSV schema: token_id, token, D, W_mid, W_final, t10/t90, flag_nonmonotonic): 'interpolation distance' = column D (L2 distance between the ' big' endpoint and token B at the intervention site); 'transition width' at the 'final layer' = column W_final (t90 - t10 of the normalized readout at the last transformer block); 'monotonic curve' = flag_nonmonotonic == 0. Models: gpt2-large, gpt2-xl, pythia-1.4b, llama-3.1-8b, qwen3-8b-base.",
+    "No report is requested: the deliverable is one Python script and one figure file. The feedback names neither path. Proposed (not yet declared) paths once unblocked: experiments/ecc_summary_figure.py and plots/ecc_summary_figure.png (+ .pdf). REPORT*.md and RESULTS*.md would stay unchanged.",
+    "The requested Pearson and Spearman coefficients are the content of the requested figure, so they are in scope when the task becomes ready."
+  ]
+}

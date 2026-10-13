@@ -469,3 +469,18 @@ On track? yes — addendum P1-P4 100% done; plan complete, no blocker.
   it can be resolved before setting the manifest to ready.
 
 On track? yes — addendum done; feedback 5 pending triage.
+
+## 2026-10-13 — triage of human_feedback_5.txt (triage only, no research)
+- Result: manifest set to `blocked`. The request asks for a script that "reads the ECC results". "ECC" appears in no
+  file of this direction or the project (word search over .md/.py/.txt/.json/.sh), so the data source is unidentified.
+- Why this is material and not an ordinary assumption: this direction has two full result sets for the same five
+  models — the input-embedding run (`results/sweep.csv`, `results/gen/*.csv`) and the block-0 run
+  (`results/block0_resid_post/sweep.csv`, `results/block0_resid_post/gen/*.csv`). The requested Pearson/Spearman values
+  differ by set, so picking one would be a silent scientific choice. Rejected alternatives: guess the newer block-0
+  set; guess the embedding set; build both behind a flag (the request asks for one figure from one named source).
+- Everything else maps cleanly (recorded in the manifest `routing_notes`): distance = `D`, final-layer width =
+  `W_final`, monotonic = `flag_nonmonotonic == 0`. Proposed paths once unblocked: `experiments/ecc_summary_figure.py`,
+  `plots/ecc_summary_figure.png`. No report change is requested.
+- No script, figure, report or result file was touched. No STOP written (rule 11).
+
+On track? blocked on one operator answer: which files are "the ECC results".

@@ -153,9 +153,12 @@ REPORT.md keeps 8 figures, so the path-control figures are in RESULTS.md R6 and 
 
 ## Next step
 
-Triage `human_feedback_5.txt` (arrived 2026-10-13 18:03, during the addendum iteration; no manifest yet, not
-started). STOP was therefore not written. Otherwise the success criterion and addendum are met. Not expanded to other models, the full vocabulary, or France/dir29;
-propose that only if the operator asks.
+`human_feedback_5.txt` is **blocked** at triage (2026-10-13): it asks for a script that reads "the ECC results", a
+name no file in the project uses. Operator answer needed: the input-embedding result set (`results/sweep.csv` +
+`results/gen/*.csv`), the block-0 set (`results/block0_resid_post/...`), or another path. Mapping of the other terms
+and proposed output paths are in `.tasks/human_feedback_5.txt.manifest.json` (`routing_notes`). Once answered, set the
+manifest to ready and write the script and figure; no report change is requested. No STOP while this feedback is open.
+The success criterion and addendum are otherwise met.
 
 ## Method references
 
