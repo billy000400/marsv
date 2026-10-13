@@ -494,3 +494,12 @@ On track? blocked on one operator answer: which files are "the ECC results".
 
 On track? blocked on one operator answer: which files are "the ECC results" — the input-embedding set
 (`results/sweep.csv` + `results/gen/*.csv`), the block-0 set (`results/block0_resid_post/...`), or another path.
+
+## 2026-10-13 — second re-check of blocked human_feedback_5.txt (no research)
+- Result: still `blocked`; nothing changed. Feedback SHA-256 still 94fc591f…, no new operator file in the direction
+  or at the project root since 18:04, and the whole-word search for "ECC" still hits only the feedback and my own
+  triage notes (plus the unrelated dir3 web-text cache).
+- No script, figure, report, result file or manifest field was touched. No STOP written (rule 11).
+
+On track? blocked on one operator answer: which files are "the ECC results" — the input-embedding set
+(`results/sweep.csv` + `results/gen/*.csv`), the block-0 set (`results/block0_resid_post/...`), or another path.
