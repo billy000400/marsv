@@ -417,3 +417,16 @@ On track? yes — 100%; complete.
 - `check-budgets` now passes; `check_render.py REPORT*.md RESULTS.md` passes. Re-wrote `STOP`.
 
 On track? yes — 100%; complete.
+
+## 2026-10-13 — feedback 4 triage (no research)
+- Feedback: "Adjust the llama plot x range to 1-2.5 and Qwen3 plot range to 10-55". Manifest set to `ready`.
+- Routing: the block-0 run's fig1 scatter for Llama-3.1-8B and Qwen3-8B-Base
+  (`plots/block0_resid_post/gen/<model>_fig1_distance_vs_width.png`, embedded in REPORT.md and RESULTS.md).
+- Assumptions: (1) block-0 run, since the ranges fit only its D values (Llama 5th-95th pct 1.56-1.90, max 16.5;
+  Qwen3 median 19.6, max 103), while embedding-run D never exceeds 1.13 / 2.66; (2) Qwen3 "range" is the x range,
+  since W is in [0,1]; (3) fig1 only. Rejected: also changing the fig2 zoom plots (already cut to 5th-95th pct) or
+  the embedding-run plots in REPORT_generalization.md.
+- Next: replot the two PNGs from the existing CSVs (no model rerun), update the two captions with the new range
+  and the count of tokens outside it, run check_render.py.
+
+On track? yes — triage done; one replot step remains.

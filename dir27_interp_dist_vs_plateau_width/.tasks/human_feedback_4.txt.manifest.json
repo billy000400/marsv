@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "state": "ready",
+  "source_feedback": "human_feedback_4.txt",
+  "source_sha256": "0f8f881fb3f1146d688f7ffd5c0fbe62ff27c7abbc2b8d0dacf570b98644203c",
+  "required_outputs": [
+    "plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png",
+    "plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png"
+  ],
+  "may_modify": [
+    ".tasks/human_feedback_4.txt.manifest.json",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md",
+    "REPORT.md",
+    "RESULTS.md",
+    "experiments/gen_plots.py",
+    "plots/block0_resid_post/gen/llama-3.1-8b_fig1_distance_vs_width.png",
+    "plots/block0_resid_post/gen/qwen3-8b-base_fig1_distance_vs_width.png"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback_4.txt",
+    "human_feedback.txt.addressed.md",
+    "human_feedback_2.txt.addressed.md",
+    "human_feedback_3.txt.addressed.md",
+    "REPORT_generalization.md",
+    "RESULTS_generalization.md",
+    "plots/gen",
+    "results",
+    "archive",
+    "plots/block0_resid_post/fig1_distance_vs_width.png",
+    "plots/block0_resid_post/fig1_zoom_distance_vs_width.png",
+    "plots/block0_resid_post/fig2_final_width_distribution.png",
+    "plots/block0_resid_post/fig3_representative_curves.png",
+    "plots/block0_resid_post/gen/gpt2-xl_fig1_distance_vs_width.png",
+    "plots/block0_resid_post/gen/pythia-1.4b_fig1_distance_vs_width.png",
+    "plots/block0_resid_post/gen/llama-3.1-8b_fig2_zoom_distance_vs_width.png",
+    "plots/block0_resid_post/gen/qwen3-8b-base_fig2_zoom_distance_vs_width.png",
+    "plots/block0_resid_post/gen/llama-3.1-8b_fig3_final_width_distribution.png",
+    "plots/block0_resid_post/gen/qwen3-8b-base_fig3_final_width_distribution.png"
+  ],
+  "report_policy": {
+    "core_research_question": "When the ' big' -> token B interpolation and the endpoint distance are both taken at the last-position residual stream after transformer block 0, does transition width W vary with block-0 distance D? (unchanged; this task only changes the x-axis limits of two existing figures)",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 8,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
+  "checklist": [
+    {
+      "request": "Adjust the llama plot x range to 1-2.5 and Qwen3 plot range to 10-55",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    }
+  ],
+  "routing_notes": [
+    "'the llama plot' / 'Qwen3 plot' = the block-0 run's full width-vs-distance scatter (fig1) for Llama-3.1-8B and Qwen3-8B-Base, the only Llama/Qwen3 figures in REPORT.md. The requested ranges fit only this run: block-0 D is 1.56-1.90 (5th-95th pct, max 16.5) for Llama and has median 19.6, 95th pct 32.3, max 103 for Qwen3; the embedding-run D (REPORT_generalization.md) never exceeds 1.13 / 2.66, so 10-55 cannot refer to it.",
+    "'Qwen3 plot range to 10-55' is read as the x range (D), parallel to the Llama clause; W lies in [0,1] so it cannot be a y range.",
+    "The zoom figures (fig2, RESULTS.md only) already restrict x to the 5th-95th percentile and are left unchanged.",
+    "No rerun: replot from existing results/block0_resid_post/gen/*.csv. REPORT.md and RESULTS.md change only in the two captions/adjacent sentences, to state the new x range and how many tokens fall outside it."
+  ]
+}
