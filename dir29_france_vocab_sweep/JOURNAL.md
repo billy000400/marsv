@@ -44,3 +44,18 @@ On track? yes — Stage 0 done, Section 1 sweep running (~15%); blocker: thresho
 - REPORT/RESULTS pass `check_render.py`. All five success-criterion items are covered, so I am creating STOP.
 
 On track? yes — all sections done; no blocker.
+
+## 2026-10-14 — triage of human_feedback.txt (plot style + separate plot script)
+
+- Triage only; no code, figure or run.
+- Manifest set to `blocked`. The feedback asks to match "the corresponding plot's style" in Direction 27 at "the same
+  figure size", but Direction 27 has two candidates that give different figures: (A) the width histogram
+  `fig2_final_width_distribution.png` (12 x 4.5 in, two panels, unstyled) and (B) the density-coloured D-vs-W scatter
+  `summary_distance_vs_width.png` (15 x 8.6 in, six panels), which the operator is restyling right now and whose script
+  already has the editable-configuration layout the second request describes. Under (B) this direction would need a new
+  scatter, not a restyled histogram.
+- Clear under either reading and recorded in routing_notes: exact title, a plot-only script reading
+  `results/france_tokens.csv`, and a `PLOTTING.md` with script, data and command. No model runs needed.
+- STOP not created (unaddressed feedback remains).
+
+On track? blocked — waiting for the operator to answer A or B.
