@@ -153,9 +153,8 @@ REPORT.md keeps 8 figures, so the path-control figures are in RESULTS.md R6 and 
 
 ## Next step
 
-None. `human_feedback_6.txt` passed the content review and was renamed `.addressed.md` by the wrapper
-(2026-10-13); its output is `plots/block0_resid_post/summary_distance_vs_width.png` / `.pdf`. The success criterion and
-the addendum are met, no unaddressed feedback remains, and `STOP` was written on 2026-10-14.
+`human_feedback_7.txt` is `review_pending` (2026-10-14): cropped Llama panel in the summary figure and five-model
+SLERP sweeps (REPORT.md Figure 9, Table 4; RESULTS.md R7). Wait for the wrapper's review; repair if rejected.
 
 ## Method references
 

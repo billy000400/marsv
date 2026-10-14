@@ -102,3 +102,16 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 
 ## 2026-10-14 — Finalization (no deliverable change)
 - REPORT*.md and RESULTS*.md unchanged; no number superseded. PLAN.md Next step closed; `STOP` written.
+
+## 2026-10-14 — Feedback 7: cropped Llama panel and five-model SLERP scatters
+- `plots/block0_resid_post/summary_distance_vs_width.png/.pdf`: Llama panel shows only D 1.0-2.5 (inset removed;
+  23 tokens not drawn, printed on the panel). No number changed.
+- New full-vocabulary SLERP-path sweeps of all five models: `results/block0_resid_post/slerp/*.csv`, `summary.json`;
+  new figures `slerp_distance_vs_width.png/.pdf` and `slerp_endpoint_distance_vs_width.png`.
+- REPORT.md: new Figure 9 and Table 4 in Finding 5, Methods paragraph "SLERP sweep", new Summary bullet; Conclusion
+  "Final block" bullet now says "straight-line path", "Path" bullet and closing sentence extended, Limitations bullet
+  updated. Pilot "Single pairs" and final-block paragraphs shortened (details already in RESULTS.md R6) to stay under
+  5,000 words. 8 -> 9 figures.
+- RESULTS.md: new section R7 (Table R7, Figures 23-24); Headline gains one sentence.
+- Story change: the final-block answer was "no consistent relationship"; it is now "no consistent relationship
+  under the straight line; a positive link under SLERP in all five models (rho +0.02 to +0.35)".

@@ -563,6 +563,61 @@ both blocks: by 0.10–0.15 from the nearest to the farthest fifth.
 - Coverage: one model, 256 random pairs, about 50 per fifth, no statistical test. The other four models
   and the full vocabulary were not run with Matthew's path.
 
+## R7 — SLERP path, full vocabulary, five models (final block)
+
+Every model's full sweep was rerun with Matthew's `slerp_rescale` path (SLERP) in place of the straight
+line; everything else is unchanged (`experiments/slerp_sweep.py`). Data: `results/block0_resid_post/slerp/<model>.csv`
+(one row per token: D, SLERP path length L_slerp summed over the 100 injected steps, endpoint cosine,
+W_mid, W_final, the combined flag, and `mono_final`, the final-block-only monotonic test). Summary
+numbers: `results/block0_resid_post/slerp/summary.json`; figures from
+`experiments/summary_slerp_distance_vs_width.py`.
+
+**Checks.** No SLERP path was non-finite in any model. The largest relative L2 gap between the injected
+vector and r_A at t = 0 / r_B at t = 1 was 1.1e-8 / 6.5e-8 (Pythia), 2.9e-8 / 6.2e-8 (Llama) and
+3.1e-9 / 5.9e-8 (Qwen3). The same check ran for the GPT-2 Large and GPT2-XL sweeps, but its log was on a
+scratch disk that was wiped; their CSVs are complete (50,256 rows, no missing values). Tokens with a
+negative endpoint cosine: GPT-2 Large 0, GPT2-XL 77, Pythia 0, Llama 4, Qwen3 5 (lowest −0.066). For
+these the absolute value in Matthew's θ makes the path depart from a true spherical arc; the endpoints
+are still exact. L_slerp / D: GPT-2 Large 1.013–1.176 (median 1.075), GPT2-XL 1.016–1.180 (1.068),
+Pythia 1.009–1.104 (1.047), Llama 1.016–1.273 (1.088), Qwen3 1.009–1.241 (1.073). Pearson r between
+L_slerp and D is 0.9995–0.9996 in the GPT-2 models, Pythia and Qwen3, and 0.9956 in Llama.
+
+The table compares the final-block relationship under the two paths with the same filter
+(final-block curve monotonic). Straight-line values use D; SLERP values use L_slerp and, in the last
+column, D.
+
+| Model | n straight | n SLERP | Pearson r straight | Pearson r SLERP | ρ straight | ρ SLERP (L_slerp) | ρ SLERP (D) |
+|---|---|---|---|---|---|---|---|
+| GPT-2 Large | 49,244 | 49,712 | +0.127 | +0.296 | +0.148 | +0.326 | +0.330 |
+| GPT2-XL | 45,954 | 46,857 | +0.054 | +0.084 | +0.054 | +0.100 | +0.101 |
+| Pythia 1.4B | 50,155 | 50,239 | −0.138 | +0.038 | −0.149 | +0.023 | +0.021 |
+| Llama-3.1-8B | 122,528 | 123,060 | +0.149 | +0.211 | +0.149 | +0.208 | +0.194 |
+| Qwen3-8B-Base | 132,653 | 139,182 | +0.061 | +0.354 | +0.088 | +0.354 | +0.353 |
+
+**Table R7.** Final-block width against distance, straight line vs SLERP, full vocabularies.
+
+Median W_final under SLERP by fifth of L_slerp (nearest to farthest): GPT-2 Large 0.115, 0.129, 0.139,
+0.150, 0.162; GPT2-XL 0.077, 0.089, 0.090, 0.092, 0.087; Pythia 0.467, 0.457, 0.458, 0.460, 0.473;
+Llama 0.289, 0.307, 0.310, 0.324, 0.351; Qwen3 0.371, 0.404, 0.425, 0.442, 0.500. Share of all tokens
+with W_final < W_mid under SLERP: GPT-2 Large 98.0%, GPT2-XL 97.1%, Pythia 94.1%, Llama 92.5%, Qwen3
+42.6% (59.7% under the straight line).
+
+Figure 23 is the report's Figure 9, the scatter against SLERP path length.
+
+![Final-block width against SLERP path length, five models](plots/block0_resid_post/slerp_distance_vs_width.png)
+
+**Figure 23.** Panels 1–5: final-block W under SLERP (y) against SLERP path length L_slerp (x, L2,
+block-0 output), tokens with a monotonic final-block curve; colour is local point density (log scale).
+Llama is shown for L_slerp 1.0–2.75 (25 tokens not drawn) and Qwen3 for the central bulk, 13.5–49.8
+(261 not drawn). Last panel: Spearman ρ per model.
+
+To check that the x-axis choice does not drive the result, Figure 24 repeats it with endpoint distance D.
+
+![Final-block width under SLERP against endpoint distance, five models](plots/block0_resid_post/slerp_endpoint_distance_vs_width.png)
+
+**Figure 24.** As Figure 23, with x = endpoint distance D (L2, block-0 output). Llama is shown for
+D 1.0–2.5 (25 tokens not drawn); no other panel is cropped.
+
 ## Headline
 
 With interpolation and distance both at the output of block 0, the middle-block width rises with
@@ -572,4 +627,6 @@ direction across models. At any one distance, widths still range from very sharp
 the widest GPT-2 Large switches again belong to size words and rare strings. In a 256-pair GPT-2 Large
 pilot, replacing the straight-line path with Matthew's curved path leaves the middle-block trend in place
 and changes single-pair widths little; the final-block trend is larger under his path and larger again
-under his normalization (R6). These are associations across tokens for one prompt; no cause was tested.
+under his normalization (R6). Over full vocabularies, SLERP raises the final-block Spearman ρ in all five
+models (to +0.02 to +0.35, from −0.15 to +0.15 under the straight line; R7). These are associations
+across tokens for one prompt; no cause was tested.

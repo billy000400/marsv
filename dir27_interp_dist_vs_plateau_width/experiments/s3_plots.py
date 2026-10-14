@@ -66,6 +66,7 @@ def main():
     axes[1].set_xlabel("token rank (sorted by W_final)")
     axes[1].set_ylabel("final-layer width W_final")
     axes[1].set_title("(b) sorted widths")
+    fig.suptitle('"The house was [big]" -> [B] sweep')
     fig.tight_layout()
     fig.savefig(os.path.join(PLOTS, "fig2_final_width_distribution.png"), dpi=130)
     plt.close(fig)
@@ -112,6 +113,20 @@ def zoom(lo=1.6, hi=3.3):
     plt.close(fig)
 
 
+def hist():
+    """Panel (a) of Figure 2 on its own, titled with Figure 2's title. Reads results/sweep.csv."""
+    with open(os.path.join(RESULTS, "sweep.csv")) as f:
+        Wf = np.array([float(r["W_final"]) for r in csv.DictReader(f)])
+    fig, ax = plt.subplots(figsize=(6, 4.5))
+    ax.hist(Wf, bins=200, color=CVD[0])
+    ax.set_xlabel("final-layer width W_final")
+    ax.set_ylabel("number of tokens")
+    ax.set_title('"The house was [big]" -> [B] sweep')
+    fig.tight_layout()
+    fig.savefig(os.path.join(PLOTS, "fig2a_final_width_histogram.png"), dpi=130)
+    plt.close(fig)
+
+
 if __name__ == "__main__":
     import sys
-    zoom() if sys.argv[1:] == ["zoom"] else main()
+    {"zoom": zoom, "hist": hist}.get(sys.argv[1] if sys.argv[1:] else "", main)()

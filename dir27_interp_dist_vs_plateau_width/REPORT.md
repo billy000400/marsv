@@ -36,10 +36,15 @@ transformer block 0. Everything else is the same. The embedding-run report is ke
 - **Groups.** Final-block widths in GPT-2 Large form one broad peak with a long tail and no separate
   groups (Figure 3).
 - **Does the straight-line path matter?** In a pilot on 256 random GPT-2 Large pairs we also injected
-  the curved path used in Matthew's experiments. The middle-block rise with distance is present under
-  both paths, and single-pair widths change little (median +0.009 middle, +0.016 final). The
+  the curved path used in Matthew's experiments (SLERP). The middle-block rise with distance is present
+  under both paths, and single-pair widths change little (median +0.009 middle, +0.016 final). The
   final-block rise is 0.02 under the straight line and 0.05 under the curved path, and 0.10–0.14 when
   his normalization is used instead of ours (Finding 5, Table 3).
+- **Final block under SLERP, all five models.** Rerunning the full sweep with the SLERP path
+  strengthens the positive link between final-block width and SLERP path length in every model. The Spearman rank correlation
+  (defined in Finding 5) is +0.33 in GPT-2 Large, +0.35 in Qwen3, +0.21 in Llama, +0.10 in GPT2-XL and
+  +0.02 in Pythia. Under the straight line the same five values are +0.15, +0.09, +0.15, +0.05 and
+  −0.15 (Figure 9, Table 4). So the final-block answer depends on the path.
 
 ## Methods
 
@@ -117,8 +122,9 @@ R1).
 **Path control (GPT-2 Large pilot).** The straight line is one of many paths between r_A and r_B, and
 Matthew's experiments use a curved one. To ask whether Finding 1 depends on that choice, we ran both
 paths on the same pairs. The curved path is the function `slerp_rescale` from `scripts/utils.py` of
-`MShinkle/activation_plateau_mechanisms` (commit `4222c3e`). It turns the vector's direction at a
-steady angular rate and sets its length to the straight-line mix of the two endpoint lengths. With
+`MShinkle/activation_plateau_mechanisms` (commit `4222c3e`). We call it SLERP (spherical linear
+interpolation). It turns the vector's direction at a steady angular rate and sets its length to the
+straight-line mix of the two endpoint lengths. With
 unit directions u_A, u_B and lengths n_A, n_B:
 
 ```math
@@ -151,6 +157,14 @@ y_{rel}(t) = \frac{\lVert x(t) - x(0) \rVert_2}{\lVert x(t) - x(0) \rVert_2 + \l
 
 The two measures agree when the readout moves in a straight line and differ when its route bends.
 Table 3 uses both.
+
+**SLERP sweep (all five models).** After the pilot we reran the full sweep of every model with the
+SLERP path in place of the straight line: same prompt, tokens, block-0 hook, 101-point grid, readout
+blocks, y(t), W and flag. Only the injected vectors change. Here L_path is summed over the 100 steps
+of the injected grid. The injected path starts at r_A and ends at r_B in every run (checks and the 86
+tokens with a slightly negative endpoint cosine: RESULTS.md, R7). Figure 9 and Table 4 apply the flag's two tests
+(one crossing of each level, no drop above 0.05) to the final-block curve only and keep the curves
+that pass, so a token is not dropped for a problem at the middle block (RESULTS.md, R7).
 
 **Baselines.** There are none; the questions are descriptive and are answered from plots and medians.
 The earlier embedding run is the reference we compare against. No statistical tests were run.
@@ -347,23 +361,55 @@ medians to within 0.003, because L_path stays within 4–16% of D. So the middle
 reading of Finding 1 does not depend on the path, and endpoint distance and path length are
 interchangeable here.
 
-**Single pairs.** The path changes the width of one pair only slightly. Among the 245 unflagged pairs
-the curved path gives the wider curve in 180 at the middle block and 218 at the final block, with
-median differences of +0.009 and +0.016; the difference exceeds 0.05 in 3 and 10 pairs. Sharp
-switches stay sharp and gradual ones stay gradual: for ` pres` the final-block width is 0.042 and
-0.048 under the two paths, and for ` hefty` 0.533 and 0.553 (paired scatter and overlaid curves:
-RESULTS.md, R6, Figures 19 and 20).
+**Single pairs.** The path changes one pair's width only slightly: median differences (curved minus
+straight) are +0.009 at the middle block and +0.016 at the final block (RESULTS.md, R6).
 
 **Final block.** Here the reading is less stable. The rise from the nearest to the farthest fifth is
 0.02 with the straight path, as in Finding 1, and 0.05 with the curved path. With the relative
 normalization, computed from the same forward passes, it is 0.14 for the straight path and 0.10 for
-the curved one, and the middle block also rises more (0.15 and 0.10). The relative normalization gives
-much larger widths overall (straight-path medians 0.436 middle and 0.341 final, against 0.210 and
-0.120). The choice of normalization therefore moves the final-block trend more than the choice of
-path. We did not test why the two normalizations differ.
+the curved one; it also gives much larger widths overall (RESULTS.md, R6). We did not test why the
+two normalizations differ. This is a pilot: one model, about 50 pairs per fifth, no statistical test.
 
-This is a pilot: one model, about 50 pairs per fifth, and no statistical test. The other four models
-were not run with the curved path.
+**All five models, full vocabulary.** Does the final-block reading of Findings 1 and 4 (no consistent
+relationship) hold when every model's full sweep uses SLERP (Methods, "SLERP sweep")? To summarize each
+cloud with one number we use the Spearman rank correlation ρ: the Pearson correlation of the tokens'
+ranks by distance with their ranks by width. ρ is +1 when width always grows with distance, −1 when it
+always shrinks and near 0 when there is no monotonic link. Figure 9 plots final-block width under SLERP against SLERP path length,
+one panel per model. Llama and Qwen3 have a few far tokens (25 of 123,060 and 261 of 139,182), so
+their panels show only the bulk; ρ and r use every token.
+
+![Final-block width against SLERP path length, five models](plots/block0_resid_post/slerp_distance_vs_width.png)
+
+**Figure 9.** Panels 1–5: one point per token B with a monotonic final-block curve; x: SLERP path
+length L_path (L2, block-0 output); y: final-block W under SLERP (shared y range). Colour: local point
+density (log scale). Titles give Pearson r; cropped panels print how many tokens are not drawn. Last
+panel: Spearman ρ per model on a fixed −1 to +1 axis.
+
+Table 4 sets these values beside the straight-line run under the same final-block filter.
+
+| Model | ρ, straight line | ρ, SLERP | median W_final, straight → SLERP | W_final under SLERP, nearest → farthest fifth |
+|---|---|---|---|---|
+| GPT-2 Large | +0.15 | +0.33 | 0.121 → 0.138 | 0.115 → 0.162 |
+| GPT2-XL | +0.05 | +0.10 | 0.076 → 0.087 | 0.077 → 0.087 |
+| Pythia 1.4B | −0.15 | +0.02 | 0.444 → 0.463 | 0.467 → 0.473 |
+| Llama-3.1-8B | +0.15 | +0.21 | 0.249 → 0.316 | 0.289 → 0.351 |
+| Qwen3-8B-Base | +0.09 | +0.35 | 0.308 → 0.429 | 0.371 → 0.500 |
+
+**Table 4.** Final-block width against distance under the two paths, full vocabularies, final-block
+monotonic curves only (straight line: 45,954–132,653 tokens per model; SLERP: 46,857–139,182).
+Straight-line ρ uses D, SLERP ρ uses L_path; ρ against D under SLERP differs by at most 0.014
+(RESULTS.md, R7). Fifths are by L_path.
+
+Under SLERP, ρ is higher than under the straight line in all five models, and the farthest fifth has
+a wider median than the nearest fifth in all five. The rise is clearest in GPT-2 Large (median 0.115 to
+0.162) and Qwen3 (0.371 to 0.500), where ρ is about 0.33–0.35. Pythia's negative relationship
+disappears (ρ −0.15 to +0.02). Median final-block width also grows under SLERP, most in Qwen3 (0.308
+to 0.429) and Llama (0.249 to 0.316). The x-axis choice does not matter here: L_path and D
+have Pearson r of 0.995 or more in every model, because L_path is only 0.9–27% longer than D (median
+5–9%). The full-vocabulary GPT-2 Large result agrees with the pilot's final-block rows of Table 3.
+
+These are correlations across tokens for one prompt: the final-block link depends on the path, and we
+did not test why.
 
 ## Conclusion
 
@@ -374,7 +420,7 @@ end.
 - **Middle block.** Tokens that are farther from ` big` after block 0 tend to switch more gradually
   in GPT-2 Large and GPT2-XL (Figures 1 and 5; Tables 1 and 2). Pythia 1.4B, Llama-3.1-8B and
   Qwen3-8B-Base show the same direction but only a small shift (Figures 6–8, Table 2).
-- **Final block.** No consistent relationship: about level in the GPT-2 models, slightly falling in
+- **Final block, straight-line path.** No consistent relationship: about level in the GPT-2 models, slightly falling in
   Pythia, slightly rising in Llama and Qwen3 (Table 2).
 - **Single tokens.** Distance leaves most of the variation unexplained. Words at the same distance
   range from a near-vertical jump to a slow ramp (Figure 4a), and the slowest switches come from size
@@ -383,15 +429,19 @@ end.
 - **Path.** In a 256-pair GPT-2 Large pilot, the middle-block trend holds under both the straight and
   the curved path. The final-block trend is small under the straight path with our normalization and
   larger under the curved path or the relative normalization (Finding 5, Table 3), so "little at the
-  final block" is specific to our path and normalization.
+  final block" is specific to our path and normalization. The full SLERP sweep extends this to all
+  five models: ρ between final-block width and path length is higher than under the straight line in
+  each, from +0.02 (Pythia, about flat) to +0.33–0.35 (GPT-2 Large, Qwen3) (Figure 9, Table 4).
 
 For the plateau experiments, this suggests that block-0 distance carries some information about switch
-width partway through the network in the GPT-2 models, and little at the final block.
+width partway through the network in the GPT-2 models. At the final block, how much it carries depends
+on the injected path: little under the straight line, a weak-to-moderate positive link under SLERP.
 
 **Limitations.**
 - One prompt and one anchor token. All relationships here are associations across tokens; no
   experiment tested a cause.
-- The main sweeps use a straight-line path and normalize y to the two endpoints. The curved path and
-  the relative normalization were tried only in the GPT-2 Large pilot of Finding 5 (256 pairs).
+- The main sweeps use a straight-line path and normalize y to the two endpoints. The SLERP sweep
+  covers all five models but only the final block is summarized here (middle-block widths are in
+  the CSVs); the relative normalization was tried only in the GPT-2 Large pilot (256 pairs).
 - W uses only the first crossing of each level, so it describes flagged curves less well.
 - In the two 16-bit models, rounding limits W to about 0.03 in the worst checked case (typically 0.001–0.003) (RESULTS.md, R1).

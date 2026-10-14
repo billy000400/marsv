@@ -80,9 +80,11 @@ BACKSTEP_TOL = 0.05
 FILTER_NOTE = {
     "final_block": "Monotonic curve: the final-block readout curve crosses the 10% and the 90% "
                    "level once each and never drops by more than 0.05 between neighbouring "
-                   "interpolation positions. Every point drawn is counted in r and in rho.",
+                   "interpolation positions. r, rho and n count every monotonic curve, including "
+                   "the ones outside a cropped x range.",
     "csv_flag": "Monotonic curve: CSV column flag_nonmonotonic = 0 (middle-block and final-block "
-                "readout curves both monotonic). Every point drawn is counted in r and in rho.",
+                "readout curves both monotonic). r, rho and n count every monotonic curve, "
+                "including the ones outside a cropped x range.",
 }
 
 # --- Figure layout ----------------------------------------------------------
@@ -124,15 +126,21 @@ TITLE_EMPTY_FMT = "{name} (no monotonic curves)"
 SHARE_Y = True                 # EDIT HERE: False lets every scatter panel pick its own y range
 Y_LIM = None                   # None = common range covering all plotted points; or (lo, hi)
 Y_PAD_FRAC = 0.03              # padding around the automatic common y range
-# Every model keeps its own x range and every panel draws ALL of its monotonic curves.
-# Llama: a few dozen monotonic tokens lie far from the rest (D up to 9.1, bulk at 1.4-2.2),
-# so the full-range panel shows the bulk as a narrow strip. An inset repeats the bulk
-# enlarged. Entry: name -> (inset x range, inset box [x0, y0, width, height] in axes
-# fractions). The box sits where the panel has no points. Set X_ZOOM_INSETS = {} for none.
-X_ZOOM_INSETS = {"Llama 3.1-8B": ((1.0, 2.5), [0.42, 0.60, 0.56, 0.37])}
-INSET_TITLE = "enlarged: D from {lo:g} to {hi:g}"
-NOTE_Y = 0.97                  # height of the "n = ..." text (axes fraction, right-aligned);
-NOTE_Y_WITH_INSET = 0.03       # a panel with an inset prints it at this height instead
+# Every model keeps its own x range. A panel draws ALL of its monotonic curves unless it is
+# cropped. Llama: a few dozen monotonic tokens lie far from the rest (D up to 9.1, bulk at
+# 1.4-2.2), so a full-range panel shows the bulk as a narrow strip. Its panel therefore
+# shows only the bulk and prints how many points are not drawn. Entry: name -> x range.
+# Set X_CROP = {} to draw every point of every model.
+X_CROP = {"Llama 3.1-8B": (1.0, 2.5)}
+# AUTO_CROP = True also crops any other panel in which a few far points stretch the x range:
+# the panel shows the central AUTO_CROP_KEEP share of the points (plus padding) when that
+# interval is shorter than AUTO_CROP_MIN_SHRINK times the full range.
+AUTO_CROP = False
+AUTO_CROP_KEEP = 0.99
+AUTO_CROP_MIN_SHRINK = 0.5
+AUTO_CROP_PAD_FRAC = 0.10
+CROP_NOTE_FMT = "{k:,} of them outside this x range, not drawn"
+NOTE_Y = 0.97                  # height of the "n = ..." text (axes fraction, right-aligned)
 GRID_ALPHA = 0.25
 GRID_LW = 0.5
 
@@ -241,6 +249,17 @@ def draw_points(ax, x, y, xlim, ylim, color, marker):
     ax.set_ylim(*ylim)
 
 
+def auto_crop(dist):
+    """x range holding the central AUTO_CROP_KEEP share of the points, or None when the
+    few points outside it do not stretch the full range much."""
+    tail = 100 * (1 - AUTO_CROP_KEEP) / 2
+    lo, hi = np.percentile(dist, [tail, 100 - tail])
+    if hi - lo >= AUTO_CROP_MIN_SHRINK * np.ptp(dist):
+        return None
+    pad = AUTO_CROP_PAD_FRAC * (hi - lo)
+    return (max(lo - pad, dist.min()), min(hi + pad, dist.max()))
+
+
 def plot_scatter(ax, rec, color, marker, ylim):
     """One model's scatter panel. `rec` is a dict built in main()."""
     style_axes(ax)
@@ -254,20 +273,15 @@ def plot_scatter(ax, rec, color, marker, ylim):
         return
     dist, width = rec["dist"], rec["width"]
     pad = 0.03 * max(np.ptp(dist), 1e-9)
-    draw_points(ax, dist, width, (dist.min() - pad, dist.max() + pad), ylim, color, marker)
+    xlim = rec["xlim"] or (dist.min() - pad, dist.max() + pad)
+    draw_points(ax, dist, width, xlim, ylim, color, marker)
     ax.set_title(TITLE_FMT.format(name=rec["name"], r=rec["pearson"]), fontsize=FONT_TITLE)
     ax.grid(alpha=GRID_ALPHA, lw=GRID_LW)
-    has_inset = rec["name"] in X_ZOOM_INSETS
-    ax.text(0.98, NOTE_Y_WITH_INSET if has_inset else NOTE_Y, f"n = {rec['n']:,}", ha="right",
-            va="bottom" if has_inset else "top", transform=ax.transAxes, fontsize=FONT_ANNOT)
-    if has_inset:  # enlarged copy of the bulk; the main panel keeps every point
-        zoom, box = X_ZOOM_INSETS[rec["name"]]
-        inset = ax.inset_axes(box)
-        draw_points(inset, dist, width, zoom, ylim, color, marker)
-        inset.tick_params(labelsize=FONT_TICK - 2)
-        inset.grid(alpha=GRID_ALPHA, lw=GRID_LW)
-        inset.text(0.03, 0.95, INSET_TITLE.format(lo=zoom[0], hi=zoom[1]), ha="left", va="top",
-                   transform=inset.transAxes, fontsize=FONT_ANNOT - 1)
+    note = f"n = {rec['n']:,}"
+    if rec["xlim"]:  # cropped panel: say how many points are not drawn
+        note += "\n" + CROP_NOTE_FMT.format(k=rec["n_not_drawn"])
+    ax.text(0.98, NOTE_Y, note, ha="right", va="top", transform=ax.transAxes, fontsize=FONT_ANNOT,
+            bbox=dict(facecolor="white", edgecolor="none", alpha=0.7, pad=1.0))
 
 
 def common_y_limits(records):
@@ -331,9 +345,12 @@ def main(results_dir, out, formats):
         ids, d_all, w_all, csv_mono = load_csv(path)
         dist, width = select_monotonic(path, ids, d_all, w_all, csv_mono)
         r, rho = correlations(dist, width)
-        records.append(dict(name=name, dist=dist, width=width, n=len(dist), pearson=r, spearman=rho))
+        xlim = X_CROP.get(name) or (auto_crop(dist) if AUTO_CROP and len(dist) else None)
+        n_out = int(((dist < xlim[0]) | (dist > xlim[1])).sum()) if xlim else 0
+        records.append(dict(name=name, dist=dist, width=width, n=len(dist), pearson=r, spearman=rho,
+                            rows=len(d_all), xlim=xlim, n_not_drawn=n_out))
         print(f"{name:14s} rows={len(d_all):7d} monotonic={len(dist):7d} "
-              f"pearson_r={r:+.4f} spearman_rho={rho:+.4f}")
+              f"pearson_r={r:+.4f} spearman_rho={rho:+.4f} xlim={xlim} not_drawn={n_out}")
 
     fig, axes = plt.subplots(NROWS, NCOLS, figsize=FIGSIZE)
     fig.subplots_adjust(wspace=WSPACE, hspace=HSPACE)
@@ -357,6 +374,7 @@ def main(results_dir, out, formats):
         fig.savefig(path, dpi=DPI, bbox_inches="tight")
         print("wrote", path)
     plt.close(fig)
+    return records
 
 
 # ============================================================================

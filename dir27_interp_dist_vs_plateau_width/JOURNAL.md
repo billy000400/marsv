@@ -572,3 +572,25 @@ On track? yes — direction complete.
   five separate report figures (would put REPORT.md at 13 figures); reusing the 256-pair pilot (not "each model").
 
 On track? yes — next pass writes `experiments/slerp_sweep.py` and starts the runs.
+
+## 2026-10-14 — Feedback 7: SLERP sweeps and cropped Llama panel (in progress)
+- Found from an earlier pass: `slerp_sweep.py`, `summary_slerp_distance_vs_width.py`, the cropped-Llama change in
+  `summary_distance_vs_width.py`, and SLERP CSVs for GPT-2 Large and GPT-2 XL. Their scratch shards and checks.json in
+  /tmp were wiped, so the endpoint checks of those two runs are not on disk (the CSVs are complete: 50,256 rows, no NaN).
+- Regenerated `summary_distance_vs_width.png/.pdf`: Llama panel now shows D 1.0-2.5 only, "23 of them outside this x
+  range, not drawn"; r, rho, n unchanged.
+- Pythia 1.4B SLERP sweep done (50,276 tokens; 0 non-finite paths; endpoint rel err <= 6.5e-8; min cosine 0.10;
+  L/D 1.009-1.104). Llama 3.1-8B running from /tmp/hf_hub, Qwen3-8B queued (same staging as the linear sweeps).
+- Not mine, left untouched: uncommitted edits to `experiments/s3_plots.py` and `fig2_final_width_distribution.png`
+  (added suptitle) are outside this manifest's declared paths.
+
+## 2026-10-14 — Feedback 7 complete -> review_pending
+- Llama and Qwen3 SLERP sweeps done (0 non-finite paths; endpoint rel err <= 6.2e-8; 4 / 5 negative-cosine tokens).
+- Final-block Spearman rho, straight -> SLERP: GPT-2 Large +0.15 -> +0.33, GPT2-XL +0.05 -> +0.10, Pythia -0.15 -> +0.02,
+  Llama +0.15 -> +0.21, Qwen3 +0.09 -> +0.35. Path length vs D: r >= 0.9956, so the x-axis choice changes rho by <= 0.014.
+- Assumption: Llama SLERP crop fixed (1.0-2.75 path length) instead of auto 99% (would hide 448 tokens). Qwen3 auto-cropped
+  (261 hidden). Rejected: cropping panels with no far outliers.
+- REPORT.md re-framed for the final block (straight line: none; SLERP: positive in all five). Trimmed pilot prose to stay
+  at 4,997 words. check_render passes for REPORT.md and RESULTS.md. Manifest -> review_pending.
+
+On track? yes — waiting for the wrapper's content review.
