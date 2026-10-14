@@ -59,3 +59,12 @@ On track? yes — all sections done; no blocker.
 - STOP not created (unaddressed feedback remains).
 
 On track? blocked — waiting for the operator to answer A or B.
+
+## 2026-10-14 — re-entry, human_feedback.txt still blocked
+
+- Checked for an operator answer: `human_feedback.txt` is byte-identical (sha256 ca2d2ea3…), no new feedback file, and
+  the manifest has no answer added. Nothing new in Direction 27 resolves it either (its feedback 7 concerns the D-vs-W
+  scatter, which fits reading B, but does not say which figure Direction 29 should match).
+- No code, figure, report or manifest change. Manifest stays `blocked` on the same A-or-B question. STOP not created.
+
+On track? blocked — waiting for the operator to answer A (width histogram) or B (D-vs-W scatter).
