@@ -156,6 +156,7 @@ names). REPORT Methods notes this.
 
 ## Next step
 
-Feedback tasks `human_feedback.txt` and `human_feedback_2.txt` are triaged and `ready` (2026-10-14): write
-`experiments/plot_sweep.py` + `PLOTTING.md`, redraw `plots/france_vocab_width_histogram.png` in the Direction 27 fig2 panel (a)
-style, and update the Figure 1 caption in REPORT.md / RESULTS.md. No new analysis.
+`human_feedback.txt` is implemented and `review_pending` (2026-10-14): `experiments/plot_sweep.py` and `PLOTTING.md` exist,
+`plots/france_vocab_width_histogram.png` is redrawn in the Direction 27 fig2 panel (a) style, and the Figure 1 captions in
+REPORT.md / RESULTS.md are updated. `human_feedback_2.txt` asks for the same change and is answered by the same files; its
+manifest still needs its completion fields filled. No new analysis.

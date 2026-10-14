@@ -102,8 +102,8 @@ tokens:
 
 ![Histogram of final transition widths](plots/france_vocab_width_histogram.png)
 
-**Figure 1.** Final transition width for ` France` → B, over all 50,256 tokens B. x: W at block 35;
-y: number of tokens per bin (log scale; 100 equal bins). The dashed line marks W = 0.3.
+**Figure 1.** Final transition width for ` France` → B, over all 50,256 tokens B. x: the width W at
+block 35 (labelled W_final on the axis); y: number of tokens per bin (linear scale; 200 equal bins).
 
 The distribution has one broad peak and a long tail toward wide switches. The median W is 0.188, and the
 middle half of tokens lies between 0.151 and 0.229. The range runs from 0.046 to 0.655. There are 47,073

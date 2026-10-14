@@ -82,3 +82,15 @@ On track? blocked — waiting for the operator to answer A (width histogram) or 
   copy of the histogram in `analyze.py` (two scripts would write the same PNG with different styles).
 
 On track? yes — next pass implements the plot script, PLOTTING.md and the Figure 1 caption changes.
+
+## 2026-10-14 — implemented the Figure 1 restyle (human_feedback.txt)
+
+- Wrote `experiments/plot_sweep.py` (CSV loader `load_data()`, a `STYLE` block, `plot()`); it reads `W_final` from
+  `results/france_tokens.csv` and runs no model. Output PNG is 780 x 585 px, exactly one half of Direction 27's
+  1560 x 585 two-panel figure. Compared both images by eye: same bars, labels and default styling; only the title differs.
+- Removed the histogram block and its now-unused matplotlib imports / `PLOTS` from `analyze.py`. Did not re-run it;
+  results CSVs and `summary.json` are byte-identical (sha256 checked against the manifest baseline).
+- Wrote `PLOTTING.md`; updated the Figure 1 caption in REPORT.md and RESULTS.md. `check_render.py` passes.
+- Not touched: `.tasks/human_feedback_2.txt.manifest.json` is outside this task's declared paths. The same files answer it.
+
+On track? yes — this task is complete and set to `review_pending`.

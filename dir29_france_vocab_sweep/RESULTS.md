@@ -24,7 +24,7 @@ The table below gives simple descriptive counts over all 50,256 tokens B ≠ ` F
 
 ![Histogram of final transition widths](plots/france_vocab_width_histogram.png)
 
-**Figure 1.** W_final for all 50,256 tokens. x: W at block 35; y: tokens per bin (log scale). Dashed line marks W = 0.3.
+**Figure 1.** W_final for all 50,256 tokens. x: W at block 35; y: tokens per bin (linear scale, 200 equal bins). Drawn by `experiments/plot_sweep.py` from `results/france_tokens.csv`; see `PLOTTING.md`.
 
 ## Token lists (machine-readable)
 

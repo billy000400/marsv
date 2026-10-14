@@ -14,3 +14,12 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - Framing: the PLAN labels W ≤ 0.3 as "non-plateau", but Figure 2 shows that small W is the flat-then-jump plateau
   shape (Direction 27's definition). The report gives the literal W ≤ 0.3 list and also names the W > 0.3 side as the
   smooth transitions. No superseded numbers.
+
+## 2026-10-14 — Figure 1 restyled (human_feedback.txt, human_feedback_2.txt)
+- `plots/france_vocab_width_histogram.png` redrawn in the style of panel (a) of Direction 27's
+  `fig2_final_width_distribution.png`: 6 x 4.5 in (was 6.4 x 3.8), 200 bins (was 100), linear y-axis (was log), no dashed
+  W = 0.3 line and no count annotations, title `"The capital of [France]" -> [B] sweep`.
+- REPORT.md and RESULTS.md: Figure 1 caption updated to match (linear scale, 200 bins, no dashed line). No numbers changed;
+  the counts on each side of W = 0.3 stay in the prose and tables.
+- Code: the figure is now drawn by the new `experiments/plot_sweep.py` from `results/france_tokens.csv`; the histogram
+  block was removed from `experiments/analyze.py`. `PLOTTING.md` documents script, data and command.

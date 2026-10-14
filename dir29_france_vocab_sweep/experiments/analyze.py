@@ -1,15 +1,12 @@
-"""Aggregate the ' France' sweep -> per-token CSV, both sides of W_final = 0.3 as sorted lists, histogram.
+"""Aggregate the ' France' sweep -> per-token CSV, both sides of W_final = 0.3 as sorted lists.
 
-Flag rule and columns are Direction 27's (s3_plots.py); histogram conventions are Direction 28's.
+Flag rule and columns are Direction 27's (s3_plots.py). The histogram is drawn by plot_sweep.py.
 """
 import csv
 import glob
 import json
 import os
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import numpy as np
 from transformers import AutoTokenizer
 
@@ -17,7 +14,7 @@ from sweep import PROMPT, ROOT, d27
 
 THR = 0.3
 BACKSTEP = 0.05
-RES, PLOTS = os.path.join(ROOT, "results"), os.path.join(ROOT, "plots")
+RES = os.path.join(ROOT, "results")
 
 
 def load():
@@ -64,23 +61,6 @@ def main():
                    W_min=float(Wf.min()), W_max=float(Wf.max()))
     json.dump(summary, open(os.path.join(RES, "summary.json"), "w"), indent=1)
     print(summary)
-
-    bins = np.linspace(0, np.ceil(Wf.max() * 10) / 10, 101)
-    ymax = np.histogram(Wf, bins)[0].max() * 12
-    fig, ax = plt.subplots(figsize=(6.4, 3.8))
-    ax.hist(Wf, bins=bins, color=d27.CVD[0], edgecolor="none")
-    ax.axvline(THR, color="0.2", ls="--", lw=1)
-    ax.text(THR - 0.01, ymax / 2.2, f"{len(le):,} tokens\nW ≤ 0.3", fontsize=8, ha="right")
-    ax.text(THR + 0.01, ymax / 2.2, f"{len(gt):,} tokens\nW > 0.3", fontsize=8)
-    ax.set_yscale("log")
-    ax.set_ylim(0.8, ymax)
-    ax.set_xlim(bins[0], bins[-1])
-    ax.set_xlabel("final transition width W (block 35)")
-    ax.set_ylabel("number of tokens (log scale)")
-    ax.set_title(f"\"{PROMPT}\": ' France' → B ({len(Wf):,} tokens)")
-    fig.tight_layout()
-    fig.savefig(os.path.join(PLOTS, "france_vocab_width_histogram.png"), dpi=130)
-    plt.close(fig)
 
 
 if __name__ == "__main__":
