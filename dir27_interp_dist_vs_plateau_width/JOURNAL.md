@@ -603,3 +603,12 @@ On track? yes — waiting for the wrapper's content review.
 - Middle-block rho under SLERP (all tokens): +0.59, +0.53, +0.32, +0.25, +0.47.
 - Max figures raised to 13 in manifest (user explicitly asked for one per model). Words 4,975 by workflow counter.
 On track? yes — waiting for review.
+
+## 2026-10-14 — Feedback 7 rejected (word budget / curation) -> repaired -> review_pending
+- Reviewer: word budget not shown to fit; 256-pair pilot + y_rel comparison (old Table 3) should leave REPORT.md.
+- Did: removed pilot Summary bullet, pilot Methods (pairs, D vs L_path text, y_rel equation), old Table 3 and its two
+  paragraphs, pilot sentence in Conclusion and Limitations. Kept SLERP + L_path definitions as Methods "SLERP path".
+  Table 4 -> Table 3. Pilot stays in RESULTS.md R6 (already complete; fixed stale coverage bullet).
+- REPORT.md words 4,975 -> 4,346 by workflow.report_counts regex; 13 figures; check_render passes.
+On track? yes — waiting for review.
+- Also: PLAN.md 'Maximum main figures' 12 -> 13 to match the manifest (check-budgets now OK; REPORT_generalization.md has 12).

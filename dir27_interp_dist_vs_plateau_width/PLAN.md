@@ -118,10 +118,11 @@ paths are used by another direction, leave them untouched.
 ## Report budget
 
 `REPORT_generalization.md` (feedback 3, approved) keeps the operator's earlier allowance: "The follow-up
-report may contain up to 12 main figures" (PLAN.md as of 2026-09-28). `REPORT.md` stays at 8 or fewer.
-The gate reads one limit for all `REPORT*.md`, so it is stated once here:
+report may contain up to 12 main figures" (PLAN.md as of 2026-09-28). `REPORT.md` holds 13: its
+8 earlier figures plus the five per-model SLERP figures that feedback 7 asked for ("one for each model").
+The gate reads one limit for all `REPORT*.md`, so it is stated once here (matches the feedback-7 manifest):
 
-- Maximum main figures: 12
+- Maximum main figures: 13
 
 ## Fallback (if time runs short)
 
@@ -149,12 +150,12 @@ data in `results/block0_resid_post/path_control/`, plots in `plots/block0_resid_
 Observed outcome: the middle-block rise of width with distance holds under both paths; single-pair widths
 change little; the final-block rise is 0.02 (linear) vs 0.05 (Matthew's path) with dir27's normalization and
 0.10-0.14 with the relative normalization. No pair had a negative endpoint cosine.
-REPORT.md keeps 8 figures, so the path-control figures are in RESULTS.md R6 and REPORT.md carries Table 3.
+The 256-pair path-control pilot (and the relative-normalization comparison) lives only in RESULTS.md R6; REPORT.md Finding 5 carries the full five-model SLERP sweep (Figures 9-13, Table 3).
 
 ## Next step
 
 `human_feedback_7.txt` is `review_pending` again (2026-10-14, repair after rejection): cropped Llama panel in the
-summary figure; per-model SLERP figures REPORT.md Figures 9-13, Table 4; RESULTS.md R7. Wait for the wrapper's review.
+summary figure; per-model SLERP figures REPORT.md Figures 9-13, Table 3 (was 4; pilot table moved to RESULTS.md R6); RESULTS.md R7. Wait for the wrapper's review.
 
 ## Method references
 

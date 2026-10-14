@@ -127,3 +127,10 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - slerp_distance_vs_width.png/.pdf: Qwen3 crop 13.5-49.8 (261 hidden) -> 10-60 (9 hidden); model labels moved
   inside the Spearman panel; y head-room for notes. Now RESULTS.md R7 Figure 23 only.
 - RESULTS.md R7: middle-block medians and rho under SLERP added; figure captions and Headline updated.
+
+## 2026-10-14 — REPORT.md: GPT-2 Large path-control pilot moved out (feedback 7 repair)
+- REPORT.md: removed the 256-pair pilot (Summary bullet, Methods "Path control" pairs/normalization text and y_rel
+  equation, Table 3, its Middle/Final-block paragraphs, Conclusion and Limitations sentences). Finding 5 now presents
+  only the five-model full-vocabulary SLERP sweep; old Table 4 renumbered Table 3; Finding 5 title "...depends on path
+  and model". Methods "SLERP path" keeps the SLERP and L_path definitions. Words 4,975 -> 4,346.
+- RESULTS.md R6: pilot coverage bullet updated to point to R7 (full five-model SLERP sweep). No numbers changed.

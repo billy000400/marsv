@@ -560,8 +560,8 @@ both blocks: by 0.10–0.15 from the nearest to the farthest fifth.
 - The final-block reading is less stable. The rise from nearest to farthest fifth is 0.02 with the linear
   path and main normalization, 0.05 with Matthew's path, and 0.10–0.14 with the relative normalization
   under either path (Table 1). The choice of normalization moves this number more than the choice of path.
-- Coverage: one model, 256 random pairs, about 50 per fifth, no statistical test. The other four models
-  and the full vocabulary were not run with Matthew's path.
+- Coverage: one model, 256 random pairs, about 50 per fifth, no statistical test. R7 runs Matthew's path
+  on the full vocabulary of all five models; this pilot is the only place the relative normalization was tried.
 
 ## R7 — SLERP path, full vocabulary, five models
 
