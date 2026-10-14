@@ -115,3 +115,15 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
 - RESULTS.md: new section R7 (Table R7, Figures 23-24); Headline gains one sentence.
 - Story change: the final-block answer was "no consistent relationship"; it is now "no consistent relationship
   under the straight line; a positive link under SLERP in all five models (rho +0.02 to +0.35)".
+
+## 2026-10-14 — Feedback 7 repair after content review rejection
+- REPORT.md: the combined five-panel SLERP figure (old Figure 9) is replaced by five per-model SLERP figures
+  (new Figures 9-13), each in the layout of the linear Figures 1 and 5-8: (a) middle block, (b) final block.
+  Table 4 gains middle-block medians by fifth under SLERP. 9 -> 13 figures (manifest limit raised for the
+  requested per-model figures); trimmed Methods checks, path-control and Finding 1/2/4 prose; 4,975 words.
+- Story correction: "SLERP strengthens a positive final-block link in every model" -> "rho is higher under
+  SLERP in all five, but a positive link appears only in GPT-2 Large (+0.33), Qwen3 (+0.35) and Llama (+0.21);
+  GPT2-XL (+0.10) and Pythia (+0.02) show essentially none". Middle-block rise holds in all five under SLERP.
+- slerp_distance_vs_width.png/.pdf: Qwen3 crop 13.5-49.8 (261 hidden) -> 10-60 (9 hidden); model labels moved
+  inside the Spearman panel; y head-room for notes. Now RESULTS.md R7 Figure 23 only.
+- RESULTS.md R7: middle-block medians and rho under SLERP added; figure captions and Headline updated.

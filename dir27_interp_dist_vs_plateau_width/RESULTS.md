@@ -563,14 +563,16 @@ both blocks: by 0.10–0.15 from the nearest to the farthest fifth.
 - Coverage: one model, 256 random pairs, about 50 per fifth, no statistical test. The other four models
   and the full vocabulary were not run with Matthew's path.
 
-## R7 — SLERP path, full vocabulary, five models (final block)
+## R7 — SLERP path, full vocabulary, five models
 
 Every model's full sweep was rerun with Matthew's `slerp_rescale` path (SLERP) in place of the straight
 line; everything else is unchanged (`experiments/slerp_sweep.py`). Data: `results/block0_resid_post/slerp/<model>.csv`
 (one row per token: D, SLERP path length L_slerp summed over the 100 injected steps, endpoint cosine,
 W_mid, W_final, the combined flag, and `mono_final`, the final-block-only monotonic test). Summary
 numbers: `results/block0_resid_post/slerp/summary.json`; figures from
-`experiments/summary_slerp_distance_vs_width.py`.
+`experiments/summary_slerp_distance_vs_width.py` (five-panel summaries, Figures 23–24) and
+`experiments/slerp_fig1_per_model.py` (per-model middle/final scatters,
+`plots/block0_resid_post/slerp/<model>_fig1_slerp_distance_vs_width.png`; these are REPORT.md Figures 9–13).
 
 **Checks.** No SLERP path was non-finite in any model. The largest relative L2 gap between the injected
 vector and r_A at t = 0 / r_B at t = 1 was 1.1e-8 / 6.5e-8 (Pythia), 2.9e-8 / 6.2e-8 (Llama) and
@@ -602,21 +604,26 @@ Llama 0.289, 0.307, 0.310, 0.324, 0.351; Qwen3 0.371, 0.404, 0.425, 0.442, 0.500
 with W_final < W_mid under SLERP: GPT-2 Large 98.0%, GPT2-XL 97.1%, Pythia 94.1%, Llama 92.5%, Qwen3
 42.6% (59.7% under the straight line).
 
-Figure 23 is the report's Figure 9, the scatter against SLERP path length.
+Median W_mid under SLERP by fifth of L_slerp, all tokens (nearest to farthest): GPT-2 Large 0.192, 0.205,
+0.222, 0.247, 0.294; GPT2-XL 0.170, 0.182, 0.198, 0.217, 0.251; Pythia 0.555, 0.564, 0.570, 0.581, 0.599;
+Llama 0.404, 0.418, 0.418, 0.425, 0.450; Qwen3 0.370, 0.386, 0.402, 0.416, 0.472. Spearman ρ of W_mid
+with L_slerp, all tokens: +0.59, +0.53, +0.32, +0.25, +0.47.
+
+Figure 23 summarizes the final block of REPORT.md Figures 9–13 in one figure, with a Spearman panel.
 
 ![Final-block width against SLERP path length, five models](plots/block0_resid_post/slerp_distance_vs_width.png)
 
 **Figure 23.** Panels 1–5: final-block W under SLERP (y) against SLERP path length L_slerp (x, L2,
 block-0 output), tokens with a monotonic final-block curve; colour is local point density (log scale).
-Llama is shown for L_slerp 1.0–2.75 (25 tokens not drawn) and Qwen3 for the central bulk, 13.5–49.8
-(261 not drawn). Last panel: Spearman ρ per model.
+Llama is shown for L_slerp 1.0–2.75 (25 tokens not drawn) and Qwen3 for 10–60 (9 not drawn), the
+ranges of REPORT.md Figures 12–13. Last panel: Spearman ρ per model.
 
 To check that the x-axis choice does not drive the result, Figure 24 repeats it with endpoint distance D.
 
 ![Final-block width under SLERP against endpoint distance, five models](plots/block0_resid_post/slerp_endpoint_distance_vs_width.png)
 
 **Figure 24.** As Figure 23, with x = endpoint distance D (L2, block-0 output). Llama is shown for
-D 1.0–2.5 (25 tokens not drawn); no other panel is cropped.
+D 1.0–2.5 (25 tokens not drawn) and Qwen3 for D 10–55 (5 not drawn); no other panel is cropped.
 
 ## Headline
 
@@ -627,6 +634,8 @@ direction across models. At any one distance, widths still range from very sharp
 the widest GPT-2 Large switches again belong to size words and rare strings. In a 256-pair GPT-2 Large
 pilot, replacing the straight-line path with Matthew's curved path leaves the middle-block trend in place
 and changes single-pair widths little; the final-block trend is larger under his path and larger again
-under his normalization (R6). Over full vocabularies, SLERP raises the final-block Spearman ρ in all five
-models (to +0.02 to +0.35, from −0.15 to +0.15 under the straight line; R7). These are associations
+under his normalization (R6). Over full vocabularies under SLERP, the middle-block rise holds in all five
+models; the final-block Spearman ρ is higher than under the straight line in all five, but a positive link
+appears only in GPT-2 Large, Qwen3 and Llama (+0.21 to +0.35), with GPT2-XL (+0.10) and Pythia (+0.02)
+near zero (R7). These are associations
 across tokens for one prompt; no cause was tested.

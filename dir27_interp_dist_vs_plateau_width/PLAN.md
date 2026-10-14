@@ -153,8 +153,8 @@ REPORT.md keeps 8 figures, so the path-control figures are in RESULTS.md R6 and 
 
 ## Next step
 
-`human_feedback_7.txt` is `review_pending` (2026-10-14): cropped Llama panel in the summary figure and five-model
-SLERP sweeps (REPORT.md Figure 9, Table 4; RESULTS.md R7). Wait for the wrapper's review; repair if rejected.
+`human_feedback_7.txt` is `review_pending` again (2026-10-14, repair after rejection): cropped Llama panel in the
+summary figure; per-model SLERP figures REPORT.md Figures 9-13, Table 4; RESULTS.md R7. Wait for the wrapper's review.
 
 ## Method references
 

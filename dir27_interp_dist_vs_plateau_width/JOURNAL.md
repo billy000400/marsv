@@ -594,3 +594,12 @@ On track? yes — next pass writes `experiments/slerp_sweep.py` and starts the r
   at 4,997 words. check_render passes for REPORT.md and RESULTS.md. Manifest -> review_pending.
 
 On track? yes — waiting for the wrapper's content review.
+
+## 2026-10-14 — Feedback 7 rejected -> repaired -> review_pending
+- Reviewer: wanted per-model two-panel SLERP figures like Figures 1/5-8 (not one combined final-block figure);
+  Qwen3 auto-crop cut dense data; Summary overclaimed for Pythia/GPT2-XL; Spearman panel labels overlapped.
+- Did: experiments/slerp_fig1_per_model.py (no reruns; CSVs already hold W_mid). Crops Llama 1-2.75 (26 hidden),
+  Qwen3 10-60 (25 hidden). REPORT Figures 9-13 + Table 4 with W_mid fifths. Fixed combined figure, moved to R7.
+- Middle-block rho under SLERP (all tokens): +0.59, +0.53, +0.32, +0.25, +0.47.
+- Max figures raised to 13 in manifest (user explicitly asked for one per model). Words 4,975 by workflow counter.
+On track? yes — waiting for review.

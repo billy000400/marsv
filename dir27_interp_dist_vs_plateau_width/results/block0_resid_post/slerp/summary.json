@@ -119,15 +119,18 @@
   "pearson_r_W_final_vs_L_slerp": 0.353533616361969,
   "spearman_rho_W_final_vs_L_slerp": 0.3539671739396312,
   "plot_xlim_L_slerp": [
-   13.478905849999999,
-   49.75557965
+   10,
+   60
   ],
-  "n_not_drawn_L_slerp": 261,
+  "n_not_drawn_L_slerp": 9,
   "W_final_median": 0.4292,
   "pearson_r_W_final_vs_D": 0.35599769717541696,
   "spearman_rho_W_final_vs_D": 0.3534303885289766,
-  "plot_xlim_D": null,
-  "n_not_drawn_D": 0,
+  "plot_xlim_D": [
+   10,
+   55
+  ],
+  "n_not_drawn_D": 5,
   "n_negative_cosine": 5,
   "n_nonfinite_width": 0,
   "L_over_D_pct_0_50_100": [

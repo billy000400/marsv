@@ -5,10 +5,8 @@ Same layout, style, y-range rule, monotonic-curve filter and correlations as sum
   slerp_distance_vs_width.{png,pdf}            x = L_slerp, the length of the injected SLERP path
   slerp_endpoint_distance_vs_width.png         x = D, the straight-line distance between the two endpoints
 y = final-block transition width measured along the SLERP path, in both.
-Llama 3.1-8B is cropped to its bulk as in the linear summary figure (D from 1.0 to 2.5; path length from 1.0 to
-2.75, the same range stretched by the ~1.1 median ratio of path length to D). Any other panel is cropped when a few
-far points stretch its x range (AUTO_CROP rule of summary_distance_vs_width.py). A cropped panel prints how many
-points are not drawn.
+Llama 3.1-8B and Qwen3-8B are cropped to their majority region with the fixed ranges of the per-model SLERP figures
+(slerp_fig1_per_model.py); a cropped panel prints how many points are not drawn.
 Also writes results/block0_resid_post/slerp/summary.json. Reads CSVs only; runs no model.
 
 Usage: python experiments/summary_slerp_distance_vs_width.py
@@ -34,8 +32,23 @@ S.FILTER_NOTE["csv_flag"] = (
     "and the 90% level once each and never drops by more than 0.05 between neighbouring interpolation "
     "positions. r, rho and n count every monotonic curve, including the ones outside a cropped x range.")
 S.Y_LABEL = "Transition width W (final block, SLERP path)"
-S.AUTO_CROP = True
-LLAMA_CROP = {"L_slerp": (1.0, 2.75), "D": (1.0, 2.5)}
+# Fixed crops, the same as the per-model SLERP Figure 1 (slerp_fig1_per_model.py): only a few far points are hidden.
+X_CROP = {"L_slerp": {"Llama 3.1-8B": (1.0, 2.75), "Qwen3-8B": (10, 60)},
+          "D": {"Llama 3.1-8B": (1.0, 2.5), "Qwen3-8B": (10, 55)}}
+_plot_summary = S.plot_summary
+
+
+def plot_summary(ax, records):
+    """Same summary panel; the model names sit inside it, right of the x = -1 line (all rho here are > -0.5)."""
+    _plot_summary(ax, records)
+    for y, label in zip(ax.get_yticks(), ax.get_yticklabels()):
+        ax.text(-0.95, y, label.get_text(), ha="left", va="center", fontsize=S.FONT_LABEL)
+    ax.set_yticklabels([])
+    ax.tick_params(axis="y", length=0)
+
+
+S.plot_summary = plot_summary
+S.Y_LIM = (-0.02, 1.08)   # head room so the n / not-drawn notes sit above the densest panels' points
 
 FIGURES = [  # (x column, x label, summary-panel title, output path without extension, formats)
     ("L_slerp", "SLERP path length (L2, block-0 output)", "Spearman rank correlation, path length vs W",
@@ -62,7 +75,7 @@ def main():
     summary = {key: {} for _, key in KEYS}
     for col, xlabel, title, out, formats in FIGURES:
         S.COL_DISTANCE, S.X_LABEL, S.SUMMARY_TITLE = col, xlabel, title
-        S.X_CROP = {"Llama 3.1-8B": LLAMA_CROP[col]}
+        S.X_CROP = X_CROP[col]
         for rec, (_, key) in zip(S.main(SLERP_DIR, out, formats), KEYS):
             summary[key].update({"n_tokens": rec["rows"], "n_monotonic": rec["n"],
                                  f"pearson_r_W_final_vs_{col}": rec["pearson"],
