@@ -99,3 +99,6 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
   45,953 -> 45,954; Pythia 50,155 -> 50,155; Llama 122,425 -> 122,528; Qwen3-8B 132,609 -> 132,653. Displayed r and rho
   are unchanged at two decimals.
 - REPORT*.md and RESULTS*.md unchanged; no result file changed.
+
+## 2026-10-14 — Finalization (no deliverable change)
+- REPORT*.md and RESULTS*.md unchanged; no number superseded. PLAN.md Next step closed; `STOP` written.

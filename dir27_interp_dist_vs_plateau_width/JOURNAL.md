@@ -549,3 +549,13 @@ On track? yes — waiting for the wrapper's checks and content review.
 - Checks: two runs give a byte-identical PNG; empty-model path and `csv_flag` rule run on a temporary copy.
 
 On track? yes — manifest `review_pending`, waiting for the wrapper's review.
+
+## 2026-10-14 — Finalize and STOP
+- Compared Current status with the success criterion: met (block-0 rerun S1-S4, path control P1-P4). All five feedback
+  files end in `.addressed.md` and every manifest is `addressed`. No experiment run.
+- `python3 ../check_render.py REPORT*.md RESULTS.md`: all checks pass (REPORT.md 4,319 words, 8 figures).
+- Noted, not changed: `REPORT_generalization.md` (2026-09-28, approved under feedback 3) embeds 12 figures, above the
+  8-figure limit introduced later. No task declares it as modifiable, so it is left as is.
+- PLAN.md Next step updated; `STOP` written.
+
+On track? yes — direction complete.
