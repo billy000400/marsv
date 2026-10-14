@@ -1,11 +1,12 @@
 {
   "version": 1,
-  "state": "blocked",
+  "state": "ready",
   "source_feedback": "human_feedback.txt",
   "source_sha256": "ca2d2ea31fdbb840e44a92d9857859ed77052e0102a717f23faa8d00c496fad8",
   "required_outputs": [
     "experiments/plot_sweep.py",
-    "PLOTTING.md"
+    "PLOTTING.md",
+    "plots/france_vocab_width_histogram.png"
   ],
   "may_modify": [
     "experiments/plot_sweep.py",
@@ -21,6 +22,7 @@
   ],
   "must_remain_unchanged": [
     "human_feedback.txt",
+    "human_feedback_2.txt",
     "experiments/sweep.py",
     "experiments/curves.py",
     "experiments/categories.py",
@@ -28,18 +30,17 @@
     "results/france_tokens.csv",
     "results/france_W_le_0.3.csv",
     "results/france_W_gt_0.3.csv",
+    "results/france_widest100_manual.csv",
     "results/summary.json"
   ],
   "report_policy": {
-    "core_research_question": "Unchanged: for the prompt 'The capital of' with the anchor token ' France' interpolated to every other GPT-2 Large vocabulary token B, how are the final-block transition widths W distributed, and do the tokens on either side of W = 0.3 show a recognizable pattern? This task changes only how the sweep figure is drawn and how its plotting code is organised; it adds no analysis.",
+    "core_research_question": "Unchanged: for the prompt 'The capital of' with the anchor token ' France' interpolated to every other GPT-2 Large vocabulary token B, how are the final-block transition widths W distributed, and do the tokens on either side of W = 0.3 show a recognizable pattern? This task changes only how the sweep histogram (Figure 1) is drawn and how its plotting code is organised; it adds no analysis.",
     "primary_report": "REPORT.md",
     "max_words": 5000,
     "max_main_figures": 8,
     "detailed_results": "RESULTS.md"
   },
-  "unresolved_ambiguities": [
-    "Which Direction 27 figure is 'the corresponding plot' whose style and figure size should be matched? Direction 29 has one figure of the whole sweep: plots/france_vocab_width_histogram.png, a histogram of final-block width W over 50,256 tokens (6.4 x 3.8 in, log y-axis, dashed line at W = 0.3). Direction 27 has two candidates. (A) plots/block0_resid_post/fig2_final_width_distribution.png: the same kind of plot (width histogram), 12 x 4.5 in, two panels: (a) histogram with 200 bins and a linear y-axis, (b) sorted widths. It has no special styling. (B) plots/block0_resid_post/summary_distance_vs_width.png (experiments/summary_distance_vs_width.py): the density-coloured scatter of interpolation distance D against width W, 15.0 x 8.6 in for six panels. This is the figure the operator is currently restyling (Direction 27 human_feedback_7), and its script already has the 'user-editable configuration' layout that the second request describes. Under (B) Direction 29 would get a NEW scatter of D against W for the France sweep (the data exist in results/france_tokens.csv), which is a different figure from the current histogram. Please answer A or B. If A: should the new figure keep both panels (histogram + sorted widths) at 12 x 4.5 in, and keep or drop the log y-axis and the W = 0.3 line? If B: should 'same figure size' mean the size of one panel of the six-panel figure (about 5 x 4.3 in), and should the new scatter replace the histogram as Figure 1 of REPORT.md or be added next to it?"
-  ],
+  "unresolved_ambiguities": [],
   "checklist": [
     {
       "request": "Can you make the sweep plot style consistent with the corresponding plot's style in /workspace/marsv_agent_haoyang/dir27_interp_dist_vs_plateau_width\nIt should be the same figure size. But let's make the title \"\"The capital of [France]\" -> [B] sweep\"",
@@ -61,10 +62,13 @@
     }
   ],
   "routing_notes": [
-    "Triage only; no script, figure, run or analysis was produced in this pass.",
-    "Blocked on one question (see unresolved_ambiguities): which Direction 27 figure is 'the corresponding plot'. The two candidate readings give different figures, so no default was chosen.",
-    "The paths in required_outputs / may_modify are provisional and assume the new figure replaces plots/france_vocab_width_histogram.png in place. If the operator picks the scatter reading (B below), a new PNG path (e.g. plots/france_distance_vs_width.png) must be added in the next triage.",
-    "Parts that are clear under either reading: (1) title is exactly: \"The capital of [France]\" -> [B] sweep ; (2) a separate plot-only script that reads the existing results/france_tokens.csv and runs no model, with the data loading separated from the style settings; (3) a markdown file (PLOTTING.md at the direction root) naming the script, the data file and the command; (4) no new model runs are needed; results CSVs stay unchanged.",
-    "The feedback path /workspace/marsv_agent_haoyang/dir27_interp_dist_vs_plateau_width is the same directory as ../dir27_interp_dist_vs_plateau_width here; Direction 27 files are read only and never modified by this task."
+    "Triage only in this pass; no script, figure or report change was made.",
+    "Previously blocked on which Direction 27 figure is 'the corresponding plot'. The operator answered in human_feedback_2.txt (2026-10-14): reading A, panel (a) of fig2_final_width_distribution.png, and 'the same figure size' means that single panel, 6 x 4.5 in. Resolved assumption: that answer also defines this earlier, less specific request, so both manifests share one implementation.",
+    "The feedback path /workspace/marsv_agent_haoyang/dir27_interp_dist_vs_plateau_width is the same directory as ../dir27_interp_dist_vs_plateau_width here.",
+    "Figure spec (from human_feedback_2.txt): restyle plots/france_vocab_width_histogram.png in place to match panel (a) of ../dir27_interp_dist_vs_plateau_width/plots/block0_resid_post/fig2_final_width_distribution.png, drawn by Direction 27 experiments/s3_plots.py as ax.hist(Wf, bins=200, color=CVD[0]) with x label 'final-layer width W_final', y label 'number of tokens', default matplotlib styling, tight_layout, dpi 130. One panel, 6 x 4.5 in, 200 bins, linear y-axis, no vertical threshold line, no sorted-widths panel.",
+    "Resolved assumption (title): the feedback writes the title as \"\"The capital of [France]\" -> [B] sweep\". The outermost pair of quotes delimits the title, so the title string is exactly: \"The capital of [France]\" -> [B] sweep  (with the inner double quotes and the literal ASCII '->'). It replaces Direction 27's panel title '(a) histogram, 200 bins'.",
+    "Code routing: new plot-only script experiments/plot_sweep.py reads the existing results/france_tokens.csv (column W_final), runs no model, and keeps data loading separate from a block of editable style settings. The histogram code is removed from experiments/analyze.py so that one script owns the figure; analyze.py is NOT re-run, so the results CSVs and summary.json stay byte-identical. PLOTTING.md at the direction root names the script, the data file and the command.",
+    "Report routing: the restyled PNG keeps its path, so it stays Figure 1 of REPORT.md (and of RESULTS.md). Only the Figure 1 caption and the sentence introducing it change (log y-axis and dashed W = 0.3 line are gone); the counts on each side of W = 0.3 remain stated in prose. No new analysis, figure or table is added.",
+    "No GPU or model run is needed. Direction 27 files are read only."
   ]
 }

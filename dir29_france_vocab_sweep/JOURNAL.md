@@ -68,3 +68,17 @@ On track? blocked — waiting for the operator to answer A or B.
 - No code, figure, report or manifest change. Manifest stays `blocked` on the same A-or-B question. STOP not created.
 
 On track? blocked — waiting for the operator to answer A (width histogram) or B (D-vs-W scatter).
+
+## 2026-10-14 — triage of human_feedback_2.txt; human_feedback.txt unblocked
+
+- New operator file `human_feedback_2.txt` answers the blocked question: match panel (a) of Direction 27's
+  `fig2_final_width_distribution.png` (reading A). One panel, 6 x 4.5 in, 200 bins, linear y-axis, no threshold line,
+  title `"The capital of [France]" -> [B] sweep`; the restyled plot stays Figure 1 of REPORT.md.
+- Triage only, no research. Both manifests set to `ready` with the same routing: new `experiments/plot_sweep.py` and
+  `PLOTTING.md`; PNG replaced in place; Figure 1 caption edits in REPORT.md / RESULTS.md.
+- Assumptions logged in the manifests: (1) the outer quote pair in the feedback delimits the title, so the inner quotes
+  and the ASCII `->` are part of it; (2) the answer in feedback 2 also defines the vaguer feedback 1; (3) the histogram
+  code moves out of `analyze.py`, which is not re-run, so results CSVs stay byte-identical. Rejected: keeping a second
+  copy of the histogram in `analyze.py` (two scripts would write the same PNG with different styles).
+
+On track? yes — next pass implements the plot script, PLOTTING.md and the Figure 1 caption changes.

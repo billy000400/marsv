@@ -156,4 +156,6 @@ names). REPORT Methods notes this.
 
 ## Next step
 
-None. STOP created. Reopen only if operator feedback arrives.
+Feedback tasks `human_feedback.txt` and `human_feedback_2.txt` are triaged and `ready` (2026-10-14): write
+`experiments/plot_sweep.py` + `PLOTTING.md`, redraw `plots/france_vocab_width_histogram.png` in the Direction 27 fig2 panel (a)
+style, and update the Figure 1 caption in REPORT.md / RESULTS.md. No new analysis.
