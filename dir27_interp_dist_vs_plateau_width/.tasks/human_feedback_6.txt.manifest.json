@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "state": "review_pending",
+  "state": "addressed",
   "source_feedback": "human_feedback_6.txt",
   "source_sha256": "212fccfd7fec68587733ff55ba42588b27fa987bad68d9c6e4532a7a0622c26f",
   "required_outputs": [
@@ -44,9 +44,7 @@
     "max_main_figures": 8,
     "detailed_results": "RESULTS.md"
   },
-  "unresolved_ambiguities": [
-    "Non-blocking, resolved by a documented assumption: 'final layer' + 'monotonic curves' is read as 'the final-block curve is monotonic'. The named CSVs hold only a combined middle-or-final flag, so the final-block test is rebuilt from the shard statistics stored beside each CSV in the same block-0 result set. One config line (MONOTONIC_RULE = \"csv_flag\") gives the CSV-column version; the two differ by at most 103 tokens per model and by nothing at two decimals."
-  ],
+  "unresolved_ambiguities": [],
   "checklist": [
     {
       "request": "Please write a reproducible Python script that reads the existing results and generates one summary figure as output.\nGoal\nCreate a 2×3 figure layout summarizing the relationship between interpolation distance and transition width across models.\nPanels 1–5: scatter plots\nMake scatter plots for these five models:",
@@ -777,7 +775,8 @@
     "The feedback names no output path. Ordinary implementation choice: script experiments/summary_distance_vs_width.py; figure plots/block0_resid_post/summary_distance_vs_width.png plus the same figure as .pdf (the feedback allows '.png and/or .pdf').",
     "No report is requested. REPORT*.md and RESULTS*.md stay unchanged; the Pearson and Spearman coefficients are requested content of the figure.",
     "Project plotting rules apply (CLAUDE.md rule 13): colour-vision-deficiency palette, no red/green contrast, marker shape varies with colour.",
-    "Repair pass after content rejection (2026-10-13): exact [-1, 1] summary axis; Llama panel draws its full range with an enlarged inset; points coloured by local density; monotonic test is final-block only, defined in full in the script and printed under the figure; value labels moved off the x = 0 line; the stale '26 far tokens' comment is gone (26 was all far Llama tokens, 23 the monotonic ones)."
+    "Repair pass after content rejection (2026-10-13): exact [-1, 1] summary axis; Llama panel draws its full range with an enlarged inset; points coloured by local density; monotonic test is final-block only, defined in full in the script and printed under the figure; value labels moved off the x = 0 line; the stale '26 far tokens' comment is gone (26 was all far Llama tokens, 23 the monotonic ones).",
+    "Non-blocking, resolved by a documented assumption: 'final layer' + 'monotonic curves' is read as 'the final-block curve is monotonic'. The named CSVs hold only a combined middle-or-final flag, so the final-block test is rebuilt from the shard statistics stored beside each CSV in the same block-0 result set. One config line (MONOTONIC_RULE = \"csv_flag\") gives the CSV-column version; the two differ by at most 103 tokens per model and by nothing at two decimals."
   ],
   "baseline_sha256": {
     ".tasks/human_feedback_6.txt.manifest.json": "c2e1758c833b10e06d0a05037238fcf150fc1cc915edb2db52331b98f17d59aa",
@@ -809,22 +808,14 @@
   "review": {
     "format_passed": true,
     "content": {
-      "pass": false,
+      "pass": true,
       "inspected_outputs": [
         "experiments/summary_distance_vs_width.py",
         "plots/block0_resid_post/summary_distance_vs_width.png",
         "plots/block0_resid_post/summary_distance_vs_width.pdf"
       ],
-      "failures": [
-        "Summary x-axis range is not the requested [-1, 1]. The script sets `ax.set_xlim(lo - SUMMARY_X_MARGIN, hi + SUMMARY_X_MARGIN)` with SUMMARY_X_MARGIN = 0.06, so the drawn axis is [-1.06, 1.06]. The request was explicit ('Set the x-axis range to [-1, 1]'); the reference lines could have been kept visible another way (e.g. clip_on=False or thicker spines) without changing the range.",
-        "The Llama 3.1-8B scatter panel does not plot all qualifying monotonic curves. X_LIMS = {'Llama 3.1-8B': (1.0, 2.5)} is on by default and hides 23 monotonic points, while the title's Pearson r and the summary Spearman rho are computed with them. The feedback asked only that each model keep its own x range, not that one be cropped; the displayed cloud and the displayed statistic therefore describe different point sets. It is disclosed in the panel, but it is an unrequested default; the full-range plot should be the default, or the outliers shown some other way (e.g. inset or broken axis).",
-        "The script comment and the figure disagree on the Llama outlier count. The comment above X_LIMS says '26 far tokens (D up to 16.5)'; the panel prints '23 beyond x range' and the manifest says '23 far monotonic tokens'. The comment does not say whether 26 counts all tokens or only monotonic ones, so a new reader cannot reconcile the two numbers.",
-        "Transparency does not reduce overplotting where the data is. With ALPHA = 0.08, MARKER_SIZE = 5 and 46k-133k points per panel, the core of every cloud renders as a solid opaque blob in both PNG and PDF; the manifest itself concedes 'the core of each cloud still saturates'. The density structure that would let a reader judge the D-W relationship is invisible, so the 'easy to read' and 'some transparency to reduce overplotting' requests are met only nominally.",
-        "'Only keep monotonic curves' with 'final layer only' is implemented with a stricter filter than requested. flag_nonmonotonic == 0 also drops tokens whose final-block curve is monotonic but whose middle-block curve is not. This is documented in the script's assumptions block, but the figure carries no note of it and the manifest lists unresolved_ambiguities as empty, so the reported n, r and rho are for 'monotonic at both mid and final block', not for the subset the feedback named.",
-        "The 'monotonic curve' definition is incomplete in the script. It refers to 'steps backwards beyond the tolerance (see experiments/s3_plots.py load_sweep)' without stating the tolerance value, and relies on a file outside this deliverable. The feedback asked the script to clearly define the term and to isolate assumptions in one place.",
-        "Minor legibility defects in the summary panel: the '+0.05' and '+0.09' value labels overlap the dashed x = 0 line, and in the PDF the '+0.09' label nearly touches the Llama diamond marker above it."
-      ],
-      "summary": "Fail. The deliverable is close: the script is structured as asked (eight sections, config at top, EDIT HERE comments, CLI, assumptions block, empty-model handling), reads only the block-0 CSVs, and the PNG and PDF show the same 2x3 figure with five scatter panels, Pearson r in each title, a shared y range, per-model x ranges, and a Spearman summary panel with annotated -1, 0 and +1 lines. No report text was added and no causal claims are made.\n\nIt is rejected because several explicit requests were altered rather than met as written:\n\n- **Summary x-range:** drawn as [-1.06, 1.06], not [-1, 1].\n- **Llama panel:** cropped by default to 1–2.5, hiding 23 qualifying points that are still counted in the statistics; the script comment says 26.\n- **Overplotting:** the alpha setting leaves every cloud core fully saturated, so transparency does not make density readable.\n- **Monotonic filter:** it is the combined mid-or-final flag, stricter than \"final layer, monotonic curves\". This is documented in the code but not on the figure or as an open ambiguity, and the tolerance in the definition is left to an external file.\n\nI could not run the script or see the CSVs, so the printed counts and coefficients are taken from the figure and manifest, not independently checked.\n\nThe fixes are small: an exact [-1, 1] axis, full-range Llama by default (or an inset), a density-revealing style (lower alpha, smaller points, or hexbin/density colouring), consistent outlier counts, and a self-contained monotonic definition with the combined-flag caveat surfaced."
+      "failures": [],
+      "summary": "Pass. The script and the figure meet every item in the feedback as written, and the seven failures from the previous review are all repaired. I could not run the script or open the result files, so the sample counts, coefficients and the shard column indices are taken from the figure and manifest, not independently checked.\n\n**What I checked against the feedback**\n- **Layout:** the PNG and PDF show the same 2×3 figure, with five scatter panels in the requested model order and the Spearman summary bottom-right.\n- **Scatter panels:** each plots D against final-block W, with Pearson r in the title in the example format, one shared y range (about 0 to 0.9), and its own x range.\n- **Readability:** points are small (area 3) with alpha 0.5, and are coloured by local density so the cloud cores are no longer solid blobs. A single colour bar explains the scale.\n- **Llama panel:** it now draws its full range (D up to about 9), with an inset enlarging the bulk. The points drawn are the points counted in r and rho.\n- **Summary panel:** the x-axis is exactly [-1, 1], with one distinct marker per model, solid lines at -1 and +1 carrying the requested annotations, and a dashed annotated line at 0. Value labels no longer touch the zero line or other markers.\n- **Script structure:** eight sections in the suggested order, all style settings as constants at the top, \"EDIT HERE\" comments for each listed item, and a command-line entry point with `--results-dir`, `--out` and `--formats`.\n- **Definitions:** one assumptions block defines \"final layer\", \"monotonic curve\" (including the 0.05 tolerance), \"transition width\" and \"interpolation distance\". It no longer points to an outside file.\n- **Empty models:** a model with no qualifying curves keeps its panel with a note, gets NaN correlations, and shows a text note in the summary panel.\n- **Scope:** no report text was added and nothing in the outputs makes a causal claim.\n\n**Points the author should know, none blocking**\n- **Extra input files:** the default monotonic filter reads the shard statistics saved beside each CSV, which the feedback did not name. They belong to the same block-0 result set, not the excluded input-embedding set. The script documents this as an assumption, and `MONOTONIC_RULE = \"csv_flag\"` switches to a CSV-only filter. The manifest says the two rules differ by at most 103 tokens per model and by nothing at two decimals.\n- **Hard-coded shard columns:** the statistics column indices (9, 10, 11) are fixed in the assumptions block. A token id missing from the shards would raise a bare `KeyError` instead of a clear message.\n- **Llama inset:** a few stray points sit close to the inset's tick labels. This is cosmetic."
     },
     "expected_outputs": [
       "experiments/summary_distance_vs_width.py",
@@ -832,5 +823,6 @@
       "plots/block0_resid_post/summary_distance_vs_width.pdf"
     ],
     "budget_failures": []
-  }
+  },
+  "addressed_feedback": "human_feedback_6.txt.addressed.md"
 }
