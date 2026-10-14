@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "state": "ready",
+  "source_feedback": "human_feedback_7.txt",
+  "source_sha256": "c0211765d7ff01e68078430284afc10b1dc22009863da8e96c87aa6a31bbd3f5",
+  "required_outputs": [
+    "experiments/summary_distance_vs_width.py",
+    "plots/block0_resid_post/summary_distance_vs_width.png",
+    "plots/block0_resid_post/summary_distance_vs_width.pdf",
+    "experiments/slerp_sweep.py",
+    "experiments/summary_slerp_distance_vs_width.py",
+    "results/block0_resid_post/slerp/gpt2-large.csv",
+    "results/block0_resid_post/slerp/gpt2-xl.csv",
+    "results/block0_resid_post/slerp/pythia-1.4b.csv",
+    "results/block0_resid_post/slerp/llama-3.1-8b.csv",
+    "results/block0_resid_post/slerp/qwen3-8b-base.csv",
+    "plots/block0_resid_post/slerp_distance_vs_width.png",
+    "plots/block0_resid_post/slerp_distance_vs_width.pdf",
+    "REPORT.md"
+  ],
+  "may_modify": [
+    "experiments/summary_distance_vs_width.py",
+    "plots/block0_resid_post/summary_distance_vs_width.png",
+    "plots/block0_resid_post/summary_distance_vs_width.pdf",
+    "experiments/slerp_sweep.py",
+    "experiments/summary_slerp_distance_vs_width.py",
+    "results/block0_resid_post/slerp/gpt2-large.csv",
+    "results/block0_resid_post/slerp/gpt2-xl.csv",
+    "results/block0_resid_post/slerp/pythia-1.4b.csv",
+    "results/block0_resid_post/slerp/llama-3.1-8b.csv",
+    "results/block0_resid_post/slerp/qwen3-8b-base.csv",
+    "plots/block0_resid_post/slerp_distance_vs_width.png",
+    "plots/block0_resid_post/slerp_distance_vs_width.pdf",
+    "REPORT.md",
+    ".tasks/human_feedback_7.txt.manifest.json",
+    "plots/block0_resid_post/slerp_endpoint_distance_vs_width.png",
+    "results/block0_resid_post/slerp/summary.json",
+    "RESULTS.md",
+    "CHANGELOG.md",
+    "JOURNAL.md",
+    "PLAN.md"
+  ],
+  "must_remain_unchanged": [
+    "human_feedback_7.txt",
+    "REPORT_generalization.md",
+    "RESULTS_generalization.md",
+    "results/block0_resid_post/sweep.csv",
+    "results/block0_resid_post/gen/gpt2-xl.csv",
+    "results/block0_resid_post/gen/pythia-1.4b.csv",
+    "results/block0_resid_post/gen/llama-3.1-8b.csv",
+    "results/block0_resid_post/gen/qwen3-8b-base.csv",
+    "results/sweep.csv",
+    "results/block0_resid_post/path_control/pilot_widths.csv",
+    "results/block0_resid_post/path_control/summary.json",
+    "experiments/common.py",
+    "experiments/gen_common.py",
+    "experiments/matthew_reference_utils.py",
+    "human_feedback.txt.addressed.md",
+    "human_feedback_2.txt.addressed.md",
+    "human_feedback_3.txt.addressed.md",
+    "human_feedback_4.txt.addressed.md",
+    "human_feedback_6.txt.addressed.md"
+  ],
+  "report_policy": {
+    "core_research_question": "Unchanged: when the ' big' -> token B interpolation and the endpoint distance are both taken at the last-position residual stream after transformer block 0, does transition width W vary with block-0 distance D? This task adds, for each of the five models, the same width-versus-distance scatter with the interpolation following the SLERP path instead of the straight line, and changes the Llama panel of the summary figure to show only the enlarged region.",
+    "primary_report": "REPORT.md",
+    "max_words": 5000,
+    "max_main_figures": 9,
+    "detailed_results": "RESULTS.md"
+  },
+  "unresolved_ambiguities": [],
+  "checklist": [
+    {
+      "request": "In plots like dir27_interp_dist_vs_plateau_width/plots/block0_resid_post/summary_distance_vs_width.png, in the Llama panel, can you only plot the enlarged region?\nAlso in the report, can you include scatter plots of SLERP distance plots just like what you did for linear distance plots? one for each model. match the plotting style. If the outlier is too few, then only plot the majority region",
+      "status": "pending",
+      "completion": {
+        "what_was_done": "",
+        "evidence": "",
+        "ambiguity": ""
+      }
+    }
+  ],
+  "routing_notes": [
+    "Triage only; no script, figure, run or analysis was produced in this pass.",
+    "Request 1 (Llama panel): in experiments/summary_distance_vs_width.py the Llama 3.1-8B panel now draws the full D range (about 1 to 9) with an inset 'enlarged: D from 1 to 2.5'. The request is read as: remove the inset and make the whole Llama panel show that enlarged x-range only. The panel must print how many points fall outside the shown range; r, rho and n keep using every point. 'Plots like' is read as this summary figure and the new SLERP figure of the same style; the single-model Llama figure already embedded in REPORT.md is not redrawn.",
+    "Request 2, destination: 'the report' is REPORT.md, the block-0 report that the cited figure belongs to and that carries the per-model linear scatters. REPORT_generalization.md (input-embedding site) stays unchanged.",
+    "Request 2, scope: SLERP data exist only for 256 random GPT-2 Large pairs (results/block0_resid_post/path_control/). 'One for each model' therefore needs new SLERP-path runs on all five models (GPT-2 Large, GPT-2 XL, Pythia 1.4B, Llama 3.1-8B, Qwen3-8B-Base), same prompt, tokens, block-0 site, readout and width definition as the linear sweeps; only the injected path changes. This operator request overrides PLAN.md's 'no new runs' scope for this one path. SLERP = the existing port of Matthew's slerp_rescale (experiments/path_control.py, matthew_reference_utils.py), the only curved path in this project.",
+    "Request 2, x-axis ('SLERP distance'): resolved assumption. For the linear plots the x-axis D is the straight-line (L2) distance between the two block-0 endpoints, which is also the length of the linear path. The matching quantity for SLERP is the length of the injected SLERP path, so the report figure uses SLERP path length on x and final-block width under the SLERP path on y. The same scatter against endpoint distance D is saved for RESULTS.md (plots/block0_resid_post/slerp_endpoint_distance_vs_width.png) so both readings are available.",
+    "Request 2, layout and style: one figure in the style of summary_distance_vs_width.png (one scatter panel per model, same density colouring, markers, shared y-range, monotonic-curve filter, r in titles), embedded once in REPORT.md. REPORT.md already has 8 figures, so this manifest raises max_main_figures to 9 for this requested figure instead of removing an existing one. REPORT.md is at 4,319 words; the added text must keep it at or below 5,000.",
+    "Request 2, outliers: 'If the outlier is too few, then only plot the majority region' is applied per panel: when a small number of points lie far from the bulk, the x-range is cropped to the bulk and the panel states the number of points not drawn; statistics still use all points.",
+    "Feasibility note for later passes: if a full-vocabulary SLERP sweep of a model does not fit the time budget, the item stays not done; a subsample may not be silently substituted."
+  ]
+}

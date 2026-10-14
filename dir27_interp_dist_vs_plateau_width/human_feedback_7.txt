@@ -1,0 +1,2 @@
+In plots like dir27_interp_dist_vs_plateau_width/plots/block0_resid_post/summary_distance_vs_width.png, in the Llama panel, can you only plot the enlarged region?
+Also in the report, can you include scatter plots of SLERP distance plots just like what you did for linear distance plots? one for each model. match the plotting style. If the outlier is too few, then only plot the majority region

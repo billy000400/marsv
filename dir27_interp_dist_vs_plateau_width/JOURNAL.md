@@ -559,3 +559,16 @@ On track? yes — manifest `review_pending`, waiting for the wrapper's review.
 - PLAN.md Next step updated; `STOP` written.
 
 On track? yes — direction complete.
+
+## 2026-10-14 — Triage of human_feedback_7.txt (no research)
+- Filled routing in `.tasks/human_feedback_7.txt.manifest.json`; state `triage` -> `ready`. Checklist text untouched.
+- Request 1: the Llama panel of `summary_distance_vs_width.png` will show only the enlarged x-range (now the inset,
+  D from 1 to 2.5), with the count of points outside it printed; statistics keep all points.
+- Request 2: SLERP scatter per model goes into `REPORT.md`. Needs new SLERP-path runs on all five models (only 256
+  GPT-2 Large pairs exist). Assumptions: SLERP = existing `slerp_rescale` port; "SLERP distance" = length of the
+  injected SLERP path on x (endpoint-distance version saved for RESULTS.md); one five-panel figure in the summary
+  style; figure limit raised to 9 in the manifest for this requested figure.
+- Rejected alternatives: blocking on the x-axis wording (both readings come from the same run, so both are saved);
+  five separate report figures (would put REPORT.md at 13 figures); reusing the 256-pair pilot (not "each model").
+
+On track? yes — next pass writes `experiments/slerp_sweep.py` and starts the runs.
