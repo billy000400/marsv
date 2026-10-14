@@ -94,3 +94,14 @@ On track? yes — next pass implements the plot script, PLOTTING.md and the Figu
 - Not touched: `.tasks/human_feedback_2.txt.manifest.json` is outside this task's declared paths. The same files answer it.
 
 On track? yes — this task is complete and set to `review_pending`.
+
+## 2026-10-14 — closed out human_feedback_2.txt
+
+- Same change as `human_feedback.txt`, already implemented. Verified rather than redone: re-ran `plot_sweep.plot()` to a
+  temp file and got a byte-identical PNG (sha256 33600dae…); PNG is 780 x 585 px vs Direction 27's 1560 x 585; title,
+  200 bins, linear y, no threshold line confirmed by eye; all `must_remain_unchanged` hashes match the baseline;
+  `check_render.py` passes.
+- Filled both completion entries in `.tasks/human_feedback_2.txt.manifest.json` and set it to `review_pending`.
+  No deliverable changed in this pass, so no CHANGELOG entry (the 2026-10-14 entry already covers both feedback files).
+
+On track? yes — waiting on the wrapper's content review.
