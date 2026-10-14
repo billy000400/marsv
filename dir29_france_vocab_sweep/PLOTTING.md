@@ -34,7 +34,9 @@ one 6 x 4.5 in panel, 200 bins, linear y-axis, default matplotlib styling. The t
 
 ## Data
 
-`results/france_tokens.csv` is written by `experiments/analyze.py` from the raw sweep shards. Re-run
+`results/france_tokens.csv` is written by `experiments/analyze.py` from the raw sweep output. The sweep
+(`experiments/sweep.py`) saves its results in 25 pieces called shards, each covering up to 2,048 consecutive token IDs,
+as `results/sweep/shard_*.npz`. Re-run
 `analyze.py` only if the sweep itself changes; a style change never needs it. `W_final` is the transition
 width at the final block (block 35) of GPT-2 Large, as defined in `REPORT.md` Methods.
 

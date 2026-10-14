@@ -29,3 +29,12 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
   figure draws no threshold line); it now says the counts on each side of W = 0.3 are in the text below. No numbers changed.
 - PLOTTING.md: explains what Direction 27 is and writes out the colour rules instead of pointing to `../CLAUDE.md`.
 - RESULTS.md, the PNG and `experiments/plot_sweep.py` unchanged.
+
+## 2026-10-14 — second review repair for human_feedback_2.txt (text only)
+
+- RESULTS.md 'Headline': "smooth switches are mostly place names" -> "among the 100 widest switches, 53 are place
+  names and 17 are scraped tokens; the other 3,083 tokens with W > 0.3 were not labelled". No number changed.
+- REPORT.md: Direction 27, PLAN.md and `resid_post` are defined at first use. The 93.7% / 94% share with W ≤ 0.3 now
+  cites `results/summary.json`; Figure 1 is cited only for the shape of the distribution.
+- RESULTS.md header says what Direction 27 is. PLOTTING.md 'Data' says what a shard is and where the shards are.
+- No figure, table, analysis or result file changed.

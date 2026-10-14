@@ -114,3 +114,13 @@ On track? yes — waiting on the wrapper's content review.
 - `check_render.py` passes; manifest back to `review_pending`. PNG hash unchanged (33600dae…).
 
 On track? yes — waiting on the wrapper's content review.
+
+## 2026-10-14 — repaired second review rejection of human_feedback_2.txt
+
+- Reviewer confirmed every feedback request is met; rejection was for one overstated RESULTS.md sentence and
+  undefined terms (Direction 27, the PLAN, resid_post, shard) in files that are now declared outputs.
+- Fixed all five listed points with sentence-level edits. Numbers checked against `results/france_widest100_manual.csv`
+  (53 place / 17 scraped / 30 other) and 3,183 − 100 = 3,083; 25 shards in `results/sweep/`.
+- Assumption: Direction 27's anchor is ` big` in "The house was big" (from RESULTS.md 'Setup check').
+
+On track? yes — manifest back to `review_pending`.

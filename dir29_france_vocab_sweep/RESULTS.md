@@ -1,12 +1,13 @@
 # RESULTS — ` France` → vocabulary sweep (GPT-2 Large, "The capital of France")
 
 > Current-best only. History is in CHANGELOG.md. Definitions of d(t), W and the flag are in REPORT.md Methods
-> (Direction 27's code, imported unchanged by `experiments/sweep.py`).
+> (Direction 27's code, imported unchanged by `experiments/sweep.py`). Direction 27 is the sibling project folder
+> `dir27_interp_dist_vs_plateau_width`, which measured the same transition width for the anchor token ` big`.
 
 ## Setup check
 
 Direction 27's own prompt ("The house was big") was rerun through the imported code on its first 256 tokens.
-It matches Direction 27's shard 0 to max |ΔW_final| = 6.9e-7 and max |ΔW_mid| = 4.6e-7 (`results/control_limit256`).
+It matches the same 256 tokens in Direction 27's first saved output file (its "shard 0") to max |ΔW_final| = 6.9e-7 and max |ΔW_mid| = 4.6e-7 (`results/control_limit256`).
 
 ## Sweep counts
 
@@ -65,6 +66,6 @@ jump. The large-W curves rise gradually.
 
 ## Headline
 
-The smooth (large-W) switches away from ` France` are mostly place names, many of them tied to France, together
-with rarely seen scraped tokens. The sharpest switches are short capitalized word starts. This is an observation
+Among the 100 widest (smoothest) switches away from ` France`, 53 are place names by our reading, many of them
+tied to France, and 17 are rarely seen scraped tokens. The other 3,083 tokens with W > 0.3 were not labelled. The sharpest switches are short capitalized word starts. This is an observation
 from one prompt and does not test a cause.

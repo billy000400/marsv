@@ -159,5 +159,6 @@ names). REPORT Methods notes this.
 `human_feedback.txt` is implemented and `review_pending` (2026-10-14): `experiments/plot_sweep.py` and `PLOTTING.md` exist,
 `plots/france_vocab_width_histogram.png` is redrawn in the Direction 27 fig2 panel (a) style, and the Figure 1 captions in
 REPORT.md / RESULTS.md are updated. `human_feedback_2.txt` asks for the same change and is answered by the same files; its
-manifest was rejected once (REPORT.md and RESULTS.md were not declared outputs), repaired, and is `review_pending` again
+manifest was rejected once (REPORT.md and RESULTS.md were not declared outputs), repaired; rejected a second time for an overstated RESULTS.md headline and undefined terms
+(Direction 27, the PLAN, resid_post, shard), repaired with text-only edits, and is `review_pending` again
 (2026-10-14). No new analysis; nothing further to do until review returns.

@@ -13,7 +13,8 @@ followed by a sudden jump. Those experiments read plateaus as a sign of how the 
 If the tokens that avoid a plateau form a meaningful group, that says something about which inputs the
 model treats as close.
 
-**Answer.** Almost every token (47,073 of 50,256, 93.7%) switches sharply, with width W ≤ 0.3 (Figure 1).
+**Answer.** Almost every token (47,073 of 50,256, 93.7%) switches sharply, with width W ≤ 0.3 (count from `results/summary.json`; Figure 1 shows the shape of the
+distribution).
 The sharpest switches come from short, capitalized word starts such as ` Ent`, ` Spe` and ` Tem`
 (Table 1). The d(t) curves in Figure 2 show that these tokens produce the flat-then-jump plateau shape.
 The smooth, gradual switches are on the other side of the threshold, the 3,183 tokens with W > 0.3.
@@ -32,7 +33,10 @@ GPT-2 tokenizer.
 **Prompt and endpoints.** The prompt is "The capital of France", which tokenizes as
 `[464, 3139, 286, 4881]`. Endpoint A is the last token ` France` (id 4881). Endpoint B keeps the same prefix
 "The capital of" and replaces the last token ID with B. We never decode and retokenize a string. B runs
-over all 50,256 other GPT-2 token IDs. We excluded none, following Direction 27.
+over all 50,256 other GPT-2 token IDs. We excluded none, following Direction 27. Direction 27 is the sibling project folder
+`dir27_interp_dist_vs_plateau_width`, which measured the same transition width for the prompt
+"The house was big" with the anchor token ` big`. This direction reuses its code, its threshold and its
+flag rule.
 
 **Where we interpolate.** Everything reuses Direction 27's code without changes (`experiments/sweep.py`
 imports it). Interpolation happens at layer 0, the input embedding of the last position. The position
@@ -42,8 +46,10 @@ embedding is shared by A and B, so blending the two token embeddings blends the 
 h(t) = (1-t)\,e_{\text{France}} + t\,e_B, \qquad t \in \lbrace 0, 0.01, \dots, 1 \rbrace
 ```
 
-Here $e$ is a row of GPT-2's token-embedding matrix, and t takes 101 evenly spaced values. The PLAN names
-the site "block-0 resid_post". Direction 27's code actually interpolates at the embedding layer, so we
+Here $e$ is a row of GPT-2's token-embedding matrix, and t takes 101 evenly spaced values. The PLAN is `PLAN.md` in this direction's folder, the plan written before the sweep was run; it states the
+research question, the threshold and what is out of scope. It names
+the site "block-0 resid_post", meaning the residual stream (the running hidden state that every block reads
+and adds to) after the first transformer block. Direction 27's code actually interpolates at the embedding layer, so we
 followed the code. As a check, this code reproduced Direction 27's own first 256 results to within
 7e-7.
 
@@ -226,7 +232,7 @@ same kind of token that formed the tight far-away cluster in Direction 27. The "
 ## Conclusion
 
 **The literal W ≤ 0.3 set is heterogeneous in meaning but structured in form.** It holds 94% of the
-vocabulary (Figure 1). Its narrowest end is dominated by short, capitalized word starts, with no visible
+vocabulary (47,073 of 50,256 tokens, `results/summary.json`). Its narrowest end is dominated by short, capitalized word starts, with no visible
 link to France (Table 1). Figure 2(a) shows that these tokens give the sharpest plateau-shaped switches.
 
 **The smooth transitions are the W > 0.3 tokens, and they look structured.** Figure 2(b) confirms that
