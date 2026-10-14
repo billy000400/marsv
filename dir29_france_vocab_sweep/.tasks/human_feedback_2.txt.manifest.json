@@ -6,7 +6,9 @@
   "required_outputs": [
     "experiments/plot_sweep.py",
     "PLOTTING.md",
-    "plots/france_vocab_width_histogram.png"
+    "plots/france_vocab_width_histogram.png",
+    "REPORT.md",
+    "RESULTS.md"
   ],
   "may_modify": [
     "experiments/plot_sweep.py",
@@ -46,8 +48,8 @@
       "request": "Can you make the sweep plot (plots/france_vocab_width_histogram.png) style consistent with panel (a), the 200-bin histogram, of dir27_interp_dist_vs_plateau_width/plots/block0_resid_post/fig2_final_width_distribution.png\nIt should be the same figure size as that single panel, i.e. half of the 12 x 4.5 in two-panel figure: 6 x 4.5 in. One panel only; do not add the sorted-widths panel (b).\nMatch that panel's style: 200 bins, linear y-axis, no vertical threshold line.\nBut let's make the title \"\"The capital of [France]\" -> [B] sweep\"\nThe restyled plot replaces the current histogram as Figure 1 of REPORT.md.",
       "status": "done",
       "completion": {
-        "what_was_done": "plots/france_vocab_width_histogram.png is redrawn as a single 6 x 4.5 in panel (780 x 585 px at dpi 130, exactly half of Direction 27's 1560 x 585 two-panel figure) with ax.hist(W_final, bins=200), Direction 27's blue #0072B2, its axis labels 'final-layer width W_final' and 'number of tokens', default matplotlib styling, linear y-axis, no vertical threshold line and no sorted-widths panel. The title is exactly: \"The capital of [France]\" -> [B] sweep. The PNG keeps its path, so it is Figure 1 of REPORT.md; the Figure 1 caption there (and in RESULTS.md) now says linear scale and 200 equal bins and no longer mentions a dashed line. Verified this iteration: re-running the plot code reproduces the PNG byte-for-byte, and check_render.py passes on REPORT.md and RESULTS.md.",
-        "evidence": "plots/france_vocab_width_histogram.png; REPORT.md Results, Figure 1 (embed and caption, lines 100-106); RESULTS.md Figure 1; experiments/plot_sweep.py STYLE block (FIGSIZE, DPI, BINS, COLOR, TITLE).",
+        "what_was_done": "plots/france_vocab_width_histogram.png is redrawn as a single 6 x 4.5 in panel (780 x 585 px at dpi 130, exactly half of Direction 27's 1560 x 585 two-panel figure) with ax.hist(W_final, bins=200), Direction 27's blue #0072B2, its axis labels 'final-layer width W_final' and 'number of tokens', default matplotlib styling, linear y-axis, no vertical threshold line and no sorted-widths panel. The title is exactly: \"The capital of [France]\" -> [B] sweep. The PNG keeps its path, so it is Figure 1 of REPORT.md; the Figure 1 caption there (and in RESULTS.md) now says linear scale and 200 equal bins and no longer mentions a dashed line. Verified this iteration: re-running the plot code reproduces the PNG byte-for-byte, and check_render.py passes on REPORT.md and RESULTS.md. Repair after review (2026-10-14): REPORT.md and RESULTS.md are now declared required outputs so the reviewer can read the Figure 1 embed and caption directly. The sentence introducing Figure 1 in REPORT.md no longer says the plot shows the two sides of the threshold; it says the figure marks no threshold and that the counts on each side of W = 0.3 are in the text below. REPORT.md is 2944 words with 2 figures (limits 5,000 and 8); no analysis, figure or table was added.",
+        "evidence": "plots/france_vocab_width_histogram.png; REPORT.md section 'Results' > 'The width distribution' (introducing sentence, Figure 1 embed, Figure 1 caption, and the paragraph giving the W = 0.3 counts); RESULTS.md Figure 1 embed and caption; experiments/plot_sweep.py STYLE block (FIGSIZE, DPI, BINS, COLOR, TITLE).",
         "ambiguity": "None. Resolved assumption: the outer pair of quotes in the feedback delimits the title, so the title keeps the inner double quotes and the literal ASCII '->'."
       }
     },
@@ -55,8 +57,8 @@
       "request": "This plot style could be changed frequently later. You should make a separate plot script and factor out the data part. Then, leave a markdown file for agents and human to know where is the script and where is the data and how to run command to make the plot",
       "status": "done",
       "completion": {
-        "what_was_done": "The histogram is drawn by a separate plot-only script, experiments/plot_sweep.py. Data is factored out: load_data() reads column W_final from the saved results/france_tokens.csv (no model, no GPU), a STYLE block at the top holds every style setting, and plot() draws the figure. The old histogram code was removed from experiments/analyze.py so one script owns the figure; analyze.py was not re-run and the results files are byte-identical to the manifest baseline. PLOTTING.md at the direction root tells people and agents where the script, the data and the output are, the command to run, and where to edit the style.",
-        "evidence": "experiments/plot_sweep.py; PLOTTING.md (table of script / data / figure paths, section 'Command': MPLBACKEND=Agg python3 experiments/plot_sweep.py, section 'Changing the style'); experiments/analyze.py (histogram block removed).",
+        "what_was_done": "The histogram is drawn by a separate plot-only script, experiments/plot_sweep.py. Data is factored out: load_data() reads column W_final from the saved results/france_tokens.csv (no model, no GPU), a STYLE block at the top holds every style setting, and plot() draws the figure. The old histogram code was removed from experiments/analyze.py so one script owns the figure; analyze.py was not re-run and the results files are byte-identical to the manifest baseline. PLOTTING.md at the direction root tells people and agents where the script, the data and the output are, the command to run, and where to edit the style. Repair after review (2026-10-14): PLOTTING.md now says what Direction 27 is (the sibling project folder whose figure the style copies) and states the colour rules in full in its own 'Colour rules' section, so a reader needs no other file.",
+        "evidence": "experiments/plot_sweep.py; PLOTTING.md (table of script / data / figure paths; sections 'Command', 'Changing the style', 'Data', 'Colour rules'); experiments/analyze.py (histogram block removed).",
         "ambiguity": "None."
       }
     }
@@ -68,7 +70,8 @@
     "Resolved assumption (title): the feedback writes the title as \"\"The capital of [France]\" -> [B] sweep\". The outermost pair of quotes delimits the title, so the title string is exactly: \"The capital of [France]\" -> [B] sweep  (with the inner double quotes and the literal ASCII '->'). It replaces Direction 27's panel title '(a) histogram, 200 bins'.",
     "Code routing: new plot-only script experiments/plot_sweep.py reads the existing results/france_tokens.csv (column W_final), runs no model, and keeps data loading separate from a block of editable style settings. The histogram code is removed from experiments/analyze.py so that one script owns the figure; analyze.py is NOT re-run, so the results CSVs and summary.json stay byte-identical. PLOTTING.md at the direction root names the script, the data file and the command.",
     "Report routing: the restyled PNG keeps its path, so it stays Figure 1 of REPORT.md (and of RESULTS.md). Only the Figure 1 caption and the sentence introducing it change (log y-axis and dashed W = 0.3 line are gone); the counts on each side of W = 0.3 remain stated in prose. No new analysis, figure or table is added.",
-    "No GPU or model run is needed. Direction 27 files are read only."
+    "No GPU or model run is needed. Direction 27 files are read only.",
+    "Repair of the 2026-10-14 content-review rejection: REPORT.md and RESULTS.md added to required_outputs so they are bundled for review; REPORT.md Figure 1 introducing sentence reworded (no threshold is drawn); PLOTTING.md made self-contained (Direction 27 explained, colour rules written out). The PNG and plot script are unchanged."
   ],
   "baseline_sha256": {
     ".tasks/human_feedback_2.txt.manifest.json": "f7e94c7ea26df4452876a5462989ee80b79e92879ae669ee10bba0f2523f5cc0",
@@ -100,19 +103,25 @@
       "inspected_outputs": [
         "experiments/plot_sweep.py",
         "PLOTTING.md",
-        "plots/france_vocab_width_histogram.png"
+        "plots/france_vocab_width_histogram.png",
+        "REPORT.md",
+        "RESULTS.md"
       ],
       "failures": [
-        "The feedback line 'The restyled plot replaces the current histogram as Figure 1 of REPORT.md' cannot be confirmed from the bundle. REPORT.md is not a declared output and is not bundled, although the manifest says its Figure 1 caption and introducing sentence were edited (log y-axis and dashed W = 0.3 line removed). Overwriting the PNG in place keeps the embed, but a stale caption would contradict the new figure, and the only evidence that it was updated is the manifest's own claim. To clear this, declare and bundle REPORT.md (and RESULTS.md, which the manifest says carries the same caption).",
-        "For the same reason, the report budget (5000 words, 8 main figures) and the claim that no analysis was added to REPORT.md cannot be checked.",
-        "Minor, not blocking on its own: PLOTTING.md points to '../CLAUDE.md rule 13' for colour rules and to 'Direction 27' without saying what either is. A new reader holding only this note cannot tell what the colour constraint is."
+        "RESULTS.md, 'Headline': 'The smooth (large-W) switches away from ` France` are mostly place names' is stronger than its evidence. The only labelled evidence is a hand reading of the 100 widest tokens, of which 53 are places; the other 3,083 tokens with W > 0.3 were not labelled, and REPORT.md itself says the place rate was not compared against the vocabulary. Fix: scope the sentence to the sample, e.g. 'Among the 100 widest switches, 53 are place names by our reading, many tied to France, and 17 are rarely seen scraped tokens.'",
+        "REPORT.md uses 'Direction 27' about a dozen times (first in 'We excluded none, following Direction 27') without ever saying what it is. The threshold, the code, the flag rule and two comparisons all rest on it, so a new researcher cannot follow the Methods. PLOTTING.md was repaired on this point last round; REPORT.md was not. Fix: one sentence at first use, e.g. 'Direction 27 is the sibling project folder dir27_interp_dist_vs_plateau_width, which measured the same transition width for the anchor token ` big`.'",
+        "REPORT.md refers to 'the PLAN' (its site name 'block-0 resid_post', its threshold labels, its out-of-scope list) without saying what or where that document is, and 'resid_post' is never defined. The 'labels appear swapped' argument in Methods and Limits depends on it. Fix: name the file (PLAN.md, this direction's pre-registered plan) at first use and gloss 'resid_post' as the residual stream after a block.",
+        "Minor, not blocking on its own: REPORT.md cites '(Figure 1)' for the 93.7% / 94% share with W <= 0.3 in the Summary and Conclusion, but the restyled figure no longer marks the threshold, so it does not show that count. Cite the text or results/summary.json for the count and use Figure 1 only for the shape of the distribution.",
+        "Minor, not blocking on its own: PLOTTING.md says the CSV is written 'from the raw sweep shards' without saying what a shard is or where the shards are."
       ],
-      "summary": "Fail, on one gap: the three declared outputs meet the feedback, but the REPORT.md Figure 1 requirement cannot be verified because REPORT.md is not declared or bundled.\n\nWhat I checked in the three outputs, all of which is satisfactory:\n\n- **plots/france_vocab_width_histogram.png**: a single panel at 6 x 4.5 in proportions, with a fine-binned histogram consistent with 200 bins, a linear y-axis, no vertical threshold line and no sorted-widths panel. The title reads exactly `\"The capital of [France]\" -> [B] sweep`. The axis labels are 'final-layer width W_final' and 'number of tokens', and the bars are a single blue.\n- **experiments/plot_sweep.py**: a plot-only script. `load_data()` reads `W_final` from `results/france_tokens.csv`, a `STYLE` block holds figure size (6, 4.5), DPI 130, 200 bins, colour, title and labels, and `plot()` draws the figure. It loads no model, sets no log scale and draws no threshold line.\n- **PLOTTING.md**: short and clear. It gives the script, data and output paths, the command `MPLBACKEND=Agg python3 experiments/plot_sweep.py`, and where to edit the style.\n\nI did not run the script, and I could not compare against the Direction 27 reference panel because it is not in the bundle; the style match rests on the manifest's description of that panel.\n\nThe outputs add no analysis and make no causal or overstated claims. The failure is about verification coverage, not a defect found in the delivered files."
+      "summary": "Fail, but not on the feedback itself: every request in the feedback is met, and the rejection rests on one overstated claim and two undefined terms in REPORT.md and RESULTS.md, which are now declared outputs. The first three failures are blocking; none of them is in text this task changed, and all are one-sentence fixes in files the manifest allows to be modified.\n\n**Feedback requests, all satisfied:**\n- **Figure** (`plots/france_vocab_width_histogram.png`): one panel at 6 x 4.5 proportions, linear y-axis, no vertical threshold line, no sorted-widths panel, single blue fill. The title reads exactly `\"The capital of [France]\" -> [B] sweep`.\n- **Script** (`experiments/plot_sweep.py`): plot-only. `load_data()` reads `W_final` from `results/france_tokens.csv`, a STYLE block holds figure size (6, 4.5), DPI 130, 200 bins, colour, title and labels, and `plot()` draws the figure. It loads no model.\n- **Note** (`PLOTTING.md`): gives the script, data and output paths, the command, and where to edit the style. It now explains Direction 27 and writes out the colour rules.\n- **Figure 1 in REPORT.md**: the embed points at the restyled PNG, the caption says linear scale and 200 equal bins, and the introducing sentence says no threshold is marked. RESULTS.md carries a matching caption.\n- **Budget**: REPORT.md is well under 5,000 words with 2 figures, and no analysis, figure or table was added for this task.\n\n**Not verified:** I did not run the script, and the Direction 27 reference panel is not in the bundle. The 200-bin count rests on the script's `BINS = 200`, and the style match rests on the manifest's description of that panel."
     },
     "expected_outputs": [
       "experiments/plot_sweep.py",
       "PLOTTING.md",
-      "plots/france_vocab_width_histogram.png"
+      "plots/france_vocab_width_histogram.png",
+      "REPORT.md",
+      "RESULTS.md"
     ],
     "budget_failures": []
   }

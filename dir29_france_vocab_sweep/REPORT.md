@@ -97,8 +97,8 @@ and no automated labeling (see the PLAN's out-of-scope list).
 
 ### The width distribution
 
-To see how many tokens fall on each side of the threshold, we plot the width of every one of the 50,256
-tokens:
+To see how the widths are distributed, we plot the width of every one of the 50,256 tokens. The figure
+marks no threshold; the counts on each side of W = 0.3 are given in the text below it:
 
 ![Histogram of final transition widths](plots/france_vocab_width_histogram.png)
 

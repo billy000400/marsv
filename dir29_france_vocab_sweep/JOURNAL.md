@@ -105,3 +105,12 @@ On track? yes — this task is complete and set to `review_pending`.
   No deliverable changed in this pass, so no CHANGELOG entry (the 2026-10-14 entry already covers both feedback files).
 
 On track? yes — waiting on the wrapper's content review.
+
+## 2026-10-14 — repaired review rejection of human_feedback_2.txt
+
+- Reviewer could not verify the "Figure 1 of REPORT.md" line because REPORT.md / RESULTS.md were not declared outputs.
+  Added both to `required_outputs`. Captions were already correct; reworded the one REPORT.md sentence that still
+  implied the figure shows the threshold. Made PLOTTING.md self-contained (Direction 27, colour rules).
+- `check_render.py` passes; manifest back to `review_pending`. PNG hash unchanged (33600dae…).
+
+On track? yes — waiting on the wrapper's content review.

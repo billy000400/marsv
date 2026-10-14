@@ -25,8 +25,10 @@ Edit the `STYLE` block at the top of `experiments/plot_sweep.py` (figure size, D
 title, axis labels) and re-run the command. For changes beyond those settings, edit `plot()`.
 `load_data()` only reads the CSV and does not need to change for a style edit.
 
-The current style copies panel (a) of Direction 27's
-`../dir27_interp_dist_vs_plateau_width/plots/block0_resid_post/fig2_final_width_distribution.png`:
+The current style copies panel (a) of
+`../dir27_interp_dist_vs_plateau_width/plots/block0_resid_post/fig2_final_width_distribution.png`.
+That figure belongs to Direction 27, the sibling project folder `../dir27_interp_dist_vs_plateau_width/`, which
+measured the same transition width for other token pairs. The copied style is:
 one 6 x 4.5 in panel, 200 bins, linear y-axis, default matplotlib styling. The title is
 `"The capital of [France]" -> [B] sweep`.
 
@@ -37,4 +39,18 @@ one 6 x 4.5 in panel, 200 bins, linear y-axis, default matplotlib styling. The t
 width at the final block (block 35) of GPT-2 Large, as defined in `REPORT.md` Methods.
 
 If the caption needs to change with the style (for example a log axis), update the Figure 1 caption in
-`REPORT.md` and `RESULTS.md` too. Keep to the colour rules in `../CLAUDE.md` rule 13.
+`REPORT.md` and `RESULTS.md` too.
+
+## Colour rules
+
+The main reader of these plots has red-green colour deficiency, so every restyle must stay readable without
+telling red from green (the full rule is rule 13 of the project-wide instructions file `../CLAUDE.md`):
+
+- Never use red against green as a contrast.
+- For separate series use these colours in this order: `#0072B2` (blue), `#D55E00` (vermillion), `#CC79A7`
+  (reddish purple), `#56B4E9` (sky blue), `#E69F00` (orange). Use at most five.
+- If the plot has more than one series, also give each a different line style, marker or hatch, so the figure
+  still reads in grayscale.
+- For colour maps use `viridis` or `cividis` (one direction) or `coolwarm` / `RdBu` (two directions). Do not use
+  `jet`, `rainbow`, `hsv`, `RdYlGn` or `Spectral`.
+- In captions, name a series by what it is and by its line style or marker, never by its colour.

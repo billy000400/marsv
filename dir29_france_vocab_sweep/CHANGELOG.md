@@ -23,3 +23,9 @@ RESULTS.md and every REPORT*.md stay current-best with no history.
   the counts on each side of W = 0.3 stay in the prose and tables.
 - Code: the figure is now drawn by the new `experiments/plot_sweep.py` from `results/france_tokens.csv`; the histogram
   block was removed from `experiments/analyze.py`. `PLOTTING.md` documents script, data and command.
+
+## 2026-10-14 — review repair for human_feedback_2.txt
+- REPORT.md: the sentence introducing Figure 1 no longer says the plot shows the two sides of the threshold (the restyled
+  figure draws no threshold line); it now says the counts on each side of W = 0.3 are in the text below. No numbers changed.
+- PLOTTING.md: explains what Direction 27 is and writes out the colour rules instead of pointing to `../CLAUDE.md`.
+- RESULTS.md, the PNG and `experiments/plot_sweep.py` unchanged.
